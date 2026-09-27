@@ -343,11 +343,14 @@ MODELS.ready=new Promise(res=>{
   const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
   const jobs=[['a','anims'],...MKEYS.map(k=>['m',k]),...WKEYS.map(k=>['w',k])];let n=0,fail=false;
   const fin=()=>{if(++n<jobs.length)return;MODELS.ok=!fail&&MODELS.anims.length>0;res(MODELS.ok)};
-  for(const [t,k] of jobs)ld.load('models/'+(t==='w'?'w_':'')+k+'.glb',g=>{
+  const one=(t,k,g)=>{
     if(t==='a')MODELS.anims=g.animations;
     else if(t==='w')MODELS.w[k]=g.scene;
     else{MODELS.list[k]=g.scene;const b=new THREE.Box3().setFromObject(g.scene);MODELS.h[k]=b.max.y-b.min.y||2}
-    fin()},undefined,()=>{fail=true;fin()});
+    fin()};
+  const fk=(t,k)=>(t==='w'?'w_':'')+k;
+  const perFile=()=>{for(const [t,k] of jobs)ld.load('models/'+fk(t,k)+'.glb',g=>one(t,k,g),undefined,()=>{fail=true;fin()})};
+  fetch('models-pack.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(p=>{for(const [t,k] of jobs){const b=p[fk(t,k)];if(!b){fail=true;fin();continue}const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);ld.parse(u.buffer,'',g=>one(t,k,g),()=>{fail=true;fin()})}}).catch(perFile);
   setTimeout(()=>{if(n<jobs.length){fail=true;n=jobs.length-1;fin()}},25000);
 });
 const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded'];
