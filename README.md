@@ -11,8 +11,19 @@ RPG de ação 3D para celular, inspirado na fantasia de caçadores, portais e so
 ## Estrutura
 - `game.html` — o jogo (fonte única).
 - `index.html` — gerado por `python3 tools/build.py` (acrescenta o cabeçalho do site e o modo offline).
-- `models/` — personagens e armas 3D.
+- `models/` — personagens, armas e cenário 3D (`env.glb`).
 - `sw.js`, `manifest.webmanifest`, `icon-*.png` — app instalável e offline.
 
+## Gráficos
+O botão **HD / LEVE** (ao lado de SOM) troca a qualidade: no modo LEVE há menos grama e flores e a resolução cai, bom para celulares mais fracos. A escolha fica salva.
+
 ## Créditos
-Personagens, animações e armas 3D: **KayKit Adventurers** e **KayKit Skeletons**, de Kay Lousberg (www.kaylousberg.com), licença CC0. Licenças em `models/`.
+Todos os modelos 3D são de licença CC0 (domínio público). Licenças em `models/`.
+- Personagens, animações e armas: **KayKit Adventurers** e **KayKit Skeletons**, de Kay Lousberg (www.kaylousberg.com).
+- Cidades (casas, torres, muralhas, poço, props): **KayKit Medieval Hexagon Pack**, de Kay Lousberg.
+- Masmorras (pilares, tochas, barris, caixas, estandartes, baús): **KayKit Dungeon Remastered**, de Kay Lousberg.
+- Árvores secas, lápides e ossos: **KayKit Halloween Bits**, de Kay Lousberg.
+- Árvores, pedras, grama, flores e cogumelos: **Nature Kit**, da Kenney (www.kenney.nl).
+- Fonte, barracas e lampiões: **Fantasy Town Kit**, da Kenney.
+
+O arquivo `models/env.glb` junta os modelos de cenário já convertidos (cores assadas nos vértices, sem texturas) para carregar rápido.
