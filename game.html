@@ -1334,7 +1334,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
   run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)));let need=xpNeed();const r0=rankOf();
-  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +3 pontos de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
+  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35){if(consFull())run.pts=(run.pts||0)+2;else run.cpts=(run.cpts||0)+1}run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +3 pontos de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
 }
@@ -2134,6 +2134,7 @@ function extraActions(a,v){
   if(a==='stat'||a==='stat5'){const n=a==='stat5'?5:1;if(run.pts<n)return;run.pts-=n;run.stats[v]+=n;refreshStats();return true}
   if(a==='skup'){if(run.spts<1)return;const l=run.skl[v]||0;if(l>=10)return;run.spts--;run.skl[v]=l+1;return true}
   if(a==='skup2'){if(run.spts<2)return;const l=run.skl[v]||0;if(l>=10)return;run.spts-=2;run.skl[v]=l+1;return true}
+  if(a==='consconv'){if(!consFull()||!run.cpts)return;run.pts=(run.pts||0)+run.cpts*2;toast('<b>[SISTEMA]</b> '+run.cpts+' pontos de constelação viraram '+(run.cpts*2)+' pontos de status.');run.cpts=0;return true}
   if(a==='mast'){if(run.spts<1)return;run.spts--;run.mastery=(run.mastery||0)+1;refreshStats();return true}
   if(a==='powslot'){const [i,k]=String(v).split(':').map(Number);const sk=powLib()[i];if(!sk)return;const old=run.stolen.findIndex(x=>x.n===sk.n);if(old>=0)run.stolen.splice(old,1);if(k>=run.stolen.length)run.stolen.push({...sk,cdT:0});else run.stolen[k]={...sk,cdT:0};run.stolen=run.stolen.slice(0,3);buildSteal();return true}
   if(a==='buybook'){const B=bookList()[+v];if(!B||run.gold<B.price)return;if(powLib().some(x=>x.n===B.sk.n)){toast('Você já conhece '+B.sk.n+'.');return}run.gold-=B.price;learnPower(B.sk);sfx('level');toast('<b>[SISTEMA]</b> Grimório lido: <b>'+B.sk.n+'</b>.',4000);return true}
@@ -2352,7 +2353,8 @@ const SETS=[{n:'Caçador Noturno',d:'+15% de dano',b:{dmg:.15}},{n:'Guardião',d
 function setB(){const w=run.equip.w,a=run.equip.a;return w&&a&&w.set&&w.set===a.set?SETS.find(s=>s.n===w.set).b:{}}
 const CONS=[['fur','Fúria','+2% de dano por ponto','Ápice: críticos causam 2,4x'],['mur','Muralha','+3% de vida por ponto','Ápice: revive uma vez por masmorra'],['arc','Arcano','+3% de dano de habilidade por ponto','Ápice: recarga 20% menor']];
 const cons=k=>(run.cons||{})[k]||0;
-function consView(){view=consView;run.cons=run.cons||{fur:0,mur:0,arc:0};let h='<div class="sysline">Pontos de constelação: <b>'+(run.cpts||0)+'</b>. Ganhe 1 por nível a partir do 35.</div>';
+function consFull(){const c=run.cons||{};return CONS.every(([k,,,cap])=>(c[k]||0)>=10)}
+function consView(){view=consView;run.cons=run.cons||{fur:0,mur:0,arc:0};let h='<div class="sysline">Pontos de constelação: <b>'+(run.cpts||0)+'</b>. Ganhe 1 por nível a partir do 35.'+(consFull()?' <b style="color:#ffd54f">Constelações completas:</b> a partir de agora cada nível dá +2 pontos de status no lugar.':'')+'</div>'+(consFull()&&run.cpts>0?'<div style="display:flex;justify-content:flex-end">'+btn('CONVERTER '+run.cpts+' PONTOS EM '+(run.cpts*2)+' DE STATUS','consconv',0,true,'hot')+'</div>':'');
   for(const [k,n,d,cap] of CONS){const v=cons(k);h+=row(n+' <b>'+v+'/10</b>','<span style="color:#ffd070">'+'★'.repeat(v)+'☆'.repeat(10-v)+'</span> · '+d+' · '+cap,btn('+1','cons',k,(run.cpts||0)>0&&v<10))}
   openModal('CONSTELAÇÕES',h)}
 const rebirthB=()=>1+.1*(profile.rebirths||0);
