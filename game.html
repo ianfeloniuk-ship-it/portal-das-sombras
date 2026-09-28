@@ -1037,7 +1037,7 @@ function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
   enemies.push(e);return e;
 }
 function kindsFor(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
-function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;return e}
+function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;return e}
 function spawnRival(x,z,gr,extra={}){
   const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
   const K={gk:CLASS_GK[CLASSES.indexOf(cl)],gtint:CLASS_TINT[CLASSES.indexOf(cl)],n:'',hp:150,dmg:13,spd:3.4,ai:'rival',range:1.9,wind:.38,atkCd:.9,xp:0,scale:1,r:.55,body:cl.body,wep:['bow','staff','wand','tome','bonestaff'].includes(cl.wep)?'sword':cl.wep,skin:0xffd8b8,eye:0x111111,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a])};
@@ -1048,7 +1048,7 @@ function spawnBoss(x,z,gr,B){
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
   const K={gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:650,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
   const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;
-  if(Math.random()<.6){e.mech=pick(Object.keys(BMECH));e.mechT=8}return e;
+  if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(Object.keys(BMECH));e.mechT=8}return e;
 }
 /* MECÂNICAS DE CHEFE: cada chefe pode vir com um "quebra-cabeça" próprio. */
 const BMECH={
@@ -1062,6 +1062,9 @@ function updBossMech(e,dt){if(!e.mech||e.dead)return;
   if(e.mech==='inverte'&&e.mechT<=0){e.mechT=12;FX2.inv=3;bigText('CONTROLES INVERTIDOS',1200);fxRing(player.x,player.z,0xd06bff,2.5,.6)}
   if(e.mech==='barreira'){if(e.mechT<=0&&!e.barrier){e.barrier=5;e.mechT=15;floater(e.x,e.z,'BARREIRA','#7fd8ff',true,4);fxRing(e.x,e.z,0x7fd8ff,4,.8)}if(e.barrier>0){e.barrier-=dt;if(Math.random()<dt*6)fxRing(e.x,e.z,0x7fd8ff,3.2,.3);if(e.barrier<=0){e.barrier=0;floater(e.x,e.z,'BARREIRA CAIU','#ffd54f',true,4)}}}
   if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(i?'gigante':'orc',e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
+/* TRAÇOS: monstros de portais altos ganham poderes que respondem ao jogador. */
+const TRAITS={regen:{n:'Regenerador',d:'recupera 2% da vida por segundo'},veloz:{n:'Veloz',d:'40% mais rápido'},blind:{n:'Blindado',d:'toma 40% menos dano (críticos ignoram)'},vamp:{n:'Vampírico',d:'cura 30% do dano que causa'}};
+function giveTrait(e){const t=pick(Object.keys(TRAITS));e.trait=t;e.name=e.name+' '+TRAITS[t].n;if(t==='veloz')e.speed*=1.4}
 function spawnShadow(B,x,z,rec){
   const pm=toon(0x3a1d6e,0x2a0f55);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0xc9a8ff,wep:'sword',scale:1.3,helm:true,gk:'Knight',tint:0x3a1d6e,emis:0x2a0f55,shield:true});
   m.root.position.set(x,0,z);scene.add(m.root);const mh=260*RANKS[rankOf()].mult*(1+run.level*.04)*(B.p3?4:B.types?2.2:1)*(rec?(1+.08*(rec.lvl-1))*(ALLBOSS().some(b=>b.n===rec.n)?1:.6):1);
@@ -1231,8 +1234,9 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
-  if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
+  if(player.stealth>0&&o.fromPlayer){amt*=e.isBoss?1.8:3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   if(o.fromPlayer&&profile.cls===4&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
+  if(e.trait==='blind')amt*=.6;
   const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit+affB().crit/100:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
@@ -1325,7 +1329,7 @@ function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)));
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
-  if(curAtk)player.lastHit=curAtk;flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
+  if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
 function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
@@ -1442,7 +1446,7 @@ function pickTarget(e){
   return best?{t:best,d:bd}:null;
 }
 function dmgTo(t,amt){if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
-function updEnemy(e,dt){curAtk=e;
+function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
@@ -2016,9 +2020,16 @@ function bestMul(k){const l=k&&bestLvl(k);return l?1+l[1]:1}
 function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k);profile.bestiary[k]=(profile.bestiary[k]||0)+1;const after=bestLvl(k);
   if(after&&after!==before){toast('<b>[BESTIÁRIO]</b> '+KINDS[k].n+': <b>'+after[2]+'</b> — +'+Math.round(after[1]*100)+'% de dano contra essa espécie.',5000);sfx('level')}
   if(profile.bestiary[k]%5===1||after!==before)store.set('pds2_profile',profile)}
+const AIDESC={melee:'Luta corpo a corpo',ranged:'Ataca de longe e mantém distância',lunge:'Dá saltos rápidos em você',slam:'Golpes pesados em área',wraith:'Flutua e dispara magia',rival:'Luta como um caçador'};
+function bestInfo(k,n){const K=KINDS[k];let t='';
+  if(n>=10)t+='<br>Vida base '+K.hp+' · dano base '+K.dmg+' · velocidade '+K.spd;
+  if(n>=50)t+='<br>Comportamento: '+(AIDESC[K.ai]||'?')+(K.shield?' · escudo na frente bloqueia golpes':'');
+  if(n>=200)t+='<br><span style="color:#6fe39a">Ponto fraco: '+(K.shield?'ataque pelas costas ou atordoe':K.ai==='ranged'||K.ai==='wraith'?'chegue perto, é frágil':K.ai==='slam'?'esquive do golpe lento e bata em seguida':K.ai==='lunge'?'esquive do salto e contra-ataque':'lento para reagir a atordoamento')+'</span>';
+  if(n<200)t+='<br><span style="color:var(--dim)">Próxima informação em '+(n<10?10:n<50?50:200)+' abates.</span>';
+  return t+'<br><span style="color:var(--dim)">Traços possíveis em portais altos: '+Object.values(TRAITS).map(x=>x.n).join(', ')+'.</span>'}
 function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS);let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies encontradas: <b>'+ks.filter(k=>b[k]).length+'/'+ks.length+'</b>. Cada espécie estudada dá dano extra contra ela, para sempre (10, 50, 200 e 1000 abates).</div>';
   for(const k of ks){const n=b[k]||0,l=bestLvl(k),nx=BEST_STEPS.find(s=>n<s[0]);
-    h+=n?row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo'),''):row('<span style="color:#56607a">???</span>','Espécie ainda não encontrada','')}
+    h+=n?row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+bestInfo(k,n),''):row('<span style="color:#56607a">???</span>','Espécie ainda não encontrada','')}
   openModal('BESTIÁRIO',h)}
 /* VIAGEM RÁPIDA: pelos Portais de Viagem das cidades já visitadas (Associação → Viagem). */
 function markVisited(){if(!started||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d<30){profile.visited=profile.visited||{};if(!profile.visited[n.c.id]){profile.visited[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z};store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Portal de Viagem de <b>'+n.c.name+'</b> registrado. Viaje pela Associação (aba Viagem).',4500)}}}
