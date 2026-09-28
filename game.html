@@ -112,7 +112,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()">ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()">ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
@@ -379,12 +379,13 @@ function makeActor(o){
   /* Algumas classes usam peças embutidas do modelo: Curandeiro = varinha + livro aberto; Invocador = livro aberto (+ cajado). */
   const keepW={wand:['1H_Wand','Spellbook_open'],tome:['Spellbook_open']}[o.wep]||[];
   model.traverse(c=>{if(c.isMesh&&c.parent&&/^handslot/.test(c.parent.name)&&!keepW.includes(c.name))c.visible=false});
+  const wmats=[],wnodes=[];
   const [wr,wl]=wfor(gk,o.wep,o.shield);
-  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot)||model.getObjectByName(slot.replace('.',''));if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=c.material.clone();if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material)}});b.add(w)};
+  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot)||model.getObjectByName(slot.replace('.',''));if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=c.material.clone();if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material);wmats.push(c.material)}});b.add(w);wnodes.push(w)};
   att('handslot.r',wr);att('handslot.l',wl);
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
-  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:o.atkClip||ATK_CLIP[o.wep]||ATK_CLIP.none,la:0,lw:0};
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:o.atkClip||ATK_CLIP[o.wep]||ATK_CLIP.none,la:0,lw:0,wmats,wnodes};
 }
 let ADT=0;
 /* monstros de bioma */
@@ -497,7 +498,12 @@ function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
     buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};
 }
-function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp;Object.assign(player,st);player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp)}
+/* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
+function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a;
+  for(const mt of m.wmats){if(!mt.emissive)continue;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar}else mt.emissive.set(0)}
+  for(const n of m.wnodes||[])n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1);
+  for(const mt of m.mats){if(m.wmats.includes(mt)||!mt.emissive)continue;if(a&&a.rar>0){mt.emissive.set(RAR[a.rar].c);mt.emissiveIntensity=.03+.035*a.rar}else if(!mt.userData.keepEm)mt.emissive.set(0)}}
+function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp;Object.assign(player,st);player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp);try{gearLook()}catch(e){}}
 
 /* ================= COLISÃO ================= */
 const HB=8;const hkey=(bx,bz)=>(bx+100)*1000+(bz+100);
@@ -2142,6 +2148,7 @@ function extraActions(a,v){
     const R=RANKS[cur];bigText('REAVALIAÇÃO · RANK '+R.id,2400);shake(.6);fxRing(player.x,player.z,0xffd54f,5,1);setTimeout(()=>fxRing(player.x,player.z,0x4fc3ff,8,1),300);sfx('level');
     toast('<b>[SISTEMA]</b> A Associação registrou você como caçador <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
   if(a==='album')return albumView(),'close0';
+  if(a==='bestv')return bestView(),'close0';
   if(a==='travel'){const c=(profile.visited||{})[v];if(!c)return;const cost=travelCost(c);if(run.gold<cost)return;if(enemies.some(e=>!e.dead&&e.aggro&&Math.hypot(e.x-player.x,e.z-player.z)<25)){toast('Monstros estão te perseguindo. Não dá para viajar agora.');return}
     run.gold-=cost;closeModal();player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);fxRing(player.x,player.z,0x4fc3ff,4,.8);bigText(c.n,1400);sfx('arise');saveRun();return}
   if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
@@ -2278,7 +2285,8 @@ function updSpecial2(S,dt){
     if(!S.spawned&&S.t>1.5){S.spawned=true;if(S.boss){const pool=S.floor>=100||S.gr>=8?SOVEREIGNS:S.gr>=6?BOSSES_HIGH:BOSSES;const b=spawnBoss(0,-8,S.gr,pick(pool));const m=1+S.floor*.04;b.hp*=m;b.maxhp*=m;b.aggro=true;bossAggro(b)}
       else{const n=6+Math.floor(S.floor/3);for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(8,16);x=Math.cos(a)*d;z=Math.sin(a)*d-3;if(freeAt(x,z,.6))break}const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});const m=1+S.floor*.05;e.hp*=m;e.maxhp*=m;e.dmg*=1+S.floor*.03;e.aggro=true;if(i<Math.floor(S.floor/5))makeElite(e)}}}
     S.msg='TORRE · andar '+S.floor+(S.boss?' · CHEFE':'')+' · inimigos '+alive;
-    if(S.spawned&&!S.cleared&&alive===0&&!(bossE&&!bossE.dead))towerClear(S)}
+    /* Conta de novo: 'alive' foi medido antes dos inimigos do andar nascerem (bug: andar limpava sozinho). */
+    if(S.spawned&&!S.cleared&&S.t>2&&enemies.filter(e=>!e.dead&&!e.totem).length===0&&!(bossE&&!bossE.dead))towerClear(S)}
   else if(S.kind==='reverse'){const tl=S.totems.filter(e=>!e.dead);S.msg='Portal Invertido · destrua os totens · restam '+tl.length;S.sp-=dt;
     if(S.sp<=0&&tl.length){S.sp=5;for(const t of tl){const e=spawnKind(pick(['minion','rogue','demon']),t.x+rnd(-2,2),t.z+3,S.gr,{});e.aggro=true;fxRing(t.x,t.z,0xff40ff,2)}}
     if(!tl.length&&!S.cleared){S.cleared=true;winSpecial('Ninho destruído. O mundo deles sentiu o golpe.',true)}}
@@ -2287,12 +2295,13 @@ function updSpecial2(S,dt){
 }
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[SISTEMA]</b> '+msg,4000)}
 function towerClear(S){S.cleared=true;profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
-  for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
+  /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
+  if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
   if(S.floor>=100){run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares.',6000);return}
   const gold=Math.round(80*S.floor*GR[S.gr].gold);run.gold+=gold;floater(player.x,player.z,'+'+fmt(gold)+' ouro','#ffd54f',true);if(S.floor%5===0)addChest(3,0,S.gr,S.boss);
   const grp=new THREE.Group();grp.position.set(0,0,-4);const ring=new THREE.Mesh(geo('gring',()=>0),glowS(0xffd070,1));ring.position.y=2.6;grp.add(ring);const sg=makeSign('ANDAR '+(S.floor+1),'#ffd070',.55);sg.position.y=5.5;grp.add(sg);L.group.add(grp);L.exits.push({ring,grp,sg,locked:false});
   L.inter.push({type:'next',x:0,z:-4,r:3.2,label:'F · SUBIR PARA O ANDAR '+(S.floor+1),use:()=>buildSpecial('tower',{x:L.gate.x,z:L.gate.z},S.floor+1)});
-  bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. Suba ou saia pelo portal azul.',3500)}
+  bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500)}
 function towerTab(){const b=profile.towerBest||0,c=Math.min(96,Math.floor(b/5)*5+1);let h='<div class="sysline">A Torre do Sistema tem <b>100 andares</b>. Chefe a cada 10 e um Soberano no topo. Seu recorde: <b>andar '+b+'</b>.</div>'+row('Começar do andar 1','Aquecimento',btn('Entrar','tower',1))+(b>=5&&b<100?row('Continuar do andar '+c,'Pula os andares que você já venceu',btn('Entrar','tower',c,true,'hot')):'');
   h+='<div class="sec">RANKING DA TORRE</div>';towerRank().forEach((r,i)=>{h+='<div class="it" style="'+(r.me?'background:rgba(79,195,255,.14)':'')+'"><div class="d"><b>'+(i+1)+'º</b> '+r.n+'</div><span>andar '+r.f+'</span></div>'});return h}
 
@@ -2409,12 +2418,31 @@ function doRebuild(id){const c=nearestCity(player.x,player.z).c;if(c.id!==id)ret
   const ch=chunks.get(c.cx+','+c.cz);if(ch){unloadChunk(ch);loadChunk(c.cx,c.cz)}closeModal();bigText(c.name.toUpperCase()+' RECONSTRUÍDA',1800);sfx('gong');sfx('level');
   toast('<b>[CIDADE]</b> '+c.name+' voltou a viver. Lojas abertas, muralhas de pé. Reputação +2.',6000)}
 /* bolsa organizada */
+/* FICHA DO PERSONAGEM: de onde vem cada número (pedido do Irror). */
+function charSheet(){const sb=statsBonus(),rk=RANKS[rankOf()],cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),pct=v=>(v>=0?'+':'')+Math.round(v*100)+'%';
+  const crit=.12+sb.crit+af.crit/100,line=(n,v,d)=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(79,195,255,.12)"><span>'+n+(d?'<br><small style="color:var(--dim)">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
+  let h='<div class="sec">FICHA DO PERSONAGEM</div><div style="font-size:13px">';
+  h+=line('Dano do ataque',fmt(player.dmg),'base '+fmt(10+run.level*1.6)+' (nível) · rank '+rk.id+' x'+rk.mult+' · classe x'+cb.dmg+' · '+(isMagic()?'Inteligência':'Força')+' '+pct(sb.dmg-1)+' · arma '+pct(w?w.bonus:0)+' · afixos '+pct(af.dmg/100)+(tierOf()?' · provação '+pct(tierB()-1):''));
+  h+=line('Vida',fmt(player.maxhp),'base '+fmt(95+run.level*9)+' · rank x'+rk.mult+' · classe x'+cb.hp+' · Vitalidade '+pct(sb.hp-1)+' · armadura '+pct(a?a.bonus:0));
+  h+=line('Mana',fmt(player.maxmp),'Inteligência '+pct(sb.mp-1));
+  h+=line('Dano de habilidade',pct(sb.skill-1),'vem de '+(isMagic()?'Inteligência':'Força'));
+  h+=line('Chance de crítico',Math.round(crit*100)+'%','base 12% · Percepção '+pct(sb.crit)+' · afixos '+pct(af.crit/100));
+  h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','classe '+pct(cb.def)+' · armadura '+pct(a?a.def:0));
+  h+=line('Velocidade de ataque',pct(1/sb.atk-1),'Agilidade');
+  h+=line('Recarga da esquiva',dodgeCdVal().toFixed(2)+'s','Agilidade');
+  h+=line('Velocidade de movimento',(player.spd||0).toFixed(1),'rank e Agilidade');
+  h+=line('Roubo de vida',Math.round(af.ls||0)+'%','afixos');
+  const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
+  return h+'</div>'}
 function bagTabs(cur){return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes'],['itens','Itens'],['world','Mundo']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+='<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
+    h+=charSheet();
     h+=row('Status e habilidades',run.pts?'<b>'+run.pts+' pontos livres</b>':'Distribuir pontos',unl('status')?btn('Abrir','status',0,true,run.pts?'hot':''):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
     h+=row('Títulos','Bônus de conquistas',unl('titles')?btn('Abrir','titles',0):'Derrote um guardião');
+    h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla J)'),btn('Abrir','bestv',0));
+    h+=row('Coleção de Sombras','Todas as sombras que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
     h+=row('Reencarnação','Volta ao nível 1 com +10% permanente em tudo. Mantém ouro, itens e sombras. Próxima exige nível <b>'+(100*((profile.rebirths||0)+1))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100*((profile.rebirths||0)+1),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
@@ -2597,7 +2625,7 @@ function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e 
   for(const [act,n] of KEYACT)h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true));
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
-addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyP'&&started&&$('dead').hidden){modalOpen?closeModal():bagView('char');return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
