@@ -1031,8 +1031,21 @@ function spawnRival(x,z,gr,extra={}){
 function spawnBoss(x,z,gr,B){
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
   const K={gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:650,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
-  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;return e;
+  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;
+  if(Math.random()<.6){e.mech=pick(Object.keys(BMECH));e.mechT=8}return e;
 }
+/* MECÂNICAS DE CHEFE: cada chefe pode vir com um "quebra-cabeça" próprio. */
+const BMECH={
+  costas:{n:'Couraça Frontal',d:'Só toma dano de verdade PELAS COSTAS. Esquive para trás dele.'},
+  divide:{n:'Divisão',d:'Na metade da vida, se parte em dois fragmentos.'},
+  inverte:{n:'Olhar Distorcido',d:'De tempos em tempos INVERTE seus controles por 3 segundos.'},
+  barreira:{n:'Barreira de Mana',d:'De tempos em tempos fica quase imune. Afaste-se e espere a barreira cair.'}};
+function updBossMech(e,dt){if(!e.mech||e.dead)return;
+  if(!e.mechShown&&e.intro){e.mechShown=true;const M=BMECH[e.mech];setTimeout(()=>{showSys('Mecânica do chefe: <b>'+M.n+'</b>. '+M.d)},1200)}
+  if(!e.intro)return;e.mechT-=dt;
+  if(e.mech==='inverte'&&e.mechT<=0){e.mechT=12;FX2.inv=3;bigText('CONTROLES INVERTIDOS',1200);fxRing(player.x,player.z,0xd06bff,2.5,.6)}
+  if(e.mech==='barreira'){if(e.mechT<=0&&!e.barrier){e.barrier=5;e.mechT=15;floater(e.x,e.z,'BARREIRA','#7fd8ff',true,4);fxRing(e.x,e.z,0x7fd8ff,4,.8)}if(e.barrier>0){e.barrier-=dt;if(Math.random()<dt*6)fxRing(e.x,e.z,0x7fd8ff,3.2,.3);if(e.barrier<=0){e.barrier=0;floater(e.x,e.z,'BARREIRA CAIU','#ffd54f',true,4)}}}
+  if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(i?'gigante':'orc',e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
 function spawnShadow(B,x,z,rec){
   const pm=toon(0x3a1d6e,0x2a0f55);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0xc9a8ff,wep:'sword',scale:1.3,helm:true,gk:'Knight',tint:0x3a1d6e,emis:0x2a0f55,shield:true});
   m.root.position.set(x,0,z);scene.add(m.root);const mh=260*RANKS[rankOf()].mult*(1+run.level*.04)*(B.p3?4:B.types?2.2:1)*(rec?(1+.08*(rec.lvl-1))*(ALLBOSS().some(b=>b.n===rec.n)?1:.6):1);
@@ -1193,6 +1206,8 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
   let blocked=false;
+  if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
+  if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
   if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit+affB().crit/100:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
@@ -1211,7 +1226,7 @@ function killEnemy(e){
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   if(e.elite&&!e.isBoss)npcEv('elite');
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
-  if(CLASSES[profile.cls].arise&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ARISE',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
+  if(CLASSES[profile.cls].arise&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER SOMBRA',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
   const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0){run.gold+=g;sfx('coin');floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',false,1.4)}
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
   qev('kill');demandKill();
@@ -1250,7 +1265,7 @@ function enrage(b){b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.wind*=.85;bossLight.co
   for(let i=0;i<2;i++){const a=rnd(0,TAU);const m=spawnKind(b.gr>=5?'demon':'minion',b.x+Math.cos(a)*3,b.z+Math.sin(a)*3,b.gr,{room:b.room});m.aggro=true}
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
-const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0};
+const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
@@ -1337,7 +1352,7 @@ function absorb(b){
   const has=run.stolen.some(s=>s.n===b.boss.skill.n);
   if(!has&&Math.random()<rk.steal+b.gr*.03){if(run.stolen.length>=3)run.stolen.shift();run.stolen.push({...b.boss.skill,cdT:0});buildSteal();toast('<b>[SISTEMA]</b> Habilidade roubada: <b>'+b.boss.skill.n+'</b>',4000)}
   else toast('<b>[SISTEMA]</b> A essência escapou. Chance de roubo no rank '+rk.id+': '+Math.round((rk.steal+b.gr*.03)*100)+'%',3500);
-  if(c.arise){bigText('LEVANTE-SE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[SISTEMA]</b> ARISE: a sombra de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
+  if(c.arise){bigText('LEVANTE-SE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[SISTEMA]</b> ERGUER SOMBRA: a sombra de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
   else{fxBurst(b.x,.5,b.z,0xffd070,20,5);b.m.root.visible=false}
   saveRun();
 }
@@ -1346,7 +1361,7 @@ function ctxTarget(){
   let best=null,bd=1e9;const P=player;
   for(const it of L.inter){if(it.hidden)continue;const d=Math.hypot(P.x-it.x,P.z-it.z);if(d<it.r&&d<bd){bd=d;best=it}}
   for(const n of npcs){if(n.gone||n.kind==='deco')continue;const d=Math.hypot(P.x-n.x,P.z-n.z);if(d<2.8&&d<bd){bd=d;best=n}}
-  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){best={label:CLASSES[profile.cls].arise?'F · ARISE':'F · ABSORVER ESSÊNCIA',use:()=>absorb(bossE)}}}
+  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){best={label:CLASSES[profile.cls].arise?'F · ERGUER SOMBRA':'F · ABSORVER ESSÊNCIA',use:()=>absorb(bossE)}}}
   return best;
 }
 function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use()}
@@ -1480,7 +1495,7 @@ function frame(now){
   AU.want=wantTrack();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
-  if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;
+  if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0)update(dt);
   camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
@@ -1491,6 +1506,7 @@ function update(dt){
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
   if(pcCam.yaw)[ix,iz]=camRot(ix,iz);
+  if(FX2.inv>0){ix=-ix;iz=-iz}
   const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}
   if(!P.dead){
     P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
@@ -1882,7 +1898,7 @@ const STATN={for:'Força',agi:'Agilidade',per:'Percepção',int:'Inteligência',
 const STATD={for:'+2% dano',agi:'+1% velocidade e ataque mais rápido',per:'+0,6% crítico',int:'+2% mana e +2% dano de habilidade',vit:'+3% vida'};
 const DAILY=[['run','Correr',1000,'m'],['atk','Golpes',100,''],['dodge','Esquivas',20,''],['kill','Monstros',30,'']];
 const todayKey=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
-const SHNAMES=['Kaizen','Vorn','Ignar','Belru','Tusk','Grimm','Nyx','Morvak','Sombra Alfa','Rurik','Zael','Orsk'];
+const SHNAMES=['Kaizen','Vorn','Ignar','Velmor','Durak','Grimm','Nyx','Morvak','Sombra Alfa','Rurik','Zael','Orsk'];
 const LOOK_H=[null,0x222222,0xc85a1e,0xe8e8ff,0x3a5fd0,0xd0b070,0x8a2b8a,0x2f8a4a];
 const LOOK_B=[null,0x2a3a5a,0x7a1a2a,0x1f6b4a,0x5a3a8a,0x8a7a50,0x222228,0xd8d8e0];
 const LORE={
@@ -1908,7 +1924,7 @@ function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=
 function shadowCap(){return 3+Math.floor(rankOf()/2)}
 function shadowRecs(){return run.shadows}
 function albumView(){view=albumView;const a=profile.album||[];let h='<div class="sysline"><b>[SISTEMA]</b> Coleção de Sombras: <b>'+a.length+'</b> espécies já erguidas. A coleção fica mesmo se você morrer.</div>';
-  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhuma sombra erguida ainda. Use ARISE em guardiões e elites.</small></div></div>';
+  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhuma sombra erguida ainda. Use ERGUER SOMBRA (F) em guardiões e elites.</small></div></div>';
   for(const n of a)h+='<div class="it"><div class="d"><b style="color:#b18cff">'+n+'</b><small>Sombra registrada</small></div></div>';openModal('COLEÇÃO DE SOMBRAS',h)}
 function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Nova sombra na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[SISTEMA]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
@@ -1974,7 +1990,7 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   openModal('JANELA DE STATUS',h)}
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Sombras ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Sombras ganham nível lutando.</div>';
-  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(CLASSES[profile.cls].arise?'Use ARISE em guardiões e elites.':'Só o Necromante levanta sombras.')+'</small></div></div>';
+  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(CLASSES[profile.cls].arise?'Use ERGUER SOMBRA (F) em guardiões e elites.':'Só o Necromante levanta sombras.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*r.lvl,btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE SOMBRAS',h)}
 function diaryView(){view=null;const l=profile.lore||[];let h='';for(const k of l)h+='<div class="it"><div class="d"><b>'+LORE[k][0]+'</b><small>'+LORE[k][1]+'</small></div></div>';if(!l.length)h='<div class="sysline">Nada escrito ainda.</div>';openModal('DIÁRIO DO CAÇADOR',h)}
@@ -2129,7 +2145,7 @@ function extraActions2(a,v){
   if(a==='fuse'){const s=run.stolen[+v],t=Math.min(8,rankOf());if(run.res.cry[t]<50)return;run.res.cry[t]-=50;run.fused={...s,cdT:0,tag:fuseTag(s.n)};run.stolen.splice(+v,1);buildSteal();bigText((ADV[profile.cls].n+' '+run.fused.tag).toUpperCase(),2000);sfx('arise');return true}
   if(a==='fuseshadow'){const t=Math.min(8,rankOf());if(run.res.cry[t]<100)return;run.res.cry[t]-=100;
     if(profile.cls!==7){if(run.res.core[t]<5)return;run.res.core[t]-=5;run.fused={...S('Legião dos Mortos','summon',18,40,3,0xa26bff),cdT:0,tag:'Necromante'}}
-    else{const r=run.shadows[+v];run.shadows.splice(+v,1);const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}run.fused={...S('Chamado: '+(r.nick||r.n),'summon',16,40,1,0xb98cff),cdT:0,tag:'Soberano das Sombras',giant:true}}
+    else{const r=run.shadows[+v];run.shadows.splice(+v,1);const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}run.fused={...S('Chamado: '+(r.nick||r.n),'summon',16,40,1,0xb98cff),cdT:0,tag:'Soberano do Vazio',giant:true}}
     buildSteal();bigText((ADV[profile.cls].n+' '+run.fused.tag).toUpperCase(),2000);sfx('arise');return true}
   if(a==='buyelix'){const p=ELIX[+v];if(run.gold<p.price)return;run.gold-=p.price;run.foods=run.foods||{};run.foods[p.n]=(run.foods[p.n]||0)+1;toast('Comprado: '+p.n+'. Beba pela BOLSA.');return true}
   if(a==='titles')return titlesView(),'close0';
@@ -2406,7 +2422,7 @@ function bagItems(){
   {const fo=run.foods||{};const ks=Object.keys(fo).filter(k=>fo[k]>0);h+=row('Comida'+(run.food&&run.food.t>0?' · ativo: '+run.food.n+' ('+fmtT(run.food.t)+')':''),ks.length?'':'Cozinhe no Mercado com peixes do lago',ks.map(k=>btn('Comer '+k+' ×'+fo[k],'eat',k)).join(''))}
   const canScroll=L.mode==='dungeon'&&!(L.gate.red&&!L.bossDead)&&run.scrolls>0;
   h+=row('Poções de vida: '+run.pots,'Botão ✚ ou tecla H','')+row('Pergaminhos de retorno: '+run.scrolls,'Leva você da masmorra para a cidade',btn('USAR','scroll',0,canScroll));
-  h+='<div class="sec">PODERES</div>'+row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Nenhuma ainda. Absorva essências de guardiões.','')+row('Sombras',run.shadows.length?run.shadows.map(b=>b.n).join(', '):(CLASSES[profile.cls].arise?'Use ARISE nos guardiões':'Só o Necromante levanta sombras'),'')+row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Associação','');
+  h+='<div class="sec">PODERES</div>'+row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Nenhuma ainda. Absorva essências de guardiões.','')+row('Sombras',run.shadows.length?run.shadows.map(b=>b.n).join(', '):(CLASSES[profile.cls].arise?'Use ERGUER SOMBRA nos guardiões':'Só o Necromante levanta sombras'),'')+row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Associação','');
   if(!city)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Venda de itens só dentro de uma cidade.</div>';
   openModal('BOLSA',bagTabs('itens')+h);
 }
@@ -2526,7 +2542,7 @@ $('bBag').addEventListener('click',()=>{if(!modalOpen&&!player.dead)bagView()});
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML=RANKS.filter(r=>!r.secret).map(r=>'<div><span style="color:'+r.c+'">'+r.id+'</span>'+(r.p<1?r.p.toFixed(2):r.p)+'%</div>').join('');
 function showProfile(){const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
-  $('rolls').innerHTML=c.sk.map((s,i)=>'QRT'[i]+' '+s.n).join(' · ')+(c.arise?'<br>Único com ARISE':'')+'<br>Mortes: '+(profile.deaths||0)}
+  $('rolls').innerHTML=c.sk.map((s,i)=>'QRT'[i]+' '+s.n).join(' · ')+(c.arise?'<br>Único que ergue sombras':'')+'<br>Mortes: '+(profile.deaths||0)}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=false}
 $('goBtn').addEventListener('click',()=>{
   audioInit();

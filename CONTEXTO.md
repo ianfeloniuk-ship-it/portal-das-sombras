@@ -1,6 +1,6 @@
 # Contexto do projeto Portal das Sombras (para outra conversa/IA continuar)
 
-Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, inspirado em Solo Leveling (caçadores, portais, sombras).
+Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, do gênero caçadores/portais/sombras (fantasia de 'dungeon' moderna). Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes (ex.: não usar "ARISE"; a ação é **ERGUER SOMBRA**).
 Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-das-sombras/ (GitHub Pages, branch `main`, pasta raiz).
 
 ## Arquivos
@@ -29,6 +29,9 @@ Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-da
 - Livro de Habilidade: elites têm 8% de chance de dar +1 ponto de habilidade.
 - NOTÍCIAS: todo aviso (toast/showSys) fica em `profile.news` (últimos 100); tecla N, botão NOTÍCIAS no topo ou clicar no aviso.
 - Invasão explicada: aviso longo com o que fazer e as consequências (preço +20% na cidade abandonada, reputação/karma) e contador no HUD.
+- Recomendação na bolsa: nota de poder (`itemScore`), ▲/▼ comparando com o equipado, botão EQUIPAR O MELHOR.
+- Mecânicas de chefe (`BMECH`, 60% dos chefes): Couraça Frontal (dano só pelas costas), Divisão (2 fragmentos na metade), Olhar Distorcido (inverte controles), Barreira de Mana.
+- Direitos autorais: "ARISE" trocado por ERGUER SOMBRA; nomes de sombra parecidos com a obra trocados.
 - Teclas configuráveis no PC (menu ⚙ → Configurar teclas), salvas em `pds_keys`.
 
 ## Decisões do Ian (não mudar sem perguntar)
