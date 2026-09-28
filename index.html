@@ -129,7 +129,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
@@ -1102,7 +1102,12 @@ function fxGhost(){const o=new THREE.Mesh(geo('ghost',()=>new THREE.CylinderGeom
 function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt),col,t:0,big})}
 function shake(a){shakeA=Math.max(shakeA,a)}
 function hitstop(s){freeze=Math.max(freeze,s)}
-function toast(html,ms=2600){const d=document.createElement('div');d.className='toast panel';d.innerHTML=html;$('toasts').appendChild(d);setTimeout(()=>d.remove(),ms);while($('toasts').children.length>3)$('toasts').firstChild.remove();sfx('ding')}
+/* NOTÍCIAS: todo aviso fica guardado para reler (tecla N, botão NOTÍCIAS, ou clicar no aviso). */
+function logNews(html){try{if(!profile)return;profile.news=profile.news||[];const t=new Date();profile.news.unshift({h:html,t:String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')});if(profile.news.length>100)profile.news.length=100;store.set('pds2_profile',profile)}catch(e){}}
+function newsView(){view=newsView;const n=(profile&&profile.news)||[];let h='<div class="sysline">As últimas '+n.length+' mensagens do Sistema e eventos do mundo, da mais nova para a mais antiga.</div>';
+  if(!n.length)h+='<div class="it"><div class="d"><small>Nenhuma notícia ainda.</small></div></div>';
+  for(const x of n)h+='<div class="it"><div class="d" style="white-space:normal">'+x.h+'<small>'+x.t+'</small></div></div>';openModal('NOTÍCIAS',h)}
+function toast(html,ms=2600){logNews(html);const d=document.createElement('div');d.className='toast panel';d.innerHTML=html;d.style.pointerEvents='auto';d.style.cursor='pointer';d.title='Clique para ver todas as notícias';d.onclick=()=>{if(started&&!modalOpen)newsView()};$('toasts').appendChild(d);setTimeout(()=>d.remove(),ms);while($('toasts').children.length>3)$('toasts').firstChild.remove();sfx('ding')}
 function bigText(t,ms=1600){const b=$('big');b.textContent=t;b.style.opacity=1;setTimeout(()=>b.style.opacity=0,ms)}
 
 /* ================= EFEITOS VISUAIS POR HABILIDADE ================= */
@@ -1663,7 +1668,8 @@ function hud(){
   $('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bb').style.width=(100*Math.max(0,bossE.hp)/bossE.maxhp)+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
-  const dmd=run.demand?'[EXIGÊNCIA '+run.demand.got+'/'+run.demand.n+'] ':'',dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
+  const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
+  const dmd=invs+(run.demand?'[EXIGÊNCIA '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
   $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s) · receba na Associação':q?'[MISSÃO] '+q.d+': '+q.got+'/'+q.n:'');$('mission').hidden=!(done||q||dl||pt||dmd);
   drawMap(mmc,192,false);
 }
@@ -1954,7 +1960,8 @@ function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;evT-=dt;
   const pr=rankOf(),r=Math.random();
   if(r<.34){const c=nc.c,a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]),x=c.x+Math.cos(a)*48,z=c.z+Math.sin(a)*48,gr=clamp(pr,0,8);for(let i=0;i<8;i++){const e=spawnKind(wpick(kindsFor(gr)).k,x+rnd(-5,5),z+rnd(-5,5),gr,{wild:true,breaker:true});e.gold*=3;if(i<2)makeElite(e)}
     for(const e of enemies)if(e.breaker&&!e.dead&&Math.hypot(e.x-x,e.z-z)<10)e.inv=true;L.inv={c,t:150};
-    toast('<b>[EVENTO]</b> Invasão! Monstros cercam a cidade de '+c.name+'. Defenda em 2:30 ou ela vai se lembrar.',6000);
+    toast('<b>[EVENTO] INVASÃO!</b> Monstros cercam a cidade de <b>'+c.name+'</b>. Mate todos em <b>2:30</b> (marcados no mapa). Se salvar: a cidade fica grata e os preços caem. Se não: os preços lá ficam <b>20% mais caros</b> até você salvá-la numa próxima invasão.',12000);
+    showSys('INVASÃO em '+c.name+'. Vá até lá e derrote todos os monstros antes do tempo acabar. O resultado muda os preços da cidade (veja em NOTÍCIAS).');
     if(cityL(c)>=4){for(let i=0;i<3;i++)makeHunterAlly({name:'Guarda',cls:[0,2,4][i],rank:clamp(pr,0,7),lvl:run.level+5,hair:0x333333},c.x+Math.cos(a)*38+rnd(-2,2),c.z+Math.sin(a)*38+rnd(-2,2),true);toast('<b>[CIDADE]</b> Os guardas de '+c.name+' saíram para lutar.')}bigText('INVASÃO',1200)}
   else if(r<.67){const a=rnd(0,TAU),x=P.x+Math.cos(a)*38,z=P.z+Math.sin(a)*38;const e=spawnRival(x,z,clamp(pr+1,0,8),{wild:true,breaker:true});e.name='Lendário '+e.name;e.hp*=4;e.maxhp*=4;e.gold*=6;e.xp*=4;e.m.body.scale.multiplyScalar(1.25);
     toast('<b>[EVENTO]</b> Um caçador lendário foi visto a '+Math.round(Math.hypot(x-P.x,z-P.z))+'m. Recompensa enorme, perigo enorme.',6000)}
@@ -2109,7 +2116,7 @@ function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citie
   (on?row('Portal Primordial','Soberano inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
 const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Soberanos se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Soberano. E você é o meu herdeiro.'};
-function showSys(t){$('dlg').innerHTML='<b style="color:#d7b8ff">[SISTEMA]</b> '+t+'<small>...</small>';$('dlg').style.borderColor='#a26bff';$('dlg').hidden=false;dlgT=9;sfx('gong');setTimeout(()=>$('dlg').style.borderColor='',9000)}
+function showSys(t){logNews('<b>[SISTEMA]</b> '+t);$('dlg').innerHTML='<b style="color:#d7b8ff">[SISTEMA]</b> '+t+'<small>...</small>';$('dlg').style.borderColor='#a26bff';$('dlg').hidden=false;dlgT=9;sfx('gong');setTimeout(()=>$('dlg').style.borderColor='',9000)}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Soberano, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){profile.story=profile.story||[];if(!profile.story.includes(l)){profile.story.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0};setTimeout(()=>showSys('Tenho uma exigência. '+t[1]+'. Não me decepcione.'),5000)}}
 function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=5;run.spts+=2;run.demand=null;showSys('Exigência cumprida. +5 pontos de status, +2 de habilidade. Você me diverte.')}}
@@ -2277,8 +2284,8 @@ function updSpecial3(S,dt){const alive=enemies.filter(e=>!e.dead).length;
 /* escolhas: salvar ou abandonar cidades */
 const karma=()=>clamp(profile.karma||0,-10,10);
 function updInvasion(dt){const I=L.inv;if(!I)return;I.t-=dt;const alive=enemies.filter(e=>e.inv&&!e.dead).length;
-  if(alive===0){L.inv=null;profile.karma=(profile.karma||0)+1;delete (profile.abandon||{})[I.c.id];store.set('pds2_profile',profile);bigText('CIDADE SALVA',1300);toast('<b>[ESCOLHA]</b> Você salvou '+I.c.name+'. As pessoas vão lembrar.',5000)}
-  else if(I.t<=0){L.inv=null;profile.karma=(profile.karma||0)-1;profile.abandon=profile.abandon||{};profile.abandon[I.c.id]=1;store.set('pds2_profile',profile);toast('<b>[ESCOLHA]</b> Você não defendeu '+I.c.name+'. A cidade não vai esquecer: preços mais altos lá.',6000)}}
+  if(alive===0){L.inv=null;profile.karma=(profile.karma||0)+1;delete (profile.abandon||{})[I.c.id];store.set('pds2_profile',profile);bigText('CIDADE SALVA',1300);toast('<b>[ESCOLHA]</b> Você salvou <b>'+I.c.name+'</b>. Sua reputação subiu: preços um pouco mais baratos em todas as cidades (reputação '+karma()+'). Se a cidade estava com preço alto por abandono, voltou ao normal.',9000)}
+  else if(I.t<=0){L.inv=null;profile.karma=(profile.karma||0)-1;profile.abandon=profile.abandon||{};profile.abandon[I.c.id]=1;store.set('pds2_profile',profile);toast('<b>[ESCOLHA]</b> Você não defendeu <b>'+I.c.name+'</b> a tempo. A partir de agora as lojas de lá cobram <b>20% a mais</b>, e sua reputação caiu (preços um pouco mais caros em todo lugar). Para desfazer: salve essa cidade numa próxima invasão.',12000)}}
 const choiceMul=()=>{const c=nearestCity(player.x,player.z).c;return (1-karma()*.015)*((profile.abandon||{})[c.id]?1.2:1)};
 /* reconstruir cidade caída */
 const rebuildCost=()=>({gold:Math.round(20000*(rankOf()+1)),cry:30});
@@ -2464,7 +2471,7 @@ function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e 
   for(const [act,n] of KEYACT)h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true));
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
-addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}

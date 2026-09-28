@@ -27,6 +27,8 @@ Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-da
 - Reavaliação na Associação (aba Reavaliação): oficializa o rank atual com cerimônia, ouro e 2 pontos. `run.official`.
 - Coleção de Sombras permanente (`profile.album`), tecla K ou menu ⚙.
 - Livro de Habilidade: elites têm 8% de chance de dar +1 ponto de habilidade.
+- NOTÍCIAS: todo aviso (toast/showSys) fica em `profile.news` (últimos 100); tecla N, botão NOTÍCIAS no topo ou clicar no aviso.
+- Invasão explicada: aviso longo com o que fazer e as consequências (preço +20% na cidade abandonada, reputação/karma) e contador no HUD.
 - Teclas configuráveis no PC (menu ⚙ → Configurar teclas), salvas em `pds_keys`.
 
 ## Decisões do Ian (não mudar sem perguntar)
