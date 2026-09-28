@@ -1073,7 +1073,7 @@ function makeHunterAlly(p,x,z,guest){
 
 /* ================= ITENS ================= */
 function makeItem(slot,tier,rar){
-  const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco'}[CLASSES[profile.cls].wep];
+  const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Besta',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
   return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],bonus:+(WBON[tier]*(slot==='w'?1:.8)*R.m).toFixed(2),def:slot==='a'?Math.min(.45,+(ADEF[tier]*R.m).toFixed(2)):0,value:Math.round(PRICE[tier]*.3*R.m),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
 function rollItem(tier,boss){const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=wpick(w.map((w,i)=>({i,w}))).i;const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.bonus=+(it.bonus*1.5).toFixed(2);it.name+=' (Amaldiçoado)'}return it}
@@ -2396,14 +2396,26 @@ function guildView(tab){
     h+='<div class="sysline">Ranking de caçadores da região.</div>';list.forEach((r,i)=>{h+='<div class="it" style="'+(r.me?'background:rgba(79,195,255,.14)':'')+'"><div class="d"><b>'+(i+1)+'º</b> '+r.name+'</div><span class="rl" style="color:'+RANKS[r.rank].c+'">'+RANKS[r.rank].id+'</span><span style="width:64px;text-align:right">NV '+r.lvl+'</span></div>'})}
   openModal('ASSOCIAÇÃO DE CAÇADORES',h);
 }
+/* RECOMENDAÇÃO DO SISTEMA: nota de poder de cada item, comparada com o equipado. */
+const AFW={dmg:1,crit:.8,ls:.6,spd:.5,hp:.5,mp:.3};
+function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?it.bonus*100:it.bonus*100*.6+(it.def||0)*120;
+  for(const a of it.aff||[])sc+=a.v*(AFW[a.k]??(run.elem===a.k?1:.35));
+  if(it.set){const o=run.equip[it.slot==='w'?'a':'w'];if(o&&o.set===it.set)sc+=15}
+  if(it.curse)sc-=12;return Math.round(sc)}
+function bestInBag(slot){const pr=rankOf();let b=null;for(const it of run.items)if(it.slot===slot&&pr>=it.tier&&(!b||itemScore(it)>itemScore(b)))b=it;return b}
+function recoTag(it){const cur=run.equip[it.slot],d=itemScore(it)-itemScore(cur);if(rankOf()<it.tier)return '<span style="color:#9fb0c4">🔒 rank '+RANKS[it.tier].id+' necessário</span>';
+  if(d>0&&bestInBag(it.slot)===it)return '<b style="color:#6fe39a">▲ RECOMENDADO +'+d+' de poder</b>';if(d>0)return '<span style="color:#6fe39a">▲ +'+d+' de poder</span>';if(d<0)return '<span style="color:#ff8a9a">▼ '+d+' de poder</span>';return '<span style="color:#9fb0c4">= igual ao seu</span>'}
 function bagItems(){
+  for(const it of[...run.items,run.equip.w,run.equip.a])if(it&&/^undefined/.test(it.name))it.name=it.name.replace(/^undefined/,'Arma');
   view=bagItems;const city=inCity(player.x,player.z),pr=rankOf();
   let h='<div class="sysline">Ouro <b class="gold">'+fmt(run.gold)+'</b> · Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'%</div>';
+  {const rw=bestInBag('w'),ra=bestInBag('a'),up=[];if(rw&&itemScore(rw)>itemScore(run.equip.w))up.push('<b style="color:'+RAR[rw.rar].c+'">'+rw.name+'</b>');if(ra&&itemScore(ra)>itemScore(run.equip.a))up.push('<b style="color:'+RAR[ra.rar].c+'">'+ra.name+'</b>');
+    h+='<div class="sysline"><b>[SISTEMA]</b> '+(up.length?'Recomendo equipar '+up.join(' e ')+'.</div><div style="display:flex;justify-content:flex-end">'+btn('EQUIPAR O MELHOR','equipbest',0,true,'hot')+'</div>':'Você já está com o melhor equipamento da bolsa.</div>')}
   h+='<div class="sec">EQUIPADO</div>';
-  for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · '+statTxt(it):'Compre na cidade ou ache em baús','')}
+  for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · <b>'+itemScore(it)+' de poder</b> · '+statTxt(it):'Compre na cidade ou ache em baús','')}
   h+='<div class="sec">BOLSA ('+run.items.length+'/16)</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Baús e guardiões dão equipamentos.</small></div></div>';
-  run.items.forEach(it=>{const lock=pr<it.tier;h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>',RAR[it.rar].n+' · rank '+RANKS[it.tier].id+' · '+statTxt(it),btn(lock?'Rank '+RANKS[it.tier].id:'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
+  run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{const lock=pr<it.tier;h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b><br>'+recoTag(it),(it.slot==='w'?'Arma':'Armadura')+' · '+RAR[it.rar].n+' · rank '+RANKS[it.tier].id+' · <b>'+itemScore(it)+' de poder</b> · '+statTxt(it),btn(lock?'Rank '+RANKS[it.tier].id:'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
   h+=row('Banco',fmt(profile.bank||0)+' ouro guardado · não se perde na morte','');
   h+='<div class="sec">RECURSOS</div>';const rs=[];for(let r=0;r<9;r++){if(run.res.core[r])rs.push(run.res.core[r]+' núcleo '+GR[r].id);if(run.res.cry[r])rs.push(run.res.cry[r]+' cristal '+GR[r].id)}
   h+=row('Núcleos e cristais',rs.length?rs.join(' · '):'Nada ainda. Venda no Mercado de qualquer cidade.','');
@@ -2442,6 +2454,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[SISTEMA]</b> Comprado: '+p.n)}
   if(a==='buyi'){const sl=v[0],t=+v.slice(1),pp=Math.round(PRICE[t]*priceMul(sl==='w'?'wep':'arm'));if(run.gold<pp)return;run.gold-=pp;addItem(makeItem(sl,t,0))}
+  if(a==='equipbest'){for(const sl of['w','a']){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[SISTEMA]</b> Equipamento otimizado.');}
   if(a==='equip'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;const it=run.items[i];run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[SISTEMA]</b> Equipado: '+it.name)}
   if(a==='sell'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;run.gold+=run.items[i].value;toast('<b>[SISTEMA]</b> Vendido por '+fmt(run.items[i].value)+' ouro');run.items.splice(i,1)}
   if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.1*affL('Lyra')));run.gold+=rw;toast('<b>[SISTEMA]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);run.quests[+v]=genQuest(q.t)}
