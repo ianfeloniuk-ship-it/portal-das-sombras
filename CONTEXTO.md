@@ -18,6 +18,17 @@ Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-da
 - Modo ULTRA automático no PC com gráficos HD (resolução até 2x + tonemap filmico). O botão LEVE continua desligando.
 - Save do PC fica no navegador do PC; levar progresso via Exportar/Importar save.
 
+## Atualizações recentes (set/2026, feitas com Claude no PC)
+- Armas das classes corrigidas (o carregador renomeia `handslot.r` → `handslotr`); armas embutidas dos modelos ficam escondidas. Necromante: cajado de osso e tom sombrio; Curandeiro: varinha + livro; Invocador: cajado + livro.
+- Status liberado no nível 1 (tecla C/Tab no PC, tocar no painel do personagem no celular).
+- 10 monstros Quaternius (CC0) em `models/m_*.glb`, carregados em segundo plano (`MON`, `MON_DEF`); entram por rank em `kindsFor`.
+- Esquiva perfeita (câmera lenta + contra-ataque +60%), contador de combo, alvo sob o mouse (PC).
+- Entrada cinematográfica do chefe (câmera fecha e mostra o nome).
+- Reavaliação na Associação (aba Reavaliação): oficializa o rank atual com cerimônia, ouro e 2 pontos. `run.official`.
+- Coleção de Sombras permanente (`profile.album`), tecla K ou menu ⚙.
+- Livro de Habilidade: elites têm 8% de chance de dar +1 ponto de habilidade.
+- Teclas configuráveis no PC (menu ⚙ → Configurar teclas), salvas em `pds_keys`.
+
 ## Decisões do Ian (não mudar sem perguntar)
 - Rank **Soberano** é secreto: não sai no sorteio do despertar; só é obtido no templo escondido dentro de uma masmorra comum (teste dos mandamentos, como no anime). Ranks públicos até SSS.
 - 5 guildas pré-existentes com história. Fundar guilda: **50 bilhões de ouro e nível 50**. Andar 100 da torre paga **5 milhões**.

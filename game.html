@@ -1205,6 +1205,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
 function killEnemy(e){
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   if(e.elite&&!e.isBoss)npcEv('elite');
+  if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
   if(CLASSES[profile.cls].arise&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ARISE',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
   const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0){run.gold+=g;sfx('coin');floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',false,1.4)}
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
@@ -1244,7 +1245,7 @@ function enrage(b){b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.wind*=.85;bossLight.co
   for(let i=0;i<2;i++){const a=rnd(0,TAU);const m=spawnKind(b.gr>=5?'demon':'minion',b.x+Math.cos(a)*3,b.z+Math.sin(a)*3,b.gr,{room:b.room});m.aggro=true}
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
-const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false};
+const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0};
 function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
@@ -1259,7 +1260,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
   run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)));let need=xpNeed();const r0=rankOf();
-  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +3 pontos de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
+  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +3 pontos de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
 }
@@ -1474,7 +1475,8 @@ function frame(now){
   AU.want=wantTrack();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
-  if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
+  if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;
+  if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0)update(dt);
   camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
 }
@@ -1568,8 +1570,10 @@ function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*Math.min(1,dt*6);cam.z+=(P.z-cam.z)*Math.min(1,dt*6);
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
   const dun=L.mode==='dungeon',mt=run&&run.mounted?2.5:0,hgt=(portrait?(dun?16:17):(dun?13.5:12.5))+mt,back=(portrait?13:(dun?10:11))+mt*.8;
-  const[ox,oz]=camRot(0,back*pcCam.zoom),[fx,fz]=camRot(0,-2);
-  camera.position.set(cam.x+ox+rnd(-s,s),hgt*pcCam.zoom+rnd(-s,s),cam.z+oz);camera.lookAt(cam.x+fx,1,cam.z+fz);
+  const cz=pcCam.zoom*(FX2.cine>0?.62:1);let lx=cam.x,lz=cam.z;
+  if(FX2.cine>0&&bossE&&!bossE.dead){lx=(cam.x+bossE.x)/2;lz=(cam.z+bossE.z)/2}
+  const[ox,oz]=camRot(0,back*cz),[fx,fz]=camRot(0,-2);
+  camera.position.set(lx+ox+rnd(-s,s),hgt*cz+rnd(-s,s),lz+oz);camera.lookAt(lx+fx,1,lz+fz);
 }
 
 /* ================= OVERLAY E HUD ================= */
@@ -1897,7 +1901,10 @@ function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=
   if(DAILY.every(q=>d.p[q[0]]>=q[2])){d.done=true;run.pts+=3;player.hp=player.maxhp;player.mp=player.maxmp;bigText('DIÁRIA COMPLETA',1400);sfx('level');toast('<b>[SISTEMA]</b> Missão diária concluída: +3 pontos de status e recuperação total.',5000)}}
 function shadowCap(){return 3+Math.floor(rankOf()/2)}
 function shadowRecs(){return run.shadows}
-function addShadow(rec){if(run.shadows.length>=20){toast('<b>[SISTEMA]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
+function albumView(){view=albumView;const a=profile.album||[];let h='<div class="sysline"><b>[SISTEMA]</b> Coleção de Sombras: <b>'+a.length+'</b> espécies já erguidas. A coleção fica mesmo se você morrer.</div>';
+  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhuma sombra erguida ainda. Use ARISE em guardiões e elites.</small></div></div>';
+  for(const n of a)h+='<div class="it"><div class="d"><b style="color:#b18cff">'+n+'</b><small>Sombra registrada</small></div></div>';openModal('COLEÇÃO DE SOMBRAS',h)}
+function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Nova sombra na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[SISTEMA]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
 function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'SOMBRA NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 function statsBonus(){const s=run.stats||{};return{dmg:1+.02*(s.for||0),spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*(s.int||0),hp:1+.03*(s.vit||0)}}
@@ -1999,6 +2006,11 @@ function extraActions(a,v){
   if(a==='lookh'||a==='lookb'){profile.look=profile.look||{h:0,b:0};const k=a==='lookh'?'h':'b',arr=k==='h'?LOOK_H:LOOK_B;profile.look[k]=(profile.look[k]+1)%arr.length;store.set('pds2_profile',profile);rebuildLook();return true}
   if(a==='copysave'){const t=$('savecode');try{navigator.clipboard.writeText(t.value).then(()=>toast('Código copiado.'),()=>{t.select()})}catch(e){t.select()}return 'close0'}
   if(a==='loadsave'){try{const d=JSON.parse(decodeURIComponent(escape(atob($('loadcode').value.trim()))));if(!d.p)throw 0;profile=d.p;store.set('pds2_profile',profile);if(d.r)store.set('pds3_run',d.r);else store.del('pds3_run');closeModal();showProfile();$('goBtn').textContent='CONTINUAR';toast('Save carregado.')}catch(e){toast('Código inválido. Confira se copiou tudo.')}return 'close0'}
+  if(a==='reaval'){const cur=rankOf(),off=run.official??profile.rank;if(cur<=off)return;run.official=cur;run.gold+=2000*(cur+1);run.pts=(run.pts||0)+2;closeModal();
+    const R=RANKS[cur];bigText('REAVALIAÇÃO · RANK '+R.id,2400);shake(.6);fxRing(player.x,player.z,0xffd54f,5,1);setTimeout(()=>fxRing(player.x,player.z,0x4fc3ff,8,1),300);sfx('level');
+    toast('<b>[SISTEMA]</b> A Associação registrou você como caçador <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
+  if(a==='album')return albumView(),'close0';
+  if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
   if(a==='status')return statusView(),'close0';if(a==='army')return armyView(),'close0';if(a==='diary')return diaryView(),'close0';if(a==='look')return lookView(),'close0';
 }
 /* tutorial */
@@ -2333,7 +2345,7 @@ function openShop(id){
 }
 function guildView(tab){
   view=()=>guildView(tab);
-  let h='<div class="tabs">'+[['quests','Missões'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking']].filter(([k])=>k==='quests'||k==='rank'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
+  let h='<div class="tabs">'+[['quests','Missões'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação']].filter(([k])=>k==='quests'||k==='rank'||k==='reaval'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
   if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
     if(run.adv)h+='<div class="sysline">Você já é <b>'+A.n+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
@@ -2344,6 +2356,12 @@ function guildView(tab){
     h+='<div class="sysline">Chefe desta semana: <b>'+B.n+'</b>. Ele se ajusta ao seu rank.</div>'+row('Rank do chefe','Um acima do seu','<b class="rl" style="color:'+RANKS[gr].c+'">'+GR[gr].id+'</b>')+row('Recompensa','Dois baús de guardião, ouro triplo e núcleos','')+row('Troca de chefe','Em '+dd+'d '+hh+'h','');
     h+='<div style="display:flex;justify-content:flex-end">'+(done?'<span class="sysline">Concluído nesta semana.</span>':btn('ENFRENTAR','weekly',0,true,'hot'))+'</div>'}
   else if(tab==='guild'){h+=guildTab()}
+  else if(tab==='reaval'){const cur=rankOf(),off=run.official??profile.rank,ok=cur>off;
+    h+='<div class="sysline">Lyra: A Associação só reconhece oficialmente o rank depois da <b>Reavaliação</b>. O cristal mede sua mana e o resultado vai para o registro nacional.</div>'+
+      row('Rank oficial','Registrado na Associação','<b class="rl" style="color:'+RANKS[off].c+'">'+RANKS[off].id+'</b>')+
+      row('Mana medida agora','Seu poder atual','<b class="rl" style="color:'+RANKS[cur].c+'">'+RANKS[cur].id+'</b>')+
+      row('Recompensa','Bônus da Associação por subir de rank: '+fmt(2000*(cur+1))+' ouro e 2 pontos de status','')+
+      '<div style="display:flex;justify-content:flex-end">'+(ok?btn('FAZER REAVALIAÇÃO','reaval',0,true,'hot'):'<span class="sysline">Seu rank oficial já está atualizado.</span>')+'</div>'}
   else if(tab==='clone')h+=cloneTab();else if(tab==='god')h+=godTab();
   else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();
   else if(tab==='hire'){h+='<div class="sysline">Caçadores contratados seguem você no mundo e nas masmorras. Se morrerem, não voltam. Máximo de 3.</div><div class="sec">SEU GRUPO ('+run.party.length+'/3)</div>';
@@ -2419,7 +2437,17 @@ $('mx').addEventListener('click',closeModal);
 $('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').addEventListener('click',()=>{if(started&&!modalOpen&&$('dead').hidden)statusView()});
 
 /* ================= CONTROLES ================= */
-addEventListener('keydown',e=>{if(e.repeat)return;keys[e.code]=true;
+/* Teclas configuráveis (PC): cada ação pode ganhar outra tecla. */
+const KEYACT=[['attack','Atacar','Space'],['dodge','Esquiva','ShiftLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade G','KeyG'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de sombras','KeyK']];
+let KEYMAP={};try{KEYMAP=JSON.parse(localStorage.getItem('pds_keys'))||{}}catch(e){}
+let bindWait=null;
+function keyOf(act){const d=KEYACT.find(k=>k[0]===act);return KEYMAP[act]||d[2]}
+function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
+function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e aperte a nova tecla. Esc cancela. WASD/setas continuam movendo.</div>';
+  for(const [act,n] of KEYACT)h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true));
+  h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
+addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
@@ -2446,7 +2474,7 @@ function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.d
 function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
-  '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>')}
+  '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'<div class="sec">COLEÇÃO</div><button class="mini" onclick="albumView()">Coleção de sombras</button>')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
 const PETP={tiro:{n:'Disparo',d:'dispara em um monstro'},cura:{n:'Cura',d:'cura você aos poucos'},gelo:{n:'Gelo',d:'dispara e atordoa'},raio:{n:'Raio',d:'acerta até 3 monstros'}};
 function newPet(){const r=wpick([55,27,12,4.5,1.2,.25,.05].map((w,i)=>({i,w}))).i;return{rar:r,pow:pick(Object.keys(PETP)),lvl:1}}
