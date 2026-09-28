@@ -187,11 +187,15 @@ const CLASSES=[
  {n:'Guerreiro',w:20,ranged:false,body:0xb3342f,hair:0x3b2a20,wep:'sword',sk:[S('Corte Giratório','nova',6,15,1.8,0xff6644),S('Investida','dash_strike',5,12,2.2,0xffaa44),S('Grito de Guerra','buff_dmg',16,20,1.5,0xff3322)]},
  {n:'Assassino',w:17,ranged:false,body:0x2d2340,hair:0x15121c,wep:'dagger',sk:[S('Passo Sombrio','dash_strike',4,10,2.4,0xa26bff),S('Furtividade','stealth',14,18,3,0x7a55ff),S('Lâmina Envenenada','dot',7,14,1.2,0x66ff66)]},
  {n:'Tanque',w:14,ranged:false,body:0x5f6f86,hair:0x2b2b2b,wep:'axe',sk:[S('Golpe de Escudo','cone',4,10,2.2,0x9fd3ff),S('Impacto','nova',7,16,2,0xcfe8ff),S('Muralha','guard',14,18,.3,0x4fc3ff)]},
- {n:'Mago Elemental',w:14,ranged:true,body:0xc8641e,hair:0xf0e0c0,wep:'staff',sk:[S('Bola de Fogo','bolt',3,10,3,0xff7a22),S('Nova de Gelo','nova',8,18,1.6,0x8fe3ff),S('Corrente de Raios','chain',7,20,1.8,0xfff36b)]},
+ {n:'Mago Elemental',w:0,legacy:true,ranged:true,body:0xc8641e,hair:0xf0e0c0,wep:'staff',sk:[S('Bola de Fogo','bolt',3,10,3,0xff7a22),S('Nova de Gelo','nova',8,18,1.6,0x8fe3ff),S('Corrente de Raios','chain',7,20,1.8,0xfff36b)]},
  {n:'Arqueiro',w:13,ranged:true,body:0x2f6b3a,hair:0x6b4a2a,wep:'bow',sk:[S('Chuva de Flechas','rain',8,20,1.4,0xbfff8f),S('Salto Evasivo','blink',5,8,0,0x8fffc8),S('Flecha Perfurante','bolt',4,12,3.2,0xe0ffb0)]},
  {n:'Curandeiro',w:11,ranged:true,body:0xe8d9a8,hair:0xffe08a,wep:'wand',sk:[S('Luz Curativa','heal',9,20,.35,0xfff3a0),S('Julgamento','nova',6,16,1.8,0xffe066),S('Bênção','guard',14,18,.4,0xfff9d0)]},
  {n:'Invocador',w:8,ranged:true,body:0x1f7f86,hair:0xd8f4ff,wep:'tome',sk:[S('Lobo Espiritual','summon',14,25,1,0x6ff4ff),S('Elo Arcano','chain',6,16,1.6,0x6ff4ff),S('Pacto','heal',12,15,.25,0x9fffe8)]},
- {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'bonestaff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Explosão de Almas','nova',7,18,2.2,0xb98cff)]}];
+ {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'bonestaff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Explosão de Almas','nova',7,18,2.2,0xb98cff)]},
+ {n:'Mago de Fogo',w:3.5,ranged:true,body:0xb8321a,hair:0xffd08a,wep:'staff',elem:'fogo',pt:'fire',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
+ {n:'Mago de Gelo',w:3.5,ranged:true,body:0x2f7fb8,hair:0xe8f8ff,wep:'staff',elem:'gelo',pt:'orb',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
+ {n:'Mago da Terra',w:3.5,ranged:true,body:0x6a5234,hair:0x3a2a1a,wep:'staff',elem:'terra',pt:'orb',sk:[S('Estaca de Pedra','cone',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
+ {n:'Mago do Raio',w:3.5,ranged:true,body:0x5a4ab8,hair:0xfff8c0,wep:'staff',elem:'raio',pt:'orb',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','rain',10,28,1.9,0xfff36b)]}];
 const BOSSES=[
  {n:'Cavaleiro Carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
  {n:'Lich Ancestral',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
@@ -359,9 +363,9 @@ MODELS.ready=new Promise(res=>{
   (window.PDS_SITE?Promise.reject(0):fetch('models-pack.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(p=>{for(const [t,k] of jobs){const b=p[fk(t,k)];if(!b){if(t!=='e'&&t!=='f')fail=true;fin();continue}const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);ld.parse(u.buffer,'',g=>one(t,k,g),()=>{if(t!=='e'&&t!=='f')fail=true;fin()})}}).catch(perFile);
   setTimeout(()=>{if(n<jobs.length){fail=true;n=jobs.length-1;fin()}},25000);
 });
-const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded'];
+const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded','Mage','Mage','Mage','Mage'];
 const TINT_K={0x3a2266:.9};/* necromante: tom sombrio forte sobre a textura verde */
-const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x3a2266];
+const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x3a2266,0xff5a3a,0x7fd0ff,0xb89060,0xc0a8ff];
 const ATK_CLIP={sword:'1H_Melee_Attack_Slice_Diagonal',dagger:'Dualwield_Melee_Attack_Slice',axe:'2H_Melee_Attack_Slice',staff:'Spellcast_Shoot',bonestaff:'Spellcast_Shoot',wand:'Spellcast_Shoot',tome:'Spellcast_Shoot',bow:'1H_Ranged_Shoot',none:'1H_Melee_Attack_Chop'};
 function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Skeleton_Blade':'sword_1handed',dagger:sk?'Skeleton_Blade':'dagger',axe:sk?'Skeleton_Axe':'axe_1handed',staff:sk?'Skeleton_Staff':'staff',bonestaff:'Skeleton_Staff',tome:'staff',bow:'crossbow_1handed'};
   const r=m[wep]||null;let l=null;if(wep==='dagger')l=r;if(shield)l=sk?'Skeleton_Shield_Small_A':'shield_round';return[r,l]}
@@ -459,7 +463,7 @@ function loadRun(){const r=store.get('pds3_run');if(!r)return false;newRun();Obj
 
 /* ================= JOGADOR ================= */
 /* Equilíbrio por classe: corpo a corpo leva o risco, então ganha mais vida/defesa/dano. */
-const CLS_BAL=[{hp:1.35,dmg:1.25,def:.12},{hp:1.05,dmg:1.4,def:0},{hp:1.6,dmg:1,def:.2},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0}];
+const CLS_BAL=[{hp:1.35,dmg:1.25,def:.12},{hp:1.05,dmg:1.4,def:0},{hp:1.6,dmg:1,def:.2},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.9,dmg:1,def:0},{hp:.95,dmg:.95,def:.08},{hp:.9,dmg:1,def:0}];
 function statsFor(){
   const rk=RANKS[rankOf()],c=CLASSES[profile.cls],w=run.equip.w,a=run.equip.a;
   const sb=statsBonus(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),rb=rebirthB();
@@ -478,7 +482,7 @@ const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('B
  gelo:{n:'Água e Gelo',c:'#8fe3ff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
  terra:{n:'Terra',c:'#c8a070',d:'Defesa e tremores',sk:[S('Estaca de Pedra','cone',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
  raio:{n:'Ar e Raio',c:'#fff36b',d:'Velocidade e raios, mais fortes na chuva',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','rain',10,28,1.9,0xfff36b)]}};
-function pSkills(){const c=CLASSES[profile.cls],b=profile.cls===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;return[...b,...(run.adv?[ADV[profile.cls].sk]:[])].map(s=>({...s,cdT:0}))}
+function pSkills(){if(CLASSES[profile.cls].elem&&run)run.elem=CLASSES[profile.cls].elem;const c=CLASSES[profile.cls],b=profile.cls===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;return[...b,...(run.adv?[ADV[profile.cls].sk]:[])].map(s=>({...s,cdT:0}))}
 /* afixos dos itens */
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
 function rollAff2(tier,rar){const n=[0,1,2,2,3,4,5][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
@@ -1313,7 +1317,7 @@ function attack(){
   const dmg=player.dmg*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
   const shootsNow=styleOff()?!c.ranged:c.ranged;
   if(shootsNow&&styleOff()){faceTarget(14);shoot(player.x,player.z,player.face,20,dmg,'player',0x8fb8ff,'orb');beep(520,.05,.03,'triangle')}
-  else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
+  else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0x8fe3ff,reach,third);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22});hit=true}
@@ -1329,7 +1333,7 @@ function dodge(){
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
   if(pcCam.yaw)[dx,dz]=camRot(dx,dz);
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
-  player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=.55;player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
+  player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=1.1;player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
@@ -1689,7 +1693,7 @@ function hud(){
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
   const ordh=allies.some(a=>a.shadow&&!a.dead)?'[SOMBRAS: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1])+(touch?' · toque aqui':' (O)')+'] ':'';
   const sth='['+(basicIsMagic()?'ARCANO':'FÍSICO')+(styleOff()?' 70%':'')+(touch?'':' (X)')+'] ';
-  const dmd=sth+ordh+invs+(run.demand?'[EXIGÊNCIA '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
+  const dmd=sth+ordh+invs+(run.demand?'[EXIGÊNCIA: '+({nododge:'sem esquivar',nopot:'sem poção',night:'à noite'}[run.demand.t]||'')+' '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
   $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s) · receba na Associação':q?'[MISSÃO] '+q.d+': '+q.got+'/'+q.n:'');$('mission').hidden=!(done||q||dl||pt||dmd);
   drawMap(mmc,192,false);
 }
@@ -1773,7 +1777,11 @@ const ADV=[
   {n:'Atirador Celestial',sk:S('Flecha Estelar','bolt',6,25,6,0xe0ffb0)},
   {n:'Sacerdote Solar',sk:S('Sol Nascente','heal',14,35,.7,0xfff3a0)},
   {n:'Mestre das Bestas',sk:S('Matilha Espiritual','summon',16,40,3,0x6ff4ff)},
-  {n:'Senhor das Sombras',sk:S('Domínio das Sombras','nova',9,30,3.8,0xb98cff)}];
+  {n:'Senhor das Sombras',sk:S('Domínio das Sombras','nova',9,30,3.8,0xb98cff)},
+  {n:'Arquimago Ígneo',sk:S('Sol Negro','rain',11,35,3.4,0xff3a1e)},
+  {n:'Arquimago Glacial',sk:S('Era do Gelo','nova',11,35,3,0xbff4ff)},
+  {n:'Arquimago Telúrico',sk:S('Colosso de Pedra','summon',16,40,2.5,0xc8a070)},
+  {n:'Arquimago Tempestuoso',sk:S('Fúria dos Céus','chain',8,30,3.4,0xfff36b)}];
 const JOB_LVL=30;
 const weekId=()=>Math.floor((Date.now()/864e5+3)/7);
 const weekLeft=()=>((weekId()+1)*7-3)*864e5-Date.now();
@@ -1972,13 +1980,13 @@ function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
 function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'SOMBRA NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 /* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
-const MAGIC_CLS=[3,5,6,7];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
+const MAGIC_CLS=[3,5,6,7,8,9,10,11];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
 function statsBonus(){const s=run.stats||{},m=isMagic(),main=m?(s.int||0):(s.for||0);return{dmg:1+.02*main,spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*main,hp:1+.03*(s.vit||0),phys:1+.02*(s.for||0),mag:1+.02*(s.int||0)}}
 /* ESTILO DE LUTA: natural da classe (100%) ou o outro (70%). Físico usa Força, arcano usa Inteligência. */
-function styleOff(){return run.style==='off'}
+function styleOff(){return run.style==='off'&&isMagic()}
 function basicIsMagic(){return isMagic()!==styleOff()}
 function basicDmgMul(){const b=statsBonus();return (basicIsMagic()?b.mag:b.phys)/b.dmg*(styleOff()?.7:1)}
-function toggleStyle(){if(!started||paused)return;run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
+function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SISTEMA]</b> Classes físicas não usam magia. Só magos podem guardar a varinha e lutar no braço.');return}run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
   toast('<b>[SISTEMA]</b> Ataque básico agora é <b>'+(m?'ARCANO (usa Inteligência)':'FÍSICO (usa Força)')+'</b>'+(styleOff()?' · estilo fora da sua classe: 70% de eficiência':' · estilo natural da classe')+'. Habilidades Q/R/T não mudam.',5000);sfx('arise');hud()}
 function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano FÍSICO'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:STATD.agi,per:STATD.per,int:'+2% dano MÁGICO e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
@@ -2173,7 +2181,7 @@ function showSys(t){logNews('<b>[SISTEMA]</b> '+t);$('dlg').innerHTML='<b style=
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Soberano, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){profile.story=profile.story||[];if(!profile.story.includes(l)){profile.story.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0};setTimeout(()=>showSys('Tenho uma exigência. '+t[1]+'. Não me decepcione.'),5000)}}
 function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=5;run.spts+=2;run.demand=null;showSys('Exigência cumprida. +5 pontos de status, +2 de habilidade. Você me diverte.')}}
-function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){d.got=0;toast('<b>[SISTEMA]</b> Exigência reiniciada. Eu disse sem isso.')}}
+function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){const lost=d.got;d.got=0;toast('<b>[SISTEMA]</b> Exigência: <b>'+d.d+'</b>. Você '+({nododge:'esquivou',nopot:'usou poção'}[t]||'quebrou a regra')+' e perdeu o progresso ('+lost+' → 0/'+d.n+'). Termine para ganhar +5 pontos de status e +2 de habilidade.',6000)}}
 /* fusão (classe híbrida) */
 function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div class="sec">FUSÃO SECRETA</div>';
   if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla 4 / botão ★)','');
