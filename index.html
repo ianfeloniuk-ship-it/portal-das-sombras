@@ -241,7 +241,8 @@ const GR=[
  {id:'SOBERANO',hp:80,dmg:21,xp:60,gold:900,size:94,rooms:22,dens:1.55,lvl:260,th:{n:'Domínio do Soberano',floor:0x0c0a14,wall:0x1e1830,trim:0xe0d0ff,fog:0x040308,light:0xd8c8ff}}];
 const gid=i=>i===8?'Ω':GR[i].id;
 const GATE_W=[26,24,20,14,10,6,3,1.5,.4];
-const RAR=[{n:'Comum',c:'#c9d3de',m:1},{n:'Raro',c:'#4fc3ff',m:1.3},{n:'Épico',c:'#b18cff',m:1.7},{n:'Lendário',c:'#ffb84d',m:2.3}];
+const RAR=[{n:'Comum',c:'#c9d3de',m:1},{n:'Raro',c:'#4fc3ff',m:1.3},{n:'Épico',c:'#b18cff',m:1.7},{n:'Lendário',c:'#ffb84d',m:2.3},{n:'Mítico',c:'#ff5a8a',m:2.8},{n:'Divino',c:'#fff36b',m:3.4},{n:'Primordial',c:'#ff3d1e',m:4.2}];
+const RARW=[60,28,10,2,.45,.09,.012],RARWB=[0,50,38,12,3.5,.7,.1];
 const PRICE=[150,700,2400,7000,18000,50000,140000,400000,1200000];
 const CORE_P=[8,20,50,130,340,900,2200,5500,14000],CRY_P=[15,40,100,260,680,1800,4500,11000,28000];
 const HIRE=[100,300,900,2500,7000,18000,45000,110000,300000];
@@ -426,8 +427,8 @@ function loadRun(){const r=store.get('pds3_run');if(!r)return false;newRun();Obj
 function statsFor(){
   const rk=RANKS[rankOf()],c=CLASSES[profile.cls],w=run.equip.w,a=run.equip.a;
   const sb=statsBonus(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),rb=rebirthB();
-  return {maxhp:Math.round((95+run.level*9)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
-    dmg:(10+run.level*1.6)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:(a?a.def:0)+(npcHas('Brann')?.08:0),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*sb.spd*(1+cb.spd)};
+  return {maxhp:Math.round((95+run.level*9)*(1+affB().hp/100)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(1+affB().mp/100)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
+    dmg:(10+run.level*1.6)*(1+affB().dmg/100)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:(a?a.def:0)+(npcHas('Brann')?.08:0),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*(1+affB().spd/100)*sb.spd*(1+cb.spd)};
 }
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -436,10 +437,22 @@ function playerModel(){
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
   if(profile&&profile.title&&(profile.ach||[]).includes(profile.title)){const ti=TITLES.findIndex(t=>t.id===profile.title),hc=[0xffd070,0xff6a8a,0x8fe3ff,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
   scene.add(m.root);return{m,aura}}
+const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
+ gelo:{n:'Água e Gelo',c:'#8fe3ff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
+ terra:{n:'Terra',c:'#c8a070',d:'Defesa e tremores',sk:[S('Estaca de Pedra','cone',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
+ raio:{n:'Ar e Raio',c:'#fff36b',d:'Velocidade e raios, mais fortes na chuva',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','rain',10,28,1.9,0xfff36b)]}};
+function pSkills(){const c=CLASSES[profile.cls],b=profile.cls===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;return[...b,...(run.adv?[ADV[profile.cls].sk]:[])].map(s=>({...s,cdT:0}))}
+/* afixos dos itens */
+const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
+function rollAff2(tier,rar){const n=[0,1,2,2,3,4,5][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
+  out.push({k:a.k,v:Math.max(1,Math.round((3+tier*1.4)*(1+rar*.4)*(a.f||1)*(.7+Math.random()*.6)))})}return out}
+function affTxt(it){return it.aff&&it.aff.length?it.aff.map(a=>{const A=AFX.find(x=>x.k===a.k);return'+'+a.v+'% '+A.t}).join(' · ')+' · ':''}
+let AFFC=null,AFFK='';function affB(){const w=run&&run.equip&&run.equip.w,a=run&&run.equip&&run.equip.a,key=(w?w.uid+(w.up||0):'')+(a?a.uid:'')+(run?run.elem:'');if(AFFC&&AFFK===key)return AFFC;
+  const o={dmg:0,hp:0,mp:0,crit:0,ls:0,spd:0};for(const it of[w,a])if(it&&it.aff)for(const x of it.aff){if(o[x.k]!=null)o[x.k]+=x.v;else o.dmg+=x.v*(run.elem===x.k?1:.35)}AFFK=key;return AFFC=o}
 function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
-    buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:[...c.sk,...(run.adv?[ADV[profile.cls].sk]:[])].map(s=>({...s,cdT:0})),dead:false,r:.5,team:'player',ghostT:0};
+    buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};
 }
 function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp;Object.assign(player,st);player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp)}
 
@@ -1010,10 +1023,10 @@ function makeHunterAlly(p,x,z,guest){
 /* ================= ITENS ================= */
 function makeItem(slot,tier,rar){
   const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco'}[CLASSES[profile.cls].wep];
-  return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],bonus:+(WBON[tier]*(slot==='w'?1:.8)*R.m).toFixed(2),def:slot==='a'?Math.min(.45,+(ADEF[tier]*R.m).toFixed(2)):0,value:Math.round(PRICE[tier]*.3*R.m),uid:Math.random().toString(36).slice(2,9)};
+  return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],bonus:+(WBON[tier]*(slot==='w'?1:.8)*R.m).toFixed(2),def:slot==='a'?Math.min(.45,+(ADEF[tier]*R.m).toFixed(2)):0,value:Math.round(PRICE[tier]*.3*R.m),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
-function rollItem(tier,boss){const red=L.gate&&L.gate.red;const w=boss?[0,50,38,12]:[60,28,10,2];if(red){w[2]+=10;w[3]+=5}const rar=wpick(w.map((w,i)=>({i,w}))).i;const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar===3&&Math.random()<.35){it.curse=pick(CURSES);it.bonus=+(it.bonus*1.5).toFixed(2);it.name+=' (Amaldiçoado)'}return it}
-function statTxt(it){return (it.slot==='w'?'+'+Math.round(it.bonus*100)+'% dano':'+'+Math.round(it.bonus*100)+'% vida · −'+Math.round(it.def*100)+'% dano recebido')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
+function rollItem(tier,boss){const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=wpick(w.map((w,i)=>({i,w}))).i;const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.bonus=+(it.bonus*1.5).toFixed(2);it.name+=' (Amaldiçoado)'}return it}
+function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+Math.round(it.bonus*100)+'% dano':'+'+Math.round(it.bonus*100)+'% vida · −'+Math.round(it.def*100)+'% dano recebido')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
 function addItem(it){
   const cur=run.equip[it.slot];
   if(rankOf()>=it.tier&&(!cur||it.bonus>cur.bonus)){if(cur)run.items.push(cur);run.equip[it.slot]=it;refreshStats();toast('<b>[SISTEMA]</b> Equipado: <b style="color:'+RAR[it.rar].c+'">'+it.name+'</b> ('+statTxt(it)+')',3500)}
@@ -1143,8 +1156,8 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   let blocked=false;
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
   if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
-  const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
-  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;e.flash=.1;e.aggro=true;
+  const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit+affB().crit/100:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
+  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
@@ -1874,6 +1887,7 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
 function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   let h='<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',STATD[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
+  if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
   for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+'</b>','+15% poder e −5% recarga por nível',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
@@ -1913,7 +1927,9 @@ function extraActions(a,v){
   if(a==='gdon'){const g=profile.guild,amt=+v;if(run.gold<amt)return;run.gold-=amt;g.don+=amt;while(g.lvl<10&&g.don>=guildNeed(g.lvl)){g.don-=guildNeed(g.lvl);g.lvl++;toast('<b>[SISTEMA]</b> Guilda subiu para o nível '+g.lvl+'.')}store.set('pds2_profile',profile);return true}
   if(a==='gleave'){profile.guild=null;store.set('pds2_profile',profile);return true}
   if(a==='forge'){const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const rar=wpick([30,40,22,8].map((w,i)=>({i,w}))).i;sfx('boom');addItem(makeItem(sl,t,rar));return true}
-  if(a==='buypet'){if(run.gold<8000||run.pet)return;run.gold-=8000;run.pet=true;toast('<b>[SISTEMA]</b> Espírito de Mana despertou. Ele segue você e ataca monstros próximos.');return true}
+  if(a==='elem'){if(run.elem&&run.gold<20000)return;if(run.elem)run.gold-=20000;run.elem=v;AFFC=null;player.skills=pSkills();refreshStats();bigText(ELEM[v].n.toUpperCase(),1300);toast('<b>[SISTEMA]</b> Você despertou o elemento '+ELEM[v].n+'.');return true}
+  if(a==='buypet'){if(run.gold<8000)return;run.gold-=8000;const np=newPet();if(!run.pet||typeof run.pet!=='object'||np.rar>=run.pet.rar){run.pet=np;if(PET){scene.remove(PET);PET=null}toast('<b>[SISTEMA]</b> Novo companheiro: <b style="color:'+RAR[np.rar].c+'">'+RAR[np.rar].n+' · '+PETP[np.pow].n+'</b>',4500)}else{run.pet.lvl+=3;toast('<b>[SISTEMA]</b> O ovo era '+RAR[np.rar].n+'. Seu companheiro absorveu a energia: +3 níveis.')}return true}
+  if(a==='trainpet'){const c=petTrainCost();if(!run.pet||run.gold<c)return;run.gold-=c;run.pet.lvl++;toast('<b>[SISTEMA]</b> Companheiro subiu para o nível '+run.pet.lvl+'.');return true}
   if(a==='buymount'){if(run.gold<3000||run.mount)return;run.gold-=3000;run.mount=true;toast('<b>[SISTEMA]</b> Montaria comprada: Lobo de Mana. Use o botão MONTAR na bolsa ou a tecla V.');return true}
   if(a==='mount'){closeModal();setMount(!run.mounted);return 'close'}
   if(a==='lookh'||a==='lookb'){profile.look=profile.look||{h:0,b:0};const k=a==='lookh'?'h':'b',arr=k==='h'?LOOK_H:LOOK_B;profile.look[k]=(profile.look[k]+1)%arr.length;store.set('pds2_profile',profile);rebuildLook();return true}
@@ -2232,7 +2248,7 @@ function mktView(){
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
   else h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER TUDO · '+fmt(tot)+' ouro','sellall',0,true,'hot')+'</div>';
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Guarde cristais para aprimorar armas e armaduras no ferreiro.</div>';
-  h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000))+'<div class="sec">COMPANHEIRO</div>'+row('Espírito de Mana','Segue você e dispara em monstros a até 9m (25% do seu dano)',run.pet?'<b>Comprado</b>':btn('8.000 ouro','buypet',0,run.gold>=8000));
+  h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000))+'<div class="sec">COMPANHEIRO</div>'+petRows();
   h+='<div class="sec">SERVIÇOS</div>'+row('Mapa do tesouro','Marca uma ruína distante com um tesouro lendário',unl('ruins')?btn('5.000 ouro','tmap',0,run.gold>=5000&&!run.tmap):lockMsg('ruins'))+row('Escoltar caravana','Leve uma caravana até a cidade mais próxima. Emboscadas no caminho.',unl('caravan')?btn('Aceitar','caravan',0,!L.car):lockMsg('caravan'));
   h+=(unl('fish')?cookRows():'')+affRow('Dorian');
   openModal('MERCADO DE RECURSOS',h);
@@ -2244,7 +2260,7 @@ function openShop(id){
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)),cc=3*(up+1),have=run.res.cry[eq.tier];h+='<div class="sec">APRIMORAR</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=run.res.cry[eq.tier];h+='<div class="sec">APRIMORAR</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
     for(let t=0;t<Math.min(9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(eq&&eq.bonus>=it.bonus?' · você já tem melhor':''),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);
@@ -2327,7 +2343,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[SISTEMA]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
   if(a==='sellall'){let g=0;for(let r=0;r<9;r++){g+=run.res.core[r]*sellP('core',r)+run.res.cry[r]*sellP('cry',r);run.res.core[r]=0;run.res.cry[r]=0}run.gold+=g;toast('<b>[SISTEMA]</b> Recursos vendidos: +'+fmt(g)+' ouro');beep(990,.15,.05)}
-  if(a==='upg'){const eq=run.equip[v];if(!eq)return;const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)),cc=3*(up+1);if(run.gold<gc||run.res.cry[eq.tier]<cc||up>=10)return;run.gold-=gc;run.res.cry[eq.tier]-=cc;eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.bonus=+(eq.bonus*1.1).toFixed(3);if(eq.def)eq.def=Math.min(.5,+(eq.def*1.04).toFixed(3));eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[SISTEMA]</b> '+eq.name+': '+statTxt(eq))}
+  if(a==='upg'){const eq=run.equip[v];if(!eq)return;const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1);if(run.gold<gc||run.res.cry[eq.tier]<cc)return;run.gold-=gc;run.res.cry[eq.tier]-=cc;if(up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[SISTEMA]</b> O aprimoramento falhou. Materiais perdidos.');sfx('block');return}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.bonus=+(eq.bonus*1.1).toFixed(3);if(eq.def)eq.def=Math.min(.5,+(eq.def*1.04).toFixed(3));eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[SISTEMA]</b> '+eq.name+': '+statTxt(eq))}
   if(a==='job'){if(run.level<JOB_LVL||run.adv)return;closeModal();buildSpecial('job');return}
   if(a==='weekly'){if(profile.weekly===weekId())return;closeModal();buildSpecial('weekly');return}
   if(a==='dep'||a==='wd'){const have=a==='dep'?run.gold:(profile.bank||0);const amt=v==='all'?have:Math.min(+v,have);if(amt<=0)return;if(a==='dep'){run.gold-=amt;profile.bank=(profile.bank||0)+amt;npcEv('bank',amt)}else{profile.bank-=amt;run.gold+=amt}store.set('pds2_profile',profile);sfx('coin')}
@@ -2365,11 +2381,20 @@ function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">VOLUM
   '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
-let PET=null;function updPet(dt){if(!run||!run.pet||!player||player.dead){if(PET)PET.visible=false;return}
-  if(!PET){PET=new THREE.Mesh(new THREE.OctahedronGeometry(.3,0),glowS(0x9fe8ff,1));PET.t=0;scene.add(PET)}
+const PETP={tiro:{n:'Disparo',d:'dispara em um monstro'},cura:{n:'Cura',d:'cura você aos poucos'},gelo:{n:'Gelo',d:'dispara e atordoa'},raio:{n:'Raio',d:'acerta até 3 monstros'}};
+function newPet(){const r=wpick([55,27,12,4.5,1.2,.25,.05].map((w,i)=>({i,w}))).i;return{rar:r,pow:pick(Object.keys(PETP)),lvl:1}}
+function petMul(){const p=run.pet;return RAR[p.rar].m*(1+.08*(p.lvl-1))}
+function petTrainCost(){return Math.round(2000*Math.pow(1.22,(run.pet?run.pet.lvl:1)-1))}
+function petRows(){const p=run.pet&&typeof run.pet==='object'?run.pet:null;let h=row('Ovo de Companheiro','Raridade e poder sorteados: Comum até Primordial. Se sair pior que o seu, ele ganha +3 níveis.',btn('8.000 ouro','buypet',0,run.gold>=8000));
+  if(p)h+=row('<b style="color:'+RAR[p.rar].c+'">'+RAR[p.rar].n+' · '+PETP[p.pow].n+'</b> · NV '+p.lvl,PETP[p.pow].d+' · força x'+petMul().toFixed(2),btn('Treinar · '+fmt(petTrainCost()),'trainpet',0,run.gold>=petTrainCost()));return h}
+let PET=null;function updPet(dt){if(run&&run.pet===true)run.pet={rar:0,pow:'tiro',lvl:1};if(!run||!run.pet||!player||player.dead){if(PET)PET.visible=false;return}
+  const pp=run.pet;if(!PET){PET=new THREE.Mesh(new THREE.OctahedronGeometry(.24+pp.rar*.035,0),glow(new THREE.Color(RAR[pp.rar].c).getHex(),1));PET.t=0;scene.add(PET)}
   if(!PET.parent)scene.add(PET);PET.visible=true;const P=player;PET.t+=dt;const tx=P.x-Math.sin(P.face)*1.2+Math.cos(time*1.3)*.7,tz=P.z-Math.cos(P.face)*1.2+Math.sin(time*1.3)*.7,k=Math.min(1,dt*4);
   PET.position.x+=(tx-PET.position.x)*k;PET.position.z+=(tz-PET.position.z)*k;PET.position.y=2.2+Math.sin(time*3)*.2;PET.rotation.y+=dt*2;
-  if(PET.t>1.4){const e=nearestEnemy(P.x,P.z,9);if(e){PET.t=0;fxLine([{x:PET.position.x,z:PET.position.z},{x:e.x,z:e.z}],0x9fe8ff);hurtEnemy(e,Math.max(1,(player.dmg||10)*.25),PET.position.x,PET.position.z,{fromPlayer:true,kb:.3,stun:0})}}}
+  const cd=Math.max(.6,1.4-pp.rar*.1),col=new THREE.Color(RAR[pp.rar].c).getHex(),dm=Math.max(1,(player.dmg||10)*.22*petMul());
+  if(PET.t>cd){PET.t=0;if(pp.pow==='cura'){if(P.hp<P.maxhp){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.012*petMul());fxRing(P.x,P.z,0x6fe39a,1.2)}return}
+    const tg=pp.pow==='raio'?enemies.filter(e=>!e.dead&&!e.sleep&&!e.invuln&&Math.hypot(e.x-P.x,e.z-P.z)<9).slice(0,3):[nearestEnemy(P.x,P.z,9)].filter(Boolean);
+    for(const e of tg){fxLine([{x:PET.position.x,z:PET.position.z},{x:e.x,z:e.z}],col);hurtEnemy(e,dm,PET.position.x,PET.position.z,{fromPlayer:true,pet:true,kb:.3,stun:pp.pow==='gelo'?.5:0})}}}
 document.addEventListener('pointerdown',()=>audioInit(),{once:false,passive:true});
 $('mm').addEventListener('pointerdown',e=>{e.preventDefault();if(!modalOpen)mapView()});
 $('bMap').addEventListener('click',()=>{if(!modalOpen&&!player.dead)mapView()});
