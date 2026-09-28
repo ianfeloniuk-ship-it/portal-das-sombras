@@ -729,6 +729,19 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   EW(b,'lily_large',X-7.6,.07,Z-6.4,R()*TAU,.9);EW(b,'lily_small',X-6.2,.07,Z-5.3,R()*TAU,.6);EH(fl,'grass_large',X-9.3,0,Z-6.8,0,.7);EH(fl,'grass',X-4.8,0,Z-7.4,1,.6);
   if(cLv>=2&&!fallen){EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});EW(b,'resource_lumber',X-14,0,Z+13,.3,2.2);EW(b,'resource_stone',X-16.5,0,Z+11,.2,1.8)}
   if(cLv>=3&&!fallen)for(const s of[-1,1])EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);
+  /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
+  if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.34;
+    if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'banner_blue',X+Math.cos(a)*33.2,0,Z+Math.sin(a)*33.2,-(a+Math.PI/2)+Math.PI/2,2.6)}
+      EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3})}
+    if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,24,30]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
+    const ring=(n,rad,list,sc)=>{for(let i=0;i<n;i++){const a=i/n*TAU+R()*.12;if(gA(a))continue;const x=X+Math.cos(a)*rad,z=Z+Math.sin(a)*rad,ry=Math.atan2(X-x,Z-z),W=sc+R()*1.2;EW(b,pk(R,list),x,0,z,ry,W);addCol({x,z,r:W*.55});ENV.cast.push({x:x+.8,z:z-.6,r:W*.7,k:.45});if(R()<.5)EH(fl,'hedge',x+Math.cos(a+1.3)*(W*.7),0,z+Math.sin(a+1.3)*(W*.7),ry,1.4)}};
+    if(cLv>=6)ring(12,42,['building_home_A_blue','building_home_B_blue','building_home_A_red','building_home_B_green','building_home_A_yellow'],5);
+    if(cLv>=7){for(const a of[Math.PI*.25,Math.PI*1.25]){const x=X+Math.cos(a)*50,z=Z+Math.sin(a)*50;EW(b,'building_windmill_blue',x,0,z,Math.atan2(X-x,Z-z),7);addCol({x,z,r:3});for(let k=0;k<6;k++)EH(fl,'plant_flatTall',x+rnd(-5,5),0,z+rnd(-5,5),R()*TAU,1.3)}
+      const a=Math.PI*.75,x=X+Math.cos(a)*50,z=Z+Math.sin(a)*50;EW(b,'building_lumbermill_blue',x,0,z,Math.atan2(X-x,Z-z),6.5);addCol({x,z,r:3});EW(b,'log_stack',x+3,0,z+2,0,1.6)}
+    if(cLv>=8){ring(16,56,['building_home_A_blue','building_home_B_red','building_tavern_blue','building_home_B_blue','building_market_blue'],5.4);
+      const a=Math.PI*1.75,x=X+Math.cos(a)*52,z=Z+Math.sin(a)*52;EW(b,'building_church_blue',x,0,z,Math.atan2(X-x,Z-z),8);addCol({x,z,r:3.6})}
+    if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
+    if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}
   if(fallen){for(let i=0;i<14;i++){const a=R()*TAU,d=6+R()*24;EH(b,pk(R,['bone_A','skull','ribcage','rubble_half']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,.8)}}
   envOwn(g,b.mesh(BLDMAT));envOwn(g,tr.mesh(TREEMAT));envOwn(g,fl.mesh(FLORAMAT));
   inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0x8fe3ff,1),glowL.filter(o=>!o.s&&!o.w),false,g);
@@ -833,7 +846,7 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const cityD=(x,z)=>{let m=1e9,road=false;for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz);if(d<m)m=d;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<125)road=true}return{d:m,road}};
+  const cityD=(x,z)=>{let m=1e9,road=false;for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cl>=8?30:cl>=7?22:cl>=6?16:0;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<125)road=true}return{d:m,road}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -2268,6 +2281,7 @@ const TITLES=[
  {id:'brk30',n:'Resistente',d:'sobreviver 30 s numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=30,m:'Escudo recarrega 30% mais rápido',b:{}},
  {id:'brk60',n:'Inabalável',d:'sobreviver 1 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 0,20 s mais rápido',b:{}},
  {id:'brk600',n:'Imortal',d:'sobreviver 10 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
+ {id:'founder',n:'Fundador',d:'levar uma cidade ao nível 10',c:()=>Object.values(profile.cityLv||{}).some(v=>v>=10),m:'Lojas 10% mais baratas em todas as cidades',b:{}},
  {id:'sov',n:'Soberano',d:'???',secret:true,c:()=>profile.rank===8,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
 function eqTitles(){if(!profile.titles)profile.titles=profile.title?[profile.title]:[];return profile.titles.filter(id=>(profile.ach||[]).includes(id)).slice(0,3)}
 function hasT(id){return !!profile&&eqTitles().includes(id)}
@@ -2277,18 +2291,30 @@ function checkTitles(){profile.ach=profile.ach||[];for(const t of TITLES)if(!pro
 const CURSES=[{n:'Sede de Sangue',d:'−20% vida máxima',hp:-.2},{n:'Mente Rachada',d:'−30% mana',mp:-.3},{n:'Fardo',d:'−10% velocidade',spd:-.1}];
 function curseB(){const o={hp:0,mp:0,spd:0};for(const s of['w','a']){const it=run.equip[s];if(it&&it.curse){for(const k in o)o[k]+=it.curse[k]||0}}return o}
 /* comida */
-const FISH=[{n:'Peixe-lua',w:55,c:'#c9d3de'},{n:'Carpa de Mana',w:28,c:'#4fc3ff'},{n:'Enguia Relâmpago',w:13,c:'#b18cff'},{n:'Peixe Dourado',w:4,c:'#ffb84d'}];
+/* PESCA 2.0: espécies dependem de hora, clima e bioma; cada peixe tem peso (recorde por espécie); vara melhora a faixa. */
+const FISH=[{n:'Peixe-lua',w:55,c:'#c9d3de',kg:[.3,1.2],v:20,d:0},{n:'Carpa de Mana',w:28,c:'#4fc3ff',kg:[.8,3],v:45,d:1},{n:'Enguia Relâmpago',w:13,c:'#b18cff',kg:[1,4],v:90,d:2,wx:'rain'},{n:'Peixe Dourado',w:4,c:'#ffb84d',kg:[.5,2],v:300,d:3},
+ {n:'Peixe Sombrio',w:10,c:'#7a55ff',kg:[1,5],v:150,d:2,night:true},{n:'Truta Glacial',w:12,c:'#8fe3ff',kg:[1,6],v:120,d:2,bio:'neve'},{n:'Bagre do Pântano',w:14,c:'#8a9a70',kg:[2,12],v:80,d:1,bio:'pantano'},
+ {n:'Escorpião-d’água',w:10,c:'#d9b36a',kg:[.5,3],v:110,d:2,bio:'deserto'},{n:'Salmão de Tempestade',w:8,c:'#fff36b',kg:[3,9],v:220,d:3,wx:'rain'},{n:'Filhote de Leviatã',w:.6,c:'#ff3d1e',kg:[40,160],v:5000,d:4}];
+function fishPool(){const P=player,b=biomeAt(P.x,P.z),n=isNight(),w=WX.type;return FISH.filter(f=>(!f.night||n)&&(!f.bio||f.bio===b)&&(!f.wx||f.wx===w))}
+const ROD=[{n:'Vara de Bambu',z:18,t:3,p:0},{n:'Vara Reforçada',z:22,t:4,p:4000},{n:'Vara de Mana',z:26,t:4,p:25000},{n:'Vara do Caçador',z:30,t:5,p:120000}];
 const RECIPES_X=[{n:'Elixir de Fúria',need:null,d:'+25% de dano por 3 min',b:{dmg:.25},t:180},{n:'Elixir de Ferro',need:null,d:'+30% de vida por 3 min',b:{hp:.3},t:180}];
 const RECIPES=[{n:'Ensopado de Peixe',need:{'Peixe-lua':2},d:'+25% vida por 5 min',b:{hp:.25},t:300},{n:'Sushi de Mana',need:{'Carpa de Mana':1,'Peixe-lua':1},d:'+30% mana por 5 min',b:{mp:.3},t:300},{n:'Espeto Relâmpago',need:{'Enguia Relâmpago':1},d:'+20% dano por 5 min',b:{dmg:.2},t:300},{n:'Banquete Dourado',need:{'Peixe Dourado':1},d:'+20% vida, dano e mana por 10 min',b:{hp:.2,dmg:.2,mp:.2},t:600}];
 const recipe=n=>RECIPES.find(r=>r.n===n)||RECIPES_X.find(r=>r.n===n);
 function foodB(){return run.food&&run.food.t>0?recipe(run.food.n).b:{}}
-function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;let pos=0,dir=1,zone=rnd(15,65),tries=3,iv=null;
-  const h='<div class="sysline">Toque PUXAR quando o marcador estiver na faixa verde. '+'<span id="ftries">3</span> tentativas.</div><div style="position:relative;height:26px;background:#0a1830;border:1px solid #4fc3ff;border-radius:4px;margin:10px 0"><div style="position:absolute;top:0;bottom:0;left:'+zone+'%;width:18%;background:rgba(111,227,154,.45)"></div><div id="fmark" style="position:absolute;top:-4px;width:6px;height:34px;background:#ffd54f;left:0"></div></div><div style="display:flex;justify-content:flex-end">'+btn('PUXAR','fishpull',0,true,'hot')+'</div>';
-  openModal('PESCA',h);iv=setInterval(()=>{if($('modal').hidden){clearInterval(iv);return}pos+=dir*2.2;if(pos>=97||pos<=0)dir*=-1;const m=$('fmark');if(m)m.style.left=pos+'%'},16);
-  window._fish={get pos(){return pos},zone,iv,get tries(){return tries},dec(){tries--;$('ftries').textContent=tries}}}
-function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F.zone+18){clearInterval(F.iv);const f=wpick(FISH);run.fish=run.fish||{};run.fish[f.n]=(run.fish[f.n]||0)+1;profile.fish=(profile.fish||0)+1;npcEv('fish');store.set('pds2_profile',profile);closeModal();sfx('coin');toast('<b>[PESCA]</b> Você pescou: <b style="color:'+f.c+'">'+f.n+'</b>');saveRun()}
+function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;const rod=ROD[run.rod||0],f=wpick(fishPool()),zw=Math.max(8,rod.z-f.d*2.5),spd=2+f.d*.5;let pos=0,dir=1,zone=rnd(10,88-zw),zd=f.d>=2?1:0,tries=rod.t,iv=null;
+  const h='<div class="sysline">'+(f.d>=3?'<b style="color:'+f.c+'">Algo GRANDE mordeu a isca!</b> ':'Algo mordeu. ')+'Toque PUXAR quando o marcador estiver na faixa verde'+(zd?' (este peixe se mexe)':'')+'. <span id="ftries">'+tries+'</span> tentativas · '+rod.n+'</div><div style="position:relative;height:26px;background:#0a1830;border:1px solid #4fc3ff;border-radius:4px;margin:10px 0"><div id="fzone" style="position:absolute;top:0;bottom:0;left:'+zone+'%;width:'+zw+'%;background:rgba(111,227,154,.45)"></div><div id="fmark" style="position:absolute;top:-4px;width:6px;height:34px;background:#ffd54f;left:0"></div></div><div style="display:flex;justify-content:flex-end">'+btn('PUXAR','fishpull',0,true,'hot')+'</div>';
+  openModal('PESCA',h);iv=setInterval(()=>{if($('modal').hidden){clearInterval(iv);return}pos+=dir*spd;if(pos>=97||pos<=0)dir*=-1;const m=$('fmark');if(m)m.style.left=pos+'%';if(zd){zone+=zd*.35*f.d;if(zone<=2||zone>=96-zw)zd*=-1;const z=$('fzone');if(z)z.style.left=zone+'%'}},16);
+  window._fish={get pos(){return pos},get zone(){return zone},zw,f,iv,get tries(){return tries},dec(){tries--;$('ftries').textContent=tries}}}
+function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F.zone+F.zw){clearInterval(F.iv);const f=F.f,kg=+(f.kg[0]+Math.pow(Math.random(),2)*(f.kg[1]-f.kg[0])).toFixed(1);run.fish=run.fish||{};run.fish[f.n]=(run.fish[f.n]||0)+1;profile.fish=(profile.fish||0)+1;
+  profile.aqua=profile.aqua||{};const rec=profile.aqua[f.n],isNew=!rec,isRec=rec&&kg>rec;if(!rec||kg>rec)profile.aqua[f.n]=kg;if(isNew){run.pts=(run.pts||0)+1}
+  npcEv('fish');store.set('pds2_profile',profile);closeModal();sfx('coin');toast('<b>[PESCA]</b> <b style="color:'+f.c+'">'+f.n+'</b> · '+String(kg).replace('.',',')+' kg'+(isNew?' · <b>ESPÉCIE NOVA no Aquário: +1 ponto de status</b>':isRec?' · <b>NOVO RECORDE!</b>':''),5000);if(f.d>=4){bigText('LEVIATÃ!',1500);sfx('gong')}saveRun()}
   else{F.dec();sfx('block');if(F.tries<=0){clearInterval(F.iv);closeModal();toast('O peixe escapou.')}}}
-function cookRows(){let h='<div class="sec">COZINHA</div>';const f=run.fish||{};h+='<div class="sysline" style="font-size:12px">Seus peixes: '+(Object.keys(f).filter(k=>f[k]).map(k=>f[k]+' '+k).join(', ')||'nenhum. Pesque no lago da praça.')+'</div>';
+function fishValue(){let t=0;const f=run.fish||{};for(const F of FISH)t+=(f[F.n]||0)*F.v;return t}
+function aquaRows(){const A=profile.aqua||{};let h='<div class="sec">AQUÁRIO ('+Object.keys(A).length+'/'+FISH.length+')</div><div class="sysline" style="font-size:12px">Cada espécie nova dá +1 ponto de status. Alguns peixes só aparecem à noite, na chuva ou em certos biomas (neve, pântano, deserto).</div>';
+  for(const F of FISH)h+=row(A[F.n]?'<b style="color:'+F.c+'">'+F.n+'</b>':'<span style="opacity:.5">???</span>',A[F.n]?'Recorde: '+String(A[F.n]).replace('.',',')+' kg':(F.night?'Só à noite':F.wx?'Só na chuva':F.bio?'Só em '+BIO_N[F.bio]:F.d>=4?'Lendário':'Comum no lago'),'');
+  const r=run.rod||0;h+='<div class="sec">VARA DE PESCA</div>'+row(ROD[r].n,'Faixa '+ROD[r].z+'% · '+ROD[r].t+' tentativas',r<ROD.length-1?btn(ROD[r+1].n+' · '+fmt(ROD[r+1].p),'rodup',0,run.gold>=ROD[r+1].p):'<b>Máxima</b>');
+  const v=fishValue();h+=row('Vender todos os peixes','Dorian paga '+fmt(v)+' ouro (guarde os que você quer cozinhar)',btn('Vender','fishsell',0,v>0));return h}
+function cookRows(){let h=aquaRows()+'<div class="sec">COZINHA</div>';const f=run.fish||{};h+='<div class="sysline" style="font-size:12px">Seus peixes: '+(Object.keys(f).filter(k=>f[k]).map(k=>f[k]+' '+k).join(', ')||'nenhum. Pesque no lago da praça.')+'</div>';
   RECIPES.forEach((r,i)=>{const ok=Object.entries(r.need).every(([k,n])=>(f[k]||0)>=n);h+=row(r.n,r.d+' · precisa '+Object.entries(r.need).map(([k,n])=>n+' '+k).join(' + '),btn('Cozinhar','cook',i,ok))});return h}
 /* afinidade */
 const AFF_PERK={Mira:'Poções 4% mais baratas por nível',Kael:'Armas 3% mais baratas por nível',Brann:'Armaduras 3% mais baratas por nível',Dorian:'Recursos vendidos por 3% a mais por nível',Selene:'Juros diários de 0,15% por nível no banco',Lyra:'Missões pagam 5% a mais por nível'};
@@ -2297,10 +2323,14 @@ function affRow(n){const l=affL(n),c=1000*(l+1)*(l+1);return '<div class="sec">A
 function innLv(){return player?((profile.innLv||{})[nearestCity(player.x,player.z).c.id]||0):0}
 function innB(){return run&&run.rested&&run.rested.t>0?run.rested.l:0}
 function cityLv(){return (profile.cityLv||{})[nearestCity(player.x,player.z).c.id]||0}
-function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-cityLv()*.04)}
-function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),need=20*(l+1),tot=run.res.cry.reduce((a,b)=>a+b,0);
-  const U=[['1','Lojas 4% mais baratas por nível'],['2','Elixires na loja de Poções'],['3','Muralhas reforçadas e brilhantes'],['4','Guardas defendem nas invasões'],['5','Torres da muralha atiram nos monstros']];
-  return '<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/5</b>.</div>'+U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')+(l<5?row('Doar cristais',need+' cristais de qualquer rank · você tem '+tot,btn('Doar','citydon',0,tot>=need,'hot')):row('Cidade no nível máximo','',''))}
+function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-Math.min(5,cityLv())*.04-(hasT('founder')?.1:0))}
+const CITY_U=[['1','Bandeiras nas torres · lojas 4% mais baratas por nível'],['2','Carroça e depósito · elixires na loja de Poções'],['3','Muralhas brilhantes e colunas na praça'],['4','Estandartes na muralha, feira na praça · guardas defendem nas invasões'],['5','Postes de luz nas ruas · torres da muralha atiram nos monstros'],['6','BAIRRO NOVO fora da muralha · renda diária da cidade'],['7','Moinhos e serraria nos campos · renda maior'],['8','Segundo bairro e catedral · renda maior'],['9','Monumentos dos heróis e obelisco aceso · renda maior'],['10','Capital: praça dourada · renda máxima e título Fundador']];
+const cityNeed=l=>({cry:20*(l+1),gold:l>=5?50000*(l-3)*(l-3):0});
+const cityIncome=l=>l>=6?Math.round(2000*(l-5)*(l-5)*GR[Math.min(8,rankOf())].gold):0;
+function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l),tot=run.res.cry.reduce((a,b)=>a+b,0),inc=cityIncome(l),got=((profile.cityDay||{})[c.id])===todayKey();
+  return '<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
+   +(inc?row('Renda da cidade',fmt(inc)+' ouro por dia',btn(got?'Coletado hoje':'Coletar','cityinc',0,!got,'hot')):'')
+   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
 /* clima */
 const WX={type:'clear',t:120,pts:null};
 function updWeather(dt){WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random();const nt=r<.5?'clear':r<.8?'rain':'snow';if(nt!==WX.type){WX.type=nt;toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
@@ -2346,12 +2376,15 @@ function fuseTag(n){return /Almas|Sombr|Praga|Ninhada/.test(n)?'Sombrio':/Gelo|I
 function extraActions2(a,v){
   if(a==='npcdone'){const q=NPCQ[v];profile.npcSk=profile.npcSk||{};profile.npcSk[v]=true;store.set('pds2_profile',profile);refreshStats();bigText('HABILIDADE APRENDIDA',1400);sfx('level');toast('<b>['+v.toUpperCase()+']</b> '+q.sk,5000);return true}
   if(a==='fishpull'){fishPull();return 'close0'}
+  if(a==='rodup'){const r=run.rod||0,N=ROD[r+1];if(!N||run.gold<N.p)return;run.gold-=N.p;run.rod=r+1;sfx('level');toast('<b>[PESCA]</b> Nova vara: '+N.n+'.');return true}
+  if(a==='fishsell'){const v=fishValue();if(!v)return;run.gold+=v;run.fish={};sfx('coin');toast('<b>[PESCA]</b> Peixes vendidos: +'+fmt(v)+' ouro.');return true}
   if(a==='cook'){const r=RECIPES[+v];run.fish=run.fish||{};for(const [k,n] of Object.entries(r.need))run.fish[k]-=n;run.foods=run.foods||{};run.foods[r.n]=(run.foods[r.n]||0)+1;toast('<b>[COZINHA]</b> '+r.n+' pronto. Coma pela BOLSA.');sfx('coin');return true}
   if(a==='eat'){run.foods[v]--;run.food={n:v,t:recipe(v).t*(hasT('fisher')?2:1)};refreshStats();toast('<b>[COMIDA]</b> '+v+': '+recipe(v).d);sfx('level');return true}
   if(a==='title'){const t=eqTitles();if(t.includes(v))profile.titles=t.filter(x=>x!==v);else{if(t.length>=3)return;profile.titles=[...t,v]}profile.title=profile.titles[0]||null;store.set('pds2_profile',profile);refreshStats();return true}
   if(a==='gift'){const l=affL(v),c=1000*(l+1)*(l+1);if(run.gold<c||l>=10)return;run.gold-=c;profile.aff=profile.aff||{};profile.aff[v]=l+1;store.set('pds2_profile',profile);toast('<b>'+v+'</b>: Obrigado! Afinidade '+(l+1)+'/10.');sfx('ding');return true}
   if(a==='interest'){const g=Math.round((profile.bank||0)*.0015*affL('Selene'));profile.bank+=g;profile.intDay=todayKey();store.set('pds2_profile',profile);toast('Juros: +'+fmt(g)+' ouro no banco.');sfx('coin');return true}
-  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv();let need=20*(l+1);for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
+  if(a==='cityinc'){const c=nearestCity(player.x,player.z).c,inc=cityIncome(cityLv());profile.cityDay=profile.cityDay||{};if(!inc||profile.cityDay[c.id]===todayKey())return;profile.cityDay[c.id]=todayKey();run.gold+=inc;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CIDADE]</b> Renda de '+c.name+': +'+fmt(inc)+' ouro.');return true}
+  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l);if(l>=10||run.res.cry.reduce((a,b)=>a+b,0)<nd.cry||run.gold<nd.gold)return;run.gold-=nd.gold;let need=nd.cry;if(l+1>=10){profile.ach=profile.ach||[];if(!profile.ach.includes('founder'))profile.ach.push('founder')}for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
   if(a==='collect'){const d=profile.owned[+v];if(d.att)return;d.last=todayKey();const n=3+Math.floor(Math.random()*4);run.res.cry[d.rank]+=n;run.res.core[d.rank]+=2;if(Math.random()<.25)d.att=true;store.set('pds2_profile',profile);toast('<b>[DOMÍNIO]</b> +'+n+' cristais e +2 núcleos '+GR[d.rank].id+'.'+(d.att?' Caçadores estão atacando esta masmorra!':''));return true}
   if(a==='defend'){closeModal();buildSpecial('defend',null,+v);return 'close'}
   if(a==='tower'){closeModal();buildSpecial('tower',null,Math.max(1,+v));return 'close'}
