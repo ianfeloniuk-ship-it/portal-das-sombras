@@ -677,6 +677,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   const gate=a=>Math.min(...[0,Math.PI/2,Math.PI,Math.PI*1.5,TAU].map(q=>Math.abs(a-q)));
   for(let a=TAU/112;a<TAU;a+=TAU/56){if(gate(a)<.17)continue;const x=X+Math.cos(a)*34,z=Z+Math.sin(a)*34;
     const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),3.95/(m.max[0]-m.min[0]),3.1/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
+    if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/80){if(gate(a)<.16)continue;addCol({x:X+Math.cos(a)*34,z:Z+Math.sin(a)*34,r:1.6})}
   for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const s of[-1,1]){const aa=a+s*.2,x=X+Math.cos(aa)*34,z=Z+Math.sin(aa)*34;
@@ -707,7 +708,8 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   if(cLv>=3&&!fallen)for(const s of[-1,1])EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);
   if(fallen){for(let i=0;i<14;i++){const a=R()*TAU,d=6+R()*24;EH(b,pk(R,['bone_A','skull','ribcage','rubble_half']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,.8)}}
   envOwn(g,b.mesh(BLDMAT));envOwn(g,tr.mesh(TREEMAT));envOwn(g,fl.mesh(FLORAMAT));
-  inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0x8fe3ff,1),glowL.filter(o=>!o.s),false,g);
+  inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0x8fe3ff,1),glowL.filter(o=>!o.s&&!o.w),false,g);
+  if(cLv>=3&&!fallen)inst(geo('wglow',()=>new THREE.BoxGeometry(1.2,.35,1.2)),glowS(0x4fc3ff,1.4),glowL.filter(o=>o.w),false,g);
   inst(geo('lampg',()=>new THREE.SphereGeometry(.28,8,6)),glowS(fallen?0x803040:0xffd9a0,1),glowL.filter(o=>o.s),false,g);
   return shopH}
 /* ruína no meio do mapa */
@@ -1004,7 +1006,7 @@ function addChest(x,z,tier,boss){
   const it={type:'chest',x,z,r:2.3,label:boss?'F · BAÚ DO GUARDIÃO':'F · ABRIR BAÚ',use:()=>{it.hidden=true;it.opened=true;lid.rotation.x=-1.9;band.visible=false;openChest(x,z,tier,boss)}};L.inter.push(it);return it;
 }
 function openChest(x,z,tier,boss){
-  if(!boss&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');return}
+  if(!boss&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');return}
   const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
   if(boss||Math.random()<.55)addItem(rollItem(tier,boss));
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
@@ -1123,10 +1125,10 @@ function addItem(it){
 }
 
 /* ================= MISSÕES ================= */
-function genQuest(t){const pr=Math.min(8,rankOf());
-  if(t==='kill'){const n=20+pr*10;return {t,n,got:0,rw:Math.round(70*GR[pr].gold),d:'Mate '+n+' monstros'}}
-  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
-  return {t:'pvp',n:1,got:0,rw:Math.round(160*GR[pr].gold),d:'Derrote um caçador hostil'}}
+function genQuest(t){const pr=Math.min(8,rankOf()),lvM=1+(run?run.level:1)/10;
+  if(t==='kill'){const n=20+pr*10;return {t,n,got:0,rw:Math.round(70*GR[pr].gold*lvM),d:'Mate '+n+' monstros'}}
+  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
+  return {t:'pvp',n:1,got:0,rw:Math.round(160*GR[pr].gold*lvM),d:'Derrote um caçador hostil'}}
 function genQuests(){return[genQuest('kill'),genQuest('clear'),genQuest('pvp')]}
 function qev(type,val){if(type==='clear')npcEv('clear');if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[SISTEMA]</b> Missão concluída: '+q.d+'. Receba na Associação.',3500)}}
 
@@ -2298,7 +2300,7 @@ function extraActions2(a,v){
   if(a==='title'){profile.title=v;store.set('pds2_profile',profile);refreshStats();return true}
   if(a==='gift'){const l=affL(v),c=1000*(l+1)*(l+1);if(run.gold<c||l>=5)return;run.gold-=c;profile.aff=profile.aff||{};profile.aff[v]=l+1;store.set('pds2_profile',profile);toast('<b>'+v+'</b>: Obrigado! Afinidade '+(l+1)+'/5.');sfx('ding');return true}
   if(a==='interest'){const g=Math.round((profile.bank||0)*.003*affL('Selene'));profile.bank+=g;profile.intDay=todayKey();store.set('pds2_profile',profile);toast('Juros: +'+fmt(g)+' ouro no banco.');sfx('coin');return true}
-  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv();let need=20*(l+1);for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
+  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv();let need=20*(l+1);for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
   if(a==='collect'){const d=profile.owned[+v];if(d.att)return;d.last=todayKey();const n=3+Math.floor(Math.random()*4);run.res.cry[d.rank]+=n;run.res.core[d.rank]+=2;if(Math.random()<.25)d.att=true;store.set('pds2_profile',profile);toast('<b>[DOMÍNIO]</b> +'+n+' cristais e +2 núcleos '+GR[d.rank].id+'.'+(d.att?' Caçadores estão atacando esta masmorra!':''));return true}
   if(a==='defend'){closeModal();buildSpecial('defend',null,+v);return 'close'}
   if(a==='tower'){closeModal();buildSpecial('tower',null,Math.max(1,+v));return 'close'}
