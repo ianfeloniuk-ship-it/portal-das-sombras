@@ -156,7 +156,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">PORTAL DAS SOMBRAS</h1>
-    <div class="sysline"><b>[SISTEMA]</b> Você foi escolhido para <b>DESPERTAR</b>. Rank e classe serão sorteados. Você não escolhe. Ao morrer, perde tudo, menos o seu despertar.</div>
+    <div class="sysline"><b>[SISTEMA]</b> Você foi escolhido para <b>DESPERTAR</b>. Escolha sua classe. Todo caçador começa no <b>rank E</b> e sobe conforme evolui. Ao morrer, perde tudo, menos o seu despertar.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -289,6 +289,7 @@ const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Vi
 /* ================= PERFIL ================= */
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let profile=store.get('pds2_profile');
+function pickAwaken(ci){return {rank:0,cls:ci,deaths:0,best:1,seed:(Math.random()*2**31)|0}}
 function rollAwaken(){
   let r=Math.random()*100,ri=0;for(;ri<TOPR;ri++){if(r<RANKS[ri].p)break;r-=RANKS[ri].p}
   const tw=CLASSES.reduce((a,c)=>a+c.w,0);let c=Math.random()*tw,ci=0;for(;ci<CLASSES.length-1;ci++){if(c<CLASSES[ci].w)break;c-=CLASSES[ci].w}
@@ -510,9 +511,9 @@ function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
   const maxhp=(100+10*run.level+12*(s.vit||0))*(1+bp.ehp)*cb2.hp;
-  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0));
+  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh'));
   const maxmp=(50+3*run.level+3*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
-  const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
+  const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
   const spd=6.4*(1+Math.min(.25,.005*(s.agi||0))+affB().spd/100+(cb.spd||0));
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
 function playerModel(){
@@ -909,6 +910,7 @@ function buildCity(c,g,addCol,R){
   {const pond=new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
     L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView})}
   buildHouse(c,g,E);
+  if(!cityFallen(c)){const lx=X-16,lz=Z-1;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeSign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeSign('POUSADA','#ffd9a0',.5);if(E)inn.position.set(X+6.4,5.7,Z-5.9);else inn.position.set(X+7,2.6,Z-6);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}L.inter.push({type:'inn',city:c,x:X+7,z:Z-4.6,r:2.6,label:'F · POUSADA',use:innView})}
   if(profile.retired&&profile.retired.length&&!cityFallen(c)){const ri=c.name==='Aster'?profile.retired.length-1:((c.cx*7+c.cz*13)%(profile.retired.length+2)+profile.retired.length+2)%(profile.retired.length+2);if(ri<profile.retired.length){const r=profile.retired[ri];const cc=CLASSES[r.cls];const m=makeChibi({body:cc.body,hair:cc.hair,wep:cc.wep,wcol:0x8fe3ff,eye:0x8fe3ff,gk:CLASS_GK[r.cls],tint:0x8fe3ff});m.mats.forEach(mt=>{mt.transparent=true;mt.opacity=.55});m.root.position.set(X,0,Z-14);scene.add(m.root);npcs.push({kind:'vendor',home:c,m,x:X,z:Z-14,face:0,r:.5,name:r.name,short:r.name,shop:'ret'+ri,t:0,col:'#8fe3ff',sign:'VIDA PASSADA',label:'F · FALAR COM '+r.name.toUpperCase(),use:()=>retiredView(ri)})}}
   if(!E){const stall=mesh(geo('stall',()=>new THREE.BoxGeometry(3,1.1,1.4)),toonS(0x6b4a2a));stall.position.set(X+5,.55,Z+6.5);g.add(stall);
@@ -1307,7 +1309,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   const cc=o.fromPlayer?critChance():.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
   if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*.06);amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
-  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
+  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+'!!!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
@@ -1397,6 +1399,7 @@ function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.co
 function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)));
+  if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
@@ -1408,7 +1411,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
-  run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)+((festival()||{}).xp||0)));let need=xpNeed();const r0=rankOf();
+  run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)+((festival()||{}).xp||0)+.03*pb('xp')));let need=xpNeed();const r0=rankOf();
   while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35&&!consFull())run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
@@ -1435,7 +1438,7 @@ function attack(){
   const shootsNow=styleOff()?!c.ranged:c.ranged;
   if(shootsNow&&styleOff()){faceTarget(14);shoot(player.x,player.z,player.face,20,dmg,'player',0x8fb8ff,'orb');beep(520,.05,.03,'triangle')}
   else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
-  else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
+  else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area')),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0x8fe3ff,reach,third);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
@@ -2080,10 +2083,11 @@ function unlockLore(k){profile.lore=profile.lore||[];if(profile.lore.includes(k)
 function v2Item(it){if(!it||it.v2)return;it.v2=1;delete it.bonus;delete it.def;const n=[0,0,1,1,2,2,2][it.rar]||0;
   it.aff=(it.aff||[]).slice(0,n).map(x=>{const A=AFX.find(y=>y.k===x.k)||{};return{k:x.k,v:Math.max(1,Math.min(x.v,Math.round((1+it.tier*.4)*(1+it.rar*.15)*(A.f||1)*1.3)))}});
   it.value=Math.round(PRICE[Math.min(8,it.tier)]*(1+.06*it.rar)*.4*Math.pow(1.15,it.up||0))}
-function ensureRun(){run.lamps=run.lamps||0;if((profile.dayT||0)>dayT)dayT=profile.dayT;
+function ensureRun(){run.lamps=run.lamps||0;
+  if(run.v2&&!run.v2fix){run.v2fix=1;if((run.level||1)>1){const g=run.level-1;run.pts=(run.pts||0)+g;setTimeout(()=>showSys('Compensação do Sistema 2.0: a conversão apagou os pontos que vieram de missões. Devolvemos <b>+'+g+' pontos de status</b> (1 por nível, estimativa). Abra Status.'),5500)}}if((profile.dayT||0)>dayT)dayT=profile.dayT;
   {const F=festival();if(F&&run.festDay!==todayKey()){run.festDay=todayKey();setTimeout(()=>toast('<b>[FESTIVAL]</b> '+F.n+': '+F.d+'.',7000),6000)}}
   for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])if(it&&/Soberan/.test(it.name))it.name=it.name.replace(/d[oa] Soberan[oa]/,'Primeva');
-  if(!run.v2){run.v2=1;const lv=run.level||1;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=(lv-1)+Math.floor(lv/5)*(profile.rebirths||0)+5*(profile.rebirths||0);
+  if(!run.v2){run.v2=1;run.v2fix=1;const lv=run.level||1;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=2*(lv-1)+Math.floor(lv/5)*(profile.rebirths||0)+5*(profile.rebirths||0);
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
     if(lv>1)setTimeout(()=>showSys('SISTEMA 2.0. Seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível, com números fixos). Equipamentos convertidos: o rank manda. Abra Status.'),4500)}
   run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;
@@ -2344,6 +2348,17 @@ function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNe
    +(inc?row('Renda da cidade',fmt(inc)+' ouro por dia',btn(got?'Coletado hoje':'Coletar','cityinc',0,!got,'hot')):'')
    +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
 
+/* ===== LIVRARIA (ideia do Irror): passivas que servem para qualquer classe. Custam 1 ponto de habilidade + ouro por nível (máx. 10). ===== */
+const PBOOK=[{k:'xp',n:'Tomo da Sabedoria',d:l=>'+'+(3*l)+'% de XP',u:'+3% de XP por nível'},{k:'ls',n:'Tomo do Vampiro',d:l=>String(.5*l).replace('.',',')+'% do dano volta como vida',u:'+0,5% de roubo de vida por nível'},
+ {k:'sh',n:'Tomo da Égide',d:l=>'+'+(4*l)+'% de escudo máximo',u:'+4% de escudo por nível'},{k:'res',n:'Tomo da Pele de Ferro',d:l=>'−'+String(1.5*l).replace('.',',')+'% de dano recebido',u:'−1,5% de dano recebido por nível'},
+ {k:'eva',n:'Tomo do Vento',d:l=>String(1.5*l).replace('.',',')+'% de chance de evitar um golpe',u:'+1,5% de evasão por nível'},{k:'area',n:'Tomo do Alcance',d:l=>'+'+(4*l)+'% de alcance do ataque corpo a corpo',u:'+4% de alcance por nível'}];
+function pb(k){return ((run&&run.pbook)||{})[k]||0}
+function pbCost(l){return 2000*(l+1)*(l+1)}
+function libView(){view=libView;let h='<div class="sysline">Livraria: tomos de <b>passivas</b> que servem para qualquer classe. Cada nível custa <b>1 ponto de habilidade</b> e ouro. Máximo nível 10. Pontos de habilidade: <b>'+(run.spts||0)+'</b>.</div><div class="sec">PASSIVAS</div>';
+  for(const B of PBOOK){const l=pb(B.k);h+=row(B.n+' <b>NV '+l+'/10</b>','Agora: '+(l?B.d(l):'nada')+' · '+B.u,l<10?btn('+1 · '+fmt(pbCost(l))+' ouro','pbup',B.k,run.gold>=pbCost(l)&&(run.spts||0)>=1):'<b>Máximo</b>')}
+  const T=profile.trophies||[];h+='<div class="sec">TOMOS DE GUARDIÃO</div><div class="sysline" style="font-size:12px">Só aparecem os poderes dos guardiões que <b>você já derrotou</b>. Entram na Biblioteca de Poderes (teclas 1–3).</div>';
+  const L2=bookList().filter(B=>T.some(t=>ALLBOSS().some(b=>b.n===t&&b.skill&&b.skill.n===B.sk.n)));if(!L2.length)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Nenhum ainda. Derrote guardiões.</div>';
+  L2.forEach(B=>{const i=bookList().indexOf(B);h+=row('Tomo: <b>'+B.sk.n+'</b>',skillDesc(B.sk),btn(fmt(B.price)+' ouro','buybook',i,run.gold>=B.price))});openModal('LIVRARIA',h)}
 /* ===== CASA PRÓPRIA ===== */
 const HOUSE_P=150000;
 const FURN=[{k:'cama',n:'Cama',p:20000,d:'Dormir em casa é grátis e dá Bem descansado (nível 3) por 10 min',m:'bed'},{k:'bau',n:'Baú',p:30000,d:'Guarda até 20 itens para sempre (nem a morte leva)',m:'chest'},{k:'trof',n:'Estante de Troféus',p:40000,d:'Cada guardião diferente derrotado dá +0,5% de dano contra chefes (máx. +25%)',m:'statue_column'},{k:'aqua',n:'Aquário',p:25000,d:'+1 tentativa na pesca e mostra seus recordes',m:'bucket_water'},{k:'altar',n:'Altar de Mana',p:60000,d:'3 poções grátis por dia',m:'candle_triple'}];
@@ -2519,17 +2534,17 @@ function updSpecial2(S,dt){
   else if(S.kind==='primordial'){S.msg=bossE&&!bossE.dead?'Portal Primordial · '+bossE.name:'Portal Primordial'}
 }
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[SISTEMA]</b> '+msg,4000)}
-const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>100+50*(profile.rebirths||0);
+const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>1e9;
 function towerClear(S){S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
   if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
-  if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares.'+(towerCap()>100?' A torre continua.':' Acima daqui, só quem reencarnou sobe.'),6000);if(towerCap()<=100)return}
+  if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares. A torre continua, sem fim.',6000)}
   if(S.floor>=towerCap()){bigText('LIMITE DA TORRE',1500);toast('<b>[TORRE]</b> Andar '+S.floor+' é o seu limite. Cada reencarnação libera mais 50 andares.',6000);return}
   const gold=Math.round(80*S.floor*GR[S.gr].gold);run.gold+=gold;floater(player.x,player.z,'+'+fmt(gold)+' ouro','#ffd54f',true);if(S.floor%5===0)addChest(3,0,S.gr,S.boss);
   const grp=new THREE.Group();grp.position.set(0,0,-4);const ring=new THREE.Mesh(geo('gring',()=>0),glowS(0xffd070,1));ring.position.y=2.6;grp.add(ring);const sg=makeSign('ANDAR '+(S.floor+1),'#ffd070',.55);sg.position.y=5.5;grp.add(sg);L.group.add(grp);L.exits.push({ring,grp,sg,locked:false});
   L.inter.push({type:'next',x:0,z:-4,r:3.2,label:'F · SUBIR PARA O ANDAR '+(S.floor+1),use:()=>buildSpecial('tower',{x:L.gate.x,z:L.gate.z},S.floor+1)});
   bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500)}
-function towerTab(){const b=profile.towerBest||0,cap=towerCap(),c=Math.min(cap-4,Math.floor(b/5)*5+1);let h='<div class="sysline">A Torre do Sistema tem <b>100 andares</b>. Chefe a cada 10 e um Soberano no andar 100. Acima dele a torre continua: <b>cada reencarnação libera mais 50 andares</b> (seu limite: andar <b>'+cap+'</b>). Monstros do andar N têm o nível '+'<b>N × 2,6</b> até o 100 e sobem 4 níveis por andar depois. Seu recorde: <b>andar '+b+'</b>.</div>'+row('Começar do andar 1','Aquecimento',btn('Entrar','tower',1))+(b>=5&&b<cap?row('Continuar do andar '+c,'Pula os andares que você já venceu',btn('Entrar','tower',c,true,'hot')):'');
+function towerTab(){const b=profile.towerBest||0,cap=towerCap(),c=Math.max(1,b);let h='<div class="sysline">A Torre do Sistema é <b>infinita</b>. Chefe a cada 10 andares e um Soberano no andar 100. Monstros do andar N têm nível <b>N × 2,6</b> até o 100 e sobem 4 níveis por andar depois. Você sempre pode continuar do seu recorde. Recorde: <b>andar '+b+'</b>.</div>'+row('Começar do andar 1','Aquecimento',btn('Entrar','tower',1))+(b>=2?row('Continuar do andar '+c,'Pula os andares que você já venceu',btn('Entrar','tower',c,true,'hot')):'');
   h+='<div class="sec">RANKING DA TORRE</div>';towerRank().forEach((r,i)=>{h+='<div class="it" style="'+(r.me?'background:rgba(79,195,255,.14)':'')+'"><div class="d"><b>'+(i+1)+'º</b> '+r.n+'</div><span>andar '+r.f+'</span></div>'});return h}
 
 /* ================= COMPLETOS: TORRE 100, NPCs, CIDADE, FUSÃO SOMBRIA, CIDADES CAÍDAS ================= */
@@ -2683,7 +2698,7 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla J)'),btn('Abrir','bestv',0));
     h+=row('Coleção de Sombras','Todas as sombras que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
-    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>+1 ponto de status extra a cada 5 níveis</b> por reencarnação, <b>+50 andares na Torre</b> e 5 pontos para começar. Mantém ouro, itens e sombras; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(100*((profile.rebirths||0)+1))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100*((profile.rebirths||0)+1),'red'):lockMsg('rebirth'))}
+    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>+1 ponto de status extra a cada 5 níveis</b> por reencarnação e 5 pontos para começar. Mantém ouro, itens e sombras; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(100*((profile.rebirths||0)+1))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100*((profile.rebirths||0)+1),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
     h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Absorva essências de guardiões','');h+=libRows();
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Associação','');
@@ -2707,6 +2722,7 @@ function extraActions3(a,v){
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
   if(a==='buyret'){const r=profile.retired[+v],t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
   if(['housebuy','furn','hsleep','haltar','hput','hget'].includes(a))return houseAct(a,v);
+  if(a==='pbup'){const l=pb(v);if(l>=10||(run.spts||0)<1||run.gold<pbCost(l))return;run.spts--;run.gold-=pbCost(l);run.pbook=run.pbook||{};run.pbook[v]=l+1;refreshStats();sfx('level');return true}
   if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
   if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
   if(a==='dream'){closeModal();buildSpecial('dream');return 'close'}
@@ -2742,8 +2758,7 @@ function mktView(){
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Guarde cristais para aprimorar armas e armaduras no ferreiro.</div>';
   h+='<div class="sec">COMPRAR CRISTAIS (PACOTE DE 10)</div><div class="sysline" style="font-size:12px">Dorian compra por 1x e vende por 3x o preço base. Só até o seu rank.</div>';
   for(let t=0;t<=Math.min(8,rankOf());t++){const p=CRY_P[t]*30;h+=row('10 cristais <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','Você tem '+run.res.cry[t],btn(fmt(p)+' ouro','buycry',t,run.gold>=p))}
-  h+='<div class="sec">GRIMÓRIOS (PODERES DE GUARDIÕES)</div><div class="sysline" style="font-size:12px">Ensinam um poder de guardião. Ele entra nos espaços de poder absorvido (teclas 1–3; se estiver cheio, substitui o mais antigo) e pode ser aprimorado com 2 pontos por nível.</div>';
-  bookList().forEach((B,i)=>{h+=row('Grimório: <b>'+B.sk.n+'</b>',skillDesc(B.sk),btn(fmt(B.price)+' ouro','buybook',i,run.gold>=B.price))});
+  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Tomos de passivas e de guardiões agora ficam na <b>LIVRARIA</b> da praça.</div>';
   h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000))+'<div class="sec">COMPANHEIRO</div>'+petRows();
   h+='<div class="sec">SERVIÇOS</div>'+row('Mapa do tesouro','Marca uma ruína distante com um tesouro lendário',unl('ruins')?btn('5.000 ouro','tmap',0,run.gold>=5000&&!run.tmap):lockMsg('ruins'))+row('Escoltar caravana','Leve uma caravana até a cidade mais próxima. Emboscadas no caminho.',unl('caravan')?btn('Aceitar','caravan',0,!L.car):lockMsg('caravan'));
   h+=(unl('fish')?cookRows():'')+affRow('Dorian');
@@ -2954,13 +2969,16 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev/.test(
 (function(){let n=0,t0=0;$('ttl').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;
   if(!DEV)return;if(++n>=7&&profile){n=0;profile.rank=profile.rank===8?7:8;store.set('pds2_profile',profile);showProfile();beep(110,.5,.06,'sawtooth')}})})();
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
-$('tbl').innerHTML=RANKS.filter(r=>!r.secret).map(r=>'<div><span style="color:'+r.c+'">'+r.id+'</span>'+(r.p<1?r.p.toFixed(2):r.p)+'%</div>').join('');
+$('tbl').innerHTML='';
 function showProfile(){const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.map((s,i)=>'QRT'[i]+' '+s.n).join(' · ')+(c.arise?'<br>Único que ergue sombras':'')+'<br>Mortes: '+(profile.deaths||0)}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
-  if(!profile){profile=rollAwaken();store.set('pds2_profile',profile);$('rollbox').hidden=false;$('goBtn').disabled=true;let n=0;
+  if(!profile){const C=CLASSES.map((c,i)=>({c,i})).filter(o=>o.c.w>0);$('rollbox').hidden=false;$('roll').textContent='E';$('roll').style.color=RANKS[0].c;$('rollc').textContent='ESCOLHA SUA CLASSE';
+    $('rolls').innerHTML='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px">'+C.map(o=>'<button class="btn" data-cls="'+o.i+'" title="'+o.c.sk.map(s=>s.n).join(' · ')+'">'+o.c.n+'<br><small style="opacity:.7">'+(o.c.ranged?'distância':'corpo a corpo')+' · '+(PASSIVES[o.i]?PASSIVES[o.i].n:'')+'</small></button>').join('')+'</div>';
+    $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{profile=pickAwaken(+b.dataset.cls);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent='ENTRAR NA CIDADE';beep(880,.3,.06);$('reroll').hidden=!DEV}));return}
+  if(false){let n=0;
     const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES[Math.floor(Math.random()*8)].n.toUpperCase();beep(300+n*20,.04,.03);
       if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent='ENTRAR NA CIDADE';$('reroll').hidden=!DEV}},80);return}
   startGame();
@@ -2996,9 +3014,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v48</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v49</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=48;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=49;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
