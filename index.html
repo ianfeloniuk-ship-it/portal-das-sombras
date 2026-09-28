@@ -267,7 +267,7 @@ const HIRE=[100,300,900,2500,7000,18000,45000,110000,300000];
 const TIERN=['de Ferro','de Aço','de Mithril','de Runas','de Dragão','do Vazio','do Abismo','Celestial','do Soberano'];
 const WBON=[.15,.4,.8,1.4,2.3,3.6,5.5,8.5,13],ADEF=[.05,.08,.11,.14,.17,.2,.23,.26,.3];
 const ELIX=[{n:'Elixir de Fúria',d:'+25% de dano por 3 min',price:900},{n:'Elixir de Ferro',d:'+30% de vida por 3 min',price:900}];
-const POTS=[{n:'Poção de Vida',d:'Recupera 50% da vida',price:40,give:{pots:1}},{n:'Pacote com 5 poções',d:'5 poções de vida',price:180,give:{pots:5}},{n:'Pergaminho de Retorno',d:'Tira você da masmorra e leva à cidade. Não funciona em portal vermelho.',price:150,give:{scrolls:1}}];
+const POTS=[{n:'Poção de Vida',d:'Recupera 50% da vida',price:40,give:{pots:1}},{n:'Pacote com 5 poções',d:'5 poções de vida',price:180,give:{pots:5}},{n:'Pergaminho de Retorno',d:'Tira você da masmorra e leva à cidade. Não funciona em portal vermelho.',price:150,give:{scrolls:1}},{n:'Lampião Mágico',d:'Acende sozinho em masmorra com Escuridão: enxerga longe por 3 minutos.',price:120,give:{lamps:1}}];
 const SHOPS=[
  {id:'guild',n:'ASSOCIAÇÃO DE CAÇADORES',sign:'ASSOCIAÇÃO',vendor:'Lyra',x:-19,z:-19,w:12,d:9,h:7,col:0x2a5fb0,roof:0x1b3a70,sc:'#4fc3ff',vb:0x2a5fb0,vh:0xe8e8ff,vw:'staff'},
  {id:'pot',n:'LOJA DE POÇÕES',sign:'POÇÕES',vendor:'Mira',x:19,z:-19,w:8,d:7,h:5,col:0x8a2b4a,roof:0x4a1426,sc:'#ff8fa3',vb:0x8a2b4a,vh:0xffb0c8,vw:'staff'},
@@ -972,11 +972,12 @@ function buildDungeon(g){
   // veios de cristal
   for(const i of mids){if(R()<.55){const r=rooms[i];const p=randIn(r);addVein(p.x,p.z,g.rank,3+Math.floor(R()*3),th.trim)}}
   // afixos
-  const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark'))scene.fog.density=.07}
+  const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark')){scene.fog.density=.07;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[SISTEMA]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
   const en=rooms[0];exitPortal(en.wx,en.wz-3.5,g.red);
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;
 }
+function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[SISTEMA]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
 function makeElite(e){e.elite=true;e.maxhp=e.hp=e.hp*1.8;e.dmg*=1.3;e.name='Elite '+e.name;e.xp*=2.5;e.gold*=3;e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
 function exitPortal(x,z,locked){
   const col=locked?0xff2030:0x4fc3ff;const grp=new THREE.Group();grp.position.set(x,0,z);
@@ -1219,10 +1220,12 @@ function hazard(x,z,r,dur,dmg,team,col){
   const g=new THREE.Group();g.position.set(x,.06,z);
   const ring=new THREE.Mesh(new THREE.RingGeometry(r-.12,r,40),glow(col,.9));ring.rotation.x=-Math.PI/2;g.add(ring);
   const fill=new THREE.Mesh(new THREE.CircleGeometry(r,40),glow(col,.28));fill.rotation.x=-Math.PI/2;fill.scale.setScalar(.01);g.add(fill);
-  scene.add(g);hazards.push({g,fill,x,z,r,dur,t:0,dmg,team,col});
+  scene.add(g);hazards.push({g,fill,x,z,r,dur,t:0,dmg,team,col,owner:team==='enemy'?curAtk:null});
 }
 function updHazards(dt){
   for(let i=hazards.length-1;i>=0;i--){const h=hazards[i];h.t+=dt;h.fill.scale.setScalar(Math.max(.01,h.t/h.dur));
+    /* Se quem criou a área morreu antes dela explodir, a área some sem causar dano. */
+    if(h.owner&&h.owner.dead&&h.t<h.dur){h.dmg=0;h.t=h.dur;fxRing(h.x,h.z,0x9fb0c4,h.r,.25)}
     if(h.t>=h.dur){
       if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
       else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:3,fromPlayer:true})}
@@ -1279,6 +1282,9 @@ function applyPassive(e,amt,crit,o){const c=profile.cls,P=player;
   else if(c===9&&Math.random()<.25){e.slow=Math.max(e.slow,2);floater(e.x,e.z,'LENTO','#8fe3ff')}
   else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}
+/* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
+const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você'};
+function skillDesc(sk){if(!sk)return '';const nat=['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':(isMagic()?' · mágica (Inteligência)':' · física (Força)');return (SKD[sk.t]||'Habilidade')+nat+' · poder x'+sk.pow+' · '+sk.mp+' de mana · recarga '+sk.cd+'s'}
 function killEnemy(e){
   if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
@@ -1565,6 +1571,7 @@ function frame(now){
   if(started&&!paused&&!touch&&(mouseHeld||keys[keyOf('attack')]))attack();
   if(started&&(time|0)!==FX2.lastSec){FX2.lastSec=time|0;markVisited()}
   if(run&&run.sovSk&&run.sovSk.cdT>0)run.sovSk.cdT-=dt;
+  if(L.lampT>0&&L.lampL&&player){L.lampT-=dt;L.lampL.position.set(player.x,3,player.z);if(L.lampT<=0||L.mode!=='dungeon'){scene.remove(L.lampL);L.lampL=null;L.lampT=0;if(L.mode==='dungeon'){scene.fog.density=.07;toast('<b>[SISTEMA]</b> O Lampião apagou.')}}}
   if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0)update(dt);
@@ -1970,7 +1977,8 @@ function completeJob(){
   const A=ADV[profile.cls];run.adv=true;player.skills.push({...A.sk,cdT:0});refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[SISTEMA]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
 }
-function showG(){const P=player,s=P&&P.skills[3];$('bG').hidden=!s;if(s)$('bG').querySelector('.nm').textContent=s.n}
+function skillTips(){if(!player||!player.skills)return;['bQ','bR','bT','bG'].forEach((id,i)=>{const sk=player.skills[i];if(sk&&$(id))$(id).title=sk.n+': '+skillDesc(sk)})}
+function showG(){skillTips();const P=player,s=P&&P.skills[3];$('bG').hidden=!s;if(s)$('bG').querySelector('.nm').textContent=s.n}
 function bankView(){
   view=bankView;const b=profile.bank||0;
   let h='<div class="sysline">Selene: O que fica aqui não se perde, nem se você morrer lá fora. · Carregando <b class="gold">'+fmt(run.gold)+'</b> · No banco <b class="gold">'+fmt(b)+'</b></div>';
@@ -2000,7 +2008,7 @@ const LORE={
   dream:['O Sonho','Os monstros que mais te mataram moram na sua cabeça. Dá para enfrentá-los dormindo.'],
   temple:['O Templo','Existe uma masmorra dentro da masmorra. Quem cumpre os mandamentos volta diferente.']};
 function unlockLore(k){profile.lore=profile.lore||[];if(profile.lore.includes(k))return;profile.lore.push(k);store.set('pds2_profile',profile);setTimeout(()=>toast('<b>[DIÁRIO]</b> Nova página: '+LORE[k][0]),1200)}
-function ensureRun(){
+function ensureRun(){run.lamps=run.lamps||0;
   run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;
   if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
   run.shadows=(run.shadows||[]).map(s=>typeof s==='string'?{n:s,lvl:1,xp:0,nick:null,on:true}:s.n?s:{n:s.n,lvl:1,xp:0,on:true});
@@ -2046,7 +2054,7 @@ function basicIsMagic(){return isMagic()!==styleOff()}
 function basicDmgMul(){const b=statsBonus();return (basicIsMagic()?b.mag:b.phys)/b.dmg*(styleOff()?.7:1)}
 function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SISTEMA]</b> Classes físicas não usam magia. Só magos podem guardar a varinha e lutar no braço.');return}run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
   toast('<b>[SISTEMA]</b> Ataque básico agora é <b>'+(m?'ARCANO (usa Inteligência)':'FÍSICO (usa Força)')+'</b>'+(styleOff()?' · estilo fora da sua classe: 70% de eficiência':' · estilo natural da classe')+'. Habilidades Q/R/T não mudam.',5000);sfx('arise');hud()}
-function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano FÍSICO'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:STATD.agi,per:STATD.per,int:'+2% dano MÁGICO e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
+function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano <b style="color:#ff6b6b">físico</b>'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:STATD.agi,per:STATD.per,int:'+2% dano <b style="color:#6fb8ff">mágico</b> e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2101,7 +2109,7 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
-  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>','+15% poder e −5% recarga por nível',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Sistema manda você para a Zona de Penalidade.')+'</div>';
@@ -2126,7 +2134,7 @@ function guildTab(){const g=profile.guild;let h='';
     if(g.own)h+=row('Doações',fmt(g.don)+' / '+fmt(guildNeed(g.lvl))+' para o nível '+(g.lvl+1),btn('1.000','gdon','1000',run.gold>=1000)+btn('10.000','gdon','10000',run.gold>=10000));
     h+=row('Sair da guilda','',btn('Sair','gleave',0,true,'red'))}
   return h}
-function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div>';for(let t=0;t<=Math.min(8,pr);t++){const gc=Math.round(PRICE[t]*.3),nc=run.res.core[t],cc=run.res.cry[t];
+function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(8,pr);t++){const gc=Math.round(PRICE[t]*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+(sl==='w'?'arma':'armadura')+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
 function extraActions(a,v){
   if(a==='stat'||a==='stat5'){const n=a==='stat5'?5:1;if(run.pts<n)return;run.pts-=n;run.stats[v]+=n;refreshStats();return true}
@@ -2479,8 +2487,8 @@ function openShop(id){
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=run.res.cry[eq.tier];h+='<div class="sec">APRIMORAR</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
-    for(let t=0;t<Math.min(9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(eq&&eq.bonus>=it.bonus?' · você já tem melhor':''),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=run.res.cry[eq.tier];h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +10% no bônus dele. Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    for(let t=0;t<Math.min(9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const d=itemScore(it)-itemScore(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+d+' de poder</b> sobre a sua '+eq.name:' · <b style="color:#ff8a9a">▼ '+d+' de poder</b> — a sua '+eq.name+' é melhor'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
