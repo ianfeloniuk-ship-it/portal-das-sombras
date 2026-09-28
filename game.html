@@ -467,7 +467,7 @@ const keys={},input={x:0,z:0},cam={x:0,z:0};
 
 function rankOf(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
 function newRun(){run={level:1,xp:0,gold:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0]},pos:null}}
-function saveRun(){if(!run||!player||player.dead)return;if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
+function saveRun(){if(!run||!player||player.dead)return;if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
 function loadRun(){const r=store.get('pds3_run');if(!r)return false;newRun();Object.assign(run,r);
   run.stolen=(r.stolen||[]).map(n=>ALLBOSS().find(b=>b.skill.n===n)).filter(Boolean).map(b=>({...b.skill,cdT:0}));
   run.shadows=r.shadows||[];run.equip=r.equip||{w:null,a:null};run.party=r.party||[];run.items=r.items||[];if(!r.res)run.res={core:[0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0]};for(const k of['core','cry'])while(run.res[k].length<9)run.res[k].push(0);return true}
@@ -621,6 +621,7 @@ function envMesh(k,mat){const m=ENV.m[k];if(!m)return new THREE.Group();if(!ENVG
 function envOwn(parent,m){if(m){m.userData.own=1;parent.add(m)}return m}
 function envDispose(root){root.traverse(o=>{if(o.userData&&o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material&&o.material.map){o.material.map.dispose();o.material.dispose()}})}
 let GMAT2=null;const envGroundMat=()=>GMAT2||(GMAT2=new THREE.MeshLambertMaterial({vertexColors:true,map:envGroundTex()}));
+const SEAC=[[new THREE.Color(0x2f6a4a),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
 const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed','tree_pineDefaultA','tree_cone'],
   leaf:['tree_default','tree_oak','tree_detailed','tree_fat','tree_tall','tree_simple','tree_thin','tree_plateau','tree_default_dark','tree_oak_dark'],
   fall:['tree_default_fall','tree_oak_fall','tree_default_fall','tree_thin','tree_oak','tree_default'],
@@ -649,7 +650,7 @@ const TINTS=[0xffffff,0xeef5d6,0xdcebdc,0xf5eccc,0xe2e8d2];
 function tintB(h,k){return(Math.min(255,((h>>16)&255)*k)<<16)|(Math.min(255,((h>>8)&255)*k)<<8)|Math.min(255,(h&255)*k)}
 function envChunk(g,R,x0,z0,cityD,addCol){
   const Q=()=>[0,1,2,3].map(()=>new EnvBatch()),TR=Q(),FL=Q(),SO=Q(),qi=(x,z)=>(x>x0?1:0)+(z>z0?2:0),dg=danger(x0,z0),bio=WN(x0*.004+900,z0*.004+900),st=CH/12,lite=ENV.lite;let tr,fl,so;const at=(x,z)=>{const i=qi(x,z);tr=TR[i];fl=FL[i];so=SO[i]};
-  const B=biomeAt(x0,z0),set=B==='neve'?TREES.pine:bio<.34?TREES.pine:bio>.74?TREES.fall:TREES.leaf,BT=B==='neve'?0xe8f0f6:B==='pantano'?0x9aa886:null;
+  const B=biomeAt(x0,z0),SE=seasonI(),set=B==='neve'?TREES.pine:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44||q.road)continue;
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'&&(n>.56||R()<.035)){if(R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
@@ -715,7 +716,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   if(cLv>=3&&!fallen)for(const s of[-1,1])EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);
   /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
   if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.34;
-    if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'banner_blue',X+Math.cos(a)*33.2,0,Z+Math.sin(a)*33.2,-(a+Math.PI/2)+Math.PI/2,2.6)}
+    if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*34,3.1,Z+Math.sin(a)*34,-a,1.8)}
       EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3})}
     if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,24,30]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
     const ring=(n,rad,list,sc)=>{for(let i=0;i<n;i++){const a=i/n*TAU+R()*.12;if(gA(a))continue;const x=X+Math.cos(a)*rad,z=Z+Math.sin(a)*rad,ry=Math.atan2(X-x,Z-z),W=sc+R()*1.2;EW(b,pk(R,list),x,0,z,ry,W);addCol({x,z,r:W*.55});ENV.cast.push({x:x+.8,z:z-.6,r:W*.7,k:.45});if(R()<.5)EH(fl,'hedge',x+Math.cos(a+1.3)*(W*.7),0,z+Math.sin(a+1.3)*(W*.7),ry,1.4)}};
@@ -726,10 +727,11 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
       const a=Math.PI*1.75,x=X+Math.cos(a)*52,z=Z+Math.sin(a)*52;EW(b,'building_church_blue',x,0,z,Math.atan2(X-x,Z-z),8);addCol({x,z,r:3.6})}
     if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
     if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}
+  if(!fallen&&festival())for(let i=0;i<12;i++){const a=i/12*TAU+.13;EH(b,i%2?'banner_red':'banner_green',X+Math.cos(a)*15,0,Z+Math.sin(a)*15,-a,2.4)}
   if(fallen){for(let i=0;i<14;i++){const a=R()*TAU,d=6+R()*24;EH(b,pk(R,['bone_A','skull','ribcage','rubble_half']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,.8)}}
   envOwn(g,b.mesh(BLDMAT));envOwn(g,tr.mesh(TREEMAT));envOwn(g,fl.mesh(FLORAMAT));
   inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0x8fe3ff,1),glowL.filter(o=>!o.s&&!o.w),false,g);
-  if(cLv>=3&&!fallen)inst(geo('wglow',()=>new THREE.BoxGeometry(1.2,.35,1.2)),glowS(0x4fc3ff,1.4),glowL.filter(o=>o.w),false,g);
+  if(cLv>=3&&!fallen)inst(geo('wglow2',()=>new THREE.OctahedronGeometry(.32,0)),toonS(0x6fd8ff),glowL.filter(o=>o.w),false,g);
   inst(geo('lampg',()=>new THREE.SphereGeometry(.28,8,6)),glowS(fallen?0x803040:0xffd9a0,1),glowL.filter(o=>o.s),false,g);
   return shopH}
 /* ruína no meio do mapa */
@@ -830,13 +832,13 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const cityD=(x,z)=>{let m=1e9,road=false;for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cl>=8?30:cl>=7?22:cl>=6?16:0;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<125)road=true}return{d:m,road}};
+  const cityD=(x,z)=>{let m=1e9,road=false;for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cl>=8?30:cl>=7?22:cl>=6?16:0;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<125)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),q=cityD(x,z);
     if(q.d<14)tmp.copy(cd);else if(q.d<35)tmp.copy(cc);else if(q.road)tmp.copy(cc).multiplyScalar(.9);else tmp.copy(ca).lerp(cb,WN(x*.03,z*.03));
-    tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);cols.push(tmp.r,tmp.g,tmp.b)}
+    tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);if(SEAC[seasonI()])tmp.lerp(SEAC[seasonI()][0],SEAC[seasonI()][1]);cols.push(tmp.r,tmp.g,tmp.b)}
   pg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
   g.add(new THREE.Mesh(pg,GROUNDMAT));
   const trees=[],rocks=[];const st=CH/12;
@@ -889,6 +891,7 @@ function buildCity(c,g,addCol,R){
     addVendor(c,s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0x8fe3ff,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
     L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView})}
+  buildHouse(c,g,E);
   {const inn=makeSign('POUSADA','#ffd9a0',.5);if(E)inn.position.set(X+6.4,5.7,Z-5.9);else inn.position.set(X+7,2.6,Z-6);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}L.inter.push({type:'inn',city:c,x:X+7,z:Z-4.6,r:2.6,label:'F · POUSADA',use:innView})}
   if(profile.retired&&profile.retired.length&&!cityFallen(c)){const ri=c.name==='Aster'?profile.retired.length-1:((c.cx*7+c.cz*13)%(profile.retired.length+2)+profile.retired.length+2)%(profile.retired.length+2);if(ri<profile.retired.length){const r=profile.retired[ri];const cc=CLASSES[r.cls];const m=makeChibi({body:cc.body,hair:cc.hair,wep:cc.wep,wcol:0x8fe3ff,eye:0x8fe3ff,gk:CLASS_GK[r.cls],tint:0x8fe3ff});m.mats.forEach(mt=>{mt.transparent=true;mt.opacity=.55});m.root.position.set(X,0,Z-14);scene.add(m.root);npcs.push({kind:'vendor',home:c,m,x:X,z:Z-14,face:0,r:.5,name:r.name,short:r.name,shop:'ret'+ri,t:0,col:'#8fe3ff',sign:'VIDA PASSADA',label:'F · FALAR COM '+r.name.toUpperCase(),use:()=>retiredView(ri)})}}
   if(!E){const stall=mesh(geo('stall',()=>new THREE.BoxGeometry(3,1.1,1.4)),toonS(0x6b4a2a));stall.position.set(X+5,.55,Z+6.5);g.add(stall);
@@ -1038,7 +1041,7 @@ function addVein(x,z,rank,charges,col){
   const it={type:'vein',x,z,r:2.4,charges,g,label:'F · MINERAR CRISTAL',use:()=>mine(it,rank)};L.inter.push(it);return it;
 }
 function mine(it,rank){
-  if((it.cd||0)>time)return;it.cd=time+.35;const n=1+(Math.random()<.4?1:0);run.res.cry[rank]+=n;
+  if((it.cd||0)>time)return;it.cd=time+.35;let n=1+(Math.random()<.4?1:0);if(Math.random()<Math.min(1,profLv('mine')*.05))n++;if(hasT('miner'))n++;run.res.cry[rank]+=n;profXp('mine',n);storyEv('mine',n);
   player.face=Math.atan2(it.x-player.x,it.z-player.z);player.atkT=.001;
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,'#8fe3ff');fxBurst(it.x,1,it.z,0x8fe3ff,6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[SISTEMA]</b> Veio de mana esgotado.')}
@@ -1057,7 +1060,7 @@ function enterGate(g){
 }
 function startBreak(){L.brk={t:0,sp:1};for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}
   bigText('QUEBRA DE MASMORRA',2200);sfx('gong');shake(.8);showSys('A masmorra está quebrando. Os monstros não param de vir. Quanto mais você aguentar, maior o recorde. A saída continua aberta: chegue nela para sair vivo.')}
-function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)>(profile.brkBest||0)){profile.brkBest=Math.floor(B.t);if(profile.brkBest%10===0){store.set('pds2_profile',profile);checkTitles()}}
+function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)>(profile.brkBest||0)){profile.brkBest=Math.floor(B.t);if(profile.brkBest%10===0){store.set('pds2_profile',profile);checkTitles();storyEv('brk')}}
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(8,L.gate.rank);
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
@@ -1156,7 +1159,7 @@ function genQuest(t){const pr=Math.min(8,rankOf()),lvM=1+(run?run.level:1)/10;
   if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
   return {t:'pvp',n:1,got:0,rw:Math.round(160*GR[pr].gold*lvM),d:'Derrote um caçador hostil'}}
 function genQuests(){return[genQuest('kill'),genQuest('clear'),genQuest('pvp')]}
-function qev(type,val){if(type==='clear')npcEv('clear');if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[SISTEMA]</b> Missão concluída: '+q.d+'. Receba na Associação.',3500)}}
+function qev(type,val){if(type==='clear'){npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[SISTEMA]</b> Missão concluída: '+q.d+'. Receba na Associação.',3500)}}
 
 /* ================= EFEITOS ================= */
 function fxRing(x,z,col,r,dur=.45){const o=new THREE.Mesh(geo('fxr',()=>new THREE.RingGeometry(.2,.6,32)),glow(col,.9));o.rotation.x=-Math.PI/2;o.position.set(x,.08,z);scene.add(o);fxs.push({o,t:0,dur,kind:'ring',r})}
@@ -1277,7 +1280,7 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
   let blocked=false;
-  if(o.fromPlayer&&e.kind)amt*=bestMul(e.kind);if(o.fromPlayer&&e.elite&&hasT('avenger'))amt*=1.2;
+  if(o.fromPlayer&&e.kind)amt*=bestMul(e.kind);if(o.fromPlayer&&e.elite&&hasT('avenger'))amt*=1.2;if(o.fromPlayer&&hasT('towerc')&&L.special&&L.special.kind==='tower')amt*=1.2;
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
@@ -1286,7 +1289,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance():.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
   if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
-  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);if(e.isBoss)amt=Math.min(amt,e.maxhp*.06);amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
+  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*.06);amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+'!!!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
@@ -1329,9 +1332,9 @@ const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosã
 function skillDesc(sk){if(!sk)return '';const nat=['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':(isMagic()?' · mágica (Inteligência)':' · física (Força)');return (SKD[sk.t]||'Habilidade')+nat+(['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':' · <b>marca</b> os alvos')+' · poder x'+sk.pow+' · '+sk.mp+' de mana · recarga '+sk.cd+'s'}
 function killEnemy(e){
   if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
-  e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
+  e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
-  if(e.elite&&!e.isBoss)npcEv('elite');
+  if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
   if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER SOMBRA',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
   const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0){run.gold+=g;sfx('coin');floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',false,1.4)}
@@ -1344,7 +1347,7 @@ function killEnemy(e){
   weaponXp(e.xp||0);if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
   else if(Math.random()<.06){run.pots++;floater(e.x,e.z,'+POÇÃO','#ff8fa3',false,3)}
 }
-function onBossDeath(b){unlockLore('boss');npcEv('boss');profile.bossKills=(profile.bossKills||0)+1;
+function onBossDeath(b){unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;$('boss').hidden=true;
   for(const x of enemies)if(!x.dead&&x!==b&&!x.rival&&Math.hypot(x.x-b.x,x.z-b.z)<20)killEnemy(x);
   const ex=exitPortal(b.x,b.z+6,false);
@@ -1388,7 +1391,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
-  run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)));let need=xpNeed();const r0=rankOf();
+  run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)+((festival()||{}).xp||0)));let need=xpNeed();const r0=rankOf();
   while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35&&!consFull())run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
@@ -1434,7 +1437,7 @@ function dodge(){
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
   player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=dodgeCdVal();player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
-function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
+function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk)return;if(sk.cdT>0)return;
   if(['cone','nova','chain','bolt','rain','dot'].includes(sk.t)&&!nearestEnemy(player.x,player.z,sk.t==='bolt'||sk.t==='rain'?16:11)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
@@ -1589,14 +1592,16 @@ function updNpc(n,dt){
   n.t+=dt;const P=player,c=n.home;if(n.kind==='deco')return;
   if(n.kind==='vendor'){if(P&&Math.hypot(P.x-n.x,P.z-n.z)<8)turnTo(n,Math.atan2(P.x-n.x,P.z-n.z),dt,4);animChibi(n.m,{move:0,atk:0,dead:0,wind:0},n.t);n.m.root.rotation.y=n.face;return}
   let mv=0;
+  if(n.kind==='citizen'&&isNight()&&!n.leaving){n.leaving=true;n.path=[];n.wait=0;const a=rnd(0,TAU);n.tx=c.x+Math.cos(a)*27;n.tz=c.z+Math.sin(a)*27}
   if(n.wait>0){n.wait-=dt}
   else{
     if(n.goGate&&n.goGate.dead){n.goGate=null;n.path=[]}
     const tgt=n.path.length?n.path[0]:{x:n.tx,z:n.tz};const dx=tgt.x-n.x,dz=tgt.z-n.z,d=Math.hypot(dx,dz);
     if(d<1.2){if(n.path.length){n.path.shift()}
+      else if(n.leaving){n.gone=true;scene.remove(n.m.root)}
       else if(n.goGate){n.gone=true;scene.remove(n.m.root);fxRing(n.x,n.z,0x8fe3ff,2)}
       else{n.wait=rnd(2,6);const gs=gates.filter(g=>!g.dead&&Math.hypot(g.x-c.x,g.z-c.z)<200);const rx=n.x-c.x,rz=n.z-c.z;
-        if(Math.random()<.22&&gs.length){const g=pick(gs);n.goGate=g;const ga=Math.round(Math.atan2(g.z-c.z,g.x-c.x)/(Math.PI/2))*(Math.PI/2);n.path=[{x:c.x+Math.cos(ga)*28,z:c.z+Math.sin(ga)*28},{x:c.x+Math.cos(ga)*40,z:c.z+Math.sin(ga)*40}];n.tx=g.x;n.tz=g.z+1}
+        if(n.kind!=='citizen'&&Math.random()<.22&&gs.length){const g=pick(gs);n.goGate=g;const ga=Math.round(Math.atan2(g.z-c.z,g.x-c.x)/(Math.PI/2))*(Math.PI/2);n.path=[{x:c.x+Math.cos(ga)*28,z:c.z+Math.sin(ga)*28},{x:c.x+Math.cos(ga)*40,z:c.z+Math.sin(ga)*40}];n.tx=g.x;n.tz=g.z+1}
         else if(Math.hypot(rx,rz)>30){const ga=Math.round(Math.atan2(rz,rx)/(Math.PI/2))*(Math.PI/2);n.path=[{x:c.x+Math.cos(ga)*40,z:c.z+Math.sin(ga)*40},{x:c.x+Math.cos(ga)*26,z:c.z+Math.sin(ga)*26}];n.tx=c.x+rnd(-10,10);n.tz=c.z+rnd(-10,10)}
         else{const a=rnd(0,TAU),r=rnd(3,20);n.tx=c.x+Math.cos(a)*r;n.tz=c.z+Math.sin(a)*r}}}
     else{turnTo(n,Math.atan2(dx,dz),dt,6);moveEnt(n,dx/d*3.2*dt,dz/d*3.2*dt);mv=1}
@@ -1690,7 +1695,7 @@ function updWorld(dt){updEcon(dt);
   if(safe&&L.lastCity!==nc.c){L.lastCity=nc.c;if(nc.c.name!=='Aster')unlockLore('city');bigText(nc.c.name.toUpperCase(),1200);toast('<b>[SISTEMA]</b> Zona segura: cidade de '+nc.c.name+'.');L.cands=genCands()}
   if(!safe&&nc.d>40)L.lastCity=null;
   L.turT=(L.turT||0)-dt;if(L.turT<=0){L.turT=1;for(const e of enemies){if(e.dead||!e.breaker)continue;const n=nearestCity(e.x,e.z);if(n.d<60&&cityL(n.c)>=5&&!cityFallen(n.c)){hurtEnemy(e,e.maxhp*.06,n.c.x,n.c.z,{kb:0,pierce:true});fxLine([{x:n.c.x+(e.x-n.c.x)/n.d*34,z:n.c.z+(e.z-n.c.z)/n.d*34},{x:e.x,z:e.z}],0xffd070)}}}
-  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
+  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city)))spawnCitizen(ch.city);for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
 }
 function updDungeon(dt){
   for(const it of L.exits)it.ring.rotation.z+=dt*.8;
@@ -2058,7 +2063,8 @@ function unlockLore(k){profile.lore=profile.lore||[];if(profile.lore.includes(k)
 function v2Item(it){if(!it||it.v2)return;it.v2=1;delete it.bonus;delete it.def;const n=[0,0,1,1,2,2,2][it.rar]||0;
   it.aff=(it.aff||[]).slice(0,n).map(x=>{const A=AFX.find(y=>y.k===x.k)||{};return{k:x.k,v:Math.max(1,Math.min(x.v,Math.round((1+it.tier*.4)*(1+it.rar*.15)*(A.f||1)*1.3)))}});
   it.value=Math.round(PRICE[Math.min(8,it.tier)]*(1+.06*it.rar)*.4*Math.pow(1.15,it.up||0))}
-function ensureRun(){run.lamps=run.lamps||0;
+function ensureRun(){run.lamps=run.lamps||0;if((profile.dayT||0)>dayT)dayT=profile.dayT;
+  {const F=festival();if(F&&run.festDay!==todayKey()){run.festDay=todayKey();setTimeout(()=>toast('<b>[FESTIVAL]</b> '+F.n+': '+F.d+'.',7000),6000)}}
   for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])if(it&&/Soberan/.test(it.name))it.name=it.name.replace(/d[oa] Soberan[oa]/,'Primeva');
   if(!run.v2){run.v2=1;const lv=run.level||1;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=(lv-1)+Math.floor(lv/5)*(profile.rebirths||0)+5*(profile.rebirths||0);
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
@@ -2131,7 +2137,7 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function updDayNight(dt){dayT+=dt;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);
+function updDayNight(dt){dayT+=dt;if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
@@ -2141,7 +2147,7 @@ function updDayNight(dt){dayT+=dt;if(L.mode!=='world')return;const p=(dayT%DAYLE
   if(n>.99&&!L.nightNote){L.nightNote=true;toast('<b>[SISTEMA]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01)L.nightNote=false}
 /* eventos do mundo */
 let evT=240;
-function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36){evT=60;return}
+function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36){evT=60;return}
   if(profile.nemesis&&Math.random()<.4){spawnNemesis();return}
   if(unl('time')&&Math.random()<.12){const g=newGate();g.rank=clamp(rankOf(),0,8);g.time=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um portal com cor de sépia apareceu. Parece levar a outra época.',6000);bigText('PORTAL DO TEMPO',1200);return}
   if(Math.random()<.22){const g=newGate();g.rank=clamp(rankOf(),0,8);g.inverse=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um PORTAL INVERTIDO apareceu. Do outro lado fica o ninho deles.',6000);bigText('PORTAL INVERTIDO',1200);return}
@@ -2221,7 +2227,7 @@ function extraActions(a,v){
   if(a==='gmake'){const c=guildCost();if(run.gold<c||run.level<GUILD_LVL)return;run.gold-=c;profile.guild={name:'Guilda de '+pick(SHNAMES),lvl:1,don:0,own:true};store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Guilda fundada: '+profile.guild.name);return true}
   if(a==='gdon'){const g=profile.guild,amt=+v;if(run.gold<amt)return;run.gold-=amt;g.don+=amt;while(g.lvl<10&&g.don>=guildNeed(g.lvl)){g.don-=guildNeed(g.lvl);g.lvl++;toast('<b>[SISTEMA]</b> Guilda subiu para o nível '+g.lvl+'.')}store.set('pds2_profile',profile);return true}
   if(a==='gleave'){profile.guild=null;store.set('pds2_profile',profile);return true}
-  if(a==='forge'){const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const rar=wpick([30,40,22,8].map((w,i)=>({i,w}))).i;sfx('boom');addItem(makeItem(sl,t,rar));return true}
+  if(a==='forge'){const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const fl=profLv('forge');const rar=wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i;profXp('forge',10+t*5);sfx('boom');addItem(makeItem(sl,t,rar));return true}
   if(a==='elem'){if(run.elem&&run.gold<20000)return;if(run.elem)run.gold-=20000;run.elem=v;AFFC=null;player.skills=pSkills();refreshStats();bigText(ELEM[v].n.toUpperCase(),1300);toast('<b>[SISTEMA]</b> Você despertou o elemento '+ELEM[v].n+'.');return true}
   if(a==='buypet'){if(run.gold<8000)return;run.gold-=8000;const np=newPet();if(!run.pet||typeof run.pet!=='object'||np.rar>=run.pet.rar){run.pet=np;if(PET){scene.remove(PET);PET=null}toast('<b>[SISTEMA]</b> Novo companheiro: <b style="color:'+RAR[np.rar].c+'">'+RAR[np.rar].n+' · '+PETP[np.pow].n+'</b>',4500)}else{run.pet.lvl+=3;toast('<b>[SISTEMA]</b> O ovo era '+RAR[np.rar].n+'. Seu companheiro absorveu a energia: +3 níveis.')}return true}
   if(a==='trainpet'){const c=petTrainCost();if(!run.pet||run.gold<c)return;run.gold-=c;run.pet.lvl++;toast('<b>[SISTEMA]</b> Companheiro subiu para o nível '+run.pet.lvl+'.');return true}
@@ -2267,6 +2273,10 @@ const TITLES=[
  {id:'brk60',n:'Inabalável',d:'sobreviver 1 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 0,20 s mais rápido',b:{}},
  {id:'brk600',n:'Imortal',d:'sobreviver 10 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
  {id:'founder',n:'Fundador',d:'levar uma cidade ao nível 10',c:()=>Object.values(profile.cityLv||{}).some(v=>v>=10),m:'Lojas 10% mais baratas em todas as cidades',b:{}},
+ {id:'miner',n:'Amigo dos Mineiros',d:'história O Mineiro Desaparecido',c:()=>false,m:'Veios de mana rendem +1 cristal por golpe',b:{}},
+ {id:'lakeg',n:'Guardião do Lago',d:'história A Canção do Lago',c:()=>false,m:'Poções também enchem 30% do escudo',b:{}},
+ {id:'towerc',n:'Eleito da Torre',d:'história O Chamado da Torre',c:()=>false,m:'+20% de dano dentro da torre',b:{}},
+ {id:'protector',n:'Protetor da Cidade',d:'história A Cidade que Cresce',c:()=>false,m:'Renda das cidades +50%',b:{}},
  {id:'sov',n:'Soberano',d:'???',secret:true,c:()=>profile.rank===8,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
 function eqTitles(){if(!profile.titles)profile.titles=profile.title?[profile.title]:[];return profile.titles.filter(id=>(profile.ach||[]).includes(id)).slice(0,3)}
 function hasT(id){return !!profile&&eqTitles().includes(id)}
@@ -2286,13 +2296,13 @@ const RECIPES_X=[{n:'Elixir de Fúria',need:null,d:'+25% de dano por 3 min',b:{d
 const RECIPES=[{n:'Ensopado de Peixe',need:{'Peixe-lua':2},d:'+25% vida por 5 min',b:{hp:.25},t:300},{n:'Sushi de Mana',need:{'Carpa de Mana':1,'Peixe-lua':1},d:'+30% mana por 5 min',b:{mp:.3},t:300},{n:'Espeto Relâmpago',need:{'Enguia Relâmpago':1},d:'+20% dano por 5 min',b:{dmg:.2},t:300},{n:'Banquete Dourado',need:{'Peixe Dourado':1},d:'+20% vida, dano e mana por 10 min',b:{hp:.2,dmg:.2,mp:.2},t:600}];
 const recipe=n=>RECIPES.find(r=>r.n===n)||RECIPES_X.find(r=>r.n===n);
 function foodB(){return run.food&&run.food.t>0?recipe(run.food.n).b:{}}
-function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;const rod=ROD[run.rod||0],f=wpick(fishPool()),zw=Math.max(8,rod.z-f.d*2.5),spd=2+f.d*.5;let pos=0,dir=1,zone=rnd(10,88-zw),zd=f.d>=2?1:0,tries=rod.t,iv=null;
+function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;const rod=ROD[run.rod||0],f=wpick(fishPool()),zw=Math.max(8,rod.z-f.d*2.5+Math.min(10,profLv('fish')*.5)),spd=2+f.d*.5;let pos=0,dir=1,zone=rnd(10,88-zw),zd=f.d>=2?1:0,tries=rod.t+(hasF('aqua')?1:0),iv=null;
   const h='<div class="sysline">'+(f.d>=3?'<b style="color:'+f.c+'">Algo GRANDE mordeu a isca!</b> ':'Algo mordeu. ')+'Toque PUXAR quando o marcador estiver na faixa verde'+(zd?' (este peixe se mexe)':'')+'. <span id="ftries">'+tries+'</span> tentativas · '+rod.n+'</div><div style="position:relative;height:26px;background:#0a1830;border:1px solid #4fc3ff;border-radius:4px;margin:10px 0"><div id="fzone" style="position:absolute;top:0;bottom:0;left:'+zone+'%;width:'+zw+'%;background:rgba(111,227,154,.45)"></div><div id="fmark" style="position:absolute;top:-4px;width:6px;height:34px;background:#ffd54f;left:0"></div></div><div style="display:flex;justify-content:flex-end">'+btn('PUXAR','fishpull',0,true,'hot')+'</div>';
   openModal('PESCA',h);iv=setInterval(()=>{if($('modal').hidden){clearInterval(iv);return}pos+=dir*spd;if(pos>=97||pos<=0)dir*=-1;const m=$('fmark');if(m)m.style.left=pos+'%';if(zd){zone+=zd*.35*f.d;if(zone<=2||zone>=96-zw)zd*=-1;const z=$('fzone');if(z)z.style.left=zone+'%'}},16);
   window._fish={get pos(){return pos},get zone(){return zone},zw,f,iv,get tries(){return tries},dec(){tries--;$('ftries').textContent=tries}}}
 function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F.zone+F.zw){clearInterval(F.iv);const f=F.f,kg=+(f.kg[0]+Math.pow(Math.random(),2)*(f.kg[1]-f.kg[0])).toFixed(1);run.fish=run.fish||{};run.fish[f.n]=(run.fish[f.n]||0)+1;profile.fish=(profile.fish||0)+1;
   profile.aqua=profile.aqua||{};const rec=profile.aqua[f.n],isNew=!rec,isRec=rec&&kg>rec;if(!rec||kg>rec)profile.aqua[f.n]=kg;if(isNew){run.pts=(run.pts||0)+1}
-  npcEv('fish');store.set('pds2_profile',profile);closeModal();sfx('coin');toast('<b>[PESCA]</b> <b style="color:'+f.c+'">'+f.n+'</b> · '+String(kg).replace('.',',')+' kg'+(isNew?' · <b>ESPÉCIE NOVA no Aquário: +1 ponto de status</b>':isRec?' · <b>NOVO RECORDE!</b>':''),5000);if(f.d>=4){bigText('LEVIATÃ!',1500);sfx('gong')}saveRun()}
+  profXp('fish',10+f.d*10);storyEv('fish');storyEv('species');npcEv('fish');store.set('pds2_profile',profile);closeModal();sfx('coin');toast('<b>[PESCA]</b> <b style="color:'+f.c+'">'+f.n+'</b> · '+String(kg).replace('.',',')+' kg'+(isNew?' · <b>ESPÉCIE NOVA no Aquário: +1 ponto de status</b>':isRec?' · <b>NOVO RECORDE!</b>':''),5000);if(f.d>=4){bigText('LEVIATÃ!',1500);sfx('gong')}saveRun()}
   else{F.dec();sfx('block');if(F.tries<=0){clearInterval(F.iv);closeModal();toast('O peixe escapou.')}}}
 function fishValue(){let t=0;const f=run.fish||{};for(const F of FISH)t+=(f[F.n]||0)*F.v;return t}
 function aquaRows(){const A=profile.aqua||{};let h='<div class="sec">AQUÁRIO ('+Object.keys(A).length+'/'+FISH.length+')</div><div class="sysline" style="font-size:12px">Cada espécie nova dá +1 ponto de status. Alguns peixes só aparecem à noite, na chuva ou em certos biomas (neve, pântano, deserto).</div>';
@@ -2308,21 +2318,104 @@ function affRow(n){const l=affL(n),c=1000*(l+1)*(l+1);return '<div class="sec">A
 function innLv(){return player?((profile.innLv||{})[nearestCity(player.x,player.z).c.id]||0):0}
 function innB(){return run&&run.rested&&run.rested.t>0?run.rested.l:0}
 function cityLv(){return (profile.cityLv||{})[nearestCity(player.x,player.z).c.id]||0}
-function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-Math.min(5,cityLv())*.04-(hasT('founder')?.1:0))}
+function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-Math.min(5,cityLv())*.04-(hasT('founder')?.1:0)-((festival()||{}).shop||0))}
 const CITY_U=[['1','Bandeiras nas torres · lojas 4% mais baratas por nível'],['2','Carroça e depósito · elixires na loja de Poções'],['3','Muralhas brilhantes e colunas na praça'],['4','Estandartes na muralha, feira na praça · guardas defendem nas invasões'],['5','Postes de luz nas ruas · torres da muralha atiram nos monstros'],['6','BAIRRO NOVO fora da muralha · renda diária da cidade'],['7','Moinhos e serraria nos campos · renda maior'],['8','Segundo bairro e catedral · renda maior'],['9','Monumentos dos heróis e obelisco aceso · renda maior'],['10','Capital: praça dourada · renda máxima e título Fundador']];
 const cityNeed=l=>({cry:20*(l+1),gold:l>=5?50000*(l-3)*(l-3):0});
-const cityIncome=l=>l>=6?Math.round(2000*(l-5)*(l-5)*GR[Math.min(8,rankOf())].gold):0;
+const cityIncome=l=>l>=6?Math.round(2000*(l-5)*(l-5)*GR[Math.min(8,rankOf())].gold*(hasT('protector')?1.5:1)):0;
 function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l),tot=run.res.cry.reduce((a,b)=>a+b,0),inc=cityIncome(l),got=((profile.cityDay||{})[c.id])===todayKey();
   return '<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(inc?row('Renda da cidade',fmt(inc)+' ouro por dia',btn(got?'Coletado hoje':'Coletar','cityinc',0,!got,'hot')):'')
    +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
+
+/* ===== CASA PRÓPRIA ===== */
+const HOUSE_P=150000;
+const FURN=[{k:'cama',n:'Cama',p:20000,d:'Dormir em casa é grátis e dá Bem descansado (nível 3) por 10 min',m:'bed'},{k:'bau',n:'Baú',p:30000,d:'Guarda até 20 itens para sempre (nem a morte leva)',m:'chest'},{k:'trof',n:'Estante de Troféus',p:40000,d:'Cada guardião diferente derrotado dá +0,5% de dano contra chefes (máx. +25%)',m:'statue_column'},{k:'aqua',n:'Aquário',p:25000,d:'+1 tentativa na pesca e mostra seus recordes',m:'bucket_water'},{k:'altar',n:'Altar de Mana',p:60000,d:'3 poções grátis por dia',m:'candle_triple'}];
+function hasF(k){return !!(profile.house&&profile.house.f&&profile.house.f[k])}
+function trophyB(){return hasF('trof')?Math.min(.25,(profile.trophies||[]).length*.005):0}
+function rebuildCity(c){for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true)}
+function houseView(){view=houseView;const c=nearestCity(player.x,player.z).c,H=profile.house;let h='';
+  if(!H||H.city!==c.id){const p=H?20000:HOUSE_P;h+='<div class="sysline">Uma casa perto do portão leste de <b>'+c.name+'</b>.'+(H?' Você já tem casa em outra cidade: mudar para cá custa só a mudança (os móveis e o baú vão junto).':'')+'</div>'+row(H?'Mudar para esta casa':'Comprar a casa','Sua base: móveis com funções, troféus dos guardiões e um baú que nem a morte esvazia.',btn(fmt(p)+' ouro','housebuy',0,run.gold>=p,'hot'));openModal('CASA',h);return}
+  h+='<div class="sysline">Sua casa em <b>'+c.name+'</b>. Cada móvel aparece do lado de fora da casa.</div><div class="sec">MÓVEIS</div>';
+  for(const F of FURN)h+=row(F.n,F.d,hasF(F.k)?'<b style="color:#6fe39a">Seu</b>':btn(fmt(F.p)+' ouro','furn',F.k,run.gold>=F.p));
+  if(hasF('cama'))h+=row('Dormir em casa','Cura total, escudo cheio e Bem descansado (nível 3) por 10 min',btn('Dormir','hsleep',0,true,'hot'));
+  if(hasF('altar')){const ok=H.altar!==todayKey();h+=row('Altar de Mana','3 poções por dia',btn(ok?'Pegar 3 poções':'Volte amanhã','haltar',0,ok))}
+  if(hasF('trof')){const T=profile.trophies||[];h+='<div class="sec">TROFÉUS ('+T.length+') · +'+String(Math.round(trophyB()*1000)/10).replace('.',',')+'% de dano contra chefes</div><div class="sysline" style="font-size:12px">'+(T.join(' · ')||'Derrote guardiões para encher a estante.')+'</div>'}
+  if(hasF('aqua')){const A=profile.aqua||{};h+='<div class="sec">AQUÁRIO</div><div class="sysline" style="font-size:12px">'+(Object.entries(A).map(([k,v])=>k+' '+String(v).replace('.',',')+' kg').join(' · ')||'Vazio. Vá pescar.')+'</div>'}
+  if(hasF('bau')){const B=H.chest=H.chest||[];h+='<div class="sec">BAÚ ('+B.length+'/20)</div>';B.forEach((it,i)=>{h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>',statTxt(it),btn('Pegar','hget',i,run.items.length<24))});
+    h+='<div class="sec">GUARDAR DA BOLSA</div>';run.items.forEach(it=>{h+=row('<span style="color:'+RAR[it.rar].c+'">'+it.name+'</span>',statTxt(it),btn('Guardar','hput',it.uid,B.length<20))})}
+  openModal('CASA',h)}
+function houseAct(a,v){const H=profile.house;
+  if(a==='housebuy'){const p=H?20000:HOUSE_P;if(run.gold<p)return;run.gold-=p;const c=nearestCity(player.x,player.z).c,old=H&&H.city;profile.house={f:{},chest:[],...(H||{}),city:c.id};store.set('pds2_profile',profile);rebuildCity(c);if(old&&old!==c.id){for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===old)unloadChunk(ch);updChunks(true)}storyEv('house');sfx('level');toast('<b>[CASA]</b> A casa em '+c.name+' é sua.');return true}
+  if(a==='furn'){const F=FURN.find(x=>x.k===v);if(!F||hasF(v)||run.gold<F.p)return;run.gold-=F.p;H.f[v]=1;store.set('pds2_profile',profile);rebuildCity(nearestCity(player.x,player.z).c);sfx('coin');toast('<b>[CASA]</b> '+F.n+' comprado.');return true}
+  if(a==='hsleep'){run.rested={t:600,l:3};refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('<b>[CASA]</b> Você dormiu em casa. Bem descansado por 10 min.');return 'close'}
+  if(a==='haltar'){if(H.altar===todayKey())return;H.altar=todayKey();run.pots+=3;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CASA]</b> +3 poções do Altar de Mana.');return true}
+  if(a==='hput'){const B=H.chest=H.chest||[];if(B.length>=20)return;const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;B.push(run.items.splice(i,1)[0]);store.set('pds2_profile',profile);saveRun();return true}
+  if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=24)return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
+function buildHouse(c,g,E){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
+  if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT))}
+    const sg=makeSign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
+  else{const sg=makeSign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT))}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
+
+/* ===== MORADORES E FESTIVAIS ===== */
+const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu uma sombra andando sozinha.'];
+const CNAMES=['Aldo','Bia','Caio','Duda','Enzo','Flora','Gil','Helena','Ivo','Júlia','Leo','Maya','Nina','Otto','Pietra','Rui'];
+function festival(){const d=new Date(),m=d.getMonth()+1,dd=d.getDate(),w=d.getDay();
+  if((m===10&&dd>=25)||(m===11&&dd<=2))return{n:'Noite das Sombras',d:'XP +50% à noite',xp:isNight()?.5:0,shop:0,line:'Na Noite das Sombras os portais ficam inquietos...'};
+  if((m===12&&dd>=20)||(m===1&&dd<=6))return{n:'Festival de Inverno',d:'lojas 20% mais baratas e XP +25%',xp:.25,shop:.2,line:'Feliz Festival de Inverno!'};
+  if(w===0||w===6)return{n:'Feira de Fim de Semana',d:'lojas 15% mais baratas e estandartes na praça',xp:0,shop:.15,line:'Aproveita a feira! Tudo mais barato hoje.'};return null}
+function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4a,0x2f7a4a,0xb39a6a,0x7a5a9a]),hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0xd8b060]),wep:'none',gk:pick(['Knight','Barbarian','Mage','Rogue']),tint:pick([0xffffff,0xffe0c0,0xd0e0ff,0xe0ffd0]),scale:.88});
+  const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(CNAMES);
+  const n={kind:'citizen',home:c,m,x,z,face:0,r:.45,name:nm,short:nm,col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · CONVERSAR COM '+nm.toUpperCase()};
+  n.use=()=>{const F=festival();$('dlg').innerHTML='<b>'+nm+':</b> '+(F&&Math.random()<.4?F.line:pick(CLINES))+'<small>Moradora(o) de '+c.name+'</small>';$('dlg').hidden=false;dlgT=6};npcs.push(n);return n}
+
+/* ===== ATAQUE À CIDADE (chefe de mundo marcado) ===== */
+function startSiege(c){const a=rnd(0,TAU),x=c.x+Math.cos(a)*60,z=c.z+Math.sin(a)*60;const b=spawnBoss(x,z,clamp(rankOf()+1,0,8),{...WBOSS,n:'Dragão Sitiante'});b.wild=true;b.breaker=true;b.world=true;b.siege=c;b.hp*=5;b.maxhp*=5;b.gold*=6;b.bars=5;b.roam={x:c.x,z:c.z};b.aggro=true;
+  for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
+  L.siege={b,c,t:300};bigText('ATAQUE À CIDADE',1600);sfx('gong');shake(.6);showSys('Um DRAGÃO SITIANTE ataca '+c.name+'! Derrote-o em 5 minutos. Recompensa: ouro, troféu e renda dobrada hoje.')}
+function updSiege(dt){const P=player;run.siegeT=(run.siegeT||0)+dt;
+  if(!L.siege&&run.siegeT>1500&&!bossE){const nc=nearestCity(P.x,P.z);if(nc.d<120&&cityL(nc.c)>=5&&!cityFallen(nc.c)){run.siegeT=0;startSiege(nc.c)}}
+  const S=L.siege;if(!S)return;S.t-=dt;if(S.b.dead){L.siege=null;return}
+  if(S.t<=0){S.b.dead=true;S.b.gone=true;scene.remove(S.b.m.root);if(bossE===S.b){bossE=null;$('boss').hidden=true}L.siege=null;toast('<b>[CIDADE]</b> O dragão cansou e foi embora de '+S.c.name+'.',5000)}}
+function siegeWin(b){const c=b.siege;profile.cityDay=profile.cityDay||{};delete profile.cityDay[c.id];const g=Math.round(20000*(1+cityL(c))*GR[Math.min(8,rankOf())].gold);run.gold+=g;profile.trophies=profile.trophies||[];const tn='Dragão Sitiante';if(!profile.trophies.includes(tn))profile.trophies.push(tn);profile.sieges=(profile.sieges||0)+1;store.set('pds2_profile',profile);L.siege=null;
+  toast('<b>[CIDADE]</b> '+c.name+' está salva! +'+fmt(g)+' ouro e a renda da cidade pode ser coletada de novo hoje.',7000)}
+
+/* ===== PROFISSÕES ===== */
+const PROFN={mine:'Mineração',forge:'Forja',fish:'Pesca'};
+function profLv(k){return Math.floor(Math.sqrt((((profile.prof||{})[k])||0)/20))}
+function profXp(k,v){profile.prof=profile.prof||{};const l0=profLv(k);profile.prof[k]=(profile.prof[k]||0)+v;const l1=profLv(k);if(l1>l0){toast('<b>[PROFISSÃO]</b> '+PROFN[k]+' subiu para o nível <b>'+l1+'</b>.',4500);sfx('level')}}
+function profRows(){const D={mine:l=>'+'+Math.min(100,l*5)+'% de chance de +1 cristal por golpe',forge:l=>'raridades melhores ao forjar (+'+l+' nível de sorte)',fish:l=>'faixa da pesca +'+String(Math.min(10,l*.5)).replace('.',',')+'%'};let h='<div class="sec">PROFISSÕES</div>';
+  for(const k in PROFN){const l=profLv(k),x=((profile.prof||{})[k])||0,nx=20*(l+1)*(l+1);h+=row(PROFN[k]+' <b>NV '+l+'</b>',D[k](l)+' · '+fmt(x)+'/'+fmt(nx)+' XP','')}return h}
+
+/* ===== HISTÓRIAS DA ASSOCIAÇÃO ===== */
+const STORIES=[
+ {id:'miner',npc:'Dorian',n:'O Mineiro Desaparecido',steps:[['mine',30,'Dorian: Meu irmão sumiu perto dos veios. Minere 30 cristais e procure pistas.'],['clear',2,'Os cristais têm marcas de garra. Feche 2 portais: algo está saindo deles.'],['elite',5,'As garras são de elites. Mate 5 elites.'],['boss',1,'Um guardião prendeu o irmão do Dorian. Derrote um guardião.']],rw:{g:30000,p:3,t:'miner'}},
+ {id:'lake',npc:'Mira',n:'A Canção do Lago',steps:[['fish',10,'Mira: O lago está cantando à noite. Pesque 10 peixes e escute.'],['species',4,'Cada espécie canta uma nota. Tenha 4 espécies no Aquário.'],['kill',100,'A canção atrai monstros. Mate 100 deles.'],['brk',60,'A última nota vem de uma masmorra quebrando. Sobreviva 1 minuto numa Quebra de Masmorra.']],rw:{g:40000,p:3,t:'lakeg'}},
+ {id:'tower',npc:'Lyra',n:'O Chamado da Torre',steps:[['tower',20,'Lyra: A torre chamou o seu nome. Chegue ao andar 20.'],['boss',3,'Os guardiões guardam a chave. Derrote 3.'],['clear',5,'Feche 5 portais para acalmar a mana.'],['tower',50,'Suba até o andar 50.']],rw:{g:80000,p:5,t:'towerc'}},
+ {id:'city',npc:'Selene',n:'A Cidade que Cresce',steps:[['citylv',3,'Selene: Esta cidade pode ser grande. Leve uma cidade ao nível 3.'],['house',1,'Todo morador precisa de um lar. Compre uma casa.'],['siege',1,'Um dragão sempre vem atrás de cidades grandes. Defenda uma cidade de um ataque (cidade nível 5+).']],rw:{g:120000,p:5,t:'protector'}}];
+const STORY_ABS={species:()=>Object.keys(profile.aqua||{}).length,tower:()=>profile.towerBest||0,brk:()=>profile.brkBest||0,citylv:()=>Math.max(0,...Object.values(profile.cityLv||{})),house:()=>profile.house?1:0,siege:()=>profile.sieges||0};
+function storyEv(t,v=1){const P=profile.story;if(!P)return;let ch=false;
+  for(const S of STORIES){const st=P[S.id];if(!st||st.done)continue;let sp=S.steps[st.s];if(sp[0]!==t&&!STORY_ABS[sp[0]])continue;
+    if(STORY_ABS[sp[0]])st.got=STORY_ABS[sp[0]]();else st.got+=v;
+    while(sp&&st.got>=sp[1]){st.s++;st.got=0;ch=true;sp=S.steps[st.s];
+      if(!sp){st.done=true;const g=Math.round(S.rw.g*(1+rankOf()));run.gold+=g;run.pts=(run.pts||0)+S.rw.p;profile.ach=profile.ach||[];if(!profile.ach.includes(S.rw.t))profile.ach.push(S.rw.t);bigText('HISTÓRIA CONCLUÍDA',1600);sfx('arise');toast('<b>[HISTÓRIA]</b> '+S.n+' concluída: +'+fmt(g)+' ouro, +'+S.rw.p+' pontos de status e o título <b>'+TITLES.find(x=>x.id===S.rw.t).n+'</b>.',7000);break}
+      toast('<b>[HISTÓRIA]</b> '+S.n+' · capítulo '+(st.s+1)+': '+sp[2],7000);if(STORY_ABS[sp[0]])st.got=STORY_ABS[sp[0]]()}}
+  if(ch)store.set('pds2_profile',profile)}
+function storyTab(){const P=profile.story||{};let h='<div class="sysline">Histórias da Associação: cada uma tem capítulos e termina com um <b>título único</b>. Dá para seguir várias ao mesmo tempo.</div>';
+  for(const S of STORIES){const st=P[S.id],T=TITLES.find(t=>t.id===S.rw.t);
+    if(st&&st.done){h+=row('<b style="color:#6fe39a">'+S.n+'</b>','Concluída · título '+T.n+': '+T.m,'');continue}
+    if(!st){h+=row('<b>'+S.n+'</b> · '+S.npc,S.steps.length+' capítulos · recompensa: ouro, '+S.rw.p+' pontos de status e o título '+T.n+' ('+T.m+')',btn('Começar','stbeg',S.id,true,'hot'));continue}
+    const sp=S.steps[st.s];h+=row('<b>'+S.n+'</b> · capítulo '+(st.s+1)+'/'+S.steps.length,sp[2]+'<br>Progresso: <b>'+Math.min(st.got,sp[1])+'/'+sp[1]+'</b>','')}return h}
+
+/* ===== ESTAÇÕES ===== */
+const SEASONS=['Primavera','Verão','Outono','Inverno'];
+function seasonI(){return Math.floor(Math.floor(dayT/DAYLEN)/5)%4}
 /* clima */
 const WX={type:'clear',t:120,pts:null};
-function updWeather(dt){WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random();const nt=r<.5?'clear':r<.8?'rain':'snow';if(nt!==WX.type){WX.type=nt;toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
+function updWeather(dt){if(L.mode==='world'&&player){const si=seasonI();if(WX.se!==undefined&&WX.se!==si){toast('<b>[ESTAÇÃO]</b> Chegou '+(si===1?'o ':'a ')+'<b>'+SEASONS[si]+'</b>. '+['Mais chuva e o chão verdeja.','Tempo aberto quase sempre.','Árvores douradas e folhas no chão.','Neve cobre o mundo e o frio traz nevascas.'][si],7000);for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}WX.se=si}WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random(),se=seasonI();const nt=se===3?(r<.3?'clear':r<.4?'rain':'snow'):se===1?(r<.75?'clear':'rain'):se===0?(r<.45?'clear':'rain'):(r<.5?'clear':r<.85?'rain':'snow');if(nt!==WX.type){WX.type=nt;toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
   const on=L.mode==='world'&&WX.type!=='clear';
   if(on&&!WX.pts){const g=new THREE.BufferGeometry(),a=[];for(let i=0;i<700;i++)a.push(rnd(-30,30),rnd(0,22),rnd(-30,30));g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));WX.pts=new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:.12,transparent:true,opacity:.7}));scene.add(WX.pts)}
   if(WX.pts){WX.pts.visible=on;if(on){WX.pts.material.color.setHex(WX.type==='rain'?0x9fc8ff:0xffffff);WX.pts.material.size=WX.type==='rain'?.09:.16;WX.pts.position.set(player.x,0,player.z);const p=WX.pts.geometry.attributes.position;const sp=WX.type==='rain'?26:4;for(let i=0;i<p.count;i++){let y=p.getY(i)-sp*dt;if(y<0)y+=22;p.setY(i,y);if(WX.type==='snow')p.setX(i,p.getX(i)+Math.sin(time+i)*dt*.5)}p.needsUpdate=true}}}
-const wxName=()=>L.mode==='world'?(WX.type==='rain'?' · chuva':WX.type==='snow'?' · neve':''):'';
+const wxName=()=>L.mode==='world'?' · '+SEASONS[seasonI()]+(WX.type==='rain'?' · chuva':WX.type==='snow'?' · neve':''):'';
 function wxSkillMul(sk){if(L.mode!=='world')return 1;if(WX.type==='rain'&&(sk.t==='chain'||/Raio|Relâmpago/.test(sk.n)))return 1.3;if(WX.type==='snow'&&/Gelo|Inverno/.test(sk.n))return 1.3;return 1}
 /* nêmesis */
 let curAtk=null;
@@ -2368,8 +2461,9 @@ function extraActions2(a,v){
   if(a==='title'){const t=eqTitles();if(t.includes(v))profile.titles=t.filter(x=>x!==v);else{if(t.length>=3)return;profile.titles=[...t,v]}profile.title=profile.titles[0]||null;store.set('pds2_profile',profile);refreshStats();return true}
   if(a==='gift'){const l=affL(v),c=1000*(l+1)*(l+1);if(run.gold<c||l>=10)return;run.gold-=c;profile.aff=profile.aff||{};profile.aff[v]=l+1;store.set('pds2_profile',profile);toast('<b>'+v+'</b>: Obrigado! Afinidade '+(l+1)+'/10.');sfx('ding');return true}
   if(a==='interest'){const g=Math.round((profile.bank||0)*.0015*affL('Selene'));profile.bank+=g;profile.intDay=todayKey();store.set('pds2_profile',profile);toast('Juros: +'+fmt(g)+' ouro no banco.');sfx('coin');return true}
+  if(a==='stbeg'){profile.story=profile.story||{};if(profile.story[v])return;profile.story[v]={s:0,got:0};storyEv('_');store.set('pds2_profile',profile);sfx('ding');const S=STORIES.find(x=>x.id===v);toast('<b>[HISTÓRIA]</b> '+S.n+' · capítulo 1: '+S.steps[0][2],7000);return true}
   if(a==='cityinc'){const c=nearestCity(player.x,player.z).c,inc=cityIncome(cityLv());profile.cityDay=profile.cityDay||{};if(!inc||profile.cityDay[c.id]===todayKey())return;profile.cityDay[c.id]=todayKey();run.gold+=inc;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CIDADE]</b> Renda de '+c.name+': +'+fmt(inc)+' ouro.');return true}
-  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l);if(l>=10||run.res.cry.reduce((a,b)=>a+b,0)<nd.cry||run.gold<nd.gold)return;run.gold-=nd.gold;let need=nd.cry;if(l+1>=10){profile.ach=profile.ach||[];if(!profile.ach.includes('founder'))profile.ach.push('founder')}for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
+  if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l);if(l>=10||run.res.cry.reduce((a,b)=>a+b,0)<nd.cry||run.gold<nd.gold)return;run.gold-=nd.gold;let need=nd.cry;if(l+1>=10){profile.ach=profile.ach||[];if(!profile.ach.includes('founder'))profile.ach.push('founder')}for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);storyEv('citylv');for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
   if(a==='collect'){const d=profile.owned[+v];if(d.att)return;d.last=todayKey();const n=3+Math.floor(Math.random()*4);run.res.cry[d.rank]+=n;run.res.core[d.rank]+=2;if(Math.random()<.25)d.att=true;store.set('pds2_profile',profile);toast('<b>[DOMÍNIO]</b> +'+n+' cristais e +2 núcleos '+GR[d.rank].id+'.'+(d.att?' Caçadores estão atacando esta masmorra!':''));return true}
   if(a==='defend'){closeModal();buildSpecial('defend',null,+v);return 'close'}
   if(a==='tower'){closeModal();buildSpecial('tower',null,Math.max(1,+v));return 'close'}
@@ -2409,7 +2503,7 @@ function updSpecial2(S,dt){
 }
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[SISTEMA]</b> '+msg,4000)}
 const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>100+50*(profile.rebirths||0);
-function towerClear(S){S.cleared=true;if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
+function towerClear(S){S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
   if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
   if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares.'+(towerCap()>100?' A torre continua.':' Acima daqui, só quem reencarnou sobe.'),6000);if(towerCap()<=100)return}
@@ -2483,7 +2577,7 @@ const WBOSS={n:'Dragão Errante',types:['fury','soulrain'],body:0x8a1a1a,scale:3
 function spawnWorldBoss(){const P=player,a=rnd(0,TAU),x=P.x+Math.cos(a)*70,z=P.z+Math.sin(a)*70;const b=spawnBoss(x,z,clamp(rankOf()+1,0,8),WBOSS);b.wild=true;b.breaker=true;b.world=true;b.hp*=4;b.maxhp*=4;b.gold*=5;b.roam={x,z};
   for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
   toast('<b>[MUNDO]</b> Um DRAGÃO ERRANTE sobrevoa a região. Ele aparece no mapa.',6000);bigText('DRAGÃO ERRANTE',1300)}
-function worldBossDeath(b){hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
+function worldBossDeath(b){if(b.siege){siegeWin(b);storyEv('siege')}hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
 function ruinAt(cx,cz){if(((rh(cx,cz,3))%100)>=6)return false;for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor((cx+i)/REG),Math.floor((cz+j)/REG));if(Math.abs(c.cx-cx)<=1&&Math.abs(c.cz-cz)<=1)return false}return true}
 function buildRuin(ch,g,addCol){const x0=ch.cx*CH,z0=ch.cz*CH,key=ch.cx+','+ch.cz;
   if(ENV.ok)envRuin(g,x0,z0,addCol);else for(let i=0;i<8;i++){const a=i/8*TAU;if(i===3)continue;const p=mesh(geo('rpil',()=>new THREE.CylinderGeometry(.6,.7,1,8)),toonS(0x5a5a68));const h=rnd(1.5,4.5);p.scale.y=h;p.position.set(x0+Math.cos(a)*7,h/2,z0+Math.sin(a)*7);g.add(p);addCol({x:p.position.x,z:p.position.z,r:.8})}
@@ -2561,7 +2655,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Soma → efetivo',P(bp.dmg)+' → <span style="color:#ffd54f">'+P(bp.edmg)+'</span> dano · '+P(bp.hp)+' → <span style="color:#ffd54f">'+P(bp.ehp)+'</span> vida','quanto maior a soma, menos cada % rende: efetivo = 3×soma ÷ (3 + soma), nunca passa de +300%');
   h+='<div class="sec">MARCAS</div><div class="sysline" style="font-size:12px">Habilidades de ataque <b>marcam</b> os alvos por 6 s. O próximo golpe normal num alvo marcado causa <b>+50%</b> e tira <b>1 s</b> da recarga de todas as habilidades.</div>';
   const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
-  return h+'</div>'}
+  return h+'</div>'+profRows()}
 function bagTabs(cur){return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes'],['itens','Itens'],['world','Mundo']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+='<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
@@ -2595,6 +2689,7 @@ function extraActions3(a,v){
   if(a==='caravan'){closeModal();startCaravan();return 'close'}
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
   if(a==='buyret'){const r=profile.retired[+v],t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
+  if(['housebuy','furn','hsleep','haltar','hput','hget'].includes(a))return houseAct(a,v);
   if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
   if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
   if(a==='dream'){closeModal();buildSpecial('dream');return 'close'}
@@ -2653,7 +2748,7 @@ function openShop(id){
 }
 function guildView(tab){
   view=()=>guildView(tab);
-  let h='<div class="tabs">'+[['quests','Missões'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k==='quests'||k==='rank'||k==='reaval'||k==='travel'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
+  let h='<div class="tabs">'+[['quests','Missões'],['story','Histórias'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k==='quests'||k==='story'||k==='rank'||k==='reaval'||k==='travel'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
   if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
     if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação. Se morrer, perde tudo.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
@@ -2672,7 +2767,7 @@ function guildView(tab){
       row('Recompensa','Bônus da Associação por subir de rank: '+fmt(2000*(cur+1))+' ouro e 2 pontos de status','')+
       '<div style="display:flex;justify-content:flex-end">'+(ok?btn('FAZER REAVALIAÇÃO','reaval',0,true,'hot'):'<span class="sysline">Seu rank oficial já está atualizado.</span>')+'</div>'}
   else if(tab==='clone')h+=cloneTab();else if(tab==='god')h+=godTab();
-  else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();
+  else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();
   else if(tab==='hire'){h+='<div class="sysline">Caçadores contratados seguem você no mundo e nas masmorras. Se morrerem, não voltam. Máximo de 3.</div><div class="sec">SEU GRUPO ('+run.party.length+'/3)</div>';
     if(!run.party.length)h+='<div class="it"><div class="d"><small>Ninguém contratado.</small></div></div>';
     run.party.forEach((p,i)=>{h+=row(p.name+' <span class="rl" style="color:'+RANKS[p.rank].c+'">['+RANKS[p.rank].id+']</span>',CLASSES[p.cls].n+' · NV '+p.lvl,btn('Dispensar','fire',i,true,'red'))});
