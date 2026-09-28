@@ -1209,6 +1209,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit+affB().crit/100:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
+  if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
@@ -1259,8 +1260,11 @@ function enrage(b){b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.wind*=.85;bossLight.co
   toast('<b>[SISTEMA]</b> '+b.name+' entrou em FÚRIA.',3000);bigText('FÚRIA',1100);shake(.6);
   for(let i=0;i<2;i++){const a=rnd(0,TAU);const m=spawnKind(b.gr>=5?'demon':'minion',b.x+Math.cos(a)*3,b.z+Math.sin(a)*3,b.gr,{room:b.room});m.aggro=true}
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
+/* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
+const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false};
+function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt){
-  if(player.dead||player.iT>0)return;
+  if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)));
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk)player.lastHit=curAtk;flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
@@ -1294,7 +1298,7 @@ function attack(){
   const c=CLASSES[profile.cls];
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
   const third=player.combo===3;player.atkT=.001;player.atkCd=(third?.46:.3)*statsBonus().atk;dprog('atk',1);
-  const dmg=player.dmg*(player.buff>0?player.buffMul:1)*(third?1.8:1);
+  const dmg=player.dmg*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
   if(c.ranged){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=third?3.1:2.6,arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0x8fe3ff,reach,third);sfx('swing');
@@ -1487,6 +1491,7 @@ function frame(now){
   AU.want=wantTrack();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
+  if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0)update(dt);
   camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
 }
@@ -1597,6 +1602,11 @@ function drawOverlay(){
   if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a');oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
   for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;const s=f.big?22:15;oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
+  if(FX2.combo>=3){const k=Math.min(1,FX2.comboT/2.2);oc.globalAlpha=.4+.6*k;oc.font='700 '+(26+Math.min(20,FX2.combo))+'px "Russo One",sans-serif';oc.textAlign='right';oc.lineWidth=4;oc.strokeStyle='rgba(0,0,0,.8)';const t='x'+FX2.combo+' COMBO';oc.strokeText(t,W-24,H*.42);oc.fillStyle=FX2.combo>=30?'#ff5a8a':FX2.combo>=15?'#ffd54f':'#7fd8ff';oc.fillText(t,W-24,H*.42);oc.textAlign='center';oc.globalAlpha=1}
+  /* PC: inimigo sob o mouse ganha anel no chão, nome e barra de vida */
+  if(!touch&&!P.dead){const ap=aimPoint();if(ap){let best=null,bd=2.2;for(const e of enemies){if(e.dead||e.sleep)continue;const d=Math.hypot(e.x-ap.x,e.z-ap.z)-(e.r||.5);if(d<bd){bd=d;best=e}}
+    if(best){const pr=proj(best.x,.05,best.z),pt=proj(best.x,2.3*(best.m.sc||1)+.35,best.z);if(pr.ok){oc.strokeStyle='rgba(255,90,110,.9)';oc.lineWidth=2.5;oc.beginPath();oc.ellipse(pr.x,pr.y,22*(best.r||.5)*2,9*(best.r||.5)*2,0,0,TAU);oc.stroke()}
+      if(pt.ok&&!best.isBoss)bar(pt.x,pt.y,50,best.hp/best.maxhp,'#ff4d6a',best.name+' · '+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp),'#ffe0e6')}}}
   const c=ctxTarget();$('bF').hidden=!c||paused;if(c)$('bF').textContent=touch?c.label.replace('F · ',''):c.label;
 }
 const mmc=$('mm').getContext('2d');
