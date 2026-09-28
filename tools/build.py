@@ -1,7 +1,8 @@
 """Gera index.html (site instalável) a partir de game.html (fonte também usada no Artifact)."""
-import pathlib
+import pathlib,re
 root=pathlib.Path(__file__).resolve().parent.parent
 game=(root/'game.html').read_text(encoding='utf-8')
+ver=re.search(r"pds-v(\d+)",(root/'sw.js').read_text(encoding='utf-8')).group(1)
 head='''<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -21,9 +22,12 @@ head='''<!doctype html>
 <body>
 '''
 tail='''
-<script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v__V__</div>
+<button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
+<script>window.PDS_V=__V__;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
 '''
-(root/'index.html').write_text(head+game+tail,encoding='utf-8')
+(root/'index.html').write_text(head+game+tail.replace('__V__',ver),encoding='utf-8')
 print('index.html gerado')
