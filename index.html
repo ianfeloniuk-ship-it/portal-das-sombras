@@ -51,7 +51,7 @@ body{font-family:"Chakra Petch",system-ui,sans-serif;color:var(--ink)}
 #pad{position:fixed;left:0;bottom:0;width:48%;height:62%;z-index:6;touch-action:none}
 #stick{position:fixed;width:120px;height:120px;border-radius:50%;border:2px solid rgba(79,195,255,.45);background:rgba(79,195,255,.06);z-index:6;pointer-events:none;display:none}
 #knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(79,195,255,.45);box-shadow:0 0 14px var(--sys)}
-#btns{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:230px;height:220px;z-index:7}
+#btns,#pad{scale:var(--bs,1)}#btns{transform-origin:bottom right}#pad{transform-origin:bottom left}#btns{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:230px;height:220px;z-index:7}
 .b{position:absolute;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,18,38,.7);border:1.5px solid rgba(79,195,255,.6);color:var(--ink);font:700 10px "Chakra Petch",sans-serif;letter-spacing:.04em;text-align:center;touch-action:none;box-shadow:0 0 10px rgba(79,195,255,.25);overflow:hidden}
 .b.on{background:rgba(79,195,255,.35)}
 .b .k{font-size:15px;font-family:"Russo One",sans-serif}
@@ -124,7 +124,7 @@ body{font-family:"Chakra Petch",system-ui,sans-serif;color:var(--ink)}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button></div>
+<div id="tb" hidden><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
@@ -526,14 +526,18 @@ const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed'
   fall:['tree_default_fall','tree_oak_fall','tree_default_fall','tree_thin','tree_oak','tree_default'],
   dead:['tree_dead_large','tree_dead_medium','tree_dead_small']};
 const ROCKS=['rock_largeA','rock_largeB','rock_largeC','rock_largeD','rock_tallA','rock_tallB','rock_tallC','stone_tallA','stone_largeA'];
+function biomeAt(x,z){const b=WN(x*.0016+311,z*.0016+733);if(b<.3)return'neve';if(b>.7)return'deserto';return WN(x*.003+91,z*.003+57)>.68?'pantano':'campos'}
+const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens'};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
   const pos=pg.attributes.position,cols=new Float32Array(pos.count*3),t=new THREE.Color(),u=new THREE.Color();
-  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28);
+  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let d=1e9,road=0;
     for(const c of near){const dx=x-c.x,dz=z-c.z,dd=Math.hypot(dx,dz);if(dd<d)d=dd;if(dd<125){const m=Math.min(Math.abs(dx),Math.abs(dz));road=Math.max(road,clamp((4.9-m)/1.8,0,1)*clamp((125-dd)/12,0,1))}}
     t.copy(G1).lerp(G2,WN(x*.02+40,z*.02+40));
+    {const b=WN(x*.0016+311,z*.0016+733),sw=WN(x*.003+91,z*.003+57),ns=clamp((.34-b)/.06,0,1),ds=clamp((b-.66)/.06,0,1),ps=clamp((sw-.64)/.06,0,1)*(1-ns)*(1-ds);
+      if(ns>0)t.lerp(SNOW,ns*.9);if(ds>0)t.lerp(SAND,ds*.92);if(ps>0)t.lerp(SWMP,ps*.8)}
     const dr=WN(x*.06+13,z*.06+13);if(dr>.6)t.lerp(DRY,Math.min(.55,(dr-.6)*2.2));
     const fo=WN(x*.035,z*.035);if(fo>.48)t.lerp(FOR,Math.min(.7,(fo-.48)*3.5));
     if(road>0)t.lerp(u.copy(DIRT).multiplyScalar(.9+WN(x*.3,z*.3)*.2),road*.95);
@@ -545,23 +549,27 @@ const TINTS=[0xffffff,0xeef5d6,0xdcebdc,0xf5eccc,0xe2e8d2];
 function tintB(h,k){return(Math.min(255,((h>>16)&255)*k)<<16)|(Math.min(255,((h>>8)&255)*k)<<8)|Math.min(255,(h&255)*k)}
 function envChunk(g,R,x0,z0,cityD,addCol){
   const Q=()=>[0,1,2,3].map(()=>new EnvBatch()),TR=Q(),FL=Q(),SO=Q(),qi=(x,z)=>(x>x0?1:0)+(z>z0?2:0),dg=danger(x0,z0),bio=WN(x0*.004+900,z0*.004+900),st=CH/12,lite=ENV.lite;let tr,fl,so;const at=(x,z)=>{const i=qi(x,z);tr=TR[i];fl=FL[i];so=SO[i]};
-  const set=bio<.34?TREES.pine:bio>.74?TREES.fall:TREES.leaf;
+  const B=biomeAt(x0,z0),set=B==='neve'?TREES.pine:bio<.34?TREES.pine:bio>.74?TREES.fall:TREES.leaf,BT=B==='neve'?0xe8f0f6:B==='pantano'?0x9aa886:null;
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44||q.road)continue;
     const n=WN(px*.035,pz*.035);at(px,pz);
-    if(n>.56||R()<.035){const dead=dg>=5&&R()<.12+dg*.05;const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);
-      EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
+    if(B==='deserto'&&(n>.56||R()<.035)){if(R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
+    else if(n>.56||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45);const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);
+      EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();EW(so,pk(R,ROCKS),px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
   for(let k=0,nc=lite?60:150;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<37)continue;
     const fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
+    if(B==='deserto'){if(r<.5)EW(so,pk(R,['rock_smallA','rock_smallC','rock_largeA','stone_smallA']),px,-.03,pz,ry,.6+R()*1.2,0xe8d2a0);else if(r<.62)EH(so,pk(R,['bone_A','skull','ribcage']),px,0,pz,ry,.4+R()*.3);else if(r<.8)EH(fl,'plant_bushSmall',px,0,pz,ry,.5+R()*.3,0xc9a86a);continue}
+    if(B==='neve'&&r<.6){if(r<.3)EW(so,pk(R,['rock_smallA','stone_smallA','rock_smallFlatA']),px,-.03,pz,ry,.5+R()*.8,0xf0f4f8);continue}
+    if(B==='pantano'&&r<.25){EH(fl,pk(R,['mushroom_redGroup','mushroom_tanGroup','plant_flatTall','grass_leafsLarge']),px,0,pz,ry,.5+R()*.5,0x9aa886);continue}
     if(dg>=5&&r<.08){EH(so,pk(R,['bone_A','skull','ribcage','gravemarker_A','bone_A','gravestone']),px,0,pz,ry,.35+R()*.45);continue}
     if(fo>.52&&r<.3){const k2=pk(R,['mushroom_redGroup','mushroom_tanGroup','mushroom_red','stump_round','stump_old','plant_bushDetailed','log','log_large']);
       if(k2.startsWith('log')){if(worldFreeL(px,pz)){EW(so,k2,px,0,pz,ry,2.4+R()*1.2);addCol({x:px,z:pz,r:.9});ENV.cast.push({x:px,z:pz,r:1.5,k:.22})}}else if(k2.startsWith('stump'))EH(so,k2,px,0,pz,ry,.7+R()*.4);else EH(fl,k2,px,0,pz,ry,.5+R()*.5);continue}
-    if(fw>.6&&r<.55&&dg<6){for(let f=0,nf=lite?1:2;f<nf;f++)EH(fl,pk(R,FLOWERS),px+(R()-.5)*2,0,pz+(R()-.5)*2,R()*TAU,.45+R()*.35);continue}
+    if(fw>.6&&r<.55&&dg<6&&B==='campos'){for(let f=0,nf=lite?1:2;f<nf;f++)EH(fl,pk(R,FLOWERS),px+(R()-.5)*2,0,pz+(R()-.5)*2,R()*TAU,.45+R()*.35);continue}
     if(r<.45)EH(fl,lite?'grass_leafs':pk(R,['grass_leafs','grass_leafs','grass_leafs','grass','grass_leafsLarge']),px,0,pz,ry,.45+R()*.35);
     else if(r<.72)EH(fl,pk(R,['plant_bush','plant_bushLarge','plant_bushSmall','plant_flatShort','plant_flatTall']),px,0,pz,ry,.7+R()*.6);
     else if(r<.85)EW(so,pk(R,['rock_smallA','rock_smallC','stone_smallA','rock_smallFlatA']),px,-.03,pz,ry,.5+R()*.7);
     else EH(fl,'blades',px,0,pz,ry,.7+R()*.5)}
-  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz);if(q.road||q.d<36)continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(0xffffff,.85+R()*.15))}
+  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz);if(q.road||q.d<36||B==='deserto'||(B==='neve'&&k%3))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
   for(let i=0;i<4;i++){envOwn(g,TR[i].mesh(TREEMAT));envOwn(g,FL[i].mesh(FLORAMAT));envOwn(g,SO[i].mesh(ENVMAT))}
 }
 ENV.cast=[];
@@ -1125,7 +1133,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;e.flash=.1;e.aggro=true;
-  floater(e.x,e.z,blocked?'BLOQUEIO '+amt:fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));
+  floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
   sfx(blocked?'block':'hit',crit);
@@ -1441,7 +1449,7 @@ function update(dt){
 }
 function updWorld(dt){updEcon(dt);
   const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<36&&!fal;
-  if(fal&&nc.d<45){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,8);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(kindsFor(gr)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[SISTEMA]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);
+  if(fal&&nc.d<45){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,8);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(kindsFor(gr)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[SISTEMA]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);
   if(L.car){L.carT-=dt;if(L.carT<=0){L.carT=18;const c=L.car;for(let i=0;i<3;i++){const a=rnd(0,TAU),x=c.x+Math.cos(a)*14,z=c.z+Math.sin(a)*14;if(nearestCity(x,z).d<40)continue;const e=spawnKind(wpick(kindsFor(danger(x,z))).k,x,z,Math.max(danger(x,z),rankOf()-2),{wild:true});e.aggro=true}toast('<b>[CARAVANA]</b> Emboscada!',1500)}if(L.car.dead)L.car=null}
   if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}
   if(run.daily&&run.daily.day!==todayKey())ensureRun();
@@ -1528,7 +1536,7 @@ function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=(run.adv?ADV[profile.cls].n:c.n).toUpperCase();
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
-  const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:'Terras selvagens · perigo '+GR[danger(P.x,P.z)].id):'Masmorra '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
+  const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):'Masmorra '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
   $('lv').textContent='NV '+run.level+' · '+where2;
   $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
   $('mpb').style.width=(100*P.mp/P.maxmp)+'%';$('mpt').textContent=Math.floor(P.mp)+' / '+P.maxmp;
@@ -1552,13 +1560,14 @@ function hud(){
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">★</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
+window.CFG=Object.assign({vol:1,btn:1},store.get('pds_cfg')||{});
 const AU={ctx:null,on:true,track:null,want:'city',step:0,next:0,bar:0,lastBoom:0};
 try{AU.on=localStorage.getItem('pds_sound')!=='0'}catch(e){}
 function audioInit(){
   if(AU.ctx){if(AU.ctx.state==='suspended')AU.ctx.resume();return}
   try{const C=new(window.AudioContext||window.webkitAudioContext)();AU.ctx=C;
     const comp=C.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(C.destination);
-    AU.master=C.createGain();AU.master.gain.value=AU.on?1:0;AU.master.connect(comp);
+    AU.master=C.createGain();AU.master.gain.value=AU.on?CFG.vol:0;AU.master.connect(comp);
     AU.mus=C.createGain();AU.mus.gain.value=.24;AU.mus.connect(AU.master);
     AU.fx=C.createGain();AU.fx.gain.value=.75;AU.fx.connect(AU.master);
     const len=Math.floor(C.sampleRate*2.4),ir=C.createBuffer(2,len,C.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
@@ -1617,7 +1626,7 @@ function playStep(T,ch,st,t){
   if(st%T.arpEvery===0){const i=(st/T.arpEvery)%T.arp.length;tone(NOTE(ch[T.arp[i]]+T.arpOct),t,T.bell?beat*1.5:beat*.4,{type:T.lead?'square':T.bell?'sine':'triangle',v:T.lead?.03:.045,filt:T.lead?2400:0,dest:AU.mus,rev:.35})}
   const D=T.drums;if(D){if(D.k&&D.k[st])tone(150,t,.25,{v:.32,slide:45,dest:AU.mus});if(D.s&&D.s[st])noiz(t,.15,{v:.18,f:1800,q:.8,dest:AU.mus});if(D.h&&D.h[st%D.h.length])noiz(t,.04,{v:.05,type:'highpass',f:7000,dest:AU.mus})}
 }
-function setSound(on){AU.on=on;try{localStorage.setItem('pds_sound',on?'1':'0')}catch(e){}if(AU.master)AU.master.gain.value=on?1:0;$('bSnd').textContent=on?'SOM':'MUDO'}
+function setSound(on){AU.on=on;try{localStorage.setItem('pds_sound',on?'1':'0')}catch(e){}if(AU.master)AU.master.gain.value=on?CFG.vol:0;$('bSnd').textContent=on?'SOM':'MUDO'}
 
 /* ================= CLASSES AVANÇADAS ================= */
 const ADV=[
@@ -1892,6 +1901,7 @@ function extraActions(a,v){
   if(a==='gdon'){const g=profile.guild,amt=+v;if(run.gold<amt)return;run.gold-=amt;g.don+=amt;while(g.lvl<10&&g.don>=guildNeed(g.lvl)){g.don-=guildNeed(g.lvl);g.lvl++;toast('<b>[SISTEMA]</b> Guilda subiu para o nível '+g.lvl+'.')}store.set('pds2_profile',profile);return true}
   if(a==='gleave'){profile.guild=null;store.set('pds2_profile',profile);return true}
   if(a==='forge'){const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const rar=wpick([30,40,22,8].map((w,i)=>({i,w}))).i;sfx('boom');addItem(makeItem(sl,t,rar));return true}
+  if(a==='buypet'){if(run.gold<8000||run.pet)return;run.gold-=8000;run.pet=true;toast('<b>[SISTEMA]</b> Espírito de Mana despertou. Ele segue você e ataca monstros próximos.');return true}
   if(a==='buymount'){if(run.gold<3000||run.mount)return;run.gold-=3000;run.mount=true;toast('<b>[SISTEMA]</b> Montaria comprada: Lobo de Mana. Use o botão MONTAR na bolsa ou a tecla V.');return true}
   if(a==='mount'){closeModal();setMount(!run.mounted);return 'close'}
   if(a==='lookh'||a==='lookb'){profile.look=profile.look||{h:0,b:0};const k=a==='lookh'?'h':'b',arr=k==='h'?LOOK_H:LOOK_B;profile.look[k]=(profile.look[k]+1)%arr.length;store.set('pds2_profile',profile);rebuildLook();return true}
@@ -2210,7 +2220,7 @@ function mktView(){
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
   else h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER TUDO · '+fmt(tot)+' ouro','sellall',0,true,'hot')+'</div>';
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Guarde cristais para aprimorar armas e armaduras no ferreiro.</div>';
-  h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000));
+  h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000))+'<div class="sec">COMPANHEIRO</div>'+row('Espírito de Mana','Segue você e dispara em monstros a até 9m (25% do seu dano)',run.pet?'<b>Comprado</b>':btn('8.000 ouro','buypet',0,run.gold>=8000));
   h+='<div class="sec">SERVIÇOS</div>'+row('Mapa do tesouro','Marca uma ruína distante com um tesouro lendário',unl('ruins')?btn('5.000 ouro','tmap',0,run.gold>=5000&&!run.tmap):lockMsg('ruins'))+row('Escoltar caravana','Leve uma caravana até a cidade mais próxima. Emboscadas no caminho.',unl('caravan')?btn('Aceitar','caravan',0,!L.car):lockMsg('caravan'));
   h+=(unl('fish')?cookRows():'')+affRow('Dorian');
   openModal('MERCADO DE RECURSOS',h);
@@ -2337,6 +2347,17 @@ $('bSnd').addEventListener('click',()=>{audioInit();setSound(!AU.on)});setSound(
 function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'leve':'hd')}catch(e){}renderer.setPixelRatio(lite?1:Math.min(devicePixelRatio,1.6));resize();$('bGfx').textContent=lite?'LEVE':'HD';
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
+function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
+function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
+  '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
+  '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
+  '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>')}
+$('bCfg').addEventListener('click',cfgView);applyCfg();
+let PET=null;function updPet(dt){if(!run||!run.pet||!player||player.dead){if(PET)PET.visible=false;return}
+  if(!PET){PET=new THREE.Mesh(new THREE.OctahedronGeometry(.3,0),glowS(0x9fe8ff,1));PET.t=0;scene.add(PET)}
+  if(!PET.parent)scene.add(PET);PET.visible=true;const P=player;PET.t+=dt;const tx=P.x-Math.sin(P.face)*1.2+Math.cos(time*1.3)*.7,tz=P.z-Math.cos(P.face)*1.2+Math.sin(time*1.3)*.7,k=Math.min(1,dt*4);
+  PET.position.x+=(tx-PET.position.x)*k;PET.position.z+=(tz-PET.position.z)*k;PET.position.y=2.2+Math.sin(time*3)*.2;PET.rotation.y+=dt*2;
+  if(PET.t>1.4){const e=nearestEnemy(P.x,P.z,9);if(e){PET.t=0;fxLine([{x:PET.position.x,z:PET.position.z},{x:e.x,z:e.z}],0x9fe8ff);hurtEnemy(e,Math.max(1,(player.dmg||10)*.25),PET.position.x,PET.position.z,{fromPlayer:true,kb:.3,stun:0})}}}
 document.addEventListener('pointerdown',()=>audioInit(),{once:false,passive:true});
 $('mm').addEventListener('pointerdown',e=>{e.preventDefault();if(!modalOpen)mapView()});
 $('bMap').addEventListener('click',()=>{if(!modalOpen&&!player.dead)mapView()});
