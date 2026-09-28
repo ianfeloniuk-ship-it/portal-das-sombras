@@ -469,8 +469,8 @@ function statsFor(){
   const rk=RANKS[rankOf()],c=CLASSES[profile.cls],w=run.equip.w,a=run.equip.a;
   const sb=statsBonus(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),rb=rebirthB();
   const cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
-  return {maxhp:Math.round(cb2.hp*tierB()*(95+run.level*9)*(1+affB().hp/100)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(1+affB().mp/100)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
-    dmg:cb2.dmg*tierB()*(10+run.level*1.6)*(1+affB().dmg/100)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:Math.min(.7,cb2.def+(a?a.def:0)+(npcHas('Brann')?.08:0)),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*(1+affB().spd/100)*sb.spd*(1+cb.spd)};
+  return {maxhp:Math.round(cb2.hp*tierB()*(1+.01*(run.mastery||0))*(95+run.level*9)*(1+affB().hp/100)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(1+affB().mp/100)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
+    dmg:cb2.dmg*tierB()*(1+.01*(run.mastery||0))*(10+run.level*1.6)*(1+affB().dmg/100)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:Math.min(.7,cb2.def+(a?a.def:0)+(npcHas('Brann')?.08:0)),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*(1+affB().spd/100)*sb.spd*(1+cb.spd)};
 }
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -2102,6 +2102,8 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
   for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  if(run.stolen.length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of run.stolen){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
+  {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+row('Maestria <b>'+ms+'</b>','Cada ponto de habilidade aqui dá +1% de dano e +1% de vida, para sempre nesta vida. Use quando suas habilidades estiverem no máximo. Agora: <b>+'+ms+'%</b>',btn('+1','mast',0,run.spts>0))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Sistema manda você para a Zona de Penalidade.')+'</div>';
@@ -2131,6 +2133,9 @@ function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</
 function extraActions(a,v){
   if(a==='stat'||a==='stat5'){const n=a==='stat5'?5:1;if(run.pts<n)return;run.pts-=n;run.stats[v]+=n;refreshStats();return true}
   if(a==='skup'){if(run.spts<1)return;const l=run.skl[v]||0;if(l>=10)return;run.spts--;run.skl[v]=l+1;return true}
+  if(a==='skup2'){if(run.spts<2)return;const l=run.skl[v]||0;if(l>=10)return;run.spts-=2;run.skl[v]=l+1;return true}
+  if(a==='mast'){if(run.spts<1)return;run.spts--;run.mastery=(run.mastery||0)+1;refreshStats();return true}
+  if(a==='buybook'){const B=bookList()[+v];if(!B||run.gold<B.price)return;if(run.stolen.some(x=>x.n===B.sk.n)){toast('Você já conhece '+B.sk.n+'.');return}run.gold-=B.price;if(run.stolen.length>=3)run.stolen.shift();run.stolen.push({...B.sk,cdT:0});buildSteal();sfx('level');toast('<b>[SISTEMA]</b> Grimório lido: <b>'+B.sk.n+'</b> (teclas 1–3).',5000);return true}
   if(a==='shtog'){const r=run.shadows[+v];if(!r)return;if(r.on){r.on=false;const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}}else if(run.shadows.filter(s=>s.on).length<shadowCap()){r.on=true;spawnShadowRec(r,player.x+1,player.z+1)}return true}
   if(a==='shname'){const r=run.shadows[+v];const i=SHNAMES.indexOf(r.nick);r.nick=SHNAMES[(i+1)%SHNAMES.length];const al=allies.find(x=>x.rec===r);if(al)al.name=r.nick+' ['+r.n+']';return true}
   if(a==='shfree'){const r=run.shadows[+v];const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}run.shadows.splice(+v,1);return true}
@@ -2483,12 +2488,17 @@ function closeModal(){$('modal').hidden=true;modalOpen=false;view=null;if(player
 function rerender(){if(view)view()}
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+name+'<small>'+desc+'</small></div><div class="acts">'+btns+'</div></div>';
 const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" data-v="'+v+'" '+(en?'':'disabled')+'>'+txt+'</button>';
+/* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 1–3). Caros de propósito. */
+function bookList(){const pr=rankOf();const pool=[...BOSSES,...(pr>=5?BOSSES_HIGH:[])];const seen=new Set();const out=[];
+  for(const b of pool){if(!b.skill||seen.has(b.skill.n))continue;seen.add(b.skill.n);out.push({sk:b.skill,price:Math.round(60000*Math.pow(2.2,Math.min(pr,7))*(BOSSES_HIGH.includes(b)?4:1))})}return out.slice(0,6)}
 function mktView(){
   view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false,tot=0;
   for(const [k,nm,P] of[['core','Núcleo mágico',CORE_P],['cry','Cristal de mana',CRY_P]])for(let r=0;r<9;r++){const n=run.res[k][r];if(!n)continue;any=true;tot+=n*sellP(k,r);h+=row(nm+' <span class="rl" style="color:'+RANKS[r].c+'">'+GR[r].id+'</span> × '+n,fmt(sellP(k,r))+' ouro cada ('+arrow(r)+') · total '+fmt(n*sellP(k,r)),btn('Vender','sellres',k+r))}
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
   else h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER TUDO · '+fmt(tot)+' ouro','sellall',0,true,'hot')+'</div>';
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Guarde cristais para aprimorar armas e armaduras no ferreiro.</div>';
+  h+='<div class="sec">GRIMÓRIOS (PODERES DE GUARDIÕES)</div><div class="sysline" style="font-size:12px">Ensinam um poder de guardião. Ele entra nos espaços de poder absorvido (teclas 1–3; se estiver cheio, substitui o mais antigo) e pode ser aprimorado com 2 pontos por nível.</div>';
+  bookList().forEach((B,i)=>{h+=row('Grimório: <b>'+B.sk.n+'</b>',skillDesc(B.sk),btn(fmt(B.price)+' ouro','buybook',i,run.gold>=B.price))});
   h+='<div class="sec">MONTARIA</div>'+row('Lobo de Mana','+80% de velocidade fora das masmorras',run.mount?'<b>Comprado</b>':btn('3.000 ouro','buymount',0,run.gold>=3000))+'<div class="sec">COMPANHEIRO</div>'+petRows();
   h+='<div class="sec">SERVIÇOS</div>'+row('Mapa do tesouro','Marca uma ruína distante com um tesouro lendário',unl('ruins')?btn('5.000 ouro','tmap',0,run.gold>=5000&&!run.tmap):lockMsg('ruins'))+row('Escoltar caravana','Leve uma caravana até a cidade mais próxima. Emboscadas no caminho.',unl('caravan')?btn('Aceitar','caravan',0,!L.car):lockMsg('caravan'));
   h+=(unl('fish')?cookRows():'')+affRow('Dorian');
