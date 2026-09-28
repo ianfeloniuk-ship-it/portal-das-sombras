@@ -485,8 +485,8 @@ function statsFor(){
   const rk=RANKS[rankOf()],c=CLASSES[profile.cls],w=run.equip.w,a=run.equip.a;
   const sb=statsBonus(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),rb=rebirthB();
   const cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
-  return {maxhp:Math.round(cb2.hp*(95+run.level*9)*(1+affB().hp/100)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(1+affB().mp/100)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
-    dmg:cb2.dmg*(10+run.level*1.6)*(1+affB().dmg/100)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:Math.min(.7,cb2.def+(a?a.def:0)+(npcHas('Brann')?.08:0)),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*(1+affB().spd/100)*sb.spd*(1+cb.spd)};
+  return {maxhp:Math.round(cb2.hp*tierB()*(95+run.level*9)*(1+affB().hp/100)*rk.mult*(1+(a?a.bonus:0))*(run.adv?1.25:1)*sb.hp*(1+(tb.hp||0)+cb.hp+(fb.hp||0)+(stb.hp||0)+.03*cons('mur'))*rb),maxmp:Math.round((55+run.level*3)*(1+affB().mp/100)*(.8+rk.mult*.2)*sb.mp*(1+(tb.mp||0)+cb.mp+(fb.mp||0)+(stb.mp||0))),
+    dmg:cb2.dmg*tierB()*(10+run.level*1.6)*(1+affB().dmg/100)*rk.mult*(c.ranged?.95:1.05)*(1+(w?w.bonus:0))*(run.adv?1.3:1)*sb.dmg*(1+(tb.dmg||0)+(fb.dmg||0)+(npcHas('Kael')?.08:0)+(stb.dmg||0)+.02*cons('fur'))*rb,def:Math.min(.7,cb2.def+(a?a.def:0)+(npcHas('Brann')?.08:0)),spd:(6.4+Math.min(1.6,(rk.mult-1)*.4))*(1+affB().spd/100)*sb.spd*(1+cb.spd)};
 }
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -499,6 +499,8 @@ const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('B
  gelo:{n:'Água e Gelo',c:'#8fe3ff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
  terra:{n:'Terra',c:'#c8a070',d:'Defesa e tremores',sk:[S('Estaca de Pedra','cone',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
  raio:{n:'Ar e Raio',c:'#fff36b',d:'Velocidade e raios, mais fortes na chuva',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','rain',10,28,1.9,0xfff36b)]}};
+const SOV_SK={n:'Domínio Absoluto',t:'nova',cd:25,mp:40,pow:5,col:0xe6d6ff};
+function useSovereign(){if(profile.rank!==8){return}const sk=run.sovSk||(run.sovSk={...SOV_SK,cdT:0});if(sk.cdT>0){floater(player.x,player.z,'RECARGA '+Math.ceil(sk.cdT)+'s','#e6d6ff');return}useSkill(sk);if(sk.cdT>0){bigText('DOMÍNIO ABSOLUTO',1200);shake(.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-player.x,e.z-player.z)<9)e.stun=Math.max(e.stun,2)}}
 function pSkills(){if(CLASSES[profile.cls].elem&&run)run.elem=CLASSES[profile.cls].elem;const c=CLASSES[profile.cls],b=profile.cls===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;return[...b,...(run.adv?[ADV[profile.cls].sk]:[])].map(s=>({...s,cdT:0}))}
 /* afixos dos itens */
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
@@ -1073,7 +1075,7 @@ function updBossMech(e,dt){if(!e.mech||e.dead)return;
 function spawnShadow(B,x,z,rec){
   const pm=toon(0x3a1d6e,0x2a0f55);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0xc9a8ff,wep:'sword',scale:1.3,helm:true,gk:'Knight',tint:0x3a1d6e,emis:0x2a0f55,shield:true});
   m.root.position.set(x,0,z);scene.add(m.root);const mh=260*RANKS[rankOf()].mult*(1+run.level*.04)*(B.p3?4:B.types?2.2:1)*(rec?(1+.08*(rec.lvl-1))*(ALLBOSS().some(b=>b.n===rec.n)?1:.6):1);
-  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*1.1*(rec?1+.08*(rec.lvl-1):1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
+  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*1.1*(rec?1+.08*(rec.lvl-1):1)*(profile.rank===8?1.3:1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
   /* Função da sombra pela origem: arqueiro (magos/voadores), tanque (grandes/blindados) ou atacante. */
   const nm=String((B&&B.n)||'');a.role=/Mag|Lich|Vesp|Drac|Espectr|Feiti|Alma|Bruxa/i.test(nm)?'arqueiro':/Guard|Golem|Gigant|Yeti|Orc|Cavaleir|Berserk|Tit|Colosso/i.test(nm)?'tanque':'atacante';
   if(a.role==='arqueiro'){a.ranged=true;a.range=9;a.col=0xb98cff;a.dmg*=.85}else if(a.role==='tanque'){a.hp*=1.8;a.maxhp*=1.8;a.dmg*=.75}else{a.dmg*=1.2;a.speed=6.6}
@@ -1283,7 +1285,7 @@ function killEnemy(e){
   bestKill(e.kind);
   if(e.elite&&!e.isBoss)npcEv('elite');
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
-  if(CLASSES[profile.cls].arise&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER SOMBRA',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
+  if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER SOMBRA',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('LEVANTE-SE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
   const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0){run.gold+=g;sfx('coin');floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',false,1.4)}
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
   qev('kill');demandKill();
@@ -1414,7 +1416,7 @@ function absorb(b){
   const has=run.stolen.some(s=>s.n===b.boss.skill.n);
   if(!has&&Math.random()<rk.steal+b.gr*.03){if(run.stolen.length>=3)run.stolen.shift();run.stolen.push({...b.boss.skill,cdT:0});buildSteal();toast('<b>[SISTEMA]</b> Habilidade roubada: <b>'+b.boss.skill.n+'</b>',4000)}
   else toast('<b>[SISTEMA]</b> A essência escapou. Chance de roubo no rank '+rk.id+': '+Math.round((rk.steal+b.gr*.03)*100)+'%',3500);
-  if(c.arise){bigText('LEVANTE-SE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[SISTEMA]</b> ERGUER SOMBRA: a sombra de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
+  if(canArise()){bigText('LEVANTE-SE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[SISTEMA]</b> ERGUER SOMBRA: a sombra de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
   else{fxBurst(b.x,.5,b.z,0xffd070,20,5);b.m.root.visible=false}
   saveRun();
 }
@@ -1423,7 +1425,7 @@ function ctxTarget(){
   let best=null,bd=1e9;const P=player;
   for(const it of L.inter){if(it.hidden)continue;const d=Math.hypot(P.x-it.x,P.z-it.z);if(d<it.r&&d<bd){bd=d;best=it}}
   for(const n of npcs){if(n.gone||n.kind==='deco')continue;const d=Math.hypot(P.x-n.x,P.z-n.z);if(d<2.8&&d<bd){bd=d;best=n}}
-  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){best={label:CLASSES[profile.cls].arise?'F · ERGUER SOMBRA':'F · ABSORVER ESSÊNCIA',use:()=>absorb(bossE)}}}
+  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){best={label:canArise()?'F · ERGUER SOMBRA':'F · ABSORVER ESSÊNCIA',use:()=>absorb(bossE)}}}
   return best;
 }
 function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use()}
@@ -1562,6 +1564,7 @@ function frame(now){
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
   if(started&&!paused&&!touch&&(mouseHeld||keys[keyOf('attack')]))attack();
   if(started&&(time|0)!==FX2.lastSec){FX2.lastSec=time|0;markVisited()}
+  if(run&&run.sovSk&&run.sovSk.cdT>0)run.sovSk.cdT-=dt;
   if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0)update(dt);
@@ -1916,7 +1919,7 @@ function updSpecial(dt){
     const alive=enemies.filter(e=>!e.dead&&!e.isBoss).length;
     if(S.stage===0&&S.t>2.5){S.stage=1;spawnWave(8,0);toast('<b>[SISTEMA]</b> Missão de troca de classe: onda 1 de 3.')}
     else if(S.stage===1&&alive===0){S.stage=2;spawnWave(12,3);toast('<b>[SISTEMA]</b> Onda 2 de 3. Elites chegando.')}
-    else if(S.stage===2&&alive===0){S.stage=3;const B={n:'Cavaleiro do Julgamento',types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)};const b=spawnBoss(0,-8,S.gr,B);b.hp*=.6;b.maxhp*=.6;b.aggro=true;bossAggro(b);toast('<b>[SISTEMA]</b> Onda final: o Cavaleiro do Julgamento.')}
+    else if(S.stage===2&&alive===0){S.stage=3;const B={n:L.tierTrial?'Mestre da Provação':'Cavaleiro do Julgamento',types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)};const b=spawnBoss(0,-8,S.gr,B);const tm=L.tierTrial?(1+.6*tierOf()):.6;b.hp*=tm;b.maxhp*=tm;if(L.tierTrial){b.dmg*=1+.25*tierOf()}b.aggro=true;bossAggro(b);toast('<b>[SISTEMA]</b> Onda final: o Cavaleiro do Julgamento.')}
     S.msg=S.stage===0?'Prepare-se':S.stage<3?'Troca de classe · onda '+S.stage+' de 3 · restam '+alive:'Derrote o Cavaleiro do Julgamento';
   }
   else if(S.kind==='penalty')penaltyUpd(S,dt);
@@ -1955,7 +1958,15 @@ function finishTemple(){unlockLore('temple');
   for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}
   addChest(0,S.az+4,8,true);
 }
+/* PROVAÇÃO DA CLASSE: depois da evolução (nível 30), a cada 100 níveis a classe pode evoluir de novo. */
+const TIER_N=['','Mestre','Grão-Mestre','Lendário','Mítico','Divino','Primordial'];
+const tierOf=()=>run.tier||0,tierNeed=()=>100*(tierOf()+1),tierB=()=>1+.15*tierOf();
+function className(){const A=ADV[profile.cls],t=tierOf();return run.adv?(t?TIER_N[Math.min(t,TIER_N.length-1)]+' ':'')+A.n:CLASSES[profile.cls].n}
+function canArise(){return !!CLASSES[profile.cls].arise||profile.rank===8}
+function completeTier(){run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
+  bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[SISTEMA]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}
 function completeJob(){
+  if(L.tierTrial){L.tierTrial=false;completeTier();return}
   const A=ADV[profile.cls];run.adv=true;player.skills.push({...A.sk,cdT:0});refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[SISTEMA]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
 }
@@ -2090,14 +2101,14 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
-  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+'</b>','+15% poder e −5% recarga por nível',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>','+15% poder e −5% recarga por nível',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Sistema manda você para a Zona de Penalidade.')+'</div>';
   openModal('JANELA DE STATUS',h)}
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Sombras ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Sombras ganham nível lutando.</div>';
-  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(CLASSES[profile.cls].arise?'Use ERGUER SOMBRA (F) em guardiões e elites.':'Só o Necromante levanta sombras.')+'</small></div></div>';
+  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SOMBRA (F) em guardiões e elites.':'Só o Necromante levanta sombras.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*r.lvl,btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE SOMBRAS',h)}
 function diaryView(){view=null;const l=profile.lore||[];let h='';for(const k of l)h+='<div class="it"><div class="d"><b>'+LORE[k][0]+'</b><small>'+LORE[k][1]+'</small></div></div>';if(!l.length)h='<div class="sysline">Nada escrito ainda.</div>';openModal('DIÁRIO DO CAÇADOR',h)}
@@ -2414,7 +2425,7 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
     h+=row('Títulos','Bônus de conquistas',unl('titles')?btn('Abrir','titles',0):'Derrote um guardião');
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
-    h+=row('Reencarnação','Volta ao nível 1 com +10% permanente em tudo. Mantém ouro, itens e sombras.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100,'red'):lockMsg('rebirth'))}
+    h+=row('Reencarnação','Volta ao nível 1 com +10% permanente em tudo. Mantém ouro, itens e sombras. Próxima exige nível <b>'+(100*((profile.rebirths||0)+1))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100*((profile.rebirths||0)+1),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
     h+=row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Absorva essências de guardiões','');
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Associação','');
@@ -2433,7 +2444,7 @@ function extraActions3(a,v){
   if(a==='bagtab'){L.bagTab=v;bagView(v);return 'close0'}
   if(a==='consv'){consView();return 'close0'}
   if(a==='cons'){run.cons=run.cons||{fur:0,mur:0,arc:0};if((run.cpts||0)<1||cons(v)>=10)return;run.cpts--;run.cons[v]++;refreshStats();return true}
-  if(a==='rebirth'){if(run.level<100)return;if(!L.rbOk||time-L.rbOk>6){L.rbOk=time||1;toast('<b>[SISTEMA]</b> Tem certeza? Toque em Reencarnar de novo para confirmar.',4000);return 'close0'}L.rbOk=0;profile.rebirths=(profile.rebirths||0)+1;store.set('pds2_profile',profile);run.level=1;run.xp=0;run.pts=0;run.spts=0;run.cpts=0;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.skl={};run.cons={fur:0,mur:0,arc:0};refreshStats();player.hp=player.maxhp;closeModal();bigText('REENCARNAÇÃO '+profile.rebirths,2000);sfx('arise');showSys('De volta ao começo. Mas você não é mais o mesmo.');return 'close'}
+  if(a==='rebirth'){if(run.level<100*((profile.rebirths||0)+1))return;if(!L.rbOk||time-L.rbOk>6){L.rbOk=time||1;toast('<b>[SISTEMA]</b> Tem certeza? Toque em Reencarnar de novo para confirmar.',4000);return 'close0'}L.rbOk=0;profile.rebirths=(profile.rebirths||0)+1;store.set('pds2_profile',profile);run.level=1;run.xp=0;run.pts=0;run.spts=0;run.cpts=0;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.skl={};run.cons={fur:0,mur:0,arc:0};refreshStats();player.hp=player.maxhp;closeModal();bigText('REENCARNAÇÃO '+profile.rebirths,2000);sfx('arise');showSys('De volta ao começo. Mas você não é mais o mesmo.');return 'close'}
   if(a==='caravan'){closeModal();startCaravan();return 'close'}
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
   if(a==='buyret'){const r=profile.retired[+v],t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
@@ -2480,7 +2491,7 @@ function guildView(tab){
   let h='<div class="tabs">'+[['quests','Missões'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k==='quests'||k==='rank'||k==='reaval'||k==='travel'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
   if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
-    if(run.adv)h+='<div class="sysline">Você já é <b>'+A.n+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
+    if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação. Se morrer, perde tudo.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
     else{h+='<div class="sysline">Lyra: Todo '+c.n+' que passa no Julgamento vira <b>'+A.n+'</b>. Sua classe não muda, ela evolui.</div>';
       h+=row('Requisito','Nível '+JOB_LVL+' · você está no nível '+run.level,'')+row('Missão','Sobreviva a 3 ondas na Arena do Julgamento e derrote o Cavaleiro do Julgamento. Sem saída até o fim.','')+row('Recompensa','Classe '+A.n+', vida +25%, dano +30% e a habilidade '+A.sk.n,'');
       h+='<div class="sysline" style="color:#ffb3c0">Se morrer, perde tudo como sempre.</div><div style="display:flex;justify-content:flex-end">'+btn('ACEITAR MISSÃO','job',0,run.level>=JOB_LVL,'hot')+'</div>'}}
@@ -2573,6 +2584,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='sellall'){let g=0;for(let r=0;r<9;r++){g+=run.res.core[r]*sellP('core',r)+run.res.cry[r]*sellP('cry',r);run.res.core[r]=0;run.res.cry[r]=0}run.gold+=g;toast('<b>[SISTEMA]</b> Recursos vendidos: +'+fmt(g)+' ouro');beep(990,.15,.05)}
   if(a==='upg'){const eq=run.equip[v];if(!eq)return;const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1);if(run.gold<gc||run.res.cry[eq.tier]<cc)return;run.gold-=gc;run.res.cry[eq.tier]-=cc;if(up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[SISTEMA]</b> O aprimoramento falhou. Materiais perdidos.');sfx('block');return}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.bonus=+(eq.bonus*1.1).toFixed(3);if(eq.def)eq.def=Math.min(.5,+(eq.def*1.04).toFixed(3));eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[SISTEMA]</b> '+eq.name+': '+statTxt(eq))}
   if(a==='job'){if(run.level<JOB_LVL||run.adv)return;closeModal();buildSpecial('job');return}
+  if(a==='tier'){if(!run.adv||run.level<tierNeed())return;closeModal();L.tierTrial=true;buildSpecial('job');return}
   if(a==='weekly'){if(profile.weekly===weekId())return;closeModal();buildSpecial('weekly');return}
   if(a==='dep'||a==='wd'){const have=a==='dep'?run.gold:(profile.bank||0);const amt=v==='all'?have:Math.min(+v,have);if(amt<=0)return;if(a==='dep'){run.gold-=amt;profile.bank=(profile.bank||0)+amt;npcEv('bank',amt)}else{profile.bank-=amt;run.gold+=amt}store.set('pds2_profile',profile);sfx('coin')}
   if(a==='scroll'){if(run.scrolls<=0)return;run.scrolls--;closeModal();leaveDungeon(true);return}
@@ -2594,7 +2606,7 @@ function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e 
   for(const [act,n] of KEYACT)h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true));
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
-addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
