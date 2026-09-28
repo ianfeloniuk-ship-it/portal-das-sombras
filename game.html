@@ -1553,7 +1553,7 @@ function updNpc(n,dt){
 let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
-  const rdt=Math.min(.05,(now-last)/1000);last=now;
+  const rdt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   AU.want=wantTrack();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
@@ -2043,7 +2043,10 @@ function basicIsMagic(){return isMagic()!==styleOff()}
 function basicDmgMul(){const b=statsBonus();return (basicIsMagic()?b.mag:b.phys)/b.dmg*(styleOff()?.7:1)}
 function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SISTEMA]</b> Classes físicas não usam magia. Só magos podem guardar a varinha e lutar no braço.');return}run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
   toast('<b>[SISTEMA]</b> Ataque básico agora é <b>'+(m?'ARCANO (usa Inteligência)':'FÍSICO (usa Força)')+'</b>'+(styleOff()?' · estilo fora da sua classe: 70% de eficiência':' · estilo natural da classe')+'. Habilidades Q/R/T não mudam.',5000);sfx('arise');hud()}
-function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano <b style="color:#ff6b6b">físico</b>'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:STATD.agi,per:STATD.per,int:'+2% dano <b style="color:#6fb8ff">mágico</b> e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
+/* Texto da Agilidade com os valores atuais e os limites (pedido do Irror: jogador precisa saber dos limites). */
+function agiDesc(){const g=(run.stats||{}).agi||0,atkPct=Math.round((1/(1-Math.min(.35,.005*g))-1)*100),dcd=dodgeCdVal(),atkMax=g>=70,dMax=dcd<=.551;
+  return '+1% velocidade de movimento (sem limite, agora +'+g+'%)<br>Ataque mais rápido: <b>+'+atkPct+'%</b> '+(atkMax?'<b style="color:#ffd54f">· MÁXIMO</b>':'· para no ponto 70')+'<br>Recarga da esquiva: <b>'+dcd.toFixed(2)+'s</b> '+(dMax?'<b style="color:#ffd54f">· MÍNIMO</b>':'· para no ponto 51 (0,55s)')}
+function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano <b style="color:#ff6b6b">físico</b>'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:agiDesc(),per:STATD.per,int:'+2% dano <b style="color:#6fb8ff">mágico</b> e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2663,10 +2666,19 @@ function petMul(){const p=run.pet;return RAR[p.rar].m*(1+.08*(p.lvl-1))}
 function petTrainCost(){return Math.round(2000*Math.pow(1.22,(run.pet?run.pet.lvl:1)-1))}
 function petRows(){const p=run.pet&&typeof run.pet==='object'?run.pet:null;let h=row('Ovo de Companheiro','Raridade e poder sorteados: Comum até Primordial. Se sair pior que o seu, ele ganha +3 níveis.',btn('8.000 ouro','buypet',0,run.gold>=8000));
   if(p)h+=row('<b style="color:'+RAR[p.rar].c+'">'+RAR[p.rar].n+' · '+PETP[p.pow].n+'</b> · NV '+p.lvl,PETP[p.pow].d+' · força x'+petMul().toFixed(2),btn('Treinar · '+fmt(petTrainCost()),'trainpet',0,run.gold>=petTrainCost()));return h}
+/* Pet: dragãozinho voando (modelo do Dracônico em miniatura), cor pelo poder e brilho pela raridade. */
+const PET_COL={tiro:0xff7a22,gelo:0x8fe3ff,raio:0xfff36b,cura:0x6fe39a};
+function makePetModel(pp){const pc=PET_COL[pp.pow]||0xb18cff,rc=new THREE.Color(RAR[pp.rar].c);
+  if(MON.list.dragao){const model=THREE.SkeletonUtils.clone(MON.list.dragao),g=new THREE.Group();g.add(model);model.scale.setScalar((.75+pp.rar*.06)/MON.h.dragao);
+    model.traverse(c=>{if(c.isMesh){c.frustumCulled=false;c.material=c.material.clone();c.material.color.lerp(new THREE.Color(pc),.55);c.material.emissive=rc.clone();c.material.emissiveIntensity=.12+.08*pp.rar}});
+    g.mixer=new THREE.AnimationMixer(model);const cl=MON.clips.dragao.find(a=>/Flying/.test(a.name));if(cl)g.mixer.clipAction(cl).play();g.dragon=true;
+    const l=new THREE.PointLight(pc,.8,5);l.position.y=.4;g.add(l);return g}
+  return new THREE.Mesh(new THREE.OctahedronGeometry(.24+pp.rar*.035,0),glow(rc.getHex(),1))}
 let PET=null;function updPet(dt){if(run&&run.pet===true)run.pet={rar:0,pow:'tiro',lvl:1};if(!run||!run.pet||!player||player.dead){if(PET)PET.visible=false;return}
-  const pp=run.pet;if(!PET){PET=new THREE.Mesh(new THREE.OctahedronGeometry(.24+pp.rar*.035,0),glow(new THREE.Color(RAR[pp.rar].c).getHex(),1));PET.t=0;scene.add(PET)}
+  const pp=run.pet;if(PET&&!PET.dragon&&MON.list.dragao){scene.remove(PET);PET=null}
+  if(!PET){PET=makePetModel(pp);PET.t=0;scene.add(PET)}
   if(!PET.parent)scene.add(PET);PET.visible=true;const P=player;PET.t+=dt;const tx=P.x-Math.sin(P.face)*1.2+Math.cos(time*1.3)*.7,tz=P.z-Math.cos(P.face)*1.2+Math.sin(time*1.3)*.7,k=Math.min(1,dt*4);
-  PET.position.x+=(tx-PET.position.x)*k;PET.position.z+=(tz-PET.position.z)*k;PET.position.y=2.2+Math.sin(time*3)*.2;PET.rotation.y+=dt*2;
+  PET.position.x+=(tx-PET.position.x)*k;PET.position.z+=(tz-PET.position.z)*k;PET.position.y=2.2+Math.sin(time*3)*.2;if(PET.dragon){PET.rotation.y=Math.atan2(tx-PET.position.x,tz-PET.position.z)||PET.rotation.y;PET.mixer.update(dt)}else PET.rotation.y+=dt*2;
   const cd=Math.max(.6,1.4-pp.rar*.1),col=new THREE.Color(RAR[pp.rar].c).getHex(),dm=Math.max(1,(player.dmg||10)*.22*petMul());
   if(PET.t>cd){PET.t=0;if(pp.pow==='cura'){if(P.hp<P.maxhp){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.012*petMul());fxRing(P.x,P.z,0x6fe39a,1.2)}return}
     const tg=pp.pow==='raio'?enemies.filter(e=>!e.dead&&!e.sleep&&!e.invuln&&Math.hypot(e.x-P.x,e.z-P.z)<9).slice(0,3):[nearestEnemy(P.x,P.z,9)].filter(Boolean);
