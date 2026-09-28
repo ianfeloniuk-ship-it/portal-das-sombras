@@ -37,6 +37,11 @@ body{font-family:"Chakra Petch",system-ui,sans-serif;color:var(--ink)}
 #btns,#pad{scale:var(--bs,1)}#btns{transform-origin:bottom right}#pad{transform-origin:bottom left}#btns{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:230px;height:220px;z-index:7}
 .b{position:absolute;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,18,38,.7);border:1.5px solid rgba(79,195,255,.6);color:var(--ink);font:700 10px "Chakra Petch",sans-serif;letter-spacing:.04em;text-align:center;touch-action:none;box-shadow:0 0 10px rgba(79,195,255,.25);overflow:hidden}
 .b.on{background:rgba(79,195,255,.35)}
+/* PC: sem joystick nem botões redondos; barra de habilidades embaixo com teclas e recarga. */
+body.pc #pad,body.pc #stick,body.pc #bA,body.pc #bD{display:none!important}
+body.pc #btns{left:50%;right:auto;bottom:14px;width:auto;height:auto;transform:translateX(-50%);display:flex;gap:10px;scale:1}
+body.pc #btns .b{position:relative!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;width:66px!important;height:66px!important;border-radius:12px}
+body.pc #btns .b[hidden]{display:none}
 .b .k{font-size:15px;font-family:"Russo One",sans-serif}
 .b .cd{position:absolute;inset:0;background:rgba(0,0,0,.6);transform-origin:bottom;transform:scaleY(0)}
 .b .nm{font-size:8px;line-height:1.05;max-width:90%;position:relative;opacity:.85}
@@ -253,12 +258,16 @@ function rollAwaken(){
 /* ================= THREE ================= */
 const renderer=new THREE.WebGLRenderer({canvas:$('c'),antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio((()=>{try{return localStorage.getItem('pds_gfx')==='leve'}catch(e){return false}})()?1:Math.min(devicePixelRatio,1.6));
+/* PC: modo ULTRA (resolução cheia + tonemap filmico). Só no PC, nunca no celular. */
+const ULTRA=!(matchMedia('(hover:none)').matches||('ontouchstart' in window))&&(()=>{try{return localStorage.getItem('pds_gfx')!=='leve'}catch(e){return true}})();
+if(ULTRA){renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15}
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(50,1,.1,260);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
 function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?62:48;camera.updateProjectionMatrix();const d=Math.min(devicePixelRatio,2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
+if(!touch)document.body.classList.add('pc');
 const gmap=new THREE.DataTexture(new Uint8Array([70,70,70,255,160,160,160,255,255,255,255,255]),3,1,THREE.RGBAFormat);
 gmap.minFilter=gmap.magFilter=THREE.NearestFilter;gmap.needsUpdate=true;
 const GROUNDMAT=new THREE.MeshToonMaterial({vertexColors:true,gradientMap:gmap});
@@ -1211,7 +1220,16 @@ function gainXp(x){
 function xpNeed(){return Math.round(45+run.level*28+Math.pow(run.level,1.5)*6)}
 
 /* ================= AÇÕES ================= */
-function faceTarget(max=7){const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
+/* PC: mira pelo mouse. O golpe/habilidade vai para onde o cursor aponta no chão. */
+const mouseAim={x:0,y:0,ok:false},aimRay=new THREE.Raycaster(),aimPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),aimV=new THREE.Vector3();
+if(!touch)addEventListener('mousemove',e=>{mouseAim.x=e.clientX;mouseAim.y=e.clientY;mouseAim.ok=true});
+function aimPoint(){if(touch||!mouseAim.ok)return null;aimRay.setFromCamera({x:mouseAim.x/W*2-1,y:-(mouseAim.y/H)*2+1},camera);return aimRay.ray.intersectPlane(aimPlane,aimV)}
+function faceTarget(max=7){
+  const ap=aimPoint();
+  if(ap){const fa=Math.atan2(ap.x-player.x,ap.z-player.z);player.face=fa;let best=null,bd=1e9;
+    for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>max)continue;let da=Math.atan2(dx,dz)-fa;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));if(da<.7&&d<bd){bd=d;best=e}}
+    return best}
+  const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
 function attack(){
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;
   const c=CLASSES[profile.cls];
