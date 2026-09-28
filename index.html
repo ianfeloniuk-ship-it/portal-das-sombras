@@ -148,7 +148,7 @@ body.pc #btns .b[hidden]{display:none}
 </div>
 <div id="steal"></div>
 <div class="b" id="bF" hidden>F</div>
-<div id="keys" hidden>WASD mover · Espaço/clique atacar · Shift esquiva · Q R T habilidades · 1 2 3 roubadas · H poção · F interagir · M mapa · I bolsa</div>
+<div id="keys" hidden>WASD mover · Espaço/clique atacar · Shift esquiva · Q R T habilidades · 1 2 3 roubadas · H poção · F interagir · M mapa · I bolsa · C status</div>
 
 <div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="mb"></div></div></div>
 
@@ -208,7 +208,7 @@ const CLASSES=[
  {n:'Arqueiro',w:13,ranged:true,body:0x2f6b3a,hair:0x6b4a2a,wep:'bow',sk:[S('Chuva de Flechas','rain',8,20,1.4,0xbfff8f),S('Salto Evasivo','blink',5,8,0,0x8fffc8),S('Flecha Perfurante','bolt',4,12,3.2,0xe0ffb0)]},
  {n:'Curandeiro',w:11,ranged:true,body:0xe8d9a8,hair:0xffe08a,wep:'staff',sk:[S('Luz Curativa','heal',9,20,.35,0xfff3a0),S('Julgamento','nova',6,16,1.8,0xffe066),S('Bênção','guard',14,18,.4,0xfff9d0)]},
  {n:'Invocador',w:8,ranged:true,body:0x1f7f86,hair:0xd8f4ff,wep:'staff',sk:[S('Lobo Espiritual','summon',14,25,1,0x6ff4ff),S('Elo Arcano','chain',6,16,1.6,0x6ff4ff),S('Pacto','heal',12,15,.25,0x9fffe8)]},
- {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'staff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Explosão de Almas','nova',7,18,2.2,0xb98cff)]}];
+ {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'bonestaff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Explosão de Almas','nova',7,18,2.2,0xb98cff)]}];
 const BOSSES=[
  {n:'Cavaleiro Carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
  {n:'Lich Ancestral',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
@@ -321,7 +321,7 @@ function weapon(kind,col){
   if(kind==='sword'){const b=mesh(geo('ws',()=>new THREE.BoxGeometry(.1,.95,.05)),toonS(0xdfe8f0));b.position.y=-.55;g.add(b);g.add(mesh(geo('wg',()=>new THREE.BoxGeometry(.3,.06,.1)),toonS(0x8a6a2a)))}
   else if(kind==='dagger'){const b=mesh(geo('wd',()=>new THREE.ConeGeometry(.07,.55,4)),toonS(0xcfd8ff));b.rotation.x=Math.PI;b.position.y=-.3;g.add(b)}
   else if(kind==='axe'){const h=mesh(geo('wah',()=>new THREE.CylinderGeometry(.04,.04,.9,6)),toonS(0x5a3a20));h.position.y=-.35;g.add(h);const a=mesh(geo('wab',()=>new THREE.BoxGeometry(.38,.28,.06)),toonS(0xb8c0cc));a.position.set(.15,-.72,0);g.add(a)}
-  else if(kind==='staff'){const h=mesh(geo('wst',()=>new THREE.CylinderGeometry(.04,.04,1.3,6)),toonS(0x4a3020));h.position.y=-.45;g.add(h);const o=new THREE.Mesh(geo('wso',()=>new THREE.SphereGeometry(.13,10,8)),glowS(col||0x8fe3ff,1));o.position.y=-1.12;g.add(o)}
+  else if(kind==='staff'||kind==='bonestaff'){const h=mesh(geo('wst',()=>new THREE.CylinderGeometry(.04,.04,1.3,6)),toonS(0x4a3020));h.position.y=-.45;g.add(h);const o=new THREE.Mesh(geo('wso',()=>new THREE.SphereGeometry(.13,10,8)),glowS(col||0x8fe3ff,1));o.position.y=-1.12;g.add(o)}
   else if(kind==='bow'){const h=mesh(geo('wb',()=>new THREE.TorusGeometry(.42,.035,5,12,Math.PI)),toonS(0x6b4a2a));h.rotation.z=Math.PI/2;h.position.y=-.3;g.add(h)}
   return g;
 }
@@ -367,9 +367,9 @@ MODELS.ready=new Promise(res=>{
   setTimeout(()=>{if(n<jobs.length){fail=true;n=jobs.length-1;fin()}},25000);
 });
 const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded'];
-const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x8a6ab0];
-const ATK_CLIP={sword:'1H_Melee_Attack_Slice_Diagonal',dagger:'Dualwield_Melee_Attack_Slice',axe:'2H_Melee_Attack_Slice',staff:'Spellcast_Shoot',bow:'1H_Ranged_Shoot',none:'1H_Melee_Attack_Chop'};
-function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Skeleton_Blade':'sword_1handed',dagger:sk?'Skeleton_Blade':'dagger',axe:sk?'Skeleton_Axe':'axe_1handed',staff:sk?'Skeleton_Staff':'staff',bow:'crossbow_1handed'};
+const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x3a2266];
+const ATK_CLIP={sword:'1H_Melee_Attack_Slice_Diagonal',dagger:'Dualwield_Melee_Attack_Slice',axe:'2H_Melee_Attack_Slice',staff:'Spellcast_Shoot',bonestaff:'Spellcast_Shoot',bow:'1H_Ranged_Shoot',none:'1H_Melee_Attack_Chop'};
+function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Skeleton_Blade':'sword_1handed',dagger:sk?'Skeleton_Blade':'dagger',axe:sk?'Skeleton_Axe':'axe_1handed',staff:sk?'Skeleton_Staff':'staff',bonestaff:'Skeleton_Staff',bow:'crossbow_1handed'};
   const r=m[wep]||null;let l=null;if(wep==='dagger')l=r;if(shield)l=sk?'Skeleton_Shield_Small_A':'shield_round';return[r,l]}
 function makeActor(o){
   const gk=o.gk,src=MODELS.list[gk];const model=THREE.SkeletonUtils.clone(src);
@@ -377,8 +377,10 @@ function makeActor(o){
   const sc=o.scale||1;model.scale.setScalar(2.05/MODELS.h[gk]);body.scale.setScalar(sc);
   const mats=[];
   model.traverse(c=>{if(c.isMesh){envCull(c);const mm=c.material.clone();if(o.tint!=null){mm.color.lerp(new THREE.Color(o.tint),.6)}if(o.emis)mm.emissive=new THREE.Color(o.emis);mm.roughness=.8;mm.metalness=0;c.material=mm;if(!mats.includes(mm))mats.push(mm)}});
+  /* Os modelos KayKit trazem armas embutidas nas mãos (besta, facas, cajado...). Escondemos todas; a arma certa da classe é presa abaixo. */
+  model.traverse(c=>{if(c.isMesh&&c.parent&&/^handslot/.test(c.parent.name))c.visible=false});
   const [wr,wl]=wfor(gk,o.wep,o.shield);
-  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot);if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=c.material.clone();if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material)}});b.add(w)};
+  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot)||model.getObjectByName(slot.replace('.',''));if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=c.material.clone();if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material)}});b.add(w)};
   att('handslot.r',wr);att('handslot.l',wl);
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
@@ -1230,7 +1232,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
   run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)));let need=xpNeed();const r0=rankOf();
-  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b>');fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
+  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+3;if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +3 pontos de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
 }
@@ -2138,7 +2140,7 @@ function cityFallen(c){if(!seasonOn()||profile.season===weekId()||c.name==='Aste
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}
 
 /* ================= LIBERAÇÃO GRADUAL ================= */
-const UNLOCK=[['status',5,'Janela de Status: distribua pontos'],['hire',8,'Recrutar caçadores na Associação'],['fish',10,'Pesca no lago e culinária no Mercado'],['weekly',12,'Chefe semanal'],['forge',12,'Forja no ferreiro'],['sets',14,'Conjuntos de equipamento'],['tower',15,'Torre do Sistema'],['caravan',16,'Caravanas no Mercado'],['city',18,'Evolução das cidades'],['guild',20,'Guildas'],['ruins',20,'Ruínas e mapas do tesouro'],['living',22,'Armas vivas'],['season',25,'Eventos do fim do mundo'],['dream',26,'Pousada e masmorra do sonho'],['worldboss',28,'Chefes errantes no mundo'],['job',30,'Troca de classe'],['constel',35,'Constelações de passivas'],['clone',40,'Prova do clone sombrio'],['time',45,'Portais do tempo'],['rebirth',100,'Reencarnação']];
+const UNLOCK=[['status',1,'Janela de Status: distribua pontos'],['hire',8,'Recrutar caçadores na Associação'],['fish',10,'Pesca no lago e culinária no Mercado'],['weekly',12,'Chefe semanal'],['forge',12,'Forja no ferreiro'],['sets',14,'Conjuntos de equipamento'],['tower',15,'Torre do Sistema'],['caravan',16,'Caravanas no Mercado'],['city',18,'Evolução das cidades'],['guild',20,'Guildas'],['ruins',20,'Ruínas e mapas do tesouro'],['living',22,'Armas vivas'],['season',25,'Eventos do fim do mundo'],['dream',26,'Pousada e masmorra do sonho'],['worldboss',28,'Chefes errantes no mundo'],['job',30,'Troca de classe'],['constel',35,'Constelações de passivas'],['clone',40,'Prova do clone sombrio'],['time',45,'Portais do tempo'],['rebirth',100,'Reencarnação']];
 function unl(k){if(k==='domain'||k==='titles')return (profile.bossKills||0)>0;if(k==='god')return profile.rank===8;const u=UNLOCK.find(x=>x[0]===k);return !u||run.level>=u[1]||(profile.rebirths||0)>0}
 function unlockCheck(l){for(const u of UNLOCK)if(u[1]===l&&!(profile.rebirths>0))setTimeout(()=>{toast('<b>[SISTEMA]</b> Nova função liberada: <b>'+u[2]+'</b>',6000);sfx('ding')},2500)}
 const lockMsg=k=>{const u=UNLOCK.find(x=>x[0]===k);return 'Liberado no nível '+(u?u[1]:'?')};
@@ -2380,6 +2382,8 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   saveRun();rerender();
 });
 $('mx').addEventListener('click',closeModal);
+/* Tocar/clicar no painel do personagem abre a Janela de Status. */
+$('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').addEventListener('click',()=>{if(started&&!modalOpen&&$('dead').hidden)statusView()});
 
 /* ================= CONTROLES ================= */
 addEventListener('keydown',e=>{if(e.repeat)return;keys[e.code]=true;
@@ -2387,6 +2391,7 @@ addEventListener('keydown',e=>{if(e.repeat)return;keys[e.code]=true;
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
   if(e.code==='KeyI'||e.code==='KeyB'){modalOpen?closeModal():bagView();return}
+  if(e.code==='KeyC'||e.code==='Tab'){e.preventDefault();modalOpen?closeModal():statusView();return}
   if(paused)return;
   if(e.code==='Space'){e.preventDefault();attack()}
   if(e.code==='ShiftLeft'||e.code==='ShiftRight')dodge();
