@@ -1001,7 +1001,7 @@ function exitPortal(x,z,locked){
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:0x04101e,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
   const sg=makeSign(locked?'SEM SAÍDA':'SAÍDA',hex(col),.55);sg.position.y=5.5;grp.add(sg);
   L.group.add(grp);
-  const it={type:'exit',x,z,r:3.4,ring,grp,sg,locked,label:'F · SAIR DA MASMORRA',use:tryExit};L.inter.push(it);L.exits.push(it);return it;
+  const it={type:'exit',x,z,r:3.4,ring,grp,sg,locked,label:'F · SAIR DA MASMORRA',use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
 }
 function addChest(x,z,tier,boss){
   let g,lid,band;if(ENV.ok){const o=envChest(boss);g=o.g;lid=o.lid;band=o.band}else{
@@ -1029,7 +1029,7 @@ function mine(it,rank){
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,'#8fe3ff');fxBurst(it.x,1,it.z,0x8fe3ff,6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[SISTEMA]</b> Veio de mana esgotado.')}
 }
-function tryExit(){if(L.gate.red&&!L.bossDead){toast('<b>[SISTEMA]</b> Portal vermelho: não há saída até o guardião cair.');return}leaveDungeon(false)}
+function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[SISTEMA]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead){toast('<b>[SISTEMA]</b> Portal vermelho: não há saída até o guardião cair.');return}leaveDungeon(false)}
 function enterGate(g){
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
