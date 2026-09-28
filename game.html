@@ -240,6 +240,8 @@ const GR=[
  {id:'SS',hp:28,dmg:9.5,xp:21,gold:160,size:82,rooms:18,dens:1.5,lvl:120,th:{n:'Abismo Carmesim',floor:0x220a10,wall:0x4a1420,trim:0xff2d55,fog:0x12030a,light:0xff9aa8}},
  {id:'SSS',hp:46,dmg:14,xp:34,gold:380,size:88,rooms:20,dens:1.55,lvl:180,th:{n:'Castelo Demoníaco',floor:0x1a1010,wall:0x3a1a14,trim:0xff8a1e,fog:0x0e0604,light:0xffc080}},
  {id:'SOBERANO',hp:80,dmg:21,xp:60,gold:900,size:94,rooms:22,dens:1.55,lvl:260,th:{n:'Domínio do Soberano',floor:0x0c0a14,wall:0x1e1830,trim:0xe0d0ff,fog:0x040308,light:0xd8c8ff}}];
+/* Portais altos mais duros (feedback do Ian e do Irror: estava fácil): vida +25% e dano +15% por rank acima do E. */
+GR.forEach((g,i)=>{g.hp*=1+.25*i;g.dmg*=1+.15*i});
 const gid=i=>i===8?'Ω':GR[i].id;
 const GATE_W=[26,24,20,14,10,6,3,1.5,.4];
 const RAR=[{n:'Comum',c:'#c9d3de',m:1},{n:'Raro',c:'#4fc3ff',m:1.3},{n:'Épico',c:'#b18cff',m:1.7},{n:'Lendário',c:'#ffb84d',m:2.3},{n:'Mítico',c:'#ff5a8a',m:2.8},{n:'Divino',c:'#fff36b',m:3.4},{n:'Primordial',c:'#ff3d1e',m:4.2}];
@@ -1068,7 +1070,7 @@ function giveTrait(e){const t=pick(Object.keys(TRAITS));e.trait=t;e.name=e.name+
 function spawnShadow(B,x,z,rec){
   const pm=toon(0x3a1d6e,0x2a0f55);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0xc9a8ff,wep:'sword',scale:1.3,helm:true,gk:'Knight',tint:0x3a1d6e,emis:0x2a0f55,shield:true});
   m.root.position.set(x,0,z);scene.add(m.root);const mh=260*RANKS[rankOf()].mult*(1+run.level*.04)*(B.p3?4:B.types?2.2:1)*(rec?(1+.08*(rec.lvl-1))*(ALLBOSS().some(b=>b.n===rec.n)?1:.6):1);
-  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*1.1*(rec?1+.08*(rec.lvl-1):1)*(profile.rank===8?1.3:1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
+  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*.6*(rec?1+.08*(rec.lvl-1):1)*(profile.rank===8?1.3:1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
   /* Função da sombra pela origem: arqueiro (magos/voadores), tanque (grandes/blindados) ou atacante. */
   const nm=String((B&&B.n)||'');a.role=/Mag|Lich|Vesp|Drac|Espectr|Feiti|Alma|Bruxa/i.test(nm)?'arqueiro':/Guard|Golem|Gigant|Yeti|Orc|Cavaleir|Berserk|Tit|Colosso/i.test(nm)?'tanque':'atacante';
   if(a.role==='arqueiro'){a.ranged=true;a.range=9;a.col=0xb98cff;a.dmg*=.85}else if(a.role==='tanque'){a.hp*=1.8;a.maxhp*=1.8;a.dmg*=.75}else{a.dmg*=1.2;a.speed=6.6}
