@@ -105,6 +105,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="stat" class="ui panel" hidden>
   <div class="row"><span id="rk">E</span><div style="text-align:right"><div id="cls">GUERREIRO</div><div id="lv" style="font-size:10px;color:var(--dim)">NV 1</div></div></div>
   <div class="bar"><i id="hpb" style="background:var(--hp)"></i></div><div class="lbl"><span>VIDA</span><span id="hpt">100</span></div>
+  <div class="bar" style="height:5px"><i id="shb" style="background:#9fe8ff"></i></div><div class="lbl"><span>ESCUDO</span><span id="sht">0</span></div>
   <div class="bar"><i id="mpb" style="background:var(--mp)"></i></div><div class="lbl"><span>MANA</span><span id="mpt">60</span></div>
   <div class="bar" style="height:4px"><i id="xpb" style="background:var(--xp)"></i></div><div class="lbl"><span>XP</span><span id="rkp"></span></div>
   <div class="lbl" style="font-size:11px"><span>OURO</span><span id="gold" class="gold">0</span></div>
@@ -479,26 +480,29 @@ const effB=t=>t<=0?t:3*t/(3+t);
 function gearQ(it){return (1+.06*(it.rar||0))*(1+.08*(it.up||0))*(1+.02*(it.wlv||0))*(it.curse?1.3:1)}
 function itemAtk(it){return it&&it.slot==='w'?Math.round(WATK[Math.min(8,it.tier)]*gearQ(it)):0}
 function itemHp(it){return it&&it.slot==='a'?Math.round(AHPV[Math.min(8,it.tier)]*gearQ(it)):0}
+const SHV=AHPV.map(v=>Math.round(v*1.6));
+function itemSh(it){return it&&it.slot==='a'?Math.round(SHV[Math.min(8,it.tier)]*gearQ(it)):0}
 function itemArm(it){return it&&it.slot==='a'?Math.round(AARM[Math.min(8,it.tier)]*gearQ(it)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
 function atkOf(kind){const s=run.stats||{};return 10+2*run.level+2*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===8?.8:rk*.05;
-  const src=[['Rank '+RANKS[rk].id,rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Constelações',.01*cons('fur'),.015*cons('mur')],['Título',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0]];
+  const src=[['Rank '+RANKS[rk].id,rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
-  const maxhp=(100+10*run.level+12*(s.vit||0)+itemHp(a))*(1+bp.ehp)*cb2.hp;
+  const maxhp=(100+10*run.level+12*(s.vit||0))*(1+bp.ehp)*cb2.hp;
+  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0));
   const maxmp=(50+3*run.level+3*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
-  const def=Math.min(.7,cb2.def+armRed(itemArm(a))+(npcHas('Brann')?.08:0));
+  const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
   const spd=6.4*(1+Math.min(.25,.005*(s.agi||0))+affB().spd/100+(cb.spd||0));
-  return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),dmg,def,spd}}
+  return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
   const m=makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
-  if(profile&&profile.title&&(profile.ach||[]).includes(profile.title)){const ti=TITLES.findIndex(t=>t.id===profile.title),hc=[0xffd070,0xff6a8a,0x8fe3ff,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
+  if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0x8fe3ff,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
   scene.add(m.root);return{m,aura}}
 const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
  gelo:{n:'Água e Gelo',c:'#8fe3ff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
@@ -517,14 +521,14 @@ let AFFC=null,AFFK='';function affB(){const w=run&&run.equip&&run.equip.w,a=run&
 function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
-    buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};
+    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};
 }
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a;
   for(const mt of m.wmats){if(!mt.emissive)continue;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar}else mt.emissive.set(0)}
   for(const n of m.wnodes||[])n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1);
   for(const mt of m.mats){if(m.wmats.includes(mt)||!mt.emissive)continue;if(a&&a.rar>0){mt.emissive.set(RAR[a.rar].c);mt.emissiveIntensity=.03+.035*a.rar}else if(!mt.userData.keepEm)mt.emissive.set(0)}}
-function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp;Object.assign(player,st);player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp);try{gearLook()}catch(e){}}
+function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp,fs=player.maxsh?player.shield/player.maxsh:1;Object.assign(player,st);player.shield=Math.round(st.maxsh*Math.min(1,fs));player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp);try{gearLook()}catch(e){}}
 
 /* ================= COLISÃO ================= */
 const HB=8;const hkey=(bx,bz)=>(bx+100)*1000+(bz+100);
@@ -1010,7 +1014,7 @@ function addChest(x,z,tier,boss){
 function openChest(x,z,tier,boss){
   if(!boss&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');return}
   const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
-  if(boss||Math.random()<.55)addItem(rollItem(tier,boss));
+  if(boss||Math.random()<(hasT('lord')?.7:.55))addItem(rollItem(tier,boss));
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
   saveRun();
 }
@@ -1037,7 +1041,13 @@ function enterGate(g){
   if(g.hostile)setTimeout(()=>toast('<b>[SISTEMA]</b> Caçadores hostis detectados nesta masmorra.'),1500);
   if(g.friends)setTimeout(()=>toast('<b>[SISTEMA]</b> Outro grupo de caçadores está lá dentro.'),2600);
 }
-function leaveDungeon(toCity){
+function startBreak(){L.brk={t:0,sp:1};for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}
+  bigText('QUEBRA DE MASMORRA',2200);sfx('gong');shake(.8);showSys('A masmorra está quebrando. Os monstros não param de vir. Quanto mais você aguentar, maior o recorde. A saída continua aberta: chegue nela para sair vivo.')}
+function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)>(profile.brkBest||0)){profile.brkBest=Math.floor(B.t);if(profile.brkBest%10===0){store.set('pds2_profile',profile);checkTitles()}}
+  if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(8,L.gate.rank);
+    for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
+      const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
+function leaveDungeon(toCity){if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&g.ref&&g.ref.id)g.ref.dead=true;player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[SISTEMA]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead;
   if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
@@ -1091,7 +1101,7 @@ function giveTrait(e){const t=pick(Object.keys(TRAITS));e.trait=t;e.name=e.name+
 function spawnShadow(B,x,z,rec){
   const pm=toon(0x3a1d6e,0x2a0f55);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0xc9a8ff,wep:'sword',scale:1.3,helm:true,gk:'Knight',tint:0x3a1d6e,emis:0x2a0f55,shield:true});
   m.root.position.set(x,0,z);scene.add(m.root);const mh=260*RANKS[rankOf()].mult*(1+run.level*.04)*(B.p3?4:B.types?2.2:1)*(rec?(1+.08*(rec.lvl-1))*(ALLBOSS().some(b=>b.n===rec.n)?1:.6):1);
-  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*.6*(rec?1+.08*(rec.lvl-1):1)*(profile.rank===8?1.3:1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
+  const a={m,mats:m.mats,x,z,face:0,rec,name:rec&&rec.nick?rec.nick+' ['+B.n+']':'Sombra: '+B.n,short:'Sombra',hp:mh,maxhp:mh,dmg:player.dmg*.6*(hasT('army')?1.2:1)*(rec?1+.08*(rec.lvl-1):1)*(profile.rank===8?1.3:1),speed:5.8,range:2.2,r:.8,cd:0,act:null,stun:0,team:'ally',shadow:true,bossRef:B,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0};
   /* Função da sombra pela origem: arqueiro (magos/voadores), tanque (grandes/blindados) ou atacante. */
   const nm=String((B&&B.n)||'');a.role=/Mag|Lich|Vesp|Drac|Espectr|Feiti|Alma|Bruxa/i.test(nm)?'arqueiro':/Guard|Golem|Gigant|Yeti|Orc|Cavaleir|Berserk|Tit|Colosso/i.test(nm)?'tanque':'atacante';
   if(a.role==='arqueiro'){a.ranged=true;a.range=9;a.col=0xb98cff;a.dmg*=.85}else if(a.role==='tanque'){a.hp*=1.8;a.maxhp*=1.8;a.dmg*=.75}else{a.dmg*=1.2;a.speed=6.6}
@@ -1118,7 +1128,7 @@ function makeItem(slot,tier,rar){
   return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
 function rollItem(tier,boss){const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=wpick(w.map((w,i)=>({i,w}))).i;const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
-function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemHp(it)+' de vida · '+itemArm(it)+' de armadura')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
+function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
 function addItem(it){
   const cur=run.equip[it.slot];
   if(rankOf()>=it.tier&&(!cur||itemScore(it)>itemScore(cur))){if(cur)run.items.push(cur);run.equip[it.slot]=it;refreshStats();toast('<b>[SISTEMA]</b> Equipado: <b style="color:'+RAR[it.rar].c+'">'+it.name+'</b> ('+statTxt(it)+')',3500)}
@@ -1253,7 +1263,7 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
   let blocked=false;
-  if(o.fromPlayer&&e.kind)amt*=bestMul(e.kind);
+  if(o.fromPlayer&&e.kind)amt*=bestMul(e.kind);if(o.fromPlayer&&e.elite&&hasT('avenger'))amt*=1.2;
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
@@ -1263,7 +1273,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   const cc=o.fromPlayer?critChance():.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
   if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);if(e.isBoss)amt=Math.min(amt,e.maxhp*.06);amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
-  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
+  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+'!!!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
@@ -1305,7 +1315,7 @@ const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosã
 function skillDesc(sk){if(!sk)return '';const nat=['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':(isMagic()?' · mágica (Inteligência)':' · física (Força)');return (SKD[sk.t]||'Habilidade')+nat+(['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':' · <b>marca</b> os alvos')+' · poder x'+sk.pow+' · '+sk.mp+' de mana · recarga '+sk.cd+'s'}
 function killEnemy(e){
   if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
-  e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
+  e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
   if(e.elite&&!e.isBoss)npcEv('elite');
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
@@ -1353,6 +1363,8 @@ function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.co
 function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)));
+  player.shT=4;if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
+  if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
@@ -1400,7 +1412,7 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player'});
 }
 /* Recarga da esquiva ligada à Agilidade: 1,4 s sem pontos, cai 1,2% por ponto, mínimo 0,55 s. */
-function dodgeCdVal(){return Math.max(1,1.5-.01*((run.stats||{}).agi||0))}
+function dodgeCdVal(){return Math.max(1,1.5-.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0)}
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
@@ -1408,16 +1420,16 @@ function dodge(){
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
   player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=dodgeCdVal();player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
-function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
+function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk)return;if(sk.cdT>0)return;
   if(['cone','nova','chain','bolt','rain','dot'].includes(sk.t)&&!nearestEnemy(player.x,player.z,sk.t==='bolt'||sk.t==='rain'?16:11)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
-  L.markWin=time+.8;player.mp-=sk.mp;sk.cdT=sk.cd*(1-.05*(run.skl[sk.n]||0))*(cons('arc')>=10?.8:1);runSkill(sk);player.atkT=.001;
+  L.markWin=time+.8;player.mp-=sk.mp;sk.cdT=sk.cd*(1-.05*(run.skl[sk.n]||0))*(1-.015*cons('arc'))*(cons('arc')>=10?.8:1);runSkill(sk);player.atkT=.001;
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
 function runSkill(sk){
-  const P=player,dmg=P.dmg*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0)+.015*cons('arc')),col=sk.col;const tgt=faceTarget(14);skillFx(sk,P);
+  const P=player,dmg=P.dmg*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0)),col=sk.col;const tgt=faceTarget(14);skillFx(sk,P);
   switch(sk.t){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true})}hitstop(.08);shake(.3);break}
     case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true});hitstop(.08);shake(.35);break}
@@ -1607,6 +1619,9 @@ function update(dt){
     P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
     if(P.stealth>0){P.stealth-=dt;if(P.stealth<=0)setStealth(false)}
     P.mp=Math.min(P.maxmp,P.mp+dt*(3+P.maxmp*.03));
+    if(P.shT>0)P.shT-=dt;else if(P.shield<P.maxsh)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.2*dt*(hasT('brk30')?1.3:1));
+    if(hasT('brk600')&&P.hp<P.maxhp&&!P.dead)P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.01*dt);
+    if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
     for(const s of P.skills)s.cdT-=dt;for(const s of run.stolen)s.cdT-=dt;if(run.fused)run.fused.cdT-=dt;if(run.food&&run.food.t>0){run.food.t-=dt;if(run.food.t<=0){refreshStats();toast('O efeito da comida acabou.')}}
     let mv=0;
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
@@ -1666,7 +1681,7 @@ function updWorld(dt){updEcon(dt);
 function updDungeon(dt){
   for(const it of L.exits)it.ring.rotation.z+=dt*.8;
   updSpecial(dt);
-  if(L.bossDead){L.closeT-=dt;if(L.closeT<=0){toast('<b>[SISTEMA]</b> A masmorra se fechou e sumiu. Você foi expulso.',4000);leaveDungeon(false);return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[SISTEMA]</b> 30 segundos para a masmorra se fechar.')}}
+  if(L.brk){updBreak(dt)}else if(L.bossDead){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[SISTEMA]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
   const G=L.grid,P=player,cx=Math.floor((P.x-G.ox)/G.CS),cz=Math.floor((P.z-G.oz)/G.CS);
   for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){if(dx*dx+dy*dy>36)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
@@ -1750,7 +1765,7 @@ function hud(){
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):'Masmorra '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
   $('lv').textContent='NV '+run.level+' · '+where2;
-  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
+  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0);$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
   $('mpb').style.width=(100*P.mp/P.maxmp)+'%';$('mpt').textContent=Math.floor(P.mp)+' / '+P.maxmp;
   $('xpb').style.width=(100*run.xp/xpNeed())+'%';$('gold').textContent=fmt(run.gold);
   const ri=rankOf();let lv=run.level-1,r=profile.rank;while(r<ri){lv-=RANK_STEPS[Math.min(r,7)];r++}
@@ -1761,7 +1776,7 @@ function hud(){
   let obj='';
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Associação · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
-  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.bossDead?'Portal fecha em '+fmtT(L.closeT)+' · minere cristais, abra o baú e saia':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
+  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'QUEBRA DE MASMORRA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Quebra da masmorra em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
   $('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent+=' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
@@ -2001,7 +2016,7 @@ function bankView(){
   view=bankView;const b=profile.bank||0;
   let h='<div class="sysline">Selene: O que fica aqui não se perde, nem se você morrer lá fora. · Carregando <b class="gold">'+fmt(run.gold)+'</b> · No banco <b class="gold">'+fmt(b)+'</b></div>';
   h+=row('Depositar','Guarda o ouro com segurança',btn('100','dep','100',run.gold>=100)+btn('1.000','dep','1000',run.gold>=1000)+btn('Tudo','dep','all',run.gold>0,'hot'));
-  h+=(affL('Selene')?row('Juros','Coletar '+(affL('Selene')*.3).toFixed(1)+'% do saldo (uma vez por dia)',btn('Coletar','interest',0,profile.intDay!==todayKey()&&b>0)):'')+affRow('Selene');
+  h+=(affL('Selene')?row('Juros','Coletar '+(affL('Selene')*.15).toFixed(2).replace('.',',')+'% do saldo (uma vez por dia)',btn('Coletar','interest',0,profile.intDay!==todayKey()&&b>0)):'')+affRow('Selene');
   h+=row('Sacar','Leva o ouro de volta para a bolsa',btn('100','wd','100',b>=100)+btn('1.000','wd','1000',b>=1000)+btn('Tudo','wd','all',b>0));
   openModal('BANCO DE '+nearestCity(player.x,player.z).c.name.toUpperCase(),h);
 }
@@ -2143,8 +2158,8 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 11)</div>';
-  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
-  if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
+  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
   {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+row('Maestria <b>'+ms+'</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida (entra no bônus somado), para sempre nesta vida. Use quando suas habilidades estiverem no máximo. Agora: <b>+'+(ms/2).toString().replace('.',',')+'%</b>',btn('+1','mast',0,run.spts>0))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
@@ -2221,19 +2236,25 @@ const affN=g=>(g.aff||[]).map(i=>AFFIX.find(a=>a.id===i).n);
 function rollAff(rank){if(Math.random()>.35+rank*.04)return[];const a=[...AFFIX].sort(()=>Math.random()-.5);return a.slice(0,Math.random()<.3?2:1).map(x=>x.id)}
 const hasAff=id=>L.mode==='dungeon'&&L.gate&&(L.gate.aff||[]).includes(id);
 /* títulos */
+/* TÍTULOS (feedback do Irror): até 3 equipados; cada um dá uma MECÂNICA própria, não só número. */
 const TITLES=[
- {id:'hunter',n:'Caçador de Monstros',d:'200 monstros numa vida',c:()=>run.kills>=200,b:{dmg:.03}},
- {id:'kings',n:'Matador de Reis',d:'10 guardiões',c:()=>(profile.bossKills||0)>=10,b:{boss:.08}},
- {id:'lvl50',n:'Veterano',d:'nível 50',c:()=>run.level>=50,b:{hp:.05}},
- {id:'rich',n:'Magnata',d:'1 milhão de ouro somando o banco',c:()=>run.gold+(profile.bank||0)>=1e6,b:{gold:.06}},
- {id:'phoenix',n:'Fênix',d:'morrer 5 vezes',c:()=>(profile.deaths||0)>=5,b:{hp:.04}},
- {id:'tower',n:'Escalador',d:'andar 20 da torre',c:()=>(profile.towerBest||0)>=20,b:{dmg:.05}},
- {id:'army',n:'General das Sombras',d:'10 sombras',c:()=>run.shadows.length>=10,b:{dmg:.05}},
- {id:'fisher',n:'Pescador',d:'30 peixes',c:()=>(profile.fish||0)>=30,b:{mp:.06}},
- {id:'avenger',n:'Vingador',d:'derrotar seu nêmesis',c:()=>(profile.nemKills||0)>=1,b:{dmg:.04}},
- {id:'lord',n:'Senhor de Domínios',d:'3 masmorras dominadas',c:()=>(profile.owned||[]).length>=3,b:{gold:.05}},
- {id:'sov',n:'Soberano',d:'???',secret:true,c:()=>profile.rank===8,b:{dmg:.1,hp:.1}}];
-function titleB(){const t=TITLES.find(x=>x.id===profile.title);return t&&(profile.ach||[]).includes(t.id)?t.b:{}}
+ {id:'hunter',n:'Caçador de Monstros',d:'200 monstros numa vida',c:()=>run.kills>=200,m:'Cada abate recarrega 5% do escudo',b:{}},
+ {id:'kings',n:'Matador de Reis',d:'10 guardiões',c:()=>(profile.bossKills||0)>=10,m:'Quebrar uma barra de vida de chefe cura 10% da sua vida',b:{}},
+ {id:'lvl50',n:'Veterano',d:'nível 50',c:()=>run.level>=50,m:'Poções curam 25% a mais',b:{}},
+ {id:'rich',n:'Magnata',d:'1 milhão de ouro somando o banco',c:()=>run.gold+(profile.bank||0)>=1e6,m:'+10% de ouro dos monstros',b:{gold:.1}},
+ {id:'phoenix',n:'Fênix',d:'morrer 5 vezes',c:()=>(profile.deaths||0)>=5,m:'Ao cair abaixo de 20% de vida, o escudo enche na hora (1 vez por minuto)',b:{}},
+ {id:'tower',n:'Escalador',d:'andar 20 da torre',c:()=>(profile.towerBest||0)>=20,m:'Na torre, cada andar limpo cura 25% da vida',b:{}},
+ {id:'army',n:'General das Sombras',d:'10 sombras',c:()=>run.shadows.length>=10,m:'Sombras causam +20% de dano',b:{}},
+ {id:'fisher',n:'Pescador',d:'30 peixes',c:()=>(profile.fish||0)>=30,m:'Comida dura o dobro do tempo',b:{}},
+ {id:'avenger',n:'Vingador',d:'derrotar seu nêmesis',c:()=>(profile.nemKills||0)>=1,m:'+20% de dano contra elites',b:{}},
+ {id:'lord',n:'Senhor de Domínios',d:'3 masmorras dominadas',c:()=>(profile.owned||[]).length>=3,m:'Baús comuns têm +15% de chance de trazer item',b:{}},
+ {id:'brk30',n:'Resistente',d:'sobreviver 30 s numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=30,m:'Escudo recarrega 30% mais rápido',b:{}},
+ {id:'brk60',n:'Inabalável',d:'sobreviver 1 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 0,20 s mais rápido',b:{}},
+ {id:'brk600',n:'Imortal',d:'sobreviver 10 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
+ {id:'sov',n:'Soberano',d:'???',secret:true,c:()=>profile.rank===8,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
+function eqTitles(){if(!profile.titles)profile.titles=profile.title?[profile.title]:[];return profile.titles.filter(id=>(profile.ach||[]).includes(id)).slice(0,3)}
+function hasT(id){return !!profile&&eqTitles().includes(id)}
+function titleB(){const o={};for(const id of eqTitles()){const t=TITLES.find(x=>x.id===id);if(t)for(const k in t.b)o[k]=(o[k]||0)+t.b[k]}return o}
 function checkTitles(){profile.ach=profile.ach||[];for(const t of TITLES)if(!profile.ach.includes(t.id)&&t.c()){profile.ach.push(t.id);store.set('pds2_profile',profile);toast('<b>[CONQUISTA]</b> Título desbloqueado: <b>'+t.n+'</b>. Equipe na BOLSA.',5000);sfx('level')}}
 /* maldições */
 const CURSES=[{n:'Sede de Sangue',d:'−20% vida máxima',hp:-.2},{n:'Mente Rachada',d:'−30% mana',mp:-.3},{n:'Fardo',d:'−10% velocidade',spd:-.1}];
@@ -2253,11 +2274,13 @@ function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F
 function cookRows(){let h='<div class="sec">COZINHA</div>';const f=run.fish||{};h+='<div class="sysline" style="font-size:12px">Seus peixes: '+(Object.keys(f).filter(k=>f[k]).map(k=>f[k]+' '+k).join(', ')||'nenhum. Pesque no lago da praça.')+'</div>';
   RECIPES.forEach((r,i)=>{const ok=Object.entries(r.need).every(([k,n])=>(f[k]||0)>=n);h+=row(r.n,r.d+' · precisa '+Object.entries(r.need).map(([k,n])=>n+' '+k).join(' + '),btn('Cozinhar','cook',i,ok))});return h}
 /* afinidade */
-const AFF_PERK={Mira:'Poções 8% mais baratas por nível',Kael:'Armas 6% mais baratas por nível',Brann:'Armaduras 6% mais baratas por nível',Dorian:'Recursos vendidos por 6% a mais por nível',Selene:'Juros diários de 0,3% por nível no banco',Lyra:'Missões pagam 10% a mais por nível'};
-const affL=n=>(profile.aff||{})[n]||0;
-function affRow(n){const l=affL(n),c=1000*(l+1)*(l+1);return '<div class="sec">AFINIDADE COM '+n.toUpperCase()+'</div>'+row('<span style="color:#ff8fa3">'+'♥'.repeat(l)+'♡'.repeat(5-l)+'</span>',AFF_PERK[n],l<5?btn('Presentear '+fmt(c),'gift',n,run.gold>=c):'<b>Máxima</b>')+npcRows(n)}
+const AFF_PERK={Mira:'Poções 4% mais baratas por nível',Kael:'Armas 3% mais baratas por nível',Brann:'Armaduras 3% mais baratas por nível',Dorian:'Recursos vendidos por 3% a mais por nível',Selene:'Juros diários de 0,15% por nível no banco',Lyra:'Missões pagam 5% a mais por nível'};
+const affL=n=>{if(profile.aff&&!profile.aff10){profile.aff10=1;for(const k in profile.aff)profile.aff[k]=Math.min(10,profile.aff[k]*2)}return (profile.aff||{})[n]||0};
+function affRow(n){const l=affL(n),c=1000*(l+1)*(l+1);return '<div class="sec">AFINIDADE COM '+n.toUpperCase()+'</div>'+row('<span style="color:#ff8fa3">'+'♥'.repeat(l)+'♡'.repeat(10-l)+' '+l+'/10</span>',AFF_PERK[n],l<10?btn('Presentear '+fmt(c),'gift',n,run.gold>=c):'<b>Máxima</b>')+npcRows(n)}
+function innLv(){return player?((profile.innLv||{})[nearestCity(player.x,player.z).c.id]||0):0}
+function innB(){return run&&run.rested&&run.rested.t>0?run.rested.l:0}
 function cityLv(){return (profile.cityLv||{})[nearestCity(player.x,player.z).c.id]||0}
-function priceMul(kind){const a=kind==='pot'?affL('Mira')*.08:kind==='wep'?affL('Kael')*.06:kind==='arm'?affL('Brann')*.06:0;return choiceMul()*Math.max(.4,1-a-cityLv()*.04)}
+function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-cityLv()*.04)}
 function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),need=20*(l+1),tot=run.res.cry.reduce((a,b)=>a+b,0);
   const U=[['1','Lojas 4% mais baratas por nível'],['2','Elixires na loja de Poções'],['3','Muralhas reforçadas e brilhantes'],['4','Guardas defendem nas invasões'],['5','Torres da muralha atiram nos monstros']];
   return '<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/5</b>.</div>'+U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')+(l<5?row('Doar cristais',need+' cristais de qualquer rank · você tem '+tot,btn('Doar','citydon',0,tot>=need,'hot')):row('Cidade no nível máximo','',''))}
@@ -2307,10 +2330,10 @@ function extraActions2(a,v){
   if(a==='npcdone'){const q=NPCQ[v];profile.npcSk=profile.npcSk||{};profile.npcSk[v]=true;store.set('pds2_profile',profile);refreshStats();bigText('HABILIDADE APRENDIDA',1400);sfx('level');toast('<b>['+v.toUpperCase()+']</b> '+q.sk,5000);return true}
   if(a==='fishpull'){fishPull();return 'close0'}
   if(a==='cook'){const r=RECIPES[+v];run.fish=run.fish||{};for(const [k,n] of Object.entries(r.need))run.fish[k]-=n;run.foods=run.foods||{};run.foods[r.n]=(run.foods[r.n]||0)+1;toast('<b>[COZINHA]</b> '+r.n+' pronto. Coma pela BOLSA.');sfx('coin');return true}
-  if(a==='eat'){run.foods[v]--;run.food={n:v,t:recipe(v).t};refreshStats();toast('<b>[COMIDA]</b> '+v+': '+recipe(v).d);sfx('level');return true}
-  if(a==='title'){profile.title=v;store.set('pds2_profile',profile);refreshStats();return true}
-  if(a==='gift'){const l=affL(v),c=1000*(l+1)*(l+1);if(run.gold<c||l>=5)return;run.gold-=c;profile.aff=profile.aff||{};profile.aff[v]=l+1;store.set('pds2_profile',profile);toast('<b>'+v+'</b>: Obrigado! Afinidade '+(l+1)+'/5.');sfx('ding');return true}
-  if(a==='interest'){const g=Math.round((profile.bank||0)*.003*affL('Selene'));profile.bank+=g;profile.intDay=todayKey();store.set('pds2_profile',profile);toast('Juros: +'+fmt(g)+' ouro no banco.');sfx('coin');return true}
+  if(a==='eat'){run.foods[v]--;run.food={n:v,t:recipe(v).t*(hasT('fisher')?2:1)};refreshStats();toast('<b>[COMIDA]</b> '+v+': '+recipe(v).d);sfx('level');return true}
+  if(a==='title'){const t=eqTitles();if(t.includes(v))profile.titles=t.filter(x=>x!==v);else{if(t.length>=3)return;profile.titles=[...t,v]}profile.title=profile.titles[0]||null;store.set('pds2_profile',profile);refreshStats();return true}
+  if(a==='gift'){const l=affL(v),c=1000*(l+1)*(l+1);if(run.gold<c||l>=10)return;run.gold-=c;profile.aff=profile.aff||{};profile.aff[v]=l+1;store.set('pds2_profile',profile);toast('<b>'+v+'</b>: Obrigado! Afinidade '+(l+1)+'/10.');sfx('ding');return true}
+  if(a==='interest'){const g=Math.round((profile.bank||0)*.0015*affL('Selene'));profile.bank+=g;profile.intDay=todayKey();store.set('pds2_profile',profile);toast('Juros: +'+fmt(g)+' ouro no banco.');sfx('coin');return true}
   if(a==='citydon'){const c=nearestCity(player.x,player.z).c,l=cityLv();let need=20*(l+1);for(let t=0;t<9&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}profile.cityLv=profile.cityLv||{};profile.cityLv[c.id]=l+1;store.set('pds2_profile',profile);for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true);toast('<b>[CIDADE]</b> '+c.name+' subiu para o nível '+(l+1)+'.');sfx('level');return true}
   if(a==='collect'){const d=profile.owned[+v];if(d.att)return;d.last=todayKey();const n=3+Math.floor(Math.random()*4);run.res.cry[d.rank]+=n;run.res.core[d.rank]+=2;if(Math.random()<.25)d.att=true;store.set('pds2_profile',profile);toast('<b>[DOMÍNIO]</b> +'+n+' cristais e +2 núcleos '+GR[d.rank].id+'.'+(d.att?' Caçadores estão atacando esta masmorra!':''));return true}
   if(a==='defend'){closeModal();buildSpecial('defend',null,+v);return 'close'}
@@ -2324,9 +2347,9 @@ function extraActions2(a,v){
   if(a==='buyelix'){const p=ELIX[+v];if(run.gold<p.price)return;run.gold-=p.price;run.foods=run.foods||{};run.foods[p.n]=(run.foods[p.n]||0)+1;toast('Comprado: '+p.n+'. Beba pela BOLSA.');return true}
   if(a==='titles')return titlesView(),'close0';
 }
-function titlesView(){view=titlesView;const got=profile.ach||[];let h='<div class="sysline">Equipe um título para ganhar o bônus dele.</div>';
-  for(const t of TITLES){const ok=got.includes(t.id);if(t.secret&&!ok)continue;const bs=Object.entries(t.b).map(([k,v])=>'+'+Math.round(v*100)+'% '+({dmg:'dano',hp:'vida',mp:'mana',gold:'ouro',boss:'dano em chefes'}[k])).join(', ');
-    h+=row((ok?'<b>':'<span style="opacity:.5">')+t.n+(ok?'</b>':'</span>'),(ok?bs:'Bloqueado · '+t.d),ok?(profile.title===t.id?'<b>Equipado</b>':btn('Equipar','title',t.id)):'')}
+function titlesView(){view=titlesView;const got=profile.ach||[];let h='<div class="sysline">Equipe até <b>3 títulos</b> ('+eqTitles().length+'/3). Cada um dá uma mecânica própria. O primeiro também dá a auréola.</div>';
+  for(const t of TITLES){const ok=got.includes(t.id);if(t.secret&&!ok)continue;const bs=t.m;
+    h+=row((ok?'<b>':'<span style="opacity:.5">')+t.n+(ok?'</b>':'</span>'),(ok?bs:'Bloqueado · '+t.d),ok?(eqTitles().includes(t.id)?btn('Tirar','title',t.id,true,'on'):btn('Equipar','title',t.id,eqTitles().length<3)):'')}
   openModal('TÍTULOS E CONQUISTAS',h)}
 /* instâncias novas */
 function specialSetup2(kind,S,arg){
@@ -2351,7 +2374,7 @@ function updSpecial2(S,dt){
 }
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[SISTEMA]</b> '+msg,4000)}
 const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>100+50*(profile.rebirths||0);
-function towerClear(S){S.cleared=true;profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
+function towerClear(S){S.cleared=true;if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
   if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
   if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares.'+(towerCap()>100?' A torre continua.':' Acima daqui, só quem reencarnou sobe.'),6000);if(towerCap()<=100)return}
@@ -2373,8 +2396,8 @@ const NPCTALK={Lyra:['Mais um caçador novo... cuidado lá fora.','Você voltou 
   Dorian:['Núcleos, cristais, compro tudo.','Você tem olho pra coisa boa.','Sabia que cristal de rank S canta de noite?','Tenho um comprador secreto. Paga mais.','Sócio? Sócio.','Sócio, amigo, irmão. Escolhe o título, a metade do lucro já é sua.'],
   Selene:['Depósitos e saques, só isso.','Seu saldo está bonito.','O banco guarda mais que ouro. Guarda nomes de quem não voltou.','Abri uma conta especial pra você.','Se você morrer, eu cuido do que é seu. Prometo.','Seu cofre agora tem duas chaves. A outra fica comigo, junto do coração.']};
 const npcHas=n=>!!(profile.npcSk||{})[n];
-function npcEv(t,v=1){profile.npcq=profile.npcq||{};for(const n in NPCQ){const q=NPCQ[n];if(q.t!==t||affL(n)<3||npcHas(n))continue;const s=profile.npcq[n]=profile.npcq[n]||{got:0};if(s.got>=q.n)continue;s.got=Math.min(q.n,s.got+v);if(s.got>=q.n)toast('<b>['+n.toUpperCase()+']</b> Missão pessoal concluída. Fale comigo.',4000)}store.set('pds2_profile',profile)}
-function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};let h=row('Conversar','"'+NPCTALK[n][Math.min(NPCTALK[n].length-1,l)]+'"','');
+function npcEv(t,v=1){profile.npcq=profile.npcq||{};for(const n in NPCQ){const q=NPCQ[n];if(q.t!==t||affL(n)<6||npcHas(n))continue;const s=profile.npcq[n]=profile.npcq[n]||{got:0};if(s.got>=q.n)continue;s.got=Math.min(q.n,s.got+v);if(s.got>=q.n)toast('<b>['+n.toUpperCase()+']</b> Missão pessoal concluída. Fale comigo.',4000)}store.set('pds2_profile',profile)}
+function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};let h=row('Conversar','"'+NPCTALK[n][Math.min(NPCTALK[n].length-1,Math.floor(l/2))]+'"','');
   if(npcHas(n))h+=row('Habilidade aprendida',q.sk,'<b style="color:#6fe39a">Ativa</b>');
   else if(l>=3)h+=row('Missão pessoal: '+q.d,'Progresso '+fmt(Math.min(s.got,q.n))+'/'+fmt(q.n)+' · recompensa: '+q.sk,btn('Concluir','npcdone',n,s.got>=q.n,'hot'));
   else h+=row('Missão pessoal','Liberada com 3 corações','');return h}
@@ -2399,7 +2422,7 @@ function weaponXp(x){if(!unl('living'))return;const w=run.equip.w;if(!w)return;w
   if(w.soul&&Math.random()<.02&&(!L.wtalk||time-L.wtalk>60)){L.wtalk=time;toast('<b>['+w.soul.toUpperCase()+']</b> '+pick(WLINES),4000)}}
 const SETS=[{n:'Caçador Noturno',d:'+15% de dano',b:{dmg:.15}},{n:'Guardião',d:'+20% de vida',b:{hp:.2}},{n:'Arcano',d:'+25% de mana e +15% de dano de habilidade',b:{mp:.25,skill:.15}}];
 function setB(){const w=run.equip.w,a=run.equip.a;return w&&a&&w.set&&w.set===a.set?SETS.find(s=>s.n===w.set).b:{}}
-const CONS=[['fur','Fúria','+1% de dano por ponto','Ápice: +10% de chance de crítico'],['mur','Muralha','+1,5% de vida por ponto','Ápice: revive uma vez por masmorra'],['arc','Arcano','+1,5% de dano de habilidade por ponto','Ápice: recarga 20% menor']];
+const CONS=[['fur','Fúria','+1% de chance de crítico por ponto','Ápice: mais +10% de chance de crítico'],['mur','Muralha','+3% de escudo máximo por ponto','Ápice: revive uma vez por masmorra'],['arc','Arcano','−1,5% de recarga das habilidades por ponto','Ápice: mais −20% de recarga']];
 const cons=k=>(run.cons||{})[k]||0;
 function consFull(){const c=run.cons||{};return CONS.every(([k,,,cap])=>(c[k]||0)>=10)}
 function consView(){view=consView;run.cons=run.cons||{fur:0,mur:0,arc:0};let h='<div class="sysline">Pontos de constelação: <b>'+(run.cpts||0)+'</b>. Ganhe 1 por nível a partir do 35.'+(consFull()?' <b style="color:#ffd54f">Constelações completas:</b> as constelações param de dar pontos (cada nível segue dando 1 ponto de status).':'')+'</div>'+(consFull()&&run.cpts>0?'<div style="display:flex;justify-content:flex-end">'+btn('CONVERTER '+run.cpts+' PONTOS EM '+run.cpts+' DE STATUS','consconv',0,true,'hot')+'</div>':'');
@@ -2409,7 +2432,7 @@ const rebirthB=()=>1+.1*(profile.rebirths||0);
 /* ================= BLOCO B: ECONOMIA, CARAVANAS, CHEFES ERRANTES, RUÍNAS ================= */
 const ECON=[1,1,1,1,1,1,1,1,1];let econT=45;
 function updEcon(dt){econT-=dt;if(econT>0)return;econT=45;for(let i=0;i<9;i++)ECON[i]=clamp(ECON[i]*rnd(.9,1.12)+(1-ECON[i])*.05,.6,1.8)}
-const sellP=(k,r)=>Math.round((k==='core'?CORE_P:CRY_P)[r]*ECON[r]*(1+.06*affL('Dorian')));
+const sellP=(k,r)=>Math.round((k==='core'?CORE_P:CRY_P)[r]*ECON[r]*(1+.03*affL('Dorian')));
 const arrow=r=>ECON[r]>1.05?'<span style="color:#6fe39a">▲'+Math.round((ECON[r]-1)*100)+'%</span>':ECON[r]<.95?'<span style="color:#ff8fa3">▼'+Math.round((1-ECON[r])*100)+'%</span>':'estável';
 function startCaravan(){const P=player,here=nearestCity(P.x,P.z).c;const dests=citiesAround(P.x,P.z,900).filter(c=>c!==here&&!cityFallen(c)).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z));
   if(!dests.length){toast('Nenhuma cidade por perto.');return}const d=dests[0],dist=Math.hypot(d.x-P.x,d.z-P.z);
@@ -2440,7 +2463,8 @@ function retire(){profile.retired=profile.retired||[];profile.retired.push({name
 function retiredView(i){view=()=>retiredView(i);const r=profile.retired[i];if(!r)return;const t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);
   let h='<div class="sysline">"Eu era você. Morri no nível '+r.lvl+', rank '+RANKS[r.rank].id+', como '+CLASSES[r.cls].n+', carregando '+fmt(r.gold)+' de ouro. Agora vendo o que sobrou da minha vida."</div>';
   h+=r.sold?'<div class="sysline">Já te vendi tudo que eu tinha.</div>':row('Relíquia da vida passada','Equipamento épico de rank '+GR[t].id,btn(fmt(price)+' ouro','buyret',i,run.gold>=price,'hot'));openModal(r.name.toUpperCase(),h)}
-function innView(){view=null;let h='<div class="sysline">Pousada: descanse ou sonhe.</div>'+row('Descansar','Cura total e passa a noite',btn('100 ouro','rest',0,run.gold>=100));
+function innView(){view=innView;const l=innLv(),c=nearestCity(player.x,player.z).c,up=20000*(l+1)*(l+1);let h='<div class="sysline">Pousada de <b>'+c.name+'</b> · nível <b>'+l+'/5</b>. Quanto melhor a pousada, melhor o descanso.</div>'+row('Descansar','Cura total, enche o escudo e passa a noite'+(l?' · <b>Bem descansado</b>: +'+(5*l)+'% de vida por 10 min'+(l>=5?' e +25% de escudo':''):''),btn('100 ouro','rest',0,run.gold>=100));
+  h+=l<5?row('Melhorar a pousada','Nível '+(l+1)+': descanso dá +'+(5*(l+1))+'% de vida por 10 min'+(l+1>=5?' e +25% de escudo':''),btn(fmt(up)+' ouro','innup',0,run.gold>=up,'hot')):row('Pousada no nível máximo','','');
   h+=unl('dream')?row('Sonhar','Uma masmorra feita dos monstros que mais te mataram · sem saída até acordar',btn('Sonhar','dream',0,true,'hot')):row('Sonhar',lockMsg('dream'),'');openModal('POUSADA',h)}
 function godTab(){const g=L.godSel=L.godSel||{rank:5,aff:[],rooms:10};let h='<div class="sysline"><b style="color:#e6d6ff">Autoridade do Soberano.</b> Crie seu próprio portal.</div>';
   h+=row('Rank','',GR.map((G,i)=>btn(gid(i),'gsel','r'+i,true,g.rank===i?'on':'')).join(''));
@@ -2479,7 +2503,7 @@ function doRebuild(id){const c=nearestCity(player.x,player.z).c;if(c.id!==id)ret
 /* bolsa organizada */
 /* FICHA DO PERSONAGEM: de onde vem cada número (pedido do Irror). */
 /* Dano crítico: x1,7 base (x2,4 com Fúria 10). Chance acima de 100% vira dano crítico extra (+1% por 1% que sobra). */
-function critChance(){return .05+statsBonus().crit+affB().crit/100+(cons('fur')>=10?.1:0)}
+function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur')+(cons('fur')>=10?.1:0)}
 function critMul(){return 2}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
@@ -2491,7 +2515,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade 12×'+(s.vit||0)+' + armadura '+itemHp(a)+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
   h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência 3×'+(s.int||0));
   h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','armadura '+itemArm(a)+' pontos = '+Math.round(armRed(itemArm(a))*100)+'% · classe '+Math.round(cb.def*100)+'%'+(npcHas('Brann')?' · Brann 8%':'')+' · máximo 70%');
-  h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')>=10?' · Fúria 10%':''));
+  h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')?' · Fúria '+(cons('fur')+(cons('fur')>=10?10:0))+'%':''));
   h+=line('Dano crítico','×2'+(cc>1?' / ×3':''),'crítico sempre dobra'+(cc>1?' · o que passa de 100% ('+Math.round((cc-1)*100)+'%) é chance de TRIPLICAR':' · acima de 100% de chance, o que sobra vira chance de triplicar'));
   h+=line('Velocidade de ataque','+'+Math.round(Math.min(30,.4*g))+'%','Agilidade 0,4%×'+g+' · máximo +30%');
   h+=line('Velocidade de movimento','+'+Math.round(Math.min(25,.5*g)+af.spd)+'%','Agilidade 0,5%×'+g+' (máx. +25%)'+(af.spd?' · afixos '+af.spd+'%':''));
@@ -2536,7 +2560,8 @@ function extraActions3(a,v){
   if(a==='caravan'){closeModal();startCaravan();return 'close'}
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
   if(a==='buyret'){const r=profile.retired[+v],t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
-  if(a==='rest'){if(run.gold<100)return;run.gold-=100;player.hp=player.maxhp;player.mp=player.maxmp;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
+  if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
+  if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
   if(a==='dream'){closeModal();buildSpecial('dream');return 'close'}
   if(a==='clone'){if(profile.cloneDay===todayKey())return;closeModal();buildSpecial('clone');return 'close'}
   if(a==='gsel'){const g=L.godSel;if(v[0]==='r')g.rank=+v.slice(1);else if(v[0]==='a'){const id=v.slice(1);g.aff=g.aff.includes(id)?g.aff.filter(x=>x!==id):[...g.aff,id]}else if(v==='s+')g.rooms=Math.min(22,g.rooms+2);else g.rooms=Math.max(4,g.rooms-2);return true}
@@ -2556,7 +2581,7 @@ function bookList(){const pr=rankOf();const pool=[...BOSSES,...(pr>=5?BOSSES_HIG
 function powLib(){run.lib=(run.lib||[]).filter((x,i,a)=>a.findIndex(y=>y.n===x.n)===i);run.stolen=run.stolen.filter((x,i,a)=>a.findIndex(y=>y.n===x.n)===i);for(const s of run.stolen)if(!run.lib.some(x=>x.n===s.n))run.lib.push({...s,cdT:0});return run.lib}
 function learnPower(sk){const lib=powLib();
   /* Repetido: sobe 1 nível do poder (ideia do Irror); no máximo, vira 2 pontos de habilidade. */
-  if(lib.some(x=>x.n===sk.n)){const l=run.skl[sk.n]||0;if(l<10){run.skl[sk.n]=l+1;toast('<b>[SISTEMA]</b> Você já conhecia <b>'+sk.n+'</b>: ele subiu para o <b>NV '+(l+2)+'</b>.',5000)}else{run.spts=(run.spts||0)+2;toast('<b>[SISTEMA]</b> <b>'+sk.n+'</b> já está no máximo: +2 pontos de habilidade.',5000)}sfx('level');return}
+  if(lib.some(x=>x.n===sk.n)){const l=run.skl[sk.n]||0;if(l<10){run.skl[sk.n]=l+1;toast('<b>[SISTEMA]</b> Você já conhecia <b>'+sk.n+'</b>: ele subiu para o <b>NV '+(l+1)+'</b>.',5000)}else{run.spts=(run.spts||0)+2;toast('<b>[SISTEMA]</b> <b>'+sk.n+'</b> já está no máximo: +2 pontos de habilidade.',5000)}sfx('level');return}
   lib.push({...sk,cdT:0});
   if(run.stolen.length<3&&!run.stolen.some(x=>x.n===sk.n)){run.stolen.push({...sk,cdT:0});buildSteal()}
   else toast('<b>[SISTEMA]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
@@ -2584,7 +2609,7 @@ function openShop(id){
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% nos números base (ataque, vida e armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
     for(let t=0;t<Math.min(profile.rank===8?9:8,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const d=itemScore(it)-itemScore(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+d+' de poder</b> sobre a sua '+eq.name:' · <b style="color:#ff8a9a">▼ '+d+' de poder</b> — a sua '+eq.name+' é melhor'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);
@@ -2623,7 +2648,7 @@ function guildView(tab){
 }
 /* RECOMENDAÇÃO DO SISTEMA: nota de poder de cada item, comparada com o equipado. */
 const AFW={dmg:1,crit:.8,ls:.6,spd:.5,hp:.5,mp:.3};
-function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?itemAtk(it):itemHp(it)/8+itemArm(it)*1.5;
+function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?itemAtk(it):itemSh(it)/6;
   for(const a of it.aff||[])sc*=1+a.v*(AFW[a.k]??(run.elem===a.k?1:.35))/100;
   if(it.set){const o=run.equip[it.slot==='w'?'a':'w'];if(o&&o.set===it.set)sc*=1.05}
   if(it.curse)sc*=.9;return Math.round(sc)}
@@ -2682,7 +2707,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='equipbest'){for(const sl of['w','a']){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[SISTEMA]</b> Equipamento otimizado.');}
   if(a==='equip'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;const it=run.items[i];run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[SISTEMA]</b> Equipado: '+it.name)}
   if(a==='sell'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;run.gold+=run.items[i].value;toast('<b>[SISTEMA]</b> Vendido por '+fmt(run.items[i].value)+' ouro');run.items.splice(i,1)}
-  if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.1*affL('Lyra')));run.gold+=rw;toast('<b>[SISTEMA]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);run.quests[+v]=genQuest(q.t)}
+  if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[SISTEMA]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);run.quests[+v]=genQuest(q.t)}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[SISTEMA]</b> '+p.name+' entrou no seu grupo.')}
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[SISTEMA]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
