@@ -129,7 +129,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()">ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
@@ -1327,9 +1327,11 @@ function attack(){
   const c=CLASSES[profile.cls];
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
   const third=player.combo===3;player.atkT=.001;player.atkCd=(third?.46:.3)*statsBonus().atk;dprog('atk',1);
-  const dmg=player.dmg*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
-  if(c.ranged){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
-  else{faceTarget(6);const reach=third?3.1:2.6,arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
+  const dmg=player.dmg*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
+  const shootsNow=styleOff()?!c.ranged:c.ranged;
+  if(shootsNow&&styleOff()){faceTarget(14);shoot(player.x,player.z,player.face,20,dmg,'player',0x8fb8ff,'orb');beep(520,.05,.03,'triangle')}
+  else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
+  else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0x8fe3ff,reach,third);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
@@ -1703,7 +1705,8 @@ function hud(){
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
   const ordh=allies.some(a=>a.shadow&&!a.dead)?'[SOMBRAS: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1])+(touch?' · toque aqui':' (O)')+'] ':'';
-  const dmd=ordh+invs+(run.demand?'[EXIGÊNCIA '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
+  const sth='['+(basicIsMagic()?'ARCANO':'FÍSICO')+(styleOff()?' 70%':'')+(touch?'':' (X)')+'] ';
+  const dmd=sth+ordh+invs+(run.demand?'[EXIGÊNCIA '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
   $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s) · receba na Associação':q?'[MISSÃO] '+q.d+': '+q.got+'/'+q.n:'');$('mission').hidden=!(done||q||dl||pt||dmd);
   drawMap(mmc,192,false);
 }
@@ -1987,8 +1990,14 @@ function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=
 function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'SOMBRA NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 /* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
 const MAGIC_CLS=[3,5,6,7];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
-function statsBonus(){const s=run.stats||{},m=isMagic(),main=m?(s.int||0):(s.for||0);return{dmg:1+.02*main,spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*main,hp:1+.03*(s.vit||0)+(m?.01*(s.for||0):0)}}
-function statDesc(){return isMagic()?{for:'+1% vida (classe mágica: Força não aumenta dano)',agi:STATD.agi,per:STATD.per,int:'+2% dano do ataque e das habilidades, +2% mana',vit:STATD.vit}:{for:'+2% dano do ataque e das habilidades',agi:STATD.agi,per:STATD.per,int:'+2% mana (classe física: Inteligência não aumenta dano)',vit:STATD.vit}}
+function statsBonus(){const s=run.stats||{},m=isMagic(),main=m?(s.int||0):(s.for||0);return{dmg:1+.02*main,spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*main,hp:1+.03*(s.vit||0),phys:1+.02*(s.for||0),mag:1+.02*(s.int||0)}}
+/* ESTILO DE LUTA: natural da classe (100%) ou o outro (70%). Físico usa Força, arcano usa Inteligência. */
+function styleOff(){return run.style==='off'}
+function basicIsMagic(){return isMagic()!==styleOff()}
+function basicDmgMul(){const b=statsBonus();return (basicIsMagic()?b.mag:b.phys)/b.dmg*(styleOff()?.7:1)}
+function toggleStyle(){if(!started||paused)return;run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
+  toast('<b>[SISTEMA]</b> Ataque básico agora é <b>'+(m?'ARCANO (usa Inteligência)':'FÍSICO (usa Força)')+'</b>'+(styleOff()?' · estilo fora da sua classe: 70% de eficiência':' · estilo natural da classe')+'. Habilidades Q/R/T não mudam.',5000);sfx('arise');hud()}
+function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2% dano FÍSICO'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:STATD.agi,per:STATD.per,int:'+2% dano MÁGICO e +2% mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2547,7 +2556,7 @@ function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e 
   for(const [act,n] of KEYACT)h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true));
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
-addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
