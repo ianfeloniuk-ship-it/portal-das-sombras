@@ -2457,7 +2457,7 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Absorva essências de guardiões','');
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Associação','');
     h+=row('Sombras',run.shadows.length+' no exército',btn('Exército','army',0));
-    h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10 · '+Math.floor(w.wxp||0)+' XP'+(w.rar<2?' · só épicas e lendárias despertam':''):'Sem arma','');
+    h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10'+((w.wlv||0)>=10?' · MÁXIMO':' · '+Math.floor(w.wxp||0)+' XP')+' · bônus da arma +'+Math.round((Math.pow(1.03,w.wlv||0)-1)*100)+'%'+(w.rar<2?' · só Épicas ou melhores despertam uma alma':'')+'<br><span style="color:var(--dim)">A arma que você usa ganha XP quando você mata: cada nível dá +3% no bônus dela (até o 10). No nível 5, armas Épicas+ despertam uma alma que fala com você. A XP fica na arma: trocar de arma recomeça.</span>':'Sem arma','');
     h+=row('Conjunto',!unl('sets')?lockMsg('sets'):(Object.keys(setB()).length?'<b>'+run.equip.w.set+'</b> ativo: '+SETS.find(s=>s.n===run.equip.w.set).d:'Arma e armadura do mesmo conjunto ativam o bônus'),'');
     h+=row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Associação','')}
   else if(tab==='world'){h+=row('Diário','Páginas da história',btn('Ler','diary',0));
