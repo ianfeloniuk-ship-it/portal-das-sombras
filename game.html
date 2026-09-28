@@ -1356,12 +1356,14 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
   projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player'});
 }
+/* Recarga da esquiva ligada à Agilidade: 1,4 s sem pontos, cai 1,2% por ponto, mínimo 0,55 s. */
+function dodgeCdVal(){return Math.max(.55,1.4*(1-.012*((run.stats||{}).agi||0)))}
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
   if(pcCam.yaw)[dx,dz]=camRot(dx,dz);
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
-  player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=1.1;player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
+  player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=dodgeCdVal();player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
@@ -1952,7 +1954,7 @@ function bankView(){
 
 /* ================= SISTEMAS: STATUS, DIÁRIA, SOMBRAS, GUILDA, FORJA, MONTARIA, DIA/NOITE, EVENTOS, APARÊNCIA, DIÁRIO ================= */
 const STATN={for:'Força',agi:'Agilidade',per:'Percepção',int:'Inteligência',vit:'Vitalidade'};
-const STATD={for:'+2% dano',agi:'+1% velocidade e ataque mais rápido',per:'+0,6% crítico',int:'+2% mana e +2% dano de habilidade',vit:'+3% vida'};
+const STATD={for:'+2% dano',agi:'+1% velocidade, ataque mais rápido e esquiva recarrega mais rápido',per:'+0,6% crítico',int:'+2% mana e +2% dano de habilidade',vit:'+3% vida'};
 const DAILY=[['run','Correr',1000,'m'],['atk','Golpes',100,''],['dodge','Esquivas',20,''],['kill','Monstros',30,'']];
 const todayKey=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 const SHNAMES=['Kaizen','Vorn','Ignar','Velmor','Durak','Grimm','Nyx','Morvak','Sombra Alfa','Rurik','Zael','Orsk'];
