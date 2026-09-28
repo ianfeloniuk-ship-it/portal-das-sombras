@@ -214,7 +214,16 @@ const KINDS={
  warrior:{gk:'Skeleton_Warrior',clip:'1H_Melee_Attack_Chop',n:'Esqueleto Guarda',hp:85,dmg:13,spd:2.1,ai:'melee',range:2.1,wind:.7,atkCd:1.7,xp:16,scale:1.15,body:0x8a8f99,wep:'axe',shield:true,r:.7},
  golem:{gk:'Skeleton_Warrior',gtint:0x6a82ff,clip:'2H_Melee_Attack_Slice',n:'Golem de Mana',hp:240,dmg:20,spd:1.8,ai:'slam',range:2.6,wind:1,atkCd:2.4,xp:34,scale:1.7,body:0x4a5f7a,skin:0x6a82a0,eye:0x8fe3ff,wep:'none',r:.95},
  wraith:{gk:'Skeleton_Mage',gtint:0x5a3aa0,n:'Espectro',hp:70,dmg:14,spd:3.4,ai:'wraith',range:11,wind:.6,atkCd:2,xp:26,scale:1,body:0x241a3e,skin:0x3a2c5a,eye:0x9cf0ff,wep:'staff',r:.55},
- demon:{gk:'Skeleton_Rogue',gtint:0xd03030,n:'Demônio',hp:120,dmg:18,spd:4.6,ai:'lunge',range:1.7,wind:.35,atkCd:1.3,xp:30,scale:1.1,body:0x8a1a1a,skin:0xb03030,eye:0xffa000,wep:'axe',r:.6},
+ demon:{mon:'demonio',gk:'Skeleton_Rogue',gtint:0xd03030,n:'Demônio',hp:120,dmg:18,spd:4.6,ai:'lunge',range:1.7,wind:.35,atkCd:1.3,xp:30,scale:1.1,body:0x8a1a1a,skin:0xb03030,eye:0xffa000,wep:'axe',r:.6},
+ goblin:{mon:'goblin',gk:'Skeleton_Minion',n:'Goblin',hp:30,dmg:7,spd:4.2,ai:'melee',range:1.5,wind:.35,atkCd:1,xp:8,scale:1,body:0x4a7a3a,wep:'none',r:.45},
+ lobo:{mon:'lobo',gk:'Skeleton_Rogue',n:'Lobo Sombrio',hp:38,dmg:9,spd:5.4,ai:'lunge',range:1.6,wind:.3,atkCd:1.4,xp:11,scale:1,body:0x3a3a4a,wep:'none',r:.55},
+ aranha:{mon:'aranha',gk:'Skeleton_Rogue',n:'Aranha Gigante',hp:46,dmg:10,spd:3.8,ai:'lunge',range:1.6,wind:.4,atkCd:1.6,xp:13,scale:1.1,body:0x2a2a2a,wep:'none',r:.7},
+ vespa:{mon:'vespa',gk:'Skeleton_Mage',n:'Vespa Rainha',hp:40,dmg:11,spd:4,ai:'wraith',range:9,wind:.5,atkCd:1.9,xp:15,scale:1,body:0xd0a020,wep:'none',r:.55},
+ orc:{mon:'orc',gk:'Skeleton_Warrior',n:'Orc',hp:110,dmg:15,spd:2.6,ai:'melee',range:2,wind:.6,atkCd:1.6,xp:20,scale:1,body:0x4a6a2a,wep:'none',r:.7},
+ yeti:{mon:'yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
+ gigante:{mon:'gigante',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
+ raptor:{mon:'raptor',gk:'Skeleton_Rogue',n:'Raptor',hp:70,dmg:14,spd:5.2,ai:'lunge',range:1.8,wind:.3,atkCd:1.3,xp:18,scale:1,body:0x6a8a3a,wep:'none',r:.7},
+ dragao:{mon:'dragao',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
  rogue:{gk:'Skeleton_Rogue',n:'Esqueleto Ladino',hp:44,dmg:11,spd:3.4,ai:'lunge',range:1.5,wind:.5,atkCd:2.2,xp:12,scale:.95,body:0x3c3c46,wep:'dagger',r:.55}};
 // ranks de portal
 const GR=[
@@ -309,6 +318,7 @@ function weapon(kind,col){
   return g;
 }
 function makeChibi(o){
+  if(o.mon&&MON.list[o.mon])return makeMonster(o);
   if(o.gk&&MODELS.ok&&MODELS.list[o.gk])return makeActor(o);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);
   const sc=o.scale||1;body.scale.setScalar(sc);
@@ -383,7 +393,34 @@ function foxMount(){const src=MODELS.fox.scene,model=THREE.SkeletonUtils.clone(s
   model.traverse(c=>{if(c.isMesh){envCull(c);c.material=c.material.clone();c.material.color.lerp(new THREE.Color(0x7fb8ff),.55);c.material.emissive=new THREE.Color(0x0a2a50)}});
   const mixer=new THREE.AnimationMixer(model),A={};for(const a of MODELS.fox.animations)A[a.name]=mixer.clipAction(a);return{root,model,mixer,A,cur:null,fox:true}}
 function foxAnim(m,mv){const n=mv>.1?(mv>.6?'Run':'Walk'):'Survey';if(m.cur!==n&&m.A[n]){const a=m.A[n];a.reset().play();if(m.cur&&m.A[m.cur])m.A[m.cur].crossFadeTo(a,.2,false);m.cur=n}m.mixer.update(ADT)}
-function gAct(m,n){if(m.act[n])return m.act[n];const c=MODELS.anims.find(a=>a.name===n);if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
+/* ===== Monstros animados (Quaternius, CC0) — carregam em segundo plano; até lá o monstro usa o esqueleto KayKit ===== */
+const MON={list:{},clips:{},h:{}};
+const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufixo) */
+  goblin:{h:1.5,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}},
+  orc:{h:2.3,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  aranha:{h:.75,a:{Idle:'Spider_Idle',Running_A:'Spider_Walk',Death_A:'Spider_Death',ATK:'Spider_Attack'}},
+  lobo:{h:1.3,a:{Idle:'Idle',Running_A:'Gallop',Death_A:'Death',ATK:'Attack',Hit:'Idle_HitReact_Left'}},
+  demonio:{h:2.3,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  raptor:{h:1.9,a:{Idle:'Velociraptor_Idle',Running_A:'Velociraptor_Run',Death_A:'Velociraptor_Death',ATK:'Velociraptor_Attack'}},
+  dragao:{h:3.4,a:{Idle:'Dragon_Flying',Running_A:'Dragon_Flying',Death_A:'Dragon_Death',ATK:'Dragon_Attack',Hit:'Dragon_Hit'}},
+  gigante:{h:3.6,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}},
+  yeti:{h:2.6,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Punch',Hit:'HitReact'}},
+  vespa:{h:1.4,a:{Idle:'Wasp_Flying',Running_A:'Wasp_Flying',Death_A:'Wasp_Death',ATK:'Wasp_Attack'}}};
+MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
+  for(const k in MON_DEF)ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})});
+function makeMonster(o){
+  const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
+  const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
+  const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=c.material.clone();if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
+  const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k};
+}
+function gAct(m,n){if(m.act[n])return m.act[n];let c;
+  if(m.alias){const nm=m.alias[n]||(n==='Hit_A'?m.alias.Hit:null)||m.alias.Idle;c=m.clips.find(a=>a.name===nm||a.name.endsWith('|'+nm))}
+  else c=MODELS.anims.find(a=>a.name===n);
+  if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
 function gPlay(m,n,once,spd){const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
   m.body.position.y=0;m.body.rotation.set(0,0,0);
@@ -977,13 +1014,13 @@ function placeAllies(){for(const a of allies){if(a.guest)continue;a.x=player.x+r
 
 /* ================= ENTIDADES ================= */
 function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
-  const m=makeChibi({body:K.body,skin:K.skin??0xe8e0cc,eye:K.eye??0xff3030,wep:K.wep,shield:K.shield,scale:K.scale,wcol:0xb06bff,hair:K.hair,helm:K.helm,gk:K.gk,tint:K.gtint,atkClip:K.clip});
+  const m=makeChibi({body:K.body,skin:K.skin??0xe8e0cc,eye:K.eye??0xff3030,wep:K.wep,shield:K.shield,scale:K.scale,wcol:0xb06bff,hair:K.hair,helm:K.helm,gk:K.gk,tint:K.gtint,atkClip:K.clip,mon:K.mon});
   m.root.position.set(x,0,z);scene.add(m.root);
   const e={m,mats:m.mats,x,z,face:rnd(0,TAU),name:K.n,hp:K.hp*mulHp,maxhp:K.hp*mulHp,dmg:K.dmg*mulDmg,speed:K.spd,ai:K.ai,range:K.range,wind:K.wind,atkCd:K.atkCd,xp:K.xp,r:K.r,shield:!!K.shield,
     cd:rnd(.5,1.5),act:null,stun:0,slow:0,dotT:0,dotD:0,flash:0,dead:false,deadT:0,aggro:false,kb:{x:0,z:0},t:Math.random()*9,team:'enemy',gold:0,...extra};
   enemies.push(e);return e;
 }
-function kindsFor(gr){const a=[{k:'minion',w:32},{k:'rogue',w:24},{k:'mage',w:22},{k:'warrior',w:22}];if(gr>=3)a.push({k:'golem',w:12+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3});return a}
+function kindsFor(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
 function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;return e}
 function spawnRival(x,z,gr,extra={}){
   const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
