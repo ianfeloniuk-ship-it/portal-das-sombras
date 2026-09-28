@@ -1408,8 +1408,8 @@ function runSkill(sk){
 }
 function absorb(b){
   b.absorbed=true;const rk=RANKS[rankOf()],c=CLASSES[profile.cls];
-  const has=run.stolen.some(s=>s.n===b.boss.skill.n);
-  if(!has&&Math.random()<rk.steal+b.gr*.03){if(run.stolen.length>=3)run.stolen.shift();run.stolen.push({...b.boss.skill,cdT:0});buildSteal();toast('<b>[SISTEMA]</b> Habilidade roubada: <b>'+b.boss.skill.n+'</b>',4000)}
+  const has=powLib().some(s=>s.n===b.boss.skill.n);
+  if(!has&&Math.random()<rk.steal+b.gr*.03){learnPower(b.boss.skill);toast('<b>[SISTEMA]</b> Habilidade roubada: <b>'+b.boss.skill.n+'</b>',4000)}
   else toast('<b>[SISTEMA]</b> A essência escapou. Chance de roubo no rank '+rk.id+': '+Math.round((rk.steal+b.gr*.03)*100)+'%',3500);
   if(canArise()){bigText('LEVANTE-SE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[SISTEMA]</b> ERGUER SOMBRA: a sombra de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
   else{fxBurst(b.x,.5,b.z,0xffd070,20,5);b.m.root.visible=false}
@@ -2102,7 +2102,7 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
   for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
-  if(run.stolen.length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of run.stolen){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
+  if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+(l>=10?' · MÁXIMO':'/11')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
   {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+row('Maestria <b>'+ms+'</b>','Cada ponto de habilidade aqui dá +1% de dano e +1% de vida, para sempre nesta vida. Use quando suas habilidades estiverem no máximo. Agora: <b>+'+ms+'%</b>',btn('+1','mast',0,run.spts>0))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
@@ -2135,7 +2135,8 @@ function extraActions(a,v){
   if(a==='skup'){if(run.spts<1)return;const l=run.skl[v]||0;if(l>=10)return;run.spts--;run.skl[v]=l+1;return true}
   if(a==='skup2'){if(run.spts<2)return;const l=run.skl[v]||0;if(l>=10)return;run.spts-=2;run.skl[v]=l+1;return true}
   if(a==='mast'){if(run.spts<1)return;run.spts--;run.mastery=(run.mastery||0)+1;refreshStats();return true}
-  if(a==='buybook'){const B=bookList()[+v];if(!B||run.gold<B.price)return;if(run.stolen.some(x=>x.n===B.sk.n)){toast('Você já conhece '+B.sk.n+'.');return}run.gold-=B.price;if(run.stolen.length>=3)run.stolen.shift();run.stolen.push({...B.sk,cdT:0});buildSteal();sfx('level');toast('<b>[SISTEMA]</b> Grimório lido: <b>'+B.sk.n+'</b> (teclas 1–3).',5000);return true}
+  if(a==='powslot'){const [i,k]=String(v).split(':').map(Number);const sk=powLib()[i];if(!sk)return;const old=run.stolen.findIndex(x=>x.n===sk.n);if(old>=0)run.stolen.splice(old,1);if(k>=run.stolen.length)run.stolen.push({...sk,cdT:0});else run.stolen[k]={...sk,cdT:0};run.stolen=run.stolen.slice(0,3);buildSteal();return true}
+  if(a==='buybook'){const B=bookList()[+v];if(!B||run.gold<B.price)return;if(powLib().some(x=>x.n===B.sk.n)){toast('Você já conhece '+B.sk.n+'.');return}run.gold-=B.price;learnPower(B.sk);sfx('level');toast('<b>[SISTEMA]</b> Grimório lido: <b>'+B.sk.n+'</b>.',4000);return true}
   if(a==='shtog'){const r=run.shadows[+v];if(!r)return;if(r.on){r.on=false;const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}}else if(run.shadows.filter(s=>s.on).length<shadowCap()){r.on=true;spawnShadowRec(r,player.x+1,player.z+1)}return true}
   if(a==='shname'){const r=run.shadows[+v];const i=SHNAMES.indexOf(r.nick);r.nick=SHNAMES[(i+1)%SHNAMES.length];const al=allies.find(x=>x.rec===r);if(al)al.name=r.nick+' ['+r.n+']';return true}
   if(a==='shfree'){const r=run.shadows[+v];const al=allies.find(x=>x.rec===r);if(al){al.dead=true;scene.remove(al.m.root)}run.shadows.splice(+v,1);return true}
@@ -2454,7 +2455,7 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
     h+=row('Reencarnação','Volta ao nível 1 com +10% permanente em tudo. Mantém ouro, itens e sombras. Próxima exige nível <b>'+(100*((profile.rebirths||0)+1))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=100*((profile.rebirths||0)+1),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
-    h+=row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Absorva essências de guardiões','');
+    h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Absorva essências de guardiões','');h+=libRows();
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Associação','');
     h+=row('Sombras',run.shadows.length+' no exército',btn('Exército','army',0));
     h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10'+((w.wlv||0)>=10?' · MÁXIMO':' · '+Math.floor(w.wxp||0)+' XP')+' · bônus da arma +'+Math.round((Math.pow(1.03,w.wlv||0)-1)*100)+'%'+(w.rar<2?' · só Épicas ou melhores despertam uma alma':'')+'<br><span style="color:var(--dim)">A arma que você usa ganha XP quando você mata: cada nível dá +3% no bônus dela (até o 10). No nível 5, armas Épicas+ despertam uma alma que fala com você. A XP fica na arma: trocar de arma recomeça.</span>':'Sem arma','');
@@ -2491,6 +2492,13 @@ const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" 
 /* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 1–3). Caros de propósito. */
 function bookList(){const pr=rankOf();const pool=[...BOSSES,...(pr>=5?BOSSES_HIGH:[])];const seen=new Set();const out=[];
   for(const b of pool){if(!b.skill||seen.has(b.skill.n))continue;seen.add(b.skill.n);out.push({sk:b.skill,price:Math.round(60000*Math.pow(2.2,Math.min(pr,7))*(BOSSES_HIGH.includes(b)?4:1))})}return out.slice(0,6)}
+/* BIBLIOTECA DE PODERES: todo poder aprendido fica guardado; 3 ficam ativos nas teclas 1–3 (escolha na aba Poderes). */
+function powLib(){run.lib=run.lib||[];for(const s of run.stolen)if(!run.lib.some(x=>x.n===s.n))run.lib.push({...s,cdT:0});return run.lib}
+function learnPower(sk){const lib=powLib();if(!lib.some(x=>x.n===sk.n))lib.push({...sk,cdT:0});
+  if(run.stolen.length<3&&!run.stolen.some(x=>x.n===sk.n)){run.stolen.push({...sk,cdT:0});buildSteal()}
+  else toast('<b>[SISTEMA]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
+function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 1–3). Escolha qual vai em cada tecla.</div>';
+  lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,slot!==k)).join(''))});return h}
 function mktView(){
   view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false,tot=0;
   for(const [k,nm,P] of[['core','Núcleo mágico',CORE_P],['cry','Cristal de mana',CRY_P]])for(let r=0;r<9;r++){const n=run.res[k][r];if(!n)continue;any=true;tot+=n*sellP(k,r);h+=row(nm+' <span class="rl" style="color:'+RANKS[r].c+'">'+GR[r].id+'</span> × '+n,fmt(sellP(k,r))+' ouro cada ('+arrow(r)+') · total '+fmt(n*sellP(k,r)),btn('Vender','sellres',k+r))}
