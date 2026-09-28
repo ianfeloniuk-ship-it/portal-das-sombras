@@ -38,6 +38,7 @@ Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-da
 - Bestiário permanente (`profile.bestiary` — NÃO usar `profile.best`, que é o recorde de andar): abates por espécie dão +3/6/10/15% de dano contra ela (10/50/200/1000). Tecla J ou menu ⚙.
 - Viagem rápida: cidades visitadas ficam em `profile.visited`; Associação → aba Viagem, custa ouro pela distância, bloqueada com monstros perseguindo.
 - PC: segurar botão do mouse ou tecla de ataque continua atacando (`mouseHeld`).
+- Atributo principal por classe: mágicas (Mago, Curandeiro, Invocador, Necromante) usam INT para ataque e habilidades, FOR dá +1% vida; físicas usam FOR para os dois, INT só mana. Empurrão de projéteis do jogador reduzido (1,2→0,35). Habilidade de ataque sem inimigo perto não gasta mana nem recarga. (feedback do irmão do Ian)
 - Teclas configuráveis no PC (menu ⚙ → Configurar teclas), salvas em `pds_keys`.
 
 ## Decisões do Ian (não mudar sem perguntar)

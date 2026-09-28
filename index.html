@@ -1337,7 +1337,7 @@ function attack(){
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
-  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??1.2,fromPlayer:o.fromPlayer??team==='player'});
+  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player'});
 }
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
@@ -1349,6 +1349,7 @@ function dodge(){
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[SISTEMA]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5));fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk)return;if(sk.cdT>0)return;
+  if(['cone','nova','chain','bolt','rain','dot'].includes(sk.t)&&!nearestEnemy(player.x,player.z,sk.t==='bolt'||sk.t==='rain'?16:11)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
   player.mp-=sk.mp;sk.cdT=sk.cd*(1-.05*(run.skl[sk.n]||0))*(cons('arc')>=10?.8:1);runSkill(sk);player.atkT=.001;
 }
@@ -1982,7 +1983,10 @@ function albumView(){view=albumView;const a=profile.album||[];let h='<div class=
 function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Nova sombra na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[SISTEMA]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
 function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'SOMBRA NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
-function statsBonus(){const s=run.stats||{};return{dmg:1+.02*(s.for||0),spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*(s.int||0),hp:1+.03*(s.vit||0)}}
+/* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
+const MAGIC_CLS=[3,5,6,7];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
+function statsBonus(){const s=run.stats||{},m=isMagic(),main=m?(s.int||0):(s.for||0);return{dmg:1+.02*main,spd:1+.01*(s.agi||0),atk:1-Math.min(.35,.005*(s.agi||0)),crit:.006*(s.per||0),mp:1+.02*(s.int||0),skill:1+.02*main,hp:1+.03*(s.vit||0)+(m?.01*(s.for||0):0)}}
+function statDesc(){return isMagic()?{for:'+1% vida (classe mágica: Força não aumenta dano)',agi:STATD.agi,per:STATD.per,int:'+2% dano do ataque e das habilidades, +2% mana',vit:STATD.vit}:{for:'+2% dano do ataque e das habilidades',agi:STATD.agi,per:STATD.per,int:'+2% mana (classe física: Inteligência não aumenta dano)',vit:STATD.vit}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2034,7 +2038,7 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
 /* janelas novas */
 function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   let h='<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
-  for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',STATD[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
+  for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
   for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+(l+1)+'</b>','+15% poder e −5% recarga por nível',btn('+1','skup',sk.n,run.spts>0&&l<10))}
