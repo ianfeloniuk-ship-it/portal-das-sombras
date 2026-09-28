@@ -1645,7 +1645,9 @@ function drawOverlay(){
   /* PC: inimigo sob o mouse ganha anel no chão, nome e barra de vida */
   if(!touch&&!P.dead){const ap=aimPoint();if(ap){let best=null,bd=2.2;for(const e of enemies){if(e.dead||e.sleep)continue;const d=Math.hypot(e.x-ap.x,e.z-ap.z)-(e.r||.5);if(d<bd){bd=d;best=e}}
     if(best){const pr=proj(best.x,.05,best.z),pt=proj(best.x,2.3*(best.m.sc||1)+.35,best.z);if(pr.ok){oc.strokeStyle='rgba(255,90,110,.9)';oc.lineWidth=2.5;oc.beginPath();oc.ellipse(pr.x,pr.y,22*(best.r||.5)*2,9*(best.r||.5)*2,0,0,TAU);oc.stroke()}
-      if(pt.ok&&!best.isBoss)bar(pt.x,pt.y,50,best.hp/best.maxhp,'#ff4d6a',best.name+' · '+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp),'#ffe0e6')}}}
+      /* Uma barra só: se o inimigo já mostra a barra normal, só escreve nome e vida acima dela. */
+      const hasBar=!best.isBoss&&!best.sleep&&!best.invuln&&Math.hypot(best.x-P.x,best.z-P.z)<=24&&(best.aggro||best.hp<best.maxhp||best.rival||best.elite);
+      if(!best.isBoss){const pb=proj(best.x,2.1*(best.m.sc||1)+.1,best.z);if(pb.ok){if(!hasBar)bar(pb.x,pb.y,34,best.hp/best.maxhp,'#ff4d6a');oc.font='700 11px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';const t=best.name+' · '+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp);const ty=pb.y-((best.rival||best.elite)&&hasBar?16:6);oc.strokeText(t,pb.x,ty);oc.fillStyle='#ffe0e6';oc.fillText(t,pb.x,ty)}}}}}
   const c=ctxTarget();$('bF').hidden=!c||paused;if(c)$('bF').textContent=touch?c.label.replace('F · ',''):c.label;
 }
 const mmc=$('mm').getContext('2d');
