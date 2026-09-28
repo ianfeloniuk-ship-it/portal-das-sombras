@@ -25,5 +25,6 @@ Todos os modelos 3D são de licença CC0 (domínio público). Licenças em `mode
 - Árvores secas, lápides e ossos: **KayKit Halloween Bits**, de Kay Lousberg.
 - Árvores, pedras, grama, flores e cogumelos: **Nature Kit**, da Kenney (www.kenney.nl).
 - Fonte, barracas e lampiões: **Fantasy Town Kit**, da Kenney.
+- Montaria (Lobo de Mana): modelo **Fox** do glTF Sample Assets — modelo de PixelMannen (CC0), rig e animação de tomkranis (CC-BY 4.0), conversão AsoboStudio e scurest (CC-BY 4.0).
 
 O arquivo `models/env.glb` junta os modelos de cenário já convertidos (cores assadas nos vértices, sem texturas) para carregar rápido.

@@ -325,17 +325,18 @@ const WKEYS=['sword_1handed','dagger','axe_1handed','staff','crossbow_1handed','
 MODELS.ready=new Promise(res=>{
   if(!THREE.GLTFLoader||!THREE.SkeletonUtils){res(false);return}
   const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  const jobs=[['a','anims'],...MKEYS.map(k=>['m',k]),...WKEYS.map(k=>['w',k]),['e','env']];let n=0,fail=false;
+  const jobs=[['a','anims'],...MKEYS.map(k=>['m',k]),...WKEYS.map(k=>['w',k]),['e','env'],['f','fox']];let n=0,fail=false;
   const fin=()=>{if(++n<jobs.length)return;MODELS.ok=!fail&&MODELS.anims.length>0;res(MODELS.ok)};
   const one=(t,k,g)=>{
+    if(t==='f'){MODELS.fox=g;fin();return}
     if(t==='e'){try{envParse(g.scene);envBlades();ENV.ok=true}catch(err){console.warn(err);ENV.ok=false}}
     else if(t==='a')MODELS.anims=g.animations;
     else if(t==='w')MODELS.w[k]=g.scene;
     else{MODELS.list[k]=g.scene;const b=new THREE.Box3().setFromObject(g.scene);MODELS.h[k]=b.max.y-b.min.y||2}
     fin()};
   const fk=(t,k)=>(t==='w'?'w_':'')+k;
-  const perFile=()=>{for(const [t,k] of jobs)ld.load('models/'+fk(t,k)+'.glb',g=>one(t,k,g),undefined,()=>{if(t!=='e')fail=true;fin()})};
-  (window.PDS_SITE?Promise.reject(0):fetch('models-pack.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(p=>{for(const [t,k] of jobs){const b=p[fk(t,k)];if(!b){if(t!=='e')fail=true;fin();continue}const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);ld.parse(u.buffer,'',g=>one(t,k,g),()=>{if(t!=='e')fail=true;fin()})}}).catch(perFile);
+  const perFile=()=>{for(const [t,k] of jobs)ld.load('models/'+fk(t,k)+'.glb',g=>one(t,k,g),undefined,()=>{if(t!=='e'&&t!=='f')fail=true;fin()})};
+  (window.PDS_SITE?Promise.reject(0):fetch('models-pack.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(p=>{for(const [t,k] of jobs){const b=p[fk(t,k)];if(!b){if(t!=='e'&&t!=='f')fail=true;fin();continue}const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);ld.parse(u.buffer,'',g=>one(t,k,g),()=>{if(t!=='e'&&t!=='f')fail=true;fin()})}}).catch(perFile);
   setTimeout(()=>{if(n<jobs.length){fail=true;n=jobs.length-1;fin()}},25000);
 });
 const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded'];
@@ -357,6 +358,16 @@ function makeActor(o){
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:o.atkClip||ATK_CLIP[o.wep]||ATK_CLIP.none,la:0,lw:0};
 }
 let ADT=0;
+/* monstros de bioma */
+const BIOM={neve:{p:'Gélido',c:0x9fd8ff,hp:1.3,dmg:1,spd:.85,gold:1.3},deserto:{p:'das Areias',c:0xe0b060,hp:1,dmg:1.25,spd:1.1,gold:1.3,suf:true},pantano:{p:'do Pântano',c:0x6a8a3a,hp:1.15,dmg:1.1,spd:1,gold:1.3,suf:true}};
+function bioMob(e,b){const B=BIOM[b];if(!B||e.isBoss)return;e.hp*=B.hp;e.maxhp*=B.hp;e.dmg*=B.dmg;e.speed=(e.speed||3)*B.spd;e.gold*=B.gold;e.name=B.suf?e.name+' '+B.p:e.name+' '+B.p;
+  if(e.mats)for(const m of e.mats)if(m.color)m.color.lerp(new THREE.Color(B.c),.35)}
+/* montaria: Lobo de Mana (modelo Fox, CC0/CC-BY) */
+function foxMount(){const src=MODELS.fox.scene,model=THREE.SkeletonUtils.clone(src),root=new THREE.Group();root.add(model);
+  const b=new THREE.Box3().setFromObject(src),h=b.max.y-b.min.y||1;model.scale.setScalar(1.75/h);
+  model.traverse(c=>{if(c.isMesh){envCull(c);c.material=c.material.clone();c.material.color.lerp(new THREE.Color(0x7fb8ff),.55);c.material.emissive=new THREE.Color(0x0a2a50)}});
+  const mixer=new THREE.AnimationMixer(model),A={};for(const a of MODELS.fox.animations)A[a.name]=mixer.clipAction(a);return{root,model,mixer,A,cur:null,fox:true}}
+function foxAnim(m,mv){const n=mv>.1?(mv>.6?'Run':'Walk'):'Survey';if(m.cur!==n&&m.A[n]){const a=m.A[n];a.reset().play();if(m.cur&&m.A[m.cur])m.A[m.cur].crossFadeTo(a,.2,false);m.cur=n}m.mixer.update(ADT)}
 function gAct(m,n){if(m.act[n])return m.act[n];const c=MODELS.anims.find(a=>a.name===n);if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
 function gPlay(m,n,once,spd){const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
@@ -406,6 +417,7 @@ function playerModel(){
   const m=makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
+  if(profile&&profile.title&&(profile.ach||[]).includes(profile.title)){const ti=TITLES.findIndex(t=>t.id===profile.title),hc=[0xffd070,0xff6a8a,0x8fe3ff,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
   scene.add(m.root);return{m,aura}}
 function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
@@ -1405,7 +1417,7 @@ function update(dt){
     else if(il>.1){const sp=P.spd*(P.atkCd>.15?.45:1)*(run.mounted?1.8:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0},time);
-    if(P.mountM){animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
+    if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
   P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
@@ -1445,7 +1457,7 @@ function updWorld(dt){updEcon(dt);
   if(L.spawnT<=0){L.spawnT=2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
     if(wild<10&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48||!worldFree(x,z,1.5))continue;
       const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,8);const k=wpick(kindsFor(gr)).k;const n=k==='minion'?3:Math.random()<.4?2:1;
-      for(let i=0;i<n;i++){const e=spawnKind(k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.gold*=1.5}}break}}}
+      for(let i=0;i<n;i++){const e=spawnKind(k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.gold*=1.5}bioMob(e,biomeAt(x,z))}break}}}
   for(const e of enemies)if(e.wild&&!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)>(e.breaker?220:90)){scene.remove(e.m.root);e.gone=true}
   if(safe&&!P.dead){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.08*dt);P.mp=Math.min(P.maxmp,P.mp+P.maxmp*.1*dt);for(const a of allies)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.1*dt)}
   if(safe&&L.lastCity!==nc.c){L.lastCity=nc.c;if(nc.c.name!=='Aster')unlockLore('city');bigText(nc.c.name.toUpperCase(),1200);toast('<b>[SISTEMA]</b> Zona segura: cidade de '+nc.c.name+'.');L.cands=genCands()}
@@ -1833,7 +1845,7 @@ function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;evT-=dt;
 /* montaria */
 function setMount(on){const P=player;if(on&&!run.mount)return;if(on&&L.mode!=='world'){toast('Montarias só fora das masmorras.');return}
   if(P.mountM){scene.remove(P.mountM.root);P.mountM=null}run.mounted=on;
-  if(on){const pm=toon(0x1f5f86,0x0a2a40);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0x8fe3ff,scale:1.25});m.body.rotation.x=0;scene.add(m.root);P.mountM=m;sfx('dodge')}}
+  if(on&&MODELS.fox){const m=foxMount();scene.add(m.root);P.mountM=m;sfx('dodge')}else if(on){const pm=toon(0x1f5f86,0x0a2a40);const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:0x8fe3ff,scale:1.25});m.body.rotation.x=0;scene.add(m.root);P.mountM=m;sfx('dodge')}}
 /* aparência */
 function rebuildLook(){const P=player;if(!P)return;const st={x:P.x,z:P.z,face:P.face};scene.remove(P.m.root);const {m,aura}=playerModel();P.m=m;P.aura=aura;P.x=st.x;P.z=st.z;m.root.position.set(P.x,0,P.z)}
 /* penalidade */
@@ -1894,7 +1906,7 @@ function extraActions(a,v){
 }
 /* tutorial */
 function tutorial(){if(profile.tut)return;profile.tut=true;store.set('pds2_profile',profile);
-  const steps=['Bem-vindo, caçador. Arraste à esquerda para andar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Q, R e T são suas habilidades. Elas gastam mana.','Na cidade: Associação (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra a BOLSA para Status, Diária, Sombras e Diário. Boa caçada.'];
+  const steps=['Bem-vindo, caçador. Arraste à esquerda para andar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Q, R e T são suas habilidades. Elas gastam mana.','Na cidade: Associação (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra a BOLSA para Status, Diária, Sombras e Diário.','Longe das cidades há Tundra, Deserto e Pântano, com monstros próprios. Quanto mais longe, mais perigoso.','O Mercado vende Montaria e o Espírito de Mana. No ⚙ você ajusta volume, tamanho dos botões e gráficos. Boa caçada.'];
   steps.forEach((s,i)=>setTimeout(()=>toast('<b>[TUTORIAL]</b> '+s,5000),1500+i*5200))}
 
 /* ================= IDEIAS: AFIXOS, PESCA, CULINÁRIA, MIMIC, TÍTULOS, MALDIÇÕES, TORRE, NÊMESIS, AFINIDADE, CIDADE, CLIMA, INVERTIDO, DOMÍNIOS, FUSÃO, SAZONAL, SISTEMA ================= */
