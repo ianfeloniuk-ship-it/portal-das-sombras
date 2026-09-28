@@ -1660,6 +1660,7 @@ function drawMap(ctx,S,full){
       ctx.fillStyle=col;ctx.font='700 '+(full?12:9)+'px "Russo One",sans-serif';ctx.fillText(g.secret?'?':gid(g.rank),tx(g.x),tz(g.z)+1)}
     for(const e of enemies){if(e.dead)continue;ctx.fillStyle=e.breaker?'#ff8a4d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
     if(run.tmap){ctx.strokeStyle='#ffd54f';ctx.lineWidth=3;const X=tx(run.tmap.x),Z=tz(run.tmap.z);ctx.beginPath();ctx.moveTo(X-6,Z-6);ctx.lineTo(X+6,Z+6);ctx.moveTo(X+6,Z-6);ctx.lineTo(X-6,Z+6);ctx.stroke()}
+    for(const e of enemies)if(e.legend&&!e.dead){const X=tx(e.x),Z=tz(e.z),r=full?9:6;ctx.fillStyle='#ffd54f';ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(X+Math.cos(a)*rr,Z+Math.sin(a)*rr)}ctx.closePath();ctx.stroke();ctx.fill();if(full){ctx.font='700 11px sans-serif';ctx.fillStyle='#ffd54f';ctx.textAlign='left';ctx.fillText(e.name,X+11,Z+4)}}
     for(const e of enemies)if(e.world&&!e.dead){ctx.fillStyle='#ff5a1e';ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),6,0,TAU);ctx.fill()}
     for(const n of npcs)if(n.kind==='hunter'){ctx.fillStyle='rgba(232,246,255,.7)';ctx.fillRect(tx(n.x)-1.5,tz(n.z)-1.5,3,3)}
   }else{
@@ -2014,8 +2015,9 @@ function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;evT-=dt;
     toast('<b>[EVENTO] INVASÃO!</b> Monstros cercam a cidade de <b>'+c.name+'</b>. Mate todos em <b>2:30</b> (marcados no mapa). Se salvar: a cidade fica grata e os preços caem. Se não: os preços lá ficam <b>20% mais caros</b> até você salvá-la numa próxima invasão.',12000);
     showSys('INVASÃO em '+c.name+'. Vá até lá e derrote todos os monstros antes do tempo acabar. O resultado muda os preços da cidade (veja em NOTÍCIAS).');
     if(cityL(c)>=4){for(let i=0;i<3;i++)makeHunterAlly({name:'Guarda',cls:[0,2,4][i],rank:clamp(pr,0,7),lvl:run.level+5,hair:0x333333},c.x+Math.cos(a)*38+rnd(-2,2),c.z+Math.sin(a)*38+rnd(-2,2),true);toast('<b>[CIDADE]</b> Os guardas de '+c.name+' saíram para lutar.')}bigText('INVASÃO',1200)}
-  else if(r<.67){const a=rnd(0,TAU),x=P.x+Math.cos(a)*38,z=P.z+Math.sin(a)*38;const e=spawnRival(x,z,clamp(pr+1,0,8),{wild:true,breaker:true});e.name='Lendário '+e.name;e.hp*=4;e.maxhp*=4;e.gold*=6;e.xp*=4;e.m.body.scale.multiplyScalar(1.25);
-    toast('<b>[EVENTO]</b> Um caçador lendário foi visto a '+Math.round(Math.hypot(x-P.x,z-P.z))+'m. Recompensa enorme, perigo enorme.',6000)}
+  else if(r<.67){const a=rnd(0,TAU),x=P.x+Math.cos(a)*38,z=P.z+Math.sin(a)*38;const e=spawnRival(x,z,clamp(pr+1,0,8),{wild:true,breaker:true});e.name='Lendário '+e.name;e.legend=true;e.hp*=4;e.maxhp*=4;e.gold*=6;e.xp*=4;e.m.body.scale.multiplyScalar(1.25);
+    const dir=['leste','sudeste','sul','sudoeste','oeste','noroeste','norte','nordeste'][((Math.round(Math.atan2(z-P.z,x-P.x)/(Math.PI/4))%8)+8)%8];
+    toast('<b>[EVENTO]</b> Um <b style="color:#ffd54f">caçador lendário</b> foi visto a '+Math.round(Math.hypot(x-P.x,z-P.z))+'m ao <b>'+dir+'</b> (estrela dourada no MAPA). Recompensa enorme, perigo enorme.',9000)}
   else{const g=newGate();g.rank=clamp(pr+1,0,8);g.red=true;g.giant=true;g.life=600;g.x=P.x+rnd(-40,40);g.z=P.z-50;gates.push(g);gateMesh(g);g.mesh.scale.setScalar(1.8);toast('<b>[EVENTO]</b> Um PORTAL GIGANTE vermelho se abriu perto de você. Recompensas triplas.',6000);bigText('PORTAL GIGANTE',1200)}
 }
 /* montaria */
