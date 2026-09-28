@@ -1249,6 +1249,7 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
+  if(pcCam.yaw)[dx,dz]=camRot(dx,dz);
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
   player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=.55;player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
@@ -1434,6 +1435,7 @@ function update(dt){
   const P=player;
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
+  if(pcCam.yaw)[ix,iz]=camRot(ix,iz);
   const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}
   if(!P.dead){
     P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
@@ -1506,11 +1508,20 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom)bigText('GUARDIÃO',1000);if(r.hostile)toast('<b>[SISTEMA]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
+/* Câmera livre no PC: botão direito arrasta para girar, roda aproxima/afasta, botão do meio volta ao padrão. */
+const pcCam={yaw:0,zoom:1,drag:false};
+function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
+addEventListener('contextmenu',e=>{if(!touch)e.preventDefault()});
+addEventListener('mousedown',e=>{if(touch)return;if(e.button===2)pcCam.drag=true;if(e.button===1){pcCam.yaw=0;pcCam.zoom=1}});
+addEventListener('mouseup',e=>{if(e.button===2)pcCam.drag=false});
+addEventListener('mousemove',e=>{if(pcCam.drag)pcCam.yaw-=e.movementX*.008});
+addEventListener('wheel',e=>{if(touch||modalOpen)return;pcCam.zoom=Math.min(1.7,Math.max(.55,pcCam.zoom+(e.deltaY>0?.08:-.08)))},{passive:true});
 function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*Math.min(1,dt*6);cam.z+=(P.z-cam.z)*Math.min(1,dt*6);
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
   const dun=L.mode==='dungeon',mt=run&&run.mounted?2.5:0,hgt=(portrait?(dun?16:17):(dun?13.5:12.5))+mt,back=(portrait?13:(dun?10:11))+mt*.8;
-  camera.position.set(cam.x+rnd(-s,s),hgt+rnd(-s,s),cam.z+back);camera.lookAt(cam.x,1,cam.z-2);
+  const[ox,oz]=camRot(0,back*pcCam.zoom),[fx,fz]=camRot(0,-2);
+  camera.position.set(cam.x+ox+rnd(-s,s),hgt*pcCam.zoom+rnd(-s,s),cam.z+oz);camera.lookAt(cam.x+fx,1,cam.z+fz);
 }
 
 /* ================= OVERLAY E HUD ================= */
