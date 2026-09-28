@@ -2537,21 +2537,23 @@ $('bBag').addEventListener('click',()=>{if(!modalOpen&&!player.dead)bagView()});
 })();
 
 /* ================= TELAS ================= */
+/* Atalhos de teste SÓ no PC local com ?dev no endereço. No site publicado não existem. */
+const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev/.test(location.search);
 (function(){let n=0,t0=0;$('ttl').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;
-  if(++n>=7&&profile){n=0;profile.rank=profile.rank===8?7:8;store.set('pds2_profile',profile);showProfile();beep(110,.5,.06,'sawtooth')}})})();
-(function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
+  if(!DEV)return;if(++n>=7&&profile){n=0;profile.rank=profile.rank===8?7:8;store.set('pds2_profile',profile);showProfile();beep(110,.5,.06,'sawtooth')}})})();
+(function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML=RANKS.filter(r=>!r.secret).map(r=>'<div><span style="color:'+r.c+'">'+r.id+'</span>'+(r.p<1?r.p.toFixed(2):r.p)+'%</div>').join('');
 function showProfile(){const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.map((s,i)=>'QRT'[i]+' '+s.n).join(' · ')+(c.arise?'<br>Único que ergue sombras':'')+'<br>Mortes: '+(profile.deaths||0)}
-if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=false}
+if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
   if(!profile){profile=rollAwaken();store.set('pds2_profile',profile);$('rollbox').hidden=false;$('goBtn').disabled=true;let n=0;
     const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES[Math.floor(Math.random()*8)].n.toUpperCase();beep(300+n*20,.04,.03);
-      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent='ENTRAR NA CIDADE';$('reroll').hidden=false}},80);return}
+      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent='ENTRAR NA CIDADE';$('reroll').hidden=!DEV}},80);return}
   startGame();
 });
-$('reroll').addEventListener('click',()=>{profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
+$('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
 $('again').addEventListener('click',()=>{$('bG').hidden=true;$('dead').hidden=true;for(const a of allies)scene.remove(a.m.root);allies=[];scene.remove(player.m.root);newRun();ensureRun();run.quests=genQuests();makePlayer();curGate=null;gates=[];buildWorld();buildSteal();cam.x=player.x;cam.z=player.z;paused=false;saveRun()});
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
