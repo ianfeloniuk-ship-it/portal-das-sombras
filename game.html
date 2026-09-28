@@ -1221,19 +1221,47 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
   if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
+  if(o.fromPlayer&&profile.cls===4&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   const crit=!blocked&&Math.random()<.12+(o.fromPlayer?statsBonus().crit+affB().crit/100:0);if(crit)amt*=(o.fromPlayer&&cons('fur')>=10?2.4:1.7);
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0);amt=Math.max(1,Math.round(amt));e.hp-=amt;if(o.fromPlayer&&!o.pet){const ls=affB().ls;if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
+  if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
   sfx(blocked?'block':'hit',crit);
   if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true;
   if(e.hp<=0)killEnemy(e);
   else if(e.isBoss&&e.phase===1&&e.hp<e.maxhp*.5)enrage(e);
   else if(e.isBoss&&e.phase===2&&e.boss.p3&&e.hp<e.maxhp*.25)awaken3(e);
 }
+/* PASSIVAS DE CLASSE: funcionam sozinhas a cada acerto do jogador (feedback do Irror). */
+const PASSIVES=[
+ {n:'Fúria de Batalha',d:'O 3º golpe do combo atordoa por mais tempo e cura 3% da sua vida.'},
+ {n:'Sangramento',d:'25% de chance de fazer o inimigo sangrar (50% do dano ao longo de 3 s).'},
+ {n:'Muralha Viva',d:'20% de chance de empurrar o inimigo com força e atordoar.'},
+ {n:'Afinidade Arcana',d:'Acertos têm 15% de chance de reduzir a recarga das habilidades em 1 s.'},
+ {n:'Olho de Águia',d:'Quanto mais longe o alvo, mais dano: +2% por metro (até +30%).'},
+ {n:'Graça',d:'Cada acerto cura 1,5% da sua vida.'},
+ {n:'Elo Espiritual',d:'Acertos têm 20% de chance de reduzir a recarga das habilidades em 1 s.'},
+ {n:'Colheita de Almas',d:'Cada inimigo derrotado devolve 5% de mana e 3% de vida.'},
+ {n:'Queimadura',d:'30% de chance de incendiar (60% do dano ao longo de 3 s).'},
+ {n:'Frio Cortante',d:'25% de chance de deixar o inimigo lento por 2 s.'},
+ {n:'Abalo',d:'15% de chance de atordoar o inimigo por 0,8 s.'},
+ {n:'Estática',d:'20% de chance de um raio pular para outro inimigo próximo (50% do dano).'}];
+function passiveOf(){return PASSIVES[profile.cls]||null}
+function applyPassive(e,amt,crit,o){const c=profile.cls,P=player;
+  if(c===0&&o.third){e.stun=Math.max(e.stun,.9);P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.03)}
+  else if(c===1&&Math.random()<.25){e.dotT=3;e.dotD=Math.max(e.dotD||0,amt*.5/3);floater(e.x,e.z,'SANGRANDO','#ff4d6a')}
+  else if(c===2&&Math.random()<.2&&!e.isBoss){const ax=e.x-P.x,az=e.z-P.z,l=Math.hypot(ax,az)||1;e.kb.x=ax/l*14;e.kb.z=az/l*14;e.stun=Math.max(e.stun,.7);fxRing(e.x,e.z,0x9fd3ff,1.6,.3)}
+  else if((c===3&&Math.random()<.15)||(c===6&&Math.random()<.2)){for(const sk of P.skills)sk.cdT=Math.max(0,sk.cdT-1)}
+  else if(c===5){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.015)}
+  else if(c===8&&Math.random()<.3){e.dotT=3;e.dotD=Math.max(e.dotD||0,amt*.6/3);floater(e.x,e.z,'QUEIMANDO','#ff7a22')}
+  else if(c===9&&Math.random()<.25){e.slow=Math.max(e.slow,2);floater(e.x,e.z,'LENTO','#8fe3ff')}
+  else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
+  else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}
 function killEnemy(e){
+  if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
   if(e.elite&&!e.isBoss)npcEv('elite');
@@ -1320,7 +1348,7 @@ function attack(){
   else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0x8fe3ff,reach,third);sfx('swing');
-    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22});hit=true}
+    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
 }
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
@@ -2039,7 +2067,7 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
     bigText('PENALIDADE CUMPRIDA',1600);toast('<b>[SISTEMA]</b> Penalidade cumprida. Não ignore o treino de novo.',4000)}}
 /* janelas novas */
 function statusView(){view=statusView;const s=run.stats,b=statsBonus();
-  let h='<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
+  const pv=passiveOf();let h=(pv?'<div class="sysline">Passiva da classe: <b style="color:#ffd54f">'+pv.n+'</b> — '+pv.d+'</div>':'')+'<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 10)</div>';
