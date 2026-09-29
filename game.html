@@ -1221,7 +1221,6 @@ function buildDungeon(g){
   // baús
   const chestN=1+(rooms.length>8?1:0)+(g.red?1:0);const used=new Set();
   for(let k=0;k<chestN&&k<mids.length;k++){let i;let t=0;do{i=mids[Math.floor(R()*mids.length)]}while(used.has(i)&&t++<20);used.add(i);const r=rooms[i];addChest(r.wx+(R()<.5?1.5:-1.5),r.wz,g.rank,false)}
-  addPortalEncounter(g,mids,randIn);
   // guardião
   const pool=g.rank>=9?SOVEREIGNS:g.rank>=6?BOSSES_HIGH:BOSSES;const B=pool[Math.floor(R()*pool.length)];const b=spawnBoss(br.wx,br.wz,g.rank,B);b.room=bi;b.hp*=redM;b.maxhp*=redM;
   // veios de cristal
@@ -1232,21 +1231,6 @@ function buildDungeon(g){
   const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;
 }
-const PORTAL_ENCOUNTERS=[{id:'cache',n:'Cofre selado',d:'Derrote os inimigos desta sala para abrir o cofre. Recompensa: 3 cristais do rank do portal e ouro.',col:0xffd070},{id:'scout',n:'Explorador perdido',d:'Limpe esta sala para libertar o explorador. Ele entrega 2 poções e revela a sala do guardião no mapa.',col:0x6fe39a},{id:'spring',n:'Fonte de ressonância',d:'Escolha recuperar 50% da vida máxima ou 50% da mana máxima. Apenas uma escolha por portal.',col:0x70ddff}];
-function portalEncounterPlan(g,mids){if(!mids.length||g.encounterUsed)return null;const r=mulberry32((g.seed^0x5eeda11)>>>0);return {kind:Math.floor(r()*PORTAL_ENCOUNTERS.length),room:mids[Math.floor(r()*mids.length)]}}
-function addPortalEncounter(g,mids,randIn){const plan=portalEncounterPlan(g,mids);if(!plan)return;const cfg=PORTAL_ENCOUNTERS[plan.kind];let p=randIn(L.rooms[plan.room]);for(let i=0;i<40&&!freeAt(p.x,p.z,.8);i++)p=randIn(L.rooms[plan.room]);if(!freeAt(p.x,p.z,.8))return;let obj;
-  if(cfg.id==='scout'){const m=makeChibi({body:0x3d7054,hair:0x4d3020,wep:'none',gk:'Rogue_Hooded'});obj=m.root;obj.rotation.y=Math.PI}
-  else{obj=new THREE.Group();const base=mesh(geo('encBase',()=>new THREE.CylinderGeometry(.8,1,.5,8)),toonS(0x4b4655));base.position.y=.25;obj.add(base);const top=mesh(cfg.id==='cache'?geo('encCache',()=>new THREE.BoxGeometry(1.2,.7,.9)):geo('encSpring',()=>new THREE.OctahedronGeometry(.6)),glowS(cfg.col,.7));top.position.y=1.05;obj.add(top)}
-  obj.position.set(p.x,0,p.z);L.group.add(obj);const it={type:'encounter',x:p.x,z:p.z,r:2.8,label:'F · '+cfg.n.toUpperCase(),use:()=>portalEncounterView()};L.inter.push(it);L.encounter={...plan,...p,it,cfg,obj};L.rooms[plan.room].encounter=cfg.n;
-}
-function encounterEnemies(){const ev=L.encounter;return ev?enemies.filter(e=>!e.dead&&e.room===ev.room).length:0}
-function claimPortalEncounter(choice){const ev=L.encounter;if(!ev||L.special||L.mode!=='dungeon'||L.gate.encounterUsed||player.dead||Math.hypot(player.x-ev.x,player.z-ev.z)>ev.it.r)return false;const id=ev.cfg.id;if(id!=='spring'&&encounterEnemies()>0)return false;
-  if(id==='spring'){if(choice==='hp'){if(hasAff('nocure')||player.hp>=player.maxhp)return false;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.5)}else if(choice==='mp'){if(player.mp>=player.maxmp)return false;player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.5)}else return false}
-  else if(id==='cache'){run.res.cry[L.gate.rank]=(run.res.cry[L.gate.rank]||0)+3;run.gold+=Math.round(50*GR[L.gate.rank].gold)}
-  else if(id==='scout'){run.pots+=2;const r=L.rooms[L.bossRoom],G=L.grid;for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++)L.visited[y*G.W+x]=1;}
-  else return false;L.gate.encounterUsed=true;ev.it.hidden=true;ev.obj.visible=false;toast('<b>[EXPLORAÇÃO]</b> Encontro concluído: '+ev.cfg.n+'.'+(id==='cache'?' +3 cristais e '+fmt(Math.round(50*GR[L.gate.rank].gold))+' ouro.':id==='scout'?' +2 poções. Sala do guardião revelada no mapa.':choice==='hp'?' Vida recuperada.':' Mana recuperada.'));saveRun();return true;
-}
-function portalEncounterView(){const ev=L.encounter;if(!ev||L.gate.encounterUsed)return;view=portalEncounterView;const id=ev.cfg.id,n=encounterEnemies();let h='<div class="sysline">Encontro opcional · não é necessário para fechar o portal.</div>'+row(ev.cfg.n,ev.cfg.d+(id==='cache'?'<br>Ouro: '+fmt(Math.round(50*GR[L.gate.rank].gold))+'.':''),'');if(id==='spring')h+=btn('Recuperar vida','encclaim','hp',!hasAff('nocure')&&player.hp<player.maxhp)+btn('Recuperar mana','encclaim','mp',player.mp<player.maxmp)+(hasAff('nocure')?'<div class="sysline">Sem cura impede recuperar vida neste portal.</div>':'');else h+=row(n?'Sala em combate':'Sala segura',n?'Restam '+n+' inimigos nesta sala.':'Você já pode receber a recompensa.',btn(id==='cache'?'Abrir cofre':'Libertar explorador','encclaim','take',n===0));openModal(ev.cfg.n.toUpperCase(),h)}
 function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[ORÁCULO]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
 function makeElite(e){e.elite=true;e.res=.2;e.maxhp=e.hp=e.hp*1.8;e.dmg*=1.3;e.name='Elite '+e.name;e.xp*=2.5;e.gold*=3;e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
 function exitPortal(x,z,locked){
@@ -2052,7 +2036,7 @@ function updDungeon(dt){
   for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){if(dx*dx+dy*dy>36)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
   L.rooms.forEach((r,i)=>{if(L.seen.has(i))return;if(cx>=r.x&&cx<r.x+r.w&&cz>=r.y&&cz<r.y+r.h){L.seen.add(i);
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
-    if(r.encounter&&!L.gate.encounterUsed)toast('<b>[EXPLORAÇÃO]</b> '+r.encounter+' nesta sala. Aproxime-se e interaja para ver o encontro opcional.',5000);if(i===L.bossRoom)bigText('GUARDIÃO',1000);if(r.hostile)toast('<b>[ORÁCULO]</b> Caçadores hostis! Eles querem seu ouro.');}});
+    if(i===L.bossRoom)bigText('GUARDIÃO',1000);if(r.hostile)toast('<b>[ORÁCULO]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
 /* Câmera livre no PC: botão direito arrasta para girar, roda aproxima/afasta, botão do meio volta ao padrão. */
 const pcCam={yaw:0,zoom:1,drag:false};
@@ -2156,7 +2140,7 @@ function hud(){
   let obj='';
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
-  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.encounter&&!L.gate.encounterUsed&&L.seen.has(L.encounter.room)?' · opcional: '+L.encounter.cfg.n:'')+(L.gate.red?' · SEM SAÍDA':''));
+  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
   $('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const _mt=missionPanelText();
@@ -2669,7 +2653,6 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(9,pr);t++){const gc=Math.round(PRICE[t]*equipFactor(sl)*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
 function extraActions(a,v){
-  if(a==='encclaim'){if(claimPortalEncounter(v))closeModal();else portalEncounterView();return 'close0'}
   if(a==='lootmode'){const [sl,mode]=v.split('|');L.lootMode=mode;lootForgeView(sl);return 'close0'}
   if(a==='lootforge'){lootForgeView(v);return 'close0'}
   if(a==='lootcraft'){const [sl,mode,key]=v.split('|');try{craftWithLoot(sl,decodeURIComponent(key),mode)}catch(e){console.warn('Receita inválida',e)}lootForgeView(sl);return 'close0'}
