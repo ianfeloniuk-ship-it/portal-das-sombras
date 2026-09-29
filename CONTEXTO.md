@@ -1,6 +1,6 @@
 # Contexto do projeto Ecos da Fenda (antigo Portal das Sombras) (para outra conversa/IA continuar)
 
-Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, do gênero caçadores/portais/sombras (fantasia de 'dungeon' moderna). Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes (ex.: não usar "ARISE"; a ação é **ERGUER SOMBRA**).
+Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, com foco em PC e suporte a celular, ambientado nas Fendas e ecos de mundos mortos. Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes. A identidade atual é **Ecos da Fenda**, com a ação **ERGUER ECO**; os registros históricos abaixo descrevem versões anteriores.
 Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-das-sombras/ (GitHub Pages, branch `main`, pasta raiz).
 
 ## Arquivos
@@ -188,3 +188,19 @@ Base: revisão pública `7e90abc` (v67), mais recente que a cópia antiga de PC.
 - **Foco da entrega: PC.** A prévia principal deve mostrar a interface com mouse/teclado em tela larga; a captura em retrato serviu apenas à revisão complementar de toque.
 
 Validação: scripts inline dos dois HTMLs analisados; regressão nas funções reais de mana/recarga, invocações, transições e descrições aprovada; revisão no navegador da interface de PC em 1280×720, dos controles de toque em 390×844 e da janela mostrando 11,1s com Arcano 5. Não foi feita uma sessão extensa de balanceamento. Ian autorizou publicar a v68 e continuar o projeto em 29/09, após confirmar que a tela em retrato era a prévia de celular. O foco da versão continua sendo PC.
+
+Publicação v68: revisão `a7f67be` enviada ao branch principal, implantação do GitHub Pages concluída com sucesso e marcador v68 confirmado no site em 29/09/2026.
+
+## Continuação no Codex — 29/09/2026, v69
+
+Ian autorizou continuar acrescentando funcionalidades e terminar partes esquecidas. Esta rodada reúne sistemas existentes para facilitar a experiência de PC:
+
+- **Diário de Jornada (L):** objetivos da próxima Prova de Rank, missões da Ordem, histórias paralelas ativas e treino diário. É possível acompanhar um objetivo no painel; a escolha fica no save e segue o próximo capítulo da mesma história. Atos principais e páginas descobertas podem ser relidos nas abas História e Descobertas.
+- **Torre e história:** rank público máximo (`***`) mais andar 100 desbloqueiam uma conclusão original do Ato VII, registrada uma única vez no Diário. Saves que já cumpriram as condições recebem a página ao continuar. A torre infinita e recompensas existentes foram preservadas; o fim de cada andar salva o progresso imediatamente.
+- **Controles de PC:** ajuda completa usa as teclas configuradas. Ao escolher uma tecla ocupada por outra ação configurável, as duas trocam de lugar; movimento e atalhos fixos ficam reservados. Barra de habilidades, interação e poção mostram a tecla atual. Nível da habilidade aparece na dica da barra.
+- **Coerência:** indicador do próximo rank mostra o nível exigido pela prova. Diário usa a origem das Fendas há cem anos, ranks `**`/`***` e transbordo. A câmara secreta agora se chama Santuário da Ressonância e usa protocolos do Vigia, com a mesma mecânica. Exibição do rank secreto padronizada em `@`.
+- **Layout:** botões de PC podem quebrar linha; objetivo, barra de chefe e avisos são posicionados abaixo deles. Em retrato, o botão Diário cabe nas duas filas do topo. README passa a orientar o jogo no PC.
+
+Multiplayer/save na nuvem e balanceamento por sessões extensas continuam pendentes. A proposta de Necromante como classe especial continua para decisão futura de Ian.
+
+Validação v69: análise dos scripts inline, regressão das correções v68 e testes nas funções reais de objetivos, capítulos, conclusão da torre, migração e remapeamento aprovados. No navegador: Diário, acompanhamento após recarregar, ajuda completa, troca Q/R e restauração dos controles verificados em PC 1280×720; topo/painel verificados em retrato 390×844. Nenhuma sessão extensa de combate/balanceamento foi feita nesta rodada.

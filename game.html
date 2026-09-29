@@ -23,6 +23,7 @@ body{font-family:"Chakra Petch",system-ui,sans-serif;color:var(--ink)}
 #boss .bar{height:9px}
 #mm{top:calc(48px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));width:96px;height:96px;pointer-events:auto}
 body.pc #mm{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:150px;height:150px}
+body.pc #tb{max-width:70vw;flex-wrap:wrap;justify-content:flex-end}
 #tb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:7}
 .mini{font:700 10px "Chakra Petch",sans-serif;letter-spacing:.08em;color:var(--ink);background:var(--panel);border:1px solid rgba(255,179,71,.55);border-radius:4px;padding:7px 8px;touch-action:none;cursor:pointer}
 #toasts{top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:5px;align-items:center;width:min(90vw,440px)}
@@ -58,7 +59,6 @@ body.pc #btns .b[hidden]{display:none}
 #steal .b{position:relative;width:50px;height:50px;border-color:#ffb84d}
 #bF{position:fixed;right:calc(250px + env(safe-area-inset-right,0px));bottom:calc(130px + env(safe-area-inset-bottom,0px));width:auto;height:auto;border-radius:6px;padding:10px 14px;font-size:13px;z-index:7;border-color:#d7b8ff;box-shadow:0 0 16px rgba(162,107,255,.6);animation:pulse 1.2s infinite}
 @keyframes pulse{50%{box-shadow:0 0 26px rgba(162,107,255,.9)}}
-#keys{display:none!important;position:fixed;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);z-index:5;white-space:nowrap}
 .scr{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding-inline:16px;background:radial-gradient(ellipse at 50% 30%,rgba(30,60,120,.5),rgba(2,6,14,.92) 70%);overflow:auto}
 .card{max-width:520px;width:100%;padding:18px;text-align:center}
 .card h1{font-family:"Russo One",sans-serif;font-size:clamp(26px,7vw,44px);margin:0 0 4px;letter-spacing:.06em;color:#dff4ff;text-shadow:0 0 16px var(--sys),0 0 36px #1d5bd6;text-wrap:balance}
@@ -96,8 +96,7 @@ body.pc #btns .b[hidden]{display:none}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
 .rl{font-family:"Russo One",sans-serif}
 @media (orientation:portrait){#btns{transform:scale(.92);transform-origin:bottom right}#obj{top:calc(116px + env(safe-area-inset-top,0px));max-width:80vw}#boss{top:calc(146px + env(safe-area-inset-top,0px));width:80vw}#toasts{top:calc(180px + env(safe-area-inset-top,0px))}#mission{display:none}#bF{right:auto;left:50%;transform:translateX(-50%);bottom:calc(250px + env(safe-area-inset-bottom,0px))}#steal{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(230px + env(safe-area-inset-bottom,0px))}#pad{height:50%}}
-@media (orientation:portrait){#tb{left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}#tb .mini{padding:7px 3px;letter-spacing:.03em}#stat{top:calc(80px + env(safe-area-inset-top,0px))}#mm{top:calc(80px + env(safe-area-inset-top,0px))}#obj{max-width:92vw}}
-@media (hover:none){#keys{display:none}}
+@media (orientation:portrait){#tb{left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}#tb .mini{padding:7px 2px;font-size:9px;letter-spacing:.02em}#stat{top:calc(80px + env(safe-area-inset-top,0px))}#mm{top:calc(80px + env(safe-area-inset-top,0px))}#obj{max-width:92vw}}
 @media (prefers-reduced-motion:reduce){.toast,#bF{animation:none}}
 </style>
 
@@ -106,7 +105,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="vig" class="ui"></div>
 
 <div id="stat" class="ui panel" hidden>
-  <div class="row"><span id="rk">E</span><div style="text-align:right"><div id="cls">GUERREIRO</div><div id="lv" style="font-size:10px;color:var(--dim)">NV 1</div></div></div>
+  <div class="row"><span id="rk">F</span><div style="text-align:right"><div id="cls">GUERREIRO</div><div id="lv" style="font-size:10px;color:var(--dim)">NV 1</div></div></div>
   <div class="bar"><i id="hpb" style="background:var(--hp)"></i></div><div class="lbl"><span>VIDA</span><span id="hpt">100</span></div>
   <div class="bar" style="height:5px"><i id="shb" style="background:#9fe8ff"></i></div><div class="lbl"><span>ESCUDO</span><span id="sht">0</span></div>
   <div class="bar"><i id="mpb" style="background:var(--mp)"></i></div><div class="lbl"><span>MANA</span><span id="mpt">60</span></div>
@@ -117,7 +116,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bPot" onclick="usePot()">POÇÃO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bDiary" onclick="modalOpen?closeModal():journeyView()">DIÁRIO</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bPot" onclick="usePot()">POÇÃO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden style="pointer-events:auto"></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">DESPERTE</div>
@@ -137,7 +136,6 @@ body.pc #btns .b[hidden]{display:none}
 </div>
 <div id="steal"></div>
 <div class="b" id="bF" hidden>F</div>
-<div id="keys" hidden>WASD mover · Espaço/clique atacar · Shift esquiva · Q R T habilidades · 1 2 3 roubadas · H poção · F interagir · M mapa · I bolsa · C status</div>
 
 <div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="mb"></div></div></div>
 
@@ -300,7 +298,7 @@ const statK=L=>atkPer(L)/2;
 const expAtk=L=>(10+2*L+L*atkPer(L)+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
 const eHP=L=>expAtk(L)/20,eDMG=L=>expHp(L)/110;
 GR.forEach(g=>{g.hp=eHP(g.lvl);g.dmg=eDMG(g.lvl)});
-const gid=i=>i===8?'Ω':GR[i].id;
+const gid=i=>GR[i].id;
 const GATE_W=[26,24,20,14,10,6,3,1.5,.4];
 const RAR=[{n:'Comum',c:'#c9d3de',m:1},{n:'Raro',c:'#ffb347',m:1.3},{n:'Épico',c:'#b18cff',m:1.7},{n:'Lendário',c:'#ffb84d',m:2.3},{n:'Mítico',c:'#ff5a8a',m:2.8},{n:'Divino',c:'#fff36b',m:3.4},{n:'Primordial',c:'#ff3d1e',m:4.2}];
 const RARW=[60,28,10,2,.45,.09,.012],RARWB=[0,50,38,12,3.5,.7,.1];
@@ -1908,7 +1906,7 @@ function drawOverlay(){
       /* Uma barra só; elites e rivais já têm o nome, então a mira acrescenta apenas a vida. */
       const hasBar=!best.isBoss&&!best.sleep&&!best.invuln&&Math.hypot(best.x-P.x,best.z-P.z)<=24&&(best.aggro||best.hp<best.maxhp||best.rival||best.elite);
       if(!best.isBoss){const pb=proj(best.x,2.1*(best.m.sc||1)+.1,best.z);if(pb.ok){if(!hasBar)bar(pb.x,pb.y,34,best.hp/best.maxhp,'#ff4d6a');oc.font='700 11px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';const t=((best.rival||best.elite)&&hasBar?'':best.name+' · ')+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp);const ty=pb.y-((best.rival||best.elite)&&hasBar?16:6);oc.strokeText(t,pb.x,ty);oc.fillStyle='#ffe0e6';oc.fillText(t,pb.x,ty)}}}}}
-  const c=ctxTarget();$('bF').hidden=!c||paused;if(c)$('bF').textContent=touch?c.label.replace('F · ',''):c.label;
+  const c=ctxTarget();$('bF').hidden=!c||paused;if(c)$('bF').textContent=touch?c.label.replace('F · ',''):c.label.replace(/^F · /,keyLabel(keyOf('use'))+' · ');
 }
 const mmc=$('mm').getContext('2d');
 function drawMap(ctx,S,full){
@@ -1950,30 +1948,31 @@ function hud(){
   $('mpb').style.width=(100*P.mp/P.maxmp)+'%';$('mpt').textContent=Math.floor(P.mp)+' / '+P.maxmp;
   $('xpb').style.width=(100*run.xp/xpNeed())+'%';$('gold').textContent=fmt(run.gold);
   const mi=minionAllies().length,ec=allies.filter(a=>a.shadow&&!a.dead).length,showArmy=mi>0||ec>0||canArise()||P.skills.some(s=>s&&['summon','minionbuff'].includes(s.t));$('armyline').style.display=showArmy?'flex':'none';$('ecot').textContent='ECOS '+ec+'/'+shadowCap();$('armyt').textContent='INVOCADOS '+mi+'/'+summonCap();
-  const ri=rankOf();let lv=run.level-1,r=profile.rank;while(r<ri){lv-=RANK_STEPS[Math.min(r,7)];r++}
-  $('rkp').textContent=ri<TOPR?'próximo rank em '+(RANK_STEPS[Math.min(ri,7)]-lv)+' nv':'rank máximo';
+  const ri=rankOf();
+  $('rkp').textContent=ri<TOPR?'prova '+RANKS[ri+1].id+' · nível '+GR[ri+1].lvl:'rank máximo';
   $('bZ').hidden=profile.rank!==8;
-  for(const [id,s] of[['bQ',P.skills[0]],['bR',P.skills[1]],['bT',P.skills[2]],['bG',P.skills[3]],['bZ',profile.rank===8?(run.sovSk||SOV_SK):null]]){if(!s)continue;const b=$(id);b.querySelector('.nm').textContent=s.n;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(s)+')';b.style.opacity=P.mp>=s.mp?1:.55;const tip=(s.n+': '+skillDesc(s)).replace(/<[^>]*>/g,'');if(b.title!==tip)b.title=tip}
+  for(const [id,s] of[['bQ',P.skills[0]],['bR',P.skills[1]],['bT',P.skills[2]],['bG',P.skills[3]],['bZ',profile.rank===8?(run.sovSk||SOV_SK):null]]){if(!s)continue;const b=$(id);b.querySelector('.nm').textContent=s.n;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(s)+')';b.style.opacity=P.mp>=s.mp?1:.55;const tip=skillButtonTip(s);if(b.title!==tip)b.title=tip}
   if(run.fused&&$('stF'))$('stF').querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(run.fused)+')';run.stolen.forEach((s,i)=>{const b=$('st'+i);if(b)b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(s)+')'});
   $('potn').textContent=run.pots;
   let obj='';
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
-  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Quebra da masmorra em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
+  else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
   $('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
   const ordh=allies.some(a=>a.shadow&&!a.dead)?'Ecos ('+allies.filter(a=>a.shadow&&!a.dead).length+'): '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
   const sth='';
-  const dmd=sth+ordh+invs+(run.demand?'Desafio do Oráculo: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' (C)')+' · ':'';
-  $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · H');
-  const _mt=dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Ordem':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
+  const dmd=sth+ordh+invs+(run.demand?'Desafio do Oráculo: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' ('+keyLabel(keyOf('status'))+')')+' · ':'';
+  $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · '+keyLabel(keyOf('pot')));
+  const track=trackedObjective(),trackText=track?'<div style="margin-bottom:4px;cursor:pointer;color:var(--ink)" onclick="event.stopPropagation();journeyView()">◆ '+track.n+' · '+track.progress+'</div>':'';
+  const _mt=trackText+dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Ordem':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
   if($('mission').dataset.t!==_mt){$('mission').dataset.t=_mt;$('mission').innerHTML='<span style="float:right;cursor:pointer;margin-left:6px;opacity:.7" title="Esconder (volta pelo ⚙)" onclick="try{localStorage.setItem(\'pds_hidemis\',\'1\')}catch(e){}$(\'mission\').hidden=true">✕</span>'+_mt}
-  $('mission').hidden=_hm||!(done||q||dl||pt||dmd);{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';$('obj').style.top=H>W?(r.bottom+6)+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':''}
+  $('mission').hidden=_hm||!(track||done||q||dl||pt||dmd);{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':pcTop?(pcTop+60)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
   drawMap(mmc,192,false);
 }
-function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">★</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
+function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':'4')+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
 window.CFG=Object.assign({vol:1,btn:1},store.get('pds_cfg')||{});
@@ -2089,7 +2088,7 @@ const SP_TH={
   reverse:{n:'Portal Invertido',floor:0x2a0a2a,wall:0x4a1450,trim:0xff40ff,fog:0x140414,light:0xffa0ff},
   defend:{n:'Defesa do Domínio',floor:0x1e2a1e,wall:0x3a4a2a,trim:0x6fe39a,fog:0x081008,light:0xc0ffc0},
   primordial:{n:'Portal Primordial',floor:0x1a0606,wall:0x3a0a0a,trim:0xff2020,fog:0x0a0000,light:0xff8080},
-  temple:{n:'Templo do Juramento',floor:0x34343f,wall:0x55556a,trim:0xffd070,fog:0x08080e,light:0xfff0d0}};
+  temple:{n:'Santuário da Ressonância',floor:0x34343f,wall:0x55556a,trim:0xffd070,fog:0x08080e,light:0xfff0d0}};
 function buildSpecial(kind,gRef,arg){
   const ret=gRef?{x:gRef.x,z:gRef.z}:{x:player.x,z:player.z};
   const pr=rankOf();
@@ -2117,9 +2116,9 @@ function buildSpecial(kind,gRef,arg){
     S.statues=[];const K={n:'Estátua do Templo',hp:1e9,dmg:1,spd:1.7,ai:'melee',range:2.2,wind:.9,atkCd:2.2,xp:0,scale:1.8,body:0x80808c,skin:0x90909c,eye:0x333333,wep:'axe',r:.9};
     for(const sx of[-12,12])for(let z=-14;z<=16;z+=6){const e=mkEnemy({...K,wep:z%12===0?'sword':'axe'},sx,z,1,1,{statue:true,invuln:true,frozen:true,gold:0});e.face=sx>0?-Math.PI/2:Math.PI/2;e.m.root.rotation.y=e.face;S.statues.push(e)}
     const steles=[[-9,21,'I'],[9,21,'II'],[-5,-9,'III']];for(const [x,z,t] of steles){block(x,z,1.2);let st;if(ENV.ok&&ENV.m.gravestone){st=envMesh('gravestone');st.scale.setScalar(2.9/ENV.m.gravestone.h);st.position.set(x,0,z);st.rotation.y=z>0?Math.PI:0}else{st=mesh(geo('stele',()=>new THREE.BoxGeometry(1.6,2.8,.5)),toonS(0x5a5a6a));st.position.set(x,1.4,z)}L.group.add(st);const sg=makeSign(t,'#ffd070',.35);sg.position.set(x,3.4,z);L.group.add(sg);
-      L.inter.push({type:'tablet',x,z,r:2.6,label:'F · LER MANDAMENTOS',use:showRules})}
-    S.rite={type:'rite',x:0,z:0,r:999,hidden:true,label:'F · REVERENCIAR',use:()=>{}};L.inter.push(S.rite);
-    S.altar={type:'altar',x:S.ax,z:S.az,r:3.4,hidden:true,label:'F · LOUVAR O DEUS',use:()=>{}};L.inter.push(S.altar);
+      L.inter.push({type:'tablet',x,z,r:2.6,label:'F · LER PROTOCOLOS',use:showRules})}
+    S.rite={type:'rite',x:0,z:0,r:999,hidden:true,label:'F · SINCRONIZAR',use:()=>{}};L.inter.push(S.rite);
+    S.altar={type:'altar',x:S.ax,z:S.az,r:3.4,hidden:true,label:'F · ATIVAR O FOCO',use:()=>{}};L.inter.push(S.altar);
     bossLight.position.set(0,7,gz);bossLight.color.setHex(0xfff0d0);bossLight.intensity=.6;
   }
   renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,false);
@@ -2134,8 +2133,8 @@ function buildSpecial(kind,gRef,arg){
 }
 function spawnWave(n,elites){const S=L.special;for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(10,18);x=Math.cos(a)*d;z=Math.sin(a)*d-2;if(freeAt(x,z,.6))break}
   const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});e.aggro=true;if(i<elites)makeElite(e);fxRing(x,z,0xffd070,1.5)}}
-function showRules(){$('dlg').innerHTML='<b>MANDAMENTOS DO TEMPLO</b><br>I. Reverencie o deus.<br>II. Louve o deus.<br>III. Prove a sua fé.<small>Gravado nas placas de pedra. Embaixo, quase apagado: "a fé repousa aos pés do deus".</small>';$('dlg').hidden=false;dlgT=12}
-function punish(msg){const P=player;toast('<b>[ORÁCULO]</b> '+msg+' O deus pune os infiéis.',3000);laser(.45)}
+function showRules(){$('dlg').innerHTML='<b>PROTOCOLOS DE RESSONÂNCIA</b><br>I. Sincronize com o Vigia.<br>II. Ative o foco da câmara.<br>III. Suporte a vigília.<small>O foco protege contra os sentinelas. Quando os olhos do Vigia acenderem, permaneça imóvel.</small>';$('dlg').hidden=false;dlgT=12}
+function punish(msg){const P=player;toast('<b>[ORÁCULO]</b> '+msg+' O Vigia rejeitou a resposta.',3000);laser(.45)}
 function laser(frac){const P=player,S=L.special;if(P.dead)return;fxLine([{x:0,z:S.god.root.position.z+1},{x:P.x,z:P.z}],0xff2020);fxBurst(P.x,1,P.z,0xff2020,10,4);sfx('laser');shake(.5);P.iT=0;hurtPlayer(P.maxhp*frac)}
 function updSpecial(dt){
   const S=L.special;if(!S)return;S.t+=dt;const P=player;
@@ -2155,19 +2154,19 @@ function updSpecial(dt){
   else if(S.kind==='temple'){
     const eyes=c=>S.god.eyeMat.color.setHex(c);
     if(P.bowT>0){P.bowT-=dt;P.m.body.rotation.x=.75}
-    if(S.stage===0){S.msg='Templo do Juramento · leia os mandamentos';if(S.t>1&&!S.shown){S.shown=true;showRules();sfx('gong')}
-      if(S.t>8){S.stage=1;S.t=0;eyes(0xffd070);sfx('gong');toast('<b>[ORÁCULO]</b> Os olhos do deus se acenderam.',3000);S.rite.hidden=false;
-        S.rite.use=()=>{P.bowT=1.4;fxRing(P.x,P.z,0xffd070,3,.7);sfx('ding');S.stage=2;S.t=0;S.rite.hidden=true;S.altar.hidden=false;toast('<b>[ORÁCULO]</b> Você se curvou. O deus aceitou a reverência.',3500);
+    if(S.stage===0){S.msg='Santuário · leia os protocolos';if(S.t>1&&!S.shown){S.shown=true;showRules();sfx('gong')}
+      if(S.t>8){S.stage=1;S.t=0;eyes(0xffd070);sfx('gong');toast('<b>[ORÁCULO]</b> O Vigia iniciou a sincronização.',3000);S.rite.hidden=false;
+        S.rite.use=()=>{P.bowT=1.4;fxRing(P.x,P.z,0xffd070,3,.7);sfx('ding');S.stage=2;S.t=0;S.rite.hidden=true;S.altar.hidden=false;toast('<b>[ORÁCULO]</b> Sincronização aceita. Ative o foco de ressonância.',3500);
           S.altar.use=()=>{P.bowT=1.4;fxRing(S.ax,S.az,0xffd070,4,.8);sfx('gong');S.altar.hidden=true;S.stage=3;S.t=0;S.gaze=3;S.open=false;S.px=P.x;S.pz=P.z;
-            for(const e of S.statues){e.frozen=false;e.aggro=true;e.dmg=P.maxhp*.28;e.m.eyeMat.color.setHex(0xff2020)}bigText('PROVE A SUA FÉ',1500);toast('<b>[ORÁCULO]</b> As estátuas despertaram.',3500)}}}}
-    else if(S.stage===1){S.rite.x=P.x;S.rite.z=P.z;const left=12-S.t;S.msg='Mandamento I · '+fmtT(left);if(left<=0){S.t=0;punish('Você não reverenciou o deus.')}}
-    else if(S.stage===2){const left=30-S.t;S.msg='Mandamento II · '+fmtT(left);S.pT=(S.pT||2)-dt;if(S.pT<=0){S.pT=2.6;hazard(P.x+rnd(-2.5,2.5),P.z+rnd(-2.5,2.5),2,1.1,P.maxhp*.16,'enemy',0xffd070)}if(left<=0){S.t=0;punish('Nenhum louvor chegou ao deus.')}}
+            for(const e of S.statues){e.frozen=false;e.aggro=true;e.dmg=P.maxhp*.28;e.m.eyeMat.color.setHex(0xff2020)}bigText('SUPORTE A VIGÍLIA',1500);toast('<b>[ORÁCULO]</b> As estátuas despertaram.',3500)}}}}
+    else if(S.stage===1){S.rite.x=P.x;S.rite.z=P.z;const left=12-S.t;S.msg='Protocolo I · sincronize · '+fmtT(left);if(left<=0){S.t=0;punish('A sincronização não foi concluída.')}}
+    else if(S.stage===2){const left=30-S.t;S.msg='Protocolo II · ative o foco · '+fmtT(left);S.pT=(S.pT||2)-dt;if(S.pT<=0){S.pT=2.6;hazard(P.x+rnd(-2.5,2.5),P.z+rnd(-2.5,2.5),2,1.1,P.maxhp*.16,'enemy',0xffd070)}if(left<=0){S.t=0;punish('O foco não foi ativado a tempo.')}}
     else if(S.stage===3){const left=60-S.t;S.gaze-=dt;
-      if(S.gaze<=0){S.open=!S.open;S.gaze=S.open?2.3:rnd(2.8,4.2);eyes(S.open?0xff2020:0x333333);bossLight.color.setHex(S.open?0xff2020:0xfff0d0);bossLight.intensity=S.open?2.6:.6;if(S.open){toast('Os olhos do deus se abriram.',1200);sfx('laser')}S.px=P.x;S.pz=P.z}
+      if(S.gaze<=0){S.open=!S.open;S.gaze=S.open?2.3:rnd(2.8,4.2);eyes(S.open?0xff2020:0x333333);bossLight.color.setHex(S.open?0xff2020:0xfff0d0);bossLight.intensity=S.open?2.6:.6;if(S.open){toast('Vigia ativo: permaneça imóvel.',1200);sfx('laser')}S.px=P.x;S.pz=P.z}
       if(S.open&&Math.hypot(P.x-S.px,P.z-S.pz)>.25&&(S.lz||0)<time){S.lz=time+.8;laser(.3)}
       if(S.open){S.px=P.x;S.pz=P.z}
       const safe=Math.hypot(P.x-S.ax,P.z-S.az)<3.2;for(const e of S.statues)e.hold=safe;
-      S.msg='Mandamento III · '+fmtT(left)+' · olhos '+(S.open?'ABERTOS':'fechados');
+      S.msg='Protocolo III · sobreviva · '+fmtT(left)+' · olhos '+(S.open?'ABERTOS':'fechados');
       if(left<=0)finishTemple()}
   }
 }
@@ -2177,9 +2176,9 @@ function finishTemple(){unlockLore('temple');
   for(const e of S.statues){e.dead=true;e.gone=true;scene.remove(e.m.root);fxBurst(e.x,1,e.z,0xffd070,8,3)}
   S.god.eyeMat.color.setHex(0xffd070);bossLight.color.setHex(0xffd070);bossLight.intensity=2;sfx('arise');sfx('gong');
   if(profile.rank<8){profile.rank=8;store.set('pds2_profile',profile);refreshStats();P.hp=P.maxhp;player.aura.material.color.set(RANKS[8].c);bigText('ARCONTE',2600);
-    toast('<b>[ORÁCULO]</b> Você cumpriu os mandamentos. O Oráculo reconhece um novo <b style="color:#e6d6ff">ARCONTE</b>.',6000);
+    toast('<b>[ORÁCULO]</b> Você completou os protocolos. O Oráculo reconhece um novo <b style="color:#e6d6ff">ARCONTE</b>.',6000);
     setTimeout(()=>toast('<b>[ORÁCULO]</b> Este despertar é permanente. Nem a morte o tira de você.',5000),2500)}
-  else{bigText('O TEMPLO TE RECONHECE',1800);toast('<b>[ORÁCULO]</b> O templo reconhece o Arconte.',4000)}
+  else{bigText('RESSONÂNCIA RECONHECIDA',1800);toast('<b>[ORÁCULO]</b> O Vigia reconhece a ressonância do Arconte.',4000)}
   L.bossDead=true;L.closeT=150;
   for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
   addChest(0,S.az+4,8,true);
@@ -2198,8 +2197,9 @@ function completeJob(){
   const A=ADV[profile.cls];run.adv=true;player.skills.push({...A.sk,cdT:0});refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[ORÁCULO]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
 }
-function skillTips(){if(!player||!player.skills)return;['bQ','bR','bT','bG'].forEach((id,i)=>{const sk=player.skills[i];if(sk&&$(id))$(id).title=(sk.n+': '+skillDesc(sk)).replace(/<[^>]*>/g,'')})}
-function showG(){skillTips();const P=player,s=P&&P.skills[3];$('bG').hidden=!s;if(s)$('bG').querySelector('.nm').textContent=s.n;$('bZ').hidden=profile.rank!==8;$('bZ').querySelector('.k').textContent=touch?'✦':keyOf('sovereign').replace(/^Key|^Digit/,'')}
+function skillButtonTip(sk){return (sk.n+' · NV '+((run.skl||{})[sk.n]||0)+'/10: '+skillDesc(sk)+' · Melhore em Status.').replace(/<[^>]*>/g,'')}
+function skillTips(){if(!player||!player.skills)return;['bQ','bR','bT','bG'].forEach((id,i)=>{const sk=player.skills[i];if(sk&&$(id))$(id).title=skillButtonTip(sk)})}
+function showG(){skillTips();const P=player,s=P&&P.skills[3];$('bG').hidden=!s;if(s)$('bG').querySelector('.nm').textContent=s.n;$('bZ').hidden=profile.rank!==8;refreshKeyLabels()}
 function bankView(){
   view=bankView;const b=profile.bank||0;
   let h='<div class="sysline">Selene: O que fica aqui não se perde, nem se você morrer lá fora. · Carregando <b class="gold">'+fmt(run.gold)+'</b> · No banco <b class="gold">'+fmt(b)+'</b></div>';
@@ -2218,16 +2218,17 @@ const SHNAMES=['Kaizen','Vorn','Ignar','Velmor','Durak','Grimm','Nyx','Morvak','
 const LOOK_H=[null,0x222222,0xc85a1e,0xe8e8ff,0x3a5fd0,0xd0b070,0x8a2b8a,0x2f8a4a];
 const LOOK_B=[null,0x2a3a5a,0x7a1a2a,0x1f6b4a,0x5a3a8a,0x8a7a50,0x222228,0xd8d8e0];
 const LORE={
-  start:['O Despertar','Há dez anos os primeiros portais se abriram. Quem sobreviveu ao contato com a mana despertou. O Oráculo mede todos, mas ninguém sabe quem criou o Oráculo.'],
-  gate:['Portais','Cada portal leva a uma masmorra fora do nosso mundo. Se ninguém fecha, os monstros atravessam. A Ordem chama isso de quebra.'],
+  start:['O Despertar','Há cem anos o céu rachou. As Fendas trouxeram ecos de mundos mortos, e o Oráculo escolheu quem conseguiria enfrentá-los. Ninguém conhece a origem dessa voz.'],
+  gate:['Fendas e Portais','Cada portal atravessa uma Fenda e leva a um fragmento de outro mundo. Se o guardião permanece vivo, a mana se acumula até transbordar: os monstros atravessam para o nosso lado.'],
   boss:['Guardiões','Todo portal tem um guardião. Quando ele cai, a masmorra perde a âncora e começa a se desfazer.'],
   city:['As Cidades','As muralhas das cidades foram erguidas com cristais de mana. Monstro nenhum atravessa. Por enquanto.'],
-  high:['Portais acima do S','A Ordem evita falar dos portais SS e SSS. Os caçadores que voltam de lá não gostam de contar o que viram.'],
+  high:['Portais de rank ** e ***','A Ordem registra essas Fendas com estrelas: ** e ***. São fragmentos de mundos quase esquecidos. Os caçadores que voltam de lá raramente contam tudo o que viram.'],
   shadow:['Ecos','Necromantes dizem ouvir os mortos pedirem para lutar de novo. Poucos conseguem responder.'],
   penalty:['A Zona de Penalidade','O Oráculo não perdoa quem ignora o treino. Ninguém escolhe ir para lá.'],
   past:['Antes dos Portais','Havia um guardião antes de todos. Ele não deixava nada sair. Alguém o derrotou, e a porta ficou aberta.'],
   dream:['O Sonho','Os monstros que mais te mataram moram na sua cabeça. Dá para enfrentá-los dormindo.'],
-  temple:['O Templo','Existe uma masmorra dentro da masmorra. Quem cumpre os mandamentos volta diferente.']};
+  temple:['O Santuário','Existe uma câmara oculta dentro de certas Fendas. O Vigia testa a ressonância dos despertos; quem completa os protocolos retorna ligado ao Oráculo.'],
+  towerEnd:['Ato VII · A Porta do Arquiteto','No andar 100, o guardião caiu e a porta se abriu. Do outro lado não havia um trono: havia o mapa de incontáveis mundos rachados. Uma mensagem de Aldric esperava na pedra: "O Arquiteto constrói passagens, mas não decide quem atravessa. Essa escolha é nossa." Você deixou um sinal para a Ordem. O primeiro ciclo da torre está encerrado; os caminhos acima dele continuam abertos.']};
 function unlockLore(k){profile.lore=profile.lore||[];if(profile.lore.includes(k))return;profile.lore.push(k);store.set('pds2_profile',profile);setTimeout(()=>toast('<b>[DIÁRIO]</b> Nova página: '+LORE[k][0]),1200)}
 function v2Item(it){if(!it||it.v2)return;it.v2=1;delete it.bonus;delete it.def;const n=[0,0,1,1,2,2,2][it.rar]||0;
   it.aff=(it.aff||[]).slice(0,n).map(x=>{const A=AFX.find(y=>y.k===x.k)||{};return{k:x.k,v:Math.max(1,Math.min(x.v,Math.round((1+it.tier*.4)*(1+it.rar*.15)*(A.f||1)*1.3)))}});
@@ -2241,7 +2242,8 @@ function ensureRun(){run.lamps=run.lamps||0;
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
     if(lv>1)setTimeout(()=>showSys('ORÁCULO 2.0. Seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível, com números fixos). Equipamentos convertidos: o rank manda. Abra Status.'),4500)}
   run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;
-  if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
+  if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p||{}).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
+  run.daily.p=run.daily.p||{};for(const [k,,n] of DAILY)run.daily.p[k]=clamp(Number(run.daily.p[k])||0,0,n);if(typeof run.trackObj!=='string')run.trackObj=null;
   run.shadows=(run.shadows||[]).map(s=>typeof s==='string'?{n:s,lvl:1,xp:0,nick:null,on:true}:s.n?s:{n:s.n,lvl:1,xp:0,on:true});
 }
 function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=>q[0]===k);const b=d.p[k];d.p[k]=Math.min(g[2],b+v);
@@ -2374,7 +2376,24 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
   if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER ECO (F) em guardiões e elites.':'Só o Necromante levanta ecos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*r.lvl,btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
-function diaryView(){view=null;const l=profile.lore||[];let h='';for(const k of l)h+='<div class="it"><div class="d"><b>'+LORE[k][0]+'</b><small>'+LORE[k][1]+'</small></div></div>';if(!l.length)h='<div class="sysline">Nada escrito ainda.</div>';openModal('DIÁRIO DO CAÇADOR',h)}
+function journeyObjectives(){const list=[],nx=profile.rank+1;
+  if(nx<=TOPR){const need=GR[nx].lvl,ready=run.level>=need;list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Seu nível já permite a prova. Procure Lyra na Ordem da Fenda; enfrente as três ondas e o Examinador.':'Chegue ao nível '+need+' e procure Lyra na Ordem da Fenda para fazer a prova.',progress:'nível '+run.level+'/'+need+(ready?' · prova disponível':''),ready})}
+  else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre do Oráculo para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
+  for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
+  (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
+function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h='<div class="tabs">'+[['goals','Objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+  if(tab==='goals'){h+='<div class="sysline">Acompanhe um objetivo no painel do personagem. Histórias iniciadas na Ordem e missões continuam registradas aqui; as recompensas são recebidas com Lyra.</div>';const list=journeyObjectives(),tracked=trackedObjective();
+    for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
+    if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
+    h+='<div class="sec">TREINO DIÁRIO'+(run.daily&&run.daily.done?' · CONCLUÍDO':'')+'</div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
+  }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
+    for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
+    if(!any)h+='<div class="sysline">Passe na primeira Prova de Rank para receber o chamado de Lyra.</div>';
+    if((profile.lore||[]).includes('towerEnd'))h+=row('<b>'+LORE.towerEnd[0]+' · CONCLUSÃO</b>',LORE.towerEnd[1],'');
+  }else{let any=false;for(const k of profile.lore||[]){const page=LORE[k];if(!page)continue;any=true;h+=row('<b>'+page[0]+'</b>',page[1],'')}if(!any)h+='<div class="sysline">Explore as Fendas para descobrir novas páginas.</div>'}
+  openModal('DIÁRIO DE JORNADA',h)}
+function diaryView(){journeyView('lore')}
 function lookView(){view=lookView;const lk=profile.look||{h:0,b:0};let h='<div class="sysline">Mude a aparência do seu caçador. Fica salvo no seu despertar.</div>';
   h+=row('Cabelo','Estilo '+(lk.h||'da classe'),btn('Trocar','lookh',0))+row('Roupa','Cor '+(lk.b||'da classe'),btn('Trocar','lookb',0));openModal('APARÊNCIA',h)}
 function saveCodeView(imp){view=null;let h;
@@ -2426,7 +2445,8 @@ function extraActions(a,v){
   if(a==='bestv')return bestView(),'close0';
   if(a==='travel'){const c=(profile.visited||{})[v];if(!c)return;const cost=travelCost(c);if(run.gold<cost)return;if(enemies.some(e=>!e.dead&&e.aggro&&Math.hypot(e.x-player.x,e.z-player.z)<25)){toast('Monstros estão te perseguindo. Não dá para viajar agora.');return}
     run.gold-=cost;closeModal();player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);fxRing(player.x,player.z,0xffb347,4,.8);bigText(c.n,1400);sfx('arise');saveRun();return}
-  if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
+  if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};refreshKeyLabels();try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
+  if(a==='journeytab')return journeyView(v),'close0';if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
   if(a==='status')return statusView(),'close0';if(a==='army')return armyView(),'close0';if(a==='diary')return diaryView(),'close0';if(a==='look')return lookView(),'close0';
 }
 /* tutorial */
@@ -2452,9 +2472,9 @@ const TITLES=[
  {id:'fisher',n:'Pescador',d:'30 peixes',c:()=>(profile.fish||0)>=30,m:'Comida dura o dobro do tempo',b:{}},
  {id:'avenger',n:'Vingador',d:'derrotar seu nêmesis',c:()=>(profile.nemKills||0)>=1,m:'+20% de dano contra elites',b:{}},
  {id:'lord',n:'Senhor de Domínios',d:'3 masmorras dominadas',c:()=>(profile.owned||[]).length>=3,m:'Baús comuns têm +15% de chance de trazer item',b:{}},
- {id:'brk30',n:'Resistente',d:'sobreviver 30 s numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=30,m:'Escudo recarrega 30% mais rápido',b:{}},
- {id:'brk60',n:'Inabalável',d:'sobreviver 1 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 0,20 s mais rápido',b:{}},
- {id:'brk600',n:'Imortal',d:'sobreviver 10 min numa Quebra de Masmorra',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
+ {id:'brk30',n:'Resistente',d:'sobreviver 30 s num Transbordo da Fenda',c:()=>(profile.brkBest||0)>=30,m:'Escudo recarrega 30% mais rápido',b:{}},
+ {id:'brk60',n:'Inabalável',d:'sobreviver 1 min num Transbordo da Fenda',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 0,20 s mais rápido',b:{}},
+ {id:'brk600',n:'Imortal',d:'sobreviver 10 min num Transbordo da Fenda',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
  {id:'founder',n:'Fundador',d:'levar uma cidade ao nível 10',c:()=>Object.values(profile.cityLv||{}).some(v=>v>=10),m:'Lojas 10% mais baratas em todas as cidades',b:{}},
  {id:'miner',n:'Amigo dos Mineiros',d:'história O Mineiro Desaparecido',c:()=>false,m:'Veios de mana rendem +1 cristal por golpe',b:{}},
  {id:'lakeg',n:'Guardião do Lago',d:'história A Canção do Lago',c:()=>false,m:'Poções também enchem 30% do escudo',b:{}},
@@ -2534,7 +2554,8 @@ const MAIN_ACTS=[null,
  ['Ato V · O Retorno','Aldric aparece ferido na Ordem: "O Arquiteto quer caçadores fortes. Ele se alimenta de quem sobe. Não pare, mas nunca suba sozinho."'],
  ['Ato VI · As Muralhas','As cidades começam a cair nas estações do fim do mundo. Aldric: "Ele está testando as muralhas. Cada cidade que você fortalece atrapalha o plano."'],
  ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
-function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}showSys('<b>'+A[0]+'</b><br>'+A[1])}
+function finishTowerStory(announce=false){if(profile.rank<TOPR||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
+function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
 function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank novo: <b>+10% de dano e vida</b>, portais mais fortes, <b>+1 vaga de trabalho</b> e um novo ato da história.</div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
   if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Requisito: nível '+need+' (você está no '+run.level+') · 3 ondas de monstros rank '+RANKS[nx].id+' e o Examinador do Rank. Sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,run.level>=need,'hot'));
@@ -2619,7 +2640,7 @@ function profRows(){const D={mine:l=>'+'+Math.min(100,l*5)+'% de chance de +1 cr
 /* ===== HISTÓRIAS DA ORDEM ===== */
 const STORIES=[
  {id:'miner',npc:'Dorian',n:'O Mineiro Desaparecido',steps:[['mine',30,'Dorian: Meu irmão sumiu perto dos veios. Minere 30 cristais e procure pistas.'],['clear',2,'Os cristais têm marcas de garra. Feche 2 portais: algo está saindo deles.'],['elite',5,'As garras são de elites. Mate 5 elites.'],['boss',1,'Um guardião prendeu o irmão do Dorian. Derrote um guardião.']],rw:{g:30000,p:3,t:'miner'}},
- {id:'lake',npc:'Mira',n:'A Canção do Lago',steps:[['fish',10,'Mira: O lago está cantando à noite. Pesque 10 peixes e escute.'],['species',4,'Cada espécie canta uma nota. Tenha 4 espécies no Aquário.'],['kill',100,'A canção atrai monstros. Mate 100 deles.'],['brk',60,'A última nota vem de uma masmorra quebrando. Sobreviva 1 minuto numa Quebra de Masmorra.']],rw:{g:40000,p:3,t:'lakeg'}},
+ {id:'lake',npc:'Mira',n:'A Canção do Lago',steps:[['fish',10,'Mira: O lago está cantando à noite. Pesque 10 peixes e escute.'],['species',4,'Cada espécie canta uma nota. Tenha 4 espécies no Aquário.'],['kill',100,'A canção atrai monstros. Mate 100 deles.'],['brk',60,'A última nota vem de uma masmorra quebrando. Sobreviva 1 minuto num Transbordo da Fenda.']],rw:{g:40000,p:3,t:'lakeg'}},
  {id:'tower',npc:'Lyra',n:'O Chamado da Torre',steps:[['tower',20,'Lyra: A torre chamou o seu nome. Chegue ao andar 20.'],['boss',3,'Os guardiões guardam a chave. Derrote 3.'],['clear',5,'Feche 5 portais para acalmar a mana.'],['tower',50,'Suba até o andar 50.']],rw:{g:80000,p:5,t:'towerc'}},
  {id:'city',npc:'Selene',n:'A Cidade que Cresce',steps:[['citylv',3,'Selene: Esta cidade pode ser grande. Leve uma cidade ao nível 3.'],['house',1,'Todo morador precisa de um lar. Compre uma casa.'],['siege',1,'Um dragão sempre vem atrás de cidades grandes. Defenda uma cidade de um ataque (cidade nível 5+).']],rw:{g:120000,p:5,t:'protector'}}];
 const STORY_ABS={species:()=>Object.keys(profile.aqua||{}).length,tower:()=>profile.towerBest||0,brk:()=>profile.brkBest||0,citylv:()=>Math.max(0,...Object.values(profile.cityLv||{})),house:()=>profile.house?1:0,siege:()=>profile.sieges||0};
@@ -2734,14 +2755,15 @@ function updSpecial2(S,dt){
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[ORÁCULO]</b> '+msg,4000)}
 const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>1e9;
 function towerClear(S){S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);
+  const storyEnd=finishTowerStory();
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
   if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
-  if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys('Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares. A torre continua, sem fim.',6000)}
+  if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,8,true);addChest(4,0,8,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys(storyEnd?'<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia em DIÁRIO → História.</small>':'Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares. A torre continua, sem fim.',6000)}else if(storyEnd)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]);
   if(S.floor>=towerCap()){bigText('LIMITE DA TORRE',1500);toast('<b>[TORRE]</b> Andar '+S.floor+' é o seu limite. Cada reencarnação libera mais 50 andares.',6000);return}
   const gold=Math.round(80*S.floor*GR[S.gr].gold);run.gold+=gold;floater(player.x,player.z,'+'+fmt(gold)+' ouro','#ffd54f',true);if(S.floor%5===0)addChest(3,0,S.gr,S.boss);
   const grp=new THREE.Group();grp.position.set(0,0,-4);const ring=new THREE.Mesh(geo('gring',()=>0),glowS(0xffd070,1));ring.position.y=2.6;grp.add(ring);const sg=makeSign('ANDAR '+(S.floor+1),'#ffd070',.55);sg.position.y=5.5;grp.add(sg);L.group.add(grp);L.exits.push({ring,grp,sg,locked:false});
   L.inter.push({type:'next',x:0,z:-4,r:3.2,label:'F · SUBIR PARA O ANDAR '+(S.floor+1),use:()=>buildSpecial('tower',{x:L.gate.x,z:L.gate.z},S.floor+1)});
-  bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500)}
+  bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500);saveRun()}
 function towerTab(){const b=profile.towerBest||0,cap=towerCap(),c=Math.max(1,b);let h='<div class="sysline">A Torre do Oráculo é <b>infinita</b>. Chefe a cada 10 andares e um Arconte no andar 100. Monstros do andar N têm nível <b>N × 2,6</b> até o 100 e sobem 4 níveis por andar depois. Você sempre pode continuar do seu recorde. Recorde: <b>andar '+b+'</b>.</div>'+row('Começar do andar 1','Aquecimento',btn('Entrar','tower',1))+(b>=2?row('Continuar do andar '+c,'Pula os andares que você já venceu',btn('Entrar','tower',c,true,'hot')):'');
   h+='<div class="sec">RANKING DA TORRE</div>';towerRank().forEach((r,i)=>{h+='<div class="it" style="'+(r.me?'background:rgba(255,179,71,.14)':'')+'"><div class="d"><b>'+(i+1)+'º</b> '+r.n+'</div><span>andar '+r.f+'</span></div>'});return h}
 
@@ -3091,16 +3113,26 @@ $('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').
 
 /* ================= CONTROLES ================= */
 /* Teclas configuráveis (PC): cada ação pode ganhar outra tecla. */
-const KEYACT=[['attack','Atacar','Space'],['dodge','Esquiva','ShiftLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade G','KeyG'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK']];
+const KEYACT=[['attack','Atacar','Space'],['dodge','Esquiva','ShiftLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL']];
+const KEYRES=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape','Tab','Enter','ShiftRight','KeyE','KeyB','KeyO','KeyN','KeyP','KeyJ','KeyX','KeyV','Digit1','Digit2','Digit3','Digit4']);
 let KEYMAP={};try{KEYMAP=JSON.parse(localStorage.getItem('pds_keys'))||{}}catch(e){}
 let bindWait=null;
 function keyOf(act){const d=KEYACT.find(k=>k[0]===act);return KEYMAP[act]||d[2]}
+function keyLabel(code){const names={Space:'Espaço',ShiftLeft:'Shift',ShiftRight:'Shift direito',ControlLeft:'Ctrl',ControlRight:'Ctrl direito',Backquote:'`',Minus:'−',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'barra invertida',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/'};return names[code]||code.replace(/^Key|^Digit/,'').replace(/^Numpad/,'Num ')}
+function bindableKey(code){return typeof code==='string'&&!KEYRES.has(code)&&/^(Key[A-Z]|Digit[0-9]|Numpad[0-9]|Space|ShiftLeft|ControlLeft|ControlRight|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash)$/.test(code)}
+function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!action||!bindableKey(code))return false;const old=keyOf(act),other=KEYACT.find(k=>k[0]!==act&&keyOf(k[0])===code);
+  if(other){if(old===other[2])delete KEYMAP[other[0]];else KEYMAP[other[0]]=old}if(code===action[2])delete KEYMAP[act];else KEYMAP[act]=code;return true}
+{const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
-function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e aperte a nova tecla. Esc cancela. WASD/setas continuam movendo.</div>';
-  for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==8)continue;h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyOf(act).replace(/^Key|^Digit/,'')+'</b>',btn('Mudar','bindk',act,true))}
+function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'))}
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Mover o personagem','')+row('Mouse','Mira e ataque com o botão esquerdo (segure para continuar atacando). Arraste com o botão direito para girar a câmera; use a roda para aproximar e o botão do meio para restaurar.','')+'<div class="sec">SUAS TECLAS</div>';
+  for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==8)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
+  h+='<div class="sec">OUTROS ATALHOS</div>';for(const [n,k] of [['Poderes absorvidos','1 · 2 · 3'],...(run.fused?[['Poder fundido','4']]:[]),['Ordens dos ecos','O'],['Personagem','P'],['Bestiário','J'],['Notícias','N'],['Estilo físico/arcano','X'],['Montar / desmontar','V'],['Interagir (alternativas)','E · Enter'],['Bolsa (alternativa)','B'],['Status (alternativa)','Tab'],['Fechar janela / cancelar troca de tecla','Esc']])h+=row(n,'','<b>'+k+'</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
+function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e aperte a nova tecla. Esc cancela. Se ela já estiver em outra ação configurável, as duas teclas trocam de lugar. Movimento e os atalhos da seção Outros atalhos ficam reservados.</div>';
+  for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==8)continue;h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyLabel(keyOf(act))+'</b>',btn('Mudar','bindk',act,true))}
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
-addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){for(const k in KEYMAP)if(KEYMAP[k]===e.code)delete KEYMAP[k];KEYMAP[bindWait]=e.code;try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}bindWait=null;keysView()},true);
-addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyP'&&started&&$('dead').hidden){modalOpen?closeModal():bagView('char');return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
+addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){if(!setKeyBinding(bindWait,e.code)){toast('Essa tecla é reservada ou não pode ser usada. Escolha outra, ou Esc para cancelar.');return}try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}for(const k in keys)keys[k]=false;bindWait=null;refreshKeyLabels();keysView()},true);
+addEventListener('keydown',e0=>{if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyL'&&started&&$('dead').hidden){modalOpen?closeModal():journeyView();return}if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyP'&&started&&$('dead').hidden){modalOpen?closeModal():bagView('char');return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
@@ -3128,7 +3160,7 @@ function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'lev
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
 function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
-function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="toast(document.getElementById(\'keys\').textContent,8000)">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
+function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
@@ -3201,7 +3233,7 @@ function startGame(){
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   for(const id of['stat','obj','mm','tb','pad','btns'])$(id).hidden=false;showG();
-  if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}if(!touch)$('keys').hidden=false;
+  if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
   started=true;paused=false;cam.x=player.x;cam.z=player.z;
   const rk=RANKS[rankOf()];
   toast('<b>[ORÁCULO]</b> Caçador rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
