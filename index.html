@@ -1164,7 +1164,7 @@ function newGate(){
   const life=rnd(420,900);
   return {id:++gateSeq,x,z,rank,aff:rollAff(rank),double:Math.random()<(rank<=1?.03:.012),red:rank>0&&Math.random()<.12,life,max:life,seed:(Math.random()*2**31)|0,cleared:false,dead:false};
 }
-function gateMesh(g){
+function gateMesh(g){if(expeditionType(g)==='extract')g.red=false;
   const col=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
   const grp=new THREE.Group();grp.position.set(g.x,0,g.z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
@@ -1203,7 +1203,7 @@ function talk(n){$('dlg').innerHTML='<b>'+n.name+':</b> '+pick(HLINES)+'<small>C
 
 /* ================= MASMORRA PROCEDURAL ================= */
 function buildDungeon(g){
-  clearLevel();
+  if(expeditionType(g)==='extract'){g.red=false;g.double=false}clearLevel();
   const G=GR[g.rank],th=G.th,R=mulberry32(g.seed);
   const Wd=G.size,Hd=G.size,CS=2,ox=-Wd*CS/2,oz=-Hd*CS/2,cells=new Uint8Array(Wd*Hd);
   const rooms=[];let tries=0;
@@ -1226,7 +1226,7 @@ function buildDungeon(g){
   rooms.forEach((r,i)=>{r.i=i;const c=cellPos(cen(r).x,cen(r).y);r.wx=c.x;r.wz=c.z});
   const KW=kindsFor(g.rank);
   const redM=g.red?1.3:1;
-  const mids=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==bi);
+  const mids=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==bi);if(mids.length<2)g.expType='standard';
   // monstros
   for(const i of mids){const r=rooms[i];const n=clamp(Math.round(r.w*r.h/22*G.dens*1.6),3,12);let first=null;
     for(let k=0;k<n;k++){const kind=wpick(KW).k;const reps=kind==='minion'?2:1;for(let q=0;q<reps;q++){const p=randIn(r);const e=spawnKind(kind,p.x,p.z,g.rank,{room:i});e.hp*=redM;e.maxhp*=redM;if(!first)first=e}}
@@ -1239,15 +1239,90 @@ function buildDungeon(g){
   const chestN=1+(rooms.length>8?1:0)+(g.red?1:0);const used=new Set();
   for(let k=0;k<chestN&&k<mids.length;k++){let i;let t=0;do{i=mids[Math.floor(R()*mids.length)]}while(used.has(i)&&t++<20);used.add(i);const r=rooms[i];addChest(r.wx+(R()<.5?1.5:-1.5),r.wz,g.rank,false)}
   // guardião
-  const pool=g.rank>=9?SOVEREIGNS:g.rank>=6?BOSSES_HIGH:BOSSES;const B=pool[Math.floor(R()*pool.length)];const b=spawnBoss(br.wx,br.wz,g.rank,B);b.room=bi;b.hp*=redM;b.maxhp*=redM;
+  const pool=g.rank>=9?SOVEREIGNS:g.rank>=6?BOSSES_HIGH:BOSSES;if(expeditionType(g)!=='extract'){let B=pool[Math.floor(R()*pool.length)];if(expeditionType(g)==='hunt'){const sp=expState(g).species;B={n:sp?'Devorador de Mana':'Predador da Fenda',mon:sp?'aranha':'lobo',types:['fury'],body:sp?0x765398:0x8b735b,scale:1.6,skill:S('Instinto da Caçada','dash_strike',8,20,2.5,0xdba77d)}}const b=spawnBoss(br.wx,br.wz,g.rank,B);b.room=bi;b.hp*=redM;b.maxhp*=redM;}
   // veios de cristal
   for(const i of mids){if(R()<.55){const r=rooms[i];const p=randIn(r);addVein(p.x,p.z,g.rank,3+Math.floor(R()*3),th.trim)}}
   // afixos
   const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark')){scene.fog.density=.07;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[ORÁCULO]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
   const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
+  setupExpedition(g,mids);
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;
 }
+/* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
+const EXP_TYPES={rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},extract:{n:'Extração',d:'Recolha materiais em uma carga separada de 12 espaços. Envie ao menos 6 espaços de carga para concluir. Cada envio exige defender um ponto por 12s e derrotar seus invasores. Pode continuar depois. Ao morrer, sair ou recarregar, perde a carga não enviada. Os materiais enviados ficam guardados; as penalidades normais de morte continuam.'}};
+const EXP_MATS={ward:{n:'Essência de Proteção',rune:'ward',v:80},echo:{n:'Essência de Duplicação',rune:'reprise',v:100},storm:{n:'Essência de Assalto',rune:'arcane',v:80},fang:{n:'Presa do Predador',rune:'fang',v:70},stalker:{n:'Glândula do Caçador',rune:'stalker',v:100},ore:{n:'Minério de Ressonância',rune:'shell',v:35,w:1},core:{n:'Núcleo Estável',rune:'vigor',v:70,w:2},heart:{n:'Coração de Cristal',rune:'arcane',v:140,w:3}};
+const EXP_FOCI=[{id:'ward',n:'Proteção',d:'Aliados do foco próximos recebem 40% menos dano. No chefe: escudo de 6% da vida máxima por foco, renovado a cada 16s.',c:0x70ddff},{id:'echo',n:'Duplicação',d:'Cria cópias frágeis na sala. No chefe: duas cópias por ativação, com limite de quatro vivas.',c:0xb98cff},{id:'storm',n:'Assalto',d:'Projeta impactos em linha na sala. No chefe: linhas anunciadas por 1,2s, sem bloquear a arena inteira.',c:0xff8750}];
+function expeditionType(g){if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'extract'}
+function expState(g){if(g.expState)return g.expState;const type=expeditionType(g);if(!type)return null;const R=mulberry32(g.seed^0x33a7);return g.expState={type,foci:Array.from({length:3},(_,i)=>({kind:i===2?Math.floor(R()*3):(Math.floor(R()*3)+i)%3,status:'active'})),nests:[false,false],bait:false,baitTaken:false,traps:[false,false],trapSpent:[false,false],species:R()<.5?0:1,retreats:0,rewarded:false,cargo:[],sent:0,instability:0,deposits:Array(9).fill(2)}}
+function expReward(key,n){const m=EXP_MATS[key];if(!m||n<=0)return;run.loot=run.loot||{};const r=run.loot[m.n]||(run.loot[m.n]={n:0,v:m.v,b:false,rune:m.rune,recipeParts:3});r.n+=n;r.rune=m.rune;r.recipeParts=3;toast('<b>[EXPEDIÇÃO]</b> +'+n+' '+m.n+' · grave '+GEAR_RUNES[m.rune].n+' na forja.');saveRun()}
+function expRecipe(key){const m=EXP_MATS[key];return m.n+' → '+GEAR_RUNES[m.rune].n+': '+GEAR_RUNES[m.rune].d+' (3 materiais por inscrição, mais ouro e cristais).'}
+function expCargoWeight(s){return s.cargo.reduce((n,k)=>n+EXP_MATS[k].w,0)}
+function expStage(s){return Math.min(3,Math.floor(s.instability/4))}
+function expPoint(room,offset=0){const r=L.rooms[room];const choices=[[offset,0],[0,0],[2,2],[-2,-2],[3,-2],[-3,2]];for(const [dx,dz] of choices)if(freeAt(r.wx+dx,r.wz+dz,.8))return{x:r.wx+dx,z:r.wz+dz};return{x:r.wx,z:r.wz}}
+function expNode(kind,index,room,label,color){let p=expPoint(room,kind==='beacon'?-3:2);const rr=L.rooms[room],G=L.grid;for(let y=rr.y+1;y<rr.y+rr.h-1;y++){let found=false;for(let x=rr.x+1;x<rr.x+rr.w-1;x++){const q={x:G.ox+(x+.5)*G.CS,z:G.oz+(y+.5)*G.CS};if(freeAt(q.x,q.z,.8)&&L.expedition.nodes.every(n=>Math.hypot(n.x-q.x,n.z-q.z)>2.7)){p=q;found=true;break}}if(found)break}const g=new THREE.Group(),base=mesh(geo('expBase',()=>new THREE.CylinderGeometry(.7,.95,.45,7)),toonS(0x51485b));base.position.y=.22;g.add(base);const shape=mesh(kind==='nest'?geo('expNest',()=>new THREE.TorusGeometry(.7,.25,5,8)):kind==='trap'?geo('expColumn',()=>new THREE.BoxGeometry(.6,2.3,.6)):geo('expCrystal',()=>new THREE.OctahedronGeometry(.6)),glowS(color,.65));shape.position.y=kind==='trap'?1.4:.95;if(kind==='nest')shape.rotation.x=Math.PI/2;g.add(shape);g.position.set(p.x,0,p.z);L.group.add(g);const it={type:'expedition',kind,index,room,...p,r:3,label:'F · '+label,grp:g,use:()=>expView(kind,index)};L.inter.push(it);L.expedition.nodes.push(it);return it}
+function setupExpedition(g,mids){const s=expState(g);if(!s||mids.length<2)return;const ex=L.expedition={s,nodes:[],timer:3,routeT:0,challenge:null,patrol:0,lastCast:0};const rooms=mids.slice().sort((a,b)=>((a*17+g.seed)%37)-((b*17+g.seed)%37));
+ if(s.type==='rupture'){s.foci.forEach((f,i)=>{const cfg=EXP_FOCI[f.kind],node=expNode('focus',i,rooms[i%rooms.length],'FOCO DE '+cfg.n.toUpperCase(),cfg.c);f.room=node.room;node.hidden=f.status!=='active';node.grp.visible=!node.hidden});if(bossE){bossE.mech=null;bossE.expBoss=true}}
+ if(s.type==='hunt'){for(let i=0;i<2;i++){const node=expNode('nest',i,rooms[i],'DESTRUIR NINHO',0xe4a36e);node.hidden=s.nests[i];node.grp.visible=!node.hidden}expNode('bait',0,rooms[rooms.length-1],'RECOLHER ISCA',0xb8eb85);for(let i=0;i<2;i++)expNode('trap',i,rooms[(i+2)%rooms.length],'PREPARAR ARENA',0xe5c485);if(bossE){bossE.mech=null;bossE.expBoss=true;bossE.name=s.species?'Devorador de Mana':'Predador da Fenda';bossE.r=.7;bossE.speed=4.2;bossE.room=-1;bossE.aggro=false;ex.homeHp=bossE.hp;ex.target=expPoint(rooms[0]);ex.patrolRooms=rooms}}
+ if(s.type==='extract'){g.red=false;g.double=false;s.cargo=[];for(let i=0;i<9;i++){const node=expNode('deposit',i,rooms[i%rooms.length],'DEPÓSITO · '+EXP_MATS[['ore','core','heart'][i%3]].n.toUpperCase(),[0x8dddc8,0x77baff,0xe8a4ff][i%3]);node.hidden=s.deposits[i]<=0;node.grp.visible=!node.hidden}expNode('beacon',0,0,'ENVIAR CARGA',0x7cf4d2);expNode('beacon',1,rooms[Math.floor(rooms.length/2)],'ENVIAR CARGA',0x7cf4d2);if(s.sent>=6){L.bossDead=true;L.closeT=999999}}
+ toast('<b>['+EXP_TYPES[s.type].n.toUpperCase()+']</b> '+EXP_TYPES[s.type].d,9000);
+}
+function expNear(kind,index){const ex=L.expedition;if(!ex||L.special||player.dead)return null;const n=ex.nodes.find(x=>x.kind===kind&&x.index===index&&!x.hidden);return n&&Math.hypot(n.x-player.x,n.z-player.z)<=n.r+.2?n:null}
+function expRoomAlive(room){return enemies.filter(e=>!e.dead&&!e.isBoss&&e.room===room).length}
+function expSpawn(x,z,n,tag,room){const out=[];for(let i=0;i<n;i++){let px=x+Math.sin(i*2.4)*5,pz=z+Math.cos(i*2.4)*5;if(!freeAt(px,pz,.7)){px=x;pz=z}const e=spawnKind(i%2?'rogue':'warrior',px,pz,L.gate.rank,{room});e.expTag=tag;e.aggro=true;out.push(e)}return out}
+function expLine(x,z,dmg,col){const a=Math.atan2(player.x-x,player.z-z);for(let i=1;i<=5;i++){const px=x+Math.sin(a)*i*2,pz=z+Math.cos(a)*i*2;if(freeAt(px,pz,.4))expHazard(px,pz,1.05,1.2,dmg,'enemy',col)}}
+function expView(kind,index){const node=expNear(kind,index);if(!node)return;const ex=L.expedition,s=ex.s;view=()=>expView(kind,index);let h='<div class="sysline">'+EXP_TYPES[s.type].d+'</div>';
+ const act=(label,op,ok=true)=>btn(label,'expact',kind+'|'+index+'|'+op,ok);
+ if(ex.challenge)h+=row('Desafio em andamento','Feche esta janela para o tempo e o combate continuarem.','');
+ if(kind==='focus'){const f=s.foci[index],cfg=EXP_FOCI[f.kind];h+=row('Foco de '+cfg.n,cfg.d+'<br>'+expRecipe(cfg.id),'');h+=row('Destruir','Derrote 2 defensores. Remove o poder; mantém o saque normal do guardião.',act('Destruir','destroy',!ex.challenge));h+=row('Purificar','Fique a até 4 m por 12s e derrote 3 defensores. Sair do círculo zera o tempo. Remove o poder e entrega 3 essências.',act('Purificar','purify',!ex.challenge));h+=row('Deixar ativo','O chefe mantém este poder. Vitória rende 6 essências deste foco.',act('Deixar ativo','close'))}
+ if(kind==='nest')h+=row('Ninho de recuperação','Sem ninhos, a criatura não pode recuar e recuperar vida. Limpe os inimigos desta sala antes de destruir. A recompensa normal permanece.',act('Destruir ninho','nest',!s.nests[index]&&expRoomAlive(node.room)===0));
+ if(kind==='bait')h+=row('Isca especial','Limpe a sala para recolher 1 isca. Use-a em uma das arenas para atrair a criatura.',act(s.baitTaken?'Já recolhida':'Recolher','bait',!s.baitTaken&&expRoomAlive(node.room)===0));
+ if(kind==='trap'){h+=row('Coluna instável','Preparar arma a coluna. Quando a criatura passar a até 3 m, a coluna cai, interrompe seus ataques por 3s e impede uma fuga nessa janela. Uso único.',act(s.traps[index]?'Preparada':'Preparar','trap',!s.traps[index]&&!s.trapSpent[index]));h+=row('Escolher esta arena','Gasta a isca para conduzir a criatura até aqui. Você pode atraí-la sem isca entrando no alcance dela.',act('Usar isca','lure',s.bait&&!bossE?.dead));h+=row('Recompensa','3 Presas e 3 Glândulas. Caçar sem usar isca concede mais 2 Glândulas; preparar colunas ou destruir ninhos não reduz o saque.', '')}
+ if(kind==='deposit'){const key=['ore','core','heart'][index%3],m=EXP_MATS[key];h+=row(m.n,'Ocupa '+m.w+' espaço(s). Restam '+s.deposits[index]+' unidades.<br>'+expRecipe(key)+'<br>Recolher aumenta a instabilidade em '+m.w+'.',act('Recolher','collect',!ex.challenge&&s.deposits[index]>0&&expCargoWeight(s)+m.w<=12))}
+ if(kind==='beacon'){h+=row('Enviar a carga','Defenda a posição a até 6 m por 12s e derrote os invasores. Sair zera o tempo. O envio guarda os materiais nos espólios, mesmo se você morrer depois.',act('Iniciar envio','send',!ex.challenge&&s.cargo.length>0));h+=row('Estabilizar a região','Consome a unidade menos volumosa da carga e reduz a instabilidade em 3. Não repõe depósitos.',act('Estabilizar','stabilize',!ex.challenge&&s.cargo.length>0&&s.instability>0))}
+ if(s.type==='extract'){h+=row('Carga '+expCargoWeight(s)+'/12 · enviada '+s.sent+'/6','Instabilidade '+s.instability+' · estágio '+expStage(s)+'.<br>0: região calma. 1: fissuras anunciadas. 2: criaturas atraídas. 3: fissuras mais frequentes. Corredores permanecem abertos.','');for(const key of [...new Set(s.cargo)])h+=row(EXP_MATS[key].n+' × '+s.cargo.filter(k=>k===key).length,'Carga não enviada',act('Descartar 1','drop:'+key,!ex.challenge))}
+ openModal(EXP_TYPES[s.type].n.toUpperCase(),h);
+}
+function expAction(kind,index,op){const node=expNear(kind,index);if(!node)return false;const ex=L.expedition,s=ex.s;if(op==='close'){closeModal();return true}if(ex.challenge)return false;
+ if(kind==='focus'&&['destroy','purify'].includes(op)){const f=s.foci[index];if(f.status!=='active'||L.bossDead)return false;const tag='focus'+index;ex.challenge={kind:op,node,tag,t:0,need:op==='purify'?12:0};expSpawn(node.x,node.z,op==='purify'?3:2,tag,node.room);toast(op==='purify'?'Purificação: mantenha-se no círculo e derrote os defensores.':'Destruição: derrote os defensores do foco.');fxRing(node.x,node.z,0xe3c7ff,4,1)}
+ else if(kind==='nest'&&op==='nest'){if(s.nests[index]||expRoomAlive(node.room)>0)return false;s.nests[index]=true;node.hidden=true;node.grp.visible=false;toast('Ninho destruído. A criatura perdeu um ponto de recuperação.')}
+ else if(kind==='bait'&&op==='bait'){if(s.baitTaken||expRoomAlive(node.room)>0)return false;s.bait=s.baitTaken=true;node.hidden=true;node.grp.visible=false;toast('Isca recolhida. Escolha uma arena para atrair a criatura.')}
+ else if(kind==='trap'&&op==='trap'){if(s.traps[index]||s.trapSpent[index])return false;s.traps[index]=true;toast('Coluna preparada. Atraia a criatura para perto.')}
+ else if(kind==='trap'&&op==='lure'){if(!s.bait||!bossE||bossE.dead)return false;s.bait=false;s.baitUsed=true;ex.lure=node;ex.target={x:node.x,z:node.z};ex.path=null;bossE.aggro=false;bossE.act=null;toast('A criatura farejou a isca e está vindo pelos corredores.')}
+ else if(kind==='deposit'&&op==='collect'){const key=['ore','core','heart'][index%3],m=EXP_MATS[key];if(s.deposits[index]<=0||expCargoWeight(s)+m.w>12)return false;const stage=expStage(s);s.cargo.push(key);s.deposits[index]--;s.instability+=m.w;if(s.deposits[index]===0){node.hidden=true;node.grp.visible=false}if(expStage(s)>stage)toast('Instabilidade aumentou: estágio '+expStage(s)+'. Veja as consequências no ponto de envio.');toast(m.n+' recolhido · carga '+expCargoWeight(s)+'/12.')}
+ else if(kind==='beacon'&&op==='stabilize'){if(!s.cargo.length||s.instability<=0)return false;let i=0;for(let j=1;j<s.cargo.length;j++)if(EXP_MATS[s.cargo[j]].w<EXP_MATS[s.cargo[i]].w)i=j;s.cargo.splice(i,1);s.instability=Math.max(0,s.instability-3);toast('Uma unidade da carga foi consumida. Instabilidade reduzida.')}
+ else if(kind==='beacon'&&op==='send'){if(!s.cargo.length)return false;ex.sendSeq=(ex.sendSeq||0)+1;const tag='send'+ex.sendSeq;ex.challenge={kind:'send',node,tag,t:0,need:12};expSpawn(node.x,node.z,2+expStage(s),tag,node.room);toast('Envio iniciado: defenda a posição e permaneça a até 6 m por 12s.')}
+ else if(op.startsWith('drop:')&&s.type==='extract'){const i=s.cargo.indexOf(op.slice(5));if(i<0)return false;s.cargo.splice(i,1)}else return false;closeModal();saveRun();return true;
+}
+function expFinishChallenge(){const ex=L.expedition,c=ex?.challenge;if(!c)return;const s=ex.s;if(c.kind==='send'){const weight=expCargoWeight(s);for(const key of [...new Set(s.cargo)])expReward(key,s.cargo.filter(k=>k===key).length);s.sent+=weight;s.cargo=[];if(s.sent>=6&&!s.completed){s.completed=true;L.bossDead=true;L.closeT=999999;toast('<b>[EXTRAÇÃO]</b> Objetivo concluído. Saia para fechar o portal ou continue recolhendo por sua conta.')};saveRun()}
+ else{const f=s.foci[c.node.index];f.status=c.kind==='purify'?'purified':'destroyed';c.node.hidden=true;c.node.grp.visible=false;if(c.kind==='purify')expReward(EXP_FOCI[f.kind].id,3);for(const e of enemies)if(e.expFocus===c.node.index){e.dead=true;e.gone=true;scene.remove(e.m.root)}toast('Foco de '+EXP_FOCI[f.kind].n+' removido. O guardião perdeu esse poder.');if(bossE)bossE.expShield=0}
+ ex.challenge=null;
+}
+function expeditionDamage(e,amt){const ex=L.expedition;if(!ex||ex.s.type!=='rupture')return amt;if(e===bossE&&e.expShield>0){const absorbed=Math.min(e.expShield,amt);e.expShield-=absorbed;amt-=absorbed;floater(e.x,e.z,'ESCUDO −'+Math.round(absorbed),'#70ddff')}
+ else if(!e.isBoss&&ex.s.foci.some(f=>f.status==='active'&&f.kind===0&&f.room===e.room))amt*=.6;return amt}
+function expBossReward(){const ex=L.expedition;if(!ex||ex.s.rewarded)return;const s=ex.s;s.rewarded=true;if(s.type==='rupture')for(const f of s.foci)if(f.status==='active')expReward(EXP_FOCI[f.kind].id,6);if(s.type==='hunt'){expReward('fang',3);expReward('stalker',s.baitUsed?3:5)}saveRun()}
+function expAbandon(){const s=L.expedition?.s;if(s?.type==='extract'&&s.cargo.length){s.cargo=[];toast('A carga não enviada ficou no portal. Os materiais já enviados continuam nos espólios.')}}
+function expPath(from,to){const G=L.grid;if(!G)return [];const cell=p=>({x:Math.floor((p.x-G.ox)/G.CS),y:Math.floor((p.z-G.oz)/G.CS)}),a=cell(from),b=cell(to),start=a.y*G.W+a.x,end=b.y*G.W+b.x,prev=new Int32Array(G.W*G.H).fill(-1),q=[start];if(start<0||end<0||start>=prev.length||end>=prev.length)return [];prev[start]=start;for(let i=0;i<q.length&&prev[end]<0;i++){const v=q[i],x=v%G.W,y=Math.floor(v/G.W);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,n=ny*G.W+nx;if(nx<0||ny<0||nx>=G.W||ny>=G.H||prev[n]>=0||G.cells[n]!==1)continue;prev[n]=v;q.push(n)}}if(prev[end]<0)return [];const out=[];for(let n=end;n!==start;n=prev[n])out.push({x:G.ox+(n%G.W+.5)*G.CS,z:G.oz+(Math.floor(n/G.W)+.5)*G.CS});return out.reverse()}
+function expHuntMove(e,dt){const ex=L.expedition;if(!ex||ex.s.type!=='hunt'||e!==bossE||e.dead)return false;const s=ex.s;
+ if(ex.trapHold>0){ex.trapHold-=dt;e.act=null;e.m.root.position.set(e.x,0,e.z);return true}
+ for(const n of ex.nodes.filter(n=>n.kind==='trap'))if(s.traps[n.index]&&!s.trapSpent[n.index]&&Math.hypot(e.x-n.x,e.z-n.z)<3){s.trapSpent[n.index]=true;ex.trapHold=3;ex.lure=null;ex.retreat=null;ex.target=null;e.act=null;e.aggro=true;n.grp.rotation.z=1.4;toast('A coluna interrompeu a criatura por 3s. Ataque!');return true}
+ if(!ex.lure&&!ex.retreat&&s.retreats<2&&e.hp/e.maxhp<(s.retreats===0?.65:.3)){const node=ex.nodes.find(n=>n.kind==='nest'&&!s.nests[n.index]);if(node){s.retreats++;ex.retreat=node;ex.target=node;ex.path=null;e.act=null;e.aggro=false;toast('A criatura está recuando para um ninho. Persiga ou destrua os ninhos!')}}
+ if(ex.retreat&&s.nests[ex.retreat.index]){ex.retreat=null;ex.target=null;e.aggro=true}
+ if(ex.target){const d=Math.hypot(e.x-ex.target.x,e.z-ex.target.z);if(d<1.4){if(ex.retreat){ex.regenT=(ex.regenT||0)+dt;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.03*dt);if(ex.regenT<4)return true;ex.regenT=0;ex.retreat=null}ex.target=null;ex.path=null;ex.lure=null;e.aggro=true;return false}
+ ex.routeT-=dt;if(!ex.path||ex.routeT<=0){ex.path=expPath(e,ex.target);ex.routeT=2}const p=ex.path[0];if(p){const dx=p.x-e.x,dz=p.z-e.z,len=Math.hypot(dx,dz);if(len<.35)ex.path.shift();else{e.face=Math.atan2(dx,dz);moveEnt(e,dx/len*Math.min(len,4.8*dt),dz/len*Math.min(len,4.8*dt));animChibi(e.m,{move:1,atk:0,dead:0,wind:0},time);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;if((ex.trailT||0)<time){ex.trailT=time+1;fxRing(e.x,e.z,0xd7b387,.5,5)}}}if(!ex.lure&&!ex.retreat&&Math.hypot(e.x-player.x,e.z-player.z)<9&&los(e.x,e.z,player.x,player.z)){ex.target=null;ex.path=null;e.aggro=true}return true}
+ if(!e.aggro){ex.patrol=(ex.patrol+1)%ex.patrolRooms.length;ex.target=expPoint(ex.patrolRooms[ex.patrol]);return true}if(Math.hypot(e.x-player.x,e.z-player.z)>12&&!los(e.x,e.z,player.x,player.z)){ex.target={x:player.x,z:player.z};ex.path=null;return true}return false;
+}
+function expeditionUpdate(dt){const ex=L.expedition;if(!ex||player.dead)return;const s=ex.s,c=ex.challenge;
+ if(c){const r=c.kind==='send'?6:4,near=Math.hypot(player.x-c.node.x,player.z-c.node.z)<=r;c.t=near?c.t+dt:0;const alive=enemies.some(e=>!e.dead&&e.expTag===c.tag);if(!alive&&c.t>=c.need)expFinishChallenge()}
+ ex.timer-=dt;if(ex.timer>0)return;ex.timer=s.type==='extract'?(expStage(s)>=3?5:8):8;
+ if(s.type==='rupture'&&!L.bossDead){const active=s.foci.map((f,i)=>({...f,index:i})).filter(f=>f.status==='active');for(const f of active){const n=ex.nodes.find(n=>n.kind==='focus'&&n.index===f.index);if(Math.hypot(player.x-n.x,player.z-n.z)>12)continue;if(f.kind===2)expLine(n.x,n.z,player.maxhp*.08,EXP_FOCI[2].c);if(f.kind===1&&enemies.filter(e=>!e.dead&&e.expFocus===f.index).length<2){const e=expSpawn(n.x,n.z,1,'copy',n.room)[0];e.expFocus=f.index;e.name='Cópia instável';e.hp=e.maxhp*=.25;e.gold=0;e.xp=0;e.noExpLoot=true;}}
+ if(bossE&&!bossE.dead&&bossE.aggro&&Math.hypot(player.x-bossE.x,player.z-bossE.z)<24){const ward=active.filter(f=>f.kind===0).length;if(ward&&(ex.shieldAt||0)<=time){bossE.expShield=bossE.maxhp*Math.min(.18,.06*ward);ex.shieldAt=time+16;fxRing(bossE.x,bossE.z,0x70ddff,3,1);toast('Proteção dos focos: escudo renovado no guardião.')}const cycle=(ex.bossCycle||0)%2;ex.bossCycle=cycle+1;if(cycle===0&&active.some(f=>f.kind===1)&&enemies.filter(e=>!e.dead&&e.expBossCopy).length<4){for(const e of expSpawn(bossE.x,bossE.z,2,'boss-copy',L.bossRoom)){e.expBossCopy=true;e.hp=e.maxhp*=.25;e.gold=e.xp=0;e.noExpLoot=true;e.name='Cópia do guardião'}}else if(active.some(f=>f.kind===2))expLine(bossE.x,bossE.z,bossE.dmg*.8,0xff8750)}}
+ if(s.type==='hunt'&&bossE&&!bossE.dead&&bossE.aggro&&!ex.retreat&&!ex.lure&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<20){if(s.species===1&&time-(player.lastSpellAt||-100)<5){expHazard(player.x,player.z,2,1.2,bossE.dmg,'enemy',0xa8a4ff);toast('Devorador: sua conjuração atraiu uma emboscada. Saia da marca!')}else if(s.species===0){const a=allies.find(a=>!a.dead&&Math.hypot(a.x-bossE.x,a.z-bossE.z)<14)||player;expHazard(a.x,a.z,1.8,1.2,bossE.dmg*.8,'enemy',0xff9a70)}}
+ if(s.type==='extract'&&!L.brk){const stage=expStage(s);if(stage>=1)expHazard(player.x,player.z,1.6,1.4,player.maxhp*.12,'enemy',0xe887ff);if(stage>=2&&enemies.filter(e=>!e.dead&&e.expTag==='instability').length<4){expSpawn(player.x,player.z,1,'instability',-1)}}
+}
+function expeditionObjective(){const ex=L.expedition;if(!ex)return '';const s=ex.s,c=ex.challenge;if(c)return (c.kind==='send'?'Envio':c.kind==='purify'?'Purificação':'Destruição')+' · '+Math.floor(c.t)+'/'+c.need+'s · defensores '+enemies.filter(e=>!e.dead&&e.expTag===c.tag).length+' · permaneça no círculo';if(s.type==='rupture')return 'Ruptura · focos ativos '+s.foci.filter(f=>f.status==='active').length+'/3 · '+(L.bossDead?'guardião derrotado · saia':'prepare os focos ou enfrente o guardião');if(s.type==='hunt')return 'Caçada · '+(L.bossDead?'criatura abatida · saia':bossE?.name||'encontre a criatura')+' · ninhos '+s.nests.filter(Boolean).length+'/2 destruídos';return 'Extração · carga '+expCargoWeight(s)+'/12 · enviada '+s.sent+'/6 · instabilidade '+s.instability+(s.sent>=6?' · pode sair para concluir':' · procure depósitos e pontos de envio')}
+
+function expHazard(...args){const h=hazard(...args);h.owner=null;return h}
 function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[ORÁCULO]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
 function makeElite(e){e.elite=true;e.res=.2;e.maxhp=e.hp=e.hp*1.8;e.dmg*=1.3;e.name='Elite '+e.name;e.xp*=2.5;e.gold*=3;e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
 function exitPortal(x,z,locked){
@@ -1302,7 +1377,7 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(9,L.gate.rank);
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
-function leaveDungeon(toCity){if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
+function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&g.ref&&g.ref.id)g.ref.dead=true;player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[ORÁCULO]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead;
   if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
@@ -1559,8 +1634,8 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance():.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn;if(e.res)amt*=1-e.res;
-  amt=applySkillMark(e,amt,o);
-  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
+  if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=applySkillMark(e,amt,o);
+  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(1,Math.round(amt)));if(amt<=0)return;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
@@ -1646,7 +1721,7 @@ function dropLoot(e){if(e.rival||e.statue||!run)return;const n=e.isBoss?3:e.elit
   const nm=e.isBoss?'Relíquia de '+(e.name||'Chefe'):lootName(e),v=Math.max(3,Math.round((e.gold||4)*(e.isBoss?8:3))),L0=run.loot[nm]||(run.loot[nm]={n:0,v,b:!!e.isBoss});L0.n+=n;L0.v=Math.max(L0.v,v);
   floater(e.x,e.z,'+'+n+' '+nm,e.isBoss?'#ffb84d':'#c9d3de',false,3.6)}
 function lootTotal(){let t=0;for(const k in run.loot||{})t+=run.loot[k].n*run.loot[k].v;return t}
-function killEnemy(e){dropLoot(e);
+function killEnemy(e){if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}dropLoot(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;{const pl=Math.max(1,run.level),el=e.lvl||pl,m=el>pl?Math.min(6,Math.pow(el/pl,1.3)):Math.max(.4,Math.pow(el/pl,.8));gainXp(e.xp*m);if(e.isBoss&&el>pl){const b=Math.round(xpNeed()*Math.min(1.6,.4*m));floater(e.x,e.z,'+'+fmt(b)+' XP · chefe acima do seu nível','#ffd08a',true,3.2);gainXp(b)}}storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
@@ -1663,7 +1738,7 @@ function killEnemy(e){dropLoot(e);
   weaponXp(e.xp||0);if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
   else if(Math.random()<.06){run.pots++;floater(e.x,e.z,'+POÇÃO','#ff8fa3',false,3)}
 }
-function onBossDeath(b){unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
+function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;$('boss').hidden=true;
   for(const x of enemies)if(!x.dead&&x!==b&&!x.rival&&Math.hypot(x.x-b.x,x.z-b.z)<20)killEnemy(x);
   const ex=exitPortal(b.x,b.z+6,false);
@@ -1695,7 +1770,7 @@ const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function perfectDodge(){if(FX2.perfCd>0)return;FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
-  amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)));
+  amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
@@ -1764,7 +1839,7 @@ function useSkill(sk){
    if(sk.t==='minionbuff'&&!minionAllies(true).length){floater(player.x,player.z,'SEM INVOCADOS','#9fb0c4');return}
   if(sk.t==='chain'&&sk.n!=='Fúria dos Céus'&&!nearestEnemy(player.x,player.z,12)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
-  player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;runSkill(sk);player.atkT=.001;
+  player.lastSpellAt=time;player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;runSkill(sk);player.atkT=.001;
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
 function skillGroundPoint(max=14,fallback=7){const ap=aimPoint();if(ap){const dx=ap.x-player.x,dz=ap.z-player.z,d=Math.hypot(dx,dz),k=d>max?max/d:1;return{x:player.x+dx*k,z:player.z+dz*k}}return{x:player.x+Math.sin(player.face)*fallback,z:player.z+Math.cos(player.face)*fallback}}
@@ -1826,7 +1901,7 @@ function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use
 function die(){
   if(cons('mur')>=10&&L.mode==='dungeon'&&!L.revived){L.revived=true;player.hp=player.maxhp*.5;player.iT=2;bigText('RENASCIDO',1200);sfx('arise');toast('<b>[CONSTELAÇÃO]</b> Muralha: você se levantou.');return}
   /* PROGRESSÃO CONTÍNUA (decisão do Ian): morrer custa ouro e XP; personagem, itens, trabalhos e rank ficam. */
-  player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
+  expAbandon();player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
   const rk=RANKS[profile.rank];
   $('deadtxt').innerHTML='<b>[ORÁCULO]</b> Você caiu no nível '+run.level+'. Perdeu <b class="gold">'+fmt(lostG)+' de ouro</b> e metade da XP do nível atual.<br>Seu personagem, itens, trabalhos e o <b style="color:'+rk.c+'">rank '+rkN(profile.rank)+'</b> continuam. Mortes: '+profile.deaths+'.';
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
@@ -1845,7 +1920,7 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
-  e.sleep=pd>55&&!e.aggro;if(e.sleep)return;
+  e.sleep=pd>55&&!e.aggro&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
@@ -1853,9 +1928,10 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);if(nc.d<R2&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*R2;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*R2;e.aggro=false}}}
+  if(expHuntMove(e,dt))return;
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
-  if(e.isBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
+  if(e.isBoss&&!e.expBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
   if(e.aggro&&!pt&&L.mode==='world')e.aggro=false;
   let mv=0,atk=0,wind=0;
   if(!e.aggro||!pt||e.stun>0){animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
@@ -2046,8 +2122,8 @@ function updWorld(dt){updEcon(dt);
 }
 function updDungeon(dt){
   for(const it of L.exits)it.ring.rotation.z+=dt*.8;
-  updSpecial(dt);
-  if(L.brk){updBreak(dt)}else if(L.bossDead){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[ORÁCULO]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
+  updSpecial(dt);expeditionUpdate(dt);
+  if(L.brk){updBreak(dt)}else if(L.bossDead&&L.expedition?.s.type!=='extract'){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[ORÁCULO]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
   const G=L.grid,P=player,cx=Math.floor((P.x-G.ox)/G.CS),cz=Math.floor((P.z-G.oz)/G.CS);
   for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){if(dx*dx+dy*dy>36)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
@@ -2118,7 +2194,7 @@ function drawMap(ctx,S,full){
     ctx.fillStyle='rgba(255,208,138,.35)';const cs=G.CS*k+.6;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*G.W+x;if(L.visited[i]&&G.cells[i])ctx.fillRect(tx(G.ox+x*G.CS),tz(G.oz+y*G.CS),cs,cs)}
     const vis=(x,z)=>{const i=cellIdx(x,z);return i>=0&&L.visited[i]};
-    for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
+    for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='expedition'){ctx.fillStyle='#7ce6cf';ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?5:3,0,TAU);ctx.fill()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
     if(bossE&&!bossE.dead&&L.seen.has(L.bossRoom)){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
     for(const e of enemies){if(e.dead||!e.aggro)continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
   }
@@ -2158,7 +2234,7 @@ function hud(){
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
   else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
-  $('obj').textContent=obj;
+  if(L.expedition&&!L.brk)obj=expeditionObjective();$('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const _mt=missionPanelText();
   $('bStyle').hidden=true;$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · '+keyLabel(keyOf('pot')));
@@ -2624,6 +2700,9 @@ function guildTab(){const g=profile.guild;let h='';
 function cryUp(t){let n=0;for(let r=t;r<10;r++)n+=run.res.cry[r]||0;return n}
 function spendCry(t,n){for(let r=t;r<10&&n>0;r++){const u=Math.min(n,run.res.cry[r]||0);run.res.cry[r]-=u;n-=u}}
 const GEAR_RUNES={
+ ward:{n:'Proteção Ressonante',d:'Recebe 3% menos dano por peça. Soma entre peças; aplica depois das outras reduções.'},
+ reprise:{n:'Eco do Golpe',d:'A cada 4 acertos básicos, repete 20% do dano por peça após 1s. Não gera outra repetição; novos ecos no mesmo alvo renovam o impacto mais forte.'},
+ stalker:{n:'Instinto Predador',d:'Ataques básicos causam +10% de dano por peça contra alvos acima de 80% da vida.'},
  fang:{n:'Ferida da Caçada',d:'Ataques básicos causam mais 10% do dano como sangramento em 3s. Novos golpes renovam, sem acumular sangramentos.'},
  shell:{n:'Couraça Natural',d:'+8% ao escudo máximo. Requer armadura equipada para ter escudo.'},
  arcane:{n:'Condutor Arcano',d:'+5% ao poder de dano das habilidades. Não aumenta cura ou quantidade de invocações.'},
@@ -2631,16 +2710,16 @@ const GEAR_RUNES={
  stride:{n:'Passos Leves',d:'+3% à velocidade de movimento.'},
  command:{n:'Vínculo do Guardião',d:'+8% ao dano dos seus ecos e invocações. Não afeta caçadores contratados.'}
 };
-function lootRune(key){if(run.loot?.[key]?.b)return 'command';const prefix=key.split(' de ')[0];if(['Presa','Garra','Chifre'].includes(prefix))return 'fang';if(['Couro','Escama','Osso'].includes(prefix))return 'shell';if(['Essência','Olho','Fragmento'].includes(prefix))return 'arcane';if(prefix==='Pena')return 'stride';return 'vigor'}
+function lootRune(key){if(GEAR_RUNES[run.loot?.[key]?.rune])return run.loot[key].rune;if(run.loot?.[key]?.b)return 'command';const prefix=key.split(' de ')[0];if(['Presa','Garra','Chifre'].includes(prefix))return 'fang';if(['Couro','Escama','Osso'].includes(prefix))return 'shell';if(['Essência','Olho','Fragmento'].includes(prefix))return 'arcane';if(prefix==='Pena')return 'stride';return 'vigor'}
 function gearRuneCount(id){return EQUIP_SLOTS.reduce((n,sl)=>n+(run?.equip?.[sl]?.rune===id?1:0),0)}
 function gearRuneText(it){const r=GEAR_RUNES[it?.rune];return r?' · Passiva gravada: '+r.n+' — '+r.d:''}
-function applyGearRuneHit(e,amt){const n=gearRuneCount('fang');if(!n||e.dead||e.hp<=0)return;e.basicDots=e.basicDots||{};const old=e.basicDots.rune;e.basicDots.rune={t:3,d:Math.max(old?.d||0,amt*.1*n/3),acc:old?.acc||0}}
+function applyGearRuneHit(e,amt){const repeat=gearRuneCount('reprise');if(repeat&&!e.dead&&e.hp>0){player.runeHits=(player.runeHits||0)+1;if(player.runeHits%4===0){e.basicDots=e.basicDots||{};e.basicDots.reprise={t:1,d:Math.max(e.basicDots.reprise?.d||0,amt*.2*repeat),acc:0};fxRing(e.x,e.z,0xb98cff,1,.3)}}const n=gearRuneCount('fang');if(!n||e.dead||e.hp<=0)return;e.basicDots=e.basicDots||{};const old=e.basicDots.rune;e.basicDots.rune={t:3,d:Math.max(old?.d||0,amt*.1*n/3),acc:old?.acc||0}}
 function equipmentUpgradeCost(eq){const up=eq.up||0;return{gold:Math.round(PRICE[eq.tier]*equipFactor(eq.slot)*.25*(up+1)*Math.pow(1.12,up)),cry:3*(up+1)}}
 function finishEquipmentUpgrade(eq,safe=false){const up=eq.up||0;if(!safe&&up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[FORJA]</b> O aprimoramento falhou. Materiais perdidos; equipamento preservado.');sfx('block');return false}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[FORJA]</b> '+eq.name+': '+statTxt(eq));return true}
 function lootForgeQuote(sl,key,mode){
   const material=Object.prototype.hasOwnProperty.call(run.loot||{},key)?run.loot[key]:null;if(!EQUIP_SLOTS.includes(sl)||!material||!['new','up','rune'].includes(mode))return null;
   const eq=run.equip[sl];if(mode!=='new'&&!eq)return null;
-  if(mode==='rune')return{tier:eq.tier,gold:Math.round(PRICE[eq.tier]*equipFactor(sl)*.2),cry:3,parts:material.b?3:12,rune:lootRune(key)};
+  if(mode==='rune')return{tier:eq.tier,gold:Math.round(PRICE[eq.tier]*equipFactor(sl)*.2),cry:3,parts:material.recipeParts|| (material.b?3:12),rune:lootRune(key)};
   const tier=mode==='new'?rankOf():eq.tier,up=eq?.up||0,base=mode==='up'?equipmentUpgradeCost(eq):{gold:Math.round(PRICE[tier]*equipFactor(sl)*.3),cry:5};
   return{tier,gold:mode==='up'&&!material.b?Math.ceil(base.gold*.75):base.gold,cry:mode==='up'&&!material.b?Math.max(1,Math.ceil(base.cry*.75)):base.cry,parts:mode==='new'?(material.b?3:10):(material.b?3+Math.floor(up/5):5+up),rar:material.b?2:1,safe:!!material.b};
 }
@@ -2670,6 +2749,7 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(9,pr);t++){const gc=Math.round(PRICE[t]*equipFactor(sl)*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
 function extraActions(a,v){
+  if(a==='expact'){const [kind,index,op]=v.split('|');expAction(kind,Number(index),op);return 'close0'}
   if(a==='lootmode'){const [sl,mode]=v.split('|');L.lootMode=mode;lootForgeView(sl);return 'close0'}
   if(a==='lootforge'){lootForgeView(v);return 'close0'}
   if(a==='lootcraft'){const [sl,mode,key]=v.split('|');try{craftWithLoot(sl,decodeURIComponent(key),mode)}catch(e){console.warn('Receita inválida',e)}lootForgeView(sl);return 'close0'}
@@ -3378,11 +3458,12 @@ function mapView(){
   drawMap($('bigmap').getContext('2d'),600,true);
 }
 function gateModal(g){
+  if(expeditionType(g)==='extract')g.red=false;
   view=null;if(g.secret){openModal('PORTAL ???','<div class="sysline"><b>[ORÁCULO]</b> Erro. Não foi possível medir este portal.</div>'+row('Rank','Desconhecido','<b style="color:#ffd070">???</b>')+row('Fecha em',fmtT(g.life),'')+'<div class="sysline" style="color:var(--dim)">A energia lá dentro não se parece com nada que a Ordem registrou. Quem entra não pode sair até o fim.</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','close',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>');return}const G=GR[g.rank],pr=rankOf();const warn=run.level<G.lvl;
   let h='<div class="sysline"><b>[ORÁCULO]</b> Portal <b style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+G.id+'</b> · '+G.th.n+(g.red?' · <b style="color:#ff4d6a">PORTAL VERMELHO</b>':'')+'</div>';
   if((g.aff||[]).length)h+=row('Afixos','<span style="color:#ffb84d">'+(g.aff.map(i=>{const a=AFFIX.find(x=>x.id===i);return a.n+' ('+a.d+')'}).join(', '))+'</span> · ouro +'+g.aff.length*50+'%','');
   h+=row('Nível recomendado',(warn?'<span style="color:#ff8fa3">Você está abaixo do recomendado</span>':'Você está pronto'),'<b>'+G.lvl+'+</b>');
-  h+=row('Tamanho','~'+G.rooms+' salas, guardião no fim, baús','');
+  const et=expeditionType(g);if(et){h+=row('Tipo: '+EXP_TYPES[et].n,EXP_TYPES[et].d,'');const keys=et==='rupture'?['ward','echo','storm']:et==='hunt'?['fang','stalker']:['ore','core','heart'];h+=row('Materiais e receitas',keys.map(expRecipe).join('<br>'),'');if(et==='hunt')h+=row('Desafio opcional','Vencer sem usar isca: +2 Glândulas. Ninhos e colunas não reduzem a recompensa.','')}h+=row('Tamanho','~'+G.rooms+' salas'+(et==='extract'?' · depósitos e pontos de envio':' · guardião e baús'),'');
   h+=row('Fecha em',fmtT(g.life)+(g.rank>=2?' · se fechar sem ser limpo, os monstros escapam':''),'');
   h+=row('Seu grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Sozinho'+(run.shadows.length?' + '+run.shadows.length+' eco(s)':''),'');
   if(g.red)h+='<div class="sysline" style="color:#ffb3c0">Portal vermelho: não há saída até derrotar o guardião. Monstros 30% mais fortes, recompensas em dobro. Pergaminho de retorno não funciona.</div>';
@@ -3565,9 +3646,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v87</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v88</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=87;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=88;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
