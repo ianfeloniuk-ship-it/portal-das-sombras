@@ -172,3 +172,6 @@ Save no `localStorage`: `pds2_profile` (perfil permanente) e `pds3_run` (vida at
 ## Identidade própria (29/09/2026) — decisão do Ian
 Para evitar cópia de Solo Leveling, os termos visíveis foram trocados: Portal das Sombras → **Ecos da Fenda**; Sistema → **Oráculo**; Soberano → **Arconte**; Associação de Caçadores → **Ordem da Fenda**; sombras → **ecos**; "Levante-se" → **Desperte**; quebra de masmorra → **transbordo da fenda**. Não reintroduzir os nomes antigos. Personagens e monstros novos devem ser originais (não usar protagonista de casaco preto e olhos azuis com adagas).
 Próximos passos sugeridos: trocar a paleta azul-sistema por uma própria, e a história da origem das fendas.
+
+## Ranks e paleta (29/09/2026)
+Ranks públicos: **F, E, D, C, B, A, \*\*, \*\*\***; rank secreto: **@** (antigo Arconte/Soberano). Paleta própria: âmbar (#ffb347 / #ffd08a) sobre violeta escuro (#0e0710), no lugar do azul-sistema. Lore: há cem anos o céu rachou; das Fendas saem ecos de mundos mortos; o Oráculo escolhe quem os enfrenta.
