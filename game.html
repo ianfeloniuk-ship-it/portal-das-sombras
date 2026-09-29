@@ -139,7 +139,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">PORTAL DAS SOMBRAS</h1>
-    <div class="sysline"><b>[SISTEMA]</b> Você foi escolhido para <b>DESPERTAR</b>. Escolha sua classe. Todo caçador começa no <b>rank E</b> e sobe conforme evolui. Ao morrer, perde tudo, menos o seu despertar.</div>
+    <div class="sysline"><b>[SISTEMA]</b> Você foi escolhido para <b>DESPERTAR</b>. Escolha sua classe. Todo caçador começa no <b>rank E</b> e sobe fazendo as <b>Provas de Rank</b>. Ao morrer, perde parte do ouro e da XP, mas o personagem continua.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -152,7 +152,7 @@ body.pc #btns .b[hidden]{display:none}
   <div class="card panel" style="border-color:#ff4d6a;box-shadow:0 0 22px rgba(255,77,106,.4)">
     <h1 style="color:#ffd0d8;text-shadow:0 0 16px #ff2d55">VOCÊ MORREU</h1>
     <div class="sysline" id="deadtxt"></div>
-    <button class="go" id="again" style="background:linear-gradient(#ffb3c0,#ff4d6a)">RECOMEÇAR NA CIDADE</button>
+    <button class="go" id="again" style="background:linear-gradient(#ffb3c0,#ff4d6a)">VOLTAR À CIDADE</button>
   </div>
 </div>
 
@@ -468,7 +468,8 @@ let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[
 let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,dlgT=0,view=null;
 const keys={},input={x:0,z:0},cam={x:0,z:0};
 
-function rankOf(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
+function rankOf(){if(profile&&profile.rk2)return profile.rank;return rankOfOld()}
+function rankOfOld(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
 function newRun(){run={level:1,xp:0,gold:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0]},pos:null}}
 function saveRun(){if(!run||!player||player.dead)return;if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
 function loadRun(){const r=store.get('pds3_run');if(!r)return false;newRun();Object.assign(run,r);
@@ -489,8 +490,8 @@ function itemSh(it){return it&&it.slot==='a'?Math.round(SHV[Math.min(8,it.tier)]
 function itemArm(it){return it&&it.slot==='a'?Math.round(AARM[Math.min(8,it.tier)]*gearQ(it)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
 function atkOf(kind){const s=run.stats||{};return Math.round(10+2*run.level+2*statK(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w))}
-function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===8?.8:rk*.05;
-  const src=[['Rank '+RANKS[rk].id,rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
+function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===8?1:rk*.1;
+  const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
@@ -1402,6 +1403,7 @@ function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dea
 function gainXp(x){
   run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)+((festival()||{}).xp||0)+.03*pb('xp')));let need=xpNeed();const r0=rankOf();
   while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35&&!consFull())run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[SISTEMA]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Associação (Lyra).',5000),1500)}toast('<b>[SISTEMA]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
+  {const nx=profile.rank+1;if(profile.rk2&&nx<=TOPR&&run.level>=GR[nx].lvl&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ASSOCIAÇÃO]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[SISTEMA]</b> Missão de troca de classe disponível. Fale com a Associação em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[SISTEMA]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
 }
@@ -1493,10 +1495,10 @@ function ctxTarget(){
 function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use()}
 function die(){
   if(cons('mur')>=10&&L.mode==='dungeon'&&!L.revived){L.revived=true;player.hp=player.maxhp*.5;player.iT=2;bigText('RENASCIDO',1200);sfx('arise');toast('<b>[CONSTELAÇÃO]</b> Muralha: você se levantou.');return}
-  retire();
-  player.dead=true;player.hp=0;recordNemesis();if(npcHas('Selene')&&run.gold>0){profile.bank=(profile.bank||0)+Math.round(run.gold*.2)}profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);store.del('pds3_run');
+  /* PROGRESSÃO CONTÍNUA (decisão do Ian): morrer custa ouro e XP; personagem, itens, trabalhos e rank ficam. */
+  player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
   const rk=RANKS[profile.rank];
-  $('deadtxt').innerHTML='<b>[SISTEMA]</b> Você caiu no nível '+run.level+' com '+fmt(run.gold)+' de ouro. Perdeu níveis, ouro, equipamentos, habilidades roubadas, sombras e o grupo.<br>O despertar permanece: <b style="color:'+rk.c+'">Rank '+rk.id+' · '+CLASSES[profile.cls].n+'</b>. Mortes: '+profile.deaths+'.'+(profile.bank?'<br>O ouro no banco continua seu: <b class="gold">'+fmt(profile.bank)+'</b>.':'');
+  $('deadtxt').innerHTML='<b>[SISTEMA]</b> Você caiu no nível '+run.level+'. Perdeu <b class="gold">'+fmt(lostG)+' de ouro</b> e metade da XP do nível atual.<br>Seu personagem, itens, trabalhos e o <b style="color:'+rk.c+'">rank '+rkN(profile.rank)+'</b> continuam. Mortes: '+profile.deaths+'.';
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
 }
 
@@ -1940,7 +1942,7 @@ function buildSpecial(kind,gRef,arg){
   const ret=gRef?{x:gRef.x,z:gRef.z}:{x:player.x,z:player.z};
   const pr=rankOf();
   clearLevel();
-  const gr=kind==='weekly'||kind==='primordial'?Math.min(8,pr+1):kind==='temple'?clamp(pr,2,8):Math.min(8,pr);
+  const gr=kind==='job'&&L.rankTrial?L.rankTrial:kind==='weekly'||kind==='primordial'?Math.min(8,pr+1):kind==='temple'?clamp(pr,2,8):Math.min(8,pr);
   const th=SP_TH[kind],N=kind==='temple'?30:24,Wd=N+4,Hd=N+4,CS=2,ox=-Wd*CS/2,oz=-Hd*CS/2,cells=new Uint8Array(Wd*Hd);
   for(let y=2;y<N+2;y++)for(let x=2;x<N+2;x++){const a=Math.min(x-2,N+1-x),b=Math.min(y-2,N+1-y);if(a+b<5)continue;cells[y*Wd+x]=1}
   const R=mulberry32(777+N);
@@ -1991,7 +1993,7 @@ function updSpecial(dt){
     const alive=enemies.filter(e=>!e.dead&&!e.isBoss).length;
     if(S.stage===0&&S.t>2.5){S.stage=1;spawnWave(8,0);toast('<b>[SISTEMA]</b> Missão de troca de classe: onda 1 de 3.')}
     else if(S.stage===1&&alive===0){S.stage=2;spawnWave(12,3);toast('<b>[SISTEMA]</b> Onda 2 de 3. Elites chegando.')}
-    else if(S.stage===2&&alive===0){S.stage=3;const B={n:L.tierTrial?'Mestre da Provação':'Cavaleiro do Julgamento',types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)};const b=spawnBoss(0,-8,S.gr,B);const tm=L.tierTrial?(1+.6*tierOf()):.6;b.hp*=tm;b.maxhp*=tm;if(L.tierTrial){b.dmg*=1+.25*tierOf()}b.aggro=true;bossAggro(b);toast('<b>[SISTEMA]</b> Onda final: o Cavaleiro do Julgamento.')}
+    else if(S.stage===2&&alive===0){S.stage=3;const B={n:L.rankTrial?'Examinador do Rank '+RANKS[L.rankTrial].id:L.tierTrial?'Mestre da Provação':'Cavaleiro do Julgamento',types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)};const b=spawnBoss(0,-8,S.gr,B);const tm=L.rankTrial?1:L.tierTrial?(1+.6*tierOf()):.6;b.hp*=tm;b.maxhp*=tm;if(L.tierTrial){b.dmg*=1+.25*tierOf()}b.aggro=true;bossAggro(b);toast('<b>[SISTEMA]</b> Onda final: o Cavaleiro do Julgamento.')}
     S.msg=S.stage===0?'Prepare-se':S.stage<3?'Troca de classe · onda '+S.stage+' de 3 · restam '+alive:'Derrote o Cavaleiro do Julgamento';
   }
   else if(S.kind==='penalty')penaltyUpd(S,dt);
@@ -2038,6 +2040,8 @@ function canArise(){return !!CLASSES[profile.cls].arise||profile.rank===8}
 function completeTier(){run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
   bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[SISTEMA]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% no bônus somado (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}
 function completeJob(){
+  if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
+    toast('<b>[ASSOCIAÇÃO]</b> Prova concluída: você agora é <b style="color:'+RANKS[r].c+'">rank '+RANKS[r].id+'</b>. +10% de dano e vida no bônus somado e <b>+1 vaga de trabalho</b>.',8000);setTimeout(()=>storyAct(r),2500);saveRun();return}
   if(L.tierTrial){L.tierTrial=false;completeTier();return}
   const A=ADV[profile.cls];run.adv=true;player.skills.push({...A.sk,cdT:0});refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[SISTEMA]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
@@ -2077,6 +2081,7 @@ function v2Item(it){if(!it||it.v2)return;it.v2=1;delete it.bonus;delete it.def;c
   it.aff=(it.aff||[]).slice(0,n).map(x=>{const A=AFX.find(y=>y.k===x.k)||{};return{k:x.k,v:Math.max(1,Math.min(x.v,Math.round((1+it.tier*.4)*(1+it.rar*.15)*(A.f||1)*1.3)))}});
   it.value=Math.round(PRICE[Math.min(8,it.tier)]*(1+.06*it.rar)*.4*Math.pow(1.15,it.up||0))}
 function ensureRun(){run.lamps=run.lamps||0;
+  if(!profile.rk2){profile.rank=Math.max(profile.rank||0,Math.min(profile.rank===8?8:TOPR,rankOfOld()));profile.rk2=1;jobsOf();store.set('pds2_profile',profile)}
   if(run.v2&&!run.v2fix){run.v2fix=1;if((run.level||1)>1){const g=run.level-1;run.pts=(run.pts||0)+g;setTimeout(()=>showSys('Compensação do Sistema 2.0: a conversão apagou os pontos que vieram de missões. Devolvemos <b>+'+g+' pontos de status</b> (1 por nível, estimativa). Abra Status.'),5500)}}if((profile.dayT||0)>dayT)dayT=profile.dayT;
   {const F=festival();if(F&&run.festDay!==todayKey()){run.festDay=todayKey();setTimeout(()=>toast('<b>[FESTIVAL]</b> '+F.n+': '+F.d+'.',7000),6000)}}
   for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])if(it&&/Soberan/.test(it.name))it.name=it.name.replace(/d[oa] Soberan[oa]/,'Primeva');
@@ -2347,6 +2352,39 @@ function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNe
    +(inc?row('Renda da cidade',fmt(inc)+' ouro por dia',btn(got?'Coletado hoje':'Coletar','cityinc',0,!got,'hot')):'')
    +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
 
+/* ===== TRABALHOS (estilo "jobs"): troque de classe na cidade; cada trabalho tem seus próprios atributos. Vagas = 1 + rank. ===== */
+function jobSlots(){return 1+Math.min(7,profile.rank)}
+function jobsOf(){if(!profile.jobs)profile.jobs=[profile.cls];if(!profile.jobs.includes(profile.cls))profile.jobs.push(profile.cls);return profile.jobs}
+function ptsTotal(){const s=run.stats||{};return Object.values(s).reduce((a,b)=>a+b,0)+(run.pts||0)}
+function switchJob(ci){if(ci===profile.cls||!jobsOf().includes(ci))return;if(L.mode!=='world'||!inCity(player.x,player.z)){toast('<b>[SISTEMA]</b> Só dá para trocar de trabalho dentro de uma cidade.');return}
+  run.jobData=run.jobData||{};const tot=ptsTotal();run.jobData[profile.cls]={stats:{...run.stats},pts:run.pts,adv:!!run.adv,base:tot,style:run.style};
+  const old=profile.cls;if(run.adv&&ADV[old]&&ADV[old].sk)try{learnPower({...ADV[old].sk})}catch(e){}
+  const d=run.jobData[ci];if(d){run.stats={...d.stats};run.pts=d.pts+Math.max(0,tot-d.base);run.adv=d.adv;run.style=d.style||'nat'}else{run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=tot;run.adv=false;run.style='nat'}
+  profile.cls=ci;run.elem=CLASSES[ci].elem||(ci===3?run.elem:null);AFFC=null;store.set('pds2_profile',profile);
+  const x=player.x,z=player.z,g=run.gold;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);refreshStats();player.hp=player.maxhp;showG();buildSteal();
+  bigText(CLASSES[ci].n.toUpperCase(),1600);sfx('arise');toast('<b>[TRABALHO]</b> Agora você é <b>'+CLASSES[ci].n+'</b>. Os atributos deste trabalho são separados'+(d?'':': distribua os seus '+run.pts+' pontos')+'.'+(run.jobData[old]&&run.jobData[old].adv?' A habilidade da evolução anterior foi para a sua Biblioteca de Poderes.':''),7000);saveRun()}
+function jobsTab(){const J=jobsOf(),sl=jobSlots();let h='<div class="sysline">Trabalhos: troque de classe <b>dentro da cidade</b> quando quiser. Cada trabalho guarda os <b>seus próprios atributos</b> (todos recebem os pontos de nível). A habilidade da evolução (nível 30) de um trabalho vai para a sua Biblioteca de Poderes quando você troca. Vagas: <b>'+J.length+'/'+sl+'</b> (cada rank novo dá +1).</div><div class="sec">SEUS TRABALHOS</div>';
+  for(const ci of J){const c=CLASSES[ci];h+=row('<b>'+c.n+'</b>'+(ci===profile.cls?' · <span style="color:#6fe39a">atual</span>':''),(c.ranged?'distância':'corpo a corpo')+' · '+(PASSIVES[ci]?PASSIVES[ci].n:'')+' · '+c.sk.map(x=>x.n).join(', '),ci===profile.cls?'':btn('Trocar','jobsw',ci,true,'hot'))}
+  h+='<div class="sec">APRENDER NOVO TRABALHO</div>';
+  CLASSES.forEach((c,ci)=>{if(J.includes(ci)||c.w<=0)return;h+=row(c.n,(c.ranged?'distância':'corpo a corpo')+' · '+(PASSIVES[ci]?PASSIVES[ci].n+': '+PASSIVES[ci].d:''),btn(J.length<sl?'Aprender':'Sem vaga','joblearn',ci,J.length<sl))});return h}
+/* HISTÓRIA PRINCIPAL: um ato por rank conquistado. */
+const MAIN_ACTS=[null,
+ ['Ato I · O Chamado','Lyra: A Associação reconhece você. Mas os portais estão abrindo cada vez mais perto das cidades. Parece que alguém está chamando eles.'],
+ ['Ato II · O Diário de Aldric','Lyra: Aldric, um caçador veterano, sumiu num portal vermelho. Deixou um diário: "os portais seguem um padrão". Estamos tentando entender qual.'],
+ ['Ato III · A Torre Antiga','Lyra: O diário fala de uma torre que existia antes dos portais. A Torre do Sistema é tudo o que restou dela. Quem sobe, aprende.'],
+ ['Ato IV · As Marcas','Você reconhece o mesmo símbolo gravado em todos os guardiões. Lyra: "Então alguém cria os guardiões. Alguém que a gente chama de Arquiteto."'],
+ ['Ato V · O Retorno','Aldric aparece ferido na Associação: "O Arquiteto quer caçadores fortes. Ele se alimenta de quem sobe. Não pare, mas nunca suba sozinho."'],
+ ['Ato VI · As Muralhas','As cidades começam a cair nas estações do fim do mundo. Aldric: "Ele está testando as muralhas. Cada cidade que você fortalece atrapalha o plano."'],
+ ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Associação já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
+function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}showSys('<b>'+A[0]+'</b><br>'+A[1])}
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Associação. Cada rank novo: <b>+10% de dano e vida</b>, portais mais fortes, <b>+1 vaga de trabalho</b> e um novo ato da história.</div>';
+  h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
+  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Requisito: nível '+need+' (você está no '+run.level+') · 3 ondas de monstros rank '+RANKS[nx].id+' e o Examinador do Rank. Sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,run.level>=need,'hot'));
+  else h+=row('Rank máximo da Associação','Não existe prova acima deste.','');
+  h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
+  for(let i=1;i<MAIN_ACTS.length;i++)if(acts.includes(i)||profile.rank>=i){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
+  if(!any)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">A história começa quando você passar na primeira Prova de Rank.</div>';
+  if(can)h+=row('<span style="opacity:.5">Próximo: '+MAIN_ACTS[nx][0]+'</span>','Passe na prova para o rank '+RANKS[nx].id+'.','');return h}
 /* ===== LIVRARIA (ideia do Irror): passivas que servem para qualquer classe. Custam 1 ponto de habilidade + ouro por nível (máx. 10). ===== */
 const PBOOK=[{k:'xp',n:'Tomo da Sabedoria',d:l=>'+'+(3*l)+'% de XP',u:'+3% de XP por nível'},{k:'ls',n:'Tomo do Vampiro',d:l=>String(.5*l).replace('.',',')+'% do dano volta como vida',u:'+0,5% de roubo de vida por nível'},
  {k:'sh',n:'Tomo da Égide',d:l=>'+'+(4*l)+'% de escudo máximo',u:'+4% de escudo por nível'},{k:'res',n:'Tomo da Pele de Ferro',d:l=>'−'+String(1.5*l).replace('.',',')+'% de dano recebido',u:'−1,5% de dano recebido por nível'},
@@ -2721,6 +2759,9 @@ function extraActions3(a,v){
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
   if(a==='buyret'){const r=profile.retired[+v],t=Math.min(8,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
   if(['housebuy','furn','hsleep','haltar','hput','hget'].includes(a))return houseAct(a,v);
+  if(a==='jobsw'){switchJob(+v);return 'close'}
+  if(a==='joblearn'){const J=jobsOf();if(J.includes(+v)||J.length>=jobSlots())return;J.push(+v);store.set('pds2_profile',profile);sfx('level');toast('<b>[TRABALHO]</b> Você aprendeu o trabalho <b>'+CLASSES[+v].n+'</b>. Troque para ele quando quiser, dentro da cidade.',6000);return true}
+  if(a==='rktrial'){const nx=+v;if(nx!==profile.rank+1||nx>TOPR||run.level<GR[nx].lvl)return;closeModal();L.rankTrial=nx;buildSpecial('job');L.rankTrial=nx;toast('<b>[ASSOCIAÇÃO]</b> Prova para o rank '+RANKS[nx].id+'. Sobreviva às 3 ondas e derrote o Examinador.',6000);return 'close'}
   if(a==='pbup'){const l=pb(v);if(l>=10||(run.spts||0)<1||run.gold<pbCost(l))return;run.spts--;run.gold-=pbCost(l);run.pbook=run.pbook||{};run.pbook[v]=l+1;refreshStats();sfx('level');return true}
   if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
   if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
@@ -2779,13 +2820,13 @@ function openShop(id){
 }
 function guildView(tab){
   view=()=>guildView(tab);
-  let h='<div class="tabs">'+[['quests','Missões'],['story','Histórias'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k==='quests'||k==='story'||k==='rank'||k==='reaval'||k==='travel'||unl(k)).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
+  let h='<div class="tabs">'+[['quests','Missões'],['prova','Prova de Rank'],['jobs','Trabalhos'],['story','Histórias'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k!=='reaval'&&(k==='quests'||k==='story'||k==='prova'||k==='jobs'||k==='rank'||k==='reaval'||k==='travel'||unl(k))).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
   if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
-    if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação. Se morrer, perde tudo.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
+    if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
     else{h+='<div class="sysline">Lyra: Todo '+c.n+' que passa no Julgamento vira <b>'+A.n+'</b>. Sua classe não muda, ela evolui.</div>';
       h+=row('Requisito','Nível '+JOB_LVL+' · você está no nível '+run.level,'')+row('Missão','Sobreviva a 3 ondas na Arena do Julgamento e derrote o Cavaleiro do Julgamento. Sem saída até o fim.','')+row('Recompensa','Classe '+A.n+', vida +25%, dano +30% e a habilidade '+A.sk.n,'');
-      h+='<div class="sysline" style="color:#ffb3c0">Se morrer, perde tudo como sempre.</div><div style="display:flex;justify-content:flex-end">'+btn('ACEITAR MISSÃO','job',0,run.level>=JOB_LVL,'hot')+'</div>'}}
+      h+='<div style="display:flex;justify-content:flex-end">'+btn('ACEITAR MISSÃO','job',0,run.level>=JOB_LVL,'hot')+'</div>'}}
   else if(tab==='weekly'){const B=weeklyBoss(),gr=Math.min(8,rankOf()+1),done=profile.weekly===weekId(),left=weekLeft(),dd=Math.floor(left/864e5),hh=Math.floor(left%864e5/36e5);
     h+='<div class="sysline">Chefe desta semana: <b>'+B.n+'</b>. Ele se ajusta ao seu rank.</div>'+row('Rank do chefe','Um acima do seu','<b class="rl" style="color:'+RANKS[gr].c+'">'+GR[gr].id+'</b>')+row('Recompensa','Dois baús de guardião, ouro triplo e núcleos','')+row('Troca de chefe','Em '+dd+'d '+hh+'h','');
     h+='<div style="display:flex;justify-content:flex-end">'+(done?'<span class="sysline">Concluído nesta semana.</span>':btn('ENFRENTAR','weekly',0,true,'hot'))+'</div>'}
@@ -2798,7 +2839,7 @@ function guildView(tab){
       row('Recompensa','Bônus da Associação por subir de rank: '+fmt(2000*(cur+1))+' ouro e 2 pontos de status','')+
       '<div style="display:flex;justify-content:flex-end">'+(ok?btn('FAZER REAVALIAÇÃO','reaval',0,true,'hot'):'<span class="sysline">Seu rank oficial já está atualizado.</span>')+'</div>'}
   else if(tab==='clone')h+=cloneTab();else if(tab==='god')h+=godTab();
-  else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();
+  else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();else if(tab==='prova')h+=rankTab();else if(tab==='jobs')h+=jobsTab();
   else if(tab==='hire'){h+='<div class="sysline">Caçadores contratados seguem você no mundo e nas masmorras. Se morrerem, não voltam. Máximo de 3.</div><div class="sec">SEU GRUPO ('+run.party.length+'/3)</div>';
     if(!run.party.length)h+='<div class="it"><div class="d"><small>Ninguém contratado.</small></div></div>';
     run.party.forEach((p,i)=>{h+=row(p.name+' <span class="rl" style="color:'+RANKS[p.rank].c+'">['+RANKS[p.rank].id+']</span>',CLASSES[p.cls].n+' · NV '+p.lvl,btn('Dispensar','fire',i,true,'red'))});
@@ -2983,7 +3024,8 @@ $('goBtn').addEventListener('click',()=>{
   startGame();
 });
 $('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
-$('again').addEventListener('click',()=>{$('bG').hidden=true;$('dead').hidden=true;for(const a of allies)scene.remove(a.m.root);allies=[];scene.remove(player.m.root);newRun();ensureRun();run.quests=genQuests();makePlayer();curGate=null;gates=[];buildWorld();buildSteal();cam.x=player.x;cam.z=player.z;paused=false;saveRun()});
+$('again').addEventListener('click',()=>{$('dead').hidden=true;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=2;player.slowT=0;player.bleedT=0;
+  if(L.mode!=='world'){if(L.special)leaveDungeon(false);else leaveDungeon(true)}const c=nearestCity(player.x,player.z).c;player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);paused=false;saveRun();toast('<b>[SISTEMA]</b> Você acordou em '+c.name+'.')});
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
