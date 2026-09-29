@@ -291,3 +291,7 @@ Ian autorizou seguir a lista por partes, começando pela forja. Durante a etapa 
 
 ## Painel de objetivos — v77
 Ian apontou frases aglutinadas, plural artificial e destino de recompensa pouco claro. Painel refeito em blocos com título e detalhe, espaçamento consistente e largura maior no PC. Singular/plural correto; desafio diz derrotar monstros; diária mostra objetivos concluídos; pontos identificados como atributos; missão concluída orienta falar com Lyra na Ordem da Fenda. Mantidos acompanhamento, invasão, ordens de ecos e botão de ocultar. Textos escapados antes de inserir no painel.
+
+
+## Ranks — v78
+Ian definiu a ordem F/E/D/C/B/A/S/SS/SS+/★. ★ é o rank raro acima dos normais, associado à futura escolha de uma classe rara (Necromante ou outra). Inserido SS+ público no nível 220; o antigo rank secreto mantém suas vantagens e requisitos, agora no índice 9. Migração versionada de perfil, equipamentos, recursos, companheiros e registros; cópia local anterior à migração. A escolha por trilha do Segundo Despertar continua pendente; esta etapa não inventa classes ou missões.
