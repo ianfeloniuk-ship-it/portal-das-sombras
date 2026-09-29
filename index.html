@@ -303,9 +303,10 @@ const GR=[
    Jogador esperado = nível + 1 ponto por nível no atributo principal + equipamento do rank daquele nível + ~35% de bônus. */
 const WATK=[6,14,30,60,110,190,320,520,850],AHPV=[30,70,150,300,550,950,1600,2600,4200],AARM=[5,10,16,24,34,46,60,76,95];
 const tierAt=L=>{let t=0;GR.forEach((g,i)=>{if(L>=g.lvl)t=i});return Math.min(8,t)};
-/* statK: quanto vale 1 ponto de atributo no nível L (cresce 2% por nível). */
-const statK=L=>1+L/50;
-const expAtk=L=>(10+2*L+2*L*statK(L)+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
+/* Valor de 1 ponto de atributo: números inteiros que sobem a cada 25 níveis (pedido do Irror: nada de número quebrado). */
+const pStep=L=>Math.floor(L/25),atkPer=L=>2+pStep(L),hpPer=L=>15+8*pStep(L),mpPer=L=>4+2*pStep(L),nextStep=L=>(pStep(L)+1)*25;
+const statK=L=>atkPer(L)/2;
+const expAtk=L=>(10+2*L+L*atkPer(L)+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
 const eHP=L=>expAtk(L)/20,eDMG=L=>expHp(L)/110;
 GR.forEach(g=>{g.hp=eHP(g.lvl);g.dmg=eDMG(g.lvl)});
 const gid=i=>i===8?'Ω':GR[i].id;
@@ -592,16 +593,16 @@ const SHV=AHPV.map(v=>Math.round(v*1.6));
 function itemSh(it){return it&&it.slot==='a'?Math.round(SHV[Math.min(8,it.tier)]*gearQ(it)):0}
 function itemArm(it){return it&&it.slot==='a'?Math.round(AARM[Math.min(8,it.tier)]*gearQ(it)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
-function atkOf(kind){const s=run.stats||{};return Math.round(10+2*run.level+2*statK(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w))}
+function atkOf(kind){const s=run.stats||{};return 10+2*run.level+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===8?1:rk*.1;
   const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
-  const maxhp=(100+10*run.level+15*statK(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
+  const maxhp=(100+10*run.level+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
   const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh'));
-  const maxmp=(50+3*run.level+4*statK(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
+  const maxmp=(50+3*run.level+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
   const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0));
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
@@ -2259,11 +2260,14 @@ function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SIST
 function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',',');
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
-function statDesc(){const m=isMagic(),bm=basicIsMagic(),k=statK(run.level),n=v=>String(Math.round(v*10)/10).replace('.',','),s=run.stats||{},cc=critChance();
-  return{for:'+'+n(2*k)+' de ataque <b style="color:#ff6b6b">físico</b> por ponto'+(!m?' · usado nas suas habilidades':'')+(!bm?' e no ataque básico':''),agi:agiDesc(),
-   per:'+0,25% de chance de crítico por ponto · agora <b>'+Math.round(cc*100)+'%</b>. <b>Sem limite:</b> cada 100% garante +1 multiplicador e o resto é chance de mais um (ex.: 250% = sempre ×3, com 50% de chance de ×4).',
-   int:'+'+n(2*k)+' de ataque <b style="color:#6fb8ff">mágico</b> e +'+n(4*k)+' de mana por ponto'+(m?' · usado nas suas habilidades':'')+(bm?' e no ataque básico':''),
-   vit:'+'+n(15*k)+' de vida por ponto'}}
+function statDesc(){const m=isMagic(),bm=basicIsMagic(),L=run.level,s=run.stats||{},cc=critChance(),g=s.agi||0,nx=nextStep(L),up='O valor de cada ponto sobe a cada 25 níveis (próxima melhora no nível '+nx+').';
+  return{for:['Ataque físico <b>+'+fmt(atkPer(L)*(s.for||0))+'</b>','Cada ponto de Força = <b>+'+atkPer(L)+' de ataque físico</b>. '+up+(!m?' Usado nas suas habilidades':'')+(!bm?(m?' Usado':' e')+' no ataque básico.':'.')],
+   agi:['Ataque <b>+'+Math.round(.4*g)+'%</b> · movimento <b>+'+Math.round(.5*g)+'%</b> · esquiva <b>'+dodgeCdVal().toFixed(1).replace('.',',')+' s</b>',agiDesc()],
+   per:['Chance de crítico <b>'+Math.round(cc*100)+'%</b>','Cada ponto = +0,25% de chance de crítico (4 pontos = +1%). Crítico dobra o dano. Sem limite: cada 100% garante +1 multiplicador e o resto é chance de mais um (250% = sempre ×3, com 50% de chance de ×4).'],
+   int:['Ataque mágico <b>+'+fmt(atkPer(L)*(s.int||0))+'</b> · mana <b>+'+fmt(mpPer(L)*(s.int||0))+'</b>','Cada ponto de Inteligência = <b>+'+atkPer(L)+' de ataque mágico</b> e <b>+'+mpPer(L)+' de mana</b>. '+up+(m?' Usado nas suas habilidades.':'')],
+   vit:['Vida <b>+'+fmt(hpPer(L)*(s.vit||0))+'</b>','Cada ponto de Vitalidade = <b>+'+hpPer(L)+' de vida</b>. '+up]}}
+/* Linha com dica: passe o mouse (PC) ou toque no nome (celular) para ver a explicação. */
+function tipRow(name,short,tip,btns){return '<div class="it" title="'+String(tip).replace(/<[^>]+>/g,'').replace(/"/g,"'")+'"><div class="d" style="cursor:help" onclick="const t=this.lastElementChild;t.hidden=!t.hidden">'+name+' <span style="opacity:.55">ⓘ</span><small>'+short+'</small><small class="tip" hidden style="color:#bfe8ff">'+tip+'</small></div><div class="acts">'+btns+'</div></div>'}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2315,11 +2319,11 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
 /* janelas novas */
 function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   const pv=passiveOf();let h=(pv?'<div class="sysline">Passiva da classe: <b style="color:#ffd54f">'+pv.n+'</b> — '+pv.d+'</div>':'')+'<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
-  h+='<div class="sysline" style="font-size:12px">No nível <b>'+run.level+'</b> cada ponto vale <b>×'+String(Math.round(statK(run.level)*100)/100).replace('.',',')+'</b> (cresce 2% por nível). Pontos antigos também sobem de valor.</div>';
-  for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
+  h+='<div class="sysline" style="font-size:12px">Você ganha <b>1 ponto por nível</b>. Toque no nome (ou passe o mouse) para ver o que cada atributo faz.</div>';
+  {const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+s[k]+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5))}
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
-  h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 11)</div>';
-  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">+15% poder e −5% recarga por nível</span>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  h+='<div class="sec">HABILIDADES (ATÉ O NÍVEL 10)</div>';
+  for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=tipRow(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>','Poder <b>+'+(15*l)+'%</b> · recarga <b>'+String(Math.round(sk.cd*(1-.05*l)*10)/10).replace('.',',')+' s</b>',skillDesc(sk)+'. Cada nível: +15% de poder e −5% de recarga (recarga base '+sk.cd+' s).',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
   {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+row('Maestria <b>'+ms+'</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida (entra no bônus somado), para sempre nesta vida. Use quando suas habilidades estiverem no máximo. Agora: <b>+'+(ms/2).toString().replace('.',',')+'%</b>',btn('+1','mast',0,run.spts>0))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
@@ -2825,11 +2829,11 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   line=(n,v,d)=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(79,195,255,.12)"><span>'+n+(d?'<br><small style="color:var(--dim)">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div class="sysline" style="font-size:12px">Regra do Sistema: atributos e equipamento dão <b>números fixos</b>. Tudo que é <b>%</b> entra numa soma só (lá embaixo).</div><div style="font-size:13px">';
-  h+=line('Ataque físico',fmt(atkOf('phy')),'10 + nível 2×'+run.level+' + Força '+(s.for||0)+' × '+String(Math.round(2*statK(run.level)*10)/10).replace('.',',')+' + arma '+itemAtk(w));
-  h+=line('Ataque mágico',fmt(atkOf('mag')),'10 + nível 2×'+run.level+' + Inteligência '+(s.int||0)+' × '+String(Math.round(2*statK(run.level)*10)/10).replace('.',',')+' + arma '+itemAtk(w));
+  h+=line('Ataque físico',fmt(atkOf('phy')),'10 + nível 2×'+run.level+' + Força '+(s.for||0)+' × '+atkPer(run.level)+' + arma '+itemAtk(w));
+  h+=line('Ataque mágico',fmt(atkOf('mag')),'10 + nível 2×'+run.level+' + Inteligência '+(s.int||0)+' × '+atkPer(run.level)+' + arma '+itemAtk(w));
   h+=line('Dano final ('+(m?'mágico':'físico')+')',fmt(player.dmg),'ataque '+(m?'mágico':'físico')+' × (1 '+P(bp.edmg)+' bônus) × classe '+X(cb.dmg));
-  h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade '+(s.vit||0)+' × '+String(Math.round(15*statK(run.level)*10)/10).replace('.',',')+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
-  h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência '+(s.int||0)+' × '+String(Math.round(4*statK(run.level)*10)/10).replace('.',','));
+  h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade '+(s.vit||0)+' × '+hpPer(run.level)+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
+  h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência '+(s.int||0)+' × '+mpPer(run.level));
   h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','armadura '+itemArm(a)+' pontos = '+Math.round(armRed(itemArm(a))*100)+'% · classe '+Math.round(cb.def*100)+'%'+(npcHas('Brann')?' · Brann 8%':'')+' · máximo 70%');
   h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')?' · Fúria '+(cons('fur')+(cons('fur')>=10?10:0))+'%':''));
   h+=line('Dano crítico',cc<1?'×2':'×'+(1+Math.floor(cc))+(cc%1?' / ×'+(2+Math.floor(cc)):''),'sem limite: cada 100% de chance garante +1 multiplicador; o resto é chance de mais um');
@@ -3176,9 +3180,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v56</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v57</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=56;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=57;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

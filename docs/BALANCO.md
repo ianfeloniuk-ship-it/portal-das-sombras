@@ -52,15 +52,16 @@ Raridade: +6% por nível (Comum 0 → Primordial +36%). Aprimorar: +8% por níve
 
 ## Atributos
 
-Cada ponto vale mais conforme o nível: fator = 1 + nível/50.
+Você ganha 1 ponto por nível. O valor de cada ponto é um número inteiro que sobe a cada 25 níveis.
 
-| Nível | Fator | Força/Int (ataque por ponto) | Vitalidade (vida por ponto) | Int (mana por ponto) |
-|---|---|---|---|---|
-| 1 | 1.02 | 2.0 | 15 | 4.1 |
-| 50 | 2.00 | 4.0 | 30 | 8.0 |
-| 100 | 3.00 | 6.0 | 45 | 12.0 |
-| 200 | 5.00 | 10.0 | 75 | 20.0 |
-| 300 | 7.00 | 14.0 | 105 | 28.0 |
+| Nível | Força/Int (ataque por ponto) | Vitalidade (vida por ponto) | Int (mana por ponto) |
+|---|---|---|---|
+| 1 | 2 | 15 | 4 |
+| 25 | 3 | 23 | 6 |
+| 50 | 4 | 31 | 8 |
+| 100 | 6 | 47 | 12 |
+| 200 | 10 | 79 | 20 |
+| 300 | 14 | 111 | 28 |
 
 Agilidade (sem limite): +0,4% de vel. de ataque e +0,5% de movimento por ponto; esquiva = 1,50 s ÷ (1 + 1% por ponto). Percepção (sem limite): +0,25% de crítico por ponto; cada 100% garante +1 multiplicador e o resto é chance de mais um (250% = sempre ×3, 50% de chance de ×4).
 
