@@ -25,6 +25,8 @@ RPG de ação 3D para PC, com suporte a celular. Explore as Fendas, enfrente gua
 ## Gráficos
 O botão **HD / LEVE** (ao lado de SOM) troca a qualidade: no modo LEVE há menos grama e flores e a resolução cai, bom para celulares mais fracos. A escolha fica salva.
 
+O Escaravelho e o Monarca usam variantes articuladas do cavaleiro KayKit: caminhada, repouso, ataque e queda. Coroa, chifre e carapaça são peças locais presas às articulações. Os arquivos antigos de duas poses foram preservados, mas não são carregados pelo jogo.
+
 ## Créditos
 Créditos e licenças dos modelos 3D ficam em `models/`. Os pacotes abaixo usam CC0, com atribuições adicionais indicadas na montaria.
 - Personagens, animações e armas: **KayKit Adventurers** e **KayKit Skeletons**, de Kay Lousberg (www.kaylousberg.com).

@@ -382,6 +382,7 @@ function weapon(kind,col){
   return g;
 }
 function makeChibi(o){
+  if((o.mon==='escaravelho'||o.mon==='monarca')&&MODELS.ok&&MODELS.list.Knight)return makeArmoredMonster(o);
   if(o.mon&&MON.list[o.mon])return makeMonster(o);
   if(o.gk&&MODELS.ok&&MODELS.list[o.gk])return makeActor(o);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);
@@ -451,6 +452,29 @@ function makeActor(o){
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:o.atkClip||ATK_CLIP[o.wep]||ATK_CLIP.none,la:0,lw:0,wmats,wnodes};
 }
+// Articulated CC0 variants replace the static, two-view display meshes.
+// Decorations belong to bones, so armor and weapons follow every animation.
+function makeArmoredMonster(o){
+  const royal=o.mon==='monarca',gold=royal?0xd4b56a:0xd99b29,dark=royal?0x252039:0x29271d;
+  const m=makeActor({...o,gk:'Knight',wep:'sword',shield:!royal,tint:null});
+  m.model.scale.multiplyScalar((royal?2.8:2.1)/2.05);m.locomotion=true;m.gaitSpeed=3.4*m.sc*(royal?2.8:2.1)/2.05;
+  m.model.traverse(c=>{if(!c.isMesh)return;const n=c.name;
+    if(/Knight_Cape/.test(n))c.visible=royal;
+    if(/^Knight_/.test(n)){if(/Head|Cape/.test(n))c.material.map=null;c.material.color.set(/Head/.test(n)?0x151820:/Cape/.test(n)?0x352759:royal?dark:gold);c.material.needsUpdate=true}
+  });
+  for(const mt of m.wmats){mt.color.set(gold);mt.map=null;mt.needsUpdate=true}
+  const armor=(geometry,color,parent,x,y,z,sx=1,sy=1,sz=1)=>{if(!parent)return null;const mat=toon(color),part=mesh(geometry,mat);part.position.set(x,y,z);part.scale.set(sx,sy,sz);parent.add(part);m.mats.push(mat);return part};
+  const head=m.model.getObjectByName('head'),chest=m.model.getObjectByName('chest');
+  if(royal){
+    armor(geo('royalBand',()=>new THREE.CylinderGeometry(.5,.5,.09,8,true)),gold,head,0,1.14,.02);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;armor(geo('royalTip',()=>new THREE.ConeGeometry(.075,.28,4)),gold,head,Math.sin(a)*.47,1.30,.02+Math.cos(a)*.47)}
+    const gem=armor(geo('royalGem',()=>new THREE.OctahedronGeometry(.11)),0x9472ff,chest,0,.03,.23);if(gem){gem.material.emissive.setHex(0x5030bb);gem.material.emissiveIntensity=.7}
+  }else{
+    const horn=armor(geo('scarabHorn',()=>new THREE.ConeGeometry(.12,.52,6)),gold,head,0,1.43,.15);if(horn)horn.rotation.x=.32;
+    for(const side of[-1,1]){const shell=armor(geo('scarabShell',()=>new THREE.SphereGeometry(1,8,6)),gold,chest,side*.16,-.12,-.24,.22,.37,.15);if(shell)shell.rotation.z=side*-.12}
+  }
+  return m;
+}
 let ADT=0;
 /* monstros de bioma */
 const BIOM={vulcao:{p:'Ígneo',c:0xff6a3a,hp:1.1,dmg:1.35,spd:1,gold:1.5},cristal:{p:'Cristalino',c:0x9fe8ff,hp:1.45,dmg:1,spd:.95,gold:1.6},floresta:{p:'Sombrio',c:0x3a5a3a,hp:1.2,dmg:1.15,spd:1.1,gold:1.4,suf:true},neve:{p:'Gélido',c:0x9fd8ff,hp:1.3,dmg:1,spd:.85,gold:1.3},deserto:{p:'das Areias',c:0xe0b060,hp:1,dmg:1.25,spd:1.1,gold:1.3,suf:true},pantano:{p:'do Pântano',c:0x6a8a3a,hp:1.15,dmg:1.1,spd:1,gold:1.3,suf:true}};
@@ -516,10 +540,10 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   dragaoancio:{h:3.2,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
   gato:{h:0.7,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
-  escaravelho:{h:2.1,st:1,a:{}},monarca:{h:2.8,st:1,a:{}},guardiao:{h:2,st:1,a:{}},
+  escaravelho:{h:2.1,actor:true},monarca:{h:2.8,actor:true},guardiao:{h:2,st:1,a:{}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF)ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})});
+  for(const k in MON_DEF){if(MON_DEF[k].actor)continue;ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -541,7 +565,7 @@ function animGlb(m,st){
   if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,1.2)}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
-  else if(st.move>.1){if(m.cur!=='Running_A')gPlay(m,'Running_A',false,.8+st.move*.4);m.la=0;m.lw=0}
+  else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur];const busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);
 }
@@ -1712,7 +1736,7 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   }
   for(const o of enemies){if(o===e||o.dead||o.sleep)continue;const sx=e.x-o.x,sz=e.z-o.z;if(Math.abs(sx)>2.5||Math.abs(sz)>2.5)continue;const sd=Math.hypot(sx,sz),m=e.r+o.r;if(sd<m&&sd>0)moveEnt(e,sx/sd*(m-sd)*.5,sz/sd*(m-sd)*.5)}
   if(e.act&&e.act.t<e.act.wind&&!e.isBoss)e.mats.forEach(m=>m.emissive.setHex(Math.sin(e.t*40)>0?0x552200:(m.userData.e0??0)));
-  animChibi(e.m,{move:mv,atk:clamp(atk,0,1),dead:0,wind},e.t);
+  animChibi(e.m,{move:mv,speed:Math.hypot(e.x-e.m.root.position.x,e.z-e.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind},e.t);
   e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;
 }
 function bossAggro(b){$('boss').hidden=false;toast('<b>[ORÁCULO]</b> Guardião: <b>'+b.name+'</b>');bossLight.color.setHex(0xffd070);bossLight.intensity=1.4}
@@ -1744,7 +1768,7 @@ function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
     const dx=tx-a.x,dz=tz-a.z,d=Math.hypot(dx,dz);if(d>near){turnTo(a,Math.atan2(dx,dz),dt);const s=d>10?a.speed*1.6:d<1.5?a.speed*.7:a.speed;moveEnt(a,dx/d*Math.min(s*dt,d),dz/d*Math.min(s*dt,d));mv=d>.6?1:.4}else turnTo(a,P.face,dt)
     if(a.guest&&!a.joined){a.joined=true;toast('<b>[ORÁCULO]</b> '+a.short+' e o grupo dele vão lutar com você nesta masmorra.')}
     if(d>28&&!a.guest){a.x=P.x+rnd(-1,1);a.z=P.z+1;if(L.grid&&!freeAt(a.x,a.z,.4)){a.x=P.x;a.z=P.z}}}
-  animChibi(a.m,{move:mv,atk:clamp(atk,0,1),dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face;
+  animChibi(a.m,{move:mv,speed:Math.hypot(a.x-a.m.root.position.x,a.z-a.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face;
 }
 function updNpc(n,dt){
   n.t+=dt;const P=player,c=n.home;if(n.kind==='deco')return;

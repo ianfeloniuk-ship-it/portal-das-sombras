@@ -204,3 +204,18 @@ Ian autorizou continuar acrescentando funcionalidades e terminar partes esquecid
 Multiplayer/save na nuvem e balanceamento por sessões extensas continuam pendentes. A proposta de Necromante como classe especial continua para decisão futura de Ian.
 
 Validação v69: análise dos scripts inline, regressão das correções v68 e testes nas funções reais de objetivos, capítulos, conclusão da torre, migração e remapeamento aprovados. No navegador: Diário, acompanhamento após recarregar, ajuda completa, troca Q/R e restauração dos controles verificados em PC 1280×720; topo/painel verificados em retrato 390×844. Nenhuma sessão extensa de combate/balanceamento foi feita nesta rodada.
+
+
+## Correção de movimento — 29/09/2026, v70
+
+Ian identificou movimento travado/deslizante no Escaravelho e aprovou usar um cavaleiro articulado gratuito. Os GLBs de Escaravelho e Monarca traziam duas figuras fundidas na mesma malha e nenhuma animação; balançar o conjunto não articulava as pernas. Foram substituídos em execução por variantes do Knight KayKit CC0 já presente, com animações existentes. Os GLBs antigos permanecem como referência, sem carregamento em execução.
+
+- Escaravelho: dourado, chifre e carapaça presos às articulações; espada e escudo acompanham as mãos.
+- Monarca: armadura escura, coroa, capa e gema. Caminhada, repouso, ataque e queda usam o esqueleto animado; instâncias possuem mixers independentes.
+- Ritmo da corrida acompanha deslocamento efetivo; movimento bloqueado retorna ao repouso. Valores de combate e câmera não foram alterados.
+- Validação: cenários reais de animação em navegador para ambas as variantes (pernas, independência, velocidade, bloqueio, ataque, retorno ao repouso e queda), análise dos scripts e regressões v68/v69. Integração no cenário local de PC verificada. Nenhuma ferramenta ou serviço pago, instalação ou modelo externo novo foi usado.
+
+### Propostas de Ian para a próxima etapa — ainda não implementadas
+
+1. Câmera mais próxima por trás do personagem, quase em primeira pessoa, com roda do mouse para afastar e ampliar o campo de visão. Manter leitura dos perigos no chão. Ian pediu concluir os modelos primeiro; ângulo, colisão e controles precisam de protótipo.
+2. Segundo Despertar muito raro: 10 classes iniciais e escolha entre 10 classes especiais, incluindo Necromante e Mago do Tempo. Ideia do Mago do Tempo: reduzir nível/força do oponente e ultimate que devolve dano/reflete projéteis. Sugestão discutida: redução temporária limitada de atributos e resistência de chefes, sem números aprovados. Falta decidir se a especialização complementa ou substitui a classe inicial, condições de desbloqueio e as outras oito classes. A seleção atual do Necromante permanece até implementar a decisão futura.
