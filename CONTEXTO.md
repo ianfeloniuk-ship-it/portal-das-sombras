@@ -314,3 +314,7 @@ Pendências mantidas: arcos narrativos para ranks (hoje requisitos + prova), jor
 
 ## Provas por portais — v83
 Ian substituiu as ondas preliminares da prova de rank por 10 portais do rank desejado: F→E pede 10 E; E→D pede 10 D, até SS+. Mantidos nível e tarefas da Ordem recebidas (2×índice do destino). Depois dos requisitos, duelo direto com o Examinador, sem ondas. Torre e provas de classe permanecem separadas. Contagem permanente no perfil, apenas fechamento após derrotar guardião, uma vez por portal; especiais não contam. Perfis anteriores mantêm seus ranks; contagem por rank inicia nesta atualização porque não havia histórico verificável. Não substitui o futuro desenvolvimento narrativo com Ian.
+
+
+## Clareza de combate e escolhas — v84
+Ian pediu recarga legível, flechas distintas e mais níveis/novas opções de rank. Barra mostra PRONTA, segundos de recarga, SEM MANA ou slot vazio/bloqueado, com bordas e fundos distintos, inclusive poderes absorvidos/fusão. Flecha Estelar agora lança 3 projéteis violetas em leque, cada um com 1/3 do dano total anterior; Perfurante mantém disparo único. Nome preservado para saves. Disparo dividido até 5 níveis, ricochete e golpe amplo até 8. Novos talentos: alcance/velocidade de projétil básico +15% por nível (5), perfuração (1, rank D), terceiro golpe +25% de dano base por nível (5). Mantidos os 8 pontos totais dos ranks E/SS+, escolhas existentes e redistribuição gratuita na cidade. Não amplia automaticamente todas as evoluções de classe; revisão das demais fica pendente.

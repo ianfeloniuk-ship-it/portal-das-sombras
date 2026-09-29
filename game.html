@@ -46,6 +46,15 @@ body.pc #btns .b{position:relative!important;left:auto!important;top:auto!import
 body.pc #btns .b[hidden]{display:none}
 .b .k{font-size:15px;font-family:"Russo One",sans-serif}
 .b .cd{position:absolute;inset:0;background:rgba(0,0,0,.6);transform-origin:bottom;transform:scaleY(0)}
+.b .k{position:relative;z-index:1}
+.b .state{position:relative;z-index:1;font-size:9px;font-weight:900;line-height:1.2;margin-top:3px;white-space:nowrap}
+.b[data-state="ready"]{border:2px solid #91efb1;background:#123d2e;box-shadow:0 0 8px #6ae59c55}
+.b[data-state="cooldown"]{border:2px solid #f5bd68;background:#342a20}
+.b[data-state="mana"]{border:2px dashed #7cbcf5;background:#192d47}
+.b[data-state="empty"]{border:1px dashed #777;box-shadow:none;background:#202126}
+.b[data-state="cooldown"] .state{color:#ffda92}
+.b[data-state="ready"] .state{color:#aaffcd}
+.b .cd{pointer-events:none;background:rgba(0,0,0,.68)}
 .b .nm{font-size:8px;line-height:1.05;max-width:90%;position:relative;opacity:.85}
 #bA{right:0;bottom:0;width:86px;height:86px;border-color:#ff8fa3;box-shadow:0 0 14px rgba(255,77,106,.4)}
 #bD{right:96px;bottom:0;width:58px;height:58px}
@@ -664,7 +673,7 @@ const SOV_SK={n:'Domínio Absoluto',t:'nova',cd:25,mp:40,pow:5,col:0xe6d6ff};
 function useSovereign(){if(profile.rank!==9){return}const sk=run.sovSk||(run.sovSk={...SOV_SK,cdT:0});if(sk.cdT>0){floater(player.x,player.z,'RECARGA '+Math.ceil(sk.cdT)+'s','#e6d6ff');return}useSkill(sk);if(sk.cdT>0){bigText('DOMÍNIO ABSOLUTO',1200);shake(.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-player.x,e.z-player.z)<9)e.stun=Math.max(e.stun,2)}}
 function ensureRankProgress(){if(!profile.progress80){profile.progress80=1;profile.legacySlots=6}if(!Array.isArray(profile.rankTalents))profile.rankTalents=[]}
 function classSlotCount(){ensureRankProgress();return Math.min(6,Math.max(profile.legacySlots||0,1+Math.min(profile.rank,8)))}
-const RANK_TALENTS={volley:{n:'Disparo dividido',d:'Cada ataque básico à distância ganha 1 projétil lateral, com 40% do dano. Até 2 melhorias.',max:2,rank:1},bounce:{n:'Ricochete',d:'O projétil básico salta para mais 1 inimigo a até 7 m. Cada salto mantém 70% do dano anterior e nunca repete o alvo. Até 3 melhorias.',max:3,rank:1},sweep:{n:'Golpe amplo',d:'Ataques básicos corpo a corpo ganham 25% de alcance e 40 graus de abertura por melhoria. Até 3 melhorias.',max:3,rank:1},flow:{n:'Combate em movimento',d:'Atacar deixa de reduzir sua velocidade de movimento.',max:1,rank:6}};
+const RANK_TALENTS={volley:{n:'Disparo dividido',d:'Cada ataque básico à distância ganha 1 projétil lateral, com 40% do dano. Até 5 melhorias.',max:5,rank:1},bounce:{n:'Ricochete',d:'O projétil básico salta para mais 1 inimigo a até 7 m. Cada salto mantém 70% do dano anterior e nunca repete o alvo. Até 8 melhorias.',max:8,rank:1},sweep:{n:'Golpe amplo',d:'Ataques básicos corpo a corpo ganham 25% de alcance e 40 graus de abertura por melhoria. Até 8 melhorias.',max:8,rank:1},reach:{n:'Tiro de longo alcance',d:'Projéteis do ataque básico viajam 15% mais rápido e mais longe por nível, mantendo a duração. Até 5 melhorias.',max:5,rank:1},piercing:{n:'Disparo penetrante',d:'Todos os projéteis do ataque básico atravessam inimigos. Ao combinar com ricochete, cada acerto disponível redireciona o projétil; depois dos saltos, ele segue atravessando.',max:1,rank:2},finisher:{n:'Finalizador',d:'O terceiro ataque do combo ganha mais 25% do dano base por nível, somado ao bônus de 80% que ele já tem. Vale para ataques físicos e mágicos. Até 5 melhorias.',max:5,rank:1},flow:{n:'Combate em movimento',d:'Atacar deixa de reduzir sua velocidade de movimento.',max:1,rank:6}};
 function rankTalent(k){return (profile.rankTalents||[]).filter(x=>x===k).length}
 function rankPoints(){ensureRankProgress();return Math.max(0,Math.min(8,profile.rank)-profile.rankTalents.length)}
 function chooseRankTalent(k){const t=RANK_TALENTS[k];if(!t||L.mode!=='world'||!inCity(player.x,player.z)||profile.rank<t.rank||rankPoints()<1||rankTalent(k)>=t.max)return false;profile.rankTalents.push(k);store.set('pds2_profile',profile);saveRun();return true}
@@ -1574,6 +1583,8 @@ const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingin
 function skillCooldown(sk){const lv=run&&run.skl?run.skl[sk.n]||0:0,arc=run?cons('arc'):0;return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)}
 function skillCooldownText(sk){return String(Math.round(skillCooldown(sk)*100)/100).replace('.',',')}
 function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldown(sk)||1),0,1)}
+function skillButtonState(sk,mp){if(sk.empty)return {kind:'empty',text:sk.lockedRank?'BLOQUEADO':'VAZIO'};if(sk.cdT>0)return {kind:'cooldown',text:(sk.cdT<10?sk.cdT.toFixed(1):Math.ceil(sk.cdT))+'s'};if(mp<sk.mp)return {kind:'mana',text:'SEM MANA'};return {kind:'ready',text:'PRONTA'}}
+function renderSkillButton(b,sk,mp){const state=skillButtonState(sk,mp);b.dataset.state=state.kind;let label=b.querySelector('.state');if(!label){label=document.createElement('span');label.className='state';b.appendChild(label)}if(label.textContent!==state.text)label.textContent=state.text;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(sk)+')';b.style.opacity='1';b.setAttribute('aria-label',sk.n+' · '+state.text);}
 function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atkOf(MAGIC_CLS.includes(sk.sourceClass)?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0))}
 function skillUpgradeText(sk){return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
@@ -1585,11 +1596,12 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.t==='buff_dmg')d='Aumenta seu dano em '+Math.round((sk.pow-1)*100)+'% por 8s.';
   else if(sk.t==='stealth')d='Fica furtivo por 5s; o próximo ataque causa o triplo do dano.';
   else if(sk.t==='blink')d='Salta até 7m para trás e fica imune a dano por 0,6s.';
+  else if(sk.n==='Flecha Estelar')d='Dispara três flechas celestiais em leque, atravessando inimigos. Cada flecha causa um terço do dano total; de perto, as três podem acertar o mesmo alvo. Pode disparar sem alvo próximo.';
   else if(sk.t==='bolt'&&sk.n.includes('Flecha'))d='Dispara na direção da mira e atravessa os inimigos no caminho. Pode disparar sem alvo próximo.';
   else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s.';
   else if(sk.n==='Bola de Fogo')d='Projétil de fogo; a queimadura causa mais 25% do dano ao longo de 3s.';
   lines.push('<b>Efeito:</b> '+d);
-  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
+  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
   lines.push('<b>Custo:</b> '+sk.mp+' de mana.','<b>Recarga atual:</b> '+skillCooldownText(sk)+'s.');return lines.join('<br>');
 }
 /* espólio de monstros */
@@ -1687,9 +1699,9 @@ function attack(){
   const ci=basicAttackId(),c=CLASSES[ci];
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
   const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;player.atkCd=timing.interval;dprog('atk',1);
-  const dmg=player.dmg*timing.damage*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
+  const dmg=player.dmg*timing.damage*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8+.25*rankTalent('finisher'):1)*(FX2.counter?1.6:1);FX2.counter=false;
   const shootsNow=basicIsMagic()||(!MAGIC_CLS.includes(ci)&&c.ranged);
-  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i===0?0:i===1?-.18:.18),22,dmg*(i===0?1:.4),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:ci===4&&third,bounces:rankTalent('bounce')});beep(440,.05,.03,'triangle')}
+  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i===0?0:(i%2?-1:1)*Math.ceil(i/2)*.18),22*(1+.15*rankTalent('reach')),dmg*(i===0?1:.4),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:!!rankTalent('piercing')||(ci===4&&third),bounces:rankTalent('bounce')});beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area'))*(1+.25*rankTalent('sweep')),arc=(third?1.3:1.0)+rankTalent('sweep')*Math.PI/9;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:ci});hit=true}
@@ -1727,7 +1739,7 @@ function runSkill(sk){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
     case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
     case 'chain':{let cur={x:P.x,z:P.z};const hs=new Set(),pts=[{x:P.x,z:P.z}];for(let i=0;i<5;i++){let best=null,bd=i?7:12;for(const e of enemies){if(e.dead||hs.has(e))continue;const d=Math.hypot(e.x-cur.x,e.z-cur.z);if(d<bd){bd=d;best=e}}if(!best)break;hs.add(best);pts.push({x:best.x,z:best.z});hurtEnemy(best,dmg*(1-i*.12),cur.x,cur.z,{kb:1,pierce:true,fromPlayer:true,skillHit:true});cur=best}zig(pts,col);if(pts.length===1)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
-    case 'bolt':{const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
+    case 'bolt':{if(sk.n==='Flecha Estelar'){for(const offset of [-.2,0,.2])shoot(P.x,P.z,P.face+offset,30,dmg/3,'player',0xb8a2ff,'sarrow',{skillHit:true,pierce:true,kb:1,sc:1.8});break}const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
     case 'stone_lance':{const dx=Math.sin(P.face),dz=Math.cos(P.face);for(let i=1;i<=5;i++){const x=P.x+dx*i*1.5,z=P.z+dz*i*1.5;spikes(x,z,3,0,.5,col,1.5+i*.1);cracks(x,z,.7,col)}for(const e of enemies){if(e.dead)continue;const x=e.x-P.x,z=e.z-P.z,along=x*dx+z*dz,across=Math.abs(x*dz-z*dx);if(along>0&&along<8+e.r&&across<.8+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:e.isBoss?.2:.8,pierce:true,fromPlayer:true,skillHit:true})}shake(.25);break}
     case 'thunderstorm':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);if(!targets.length)for(let i=0;i<5;i++)targets.push({x:cx+(i?Math.sin(i*Math.PI/2)*2.5:0),z:cz+(i?Math.cos(i*Math.PI/2)*2.5:0)});for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
     case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,hit:new Set()};P.dashSpd=30;break}
@@ -2090,8 +2102,8 @@ function hud(){
   const ri=rankOf();
   $('rkp').textContent=ri<TOPR?'prova '+RANKS[ri+1].id+' · nível '+GR[ri+1].lvl:'rank máximo';
   $('bZ').hidden=profile.rank!==9;
-  for(const [id,s] of[['bQ',P.skills[0]],['bR',P.skills[1]],['bT',P.skills[2]],['bG',P.skills[3]],['bY',P.skills[4]],['bU',P.skills[5]],['b5',P.skills[6]],['bZ',profile.rank===9?(run.sovSk||SOV_SK):null]]){if(!s)continue;const b=$(id);b.querySelector('.nm').textContent=s.n;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(s)+')';b.style.opacity=P.mp>=s.mp?1:.55;const tip=skillButtonTip(s);if(b.title!==tip)b.title=tip}
-  if(run.fused&&$('stF'))$('stF').querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(run.fused)+')';run.stolen.forEach((s,i)=>{const b=$('st'+i);if(b)b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(s)+')'});
+  for(const [id,s] of[['bQ',P.skills[0]],['bR',P.skills[1]],['bT',P.skills[2]],['bG',P.skills[3]],['bY',P.skills[4]],['bU',P.skills[5]],['b5',P.skills[6]],['bZ',profile.rank===9?(run.sovSk||SOV_SK):null]]){if(!s)continue;const b=$(id);b.querySelector('.nm').textContent=s.n;renderSkillButton(b,s,P.mp);const tip=skillButtonTip(s);if(b.title!==tip)b.title=tip}
+  if(run.fused&&$('stF'))renderSkillButton($('stF'),run.fused,P.mp);run.stolen.forEach((s,i)=>{const b=$('st'+i);if(b)renderSkillButton(b,s,P.mp)});
   $('potn').textContent=run.pots;
   let obj='';
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
@@ -2183,7 +2195,7 @@ const ADV=[
   {n:'Lâmina Fantasma',sk:S('Mil Cortes','nova',8,25,3.6,0xa26bff)},
   {n:'Guardião de Aço',sk:S('Fortaleza Viva','guard',16,25,.12,0x9fd3ff)},
   {n:'Arquimago',sk:S('Meteoro','rain',10,35,3,0xff7a22)},
-  {n:'Atirador Celestial',sk:S('Flecha Estelar','bolt',6,25,6,0xe0ffb0)},
+  {n:'Atirador Celestial',sk:S('Flecha Estelar','bolt',6,25,6,0xb8a2ff)},
   {n:'Sacerdote Solar',sk:S('Sol Nascente','heal',14,35,.7,0xfff3a0)},
   {n:'Mestre das Bestas',sk:S('Matilha Espiritual','summon',16,40,3,0x6ff4ff)},
   {n:'Senhor dos Ecos',sk:S('Domínio dos Ecos','nova',9,30,3.8,0xb98cff)},
