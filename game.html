@@ -1350,7 +1350,7 @@ function spawnShadow(B,x,z,rec){
   allies.push(a);return a;
 }
 function savedSummons(){return allies.filter(a=>a.permanentSummon&&!a.dead&&a.hp>0).map(a=>({kind:a.summonKind,hp:a.hp,maxhp:a.maxhp,dmg:a.dmg,giant:!!a.giant,buffT:Math.max(0,a.buffT||0)}))}
-function restoreSummons(){for(const r of run.summons||[]){if(!['wolf','skel'].includes(r.kind)||!(r.hp>0))continue;const a=spawnSummon(r.kind,player.x+1,player.z+1,1e9);a.maxhp=Math.max(1,Number(r.maxhp)||a.maxhp);a.hp=Math.min(a.maxhp,r.hp);a.dmg=Math.max(1,Number(r.dmg)||a.dmg);a.buffT=Math.max(0,Number(r.buffT)||0);if(r.giant){a.giant=true;a.m.body.scale.setScalar(2);a.r=1}}}
+function restoreSummons(){for(const r of run.summons||[]){if(!['wolf','skel','golem'].includes(r.kind)||!(r.hp>0))continue;const a=spawnSummon(r.kind,player.x+1,player.z+1,1e9);a.maxhp=Math.max(1,Number(r.maxhp)||a.maxhp);a.hp=Math.min(a.maxhp,r.hp);a.dmg=Math.max(1,Number(r.dmg)||a.dmg);a.buffT=Math.max(0,Number(r.buffT)||0);if(r.giant){a.giant=true;a.m.body.scale.setScalar(2);a.r=1}}}
 function makeSpiritWolf(){
   if(MON.list.lobo){const m=makeMonster({mon:'lobo',scale:.85,tint:0x78ccd8});m.locomotion=true;m.gaitSpeed=6.2;return m}
   // Quadruped fallback also works when the optional model cannot be loaded.
@@ -1364,12 +1364,13 @@ function makeSpiritWolf(){
   const tail=part(.22,.22,.75,0,.8,-.84);tail.rotation.x=-.5;
   return{root,body,mats,paws,tail,quadruped:true,sc:1};
 }
+function makeStoneColossus(){const m=makeChibi({body:0x766c5a,skin:0x8e8068,eye:0xffd070,scale:1.25,wep:'none'}),stone=toon(0x766c5a);for(const part of m.body.children)if(part.isMesh&&part.position.y>1.5&&part.geometry.type==='SphereGeometry')part.geometry=geo('colossusHead',()=>new THREE.DodecahedronGeometry(.46,0));for(const arm of [m.armL,m.armR]){for(const y of [0,-.55]){const rock=mesh(geo('colossusFist',()=>new THREE.DodecahedronGeometry(.3,0)),stone);rock.position.y=y;arm.add(rock)}}const core=mesh(geo('colossusCore',()=>new THREE.OctahedronGeometry(.17)),glowS(0xffd070,.8));core.position.set(0,.95,.38);m.body.add(core);m.mats.push(stone);return m}
 function spawnSummon(kind,x,z,life){
-  const wolf=kind==='wolf',col=wolf?0x6ff4ff:0xa26bff;const pm=toon(wolf?0x1f7f86:0x3a2466,wolf?0x0a3a40:0x1a0a33);
-  const m=wolf?makeSpiritWolf():makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:col,wep:'sword',scale:.9,gk:'Skeleton_Minion',tint:0x7a4ac0,emis:0x1a0a33});m.root.position.set(x,0,z);scene.add(m.root);
+  const wolf=kind==='wolf',golem=kind==='golem',col=golem?0xc8a070:wolf?0x6ff4ff:0xa26bff;const pm=toon(wolf?0x1f7f86:0x3a2466,wolf?0x0a3a40:0x1a0a33);
+  const m=golem?makeStoneColossus():wolf?makeSpiritWolf():makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:col,wep:'sword',scale:.9,gk:'Skeleton_Minion',tint:0x7a4ac0,emis:0x1a0a33});m.root.position.set(x,0,z);scene.add(m.root);
   const mh=80*RANKS[rankOf()].mult*(1+run.level*.04);
   const a={m,mats:m.mats,x,z,face:0,name:wolf?'Lobo Espiritual':'Soldado',hp:mh,maxhp:mh,dmg:player.dmg*.7,speed:6.2,range:1.8,r:.5,cd:0,act:null,stun:0,team:'ally',life:1e9,permanentSummon:true,summonKind:kind,t:0,buffT:0,kb:{x:0,z:0},flash:0,slow:0};
-  allies.push(a);fxRing(x,z,col,2.5,.5);return a;
+  if(golem){a.name='Colosso de Pedra';a.hp=a.maxhp=mh*3;a.dmg=player.dmg*1.4;a.speed=3.8;a.range=2.6;a.r=.9;a.col=col;}allies.push(a);fxRing(x,z,col,2.5,.5);return a;
 }
 function makeHunterAlly(p,x,z,guest){
   const c=CLASSES[p.cls];const m=makeChibi({body:c.body,hair:p.hair??c.hair,wep:c.wep,wcol:c.sk[0].col,gk:CLASS_GK[p.cls],tint:CLASS_TINT[p.cls],shield:p.cls===0||p.cls===2});m.root.position.set(x,0,z);scene.add(m.root);
@@ -1513,8 +1514,10 @@ function updHazards(dt){
     /* Se quem criou a área morreu antes dela explodir, a área some sem causar dano. */
     if(h.owner&&h.owner.dead&&h.t<h.dur){h.dmg=0;h.t=h.dur;fxRing(h.x,h.z,0x9fb0c4,h.r,.25)}
     if(h.t>=h.dur){
-      if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
-      else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:h.kb??3,fromPlayer:true,skillHit:true,passive:!!h.passive})}
+      if(h.healFraction){solarHeal(h.x,h.z,h.r,h.healFraction)}
+      else if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
+      else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:h.kb??3,stun:h.stun,slow:h.slow||0,fromPlayer:true,skillHit:true,passive:!!h.passive})}
+      if(h.icePulse)spikes(h.x,h.z,8,1,h.r,h.col,1);if(h.firePulse)pillar(h.x,h.z,h.col,.8,.35);
       if(h.bladeStrike)fxSlash(h.x,h.z,h.t*7,h.col,h.r);if(h.runeStrike){circle(h.x,h.z,h.col);pillar(h.x,h.z,h.col,.6,.4)}
       if(h.lightning){pillar(h.x,h.z,h.col,.22,.28);sparkUp(h.x,h.z,h.col,7,.45)}
       if(h.dmg>0){if(time-AU.lastBoom>.2){AU.lastBoom=time;sfx('boom')}fxRing(h.x,h.z,h.col,h.r,.35);fxBurst(h.x,.5,h.z,h.col,6,4);shake(h.team==='enemy'?.25:.12)}
@@ -1593,7 +1596,15 @@ function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atk
 function skillUpgradeText(sk){return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
   let d=SKD[sk.t]||'Habilidade';
-  if(sk.n==='Lâmina Rúnica')d='Três explosões rúnicas avançam em linha na direção da mira, até 7,5 m. Cada explosão causa um terço do dano total, em um raio de 2,2 m. Pode usar sem alvo.';
+  if(sk.n==='Meteoro')d='Um grande meteoro cai na região da mira após 0,9s. Atinge todos em um raio de 5 m. Pode lançar no chão vazio, a até 14 m.';
+  else if(sk.n==='Sol Negro')d='Cria uma área de fogo de 4 m na mira, a até 14 m. Causa cinco pulsos, um por segundo, inclusive em inimigos que entrarem depois. Cada pulso causa um quinto do dano total.';
+  else if(sk.n==='Era do Gelo')d='Cria uma área de gelo de 6 m na mira, a até 14 m. Quatro pulsos durante 2,4s causam dano e reduzem o movimento dos inimigos pela metade por 2s. Não atordoa. Cada pulso causa um quarto do dano total.';
+  else if(sk.n==='Fúria dos Céus')d='Três raios atingem a mesma região da mira durante 1,1s, em um raio de 3 m. Cada raio causa um terço do dano total. Pode lançar no chão vazio, a até 14 m.';
+  else if(sk.n==='Sol Nascente')d='Cura '+Math.round(sk.pow*50)+'% da vida máxima de você e dos aliados a até 6 m. Deixa mais três pulsos de cura no local durante 3s: juntos curam outros '+Math.round(sk.pow*50)+'%. Fique na área para receber os pulsos. Sem cura bloqueia a recuperação.';
+  else if(sk.n==='Domínio dos Ecos')d='Atinge inimigos a até 7 m e os marca por 8s. Seus ecos causam 20% mais dano nesses alvos. Renova a marca do ataque básico do Necromante, sem multiplicar o bônus.';
+  else if(sk.n==='Matilha Espiritual')d='Invoca até 3 lobos nas vagas livres e fortalece todos os seus lobos por 8s: +60% de dano e 45% menos dano recebido. Pode fortalecer a matilha mesmo com o limite cheio. Lobos permanecem até morrer. Ativos: '+minionAllies().length+'/'+summonCap()+'.';
+  else if(sk.n==='Colosso de Pedra')d='Invoca 1 golem de pedra, que ocupa uma vaga e permanece até morrer. Tem três vezes a vida de uma invocação comum e o dobro do dano por golpe, mas anda e ataca mais devagar. Ativos: '+minionAllies().length+'/'+summonCap()+'.';
+  else if(sk.n==='Lâmina Rúnica')d='Três explosões rúnicas avançam em linha na direção da mira, até 7,5 m. Cada explosão causa um terço do dano total, em um raio de 2,2 m. Pode usar sem alvo.';
   else if(sk.n==='Mil Cortes')d='Deixa uma área de cortes onde você está: raio de 4,5 m, com seis golpes durante 1,15s. Cada golpe causa um sexto do dano total, sem empurrar os inimigos. Você pode se mover enquanto os cortes continuam.';
   else if(sk.n==='Fortaleza Viva')d='Por 5s, você recebe '+Math.round((1-sk.pow)*100)+'% menos dano. Aliados a até 6 m no momento do uso recebem 50% menos dano por 5s, mesmo se saírem de perto. Reaplicar renova a duração, sem multiplicar a proteção.';
   else if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
@@ -1608,7 +1619,7 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s.';
   else if(sk.n==='Bola de Fogo')d='Projétil de fogo; a queimadura causa mais 25% do dano ao longo de 3s.';
   lines.push('<b>Efeito:</b> '+d);
-  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Mil Cortes'?1/6:sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Mil Cortes'?' por golpe (6 golpes)':sk.n==='Lâmina Rúnica'?' por explosão (3 explosões)':sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
+  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Sol Negro'?1/5:sk.n==='Era do Gelo'?1/4:sk.n==='Fúria dos Céus'?1/3:sk.n==='Mil Cortes'?1/6:sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Sol Negro'?' por pulso (5 pulsos)':sk.n==='Era do Gelo'?' por pulso (4 pulsos)':sk.n==='Fúria dos Céus'?' por raio (3 raios)':sk.n==='Meteoro'?' por inimigo atingido':sk.n==='Mil Cortes'?' por golpe (6 golpes)':sk.n==='Lâmina Rúnica'?' por explosão (3 explosões)':sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
   lines.push('<b>Custo:</b> '+sk.mp+' de mana.','<b>Recarga atual:</b> '+skillCooldownText(sk)+'s.');return lines.join('<br>');
 }
 /* espólio de monstros */
@@ -1731,23 +1742,31 @@ function dodge(){
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[ORÁCULO]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk||sk.empty)return;if(sk.cdT>0)return;
-   if(sk.t==='summon'&&minionAllies().length>=summonCap()){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
+   if(sk.t==='summon'&&minionAllies().length>=summonCap()&&(sk.n!=='Matilha Espiritual'||!allies.some(a=>!a.dead&&a.summonKind==='wolf'))){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
    if(sk.t==='heal'&&hasAff('nocure')){floater(player.x,player.z,'SEM CURA','#ff8fa3');return}
    if(sk.t==='minionbuff'&&!minionAllies(true).length){floater(player.x,player.z,'SEM INVOCADOS','#9fb0c4');return}
-  if(sk.t==='chain'&&!nearestEnemy(player.x,player.z,12)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
+  if(sk.t==='chain'&&sk.n!=='Fúria dos Céus'&&!nearestEnemy(player.x,player.z,12)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
   player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;runSkill(sk);player.atkT=.001;
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
 function skillGroundPoint(max=14,fallback=7){const ap=aimPoint();if(ap){const dx=ap.x-player.x,dz=ap.z-player.z,d=Math.hypot(dx,dz),k=d>max?max/d:1;return{x:player.x+dx*k,z:player.z+dz*k}}return{x:player.x+Math.sin(player.face)*fallback,z:player.z+Math.cos(player.face)*fallback}}
 function physicalEvolution(sk,dmg){const P=player;
-  if(sk.n==='Lâmina Rúnica'){for(let i=1;i<=3;i++){const x=P.x+Math.sin(P.face)*i*2.5,z=P.z+Math.cos(P.face)*i*2.5,h=hazard(x,z,2.2,i*.25,dmg/3,'player',0xffd08a);h.kb=0;h.runeStrike=true;}waveFwd(P.x,P.z,P.face,0xffd08a,8,2);return true}
-  if(sk.n==='Mil Cortes'){for(let i=0;i<6;i++){const h=hazard(P.x,P.z,4.5,.15+i*.2,dmg/6,'player',0xa26bff);h.kb=0;h.bladeStrike=true;}spinRing(P.x,P.z,0xa26bff,4.5,1.2);return true}
+  if(sk.n==='Lâmina Rúnica'){for(let i=1;i<=3;i++){const x=P.x+Math.sin(P.face)*i*2.5,z=P.z+Math.cos(P.face)*i*2.5,h=hazard(x,z,2.2,i*.25,dmg/3,'player',0xffd08a);h.kb=0;h.stun=0;h.runeStrike=true;}waveFwd(P.x,P.z,P.face,0xffd08a,8,2);return true}
+  if(sk.n==='Mil Cortes'){for(let i=0;i<6;i++){const h=hazard(P.x,P.z,4.5,.15+i*.2,dmg/6,'player',0xa26bff);h.kb=0;h.stun=0;h.bladeStrike=true;}spinRing(P.x,P.z,0xa26bff,4.5,1.2);return true}
   if(sk.n==='Fortaleza Viva'){P.guard=5;P.guardVal=sk.pow;let count=0;for(const a of allies)if(!a.dead&&Math.hypot(a.x-P.x,a.z-P.z)<=6){a.fortressUntil=time+5;fxRing(a.x,a.z,0x9fd3ff,1.2,5);count++}bubble(5,0x9fd3ff);fxRing(P.x,P.z,0x9fd3ff,6,1);toast('<b>[FORTALEZA]</b> Proteção por 5s · '+count+' aliados protegidos.');return true}
   return false;
 }
+function solarHeal(x,z,r,fraction){if(hasAff('nocure'))return;for(const a of [player,...allies])if(!a.dead&&Math.hypot(a.x-x,a.z-z)<=r){a.hp=Math.min(a.maxhp,a.hp+a.maxhp*fraction);fxRing(a.x,a.z,0xfff3a0,1,.4)}}
+function magicEvolution(sk,dmg){const P=player,col=sk.col;
+  if(['Meteoro','Sol Negro','Era do Gelo','Fúria dos Céus'].includes(sk.n)){const pt=skillGroundPoint(),meteor=sk.n==='Meteoro',fire=sk.n==='Sol Negro',ice=sk.n==='Era do Gelo',n=meteor?1:fire?5:ice?4:3,r=meteor?5:fire?4:ice?6:3;for(let i=0;i<n;i++){const delay=meteor?.9:fire?.5+i:ice?.3+i*.7:.4+i*.35,h=hazard(pt.x,pt.z,r,delay,dmg/n,'player',col);h.kb=0;h.stun=0;h.slow=ice?2:0;if(!meteor&&!fire&&!ice)h.lightning=true;if(ice)h.icePulse=true;if(fire)h.firePulse=true;}if(meteor)fallFx(pt.x,pt.z,.9,'meteor',col);else if(fire)pillar(pt.x,pt.z,0xff3a1e,1.1,.7);else if(ice)spikes(pt.x,pt.z,12,1,6,col,1);return true}
+  if(sk.n==='Sol Nascente'){solarHeal(P.x,P.z,6,sk.pow/2);for(let i=1;i<=3;i++){const h=hazard(P.x,P.z,6,i,0,'player',col);h.healFraction=sk.pow/6;}pillar(P.x,P.z,col,1.5,1);return true}
+  if(sk.n==='Domínio dos Ecos'){fxRing(P.x,P.z,col,7,1);spikes(P.x,P.z,14,1,7,col,1.5);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=7+e.r){e.echoMarkUntil=Math.max(e.echoMarkUntil||0,time+8);hurtEnemy(e,dmg,P.x,P.z,{kb:0,stun:0,fromPlayer:true,skillHit:true})}return true}
+  if(sk.n==='Matilha Espiritual'||sk.n==='Colosso de Pedra'){const wolf=sk.n==='Matilha Espiritual',n=Math.min(wolf?3:1,Math.max(0,summonCap()-minionAllies().length));for(let i=0;i<n;i++){let x=P.x+Math.sin(i*2.1)*1.8,z=P.z+Math.cos(i*2.1)*1.8;if(!freeAt(x,z,.5)){x=P.x;z=P.z}spawnSummon(wolf?'wolf':'golem',x,z,1e9)}if(wolf)for(const a of allies)if(!a.dead&&a.summonKind==='wolf'){a.buffT=Math.max(a.buffT||0,8);fxRing(a.x,a.z,col,1.4,.6)}circle(P.x,P.z,col);saveRun();return true}
+  return false;
+}
 function runSkill(sk){
-  const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)){sfx('skill');return}skillFx(sk,P);
+  const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){sfx('skill');return}skillFx(sk,P);
   switch(sk.t){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
     case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
@@ -1888,7 +1907,7 @@ function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
   if(a.act){a.act.t+=dt;atk=a.act.t/.3;if(!a.act.done&&a.act.t>.15){a.act.done=true;const t=a.act.e;
       if(a.ranged){if(t&&!t.dead)shoot(a.x,a.z,a.face,20,a.dmg*(a.buffT>0?1.6:1)*echoAttackMul(a,t),'player',a.col,'orb',{fromPlayer:false})}
       else{if(t&&!t.dead&&Math.hypot(t.x-a.x,t.z-a.z)<a.range+t.r+.6)hurtEnemy(t,a.dmg*(a.buffT>0?1.6:1)*echoAttackMul(a,t),a.x,a.z,{kb:1.2});fxSlash(a.x,a.z,a.face,a.shadow?0xa26bff:(a.col||0x6ff4ff),2)}}
-    if(a.act.t>.3){a.act=null;a.cd=a.shadow?.7:a.ranged?1.1:.9}}
+    if(a.act.t>.3){a.act=null;a.cd=a.summonKind==='golem'?1.5:a.shadow?.7:a.ranged?1.1:.9}}
   else if(e&&(pdist<18||a.guest)){const dx=e.x-a.x,dz=e.z-a.z,d=Math.hypot(dx,dz);turnTo(a,Math.atan2(dx,dz),dt);
     if(a.ranged){if(d<5){moveEnt(a,-dx/d*a.speed*dt,-dz/d*a.speed*dt);mv=1}else if(d>a.range){moveEnt(a,dx/d*a.speed*dt,dz/d*a.speed*dt);mv=1}else if(a.cd<=0)a.act={t:0,e}}
     else if(d>a.range+e.r){moveEnt(a,dx/d*a.speed*dt,dz/d*a.speed*dt);mv=1}else if(a.cd<=0)a.act={t:0,e}}
