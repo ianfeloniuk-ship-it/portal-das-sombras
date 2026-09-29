@@ -633,8 +633,6 @@ function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
     shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
 }
-/* jogador mais forte (feedback de diversão): +35% dano, +30% vida */
-{const _sf=statsFor;statsFor=function(){const s=_sf();s.dmg*=1.35;s.maxhp=Math.round(s.maxhp*1.3);return s}}
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 /* Visual do equipamento (pedido do Irror): a arma e a roupa mudam com o que você usa.
    Arma: metal na cor do rank; do rank A em diante vira a versão grande (espada/machado de duas mãos, cajado longo, besta grande, facas duplas).
@@ -1127,7 +1125,7 @@ function buildDungeon(g){
   const redM=g.red?1.3:1;
   const mids=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==bi);
   // monstros
-  for(const i of mids){const r=rooms[i];const n=clamp(Math.round(r.w*r.h/22*G.dens),2,8);let first=null;
+  for(const i of mids){const r=rooms[i];const n=clamp(Math.round(r.w*r.h/22*G.dens*1.6),3,12);let first=null;
     for(let k=0;k<n;k++){const kind=wpick(KW).k;const reps=kind==='minion'?2:1;for(let q=0;q<reps;q++){const p=randIn(r);const e=spawnKind(kind,p.x,p.z,g.rank,{room:i});e.hp*=redM;e.maxhp*=redM;if(!first)first=e}}
     if(first&&R()<.3+Math.max(0,g.rank-5)*.25)makeElite(first)}
   // caçadores dentro
@@ -1285,7 +1283,7 @@ function makeItem(slot,tier,rar){
   const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Besta',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
   return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
-function rollItem(tier,boss){const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=wpick(w.map((w,i)=>({i,w}))).i;const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
+function rollItem(tier,boss){const _rk=rankOf(),_ex=Math.max(0,tier-_rk);tier=Math.min(tier,_rk);const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,wpick(w.map((w,i)=>({i,w}))).i+Math.ceil(_ex/3));const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
 function addItem(it){
   const cur=run.equip[it.slot];
@@ -1476,7 +1474,7 @@ const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosã
 function skillDesc(sk){if(!sk)return '';const nat=['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':(isMagic()?' · mágica (Inteligência)':' · física (Força)');return (SKD[sk.t]||'Habilidade')+nat+(['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':' · <b>marca</b> os alvos')+' · poder x'+sk.pow+' · '+sk.mp+' de mana · recarga '+sk.cd+'s'}
 function killEnemy(e){
   if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
-  e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp);storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
+  e.dead=true;e.deadT=0;e.act=null;{const pl=Math.max(1,run.level),el=e.lvl||pl,m=el>pl?Math.min(6,Math.pow(el/pl,1.3)):Math.max(.4,Math.pow(el/pl,.8));gainXp(e.xp*m);if(e.isBoss&&el>pl){const b=Math.round(xpNeed()*Math.min(1.6,.4*m));floater(e.x,e.z,'+'+fmt(b)+' XP · chefe acima do seu nível','#8fe3ff',true,3.2);gainXp(b)}}storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[SISTEMA]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
@@ -3208,9 +3206,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v62</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v63</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=62;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=63;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
