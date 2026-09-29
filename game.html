@@ -2233,7 +2233,7 @@ function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
 window.CFG=Object.assign({vol:1,btn:1,moveLimit:false,moveCap:100},store.get('pds_cfg')||{});
 CFG.music=CFG.music??CFG.vol;CFG.effects=CFG.effects??CFG.vol;
-CFG.readySounds=CFG.readySounds===true;CFG.slotSounds=Array.from({length:8},(_,i)=>Number.isInteger(CFG.slotSounds?.[i])&&CFG.slotSounds[i]>=0&&CFG.slotSounds[i]<=8?CFG.slotSounds[i]:i+1);
+normalizeReadySounds();
 const AU={ctx:null,on:true,track:null,want:'city',step:0,next:0,bar:0,lastBoom:0};
 try{AU.on=localStorage.getItem('pds_sound')!=='0'}catch(e){}
 function audioInit(){
@@ -3570,10 +3570,10 @@ const CUE_NAMES=['Sem aviso','Sino','Duplo agudo','Ascendente','Grave','Descende
 const CUE_NOTES=[[],[880],[1047,1047],[523,784],[330,440],[988,659],[660,660,880],[440,880,440],[1319,1760]];
 let cueStates93=new WeakMap(),cueNext93=0;
 function playReadySound(id,preview=false){if(!Number.isInteger(id)||!CUE_NOTES[id]?.length)return;if(preview)audioInit();if(!AU.ctx||!AU.on||CFG.effects<=0)return;const t=Math.max(AU.ctx.currentTime,cueNext93);cueNext93=t+.3;CUE_NOTES[id].forEach((f,i)=>tone(f,t+i*.075,.12,{type:id===4?'triangle':'sine',v:.12,rev:.08}))}
-function updateReadySounds(){if(!player||player.dead){cueStates93=new WeakMap();return}const skills=[...player.skills,run.sovSk];skills.forEach((sk,i)=>{if(!sk||sk.empty||sk.lockedRank)return;const left=Math.max(0,Number(sk.cdT)||0),old=cueStates93.get(sk);cueStates93.set(sk,left);if(old>0&&left===0&&CFG.readySounds)playReadySound(CFG.slotSounds[i])})}
-function setReadySounds(on){CFG.readySounds=!!on;store.set('pds_cfg',CFG)}
+function normalizeReadySounds(){CFG.slotSounds=Array.from({length:8},(_,i)=>Number.isInteger(CFG.slotSounds?.[i])&&CFG.slotSounds[i]>=0&&CFG.slotSounds[i]<=8?CFG.slotSounds[i]:0);delete CFG.readySounds}
+function updateReadySounds(){if(!player||player.dead){cueStates93=new WeakMap();return}const skills=[...player.skills,run.sovSk];skills.forEach((sk,i)=>{if(!sk||sk.empty||sk.lockedRank)return;const left=Math.max(0,Number(sk.cdT)||0),old=cueStates93.get(sk);cueStates93.set(sk,left);if(old>0&&left===0&&CFG.slotSounds[i]>0)playReadySound(CFG.slotSounds[i])})}
 function setSlotSound(i,v){v=Number(v);if(!Number.isInteger(i)||i<0||i>7||!Number.isInteger(v)||v<0||v>8)return;CFG.slotSounds[i]=v;store.set('pds_cfg',CFG);playReadySound(v,true)}
-function readySoundSettings(){let h='<div class="guide93"><strong>Avisos de recarga</strong><p>Reconheça pelo som qual espaço terminou de recarregar. O aviso não verifica mana ou alcance.</p><p>Usa o volume de efeitos. Escolha um som por espaço ou deixe sem aviso.</p></div><label><input type="checkbox" '+(CFG.readySounds?'checked':'')+' onchange="setReadySounds(this.checked)"> Ativar avisos de recarga</label>';
+function readySoundSettings(){let h='<div class="guide93"><strong>Avisos de recarga</strong><p>Escolha um som para ouvir quando a habilidade desse espaço terminar de recarregar. Para desligar, escolha Sem aviso.</p><p>Usa o volume de efeitos e respeita o som mudo. O aviso não verifica mana ou alcance.</p></div>';
  const acts=['sk0','sk1','sk2','sk3','sk4','sk5','sk6','sovereign'];acts.forEach((act,i)=>{const sk=i===7?run.sovSk:player.skills[i];if(i===7&&profile.rank!==9||i<7&&(!sk||sk.lockedRank)||i===3&&!run.adv)return;const title=(i===7?'Domínio':i===3?'Evolução':'Espaço '+([1,2,3,0,4,5,6][i]))+' · '+keyLabel(keyOf(act));h+=row(title,sk&&!sk.empty?safeText(sk.n):'Espaço liberado','<div class="cue93"><select aria-label="Som '+title+'" onchange="setSlotSound('+i+',this.value)">'+CUE_NAMES.map((n,j)=>'<option value="'+j+'" '+(CFG.slotSounds[i]===j?'selected':'')+'>'+n+'</option>').join('')+'</select><button class="btn" onclick="playReadySound(CFG.slotSounds['+i+'],true)">Ouvir</button></div>')});return h}
 
 function audioSettings(){return '<div class="sec">ÁUDIO</div>'+[['music','Música'],['effects','Efeitos e avisos']].map(([k,n])=>'<label for="audio_'+k+'">'+n+' <span id="av_'+k+'">'+Math.round(CFG[k]*100)+'%</span></label><input id="audio_'+k+'" aria-label="'+n+'" type="range" min="0" max="1" step=".05" value="'+CFG[k]+'" oninput="setAudioVolume(\''+k+'\',this.value)" style="width:100%">').join('')+'<div class="sysline">Zere a música para ouvir sua playlist mantendo os efeitos e avisos do jogo.</div>'}
