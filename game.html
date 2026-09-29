@@ -327,11 +327,11 @@ const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Vi
 /* ================= PERFIL ================= */
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let profile=store.get('pds2_profile');
-function pickAwaken(ci){return {rankSchema:78,rank:0,cls:ci,deaths:0,best:1,seed:(Math.random()*2**31)|0}}
+function pickAwaken(ci){return {progress80:1,rankSchema:78,rank:0,cls:ci,deaths:0,best:1,seed:(Math.random()*2**31)|0}}
 function rollAwaken(){
   let r=Math.random()*100,ri=0;for(;ri<TOPR;ri++){if(r<RANKS[ri].p)break;r-=RANKS[ri].p}
   const tw=CLASSES.reduce((a,c)=>a+c.w,0);let c=Math.random()*tw,ci=0;for(;ci<CLASSES.length-1;ci++){if(c<CLASSES[ci].w)break;c-=CLASSES[ci].w}
-  return {rankSchema:78,rank:ri,cls:ci,deaths:0,best:1,seed:(Math.random()*2**31)|0};
+  return {progress80:1,rankSchema:78,rank:ri,cls:ci,deaths:0,best:1,seed:(Math.random()*2**31)|0};
 }
 
 /* ================= THREE ================= */
@@ -650,18 +650,30 @@ const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('B
  raio:{n:'Ar e Raio',c:'#fff36b',d:'Velocidade e raios, mais fortes na chuva',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','thunderstorm',10,28,1.9,0xfff36b)]}};
 const SOV_SK={n:'Domínio Absoluto',t:'nova',cd:25,mp:40,pow:5,col:0xe6d6ff};
 function useSovereign(){if(profile.rank!==9){return}const sk=run.sovSk||(run.sovSk={...SOV_SK,cdT:0});if(sk.cdT>0){floater(player.x,player.z,'RECARGA '+Math.ceil(sk.cdT)+'s','#e6d6ff');return}useSkill(sk);if(sk.cdT>0){bigText('DOMÍNIO ABSOLUTO',1200);shake(.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-player.x,e.z-player.z)<9)e.stun=Math.max(e.stun,2)}}
+function ensureRankProgress(){if(!profile.progress80){profile.progress80=1;profile.legacySlots=6}if(!Array.isArray(profile.rankTalents))profile.rankTalents=[]}
+function classSlotCount(){ensureRankProgress();return Math.min(6,Math.max(profile.legacySlots||0,1+Math.min(profile.rank,8)))}
+const RANK_TALENTS={volley:{n:'Disparo dividido',d:'Cada ataque básico à distância ganha 1 projétil lateral, com 40% do dano. Até 2 melhorias.',max:2,rank:1},bounce:{n:'Ricochete',d:'O projétil básico salta para mais 1 inimigo a até 7 m. Cada salto mantém 70% do dano anterior e nunca repete o alvo. Até 3 melhorias.',max:3,rank:1},sweep:{n:'Golpe amplo',d:'Ataques básicos corpo a corpo ganham 25% de alcance e 40 graus de abertura por melhoria. Até 3 melhorias.',max:3,rank:1},flow:{n:'Combate em movimento',d:'Atacar deixa de reduzir sua velocidade de movimento.',max:1,rank:6}};
+function rankTalent(k){return (profile.rankTalents||[]).filter(x=>x===k).length}
+function rankPoints(){ensureRankProgress();return Math.max(0,Math.min(8,profile.rank)-profile.rankTalents.length)}
+function chooseRankTalent(k){const t=RANK_TALENTS[k];if(!t||L.mode!=='world'||!inCity(player.x,player.z)||profile.rank<t.rank||rankPoints()<1||rankTalent(k)>=t.max)return false;profile.rankTalents.push(k);store.set('pds2_profile',profile);saveRun();return true}
+function rankTalentRows(){const points=rankPoints();let h='<div class="sec">ESCOLHAS DE COMBATE · '+points+' '+(points===1?'PONTO DISPONÍVEL':'PONTOS DISPONÍVEIS')+'</div><div class="sysline">Cada rank de E a SS+ concede 1 ponto. Estas melhorias se somam às passivas das classes. Você pode redistribuir na cidade sem custo.</div>';for(const [k,t] of Object.entries(RANK_TALENTS))h+=row(t.n+' · '+rankTalent(k)+'/'+t.max,t.d+(profile.rank<t.rank?' Exige rank '+RANKS[t.rank].id+'.':''),btn('Escolher','ranktalent',k,rankPoints()>0&&profile.rank>=t.rank&&rankTalent(k)<t.max));return h+btn('Redistribuir escolhas','rankreset',0,profile.rankTalents.length>0)}
+function bounceBasic(p){if(!p.bounces)return false;let target=null,dist=7;for(const e of enemies){if(e.dead||e.sleep||e.invuln||p.hit.has(e))continue;const d=Math.hypot(e.x-p.x,e.z-p.z);if(d<dist){dist=d;target=e}}if(!target)return false;const a=Math.atan2(target.x-p.x,target.z-p.z),speed=Math.hypot(p.vx,p.vz);p.vx=Math.sin(a)*speed;p.vz=Math.cos(a)*speed;p.mesh.rotation.y=a;p.bounces--;p.dmg*=.7;p.life=Math.max(p.life,.5);return true}
+function classTraining(){const n=jobsOf().filter(i=>!CLASSES[i].rare).length;return {level:5+10*n,bosses:2*n,gold:500*n*n}}
+function classTrainingReady(){const q=classTraining();return run.level>=q.level&&(profile.bossKills||0)>=q.bosses&&run.gold>=q.gold&&L.mode==='world'&&!!inCity(player.x,player.z)}
+function rankTrialReady(nx){return nx===profile.rank+1&&nx<=TOPR&&run.level>=GR[nx].lvl&&(profile.guildClaims||0)>=nx*2&&(profile.bossKills||0)>=nx}
+
 const CLASS_SLOTS=[0,1,2,4,5,6],CLASS_SLOT_KEYS=['Q','R','T','Y','U','5'];
 function classSkill(ci,si){const c=CLASSES[ci];if(!c)return null;const base=ci===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;const sk=base[si];return sk?{...sk,sourceClass:ci,skillId:ci+':'+si}:null}
 function learnedSkills(){return jobsOf().flatMap(ci=>CLASSES[ci].sk.map((_,si)=>classSkill(ci,si))).filter(Boolean)}
 function classLoadout(){const known=learnedSkills(),byId=new Map(known.map(s=>[s.skillId,s])),seen=new Set();if(!Array.isArray(run.classLoadout))run.classLoadout=[0,1,2].map(i=>profile.cls+':'+i);
-  run.classLoadout=Array.from({length:6},(_,i)=>{const id=run.classLoadout[i],sk=byId.get(id);if(!sk||seen.has(sk.n))return null;seen.add(sk.n);return id});return run.classLoadout}
+  run.classLoadout=Array.from({length:6},(_,i)=>{const id=run.classLoadout[i],sk=byId.get(id);if(i>=classSlotCount())return null;if(!sk||seen.has(sk.n))return null;seen.add(sk.n);return id});return run.classLoadout}
 function rememberClassCooldowns(){if(!run||!player||!player.skills)return;run.classCooldowns=run.classCooldowns||{};for(const sk of player.skills)if(!sk.empty)run.classCooldowns[sk.n]={left:Math.max(0,sk.cdT||0),max:sk.cdMax||sk.cd};}
-function pSkills(){if(CLASSES[profile.cls].elem&&run)run.elem=CLASSES[profile.cls].elem;const known=new Map(learnedSkills().map(s=>[s.skillId,s])),slots=classLoadout(),out=Array.from({length:7},()=>({empty:true,n:'Espaço vazio',t:'empty',cd:1,mp:0,cdT:0}));slots.forEach((id,i)=>{const sk=known.get(id);if(sk)out[CLASS_SLOTS[i]]={...sk,cdT:0}});if(run.adv)out[3]={...ADV[profile.cls].sk,sourceClass:profile.cls,cdT:0};for(const sk of out){const c=run.classCooldowns&&run.classCooldowns[sk.n];if(c){sk.cdT=Math.max(0,Number(c.left)||0);sk.cdMax=Number(c.max)||sk.cd}}return out}
-function equipClassSkill(slot,id){if(!Number.isInteger(slot)||slot<0||slot>=6||L.mode!=='world'||!inCity(player.x,player.z))return false;const known=learnedSkills(),chosen=id?known.find(s=>s.skillId===id):null;if(id&&!chosen)return false;const slots=classLoadout();if(chosen){const other=slots.findIndex(s=>{const k=known.find(x=>x.skillId===s);return k&&k.n===chosen.n});if(other>=0&&other!==slot)slots[other]=slots[slot]}slots[slot]=id||null;
+function pSkills(){if(CLASSES[profile.cls].elem&&run)run.elem=CLASSES[profile.cls].elem;const known=new Map(learnedSkills().map(s=>[s.skillId,s])),slots=classLoadout(),out=Array.from({length:7},()=>({empty:true,n:'Espaço vazio',t:'empty',cd:1,mp:0,cdT:0}));slots.forEach((id,i)=>{if(i>=classSlotCount()){out[CLASS_SLOTS[i]].n='Rank '+RANKS[i].id;out[CLASS_SLOTS[i]].lockedRank=RANKS[i].id;return}const sk=known.get(id);if(sk)out[CLASS_SLOTS[i]]={...sk,cdT:0}});if(run.adv)out[3]={...ADV[profile.cls].sk,sourceClass:profile.cls,cdT:0};for(const sk of out){const c=run.classCooldowns&&run.classCooldowns[sk.n];if(c){sk.cdT=Math.max(0,Number(c.left)||0);sk.cdMax=Number(c.max)||sk.cd}}return out}
+function equipClassSkill(slot,id){if(!Number.isInteger(slot)||slot<0||slot>=classSlotCount()||L.mode!=='world'||!inCity(player.x,player.z))return false;const known=learnedSkills(),chosen=id?known.find(s=>s.skillId===id):null;if(id&&!chosen)return false;const slots=classLoadout();if(chosen){const other=slots.findIndex(s=>{const k=known.find(x=>x.skillId===s);return k&&k.n===chosen.n});if(other>=0&&other!==slot)slots[other]=slots[slot]}slots[slot]=id||null;
   rememberClassCooldowns();const old=player.skills;player.skills=pSkills();for(const sk of player.skills){const prev=old.find(x=>!x.empty&&x.n===sk.n);if(prev){sk.cdT=prev.cdT;sk.cdMax=prev.cdMax}}showG();saveRun();return true}
-function loadoutView(slot){view=()=>loadoutView(slot);let h='<div class="sysline">Combine <b>6 habilidades</b> das classes aprendidas. Troque a combinação dentro da cidade. Cada habilidade mantém sua origem física/mágica. A evolução da classe-base continua em '+keyLabel(keyOf('sk3'))+'.</div>';const slots=classLoadout(),known=learnedSkills(),city=L.mode==='world'&&inCity(player.x,player.z);
-  slots.forEach((id,i)=>{const sk=known.find(x=>x.skillId===id);h+=row('Espaço '+(i+1)+' · '+keyLabel(keyOf('sk'+CLASS_SLOTS[i])),sk?'<b>'+sk.n+'</b> · '+CLASSES[sk.sourceClass].n:'Vazio',btn('Escolher','loadslot',i,city)+(id?btn('Limpar','loadset',i+'|',city):''))});
-  if(Number.isInteger(slot)&&slot>=0&&slot<6){h+='<div class="sec">HABILIDADES DISPONÍVEIS · ESPAÇO '+(slot+1)+'</div>';for(const sk of known)h+=row(sk.n+' · '+CLASSES[sk.sourceClass].n,skillDesc(sk),btn('Equipar','loadset',slot+'|'+sk.skillId,city))}
+function loadoutView(slot){view=()=>loadoutView(slot);let h='<div class="sysline">Combine até <b>'+classSlotCount()+' habilidades</b> das classes aprendidas. Troque a combinação dentro da cidade. Cada habilidade mantém sua origem física/mágica. A evolução da classe-base continua em '+keyLabel(keyOf('sk3'))+'.</div>';const slots=classLoadout(),known=learnedSkills(),city=L.mode==='world'&&inCity(player.x,player.z);
+  slots.forEach((id,i)=>{const sk=known.find(x=>x.skillId===id);if(i>=classSlotCount()){h+=row('Espaço '+(i+1),'Desbloqueia no rank '+RANKS[i].id,'Bloqueado');return}h+=row('Espaço '+(i+1)+' · '+keyLabel(keyOf('sk'+CLASS_SLOTS[i])),sk?'<b>'+sk.n+'</b> · '+CLASSES[sk.sourceClass].n:'Vazio',btn('Escolher','loadslot',i,city)+(id?btn('Limpar','loadset',i+'|',city):''))});
+  if(Number.isInteger(slot)&&slot>=0&&slot<classSlotCount()){h+='<div class="sec">HABILIDADES DISPONÍVEIS · ESPAÇO '+(slot+1)+'</div>';for(const sk of known)h+=row(sk.n+' · '+CLASSES[sk.sourceClass].n,skillDesc(sk),btn('Equipar','loadset',slot+'|'+sk.skillId,city))}
   openModal('COMBINAÇÃO DE HABILIDADES',h)}
 /* afixos dos itens */
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
@@ -1657,8 +1669,8 @@ function attack(){
   const third=player.combo===3;player.atkT=.001;player.atkCd=(third?.46:.3)*statsBonus().atk;dprog('atk',1);
   const dmg=player.dmg*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
   const shootsNow=basicIsMagic()||(!MAGIC_CLS.includes(ci)&&c.ranged);
-  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:ci===4&&third});beep(440,.05,.03,'triangle')}
-  else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area')),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
+  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i===0?0:i===1?-.18:.18),22,dmg*(i===0?1:.4),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:ci===4&&third,bounces:rankTalent('bounce')});beep(440,.05,.03,'triangle')}
+  else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area'))*(1+.25*rankTalent('sweep')),arc=(third?1.3:1.0)+rankTalent('sweep')*Math.PI/9;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:ci});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
@@ -1666,7 +1678,7 @@ function attack(){
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
-  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,third:!!o.third});
+  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
 function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
@@ -1900,7 +1912,7 @@ function update(dt){
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=P.spd*(P.atkCd>.15?.45:1)*(run.mounted?1.8:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
+    else if(il>.1){const sp=P.spd*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(run.mounted?1.8:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
@@ -1913,7 +1925,7 @@ function update(dt){
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.mesh.position.set(p.x,1.1,p.z);let done=p.life<=0;if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
-    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(!p.pierce){done=true;break}}}}
+    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
     else{if(!P.dead&&Math.hypot(P.x-p.x,P.z-p.z)<P.r+p.r){hurtPlayer(p.dmg);done=true}else for(const a of allies)if(Math.hypot(a.x-p.x,a.z-p.z)<a.r+p.r){hurtAlly(a,p.dmg);done=true;break}}
     if(!done){if(L.grid){if(!gfree(p.x,p.z))done=true}else if(!worldFree(p.x,p.z,.1))done=true}
     if(done){scene.remove(p.mesh);projs.splice(i,1)}}
@@ -2293,13 +2305,13 @@ function canArise(){return !!CLASSES[profile.cls].arise||ownsRare(7)||profile.ra
 function completeTier(){run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
   bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[ORÁCULO]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% no bônus somado (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}
 function completeJob(){
-  if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
-    toast('<b>[ORDEM]</b> Prova concluída: você agora é <b style="color:'+RANKS[r].c+'">rank '+RANKS[r].id+'</b>. +10% de dano e vida no bônus somado e <b>novos desafios</b>.',8000);setTimeout(()=>storyAct(r),2500);saveRun();return}
+  if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);rememberClassCooldowns();player.skills=pSkills();showG();store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
+    toast('<b>[ORDEM]</b> Prova concluída: você agora é <b style="color:'+RANKS[r].c+'">rank '+RANKS[r].id+'</b>. <b>Uma nova escolha de combate</b> disponível em Prova de Rank. Veja também seus espaços de habilidades.',8000);setTimeout(()=>storyAct(r),2500);saveRun();return}
   if(L.tierTrial){L.tierTrial=false;completeTier();return}
   const A=ADV[profile.cls];run.adv=true;player.skills[3]={...A.sk,sourceClass:profile.cls,cdT:0};refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[ORÁCULO]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
 }
-function skillButtonTip(sk){if(sk.empty)return 'Espaço livre. Escolha uma habilidade em Personagem → Combinação de habilidades.';return (sk.n+' · NV '+((run.skl||{})[sk.n]||0)+'/10: '+skillDesc(sk)+' · Melhore em Status.').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'')}
+function skillButtonTip(sk){if(sk.lockedRank)return 'Espaço bloqueado. Alcance o rank '+sk.lockedRank+' para liberar.';if(sk.empty)return 'Espaço livre. Escolha uma habilidade em Personagem → Combinação de habilidades.';return (sk.n+' · NV '+((run.skl||{})[sk.n]||0)+'/10: '+skillDesc(sk)+' · Melhore em Status.').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'')}
 function skillTips(){if(!player||!player.skills)return;['bQ','bR','bT','bG','bY','bU','b5'].forEach((id,i)=>{const sk=player.skills[i];if(sk&&$(id))$(id).title=skillButtonTip(sk)})}
 for(const id of ['bQ','bR','bT','bG','bY','bU','b5'])$(id).addEventListener('mouseenter',skillTips);
 function showG(){skillTips();if(player)for(const [id,i] of [['bQ',0],['bR',1],['bT',2],['bY',4],['bU',5],['b5',6]])if(player.skills[i])$(id).querySelector('.nm').textContent=player.skills[i].n;const P=player,s=P&&P.skills[3];$('bG').hidden=!s||s.empty;if(s)$('bG').querySelector('.nm').textContent=s.n;$('bZ').hidden=profile.rank!==9;refreshKeyLabels()}
@@ -2495,7 +2507,7 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
 function journeyObjectives(){const list=[],nx=profile.rank+1;
-  if(nx<=TOPR){const need=GR[nx].lvl,ready=run.level>=need;list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Seu nível já permite a prova. Procure Lyra na Ordem da Fenda; enfrente as três ondas e o Examinador.':'Chegue ao nível '+need+' e procure Lyra na Ordem da Fenda para fazer a prova.',progress:'nível '+run.level+'/'+need+(ready?' · prova disponível':''),ready})}
+  if(nx<=TOPR){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos da prova. Procure Lyra na Ordem da Fenda; enfrente as três ondas e o Examinador.':'Requisitos: nível '+need+', '+(nx*2)+' missões concluídas com recompensa recebida e '+nx+' guardiões derrotados. Procure Lyra.',progress:'nível '+run.level+'/'+need+' · missões '+(profile.guildClaims||0)+'/'+(nx*2)+' · guardiões '+(profile.bossKills||0)+'/'+nx+(ready?' · prova disponível':''),ready})}
   else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre do Oráculo para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
@@ -2711,7 +2723,7 @@ function jobsOf(){
 }
 function ownsRare(ci){jobsOf();return profile.rareClass===ci}
 function canLearnClass(ci){const c=CLASSES[ci];return !!c&&!c.legacy&&!jobsOf().includes(ci)&&!c.rare}
-function learnClass(ci){if(!canLearnClass(ci))return false;if(CLASSES[ci].rare)profile.rareClass=ci;profile.jobs.push(ci);styleTutorial();store.set('pds2_profile',profile);saveRun();return true}
+function learnClass(ci){if(!canLearnClass(ci)||!classTrainingReady())return false;run.gold-=classTraining().gold;if(CLASSES[ci].rare)profile.rareClass=ci;profile.jobs.push(ci);styleTutorial();store.set('pds2_profile',profile);saveRun();return true}
 
 function ptsTotal(){const s=run.stats||{};return Object.values(s).reduce((a,b)=>a+b,0)+(run.pts||0)}
 function switchJob(ci){if(ci===profile.cls||!jobsOf().includes(ci))return;if(L.mode!=='world'||!inCity(player.x,player.z)){toast('<b>[ORÁCULO]</b> Só dá para trocar de trabalho dentro de uma cidade.');return}
@@ -2721,9 +2733,9 @@ function switchJob(ci){if(ci===profile.cls||!jobsOf().includes(ci))return;if(L.m
   profile.cls=ci;run.elem=CLASSES[ci].elem||(ci===3?run.elem:null);AFFC=null;store.set('pds2_profile',profile);
   const x=player.x,z=player.z,g=run.gold;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);refreshStats();player.hp=player.maxhp;showG();buildSteal();
   bigText(CLASSES[ci].n.toUpperCase(),1600);sfx('arise');toast('<b>[TRABALHO]</b> Agora você é <b>'+CLASSES[ci].n+'</b>. Os atributos deste trabalho são separados'+(d?'':': distribua os seus '+run.pts+' pontos')+'.'+(run.jobData[old]&&run.jobData[old].adv?' A habilidade da evolução anterior foi para a sua Biblioteca de Poderes.':''),7000);saveRun()}
-function jobsTab(){const J=jobsOf();let h='<div class="sysline">Aprenda todas as <b>10 classes comuns</b> e combine suas habilidades. A classe-base define aparência, ataque básico e atributos; sua combinação de habilidades permanece ao trocar. A rara é um complemento: <b>uma por personagem</b>.</div>'+row('Montar habilidades','6 espaços livres + evolução da classe-base',btn('Personalizar','loadout',0,true,'hot'))+'<div class="sec">CLASSES APRENDIDAS</div>';
+function jobsTab(){const J=jobsOf();let h='<div class="sysline">Aprenda todas as <b>10 classes comuns</b> e combine suas habilidades. A classe-base define aparência, ataque básico e atributos; sua combinação de habilidades permanece ao trocar. A rara é um complemento: <b>uma por personagem</b>.</div>'+row('Montar habilidades',classSlotCount()+' espaços disponíveis + evolução da classe-base',btn('Personalizar','loadout',0,true,'hot'))+'<div class="sec">CLASSES APRENDIDAS</div>';
   for(const ci of J){const c=CLASSES[ci];h+=row('<b>'+c.n+'</b>'+(c.rare?' · RARA':'')+(ci===profile.cls?' · classe-base atual':''),(PASSIVES[ci]?PASSIVES[ci].n+': '+PASSIVES[ci].d:'')+'<br>'+c.sk.map(x=>x.n).join(', '),ci===profile.cls?'':btn('Usar como base','jobsw',ci))}
-  h+='<div class="sec">APRENDER CLASSES COMUNS</div>';CLASSES.forEach((c,ci)=>{if(J.includes(ci)||c.legacy||c.rare)return;h+=row(c.n,PASSIVES[ci]?PASSIVES[ci].d:'',btn('Aprender','joblearn',ci,true))});
+  const q=classTraining();h+='<div class="sec">APRENDER CLASSES COMUNS</div><div class="sysline">Próxima formação: nível '+q.level+' (atual '+run.level+'), '+q.bosses+' guardiões derrotados (atual '+(profile.bossKills||0)+') e '+fmt(q.gold)+' ouro. As exigências crescem a cada classe aprendida. As passivas de todas as classes aprendidas continuam somando.</div>';CLASSES.forEach((c,ci)=>{if(J.includes(ci)||c.legacy||c.rare)return;h+=row(c.n,PASSIVES[ci]?PASSIVES[ci].d:'',btn('Aprender','joblearn',ci,classTrainingReady()))});
   h+='<div class="sec">SEGUNDO DESPERTAR · UMA CLASSE RARA</div><div class="sysline">A jornada do Segundo Despertar será desenvolvida na próxima etapa. Quem já aprendeu Necromante mantém a classe e suas habilidades.</div>';
   CLASSES.forEach((c,ci)=>{if(!c.rare)return;h+=row(c.n,c.sk.map(x=>x.n).join(' · '),ownsRare(ci)?'<b>Desbloqueada</b>':btn(profile.rareClass!=null?'Escolha rara já feita':'Jornada em desenvolvimento','jobrare',ci,canLearnClass(ci)))});return h}
 /* HISTÓRIA PRINCIPAL: um ato por rank conquistado. */
@@ -2737,11 +2749,11 @@ const MAIN_ACTS=[null,
  ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
 function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
 function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
-function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank novo: <b>+10% de dano e vida</b>, portais mais fortes, <b>novos desafios</b> e avanço nos capítulos disponíveis da história.</div>';
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank de E a SS+ concede <b>1 escolha de combate</b>. De E a A, libera também mais <b>1 espaço de habilidade</b>, até seis. O bônus de dano e vida continua. Complete missões da Ordem, derrote guardiões e faça a prova final.</div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
-  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Requisito: nível '+need+' (você está no '+run.level+') · 3 ondas de monstros rank '+RANKS[nx].id+' e o Examinador do Rank. Sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,run.level>=need,'hot'));
+  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Requisito: nível '+need+' (você está no '+run.level+') · '+(nx*2)+' missões concluídas com recompensa recebida na Ordem (atual '+(profile.guildClaims||0)+') · '+nx+' guardiões derrotados (atual '+(profile.bossKills||0)+') · 3 ondas de monstros rank '+RANKS[nx].id+' e o Examinador do Rank. Sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));
   else h+=row(r>TOPR?'Rank raro ★':'Rank máximo da Ordem','As provas terminam no SS+. O rank raro ★ é um despertar especial.','');
-  h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
+  h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=rankTalentRows();h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
   for(let i=1;i<MAIN_ACTS.length;i++)if(acts.includes(i)||profile.rank>=i){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
   if(!any)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">A história começa quando você passar na primeira Prova de Rank.</div>';
   if(can&&MAIN_ACTS[nx])h+=row('<span style="opacity:.5">Próximo: '+MAIN_ACTS[nx][0]+'</span>','Passe na prova para o rank '+RANKS[nx].id+'.','');return h}
@@ -3067,7 +3079,7 @@ function doRebuild(id){const c=nearestCity(player.x,player.z).c;if(c.id!==id)ret
 /* Dano crítico: x1,7 base (x2,4 com Fúria 10). Chance acima de 100% vira dano crítico extra (+1% por 1% que sobra). */
 function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur')+(cons('fur')>=10?.1:0)}
 function critMul(){return 2}
-function passivesView(){view=passivesView;let h='<div class="sysline">Todas as passivas das classes aprendidas se somam automaticamente, independentemente da classe-base ou das habilidades equipadas.</div><div class="sec">PASSIVAS DAS CLASSES APRENDIDAS</div>';for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');h+='<div class="sec">PASSIVAS DA LIVRARIA</div>';for(const b of PBOOK){const lv=pb(b.k);h+=row(b.n+' · NV '+lv,lv?b.d(lv):'Ainda não aprendida',lv?'<b>Ativa</b>':'')}
+function passivesView(){view=passivesView;let h='<div class="sysline">Todas as passivas das classes aprendidas se somam automaticamente, independentemente da classe-base ou das habilidades equipadas.</div><div class="sec">PASSIVAS DAS CLASSES APRENDIDAS</div>';for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');h+='<div class="sec">MELHORIAS DE RANK</div>';for(const [k,t] of Object.entries(RANK_TALENTS))if(rankTalent(k))h+=row(t.n+' · '+rankTalent(k),t.d,'Ativa');h+=row('Escolhas disponíveis',rankPoints()+(rankPoints()===1?' ponto':' pontos'),btn('Ver ranks','gtab','prova'));h+='<div class="sec">PASSIVAS DA LIVRARIA</div>';for(const b of PBOOK){const lv=pb(b.k);h+=row(b.n+' · NV '+lv,lv?b.d(lv):'Ainda não aprendida',lv?'<b>Ativa</b>':'')}
   h+='<div class="sysline">Aprenda e melhore os tomos na Livraria da praça.</div><div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),lv?'<b>Ativa</b>':'Ainda sem pontos')}
   h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of ['w','a']){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row((sl==='w'?'Arma':'Armadura')+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
@@ -3096,7 +3108,7 @@ function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div cla
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+=profRows()+'<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=row('Ataque básico',CLASSES[basicAttackId()].n+' · '+basicAttackDesc(basicAttackId()),btn('Escolher estilo','basicview',0));
-    h+=row('Combinação de habilidades','Monte 6 habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=charSheet();
+    h+=row('Combinação de habilidades','Monte até '+classSlotCount()+' habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=charSheet();
     h+=row('Status e habilidades',run.pts?'<b>'+run.pts+' pontos livres</b>':'Distribuir pontos',unl('status')?btn('Abrir','status',0,true,run.pts?'hot':''):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
     h+=row('Títulos','Bônus de conquistas',unl('titles')?btn('Abrir','titles',0):'Derrote um guardião');
@@ -3118,6 +3130,8 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
   openModal('BOLSA',h)}
 function extraActions3(a,v){
+  if(a==='ranktalent'){chooseRankTalent(v);guildView('prova');return 'close0'}
+  if(a==='rankreset'){if(L.mode==='world'&&inCity(player.x,player.z)){profile.rankTalents=[];saveRun()}guildView('prova');return 'close0'}
   if(a==='basicview'){basicAttackView();return 'close0'}
   if(a==='basicset'){if(selectBasicAttack(+v))basicAttackView();return 'close0'}
   if(a==='equipshop'){if(v==='wep'||v==='arm')openShop(v);return 'close0'}
@@ -3140,7 +3154,7 @@ function extraActions3(a,v){
   if(a==='joblearn'){if(!CLASSES[+v]||CLASSES[+v].rare||!learnClass(+v))return;sfx('level');toast('<b>[CLASSE]</b> '+CLASSES[+v].n+' aprendida. Suas habilidades estão disponíveis para combinar.',6000);return true}
   if(a==='jobrare'){if(!canLearnClass(+v)||!CLASSES[+v].rare)return;openModal('ESCOLHER CLASSE RARA','<div class="sysline">Desbloquear <b>'+CLASSES[+v].n+'</b> ocupa sua única vaga rara. Ela complementa as classes comuns. Essa escolha não pode ser trocada; outras raras serão adicionadas depois.</div>'+btn('Confirmar '+CLASSES[+v].n,'rareconfirm',v,true,'hot'));return 'close0'}
   if(a==='rareconfirm'){if(!CLASSES[+v]||!CLASSES[+v].rare||!learnClass(+v))return;guildView('jobs');return 'close0'}
-  if(a==='rktrial'){const nx=+v;if(nx!==profile.rank+1||nx>TOPR||run.level<GR[nx].lvl)return;closeModal();L.rankTrial=nx;buildSpecial('job');L.rankTrial=nx;toast('<b>[ORDEM]</b> Prova para o rank '+RANKS[nx].id+'. Sobreviva às 3 ondas e derrote o Examinador.',6000);return 'close'}
+  if(a==='rktrial'){const nx=+v;if(!rankTrialReady(nx))return;closeModal();L.rankTrial=nx;buildSpecial('job');L.rankTrial=nx;toast('<b>[ORDEM]</b> Prova para o rank '+RANKS[nx].id+'. Sobreviva às 3 ondas e derrote o Examinador.',6000);return 'close'}
   if(a==='pbup'){const l=pb(v);if(l>=10||(run.spts||0)<1||run.gold<pbCost(l))return;run.spts--;run.gold-=pbCost(l);run.pbook=run.pbook||{};run.pbook[v]=l+1;refreshStats();sfx('level');return true}
   if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
   if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
@@ -3290,7 +3304,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='equipbest'){for(const sl of['w','a']){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[ORÁCULO]</b> Equipamento otimizado.');}
   if(a==='equip')equipBagItem(v);
   if(a==='sell'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;run.gold+=run.items[i].value;toast('<b>[ORÁCULO]</b> Vendido por '+fmt(run.items[i].value)+' ouro');run.items.splice(i,1)}
-  if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[ORÁCULO]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);run.quests[+v]=genQuest(q.t)}
+  if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[ORÁCULO]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);profile.guildClaims=(profile.guildClaims||0)+1;run.quests[+v]=genQuest(q.t)}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[ORÁCULO]</b> '+p.name+' entrou no seu grupo.')}
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[ORÁCULO]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
@@ -3402,7 +3416,7 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
   if(!DEV)return;if(++n>=7&&profile){n=0;profile.rank=profile.rank===9?8:9;store.set('pds2_profile',profile);showProfile();beep(110,.5,.06,'sawtooth')}})})();
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML='';
-function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
+function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.map((s,i)=>'QRT'[i]+' '+s.n).join(' · ')+(c.arise?'<br>Único que ergue ecos':'')+'<br>Mortes: '+(profile.deaths||0)}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
