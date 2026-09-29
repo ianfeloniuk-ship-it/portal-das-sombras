@@ -1488,6 +1488,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
+  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass))applyBasicAttackEffect(e,o.basicClass,amt,o.third);
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
   sfx(blocked?'block':'hit',crit);
   if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true;
@@ -1625,21 +1626,21 @@ function faceTarget(max=7){
   const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
 function attack(){
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;
-  const c=basicAttackClass();
+  const ci=basicAttackId(),c=CLASSES[ci];
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
   const third=player.combo===3;player.atkT=.001;player.atkCd=(third?.46:.3)*statsBonus().atk;dprog('atk',1);
   const dmg=player.dmg*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
-  const shootsNow=basicIsMagic()||(!isMagic()&&c.ranged&&!styleOff());
-  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb');beep(440,.05,.03,'triangle')}
+  const shootsNow=basicIsMagic()||(!MAGIC_CLS.includes(ci)&&c.ranged);
+  if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=third?3:1;for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i-(n-1)/2)*.18,22,dmg*(third?.7:1),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:ci===4&&third});beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area')),arc=third?1.3:1.0;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third);sfx('swing');
-    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third});hit=true}
+    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:ci});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
 }
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
-  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0});
+  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
 function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
@@ -1729,6 +1730,7 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   if(e.frozen||e.hold){e.act=null;animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
+  updateBasicDots(e,dt);if(e.dead)return;
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);if(nc.d<R2&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*R2;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*R2;e.aggro=false}}}
@@ -1883,7 +1885,7 @@ function update(dt){
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.mesh.position.set(p.x,1.1,p.z);let done=p.life<=0;if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
-    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(!p.pierce){done=true;break}}}}
+    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(!p.pierce){done=true;break}}}}
     else{if(!P.dead&&Math.hypot(P.x-p.x,P.z-p.z)<P.r+p.r){hurtPlayer(p.dmg);done=true}else for(const a of allies)if(Math.hypot(a.x-p.x,a.z-p.z)<a.r+p.r){hurtAlly(a,p.dmg);done=true;break}}
     if(!done){if(L.grid){if(!gfree(p.x,p.z))done=true}else if(!worldFree(p.x,p.z,.1))done=true}
     if(done){scene.remove(p.mesh);projs.splice(i,1)}}
@@ -2360,9 +2362,23 @@ function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1,hp:1,mp:1,phys:
 function canUseMagicStyle(){return jobsOf().some(ci=>MAGIC_CLS.includes(ci))}
 function styleOff(){return basicIsMagic()!==isMagic()}
 function basicIsMagic(){return isMagic()?run.style!=='off':run.style==='arc'&&canUseMagicStyle()}
-function basicAttackClass(){if(!basicIsMagic()||isMagic())return CLASSES[profile.cls];const sk=learnedSkills().find(s=>MAGIC_CLS.includes(s.sourceClass)&&classLoadout().includes(s.skillId));return CLASSES[sk?sk.sourceClass:jobsOf().find(ci=>MAGIC_CLS.includes(ci))]||CLASSES[profile.cls]}
+function basicAttackId(){const magic=basicIsMagic(),known=jobsOf(),saved=(run.basicChoices||{})[magic?'mag':'phy'];if(known.includes(saved)&&MAGIC_CLS.includes(saved)===magic)return saved;if(MAGIC_CLS.includes(profile.cls)===magic)return profile.cls;const sk=learnedSkills().find(s=>MAGIC_CLS.includes(s.sourceClass)===magic&&classLoadout().includes(s.skillId));return sk?sk.sourceClass:known.find(ci=>MAGIC_CLS.includes(ci)===magic)??profile.cls}
+function basicAttackClass(){return CLASSES[basicAttackId()]}
+function basicAttackDesc(ci){const mode=MAGIC_CLS.includes(ci)?'Mágico · usa Inteligência':CLASSES[ci].ranged?'Físico à distância · usa Força':'Corpo a corpo · usa Força';const effects={0:'3º golpe atordoa inimigos comuns por 0,9s',1:'sangra por 30% do dano em 3s',2:'3º golpe recupera 2% do escudo máximo',4:'3ª flechada atravessa inimigos',5:'cada acerto cura 0,5% da sua vida máxima',6:'cada acerto recupera 1 de mana',7:'drena 3% do dano causado como vida',8:'queima por 25% do dano em 3s',9:'lentidão por 2s',10:'3º projétil atordoa inimigos comuns por 0,8s',11:'3º disparo salta para mais um alvo com 25% do dano'};return mode+' · '+(effects[ci]||'projétil elemental')}
+function selectBasicAttack(ci){if(!Number.isInteger(ci)||!jobsOf().includes(ci))return false;const magic=MAGIC_CLS.includes(ci);run.basicChoices=run.basicChoices||{};run.basicChoices[magic?'mag':'phy']=ci;run.style=isMagic()?(magic?'nat':'off'):(magic?'arc':'nat');player.combo=0;player.comboT=0;saveRun();return true}
+function basicAttackView(){view=basicAttackView;const active=basicAttackId();let h='<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. X alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('ATAQUE BÁSICO',h)}
+function applyBasicAttackEffect(e,ci,amt,third){if(e.dead)return;const P=player;
+  if(ci===0&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.9);
+  if(ci===2&&third)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.02);
+  if(ci===5&&!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.005);
+  if(ci===6)P.mp=Math.min(P.maxmp,P.mp+1);
+  if(ci===7&&!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+amt*.03);
+  if(ci===10&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.8);
+  if(ci===11&&third){const target=enemies.filter(x=>x!==e&&!x.dead&&Math.hypot(x.x-e.x,x.z-e.z)<6).sort((a,b)=>Math.hypot(a.x-e.x,a.z-e.z)-Math.hypot(b.x-e.x,b.z-e.z))[0];if(target){zig([{x:e.x,z:e.z},{x:target.x,z:target.z}],0xfff36b);hurtEnemy(target,amt*.25,e.x,e.z,{kb:0,stun:0,pierce:true,passive:true})}}
+  if(ci===9){e.slow=Math.max(e.slow||0,2);return}if(ci!==1&&ci!==8)return;const key=ci===1?'bleed':'burn';e.basicDots=e.basicDots||{};const old=e.basicDots[key];e.basicDots[key]={t:3,d:Math.max(old&&old.d||0,amt*(ci===1?.3:.25)/3),acc:old&&old.acc||0};floater(e.x,e.z,ci===1?'SANGRANDO':'QUEIMANDO',ci===1?'#ff4d6a':'#ff7a22')}
+function updateBasicDots(e,dt){for(const [key,d] of Object.entries(e.basicDots||{})){const elapsed=Math.min(dt,Math.max(0,d.t));d.t-=elapsed;d.acc+=elapsed;while(d.acc+1e-9>=1&&!e.dead){d.acc-=1;hurtEnemy(e,d.d,e.x,e.z,{kb:0,stun:0,pierce:true})}if(d.t<=0)delete e.basicDots[key]}}
 function basicDmgMul(){return atkOf(basicIsMagic()?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy'))*(styleOff()&&!basicIsMagic()?.7:1)}
-function styleTutorial(){if(!canUseMagicStyle()||profile.styleTut71)return;profile.styleTut71=true;store.set('pds2_profile',profile);toast('<b>[TUTORIAL]</b> Você conhece uma classe mágica. Aperte <b>X</b> para alternar o ataque básico entre físico (Força) e mágico (Inteligência). As habilidades equipadas funcionam em qualquer estilo. Reveja em ⚙ → Ver atalhos do teclado.',10000)}
+function styleTutorial(){if(!canUseMagicStyle()||profile.styleTut71)return;profile.styleTut71=true;store.set('pds2_profile',profile);toast('<b>[TUTORIAL]</b> Você conhece uma classe mágica. Aperte <b>X</b> para alternar o ataque básico entre físico (Força) e mágico (Inteligência). As habilidades equipadas funcionam em qualquer estilo. Escolha fogo, gelo ou outro ataque aprendido em Personagem → Ataque básico. Reveja os controles em ⚙.',10000)}
 function toggleStyle(){if(!started||paused)return;if(!canUseMagicStyle()){toast('<b>[ORÁCULO]</b> Aprenda uma classe mágica na Ordem para usar o ataque básico arcano. Suas habilidades equipadas continuam disponíveis.');return}const next=!basicIsMagic();run.style=isMagic()?(next?'nat':'off'):(next?'arc':'nat');bigText('ESTILO: '+(next?'ARCANO':'FÍSICO'),900);
   toast('<b>[ORÁCULO]</b> Ataque básico: <b>'+(next?'ARCANO (Inteligência)':'FÍSICO (Força)')+'</b>. X alterna novamente. As 6 habilidades equipadas não mudam.',5000);sfx('arise');hud();saveRun()}
 /* Texto da Agilidade com os valores atuais e os limites (pedido do Irror: jogador precisa saber dos limites). */
@@ -3004,6 +3020,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
 function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+=profRows()+'<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
+    h+=row('Ataque básico',CLASSES[basicAttackId()].n+' · '+basicAttackDesc(basicAttackId()),btn('Escolher estilo','basicview',0));
     h+=row('Combinação de habilidades','Monte 6 habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=charSheet();
     h+=row('Status e habilidades',run.pts?'<b>'+run.pts+' pontos livres</b>':'Distribuir pontos',unl('status')?btn('Abrir','status',0,true,run.pts?'hot':''):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
@@ -3026,6 +3043,8 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
   openModal('BOLSA',h)}
 function extraActions3(a,v){
+  if(a==='basicview'){basicAttackView();return 'close0'}
+  if(a==='basicset'){if(selectBasicAttack(+v))basicAttackView();return 'close0'}
   if(a==='equipshop'){if(v==='wep'||v==='arm')openShop(v);return 'close0'}
   if(a==='defense'){defenseView();return 'close0'}
   if(a==='defup'){if(upgradeDefense(v))defenseView();return 'close0'}
@@ -3356,9 +3375,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v72</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v73</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=72;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=73;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
