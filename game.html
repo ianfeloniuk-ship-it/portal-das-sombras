@@ -1618,7 +1618,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance():.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn;if(e.res)amt*=1-e.res;
   if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=applySkillMark(e,amt,o);
-  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(1,Math.round(amt)));if(amt<=0)return;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
+  if(o.fromPlayer)amt*=1+titleHitBonus(e)+(e.isBoss?trophyB():0);if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(1,Math.round(amt)));if(amt<=0)return;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
@@ -1706,7 +1706,7 @@ function dropLoot(e){if(e.rival||e.statue||!run)return;const n=e.isBoss?3:e.elit
 function lootTotal(){let t=0;for(const k in run.loot||{})t+=run.loot[k].n*run.loot[k].v;return t}
 function killEnemy(e){if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}dropLoot(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
-  e.dead=true;e.deadT=0;e.act=null;{const pl=Math.max(1,run.level),el=e.lvl||pl,m=el>pl?Math.min(6,Math.pow(el/pl,1.3)):Math.max(.4,Math.pow(el/pl,.8));gainXp(e.xp*m);if(e.isBoss&&el>pl){const b=Math.round(xpNeed()*Math.min(1.6,.4*m));floater(e.x,e.z,'+'+fmt(b)+' XP · chefe acima do seu nível','#ffd08a',true,3.2);gainXp(b)}}storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
+  e.dead=true;e.deadT=0;e.act=null;{const pl=Math.max(1,run.level),el=e.lvl||pl,m=el>pl?Math.min(6,Math.pow(el/pl,1.3)):Math.max(.4,Math.pow(el/pl,.8));gainXp(e.xp*m);if(e.isBoss&&el>pl){const b=Math.round(xpNeed()*Math.min(1.6,.4*m));floater(e.x,e.z,'+'+fmt(b)+' XP · chefe acima do seu nível','#ffd08a',true,3.2);gainXp(b)}}storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[ORÁCULO]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
@@ -2803,10 +2803,28 @@ const TITLES=[
  {id:'towerc',n:'Eleito da Torre',d:'história O Chamado da Torre',c:()=>false,m:'+20% de dano dentro da torre',b:{}},
  {id:'protector',n:'Protetor da Cidade',d:'história A Cidade que Cresce',c:()=>false,m:'Renda das cidades +50%',b:{}},
  {id:'sov',n:'Arconte',d:'???',secret:true,c:()=>profile.rank===9,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
+const TITLE_TRACKS=[
+ {id:'endlessHunt',n:'Flagelo das Fendas',base:100,unit:'monstros derrotados',key:'hunt',effect:'dano contra inimigos comuns e elites',value:()=>Math.max(profile.titleKills||0,run.kills||0)},
+ {id:'endlessPortal',n:'Selador de Fendas',base:5,unit:'portais fechados',key:'boss',effect:'dano contra guardiões',value:()=>Object.values(profile.closedPortalsByRank||{}).reduce((a,b)=>a+Math.max(0,Number(b)||0),0)},
+ {id:'endlessTower',n:'Além do Horizonte',base:10,unit:'andares no recorde da torre',key:'tower',effect:'dano dentro da torre',value:()=>profile.towerBest||0},
+ {id:'endlessVillage',n:'Bastião das Vilas',base:1,unit:'cercos vencidos',key:'hp',effect:'bônus de vida máxima, somado às outras fontes de vida',value:()=>profile.sieges||0}
+];
+for(const t of TITLE_TRACKS)TITLES.push({...t,track:true,c:()=>false,b:{},d:'Progressão permanente',m:''});
+function titleGoal(t,n){return t.base*n*(n+1)/2}
+function titleProgress(t){const v=Math.max(0,Number(t.value())||0),saved=profile.titleProgress?.[t.id]||0;return Math.max(v,saved)}
+function titleLevel(t){return Math.max(0,Math.floor((Math.sqrt(1+8*titleProgress(t)/t.base)-1)/2))}
+function titleGain(n){return .1*n/(n+10)}
+function titlePercent(n){return (titleGain(n)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'}
+function titleName(t){return t.n+(t.track?' · NV '+titleLevel(t):'')}
+function titleEffect(t){return t.track?'+'+titlePercent(titleLevel(t))+' de '+t.effect+'.':t.m}
+function titleTrackRows(){let h='<div class="sec">TÍTULOS SEM LIMITE DE NÍVEL</div><div class="sysline">Progresso permanente: morrer ou trocar de título não apaga os marcos. Equipe para ativar o bônus. Cada trilha se aproxima de +10%, com ganhos menores a cada nível. Os níveis continuam avançando. O recorde da torre conta apenas o maior andar; repetir o mesmo andar não aumenta esse progresso. Portais especiais não entram na contagem.</div>';
+ for(const t of TITLES.filter(t=>t.track)){const n=titleLevel(t),v=titleProgress(t),next=titleGoal(t,n+1),prev=titleGoal(t,n),pct=Math.min(100,Math.max(0,100*(v-prev)/(next-prev))),ok=(profile.ach||[]).includes(t.id);h+=row(titleName(t),titleEffect(t)+'<br><b>Próximo nível: '+next.toLocaleString('pt-BR')+' '+t.unit+'</b><br>Progresso total: '+v.toLocaleString('pt-BR')+' / '+next.toLocaleString('pt-BR')+'<br>Neste nível: '+(v-prev).toLocaleString('pt-BR')+' / '+(next-prev).toLocaleString('pt-BR')+'<br>Próximo bônus: +'+titlePercent(n+1)+'<progress aria-label="Progresso de '+t.n+'" value="'+pct+'" max="100" style="display:block;width:100%;margin-top:8px;accent-color:#e9b35e"></progress>',ok?btn(eqTitles().includes(t.id)?'Tirar':'Equipar','title',t.id,true,eqTitles().includes(t.id)?'on':''):'<span>Bloqueado</span>')}return h}
+function syncTitleProgress(){profile.titleProgress=profile.titleProgress||{};let changed=false;for(const t of TITLE_TRACKS){const old=profile.titleProgress[t.id]||0,v=titleProgress(t);if(v>old){profile.titleProgress[t.id]=v;changed=true}const n=titleLevel(t),was=profile.titleLevels?.[t.id]||0;profile.titleLevels=profile.titleLevels||{};if(n>was){profile.titleLevels[t.id]=n;if(!profile.ach.includes(t.id))profile.ach.push(t.id);toast('<b>[CONQUISTA]</b> '+t.n+' chegou ao nível '+n+'. Veja o próximo marco em Títulos.',5000);changed=true;if(eqTitles().includes(t.id)&&player&&!player.dead)refreshStats()}}return changed}
+function titleHitBonus(e){const b=titleB();return (e.isBoss?b.boss||0:b.hunt||0)+(L.special?.kind==='tower'?b.tower||0:0)}
 function eqTitles(){if(!profile.titles)profile.titles=profile.title?[profile.title]:[];return [...new Set(profile.titles)].filter(id=>(profile.ach||[]).includes(id)&&TITLES.some(t=>t.id===id))}
 function hasT(id){return !!profile&&eqTitles().includes(id)}
-function titleB(){const o={};for(const id of eqTitles()){const t=TITLES.find(x=>x.id===id);if(t)for(const k in t.b)o[k]=(o[k]||0)+t.b[k]}return o}
-function checkTitles(){profile.ach=profile.ach||[];for(const t of TITLES)if(!profile.ach.includes(t.id)&&t.c()){profile.ach.push(t.id);store.set('pds2_profile',profile);toast('<b>[CONQUISTA]</b> Título desbloqueado: <b>'+t.n+'</b>. Equipe na BOLSA.',5000);sfx('level')}}
+function titleB(){const o={};for(const id of eqTitles()){const t=TITLES.find(x=>x.id===id);if(t){for(const k in t.b)o[k]=(o[k]||0)+t.b[k];if(t.track)o[t.key]=(o[t.key]||0)+titleGain(titleLevel(t))}}return o}
+function checkTitles(){profile.ach=profile.ach||[];if(syncTitleProgress())store.set('pds2_profile',profile);for(const t of TITLES)if(!profile.ach.includes(t.id)&&t.c()){profile.ach.push(t.id);store.set('pds2_profile',profile);toast('<b>[CONQUISTA]</b> Título desbloqueado: <b>'+t.n+'</b>. Equipe na BOLSA.',5000);sfx('level')}}
 /* maldições */
 const CURSES=[{n:'Sede de Sangue',d:'−20% vida máxima',hp:-.2},{n:'Mente Rachada',d:'−30% mana',mp:-.3},{n:'Fardo',d:'−10% velocidade',spd:-.1}];
 function curseB(){const o={hp:0,mp:0,spd:0};for(const s of EQUIP_SLOTS){const it=run.equip[s];if(it&&it.curse){for(const k in o)o[k]+=it.curse[k]||0}}return o}
@@ -3071,8 +3089,8 @@ function extraActions2(a,v){
   if(a==='buyelix'){const p=ELIX[+v];if(run.gold<p.price)return;run.gold-=p.price;run.foods=run.foods||{};run.foods[p.n]=(run.foods[p.n]||0)+1;toast('Comprado: '+p.n+'. Beba pela BOLSA.');return true}
   if(a==='titles')return titlesView(),'close0';
 }
-function titlesView(){view=titlesView;const got=profile.ach||[];let h='<div class="sysline">Equipe <b>quantos títulos conquistados quiser</b> ('+eqTitles().length+' ativos). Cada um dá uma mecânica própria. O primeiro também dá a auréola.</div>';
-  for(const t of TITLES){const ok=got.includes(t.id);if(t.secret&&!ok)continue;const bs=t.m;
+function titlesView(){checkTitles();view=titlesView;const got=profile.ach||[];let h='<div class="sysline">Equipe <b>quantos títulos conquistados quiser</b> ('+eqTitles().length+(eqTitles().length===1?' ativo':' ativos')+'). Cada um concede seu próprio efeito. O primeiro também dá a auréola.</div>';
+  h+=titleTrackRows()+'<div class="sec">TÍTULOS CLÁSSICOS E DE HISTÓRIA</div>';for(const t of TITLES.filter(t=>!t.track)){const ok=got.includes(t.id);if(t.secret&&!ok)continue;const bs=t.m;
     h+=row((ok?'<b>':'<span style="opacity:.5">')+t.n+(ok?'</b>':'</span>'),(ok?bs:'Bloqueado · '+t.d),ok?(eqTitles().includes(t.id)?btn('Tirar','title',t.id,true,'on'):btn('Equipar','title',t.id,true)):'')}
   openModal('TÍTULOS E CONQUISTAS',h)}
 /* instâncias novas */
@@ -3234,7 +3252,7 @@ function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur
 function critMul(){return 2}
 function passivesView(){view=passivesView;let h='<div class="sysline">Todas as passivas das classes aprendidas se somam automaticamente, independentemente da classe-base ou das habilidades equipadas.</div><div class="sec">PASSIVAS DAS CLASSES APRENDIDAS</div>';for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');h+='<div class="sec">MELHORIAS DE RANK</div>';for(const [k,t] of Object.entries(RANK_TALENTS))if(rankTalent(k))h+=row(t.n+' · '+rankTalent(k),t.d,'Ativa');h+=row('Escolhas disponíveis',rankPoints()+(rankPoints()===1?' ponto':' pontos'),btn('Ver ranks','gtab','prova'));h+='<div class="sec">PASSIVAS DA LIVRARIA</div>';for(const b of PBOOK){const lv=pb(b.k);h+=row(b.n+' · NV '+lv,lv?b.d(lv):'Ainda não aprendida',lv?'<b>Ativa</b>':'')}
   h+='<div class="sysline">Aprenda e melhore os tomos na Livraria da praça.</div><div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),lv?'<b>Ativa</b>':'Ainda sem pontos')}
-  h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row(EQUIP_LABEL[sl]+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
+  h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row(EQUIP_LABEL[sl]+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(titleName(t),titleEffect(t),'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   line=(n,v,d)=>'<div title="'+String(d||'').replace(/<[^>]+>/g,'').replace(/"/g,"'")+'" '+(d?'onclick="const t=this.querySelector(\'small\');if(t)t.hidden=!t.hidden" ':'')+'style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(255,179,71,.12)'+(d?';cursor:help':'')+'"><span>'+n+(d?' <span style="opacity:.55">ⓘ</span><br><small hidden style="color:#bfe8ff">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
