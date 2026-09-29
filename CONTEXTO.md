@@ -256,3 +256,14 @@ Ian pediu escolher o ataque básico em Personagem (ex.: aprendeu fogo e gelo, qu
 Efeitos do ataque básico: Guerreiro atordoa comuns no 3º golpe; Assassino sangra 30% do dano em 3s; Tanque recupera 2% do escudo máximo no 3º golpe; Arqueiro tem flechada perfurante no 3º ataque; Curandeiro cura 0,5% da vida máxima por acerto; Invocador recupera 1 mana; Necromante drena 3% do dano como vida; fogo queima 25% em 3s; gelo aplica lentidão 2s; terra atordoa comuns no 3º disparo; raio salta a mais um alvo com 25% do dano no 3º disparo. Sem cura bloqueia cura/dreno. Golpes bloqueados não aplicam efeitos inatos; imunidade continua respeitada. Projéteis guardam a classe de origem mesmo se o estilo mudar durante o voo. Sangramento e queimadura básicos têm temporizadores separados e renovam sem empilhar cópias ilimitadas.
 
 Validação: 7 cenários específicos de escolha/persistência, alternância, DoT, suporte, chefes e raio; regressões v71/v72/v69. No navegador, acesso pelo Personagem, lista dos 11 tipos aprendidos no personagem de teste e troca gelo→fogo. Valores iniciais sujeitos a sessões de balanceamento; não foi feita campanha longa. Nenhuma etapa de história nova iniciada.
+
+
+## Invocações e equilíbrio dos ataques — v74
+
+Ian considerou atordoamento forte demais e cura/dreno parecidos. Escolheu para Necromante fortalecer os ecos que atacam o alvo marcado: +20% por 4s, sem cura do jogador. Invocador deixa de recuperar mana por acerto: marca prioridade de alvo por 4s para invocações, e aprender a classe aumenta a capacidade para 2 + piso(mana máxima / 30), em vez de /60. Mana por conjuração e recarga permanecem.
+
+Invocações de habilidades permanecem até morrer, acompanham transições e são salvas com vida/dano/buff preservados para reabrir. Reinvocar preenche apenas vagas livres: não apaga, substitui nem cura as existentes. Capacidade cheia não gasta mana nem inicia recarga. Redução posterior da mana máxima não remove criaturas existentes; bloqueia novas até haver vaga.
+
+Eco despertado morto permanece no exército: nível 0, XP 0, guardado, podendo ser chamado novamente. Não ganha XP enquanto morto; nível zero requer 80 XP para subir. Libertar e consumir um eco manualmente continuam ações próprias, distintas de morrer. Atordoamentos por acertos/passivas/básicos limitados a 0,3s, com resistência de 3s por alvo; chefes não recebem esse controle. Domínio Absoluto mantém seu efeito específico de habilidade suprema.
+
+Validação: 8 cenários específicos de capacidade, limite sem custo, morte/XP do eco, persistência, resistência e marca; regressões v73/v71/v69. No navegador: lobo invocado, eco morto mantido em nível zero e chamado novamente. Balanceamento extenso continua pendente. Não iniciada outra etapa de história.

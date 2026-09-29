@@ -611,7 +611,7 @@ const keys={},input={x:0,z:0},cam={x:0,z:0};
 function rankOf(){if(profile&&profile.rk2)return profile.rank;return rankOfOld()}
 function rankOfOld(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
 function newRun(){run={level:1,xp:0,gold:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0]},pos:null}}
-function saveRun(){if(window._wipe||!run||!player||player.dead)return;rememberClassCooldowns();if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
+function saveRun(){if(window._wipe||!run||!player||player.dead)return;rememberClassCooldowns();run.summons=savedSummons();if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
 function loadRun(){const r=store.get('pds3_run');if(!r)return false;if(!r.v71&&!store.get('pds3_backup_v70'))store.set('pds3_backup_v70',{profile:store.get('pds2_profile'),run:r});newRun();Object.assign(run,r);run.v71=1;
   run.stolen=(r.stolen||[]).map(n=>[...(r.lib||[]),...ALLBOSS().map(b=>b.skill),...ADV.map(a=>a.sk)].find(sk=>sk&&sk.n===n)).filter(Boolean).map(sk=>({...sk,cdT:0}));
   run.shadows=r.shadows||[];run.equip=r.equip||{w:null,a:null};run.party=r.party||[];run.items=r.items||[];if(!r.res)run.res={core:[0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0]};for(const k of['core','cry'])while(run.res[k].length<9)run.res[k].push(0);return true}
@@ -1310,11 +1310,13 @@ function spawnShadow(B,x,z,rec){
   if(a.role==='arqueiro'){a.ranged=true;a.range=9;a.col=0xb98cff;a.dmg*=.85}else if(a.role==='tanque'){a.hp*=1.8;a.maxhp*=1.8;a.dmg*=.75}else{a.dmg*=1.2;a.speed=6.6}
   allies.push(a);return a;
 }
+function savedSummons(){return allies.filter(a=>a.permanentSummon&&!a.dead&&a.hp>0).map(a=>({kind:a.summonKind,hp:a.hp,maxhp:a.maxhp,dmg:a.dmg,giant:!!a.giant,buffT:Math.max(0,a.buffT||0)}))}
+function restoreSummons(){for(const r of run.summons||[]){if(!['wolf','skel'].includes(r.kind)||!(r.hp>0))continue;const a=spawnSummon(r.kind,player.x+1,player.z+1,1e9);a.maxhp=Math.max(1,Number(r.maxhp)||a.maxhp);a.hp=Math.min(a.maxhp,r.hp);a.dmg=Math.max(1,Number(r.dmg)||a.dmg);a.buffT=Math.max(0,Number(r.buffT)||0);if(r.giant){a.giant=true;a.m.body.scale.setScalar(2);a.r=1}}}
 function spawnSummon(kind,x,z,life){
   const wolf=kind==='wolf',col=wolf?0x6ff4ff:0xa26bff;const pm=toon(wolf?0x1f7f86:0x3a2466,wolf?0x0a3a40:0x1a0a33);
   const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:col,wep:wolf?'none':'sword',scale:wolf?.8:.9,gk:wolf?null:'Skeleton_Minion',tint:0x7a4ac0,emis:0x1a0a33});m.root.position.set(x,0,z);scene.add(m.root);
   const mh=80*RANKS[rankOf()].mult*(1+run.level*.04);
-  const a={m,mats:m.mats,x,z,face:0,name:wolf?'Lobo Espiritual':'Soldado',hp:mh,maxhp:mh,dmg:player.dmg*.7,speed:6.2,range:1.8,r:.5,cd:0,act:null,stun:0,team:'ally',life,t:0,buffT:0,kb:{x:0,z:0},flash:0,slow:0};
+  const a={m,mats:m.mats,x,z,face:0,name:wolf?'Lobo Espiritual':'Soldado',hp:mh,maxhp:mh,dmg:player.dmg*.7,speed:6.2,range:1.8,r:.5,cd:0,act:null,stun:0,team:'ally',life:1e9,permanentSummon:true,summonKind:kind,t:0,buffT:0,kb:{x:0,z:0},flash:0,slow:0};
   allies.push(a);fxRing(x,z,col,2.5,.5);return a;
 }
 function makeHunterAlly(p,x,z,guest){
@@ -1470,8 +1472,9 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 /* Nível do monstro: rank da masmorra (ou andar da torre) e perigo do mundo. Caveira: amarela 2×, laranja 5×, vermelha 10× o seu nível. */
 function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(8,e.gr||0)];let l=g.lvl;if(e.wild)l=Math.round(l*(1+.15*Math.max(0,(e.gr||0)-1)));if(e.elite)l+=3;if(e.isBoss)l+=5;return e.lvl=Math.max(1,l)}
 function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>=2?'#ffd54f':null}
+function resolveEnemyStun(e,oldStun){if(e.stun>oldStun){if(e.isBoss||time<(e.stunResistUntil||0))e.stun=oldStun;else{e.stun=Math.min(e.stun,.3);e.stunResistUntil=time+3}}}
 function hurtEnemy(e,amt,sx,sz,o={}){
-  if(e.dead)return;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
+  if(e.dead)return;const oldStun=e.stun||0;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
   let blocked=false;
   if(o.fromPlayer&&e.kind)amt*=bestMul(e.kind);if(o.fromPlayer&&e.elite&&hasT('avenger'))amt*=1.2;if(o.fromPlayer&&hasT('towerc')&&L.special&&L.special.kind==='tower')amt*=1.2;
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
@@ -1490,6 +1493,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
   if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass))applyBasicAttackEffect(e,o.basicClass,amt,o.third);
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
+  resolveEnemyStun(e,oldStun);
   sfx(blocked?'block':'hit',crit);
   if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true;
   if(e.hp<=0)killEnemy(e);
@@ -1508,7 +1512,7 @@ const PASSIVES=[
  {n:'Colheita de Almas',d:'Cada inimigo derrotado devolve 5% de mana e 3% de vida.'},
  {n:'Queimadura',d:'30% de chance de incendiar (60% do dano ao longo de 3 s).'},
  {n:'Frio Cortante',d:'25% de chance de deixar o inimigo lento por 2 s.'},
- {n:'Abalo',d:'15% de chance de atordoar o inimigo por 0,8 s.'},
+ {n:'Abalo',d:'15% de chance de impacto curto (até 0,3s); o alvo resiste a novos atordoamentos por 3s.'},
  {n:'Estática',d:'20% de chance de um raio pular para outro inimigo próximo (50% do dano).'}];
 function passiveClasses(){return jobsOf().filter(i=>!!PASSIVES[i])}
 function hasClassPassive(ci){return !!profile&&passiveClasses().includes(ci)}
@@ -1524,13 +1528,13 @@ function applyPassive(e,amt,crit,o){const P=player;for(const c of passiveClasses
   else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}}
 /* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
-const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Marca até 5 inimigos próximos do alvo e dispara raios verticais após um aviso curto',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (máximo pela sua mana; usar de novo renova os que estão vivos)'};
+const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Marca até 5 inimigos próximos do alvo e dispara raios verticais após um aviso curto',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (limite pela mana máxima; permanecem até morrer)'};
 function skillCooldown(sk){const lv=run&&run.skl?run.skl[sk.n]||0:0,arc=run?cons('arc'):0;return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)}
 function skillCooldownText(sk){return String(Math.round(skillCooldown(sk)*100)/100).replace('.',',')}
 function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldown(sk)||1),0,1)}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),nat=support?'':((sk.sourceClass==null?isMagic():MAGIC_CLS.includes(sk.sourceClass))?' · mágica (Inteligência)':' · física (Força)');let d;
   if(sk.t==='minionbuff')d='Cura 45% da vida máxima dos seus ecos e invocações · dano +60% e dano recebido −45% por 8s · Sem cura bloqueia a recuperação de vida';
-  else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso · '+minionAllies().length+'/'+summonCap()+' ativos (limite pela mana máxima) · usar de novo renova os vivos e substitui os mais antigos se necessário · duração 22s';
+  else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso · '+minionAllies().length+'/'+summonCap()+' ativos · limite pela mana máxima'+(hasClassPassive(6)?' (Invocador: +1 vaga a cada 30 de mana)':' (+1 vaga a cada 60 de mana)')+' · permanecem até morrer; conjurar só ocupa vagas livres';
   else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s';
   else if(sk.n==='Bola de Fogo')d='Projétil de fogo; queima por mais 25% do dano ao longo de 3s';
   else d=SKD[sk.t]||'Habilidade';
@@ -1601,7 +1605,8 @@ function hurtPlayer(amt){
   if(player.hp<=0)die();
 }
 function hurtAlly(a,amt){if(a.dead)return;if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
-  if(a.shadow){const i=run.shadows.indexOf(a.rec);if(i>=0)run.shadows.splice(i,1);toast('<b>[ORÁCULO]</b> Um eco foi destruída.')}
+  if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[ORÁCULO]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
+  if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[ORÁCULO]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
 function gainXp(x){
@@ -1654,6 +1659,7 @@ function dodge(){
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[ORÁCULO]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk||sk.empty)return;if(sk.cdT>0)return;
+   if(sk.t==='summon'&&minionAllies().length>=summonCap()){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
    if(sk.t==='heal'&&hasAff('nocure')){floater(player.x,player.z,'SEM CURA','#ff8fa3');return}
    if(sk.t==='minionbuff'&&!minionAllies(true).length){floater(player.x,player.z,'SEM INVOCADOS','#9fb0c4');return}
   if(['cone','nova','chain','bolt','rain','dot','stone_lance','thunderstorm'].includes(sk.t)&&!nearestEnemy(player.x,player.z,['bolt','rain','thunderstorm'].includes(sk.t)?16:11)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
@@ -1677,10 +1683,8 @@ function runSkill(sk){
     case 'guard':{P.guard=5;P.guardVal=sk.pow;toast('<b>[ORÁCULO]</b> '+sk.n+': dano recebido reduzido');break}
     case 'stealth':{P.stealth=5;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;toast('<b>[ORÁCULO]</b> Furtivo por 5s. Próximo golpe x3');break}
     case 'minionbuff':{const mine=minionAllies(true),blocked=hasAff('nocure');for(const a of mine){if(!blocked)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+(blocked?' fortalecidas (sem cura)':' curadas e fortalecidas'),'#b18cff');break}
-    case 'summon':{const cap=summonCap(),n=Math.min(Math.round(sk.pow),cap),mine=minionAllies(),replace=Math.max(0,mine.length+n-cap),blocked=hasAff('nocure');
-      for(const o of mine.slice(0,replace)){o.dead=true;scene.remove(o.m.root)}
-      const kept=mine.slice(replace);for(const a of kept){a.t=0;a.life=22;if(!blocked)a.hp=a.maxhp;fxRing(a.x,a.z,0xa26bff,1.2,.3)}if(kept.length)floater(P.x,P.z,'INVOCAÇÕES RENOVADAS'+(blocked?' (SEM CURA)':''),'#b18cff');
-      for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,22);if(sk.giant){a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}break}
+    case 'summon':{const n=Math.min(Math.round(sk.pow),Math.max(0,summonCap()-minionAllies().length));
+      for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,1e9);if(sk.giant){a2.giant=true;a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}saveRun();break}
     case 'rain':{const cx=tgt?tgt.x:P.x+Math.sin(P.face)*6,cz=tgt?tgt.z:P.z+Math.cos(P.face)*6;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.06:.1);hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);fallFx(hx,hz,du,fk,col)}break}
     case 'dot':{let n=0;for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<5.5){e.dotT=5;e.dotD=dmg/5;e.aggro=true;n++}if(!n)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
   }
@@ -1790,19 +1794,21 @@ function bossSpecial(b,T){
   else if(tp==='fury'){const a=Math.atan2(T.x-b.x,T.z-b.z);b.face=a;for(let i=1;i<=5;i++)hazard(b.x+Math.sin(a)*i*2.6,b.z+Math.cos(a)*i*2.6,1.7,.9,0,'enemy',0xff3030);b.act={type:'charge',t:0,wind:.9,dir:{x:Math.sin(a),z:Math.cos(a)}};toast('<b>[ORÁCULO]</b> '+b.name+': Investida Sangrenta',1400)}
   else if(tp==='legion'){const n=p2?4:3;for(let i=0;i<n;i++){const a=i/n*TAU;let x=b.x+Math.cos(a)*3.5,z=b.z+Math.sin(a)*3.5;if(!freeAt(x,z,.5)){x=b.x;z=b.z}const m=spawnKind(b.gr>=6?(i%2?'demon':'wraith'):(i%2?'minion':'rogue'),x,z,b.gr,{room:b.room});m.aggro=true;fxRing(m.x,m.z,0xd0d0d0,1.5)}hazard(b.x,b.z,5,1,b.dmg,'enemy',0xff3030);toast('<b>[ORÁCULO]</b> '+b.name+': Legião',1400)}
 }
+function echoAttackMul(a,e){return a.shadow&&e&&e.echoMarkUntil>time?1.2:1}
 function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
-  if(a.dead)return;a.t+=dt;a.cd-=dt;a.life-=dt;if(a.buffT>0){a.buffT-=dt;if(Math.random()<dt*3)fxBurst(a.x,1.2,a.z,0xb98cff,1,1)}a.healCd=(a.healCd||0)-dt;
+  if(a.dead)return;a.t+=dt;a.cd-=dt;if(!a.permanentSummon)a.life-=dt;if(a.buffT>0){a.buffT-=dt;if(Math.random()<dt*3)fxBurst(a.x,1.2,a.z,0xb98cff,1,1)}a.healCd=(a.healCd||0)-dt;
   if(a.life<=0){a.dead=true;scene.remove(a.m.root);fxBurst(a.x,1,a.z,0x6ff4ff,6,3);return}
   if(a.flash>0){a.flash-=dt;flashMats(a.m,a.flash>0?1:0,0x550000)}
   const P=player,pdist=Math.hypot(P.x-a.x,P.z-a.z);
   if(a.healer&&a.healCd<=0&&!P.dead&&P.hp<P.maxhp*.6&&pdist<12){a.healCd=7;const h=P.maxhp*.22;P.hp=Math.min(P.maxhp,P.hp+h);fxRing(P.x,P.z,0xfff3a0,3,.6);floater(P.x,P.z,'+'+fmt(h)+' ('+a.short+')','#9fffc0')}
   const ord=a.shadow?(run.order||'atacar'):'atacar';
   let e=(a.guest&&pdist>18)?nearestEnemy(a.x,a.z,9):nearestEnemy(a.x,a.z,11);
+  if(a.permanentSummon){const focus=enemies.find(t=>!t.dead&&t.summonFocusUntil>time&&Math.hypot(t.x-a.x,t.z-a.z)<14);if(focus)e=focus}
   if(ord==='seguir')e=null;else if(ord==='defender'){e=nearestEnemy(P.x,P.z,8)}
   let mv=0,atk=0;
   if(a.act){a.act.t+=dt;atk=a.act.t/.3;if(!a.act.done&&a.act.t>.15){a.act.done=true;const t=a.act.e;
-      if(a.ranged){if(t&&!t.dead)shoot(a.x,a.z,a.face,20,a.dmg*(a.buffT>0?1.6:1),'player',a.col,'orb',{fromPlayer:false})}
-      else{if(t&&!t.dead&&Math.hypot(t.x-a.x,t.z-a.z)<a.range+t.r+.6)hurtEnemy(t,a.dmg*(a.buffT>0?1.6:1),a.x,a.z,{kb:1.2});fxSlash(a.x,a.z,a.face,a.shadow?0xa26bff:(a.col||0x6ff4ff),2)}}
+      if(a.ranged){if(t&&!t.dead)shoot(a.x,a.z,a.face,20,a.dmg*(a.buffT>0?1.6:1)*echoAttackMul(a,t),'player',a.col,'orb',{fromPlayer:false})}
+      else{if(t&&!t.dead&&Math.hypot(t.x-a.x,t.z-a.z)<a.range+t.r+.6)hurtEnemy(t,a.dmg*(a.buffT>0?1.6:1)*echoAttackMul(a,t),a.x,a.z,{kb:1.2});fxSlash(a.x,a.z,a.face,a.shadow?0xa26bff:(a.col||0x6ff4ff),2)}}
     if(a.act.t>.3){a.act=null;a.cd=a.shadow?.7:a.ranged?1.1:.9}}
   else if(e&&(pdist<18||a.guest)){const dx=e.x-a.x,dz=e.z-a.z,d=Math.hypot(dx,dz);turnTo(a,Math.atan2(dx,dz),dt);
     if(a.ranged){if(d<5){moveEnt(a,-dx/d*a.speed*dt,-dz/d*a.speed*dt);mv=1}else if(d>a.range){moveEnt(a,dx/d*a.speed*dt,dz/d*a.speed*dt);mv=1}else if(a.cd<=0)a.act={t:0,e}}
@@ -2318,7 +2324,7 @@ function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=
   if(b<g[2]&&d.p[k]>=g[2])toast('<b>[DIÁRIA]</b> '+g[1]+' concluído.');
   if(DAILY.every(q=>d.p[q[0]]>=q[2])){d.done=true;run.pts+=1;player.hp=player.maxhp;player.mp=player.maxmp;bigText('DIÁRIA COMPLETA',1400);sfx('level');toast('<b>[ORÁCULO]</b> Missão diária concluída: +1 ponto de status e recuperação total.',5000)}}
 function shadowCap(){return Math.max(3,2+Math.floor(((player&&player.maxmp)||60)/50))+(profile.rank===8?3:0)}
-function summonCap(){return 2+Math.floor(((player&&player.maxmp)||60)/60)}
+function summonCap(){return 2+Math.floor(((player&&player.maxmp)||60)/(hasClassPassive(6)?30:60))}
 function minionAllies(includeEcos=false){return allies.filter(a=>a.life>0&&!a.dead&&(includeEcos||!a.shadow)&&!a.guest&&!a.party&&!a.caravan)}
 function shadowRecs(){return run.shadows}
 const ORDERS=[['atacar','ATACAR','caçam os inimigos por perto'],['defender','DEFENDER','ficam perto e só atacam quem chega em você'],['seguir','SEGUIR','não lutam, só seguem você']];
@@ -2354,7 +2360,7 @@ function albumView(){view=albumView;const a=profile.album||[];let h='<div class=
   for(const n of a)h+='<div class="it"><div class="d"><b style="color:#b18cff">'+n+'</b><small>Eco registrada</small></div></div>';openModal('COLEÇÃO DE ECOS',h)}
 function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[ORÁCULO]</b> Novo eco na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[ORÁCULO]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
-function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'ECO NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
+function shadowXp(x){for(const a of allies)if(a.shadow&&!a.dead&&a.rec&&a.rec.on){const r=a.rec;r.xp+=x*.35;const need=80*Math.max(1,r.lvl);if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'ECO NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 /* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
 const MAGIC_CLS=[3,5,6,7,8,9,10,11];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
 function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1,hp:1,mp:1,phys:1,mag:1,spd:1+.005*(s.agi||0),atk:1/(1+.004*(s.agi||0)),crit:.0025*(s.per||0)}}
@@ -2364,15 +2370,15 @@ function styleOff(){return basicIsMagic()!==isMagic()}
 function basicIsMagic(){return isMagic()?run.style!=='off':run.style==='arc'&&canUseMagicStyle()}
 function basicAttackId(){const magic=basicIsMagic(),known=jobsOf(),saved=(run.basicChoices||{})[magic?'mag':'phy'];if(known.includes(saved)&&MAGIC_CLS.includes(saved)===magic)return saved;if(MAGIC_CLS.includes(profile.cls)===magic)return profile.cls;const sk=learnedSkills().find(s=>MAGIC_CLS.includes(s.sourceClass)===magic&&classLoadout().includes(s.skillId));return sk?sk.sourceClass:known.find(ci=>MAGIC_CLS.includes(ci)===magic)??profile.cls}
 function basicAttackClass(){return CLASSES[basicAttackId()]}
-function basicAttackDesc(ci){const mode=MAGIC_CLS.includes(ci)?'Mágico · usa Inteligência':CLASSES[ci].ranged?'Físico à distância · usa Força':'Corpo a corpo · usa Força';const effects={0:'3º golpe atordoa inimigos comuns por 0,9s',1:'sangra por 30% do dano em 3s',2:'3º golpe recupera 2% do escudo máximo',4:'3ª flechada atravessa inimigos',5:'cada acerto cura 0,5% da sua vida máxima',6:'cada acerto recupera 1 de mana',7:'drena 3% do dano causado como vida',8:'queima por 25% do dano em 3s',9:'lentidão por 2s',10:'3º projétil atordoa inimigos comuns por 0,8s',11:'3º disparo salta para mais um alvo com 25% do dano'};return mode+' · '+(effects[ci]||'projétil elemental')}
+function basicAttackDesc(ci){const mode=MAGIC_CLS.includes(ci)?'Mágico · usa Inteligência':CLASSES[ci].ranged?'Físico à distância · usa Força':'Corpo a corpo · usa Força';const effects={0:'3º golpe causa impacto curto; inimigos resistem a atordoamentos repetidos',1:'sangra por 30% do dano em 3s',2:'3º golpe recupera 2% do escudo máximo',4:'3ª flechada atravessa inimigos',5:'cada acerto cura 0,5% da sua vida máxima',6:'marca o alvo para suas invocações por 4s; +1 vaga a cada 30 de mana máxima',7:'marca o alvo por 4s: seus ecos causam +20% de dano nele',8:'queima por 25% do dano em 3s',9:'lentidão por 2s',10:'3º projétil causa impacto curto; inimigos resistem a atordoamentos repetidos',11:'3º disparo salta para mais um alvo com 25% do dano'};return mode+' · '+(effects[ci]||'projétil elemental')}
 function selectBasicAttack(ci){if(!Number.isInteger(ci)||!jobsOf().includes(ci))return false;const magic=MAGIC_CLS.includes(ci);run.basicChoices=run.basicChoices||{};run.basicChoices[magic?'mag':'phy']=ci;run.style=isMagic()?(magic?'nat':'off'):(magic?'arc':'nat');player.combo=0;player.comboT=0;saveRun();return true}
 function basicAttackView(){view=basicAttackView;const active=basicAttackId();let h='<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. X alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('ATAQUE BÁSICO',h)}
 function applyBasicAttackEffect(e,ci,amt,third){if(e.dead)return;const P=player;
   if(ci===0&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.9);
   if(ci===2&&third)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.02);
   if(ci===5&&!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.005);
-  if(ci===6)P.mp=Math.min(P.maxmp,P.mp+1);
-  if(ci===7&&!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+amt*.03);
+  if(ci===6)e.summonFocusUntil=time+4;
+  if(ci===7)e.echoMarkUntil=time+4;
   if(ci===10&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.8);
   if(ci===11&&third){const target=enemies.filter(x=>x!==e&&!x.dead&&Math.hypot(x.x-e.x,x.z-e.z)<6).sort((a,b)=>Math.hypot(a.x-e.x,a.z-e.z)-Math.hypot(b.x-e.x,b.z-e.z))[0];if(target){zig([{x:e.x,z:e.z},{x:target.x,z:target.z}],0xfff36b);hurtEnemy(target,amt*.25,e.x,e.z,{kb:0,stun:0,pierce:true,passive:true})}}
   if(ci===9){e.slow=Math.max(e.slow||0,2);return}if(ci!==1&&ci!==8)return;const key=ci===1?'bleed':'burn';e.basicDots=e.basicDots||{};const old=e.basicDots[key];e.basicDots[key]={t:3,d:Math.max(old&&old.d||0,amt*(ci===1?.3:.25)/3),acc:old&&old.acc||0};floater(e.x,e.z,ci===1?'SANGRANDO':'QUEIMANDO',ci===1?'#ff4d6a':'#ff7a22')}
@@ -2457,9 +2463,9 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Oráculo manda você para a Zona de Penalidade.')+'</div>';
   openModal('JANELA DE STATUS',h)}
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
-  let h='<div class="sysline">Ecos ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando.</div>';
+  let h='<div class="sysline">Ecos ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
   if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER ECO (F) em guardiões e elites.':'Só o Necromante levanta ecos.')+'</small></div></div>';
-  run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*r.lvl,btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
+  run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
 function journeyObjectives(){const list=[],nx=profile.rank+1;
   if(nx<=TOPR){const need=GR[nx].lvl,ready=run.level>=need;list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Seu nível já permite a prova. Procure Lyra na Ordem da Fenda; enfrente as três ondas e o Examinador.':'Chegue ao nível '+need+' e procure Lyra na Ordem da Fenda para fazer a prova.',progress:'nível '+run.level+'/'+need+(ready?' · prova disponível':''),ready})}
@@ -3354,6 +3360,7 @@ function startGame(){
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
+  restoreSummons();
   for(const id of['stat','obj','mm','tb','pad','btns'])$(id).hidden=false;showG();
   if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
   started=true;paused=false;cam.x=player.x;cam.z=player.z;
@@ -3375,9 +3382,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v73</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v74</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=73;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=74;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
