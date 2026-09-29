@@ -733,7 +733,11 @@ function pushOut(e){const r=e.r||.5;hnear(HASH,e.x,e.z,c=>{const dx=e.x-c.x,dz=e
 function cellIdx(x,z){const G=L.grid;const cx=Math.floor((x-G.ox)/G.CS),cz=Math.floor((z-G.oz)/G.CS);if(cx<0||cz<0||cx>=G.W||cz>=G.H)return -1;return cz*G.W+cx}
 function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
 function freeAt(x,z,r){if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
-function moveEnt(e,dx,dz){if(L.grid){const r=(e.r||.5)*.85;if(freeAt(e.x+dx,e.z,r))e.x+=dx;if(freeAt(e.x,e.z+dz,r))e.z+=dz}else{e.x+=dx;e.z+=dz;pushOut(e)}}
+function moveEnt(e,dx,dz){if(!Number.isFinite(dx)||!Number.isFinite(dz))return;const dist=Math.hypot(dx,dz);if(!dist)return;const limit=32,scale=dist>limit?limit/dist:1;dx*=scale;dz*=scale;const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dz))/.25));dx/=steps;dz/=steps;for(let i=0;i<steps;i++){if(L.grid){const r=(e.r||.5)*.85;if(freeAt(e.x+dx,e.z,r))e.x+=dx;if(freeAt(e.x,e.z+dz,r))e.z+=dz}else{e.x+=dx;e.z+=dz;pushOut(e)}}}
+function movementSpeed(raw){if(!Number.isFinite(raw))return 0;return Math.max(0,CFG.moveLimit?Math.min(raw,6.4*CFG.moveCap/100):raw)}
+function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
+function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> Limitar minha velocidade de movimento</label><div class="sysline">100% é a velocidade inicial. O limite não aumenta sua velocidade nem reduz agilidade, ataques ou esquiva. Vale também para a montaria.</div><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%"><div class="sysline">Em velocidades de ataque extremas, o dano excedente é concentrado nos golpes visíveis. Efeitos por acerto continuam ocorrendo por golpe visível.</div>'}
+
 function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2-x1,z2-z1));for(let i=1;i<n;i++){const t=i/n;if(!gfree(x1+(x2-x1)*t,z1+(z2-z1)*t))return false}return true}
 const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);return n.d<36&&!cityFallen(n.c)};
 
@@ -1683,8 +1687,8 @@ function attack(){
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;
   const ci=basicAttackId(),c=CLASSES[ci];
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
-  const third=player.combo===3;player.atkT=.001;player.atkCd=(third?.46:.3)*statsBonus().atk;dprog('atk',1);
-  const dmg=player.dmg*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
+  const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;player.atkCd=timing.interval;dprog('atk',1);
+  const dmg=player.dmg*timing.damage*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8:1)*(FX2.counter?1.6:1);FX2.counter=false;
   const shootsNow=basicIsMagic()||(!MAGIC_CLS.includes(ci)&&c.ranged);
   if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i===0?0:i===1?-.18:.18),22,dmg*(i===0?1:.4),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Curandeiro'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:ci===4&&third,bounces:rankTalent('bounce')});beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area'))*(1+.25*rankTalent('sweep')),arc=(third?1.3:1.0)+rankTalent('sweep')*Math.PI/9;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
@@ -1929,7 +1933,7 @@ function update(dt){
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=P.spd*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(run.mounted?1.8:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
+    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
@@ -2106,7 +2110,7 @@ function hud(){
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':keyLabel(keyOf('fusion')))+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(touch?i+1:keyLabel(keyOf('absorbed'+i)))+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
-window.CFG=Object.assign({vol:1,btn:1},store.get('pds_cfg')||{});
+window.CFG=Object.assign({vol:1,btn:1,moveLimit:false,moveCap:100},store.get('pds_cfg')||{});
 const AU={ctx:null,on:true,track:null,want:'city',step:0,next:0,bar:0,lastBoom:0};
 try{AU.on=localStorage.getItem('pds_sound')!=='0'}catch(e){}
 function audioInit(){
@@ -2640,7 +2644,7 @@ function extraActions(a,v){
 }
 /* tutorial */
 function tutorial(){if(profile.tut)return;profile.tut=true;store.set('pds2_profile',profile);
-  const steps=['Há cem anos o céu rachou. Das Fendas saem ecos de mundos que morreram, e o Oráculo escolhe quem pode enfrentá-los. Ele escolheu você.',touch?'Arraste à esquerda para andar.':'Use WASD ou as setas para andar e o mouse para mirar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Personalize 6 habilidades em Personagem → Combinação. Elas gastam mana. Depois de aprender uma classe mágica, '+keyLabel(keyOf('style'))+' alterna o ataque básico físico/mágico; as habilidades funcionam em ambos.','Na cidade: Ordem (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra PERSONAGEM para atributos e habilidades. Missões, diária e história ficam no DIÁRIO.','Longe das cidades há Tundra, Deserto e Pântano, com monstros próprios. Quanto mais longe, mais perigoso.','O Mercado vende Montaria e o Espírito de Mana. No ⚙ você ajusta volume, tamanho dos botões e gráficos. Boa caçada.'];
+  const steps=['Há cem anos o céu rachou. Das Fendas saem ecos de mundos que morreram, e o Oráculo escolhe quem pode enfrentá-los. Ele escolheu você.',touch?'Arraste à esquerda para andar.':'Use WASD ou as setas para andar e o mouse para mirar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Personalize suas habilidades em Personagem → Combinação. Subir de rank libera espaços, até seis. Elas gastam mana. Depois de aprender uma classe mágica, '+keyLabel(keyOf('style'))+' alterna o ataque básico físico/mágico; as habilidades funcionam em ambos.','Na cidade: Ordem (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra PERSONAGEM para atributos e habilidades. Missões, diária e história ficam no DIÁRIO.','Longe das cidades há Tundra, Deserto e Pântano, com monstros próprios. Quanto mais longe, mais perigoso.','O Mercado vende Montaria e o Espírito de Mana. No ⚙ você ajusta volume, tamanho dos botões e gráficos. Boa caçada.'];
   steps.forEach((s,i)=>setTimeout(()=>toast('<b>[TUTORIAL]</b> '+s,5000),1500+i*5200))}
 
 /* ================= IDEIAS: AFIXOS, PESCA, CULINÁRIA, MIMIC, TÍTULOS, MALDIÇÕES, TORRE, NÊMESIS, AFINIDADE, CIDADE, CLIMA, INVERTIDO, DOMÍNIOS, FUSÃO, SAZONAL, ORÁCULO ================= */
@@ -3387,9 +3391,9 @@ $('bSnd').addEventListener('click',()=>{audioInit();setSound(!AU.on)});setSound(
 function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'leve':'hd')}catch(e){}renderer.setPixelRatio(lite?1:Math.min(devicePixelRatio,1.6));resize();$('bGfx').textContent=lite?'LEVE':'HD';
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
-function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
+function applyCfg(){CFG.moveLimit=CFG.moveLimit===true;CFG.moveCap=Number.isFinite(+CFG.moveCap)?Math.max(50,Math.min(400,+CFG.moveCap)):100;if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
 function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
-  '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
+  movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
@@ -3482,9 +3486,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v80</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v81</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=80;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=81;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
