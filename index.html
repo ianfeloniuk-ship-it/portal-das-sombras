@@ -47,7 +47,7 @@ body.pc #tb{max-width:70vw;flex-wrap:wrap;justify-content:flex-end}
 .toast{padding:6px 12px;font-size:12px;animation:tin .25s ease-out;text-align:center}
 .toast b{color:var(--sys2)}
 @keyframes tin{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:none}}
-#mission{top:calc(142px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));font-size:10px;padding:4px 7px;color:var(--sys2);max-width:min(46vw,214px)}
+#mission{top:calc(142px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));font-size:11px;line-height:1.45;padding:8px 10px;color:var(--sys2);width:250px;max-width:46vw;text-align:left}
 #big{top:38%;left:0;right:0;text-align:center;font-family:"Russo One",sans-serif;font-size:clamp(34px,9vw,80px);letter-spacing:.12em;color:#d7b8ff;text-shadow:0 0 18px #8b3dff,0 0 40px #5a1fd1;opacity:0;transition:opacity .3s}
 #vig{inset:0;box-shadow:inset 0 0 120px rgba(255,0,40,0);transition:box-shadow .25s;z-index:4}
 #pad{position:fixed;left:0;bottom:0;width:48%;height:62%;z-index:6;touch-action:none}
@@ -117,6 +117,7 @@ body.pc #btns .b[hidden]{display:none}
 @media (orientation:portrait){#tb{left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}#tb .mini{padding:7px 2px;font-size:9px;letter-spacing:.02em}#stat{top:calc(80px + env(safe-area-inset-top,0px))}#mm{top:calc(80px + env(safe-area-inset-top,0px))}#obj{max-width:92vw}}
 @media (prefers-reduced-motion:reduce){.toast,#bF{animation:none}}
 small.tip{font-size:12px;line-height:1.55}
+#mission .objective-row{margin:0 0 7px}#mission .objective-row:last-child{margin-bottom:0}#mission .objective-row strong{display:block;color:var(--ink)}#mission .objective-row small{display:block;font-size:inherit;color:var(--dim)}
 </style>
 
 <canvas id="c"></canvas>
@@ -2041,6 +2042,18 @@ function drawMap(ctx,S,full){
   for(const a of allies){const k=full?(L.mode==='world'?S/560:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}
   ctx.save();ctx.translate(tx,tz);ctx.rotate(-P.face+Math.PI);ctx.fillStyle='#ffd08a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.restore();
 }
+function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),add=(title,detail)=>rows.push('<div class="objective-row"><strong>'+safe(title)+'</strong><small>'+safe(detail)+'</small></div>');
+  const track=trackedObjective(),qs=run.quests||[],done=qs.filter(q=>q.got>=q.n).length,q=qs.find(q=>q.got<q.n);
+  if(L.inv)add('Invasão em '+L.inv.c.name,fmtT(Math.max(0,L.inv.t))+' restantes. '+enemies.filter(e=>e.inv&&!e.dead).length+' inimigos vivos.');
+  if(run.demand){const d=run.demand;add('Desafio do Oráculo','Derrote '+d.n+' monstros '+({nododge:'sem esquivar',nopot:'sem usar poções',night:'à noite'}[d.t]||'')+'. Progresso: '+d.got+' de '+d.n+'.')}
+  if(track){add(track.n,track.progress);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer" onclick="event.stopPropagation();journeyView()"')}
+  if(run.daily&&!run.daily.done){const n=DAILY.filter(q=>(run.daily.p[q[0]]||0)>=q[2]).length;add('Missão diária',n+' de '+DAILY.length+' objetivos concluídos. Veja os detalhes no Diário.')}
+  if(run.pts)add(run.pts===1?'1 ponto de atributo disponível':run.pts+' pontos de atributo disponíveis','Distribua na Janela de Status'+(touch?'.':' (tecla '+keyLabel(keyOf('status'))+').'));
+  if(done)add(done===1?'1 missão concluída':done+' missões concluídas','Fale com Lyra, na Ordem da Fenda, para receber '+(done===1?'a recompensa.':'as recompensas.'));
+  else if(q&&(!track||track.n!==q.d))add(q.d,'Progresso: '+q.got+' de '+q.n+'.');
+  const count=allies.filter(a=>a.shadow&&!a.dead).length;if(count)add(count===1?'1 eco ativo':count+' ecos ativos','Ordem: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))?.[1]||'Atacar')+(touch?'.':' (tecla '+keyLabel(keyOf('orders'))+').'));
+  return rows.join('');
+}
 function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=(run.adv?ADV[profile.cls].n:c.n).toUpperCase();
@@ -2063,16 +2076,11 @@ function hud(){
   else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
   $('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
-  const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
-  const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
-  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Ecos ('+allies.filter(a=>a.shadow&&!a.dead).length+'): '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' ('+keyLabel(keyOf('orders'))+')')+' · ':'';
-  const sth='';
-  const dmd=sth+ordh+invs+(run.demand?'Desafio do Oráculo: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' ('+keyLabel(keyOf('status'))+')')+' · ':'';
+  const _mt=missionPanelText();
   $('bStyle').hidden=true;$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · '+keyLabel(keyOf('pot')));
-  const track=trackedObjective(),trackText=track?'<div style="margin-bottom:4px;cursor:pointer;color:var(--ink)" onclick="event.stopPropagation();journeyView()">◆ '+track.n+' · '+track.progress+'</div>':'';
-  const _mt=trackText+dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Ordem':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
+  let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
   if($('mission').dataset.t!==_mt){$('mission').dataset.t=_mt;$('mission').innerHTML='<span style="float:right;cursor:pointer;margin-left:6px;opacity:.7" title="Esconder (volta pelo ⚙)" onclick="try{localStorage.setItem(\'pds_hidemis\',\'1\')}catch(e){}$(\'mission\').hidden=true">✕</span>'+_mt}
-  $('mission').hidden=_hm||!(track||done||q||dl||pt||dmd);{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':pcTop?(pcTop+60)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
+  $('mission').hidden=_hm||!_mt;{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':pcTop?(pcTop+60)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
   drawMap(mmc,192,false);
 }
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':keyLabel(keyOf('fusion')))+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(touch?i+1:keyLabel(keyOf('absorbed'+i)))+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
@@ -3452,9 +3460,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v76</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v77</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=76;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=77;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
