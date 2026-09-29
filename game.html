@@ -382,19 +382,23 @@ const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x3a2266,0xff5a3a,0
 const ATK_CLIP={sword:'1H_Melee_Attack_Slice_Diagonal',dagger:'Dualwield_Melee_Attack_Slice',axe:'2H_Melee_Attack_Slice',staff:'Spellcast_Shoot',bonestaff:'Spellcast_Shoot',wand:'Spellcast_Shoot',tome:'Spellcast_Shoot',bow:'1H_Ranged_Shoot',none:'1H_Melee_Attack_Chop'};
 function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Skeleton_Blade':'sword_1handed',dagger:sk?'Skeleton_Blade':'dagger',axe:sk?'Skeleton_Axe':'axe_1handed',staff:sk?'Skeleton_Staff':'staff',bonestaff:'Skeleton_Staff',tome:'staff',bow:'crossbow_1handed'};
   const r=m[wep]||null;let l=null;if(wep==='dagger')l=r;if(shield)l=sk?'Skeleton_Shield_Small_A':'shield_round';return[r,l]}
+/* ARTE NUM ESTILO SÓ (decisão do Ian: CC0 num estilo só): todo modelo GLB vira material "desenho" (toon) com a mesma rampa de luz do chão,
+   e as cores passam por uma paleta comum (leve puxada para o azul do Sistema). */
+const PAL=new THREE.Color(0x9fb4d8);
+function toToon(mm,skinned,pal){const t=new THREE.MeshToonMaterial({color:mm.color?mm.color.clone():new THREE.Color(0xffffff),map:mm.map||null,gradientMap:gmap,emissive:mm.emissive?mm.emissive.clone():new THREE.Color(0),transparent:!!mm.transparent,opacity:mm.opacity??1,vertexColors:!!mm.vertexColors,skinning:!!skinned,side:mm.side});if(pal)t.color.lerp(PAL,pal);return t}
 function makeActor(o){
   const gk=o.gk,src=MODELS.list[gk];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(2.05/MODELS.h[gk]);body.scale.setScalar(sc);
   const mats=[];
-  model.traverse(c=>{if(c.isMesh){envCull(c);const mm=c.material.clone();if(o.tint!=null){mm.color.lerp(new THREE.Color(o.tint),TINT_K[o.tint]||.6)}if(o.emis)mm.emissive=new THREE.Color(o.emis);mm.roughness=.8;mm.metalness=0;c.material=mm;if(!mats.includes(mm))mats.push(mm)}});
+  model.traverse(c=>{if(c.isMesh){envCull(c);const mm=toToon(c.material,c.isSkinnedMesh,.06);if(o.tint!=null){mm.color.lerp(new THREE.Color(o.tint),TINT_K[o.tint]||.6)}if(o.emis)mm.emissive=new THREE.Color(o.emis);mm.roughness=.8;mm.metalness=0;c.material=mm;if(!mats.includes(mm))mats.push(mm)}});
   /* Os modelos KayKit trazem armas embutidas nas mãos (besta, facas, cajado...). Escondemos todas; a arma certa da classe é presa abaixo. */
   /* Algumas classes usam peças embutidas do modelo: Curandeiro = varinha + livro aberto; Invocador = livro aberto (+ cajado). */
   const keepW={wand:['1H_Wand','Spellbook_open'],tome:['Spellbook_open']}[o.wep]||[];
   model.traverse(c=>{if(c.isMesh&&c.parent&&/^handslot/.test(c.parent.name)&&!keepW.includes(c.name))c.visible=false});
   const wmats=[],wnodes=[];
   const [wr,wl]=wfor(gk,o.wep,o.shield);
-  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot)||model.getObjectByName(slot.replace('.',''));if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=c.material.clone();if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material);wmats.push(c.material)}});b.add(w);wnodes.push(w)};
+  const att=(slot,k)=>{if(!k||!MODELS.w[k])return;const b=model.getObjectByName(slot)||model.getObjectByName(slot.replace('.',''));if(!b)return;const w=MODELS.w[k].clone();w.traverse(c=>{if(c.isMesh){c.material=toToon(c.material,false,.06);if(o.tint!=null&&o.tintW)c.material.color.lerp(new THREE.Color(o.tint),.5);mats.push(c.material);wmats.push(c.material)}});b.add(w);wnodes.push(w)};
   att('handslot.r',wr);att('handslot.l',wl);
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
@@ -408,7 +412,7 @@ function bioMob(e,b){const B=BIOM[b];if(!B||e.isBoss)return;e.hp*=B.hp;e.maxhp*=
 /* montaria: Lobo de Mana (modelo Fox, CC0/CC-BY) */
 function foxMount(){const src=MODELS.fox.scene,model=THREE.SkeletonUtils.clone(src),root=new THREE.Group();root.add(model);
   const b=new THREE.Box3().setFromObject(src),h=b.max.y-b.min.y||1;model.scale.setScalar(1.75/h);
-  model.traverse(c=>{if(c.isMesh){envCull(c);c.material=c.material.clone();c.material.color.lerp(new THREE.Color(0x7fb8ff),.55);c.material.emissive=new THREE.Color(0x0a2a50)}});
+  model.traverse(c=>{if(c.isMesh){envCull(c);c.material=toToon(c.material,c.isSkinnedMesh,0);c.material.color.lerp(new THREE.Color(0x7fb8ff),.55);c.material.emissive=new THREE.Color(0x0a2a50)}});
   const mixer=new THREE.AnimationMixer(model),A={};for(const a of MODELS.fox.animations)A[a.name]=mixer.clipAction(a);return{root,model,mixer,A,cur:null,fox:true}}
 function foxAnim(m,mv){const n=mv>.1?(mv>.6?'Run':'Walk'):'Survey';if(m.cur!==n&&m.A[n]){const a=m.A[n];a.reset().play();if(m.cur&&m.A[m.cur])m.A[m.cur].crossFadeTo(a,.2,false);m.cur=n}m.mixer.update(ADT)}
 /* ===== Monstros animados (Quaternius, CC0) — carregam em segundo plano; até lá o monstro usa o esqueleto KayKit ===== */
@@ -430,7 +434,7 @@ function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=c.material.clone();if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=toToon(c.material,c.isSkinnedMesh,.16);if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k};
