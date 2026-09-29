@@ -116,6 +116,7 @@ body.pc #btns .b[hidden]{display:none}
 @media (orientation:portrait){#btns{transform:scale(.92);transform-origin:bottom right}#obj{top:calc(116px + env(safe-area-inset-top,0px));max-width:80vw}#boss{top:calc(146px + env(safe-area-inset-top,0px));width:80vw}#toasts{top:calc(180px + env(safe-area-inset-top,0px))}#mission{display:none}#bF{right:auto;left:50%;transform:translateX(-50%);bottom:calc(250px + env(safe-area-inset-bottom,0px))}#steal{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(230px + env(safe-area-inset-bottom,0px))}#pad{height:50%}}
 @media (orientation:portrait){#tb{left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}#tb .mini{padding:7px 2px;font-size:9px;letter-spacing:.02em}#stat{top:calc(80px + env(safe-area-inset-top,0px))}#mm{top:calc(80px + env(safe-area-inset-top,0px))}#obj{max-width:92vw}}
 @media (prefers-reduced-motion:reduce){.toast,#bF{animation:none}}
+small.tip{font-size:12px;line-height:1.55}
 </style>
 
 <canvas id="c"></canvas>
@@ -640,10 +641,10 @@ function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
   const maxhp=(100+10*run.level+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
-  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh'));
-  const maxmp=(50+3*run.level+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
+  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
+  const maxmp=(50+3*run.level+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
-  const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0));
+  const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -1349,7 +1350,7 @@ function makeItem(slot,tier,rar){
   return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
 function rollItem(tier,boss){const _rk=rankOf(),_ex=Math.max(0,tier-_rk);tier=Math.min(tier,_rk);const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,wpick(w.map((w,i)=>({i,w}))).i+Math.ceil(_ex/3));const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
-function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')}
+function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+gearRuneText(it)}
 function addItem(it){
   const cur=run.equip[it.slot];
   if(rankOf()>=it.tier&&(!cur||itemScore(it)>itemScore(cur))){if(cur)run.items.push(cur);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: <b style="color:'+RAR[it.rar].c+'">'+it.name+'</b> ('+statTxt(it)+')',3500)}
@@ -1477,7 +1478,7 @@ function updHazards(dt){
     if(h.owner&&h.owner.dead&&h.t<h.dur){h.dmg=0;h.t=h.dur;fxRing(h.x,h.z,0x9fb0c4,h.r,.25)}
     if(h.t>=h.dur){
       if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
-      else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:3,fromPlayer:true})}
+      else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:h.kb??3,fromPlayer:true,skillHit:true,passive:!!h.passive})}
       if(h.lightning){pillar(h.x,h.z,h.col,.22,.28);sparkUp(h.x,h.z,h.col,7,.45)}
       if(h.dmg>0){if(time-AU.lastBoom>.2){AU.lastBoom=time;sfx('boom')}fxRing(h.x,h.z,h.col,h.r,.35);fxBurst(h.x,.5,h.z,h.col,6,4);shake(h.team==='enemy'?.25:.12)}
       scene.remove(h.g);h.g.traverse(o=>{if(o.geometry)o.geometry.dispose()});hazards.splice(i,1)}}
@@ -1488,6 +1489,7 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 /* Nível do monstro: rank da masmorra (ou andar da torre) e perigo do mundo. Caveira: amarela 2×, laranja 5×, vermelha 10× o seu nível. */
 function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(8,e.gr||0)];let l=g.lvl;if(e.wild)l=Math.round(l*(1+.15*Math.max(0,(e.gr||0)-1)));if(e.elite)l+=3;if(e.isBoss)l+=5;return e.lvl=Math.max(1,l)}
 function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>=2?'#ffd54f':null}
+function applySkillMark(e,amt,o){if(!o.fromPlayer||o.pet)return amt;if(o.skillHit)e.mark=time+6;else if(!o.passive&&Number.isInteger(o.basicClass)&&e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}return amt}
 function resolveEnemyStun(e,oldStun){if(e.stun>oldStun){if(e.isBoss||time<(e.stunResistUntil||0))e.stun=oldStun;else{e.stun=Math.min(e.stun,.3);e.stunResistUntil=time+3}}}
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;const oldStun=e.stun||0;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
@@ -1500,14 +1502,14 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance():.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn;if(e.res)amt*=1-e.res;
-  if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
+  amt=applySkillMark(e,amt,o);
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
-  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass))applyBasicAttackEffect(e,o.basicClass,amt,o.third);
+  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyGearRuneHit(e,amt)}
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
   resolveEnemyStun(e,oldStun);
   sfx(blocked?'block':'hit',crit);
@@ -1544,17 +1546,28 @@ function applyPassive(e,amt,crit,o){const P=player;for(const c of passiveClasses
   else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}}
 /* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
-const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Marca até 5 inimigos próximos do alvo e dispara raios verticais após um aviso curto',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (limite pela mana máxima; permanecem até morrer)'};
+const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Raios na área da mira (até 14 m), mesmo sem inimigos; com alvos, marca até 5 posições antes dos impactos',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva na área da mira (até 14 m), com impactos durante cerca de 3 s; pode lançar no chão vazio',dot:'Área de praga na mira (até 11 m), com 5 pulsos durante 5 s; atinge inimigos que entrarem nela',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (limite pela mana máxima; permanecem até morrer)'};
 function skillCooldown(sk){const lv=run&&run.skl?run.skl[sk.n]||0:0,arc=run?cons('arc'):0;return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)}
 function skillCooldownText(sk){return String(Math.round(skillCooldown(sk)*100)/100).replace('.',',')}
 function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldown(sk)||1),0,1)}
-function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),nat=support?'':((sk.sourceClass==null?isMagic():MAGIC_CLS.includes(sk.sourceClass))?' · mágica (Inteligência)':' · física (Força)');let d;
-  if(sk.t==='minionbuff')d='Cura 45% da vida máxima dos seus ecos e invocações · dano +60% e dano recebido −45% por 8s · Sem cura bloqueia a recuperação de vida';
-  else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso · '+minionAllies().length+'/'+summonCap()+' ativos · limite pela mana máxima'+(hasClassPassive(6)?' (Invocador: +1 vaga a cada 30 de mana)':' (+1 vaga a cada 60 de mana)')+' · permanecem até morrer; conjurar só ocupa vagas livres';
-  else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s';
-  else if(sk.n==='Bola de Fogo')d='Projétil de fogo; queima por mais 25% do dano ao longo de 3s';
-  else d=SKD[sk.t]||'Habilidade';
-  return d+nat+(support?'':' · <b>marca</b> os alvos')+(['minionbuff','summon'].includes(sk.t)?'':' · poder x'+sk.pow)+' · '+sk.mp+' de mana · recarga '+skillCooldownText(sk)+'s'}
+function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atkOf(MAGIC_CLS.includes(sk.sourceClass)?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0))}
+function skillUpgradeText(sk){return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
+function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
+  let d=SKD[sk.t]||'Habilidade';
+  if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
+  else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso. Ativos: '+minionAllies().length+'/'+summonCap()+'. Permanecem até morrer. O limite aumenta com a mana máxima; só ocupa vagas livres.';
+  else if(sk.t==='heal')d='Recupera '+Math.round(player.maxhp*sk.pow)+' da sua vida ('+Math.round(sk.pow*100)+'% da vida máxima) e a mesma porcentagem da vida dos aliados.';
+  else if(sk.t==='guard')d='Recebe '+Math.round((1-sk.pow)*100)+'% menos dano por 5s.';
+  else if(sk.t==='buff_dmg')d='Aumenta seu dano em '+Math.round((sk.pow-1)*100)+'% por 8s.';
+  else if(sk.t==='stealth')d='Fica furtivo por 5s; o próximo ataque causa o triplo do dano.';
+  else if(sk.t==='blink')d='Salta até 7m para trás e fica imune a dano por 0,6s.';
+  else if(sk.t==='bolt'&&sk.n.includes('Flecha'))d='Dispara na direção da mira e atravessa os inimigos no caminho. Pode disparar sem alvo próximo.';
+  else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s.';
+  else if(sk.n==='Bola de Fogo')d='Projétil de fogo; a queimadura causa mais 25% do dano ao longo de 3s.';
+  lines.push('<b>Efeito:</b> '+d);
+  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
+  lines.push('<b>Custo:</b> '+sk.mp+' de mana.','<b>Recarga atual:</b> '+skillCooldownText(sk)+'s.');return lines.join('<br>');
+}
 /* espólio de monstros */
 const LOOTP=['Presa','Couro','Essência','Osso','Garra','Escama','Gel','Pena','Chifre','Olho','Coração','Fragmento'];
 function lootName(e){const k=e.kind||e.name||'x';let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;const base=(e.name||'').replace(/^Elite /,'').replace(/ (Gélido|das Areias|do Pântano)$/,'');return LOOTP[h%LOOTP.length]+' de '+base}
@@ -1661,7 +1674,7 @@ function attack(){
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
-  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,third:!!o.third});
+  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
 function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
@@ -1678,20 +1691,21 @@ function useSkill(sk){
    if(sk.t==='summon'&&minionAllies().length>=summonCap()){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
    if(sk.t==='heal'&&hasAff('nocure')){floater(player.x,player.z,'SEM CURA','#ff8fa3');return}
    if(sk.t==='minionbuff'&&!minionAllies(true).length){floater(player.x,player.z,'SEM INVOCADOS','#9fb0c4');return}
-  if(['cone','nova','chain','bolt','rain','dot','stone_lance','thunderstorm'].includes(sk.t)&&!nearestEnemy(player.x,player.z,['bolt','rain','thunderstorm'].includes(sk.t)?16:11)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
+  if(sk.t==='chain'&&!nearestEnemy(player.x,player.z,12)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
-  L.markWin=time+.8;player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;runSkill(sk);player.atkT=.001;
+  player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;runSkill(sk);player.atkT=.001;
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
+function skillGroundPoint(max=14,fallback=7){const ap=aimPoint();if(ap){const dx=ap.x-player.x,dz=ap.z-player.z,d=Math.hypot(dx,dz),k=d>max?max/d:1;return{x:player.x+dx*k,z:player.z+dz*k}}return{x:player.x+Math.sin(player.face)*fallback,z:player.z+Math.cos(player.face)*fallback}}
 function runSkill(sk){
-  const P=player,dmg=P.dmg*(sk.sourceClass==null?1:atkOf(MAGIC_CLS.includes(sk.sourceClass)?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0)),col=sk.col;const tgt=faceTarget(14);skillFx(sk,P);
+  const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);skillFx(sk,P);
   switch(sk.t){
-    case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true})}hitstop(.08);shake(.3);break}
-    case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true});hitstop(.08);shake(.35);break}
-    case 'chain':{let cur={x:P.x,z:P.z};const hs=new Set(),pts=[{x:P.x,z:P.z}];for(let i=0;i<5;i++){let best=null,bd=i?7:12;for(const e of enemies){if(e.dead||hs.has(e))continue;const d=Math.hypot(e.x-cur.x,e.z-cur.z);if(d<bd){bd=d;best=e}}if(!best)break;hs.add(best);pts.push({x:best.x,z:best.z});hurtEnemy(best,dmg*(1-i*.12),cur.x,cur.z,{kb:1,pierce:true,fromPlayer:true});cur=best}zig(pts,col);if(pts.length===1)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
-    case 'bolt':{const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
-    case 'stone_lance':{const dx=Math.sin(P.face),dz=Math.cos(P.face);for(let i=1;i<=5;i++){const x=P.x+dx*i*1.5,z=P.z+dz*i*1.5;spikes(x,z,3,0,.5,col,1.5+i*.1);cracks(x,z,.7,col)}for(const e of enemies){if(e.dead)continue;const x=e.x-P.x,z=e.z-P.z,along=x*dx+z*dz,across=Math.abs(x*dz-z*dx);if(along>0&&along<8+e.r&&across<.8+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:e.isBoss?.2:.8,pierce:true,fromPlayer:true})}shake(.25);break}
-    case 'thunderstorm':{const cx=tgt?tgt.x:P.x+Math.sin(P.face)*7,cz=tgt?tgt.z:P.z+Math.cos(P.face)*7,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
+    case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
+    case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
+    case 'chain':{let cur={x:P.x,z:P.z};const hs=new Set(),pts=[{x:P.x,z:P.z}];for(let i=0;i<5;i++){let best=null,bd=i?7:12;for(const e of enemies){if(e.dead||hs.has(e))continue;const d=Math.hypot(e.x-cur.x,e.z-cur.z);if(d<bd){bd=d;best=e}}if(!best)break;hs.add(best);pts.push({x:best.x,z:best.z});hurtEnemy(best,dmg*(1-i*.12),cur.x,cur.z,{kb:1,pierce:true,fromPlayer:true,skillHit:true});cur=best}zig(pts,col);if(pts.length===1)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
+    case 'bolt':{const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
+    case 'stone_lance':{const dx=Math.sin(P.face),dz=Math.cos(P.face);for(let i=1;i<=5;i++){const x=P.x+dx*i*1.5,z=P.z+dz*i*1.5;spikes(x,z,3,0,.5,col,1.5+i*.1);cracks(x,z,.7,col)}for(const e of enemies){if(e.dead)continue;const x=e.x-P.x,z=e.z-P.z,along=x*dx+z*dz,across=Math.abs(x*dz-z*dx);if(along>0&&along<8+e.r&&across<.8+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:e.isBoss?.2:.8,pierce:true,fromPlayer:true,skillHit:true})}shake(.25);break}
+    case 'thunderstorm':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);if(!targets.length)for(let i=0;i<5;i++)targets.push({x:cx+(i?Math.sin(i*Math.PI/2)*2.5:0),z:cz+(i?Math.cos(i*Math.PI/2)*2.5:0)});for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
     case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,hit:new Set()};P.dashSpd=30;break}
     case 'blink':{for(let d=7;d>0;d-=1){const bx=P.x-Math.sin(P.face)*d,bz=P.z-Math.cos(P.face)*d;if(freeAt(bx,bz,.5)){fxBurst(P.x,1,P.z,col,10,4);P.x=bx;P.z=bz;break}}P.iT=.6;fxRing(P.x,P.z,col,2);break}
     case 'heal':{const h=P.maxhp*sk.pow;P.hp=Math.min(P.maxhp,P.hp+h);floater(P.x,P.z,'+'+fmt(h),'#9fffc0');for(const a of allies)if(!a.dead&&a.life>0)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*sk.pow);break}
@@ -1701,8 +1715,8 @@ function runSkill(sk){
     case 'minionbuff':{const mine=minionAllies(true),blocked=hasAff('nocure');for(const a of mine){if(!blocked)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+(blocked?' fortalecidas (sem cura)':' curadas e fortalecidas'),'#b18cff');break}
     case 'summon':{const n=Math.min(Math.round(sk.pow),Math.max(0,summonCap()-minionAllies().length));
       for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,1e9);if(sk.giant){a2.giant=true;a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}saveRun();break}
-    case 'rain':{const cx=tgt?tgt.x:P.x+Math.sin(P.face)*6,cz=tgt?tgt.z:P.z+Math.cos(P.face)*6;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.06:.1);hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);fallFx(hx,hz,du,fk,col)}break}
-    case 'dot':{let n=0;for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<5.5){e.dotT=5;e.dotD=dmg/5;e.aggro=true;n++}if(!n)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
+    case 'rain':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.28:.35);hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);fallFx(hx,hz,du,fk,col)}break}
+    case 'dot':{const pt=skillGroundPoint(11,5);for(let i=0;i<5;i++){const h=hazard(pt.x,pt.z,5.5,.5+i,dmg/5,'player',col);h.kb=0;h.passive=true}break}
   }
   sfx('skill');
 }
@@ -1810,7 +1824,7 @@ function bossSpecial(b,T){
   else if(tp==='fury'){const a=Math.atan2(T.x-b.x,T.z-b.z);b.face=a;for(let i=1;i<=5;i++)hazard(b.x+Math.sin(a)*i*2.6,b.z+Math.cos(a)*i*2.6,1.7,.9,0,'enemy',0xff3030);b.act={type:'charge',t:0,wind:.9,dir:{x:Math.sin(a),z:Math.cos(a)}};toast('<b>[ORÁCULO]</b> '+b.name+': Investida Sangrenta',1400)}
   else if(tp==='legion'){const n=p2?4:3;for(let i=0;i<n;i++){const a=i/n*TAU;let x=b.x+Math.cos(a)*3.5,z=b.z+Math.sin(a)*3.5;if(!freeAt(x,z,.5)){x=b.x;z=b.z}const m=spawnKind(b.gr>=6?(i%2?'demon':'wraith'):(i%2?'minion':'rogue'),x,z,b.gr,{room:b.room});m.aggro=true;fxRing(m.x,m.z,0xd0d0d0,1.5)}hazard(b.x,b.z,5,1,b.dmg,'enemy',0xff3030);toast('<b>[ORÁCULO]</b> '+b.name+': Legião',1400)}
 }
-function echoAttackMul(a,e){return a.shadow&&e&&e.echoMarkUntil>time?1.2:1}
+function echoAttackMul(a,e){return(a.shadow&&e&&e.echoMarkUntil>time?1.2:1)*(a.shadow||a.permanentSummon?1+.08*gearRuneCount('command'):1)}
 function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
   if(a.dead)return;a.t+=dt;a.cd-=dt;if(!a.permanentSummon)a.life-=dt;if(a.buffT>0){a.buffT-=dt;if(Math.random()<dt*3)fxBurst(a.x,1.2,a.z,0xb98cff,1,1)}a.healCd=(a.healCd||0)-dt;
   if(a.life<=0){a.dead=true;scene.remove(a.m.root);fxBurst(a.x,1,a.z,0x6ff4ff,6,3);return}
@@ -1892,7 +1906,7 @@ function update(dt){
     for(const c of Object.values(run.classCooldowns||{}))c.left=Math.max(0,c.left-dt);for(const s of P.skills)s.cdT=Math.max(0,s.cdT-dt);for(const s of run.stolen)s.cdT-=dt;if(run.fused)run.fused.cdT-=dt;if(run.food&&run.food.t>0){run.food.t-=dt;if(run.food.t<=0){refreshStats();toast('O efeito da comida acabou.')}}
     let mv=0;
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
-      if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,stun:.6});hitstop(.05)}}}
+      if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
     else if(il>.1){const sp=P.spd*(P.atkCd>.15?.45:1)*(run.mounted?1.8:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
@@ -1907,7 +1921,7 @@ function update(dt){
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.mesh.position.set(p.x,1.1,p.z);let done=p.life<=0;if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
-    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(!p.pierce){done=true;break}}}}
+    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(!p.pierce){done=true;break}}}}
     else{if(!P.dead&&Math.hypot(P.x-p.x,P.z-p.z)<P.r+p.r){hurtPlayer(p.dmg);done=true}else for(const a of allies)if(Math.hypot(a.x-p.x,a.z-p.z)<a.r+p.r){hurtAlly(a,p.dmg);done=true;break}}
     if(!done){if(L.grid){if(!gfree(p.x,p.z))done=true}else if(!worldFree(p.x,p.z,.1))done=true}
     if(done){scene.remove(p.mesh);projs.splice(i,1)}}
@@ -2051,7 +2065,7 @@ function hud(){
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
-  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Ecos ('+allies.filter(a=>a.shadow&&!a.dead).length+'): '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
+  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Ecos ('+allies.filter(a=>a.shadow&&!a.dead).length+'): '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' ('+keyLabel(keyOf('orders'))+')')+' · ':'';
   const sth='';
   const dmd=sth+ordh+invs+(run.demand?'Desafio do Oráculo: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' ('+keyLabel(keyOf('status'))+')')+' · ':'';
   $('bStyle').hidden=true;$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · '+keyLabel(keyOf('pot')));
@@ -2061,7 +2075,7 @@ function hud(){
   $('mission').hidden=_hm||!(track||done||q||dl||pt||dmd);{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':pcTop?(pcTop+60)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
   drawMap(mmc,192,false);
 }
-function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':'4')+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
+function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':keyLabel(keyOf('fusion')))+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(touch?i+1:keyLabel(keyOf('absorbed'+i)))+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
 window.CFG=Object.assign({vol:1,btn:1},store.get('pds_cfg')||{});
@@ -2286,8 +2300,9 @@ function completeJob(){
   const A=ADV[profile.cls];run.adv=true;player.skills[3]={...A.sk,sourceClass:profile.cls,cdT:0};refreshStats();player.hp=player.maxhp;
   bigText(A.n.toUpperCase(),2000);sfx('level');toast('<b>[ORÁCULO]</b> Troca de classe concluída: <b>'+A.n+'</b>. Nova habilidade: '+A.sk.n+' (botão G).',6000);showG();saveRun();
 }
-function skillButtonTip(sk){if(sk.empty)return 'Espaço livre. Escolha uma habilidade em Personagem → Combinação de habilidades.';return (sk.n+' · NV '+((run.skl||{})[sk.n]||0)+'/10: '+skillDesc(sk)+' · Melhore em Status.').replace(/<[^>]*>/g,'')}
+function skillButtonTip(sk){if(sk.empty)return 'Espaço livre. Escolha uma habilidade em Personagem → Combinação de habilidades.';return (sk.n+' · NV '+((run.skl||{})[sk.n]||0)+'/10: '+skillDesc(sk)+' · Melhore em Status.').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'')}
 function skillTips(){if(!player||!player.skills)return;['bQ','bR','bT','bG','bY','bU','b5'].forEach((id,i)=>{const sk=player.skills[i];if(sk&&$(id))$(id).title=skillButtonTip(sk)})}
+for(const id of ['bQ','bR','bT','bG','bY','bU','b5'])$(id).addEventListener('mouseenter',skillTips);
 function showG(){skillTips();if(player)for(const [id,i] of [['bQ',0],['bR',1],['bT',2],['bY',4],['bU',5],['b5',6]])if(player.skills[i])$(id).querySelector('.nm').textContent=player.skills[i].n;const P=player,s=P&&P.skills[3];$('bG').hidden=!s||s.empty;if(s)$('bG').querySelector('.nm').textContent=s.n;$('bZ').hidden=profile.rank!==8;refreshKeyLabels()}
 function bankView(){
   view=bankView;const b=profile.bank||0;
@@ -2379,7 +2394,7 @@ function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=
 function shadowXp(x){for(const a of allies)if(a.shadow&&!a.dead&&a.rec&&a.rec.on){const r=a.rec;r.xp+=x*.35;const need=80*Math.max(1,r.lvl);if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'ECO NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 /* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
 const MAGIC_CLS=[3,5,6,7,8,9,10,11];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
-function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1,hp:1,mp:1,phys:1,mag:1,spd:1+.005*(s.agi||0),atk:1/(1+.004*(s.agi||0)),crit:.0025*(s.per||0)}}
+function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1+.05*gearRuneCount('arcane'),hp:1,mp:1,phys:1,mag:1,spd:1+.005*(s.agi||0),atk:1/(1+.004*(s.agi||0)),crit:.0025*(s.per||0)}}
 /* ESTILO DE LUTA: natural da classe (100%) ou o outro (70%). Físico usa Força, arcano usa Inteligência. */
 function canUseMagicStyle(){return jobsOf().some(ci=>MAGIC_CLS.includes(ci))}
 function styleOff(){return basicIsMagic()!==isMagic()}
@@ -2388,7 +2403,7 @@ function basicAttackId(){const magic=basicIsMagic(),known=jobsOf(),saved=(run.ba
 function basicAttackClass(){return CLASSES[basicAttackId()]}
 function basicAttackDesc(ci){const mode=MAGIC_CLS.includes(ci)?'Mágico · usa Inteligência':CLASSES[ci].ranged?'Físico à distância · usa Força':'Corpo a corpo · usa Força';const effects={0:'3º golpe causa impacto curto; inimigos resistem a atordoamentos repetidos',1:'sangra por 30% do dano em 3s',2:'3º golpe recupera 2% do escudo máximo',4:'3ª flechada atravessa inimigos',5:'cada acerto cura 0,5% da sua vida máxima',6:'marca o alvo para suas invocações por 4s; +1 vaga a cada 30 de mana máxima',7:'marca o alvo por 4s: seus ecos causam +20% de dano nele',8:'queima por 25% do dano em 3s',9:'lentidão por 2s',10:'3º projétil causa impacto curto; inimigos resistem a atordoamentos repetidos',11:'3º disparo salta para mais um alvo com 25% do dano'};return mode+' · '+(effects[ci]||'projétil elemental')}
 function selectBasicAttack(ci){if(!Number.isInteger(ci)||!jobsOf().includes(ci))return false;const magic=MAGIC_CLS.includes(ci);run.basicChoices=run.basicChoices||{};run.basicChoices[magic?'mag':'phy']=ci;run.style=isMagic()?(magic?'nat':'off'):(magic?'arc':'nat');player.combo=0;player.comboT=0;saveRun();return true}
-function basicAttackView(){view=basicAttackView;const active=basicAttackId();let h='<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. X alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('ATAQUE BÁSICO',h)}
+function basicAttackView(){view=basicAttackView;const active=basicAttackId();let h='<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. '+keyLabel(keyOf('style'))+' alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('ATAQUE BÁSICO',h)}
 function applyBasicAttackEffect(e,ci,amt,third){if(e.dead)return;const P=player;
   if(ci===0&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.9);
   if(ci===2&&third)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.02);
@@ -2400,22 +2415,22 @@ function applyBasicAttackEffect(e,ci,amt,third){if(e.dead)return;const P=player;
   if(ci===9){e.slow=Math.max(e.slow||0,2);return}if(ci!==1&&ci!==8)return;const key=ci===1?'bleed':'burn';e.basicDots=e.basicDots||{};const old=e.basicDots[key];e.basicDots[key]={t:3,d:Math.max(old&&old.d||0,amt*(ci===1?.3:.25)/3),acc:old&&old.acc||0};floater(e.x,e.z,ci===1?'SANGRANDO':'QUEIMANDO',ci===1?'#ff4d6a':'#ff7a22')}
 function updateBasicDots(e,dt){for(const [key,d] of Object.entries(e.basicDots||{})){const elapsed=Math.min(dt,Math.max(0,d.t));d.t-=elapsed;d.acc+=elapsed;while(d.acc+1e-9>=1&&!e.dead){d.acc-=1;hurtEnemy(e,d.d,e.x,e.z,{kb:0,stun:0,pierce:true})}if(d.t<=0)delete e.basicDots[key]}}
 function basicDmgMul(){return atkOf(basicIsMagic()?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy'))*(styleOff()&&!basicIsMagic()?.7:1)}
-function styleTutorial(){if(!canUseMagicStyle()||profile.styleTut71)return;profile.styleTut71=true;store.set('pds2_profile',profile);toast('<b>[TUTORIAL]</b> Você conhece uma classe mágica. Aperte <b>X</b> para alternar o ataque básico entre físico (Força) e mágico (Inteligência). As habilidades equipadas funcionam em qualquer estilo. Escolha fogo, gelo ou outro ataque aprendido em Personagem → Ataque básico. Reveja os controles em ⚙.',10000)}
+function styleTutorial(){if(!canUseMagicStyle()||profile.styleTut71)return;profile.styleTut71=true;store.set('pds2_profile',profile);toast('<b>[TUTORIAL]</b> Você conhece uma classe mágica. Aperte <b>'+keyLabel(keyOf('style'))+'</b> para alternar o ataque básico entre físico (Força) e mágico (Inteligência). As habilidades equipadas funcionam em qualquer estilo. Escolha fogo, gelo ou outro ataque aprendido em Personagem → Ataque básico. Reveja os controles em ⚙.',10000)}
 function toggleStyle(){if(!started||paused)return;if(!canUseMagicStyle()){toast('<b>[ORÁCULO]</b> Aprenda uma classe mágica na Ordem para usar o ataque básico arcano. Suas habilidades equipadas continuam disponíveis.');return}const next=!basicIsMagic();run.style=isMagic()?(next?'nat':'off'):(next?'arc':'nat');bigText('ESTILO: '+(next?'ARCANO':'FÍSICO'),900);
-  toast('<b>[ORÁCULO]</b> Ataque básico: <b>'+(next?'ARCANO (Inteligência)':'FÍSICO (Força)')+'</b>. X alterna novamente. As 6 habilidades equipadas não mudam.',5000);sfx('arise');hud();saveRun()}
+  toast('<b>[ORÁCULO]</b> Ataque básico: <b>'+(next?'ARCANO (Inteligência)':'FÍSICO (Força)')+'</b>. '+keyLabel(keyOf('style'))+' alterna novamente. As 6 habilidades equipadas não mudam.',5000);sfx('arise');hud();saveRun()}
 /* Texto da Agilidade com os valores atuais e os limites (pedido do Irror: jogador precisa saber dos limites). */
 function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',',');
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
-function statDesc(){const m=isMagic(),bm=basicIsMagic(),L=run.level,s=run.stats||{},cc=critChance(),g=s.agi||0,nx=nextStep(L),up='O valor de cada ponto sobe a cada 25 níveis (próxima melhora no nível '+nx+').';
-  return{for:['Ataque físico <b>+'+fmt(atkPer(L)*(s.for||0))+'</b>','Cada ponto de Força = <b>+'+atkPer(L)+' de ataque físico</b>. '+up+(!m?' Usado nas suas habilidades':'')+(!bm?(m?' Usado':' e')+' no ataque básico.':'.')],
-   agi:['Ataque <b>+'+Math.round(.4*g)+'%</b> · movimento <b>+'+Math.round(.5*g)+'%</b> · esquiva <b>'+dodgeCdVal().toFixed(1).replace('.',',')+' s</b>',agiDesc()],
-   per:['Chance de crítico <b>'+Math.round(cc*100)+'%</b>','Cada ponto = +0,25% de chance de crítico (4 pontos = +1%). Crítico dobra o dano. Sem limite: cada 100% garante +1 multiplicador e o resto é chance de mais um (250% = sempre ×3, com 50% de chance de ×4).'],
-   int:['Ataque mágico <b>+'+fmt(atkPer(L)*(s.int||0))+'</b> · mana <b>+'+fmt(mpPer(L)*(s.int||0))+'</b>','Cada ponto de Inteligência = <b>+'+atkPer(L)+' de ataque mágico</b> e <b>+'+mpPer(L)+' de mana</b>. '+up+(m?' Usado nas suas habilidades.':'')],
-   vit:['Vida <b>+'+fmt(hpPer(L)*(s.vit||0))+'</b>','Cada ponto de Vitalidade = <b>+'+hpPer(L)+' de vida</b>. '+up]}}
+function statDesc(){const L=run.level,s=run.stats||{},cc=critChance(),g=s.agi||0,nx=nextStep(L),retro='A mudança vale também para os pontos que você já distribuiu. Acontece novamente a cada 25 níveis do personagem.',f=n=>String(Math.round(n*100)/100).replace('.',',');
+  return{for:['Bônus dos pontos: <b>+'+fmt(atkPer(L)*(s.for||0))+' de ataque físico</b>','<b>Ao gastar 1 ponto agora:</b> +'+atkPer(L)+' de ataque físico.<br><b>No nível '+nx+':</b> cada ponto passa a dar +'+atkPer(nx)+' de ataque físico. '+retro+'<br><b>Uso:</b> aumenta ataques básicos e habilidades de classes físicas, mesmo quando sua classe inicial é mágica.'],
+   int:['Bônus dos pontos: <b>+'+fmt(atkPer(L)*(s.int||0))+' de ataque mágico</b> e <b>+'+fmt(mpPer(L)*(s.int||0))+' de mana</b>','<b>Ao gastar 1 ponto agora:</b> +'+atkPer(L)+' de ataque mágico e +'+mpPer(L)+' de mana máxima.<br><b>No nível '+nx+':</b> cada ponto passa a dar +'+atkPer(nx)+' de ataque mágico e +'+mpPer(nx)+' de mana. '+retro+'<br><b>Uso:</b> aumenta ataques básicos e habilidades de classes mágicas. A mana permite usar mais habilidades e amplia o limite de invocações.'],
+   vit:['Bônus dos pontos: <b>+'+fmt(hpPer(L)*(s.vit||0))+' de vida base</b>','<b>Ao gastar 1 ponto agora:</b> +'+hpPer(L)+' de vida base, antes dos bônus de classe e equipamento.<br><b>No nível '+nx+':</b> cada ponto passa a dar +'+hpPer(nx)+' de vida base. '+retro],
+   agi:['Velocidade de ataque <b>+'+f(.4*g)+'%</b> · movimento <b>+'+f(.5*g)+'%</b>','<b>Ao gastar 1 ponto:</b> +0,4% de velocidade dos ataques básicos e +0,5% de velocidade de movimento.<br><b>Esquiva:</b> também reduz o tempo para esquivar novamente. Sua recarga atual é '+f(dodgeCdVal())+'s (mínimo 0,1s).<br>Agilidade não aumenta o dano de cada golpe nem reduz a recarga das habilidades. Esses ganhos por ponto não mudam a cada 25 níveis.'],
+   per:['Chance total de crítico: <b>'+f(cc*100)+'%</b>','<b>Ao gastar 1 ponto:</b> +0,25 ponto percentual de chance de crítico. Exemplo: 5% passa a 5,25%.<br><b>Crítico:</b> normalmente causa o dobro do dano. Acima de 100% de chance, os críticos podem causar multiplicadores maiores.<br>Esse ganho por ponto não muda a cada 25 níveis.']}}
 /* Linha com dica: passe o mouse (PC) ou toque no nome (celular) para ver a explicação. */
-function tipFmt(t){const p=String(t).split(/(?<=[.!])\s+(?=[A-ZÀ-Ú<(+−0-9])/).filter(x=>x.trim());return p.length>1?'<span style="display:block;margin-top:3px">• '+p.join('<br>• ')+'</span>':t}
-function tipRow(name,short,tip,btns){return '<div class="it" title="'+String(tip).replace(/<[^>]+>/g,'').replace(/"/g,"'")+'"><div class="d" style="cursor:help" onclick="const t=this.lastElementChild;t.hidden=!t.hidden">'+name+' <span style="opacity:.55">ⓘ</span><small>'+short+'</small><small class="tip" hidden style="color:#bfe8ff">'+tipFmt(tip)+'</small></div><div class="acts">'+btns+'</div></div>'}
+function tipFmt(t){if(String(t).includes('<br>'))return t;const p=String(t).split(/(?<=[.!])\s+(?=[A-ZÀ-Ú<(+−0-9])/).filter(x=>x.trim());return p.length>1?'<span style="display:block;margin-top:3px">• '+p.join('<br>• ')+'</span>':t}
+function tipRow(name,short,tip,btns){return '<div class="it" title="'+String(tip).replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').replace(/"/g,"'")+'"><div class="d" style="cursor:help" onclick="const t=this.lastElementChild;t.hidden=!t.hidden">'+name+' <span style="opacity:.55">ⓘ</span><small>'+short+'</small><small class="tip" hidden style="color:#bfe8ff">'+tipFmt(tip)+'</small></div><div class="acts">'+btns+'</div></div>'}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2471,12 +2486,9 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   {const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+s[k]+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5))}
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (ATÉ O NÍVEL 10)</div>';
-  for(const sk of player.skills.filter(s=>!s.empty)){const l=run.skl[sk.n]||0;h+=tipRow(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>','Poder <b>+'+(15*l)+'%</b> · recarga <b>'+skillCooldownText(sk)+' s</b>',skillDesc(sk)+'. Cada nível: +15% de poder e −5% de recarga. Arcano reduz mais 1,5% por ponto e, no ápice, mais 20% (recarga base '+sk.cd+' s).',btn('+1','skup',sk.n,run.spts>0&&l<10))}
+  for(const sk of player.skills.filter(s=>!s.empty)){const l=run.skl[sk.n]||0;h+=tipRow(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>','<b>'+sk.mp+' mana</b> · recarga <b>'+skillCooldownText(sk)+' s</b>',skillDesc(sk)+'<br><b>'+skillUpgradeText(sk)+'</b>',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
-  {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+tipRow('Maestria <b>'+ms+'</b>','Dano e vida <b>+'+(ms/2).toString().replace('.',',')+'%</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida. Entra no bônus somado (veja a ficha do personagem). Vale para sempre nesta vida. Use quando as habilidades estiverem no máximo.',btn('+1','mast',0,run.spts>0))}
-  h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
-  for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
-  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Oráculo manda você para a Zona de Penalidade.')+'</div>';
+  {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+tipRow('Maestria <b>'+ms+'</b>','Dano e vida <b>+'+(ms/2).toString().replace('.',',')+'%</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida. Entra no bônus somado (veja a ficha do personagem). Morrer não remove sua maestria. Ela só é zerada se você escolher Reencarnar. Você pode investir aqui mesmo antes de maximizar as habilidades.',btn('+1','mast',0,run.spts>0))}
   openModal('JANELA DE STATUS',h)}
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Ecos ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
@@ -2489,11 +2501,11 @@ function journeyObjectives(){const list=[],nx=profile.rank+1;
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
-function journeyView(tab='goals'){view=()=>journeyView(tab);let h='<div class="tabs">'+[['goals','Objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h='<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){h+='<div class="sysline">Acompanhe um objetivo no painel do personagem. Histórias iniciadas na Ordem e missões continuam registradas aqui; as recompensas são recebidas com Lyra.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
-    h+='<div class="sec">TREINO DIÁRIO'+(run.daily&&run.daily.done?' · CONCLUÍDO':'')+'</div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
+    h+='<div class="sec">MISSÃO DIÁRIA'+(run.daily&&run.daily.done?' · CONCLUÍDA':'')+'</div><div class="sysline">Complete os quatro objetivos até a meia-noite do seu aparelho. Recompensa automática: +1 ponto de atributo e recuperação total de vida e mana. Se começar e não concluir antes da virada do dia, a Zona de Penalidade fica pendente para a próxima entrada.</div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
   }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
     for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
     if(!any)h+='<div class="sysline">Passe na primeira Prova de Rank para receber o chamado de Lyra.</div>';
@@ -2518,9 +2530,51 @@ function guildTab(){const g=profile.guild;let h='';
 /* Cristais do rank do item OU MAIORES servem para aprimorar; gasta primeiro os de rank mais baixo (pedido do Irror). */
 function cryUp(t){let n=0;for(let r=t;r<9;r++)n+=run.res.cry[r]||0;return n}
 function spendCry(t,n){for(let r=t;r<9&&n>0;r++){const u=Math.min(n,run.res.cry[r]||0);run.res.cry[r]-=u;n-=u}}
+const GEAR_RUNES={
+ fang:{n:'Ferida da Caçada',d:'Ataques básicos causam mais 10% do dano como sangramento em 3s. Novos golpes renovam, sem acumular sangramentos.'},
+ shell:{n:'Couraça Natural',d:'+8% ao escudo máximo. Requer armadura equipada para ter escudo.'},
+ arcane:{n:'Condutor Arcano',d:'+5% ao poder de dano das habilidades. Não aumenta cura ou quantidade de invocações.'},
+ vigor:{n:'Reserva Etérea',d:'+5% à mana máxima.'},
+ stride:{n:'Passos Leves',d:'+3% à velocidade de movimento.'},
+ command:{n:'Vínculo do Guardião',d:'+8% ao dano dos seus ecos e invocações. Não afeta caçadores contratados.'}
+};
+function lootRune(key){if(run.loot?.[key]?.b)return 'command';const prefix=key.split(' de ')[0];if(['Presa','Garra','Chifre'].includes(prefix))return 'fang';if(['Couro','Escama','Osso'].includes(prefix))return 'shell';if(['Essência','Olho','Fragmento'].includes(prefix))return 'arcane';if(prefix==='Pena')return 'stride';return 'vigor'}
+function gearRuneCount(id){return ['w','a'].reduce((n,sl)=>n+(run?.equip?.[sl]?.rune===id?1:0),0)}
+function gearRuneText(it){const r=GEAR_RUNES[it?.rune];return r?' · Passiva gravada: '+r.n+' — '+r.d:''}
+function applyGearRuneHit(e,amt){const n=gearRuneCount('fang');if(!n||e.dead||e.hp<=0)return;e.basicDots=e.basicDots||{};const old=e.basicDots.rune;e.basicDots.rune={t:3,d:Math.max(old?.d||0,amt*.1*n/3),acc:old?.acc||0}}
+function equipmentUpgradeCost(eq){const up=eq.up||0;return{gold:Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cry:3*(up+1)}}
+function finishEquipmentUpgrade(eq,safe=false){const up=eq.up||0;if(!safe&&up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[FORJA]</b> O aprimoramento falhou. Materiais perdidos; equipamento preservado.');sfx('block');return false}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[FORJA]</b> '+eq.name+': '+statTxt(eq));return true}
+function lootForgeQuote(sl,key,mode){
+  const material=Object.prototype.hasOwnProperty.call(run.loot||{},key)?run.loot[key]:null;if(!['w','a'].includes(sl)||!material||!['new','up','rune'].includes(mode))return null;
+  const eq=run.equip[sl];if(mode!=='new'&&!eq)return null;
+  if(mode==='rune')return{tier:eq.tier,gold:Math.round(PRICE[eq.tier]*.2),cry:3,parts:material.b?3:12,rune:lootRune(key)};
+  const tier=mode==='new'?rankOf():eq.tier,up=eq?.up||0,base=mode==='up'?equipmentUpgradeCost(eq):{gold:Math.round(PRICE[tier]*.3),cry:5};
+  return{tier,gold:mode==='up'&&!material.b?Math.ceil(base.gold*.75):base.gold,cry:mode==='up'&&!material.b?Math.max(1,Math.ceil(base.cry*.75)):base.cry,parts:mode==='new'?(material.b?3:10):(material.b?3+Math.floor(up/5):5+up),rar:material.b?2:1,safe:!!material.b};
+}
+function canLootForge(sl,key,mode,q=lootForgeQuote(sl,key,mode)){
+  return !!q&&unl('forge')&&L.mode==='world'&&!!inCity(player.x,player.z)&&run.loot[key].n>=q.parts&&run.gold>=q.gold&&cryUp(q.tier)>=q.cry&&(mode!=='new'||run.items.length<24)&&(mode!=='rune'||run.equip[sl].rune!==q.rune);
+}
+function craftWithLoot(sl,key,mode){const q=lootForgeQuote(sl,key,mode);if(!canLootForge(sl,key,mode,q))return false;
+  run.loot[key].n-=q.parts;run.gold-=q.gold;spendCry(q.tier,q.cry);
+  if(mode==='new'){const fl=profLv('forge'),rar=Math.max(q.rar,wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i);const it=makeItem(sl,q.tier,rar);run.items.push(it);profXp('forge',10+q.tier*5);sfx('boom');toast('<b>[FORJA]</b> '+it.name+' criado e guardado na bolsa.');}
+  else if(mode==='rune'){run.equip[sl].rune=q.rune;refreshStats();sfx('boom');toast('<b>[FORJA]</b> Passiva gravada: '+GEAR_RUNES[q.rune].n+'.')}
+  else finishEquipmentUpgrade(run.equip[sl],q.safe);
+  saveRun();return true;
+}
+function lootForgeView(sl){if(!['w','a'].includes(sl))return;view=()=>lootForgeView(sl);const keys=Object.keys(run.loot||{}).filter(k=>run.loot[k].n>0),eq=run.equip[sl];
+  let h='<div class="tabs">'+btn('Armas','lootforge','w',true,sl==='w'?'on':'')+btn('Armaduras','lootforge','a',true,sl==='a'?'on':'')+btn('Voltar ao Kael','equipshop',sl==='w'?'wep':'arm')+'</div><div class="sysline">Seu ouro: <b>'+fmt(run.gold)+'</b> · Forja liberada no nível 12. Escolha o espólio: só a espécie indicada será consumida. Os materiais antigos também servem.</div><div class="sysline">Novo equipamento: rank <b>'+RANKS[rankOf()].id+'</b>, vai para a bolsa sem trocar o equipado. Partes comuns garantem raridade mínima Rara; relíquias garantem Épica. Cristais do rank indicado ou maiores, consumindo primeiro os menores.</div>';
+  h+='<div class="sysline">Aprimorar: '+(eq?eq.name+' → +'+((eq.up||0)+1):'equipe uma '+(sl==='w'?'arma':'armadura')+' primeiro')+'. Partes comuns reduzem em 25% o custo de ouro e cristais (arredondado para cima); relíquias garantem sucesso. Após +10, sem relíquia pode falhar e perder os materiais, mas nunca o equipamento.</div>';
+  h+='<div class="sec">PASSIVAS GRAVADAS</div><div class="sysline">Cada peça tem 1 espaço de passiva, separado dos afixos. Gravar outra substitui a anterior e consome os materiais exibidos. Duas peças com a mesma passiva somam o efeito; desequipar remove o bônus. Atualmente: '+(GEAR_RUNES[eq?.rune]?.n||'nenhuma nesta peça')+'.</div>';
+  if(run.items.length>=24)h+='<div class="sysline">Bolsa cheia: libere um espaço para fabricar.</div>';
+  if(!keys.length)h+='<div class="sysline">Você não tem espólios. Derrote monstros para obter partes; chefes deixam relíquias.</div>';
+  keys.forEach(k=>{const name=k.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));h+='<div class="sec">'+name+' · você tem '+run.loot[k].n+'</div>';for(const mode of ['new','up','rune']){const q=lootForgeQuote(sl,k,mode);if(!q)continue;h+=row(mode==='new'?'Fabricar '+(sl==='w'?'arma':'armadura')+' · mínimo '+RAR[q.rar].n:mode==='rune'?'Gravar '+GEAR_RUNES[q.rune].n+(eq.rune?' · substitui '+GEAR_RUNES[eq.rune]?.n:''):'Aprimorar equipado · '+(q.safe?'sucesso garantido':'custo reduzido'),(mode==='rune'?GEAR_RUNES[q.rune].d+'<br>':'')+q.parts+' × '+name+' + '+fmt(q.gold)+' ouro + '+q.cry+' cristais '+RANKS[q.tier].id+' ou maiores',btn(mode==='new'?'Fabricar':mode==='rune'?'Gravar passiva':'Aprimorar','lootcraft',sl+'|'+mode+'|'+encodeURIComponent(k),canLootForge(sl,k,mode,q)))}});
+  openModal('KAEL · FORJA DE ESPÓLIOS',h);
+}
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(8,pr);t++){const gc=Math.round(PRICE[t]*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+(sl==='w'?'arma':'armadura')+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
 function extraActions(a,v){
+  if(a==='lootforge'){lootForgeView(v);return 'close0'}
+  if(a==='lootcraft'){const [sl,mode,key]=v.split('|');try{craftWithLoot(sl,decodeURIComponent(key),mode)}catch(e){console.warn('Receita inválida',e)}lootForgeView(sl);return 'close0'}
   if(a==='stat'||a==='stat5'){const n=a==='stat5'?5:1;if(run.pts<n)return;run.pts-=n;run.stats[v]+=n;refreshStats();return true}
   if(a==='skup'){if(run.spts<1)return;const l=run.skl[v]||0;if(l>=10)return;run.spts--;run.skl[v]=l+1;return true}
   if(a==='skup2'){if(run.spts<2)return;const l=run.skl[v]||0;if(l>=10)return;run.spts-=2;run.skl[v]=l+1;return true}
@@ -2558,7 +2612,7 @@ function extraActions(a,v){
 }
 /* tutorial */
 function tutorial(){if(profile.tut)return;profile.tut=true;store.set('pds2_profile',profile);
-  const steps=['Há cem anos o céu rachou. Das Fendas saem ecos de mundos que morreram, e o Oráculo escolhe quem pode enfrentá-los. Ele escolheu você.',touch?'Arraste à esquerda para andar.':'Use WASD ou as setas para andar e o mouse para mirar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Personalize 6 habilidades em Personagem → Combinação. Elas gastam mana. Depois de aprender uma classe mágica, X alterna o ataque básico físico/mágico; as habilidades funcionam em ambos.','Na cidade: Ordem (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra a BOLSA para Status, Diária, Ecos e Diário.','Longe das cidades há Tundra, Deserto e Pântano, com monstros próprios. Quanto mais longe, mais perigoso.','O Mercado vende Montaria e o Espírito de Mana. No ⚙ você ajusta volume, tamanho dos botões e gráficos. Boa caçada.'];
+  const steps=['Há cem anos o céu rachou. Das Fendas saem ecos de mundos que morreram, e o Oráculo escolhe quem pode enfrentá-los. Ele escolheu você.',touch?'Arraste à esquerda para andar.':'Use WASD ou as setas para andar e o mouse para mirar.','ATACAR repete se você segurar. ESQUIVA te deixa imune por um instante.','Personalize 6 habilidades em Personagem → Combinação. Elas gastam mana. Depois de aprender uma classe mágica, '+keyLabel(keyOf('style'))+' alterna o ataque básico físico/mágico; as habilidades funcionam em ambos.','Na cidade: Ordem (missões), lojas, Mercado e Banco. Toque F perto das pessoas.','Portais aparecem nas terras selvagens. Veja no MAPA.','Abra PERSONAGEM para atributos e habilidades. Missões, diária e história ficam no DIÁRIO.','Longe das cidades há Tundra, Deserto e Pântano, com monstros próprios. Quanto mais longe, mais perigoso.','O Mercado vende Montaria e o Espírito de Mana. No ⚙ você ajusta volume, tamanho dos botões e gráficos. Boa caçada.'];
   steps.forEach((s,i)=>setTimeout(()=>toast('<b>[TUTORIAL]</b> '+s,5000),1500+i*5200))}
 
 /* ================= IDEIAS: AFIXOS, PESCA, CULINÁRIA, MIMIC, TÍTULOS, MALDIÇÕES, TORRE, NÊMESIS, AFINIDADE, CIDADE, CLIMA, INVERTIDO, DOMÍNIOS, FUSÃO, SAZONAL, ORÁCULO ================= */
@@ -3016,7 +3070,7 @@ function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur
 function critMul(){return 2}
 function passivesView(){view=passivesView;let h='<div class="sysline">Todas as passivas das classes aprendidas se somam automaticamente, independentemente da classe-base ou das habilidades equipadas.</div><div class="sec">PASSIVAS DAS CLASSES APRENDIDAS</div>';for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');h+='<div class="sec">PASSIVAS DA LIVRARIA</div>';for(const b of PBOOK){const lv=pb(b.k);h+=row(b.n+' · NV '+lv,lv?b.d(lv):'Ainda não aprendida',lv?'<b>Ativa</b>':'')}
   h+='<div class="sysline">Aprenda e melhore os tomos na Livraria da praça.</div><div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),lv?'<b>Ativa</b>':'Ainda sem pontos')}
-  h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
+  h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of ['w','a']){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row((sl==='w'?'Arma':'Armadura')+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   line=(n,v,d)=>'<div title="'+String(d||'').replace(/<[^>]+>/g,'').replace(/"/g,"'")+'" '+(d?'onclick="const t=this.querySelector(\'small\');if(t)t.hidden=!t.hidden" ':'')+'style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(255,179,71,.12)'+(d?';cursor:help':'')+'"><span>'+n+(d?' <span style="opacity:.55">ⓘ</span><br><small hidden style="color:#bfe8ff">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
@@ -3122,7 +3176,7 @@ function mktView(){
   {const lt=run.loot||{},ks=Object.keys(lt).filter(k=>lt[k].n);if(ks.length){any=true;tot+=lootTotal();h+='<div class="sec">ESPÓLIOS DE MONSTROS</div>';for(const k of ks)h+=row((lt[k].b?'<b style="color:#ffb84d">'+k+'</b>':k)+' × '+lt[k].n,fmt(lt[k].v)+' ouro cada','')}}
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
   else h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER TUDO · '+fmt(tot)+' ouro','sellall',0,true,'hot')+'</div>';
-  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Guarde cristais para aprimorar armas e armaduras no ferreiro.</div>';
+  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Cristais e espólios servem na forja do Kael. Vender tudo também vende as partes e relíquias; guarde o que pretende usar.</div>';
   h+='<div class="sec">COMPRAR CRISTAIS (PACOTE DE 10)</div><div class="sysline" style="font-size:12px">Dorian compra por 1x e vende por 3x o preço base. Só até o seu rank.</div>';
   for(let t=0;t<=Math.min(8,rankOf());t++){const p=CRY_P[t]*30;h+=row('10 cristais <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','Você tem '+run.res.cry[t],btn(fmt(p)+' ouro','buycry',t,run.gold>=p))}
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Tomos de passivas e de guardiões agora ficam na <b>LIVRARIA</b> da praça.</div>';
@@ -3139,9 +3193,9 @@ function openShop(id){
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
     for(let t=0;t<Math.min(profile.rank===8?9:8,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
-  if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
+  if((id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':'a'))+forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
   openModal(S.n,h);
@@ -3242,7 +3296,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[ORÁCULO]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
   if(a==='sellall'){let g=lootTotal();run.loot={};for(let r=0;r<9;r++){g+=run.res.core[r]*sellP('core',r)+run.res.cry[r]*sellP('cry',r);run.res.core[r]=0;run.res.cry[r]=0}run.gold+=g;toast('<b>[ORÁCULO]</b> Recursos vendidos: +'+fmt(g)+' ouro');beep(990,.15,.05)}
-  if(a==='upg'){const eq=run.equip[v];if(!eq)return;const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1);if(run.gold<gc||cryUp(eq.tier)<cc)return;run.gold-=gc;spendCry(eq.tier,cc);if(up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[ORÁCULO]</b> O aprimoramento falhou. Materiais perdidos.');sfx('block');return}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[ORÁCULO]</b> '+eq.name+': '+statTxt(eq))}
+  if(a==='upg'){const eq=run.equip[v];if(!eq)return;const q=equipmentUpgradeCost(eq);if(run.gold<q.gold||cryUp(eq.tier)<q.cry)return;run.gold-=q.gold;spendCry(eq.tier,q.cry);finishEquipmentUpgrade(eq)}
   if(a==='job'){if(run.level<JOB_LVL||run.adv)return;closeModal();buildSpecial('job');return}
   if(a==='tier'){if(!run.adv||run.level<tierNeed())return;closeModal();L.tierTrial=true;buildSpecial('job');return}
   if(a==='weekly'){if(profile.weekly===weekId())return;closeModal();buildSpecial('weekly');return}
@@ -3257,22 +3311,22 @@ $('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').
 
 /* ================= CONTROLES ================= */
 /* Teclas configuráveis (PC): cada ação pode ganhar outra tecla. */
-const KEYACT=[['attack','Atacar','Space'],['dodge','Esquiva','ShiftLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL']];
-const KEYRES=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape','Tab','Enter','ShiftRight','KeyE','KeyB','KeyO','KeyN','KeyP','KeyJ','KeyX','KeyV','Digit1','Digit2','Digit3','Digit4']);
+const KEYACT=[['attack','Atacar','Space'],['dodge','Esquiva','ShiftLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL'],['character','Personagem','KeyP'],['bestiary','Bestiário','KeyJ'],['news','Notícias','KeyN'],['orders','Ordens dos ecos','KeyO'],['style','Estilo físico/arcano','KeyX'],['mount','Montar / desmontar','KeyV'],['absorbed0','Poder absorvido 1','Digit1'],['absorbed1','Poder absorvido 2','Digit2'],['absorbed2','Poder absorvido 3','Digit3'],['fusion','Poder fundido','Digit4']];
+const KEYRES=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape']);
 let KEYMAP={};try{KEYMAP=JSON.parse(localStorage.getItem('pds_keys'))||{}}catch(e){}
 let bindWait=null;
 function keyOf(act){const d=KEYACT.find(k=>k[0]===act);return KEYMAP[act]||d[2]}
 function keyLabel(code){const names={Space:'Espaço',ShiftLeft:'Shift',ShiftRight:'Shift direito',ControlLeft:'Ctrl',ControlRight:'Ctrl direito',Backquote:'`',Minus:'−',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'barra invertida',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/'};return names[code]||code.replace(/^Key|^Digit/,'').replace(/^Numpad/,'Num ')}
-function bindableKey(code){return typeof code==='string'&&!KEYRES.has(code)&&/^(Key[A-Z]|Digit[0-9]|Numpad[0-9]|Space|ShiftLeft|ControlLeft|ControlRight|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash)$/.test(code)}
+function bindableKey(code){return typeof code==='string'&&!KEYRES.has(code)&&/^(Key[A-Z]|Digit[0-9]|Numpad[0-9]|Space|Tab|Enter|ShiftRight|ShiftLeft|ControlLeft|ControlRight|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash)$/.test(code)}
 function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!action||!bindableKey(code))return false;const old=keyOf(act),other=KEYACT.find(k=>k[0]!==act&&keyOf(k[0])===code);
   if(other){if(old===other[2])delete KEYMAP[other[0]];else KEYMAP[other[0]]=old}if(code===action[2])delete KEYMAP[act];else KEYMAP[act]=code;return true}
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
-function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'))}
+function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
 function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Mover o personagem','')+row('Mouse','Mira e ataque com o botão esquerdo (segure para continuar atacando). Arraste com o botão direito para girar a câmera; use a roda para aproximar e o botão do meio para restaurar.','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==8)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
-  h+='<div class="sec">OUTROS ATALHOS</div>';for(const [n,k] of [['Poderes absorvidos','1 · 2 · 3'],...(run.fused?[['Poder fundido','4']]:[]),['Ordens dos ecos','O'],['Personagem','P'],['Bestiário','J'],['Notícias','N'],['Estilo físico/arcano','X'],['Montar / desmontar','V'],['Interagir (alternativas)','E · Enter'],['Bolsa (alternativa)','B'],['Status (alternativa)','Tab'],['Fechar janela / cancelar troca de tecla','Esc']])h+=row(n,'','<b>'+k+'</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
-function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e aperte a nova tecla. Esc cancela. Se ela já estiver em outra ação configurável, as duas teclas trocam de lugar. Movimento e os atalhos da seção Outros atalhos ficam reservados.</div>';
+  h+='<div class="sec">ATALHOS ALTERNATIVOS LIVRES</div>';for(const [n,k] of [['Interagir','KeyE'],['Interagir','Enter'],['Bolsa','KeyB'],['Status','Tab'],['Esquiva','ShiftRight']])if(!KEYACT.some(([act])=>keyOf(act)===k))h+=row(n,'Pode ser atribuído a outra ação.','<b>'+keyLabel(k)+'</b>');h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
+function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e aperte a nova tecla. Esc cancela. Se ela já estiver em outra ação configurável, as duas teclas trocam de lugar. Somente WASD, setas e Esc ficam reservados. E, B, Tab, Enter e Shift direito podem ser usados; deixam de executar sua função alternativa quando atribuídos.</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==8)continue;h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyLabel(keyOf(act))+'</b>',btn('Mudar','bindk',act,true))}
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){if(!setKeyBinding(bindWait,e.code)){toast('Essa tecla é reservada ou não pode ser usada. Escolha outra, ou Esc para cancelar.');return}try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}for(const k in keys)keys[k]=false;bindWait=null;refreshKeyLabels();keysView()},true);
@@ -3398,9 +3452,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v75</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v76</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=75;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=76;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
