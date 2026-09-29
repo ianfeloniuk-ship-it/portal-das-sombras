@@ -1532,6 +1532,7 @@ function updHazards(dt){
     if(h.t>=h.dur){
       if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
       else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:h.kb??3,fromPlayer:true,skillHit:true,passive:!!h.passive})}
+      if(h.bladeStrike)fxSlash(h.x,h.z,h.t*7,h.col,h.r);if(h.runeStrike){circle(h.x,h.z,h.col);pillar(h.x,h.z,h.col,.6,.4)}
       if(h.lightning){pillar(h.x,h.z,h.col,.22,.28);sparkUp(h.x,h.z,h.col,7,.45)}
       if(h.dmg>0){if(time-AU.lastBoom>.2){AU.lastBoom=time;sfx('boom')}fxRing(h.x,h.z,h.col,h.r,.35);fxBurst(h.x,.5,h.z,h.col,6,4);shake(h.team==='enemy'?.25:.12)}
       scene.remove(h.g);h.g.traverse(o=>{if(o.geometry)o.geometry.dispose()});hazards.splice(i,1)}}
@@ -1609,7 +1610,10 @@ function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atk
 function skillUpgradeText(sk){return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
   let d=SKD[sk.t]||'Habilidade';
-  if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
+  if(sk.n==='Lâmina Rúnica')d='Três explosões rúnicas avançam em linha na direção da mira, até 7,5 m. Cada explosão causa um terço do dano total, em um raio de 2,2 m. Pode usar sem alvo.';
+  else if(sk.n==='Mil Cortes')d='Deixa uma área de cortes onde você está: raio de 4,5 m, com seis golpes durante 1,15s. Cada golpe causa um sexto do dano total, sem empurrar os inimigos. Você pode se mover enquanto os cortes continuam.';
+  else if(sk.n==='Fortaleza Viva')d='Por 5s, você recebe '+Math.round((1-sk.pow)*100)+'% menos dano. Aliados a até 6 m no momento do uso recebem 50% menos dano por 5s, mesmo se saírem de perto. Reaplicar renova a duração, sem multiplicar a proteção.';
+  else if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
   else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso. Ativos: '+minionAllies().length+'/'+summonCap()+'. Permanecem até morrer. O limite aumenta com a mana máxima; só ocupa vagas livres.';
   else if(sk.t==='heal')d='Recupera '+Math.round(player.maxhp*sk.pow)+' da sua vida ('+Math.round(sk.pow*100)+'% da vida máxima) e a mesma porcentagem da vida dos aliados.';
   else if(sk.t==='guard')d='Recebe '+Math.round((1-sk.pow)*100)+'% menos dano por 5s.';
@@ -1621,7 +1625,7 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s.';
   else if(sk.n==='Bola de Fogo')d='Projétil de fogo; a queimadura causa mais 25% do dano ao longo de 3s.';
   lines.push('<b>Efeito:</b> '+d);
-  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
+  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Mil Cortes'?1/6:sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Mil Cortes'?' por golpe (6 golpes)':sk.n==='Lâmina Rúnica'?' por explosão (3 explosões)':sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
   lines.push('<b>Custo:</b> '+sk.mp+' de mana.','<b>Recarga atual:</b> '+skillCooldownText(sk)+'s.');return lines.join('<br>');
 }
 /* espólio de monstros */
@@ -1689,7 +1693,7 @@ function hurtPlayer(amt){
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
-function hurtAlly(a,amt){if(a.dead)return;if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
+function hurtAlly(a,amt){if(a.dead)return;if(a.fortressUntil>time)amt*=.5;if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
   if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[ORÁCULO]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
@@ -1753,8 +1757,14 @@ function useSkill(sk){
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
 function skillGroundPoint(max=14,fallback=7){const ap=aimPoint();if(ap){const dx=ap.x-player.x,dz=ap.z-player.z,d=Math.hypot(dx,dz),k=d>max?max/d:1;return{x:player.x+dx*k,z:player.z+dz*k}}return{x:player.x+Math.sin(player.face)*fallback,z:player.z+Math.cos(player.face)*fallback}}
+function physicalEvolution(sk,dmg){const P=player;
+  if(sk.n==='Lâmina Rúnica'){for(let i=1;i<=3;i++){const x=P.x+Math.sin(P.face)*i*2.5,z=P.z+Math.cos(P.face)*i*2.5,h=hazard(x,z,2.2,i*.25,dmg/3,'player',0xffd08a);h.kb=0;h.runeStrike=true;}waveFwd(P.x,P.z,P.face,0xffd08a,8,2);return true}
+  if(sk.n==='Mil Cortes'){for(let i=0;i<6;i++){const h=hazard(P.x,P.z,4.5,.15+i*.2,dmg/6,'player',0xa26bff);h.kb=0;h.bladeStrike=true;}spinRing(P.x,P.z,0xa26bff,4.5,1.2);return true}
+  if(sk.n==='Fortaleza Viva'){P.guard=5;P.guardVal=sk.pow;let count=0;for(const a of allies)if(!a.dead&&Math.hypot(a.x-P.x,a.z-P.z)<=6){a.fortressUntil=time+5;fxRing(a.x,a.z,0x9fd3ff,1.2,5);count++}bubble(5,0x9fd3ff);fxRing(P.x,P.z,0x9fd3ff,6,1);toast('<b>[FORTALEZA]</b> Proteção por 5s · '+count+' aliados protegidos.');return true}
+  return false;
+}
 function runSkill(sk){
-  const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);skillFx(sk,P);
+  const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)){sfx('skill');return}skillFx(sk,P);
   switch(sk.t){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
     case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
@@ -3536,9 +3546,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v85</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v86</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=85;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=86;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

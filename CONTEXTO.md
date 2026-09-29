@@ -322,3 +322,7 @@ Ian pediu recarga legível, flechas distintas e mais níveis/novas opções de r
 
 ## Forja, venda e promoção — v85
 Feedback de Ian: forja confusa, venda ausente na seleção por peça e portais da promoção repetitivos. Forja dividida em peça/operação/material, exibindo apenas a operação selecionada, custos e faltas. Venda adicionada à seleção de peças e mantida na bolsa; botão explica restrição à cidade, validada também na execução. Promoção passa a exigir 3 portais do rank desejado ou superior nesta fase de conteúdo, preservando nível/tarefas/Examinador. Contadores exatos anteriores mantidos e somados para elegibilidade, sem perda de progresso.
+
+
+## Evoluções físicas — v86
+Ian autorizou próxima etapa. Lâmina Rúnica: 3 explosões em linha a 2,5/5/7,5m, raio 2,2m, intervalos 0,25s, cada uma 1/3 do dano calculado. Mil Cortes: 6 pulsos na posição de conjuração, raio 4,5m, 0,15–1,15s, cada um 1/6 do dano, sem empurrão. Fortaleza Viva mantém proteção pessoal por 5s e protege aliados vivos a até 6m no uso com redução de 50% por 5s; reaplicar renova, sem acumular consigo. Nomes, custos, recargas e níveis mantidos, com descrições dos efeitos reais. Flecha Estelar já distinta na v84. Próxima etapa ainda pendente: magos, cura e invocações avançadas.

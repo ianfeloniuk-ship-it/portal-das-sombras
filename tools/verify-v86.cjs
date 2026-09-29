@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const src=fs.readFileSync(__dirname+'/../game.html','utf8');
+function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(src);assert(m,n);let b=src.indexOf('{',m.index),d=0,q=null,e=false;for(let i=b;i<src.length;i++){let c=src[i];if(q){if(e)e=false;else if(c==='\\')e=true;else if(c===q)q=null;continue}if(c==='"'||c==="'"||c==='`'){q=c;continue}if(c==='{')d++;if(c==='}'&&!--d)return src.slice(m.index,i+1)}}
+
+
+
+
+const hits=[];const c={player:{x:0,z:0,face:0},allies:[],enemies:[],hazards:[],time:10,AU:{lastBoom:10},scene:{remove(){}},waveFwd(){},spinRing(){},fxRing(){},bubble(){},toast(){},fxSlash(){},circle(){},pillar(){},fxBurst(){},shake(){},sfx(){},hurtEnemy:(e,d)=>hits.push(d),hazard(x,z,r,dur,dmg,team,col){const h={x,z,r,dur,dmg,team,col,t:0,fill:{scale:{setScalar(){}}},g:{traverse(){}}};c.hazards.push(h);return h;}};vm.createContext(c);for(const n of ['physicalEvolution','updHazards','hurtAlly'])vm.runInContext(extract(n),c);
+assert(!c.physicalEvolution({n:'Corte Giratório'},600));assert(c.physicalEvolution({n:'Lâmina Rúnica'},600));assert.equal(c.hazards.length,3);assert.deepEqual(c.hazards.map(h=>h.z),[2.5,5,7.5]);assert.equal(c.hazards.reduce((a,h)=>a+h.dmg,0),600);assert(c.hazards.every(h=>h.kb===0));c.hazards=[];
+c.physicalEvolution({n:'Mil Cortes'},600);assert.equal(c.hazards.length,6);c.enemies=[{x:0,z:0,r:.5}];c.updHazards(.1);assert.equal(hits.length,0);c.updHazards(.1);assert.equal(hits.length,1);c.player.x=50;c.updHazards(1.1);assert.equal(hits.length,6);assert.equal(hits.reduce((a,b)=>a+b,0),600);assert.equal(c.hazards.length,0);c.updHazards(1);assert.equal(hits.length,6);
+c.player.x=0;const a={x:2,z:0,hp:1000},far={x:7,z:0,hp:1000},dead={x:0,z:0,dead:true};c.allies=[a,far,dead];assert(c.physicalEvolution({n:'Fortaleza Viva',pow:.12},0));assert.equal(c.player.guard,5);assert.equal(c.player.guardVal,.12);assert.equal(a.fortressUntil,15);assert.equal(far.fortressUntil,undefined);assert.equal(dead.fortressUntil,undefined);c.hurtAlly(a,100);assert.equal(a.hp,950);c.physicalEvolution({n:'Fortaleza Viva',pow:.12},0);c.hurtAlly(a,100);assert.equal(a.hp,900);c.time=16;c.hurtAlly(a,100);assert.equal(a.hp,800);
+console.log('PASS rune direction/timing/total damage, six actual cut impacts at original area, no repeated damage, fortress radius/dead exclusion/duration/refresh/expiry');
