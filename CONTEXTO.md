@@ -318,3 +318,7 @@ Ian substituiu as ondas preliminares da prova de rank por 10 portais do rank des
 
 ## Clareza de combate e escolhas — v84
 Ian pediu recarga legível, flechas distintas e mais níveis/novas opções de rank. Barra mostra PRONTA, segundos de recarga, SEM MANA ou slot vazio/bloqueado, com bordas e fundos distintos, inclusive poderes absorvidos/fusão. Flecha Estelar agora lança 3 projéteis violetas em leque, cada um com 1/3 do dano total anterior; Perfurante mantém disparo único. Nome preservado para saves. Disparo dividido até 5 níveis, ricochete e golpe amplo até 8. Novos talentos: alcance/velocidade de projétil básico +15% por nível (5), perfuração (1, rank D), terceiro golpe +25% de dano base por nível (5). Mantidos os 8 pontos totais dos ranks E/SS+, escolhas existentes e redistribuição gratuita na cidade. Não amplia automaticamente todas as evoluções de classe; revisão das demais fica pendente.
+
+
+## Forja, venda e promoção — v85
+Feedback de Ian: forja confusa, venda ausente na seleção por peça e portais da promoção repetitivos. Forja dividida em peça/operação/material, exibindo apenas a operação selecionada, custos e faltas. Venda adicionada à seleção de peças e mantida na bolsa; botão explica restrição à cidade, validada também na execução. Promoção passa a exigir 3 portais do rank desejado ou superior nesta fase de conteúdo, preservando nível/tarefas/Examinador. Contadores exatos anteriores mantidos e somados para elegibilidade, sem perda de progresso.
