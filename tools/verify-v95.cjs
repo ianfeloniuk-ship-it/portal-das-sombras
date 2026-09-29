@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const src=fs.readFileSync(__dirname+'/../game.html','utf8');
+function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(src);assert(m,n);let b=src.indexOf('{',m.index),d=0,q=null,e=false;for(let i=b;i<src.length;i++){let c=src[i];if(q){if(e)e=false;else if(c==='\\')e=true;else if(c===q)q=null;continue}if(c==='"'||c==="'"||c==='`'){q=c;continue}if(c==='{')d++;if(c==='}'&&!--d)return src.slice(m.index,i+1)}}
+const notes=[],saved=[],c={CFG:{music:1,effects:0,cues:.8,btn:1},AU:{on:true,ctx:{currentTime:0},master:{gain:{}},mus:{gain:{}},fx:{gain:{}},cues:{gain:{}}},tone:(...a)=>notes.push(a),audioInit(){},store:{set:(...a)=>saved.push(a)},localStorage:{setItem(){}},document:{documentElement:{style:{setProperty(){}}}},$:()=>({textContent:''}),innerWidth:1280,innerHeight:720,touch:false};
+vm.createContext(c);vm.runInContext(src.slice(src.indexOf('const CUE_NAMES='),src.indexOf('function playReadySound')),c);
+for(const n of ['playReadySound','applyCfg','setAudioVolume','appendHistory95','historyAtEnd95','sizeHistory95'])vm.runInContext(extract(n),c);
+c.applyCfg();assert.equal(c.AU.fx.gain.value,0);assert(Math.abs(c.AU.cues.gain.value-.6)<1e-9);c.playReadySound(3);assert.equal(notes.length,2);assert.equal(notes[0][3].dest,c.AU.cues);assert(!notes[0][3].rev);
+c.setAudioVolume('effects',1);assert(Math.abs(c.AU.cues.gain.value-.6)<1e-9);c.setAudioVolume('cues',0);assert.equal(c.AU.fx.gain.value,.75);c.playReadySound(3);assert.equal(notes.length,2);c.setAudioVolume('cues',1);c.AU.on=false;c.playReadySound(3);assert.equal(notes.length,2);
+const list=[{h:'legado',t:'12:30'}];assert(!c.appendHistory95(list,{h:'sem tag',at:1000,t:'12:31',n:1}));assert(c.appendHistory95(list,{h:'sem tag',at:2000,t:'12:32',n:1}));assert.equal(list.length,2);assert.equal(list[0].n,2);assert(!c.appendHistory95(list,{h:'sem tag',at:8000,t:'12:33',n:1}));
+for(let i=0;i<250;i++)c.appendHistory95(list,{h:'Evento '+i,at:10000+i,n:1});assert.equal(list.length,200);assert.equal(list[0].h,'Evento 249');assert.equal(list[199].h,'Evento 50');
+assert(c.historyAtEnd95({scrollHeight:1000,clientHeight:200,scrollTop:790}));assert(!c.historyAtEnd95({scrollHeight:1000,clientHeight:200,scrollTop:500}));
+let z=c.sizeHistory95(900,900);assert(z.w<=620&&z.h<=324);c.innerWidth=360;c.innerHeight=640;c.touch=true;z=c.sizeHistory95(900,900);assert(z.w<=240&&z.h<=160);
+assert(!extract('toast').includes('sfx'));assert(!extract('showSys').includes("$('dlg')"));assert(!extract('talk').includes("$('dlg')"));assert(!src.includes('id="bPot"'));assert(src.includes("blocked?'BLOQUEIO '+fmt(Math.trunc(amt))"));
+console.log('PASS independent cue bus and mute, message retention/deduplication/legacy, scroll-follow predicate, responsive size bounds, quiet notification routes, compact menu, truncated blocked damage');

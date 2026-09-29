@@ -129,7 +129,27 @@ body.pc #btns .b[hidden]{display:none}
 small.tip{font-size:12px;line-height:1.55}
 #mission .objective-row{margin:0 0 7px}#mission .objective-row:last-child{margin-bottom:0}#mission .objective-row strong{display:block;color:var(--ink)}#mission .objective-row small{display:block;font-size:inherit;color:var(--dim)}
 .gear-layout{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin:12px 0}.gear-slot{border:1px solid #80623c;border-radius:8px;padding:8px;min-width:0;background:#1a1423}.gear-slot button{white-space:normal;width:100%;margin-bottom:5px}.gear-slot small{display:block;font-size:11px;line-height:1.5;color:#c6bfb4}.gear-h{grid-column:2;grid-row:1}.gear-w{grid-column:1;grid-row:2}.gear-a{grid-column:3;grid-row:2}.gear-g{grid-column:1;grid-row:3}.gear-b{grid-column:3;grid-row:3}.gear-figure{grid-column:2;grid-row:2/4;text-align:center;color:#dfbc7c}.gear-figure svg{width:100%;max-height:230px}.gear-slot:has(button:hover){border-color:#ffe3aa}@media(max-width:520px){.gear-layout{grid-template-columns:1fr 70px 1fr;gap:5px}.gear-slot{padding:5px}.gear-slot button{font-size:10px}.gear-slot small{font-size:10px}}
-.guide93{margin:8px 0;padding:12px 14px;border-left:3px solid #d5a34b;background:#ffffff06;border-radius:5px;line-height:1.55}.guide93 strong{display:block;color:#f3cf87;margin-bottom:5px}.guide93 p{margin:5px 0}.cue93{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.cue93 select{max-width:100%;background:#211827;color:#fff;padding:8px;border:1px solid #ad8747;border-radius:4px}</style>
+.guide93{margin:8px 0;padding:12px 14px;border-left:3px solid #d5a34b;background:#ffffff06;border-radius:5px;line-height:1.55}.guide93 strong{display:block;color:#f3cf87;margin-bottom:5px}.guide93 p{margin:5px 0}.cue93{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.cue93 select{max-width:100%;background:#211827;color:#fff;padding:8px;border:1px solid #ad8747;border-radius:4px}
+/* v95: HUD compacto e histórico persistente no canto. */
+#tb,body.pc #tb{left:auto;display:block;max-width:none}
+#tb .mini{font-size:11px;padding:9px 12px}
+#gameMenu95{position:absolute;right:0;top:calc(100% + 6px);width:190px;max-height:calc(100dvh - 64px);overflow:auto;display:grid;gap:4px;padding:8px;background:#1a1423f5;border:1px solid #80623c;border-radius:6px;touch-action:pan-y}
+#gameMenu95 .mini{text-align:left}
+#history95{position:fixed;left:calc(8px + env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));width:320px;height:175px;max-width:calc(100vw - 16px);max-height:45dvh;z-index:8;display:flex;flex-direction:column;background:#15121dcf;border:1px solid #76604c77;border-radius:5px;box-sizing:border-box;font-size:12px;line-height:1.4}
+#history95 header{display:flex;align-items:center;gap:4px;min-height:32px;padding:0 5px;border-bottom:1px solid #ffffff12}
+#history95 button{border:0;background:transparent;color:#d9c8b6;font:inherit;cursor:pointer;padding:5px}
+#historyToggle95{margin-right:auto;font-size:10px!important;letter-spacing:.06em}
+#historyUnread95{font-size:10px!important;color:#ffcd82!important}
+#historyResize95{cursor:nesw-resize!important;touch-action:none;font-size:17px!important}
+#historyBody95{overflow:auto;overscroll-behavior:contain;touch-action:pan-y;flex:1;min-height:0;padding:4px 9px;overflow-wrap:anywhere;scrollbar-width:thin}
+.history-entry95{padding:5px 0;border-bottom:1px solid #ffffff08;color:#d5c9bd}
+.history-entry95 b,.history-entry95 strong{color:#f0c98e}.history-entry95 small{display:block;color:#b7a89e}
+.history-entry95.important{border-left:2px solid #d5a34b;padding-left:7px;background:#ffc37008}
+.history-time95{font-size:9px;color:#a4958a;margin-right:6px}.history-repeat95{color:#c8ad88;font-size:10px;margin-left:5px}
+#history95.collapsed{height:34px!important}#history95.collapsed #historyBody95,#history95.collapsed #historyResize95{display:none}
+body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-width:calc(100vw - 120px)}
+@media(orientation:portrait){#tb{left:auto;right:8px;display:block}#tb .mini{padding:9px 12px;font-size:11px}}
+</style>
 
 <canvas id="c"></canvas>
 <canvas id="ov"></canvas>
@@ -147,10 +167,13 @@ small.tip{font-size:12px;line-height:1.55}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bDiary" onclick="modalOpen?closeModal():journeyView()">DIÁRIO</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bPot" onclick="usePot()">POÇÃO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bMenu" aria-expanded="false" aria-controls="gameMenu95" onclick="toggleGameMenu95()">☰ MENU</button><nav id="gameMenu95" aria-label="Menu do jogo" hidden>
+<button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bDiary" onclick="modalOpen?closeModal():journeyView()">DIÁRIO</button><button class="mini" id="bNews" onclick="newsView()">HISTÓRICO</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">CONFIGURAÇÕES</button></nav></div>
 <div id="mission" class="ui panel" hidden style="pointer-events:auto"></div>
-<div id="toasts" class="ui"></div>
-<div id="big" class="ui">DESPERTE</div>
+<section id="history95" aria-label="Histórico de mensagens" hidden>
+<header><button id="historyToggle95" aria-expanded="true" aria-controls="historyBody95" onclick="toggleHistory95()">HISTÓRICO ▾</button><button id="historyUnread95" onclick="latestHistory95()" hidden></button><button id="historyResize95" aria-label="Ajustar tamanho do histórico" title="Arraste para ajustar. Use as setas do teclado quando selecionado.">⤢</button></header>
+<div id="historyBody95" tabindex="0" role="log" aria-label="Mensagens recentes, da mais antiga para a mais nova" aria-live="off"></div></section>
+<div id="big" class="ui" hidden>DESPERTE</div>
 <div id="dlg" class="ui panel" hidden></div>
 
 <div id="pad" hidden></div>
@@ -169,7 +192,7 @@ small.tip{font-size:12px;line-height:1.55}
 <div id="steal"></div>
 <div class="b" id="bF" hidden>F</div>
 
-<div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="mb"></div></div></div>
+<div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="modalNotice95" role="status" hidden style="font-size:12px;padding:8px;border-left:2px solid #d5a34b;margin-bottom:6px;max-height:90px;overflow:auto"></div><div id="mb"></div></div></div>
 
 <div id="title" class="scr">
   <div class="card panel">
@@ -1200,7 +1223,7 @@ function spawnHunter(c,inside){
   const n={kind:'hunter',home:c,m,x,z,face:0,r:.5,name:nm+' ['+RANKS[ri].id+']',short:nm,rank:ri,col:RANKS[ri].c,t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · FALAR COM '+nm.toUpperCase()};
   n.use=()=>talk(n);npcs.push(n);return n;
 }
-function talk(n){$('dlg').innerHTML='<b>'+n.name+':</b> '+pick(HLINES)+'<small>Caçador de '+n.home.name+'</small>';$('dlg').hidden=false;dlgT=6}
+function talk(n){logNews('<b>'+n.name+':</b> '+pick(HLINES)+'<small>Caçador de '+n.home.name+'</small>','dialogue')}
 
 /* ================= MASMORRA PROCEDURAL ================= */
 function buildDungeon(g){
@@ -1505,13 +1528,24 @@ function fxGhost(){const o=new THREE.Mesh(geo('ghost',()=>new THREE.CylinderGeom
 function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt),col,t:0,big})}
 function shake(a){shakeA=Math.max(shakeA,a)}
 function hitstop(s){freeze=Math.max(freeze,s)}
-/* NOTÍCIAS: todo aviso fica guardado para reler (tecla N, botão NOTÍCIAS, ou clicar no aviso). */
-function logNews(html){try{if(!profile)return;if(/Nível aumentou|Item na bolsa|Equipado:|Bolsa cheia|vendido por|Recompensa: \+|O efeito d|Você pescou|cristal|Ataque furtivo|RECARGA|Sem poções|Veio de mana/.test(html)||!/\[[A-ZÇÃÉÍÓÚÊÔ ]+\]/.test(html))return;profile.news=profile.news||[];const t=new Date();profile.news.unshift({h:html,t:String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')});if(profile.news.length>100)profile.news.length=100;store.set('pds2_profile',profile)}catch(e){}}
-function newsView(){view=newsView;const n=(profile&&profile.news)||[];let h='<div class="sysline">As últimas '+n.length+' mensagens do Oráculo e eventos do mundo, da mais nova para a mais antiga.</div>';
-  if(!n.length)h+='<div class="it"><div class="d"><small>Nenhuma notícia ainda.</small></div></div>';
-  for(const x of n)h+='<div class="it"><div class="d" style="white-space:normal">'+x.h+'<small>'+x.t+'</small></div></div>';openModal('NOTÍCIAS',h)}
-function toast(html,ms=2600){logNews(html);const d=document.createElement('div');d.className='toast panel';d.innerHTML=html;d.style.pointerEvents='auto';d.style.cursor='pointer';d.title='Clique para ver todas as notícias';d.onclick=()=>{if(started&&!modalOpen)newsView()};$('toasts').appendChild(d);setTimeout(()=>d.remove(),ms);while($('toasts').children.length>3)$('toasts').firstChild.remove();sfx('ding')}
-function bigText(t,ms=1600){const b=$('big');b.textContent=t;b.style.opacity=1;setTimeout(()=>b.style.opacity=0,ms)}
+/* Histórico compartilhado pelas notificações e falas. */
+let historyUnread95=0;
+function historyEntry95(html,kind='event'){return {h:String(html),t:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),at:Date.now(),kind,n:1}}
+function appendHistory95(list,entry){const last=list[0];if(last&&last.h===entry.h&&entry.at-(last.at||0)<5000){last.n=(last.n||1)+1;last.at=entry.at;last.t=entry.t;return true}list.unshift(entry);if(list.length>200)list.length=200;return false}
+function logNews(html,kind='event'){if(!profile)return;profile.news=Array.isArray(profile.news)?profile.news:[];const repeat=appendHistory95(profile.news,historyEntry95(html,kind));store.set('pds2_profile',profile);if(started)renderHistory95(false,repeat)}
+function historyHtml95(html){const t=document.createElement('template');t.innerHTML=String(html);for(const el of [...t.content.querySelectorAll('*')]){if(!['B','STRONG','SMALL','BR','EM','I','SPAN'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent));continue}for(const a of [...el.attributes])el.removeAttribute(a.name)}return t.innerHTML}
+function historyRow95(x){const d=document.createElement('div');d.className='history-entry95'+(x.kind==='important'||/desbloque|liberad|nova habilidade|novo sistema/i.test(x.h)?' important':'');d.innerHTML='<span class="history-time95">'+safeText(x.t||'')+'</span>'+historyHtml95(x.h)+(x.n>1?'<span class="history-repeat95">×'+x.n+'</span>':'');return d}
+function historyAtEnd95(el){return el.scrollHeight-el.clientHeight-el.scrollTop<24}
+function historyBadge95(){const b=$('historyUnread95');b.hidden=!historyUnread95;b.textContent=historyUnread95+' nova'+(historyUnread95===1?'':'s');}
+function renderHistory95(initial=false,repeat=false){const body=$('historyBody95'),list=(profile&&profile.news)||[],follow=initial||(!CFG.historyCollapsed95&&historyAtEnd95(body));let top=body.scrollTop;if(initial){body.replaceChildren();for(const x of [...list].reverse())body.appendChild(historyRow95(x))}else if(list.length){if(repeat&&body.lastElementChild)body.lastElementChild.replaceWith(historyRow95(list[0]));else body.appendChild(historyRow95(list[0]));while(body.children.length>list.length){top-=body.firstElementChild.getBoundingClientRect().height;body.firstElementChild.remove()}}if(follow){body.scrollTop=body.scrollHeight;historyUnread95=0}else{body.scrollTop=Math.max(0,top);historyUnread95++}historyBadge95()}
+function sizeHistory95(w,h){const maxW=Math.max(160,Math.min(620,innerWidth-(touch?120:16))),maxH=Math.max(90,Math.min(420,innerHeight*(touch?.25:.45)));return {w:Math.max(Math.min(220,maxW),Math.min(maxW,Number(w)||320)),h:Math.max(Math.min(110,maxH),Math.min(maxH,Number(h)||175))}}
+function applyHistory95(){const box=$('history95'),size=sizeHistory95(CFG.historyW95,CFG.historyH95);box.style.width=size.w+'px';box.style.height=size.h+'px';box.classList.toggle('collapsed',!!CFG.historyCollapsed95);$('historyToggle95').setAttribute('aria-expanded',String(!CFG.historyCollapsed95));$('historyToggle95').textContent='HISTÓRICO '+(CFG.historyCollapsed95?'▸':'▾')}
+function toggleHistory95(){CFG.historyCollapsed95=!CFG.historyCollapsed95;applyHistory95();store.set('pds_cfg',CFG)}
+function latestHistory95(){CFG.historyCollapsed95=false;applyHistory95();$('historyBody95').scrollTop=$('historyBody95').scrollHeight;historyUnread95=0;historyBadge95();store.set('pds_cfg',CFG)}
+function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory95();store.set('pds_cfg',CFG);$('historyBody95').focus()}
+function toast(html,ms=2600){logNews(html);if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
+function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
+function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
 
 /* ================= EFEITOS VISUAIS POR HABILIDADE ================= */
 function fxCustom(o,dur,upd){scene.add(o);fxs.push({o,t:0,dur,kind:'fn',upd})}
@@ -1639,7 +1673,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(o.fromPlayer)amt*=1+titleHitBonus(e)+(e.isBoss?trophyB():0);if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(1,Math.round(amt)));if(amt<=0)return;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
-  floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
+  floater(e.x,e.z,blocked?'BLOQUEIO '+fmt(Math.trunc(amt)):crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
   if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyGearRuneHit(e,amt)}
@@ -2137,10 +2171,10 @@ function updDungeon(dt){
 const pcCam={yaw:0,zoom:1,drag:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 addEventListener('contextmenu',e=>{if(!touch)e.preventDefault()});
-addEventListener('mousedown',e=>{if(touch)return;if(e.button===2)pcCam.drag=true;if(e.button===1){pcCam.yaw=0;pcCam.zoom=1}});
+addEventListener('mousedown',e=>{if(touch||e.target.closest?.('#history95,#tb'))return;if(e.button===2)pcCam.drag=true;if(e.button===1){pcCam.yaw=0;pcCam.zoom=1}});
 addEventListener('mouseup',e=>{if(e.button===2)pcCam.drag=false});
 addEventListener('mousemove',e=>{if(pcCam.drag)pcCam.yaw-=e.movementX*.008});
-addEventListener('wheel',e=>{if(touch||modalOpen)return;pcCam.zoom=Math.min(1.7,Math.max(.55,pcCam.zoom+(e.deltaY>0?.08:-.08)))},{passive:true});
+addEventListener('wheel',e=>{if(touch||modalOpen||e.target.closest?.('#history95,#tb'))return;pcCam.zoom=Math.min(1.7,Math.max(.55,pcCam.zoom+(e.deltaY>0?.08:-.08)))},{passive:true});
 function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*Math.min(1,dt*6);cam.z+=(P.z-cam.z)*Math.min(1,dt*6);
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
@@ -2239,17 +2273,17 @@ function hud(){
   if(L.expedition&&!L.brk)obj=expeditionObjective();$('obj').textContent=obj;
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const _mt=missionPanelText();
-  $('bStyle').hidden=true;$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · '+keyLabel(keyOf('pot')));
+  $('bStyle').hidden=true;
   let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
   if($('mission').dataset.t!==_mt){$('mission').dataset.t=_mt;$('mission').innerHTML='<span style="float:right;cursor:pointer;margin-left:6px;opacity:.7" title="Esconder (volta pelo ⚙)" onclick="try{localStorage.setItem(\'pds_hidemis\',\'1\')}catch(e){}$(\'mission\').hidden=true">✕</span>'+_mt}
-  $('mission').hidden=_hm||!_mt;{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('toasts').style.top=H>W?(r.bottom+38)+'px':pcTop?(pcTop+60)+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
+  $('mission').hidden=_hm||!_mt;{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px';const pcTop=!touch&&H<=W?$('tb').getBoundingClientRect().bottom+10:0;$('obj').style.top=H>W?(r.bottom+6)+'px':pcTop?pcTop+'px':'';$('boss').style.top=H>W?(r.bottom+34)+'px':pcTop?(pcTop+28)+'px':''}
   drawMap(mmc,192,false);
 }
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">'+(touch?'★':keyLabel(keyOf('fusion')))+'</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(touch?i+1:keyLabel(keyOf('absorbed'+i)))+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
 
 /* ================= ÁUDIO: MÚSICA E EFEITOS ================= */
 window.CFG=Object.assign({vol:1,btn:1,moveLimit:false,moveCap:100},store.get('pds_cfg')||{});
-CFG.music=CFG.music??CFG.vol;CFG.effects=CFG.effects??CFG.vol;
+CFG.music=CFG.music??CFG.vol;CFG.effects=CFG.effects??CFG.vol;CFG.cues=CFG.cues??CFG.effects;CFG.historyCollapsed95=CFG.historyCollapsed95??touch;
 normalizeReadySounds();
 const AU={ctx:null,on:true,track:null,want:'city',step:0,next:0,bar:0,lastBoom:0};
 try{AU.on=localStorage.getItem('pds_sound')!=='0'}catch(e){}
@@ -2260,6 +2294,7 @@ function audioInit(){
     AU.master=C.createGain();AU.master.gain.value=AU.on?1:0;AU.master.connect(comp);
     AU.mus=C.createGain();AU.mus.gain.value=.24*CFG.music;AU.mus.connect(AU.master);
     AU.fx=C.createGain();AU.fx.gain.value=.75*CFG.effects;AU.fx.connect(AU.master);
+    AU.cues=C.createGain();AU.cues.gain.value=.75*CFG.cues;AU.cues.connect(AU.master);
     const len=Math.floor(C.sampleRate*2.4),ir=C.createBuffer(2,len,C.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
     const cv=C.createConvolver();cv.buffer=ir;AU.rev=C.createGain();AU.rev.gain.value=.3;AU.rev.connect(cv);cv.connect(AU.fx);const mc=C.createConvolver();mc.buffer=ir;AU.musRev=C.createGain();AU.musRev.gain.value=.3;AU.musRev.connect(mc);mc.connect(AU.mus);
     const nb=C.createBuffer(1,C.sampleRate,C.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;AU.noise=nb;
@@ -2408,7 +2443,7 @@ function buildSpecial(kind,gRef,arg){
 }
 function spawnWave(n,elites){const S=L.special;for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(10,18);x=Math.cos(a)*d;z=Math.sin(a)*d-2;if(freeAt(x,z,.6))break}
   const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});e.aggro=true;if(i<elites)makeElite(e);fxRing(x,z,0xffd070,1.5)}}
-function showRules(){$('dlg').innerHTML='<b>PROTOCOLOS DE RESSONÂNCIA</b><br>I. Sincronize com o Vigia.<br>II. Ative o foco da câmara.<br>III. Suporte a vigília.<small>O foco protege contra os sentinelas. Quando os olhos do Vigia acenderem, permaneça imóvel.</small>';$('dlg').hidden=false;dlgT=12}
+function showRules(){logNews('<b>PROTOCOLOS DE RESSONÂNCIA</b><br>I. Sincronize com o Vigia.<br>II. Ative o foco da câmara.<br>III. Suporte a vigília.<small>O foco protege contra os sentinelas. Quando os olhos do Vigia acenderem, permaneça imóvel.</small>','important')}
 function punish(msg){const P=player;toast('<b>[NARRADOR]</b> '+msg+' O Vigia rejeitou a resposta.',3000);laser(.45)}
 function laser(frac){const P=player,S=L.special;if(P.dead)return;fxLine([{x:0,z:S.god.root.position.z+1},{x:P.x,z:P.z}],0xff2020);fxBurst(P.x,1,P.z,0xff2020,10,4);sfx('laser');shake(.5);P.iT=0;hurtPlayer(P.maxhp*frac)}
 function updSpecial(dt){
@@ -3009,7 +3044,7 @@ function spawnCritter(c){const k=pick(CRIT);if(!MON.list[k])return;const m=makeC
 function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4a,0x2f7a4a,0xb39a6a,0x7a5a9a]),hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0xd8b060]),wep:'none',gk:pick(['Knight','Barbarian','Mage','Rogue']),tint:pick([0xffffff,0xffe0c0,0xd0e0ff,0xe0ffd0]),scale:.88});
   const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(CNAMES);
   const n={kind:'citizen',home:c,m,x,z,face:0,r:.45,name:nm,short:nm,col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · CONVERSAR COM '+nm.toUpperCase()};
-  n.use=()=>{const F=festival();$('dlg').innerHTML='<b>'+nm+':</b> '+(F&&Math.random()<.4?F.line:pick(CLINES))+'<small>Moradora(o) de '+c.name+'</small>';$('dlg').hidden=false;dlgT=6};npcs.push(n);return n}
+  n.use=()=>{const F=festival();logNews('<b>'+nm+':</b> '+(F&&Math.random()<.4?F.line:pick(CLINES))+'<small>Moradora(o) de '+c.name+'</small>','dialogue')};npcs.push(n);return n}
 
 /* ===== ATAQUE À CIDADE (chefe de mundo marcado) ===== */
 function startSiege(c){const a=rnd(0,TAU),x=c.x+Math.cos(a)*60,z=c.z+Math.sin(a)*60;const b=spawnBoss(x,z,clamp(rankOf()+1,0,9),{...WBOSS,n:'Dragão Sitiante'});b.wild=true;b.breaker=true;b.world=true;b.siege=c;b.hp*=5;b.maxhp*=5;b.gold*=6;b.bars=5;b.roam={x:c.x,z:c.z};b.aggro=true;
@@ -3080,7 +3115,7 @@ function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citie
   (on?row('Portal Primordial','Arconte inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
 const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
-function showSys(t){logNews('<b>[NARRADOR]</b> '+t);$('dlg').innerHTML='<b style="color:#d7b8ff">[NARRADOR]</b> '+t+'<small>...</small>';$('dlg').style.borderColor='#a26bff';$('dlg').hidden=false;dlgT=9;sfx('gong');setTimeout(()=>$('dlg').style.borderColor='',9000)}
+function showSys(t){logNews('<b>[NARRADOR]</b> '+t,'important')}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Arconte, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){profile.story=profile.story||[];if(!profile.story.includes(l)){profile.story.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0};setTimeout(()=>showSys('Tenho uma exigência. '+t[1]+'. Não me decepcione.'),5000)}}
 function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=2;run.spts+=2;run.demand=null;showSys('Exigência cumprida. +2 pontos de status, +2 de habilidade. Você me diverte.')}}
@@ -3370,7 +3405,7 @@ function extraActions3(a,v){
 }
 
 /* ================= JANELAS ================= */
-function openModal(title,html){if(profile?.creationPending91&&started&&title!=='CRIAÇÃO DO PERSONAGEM')return;$('mx').hidden=!!(profile?.creationPending91&&started);$('mt').textContent=title;$('mb').innerHTML=html;$('modal').hidden=false;modalOpen=true;paused=true;$('dlg').hidden=true}
+function openModal(title,html){if(profile?.creationPending91&&started&&title!=='CRIAÇÃO DO PERSONAGEM')return;$('mx').hidden=!!(profile?.creationPending91&&started);toggleGameMenu95(false);if(!modalOpen||$('mt').textContent!==title)$('modalNotice95').hidden=true;$('mt').textContent=title;$('mb').innerHTML=html;$('modal').hidden=false;modalOpen=true;paused=true;$('dlg').hidden=true}
 function closeModal(){if(profile?.creationPending91&&started)return;$('modal').hidden=true;modalOpen=false;view=null;if(player&&!player.dead&&$('dead').hidden)paused=false}
 function rerender(){if(view)view()}
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+name+'<small>'+desc+'</small></div><div class="acts">'+btns+'</div></div>';
@@ -3554,7 +3589,7 @@ function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e 
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,bindWait===act?'<b style="color:#ffd54f">Aperte uma tecla…</b>':'Tecla atual: <b>'+keyLabel(keyOf(act))+'</b>',btn('Mudar','bindk',act,true))}
   h+='<div style="display:flex;justify-content:flex-end">'+btn('Restaurar padrão','bindreset',0,true)+'</div>';openModal('TECLAS (PC)',h)}
 addEventListener('keydown',e=>{if(!bindWait)return;e.preventDefault();e.stopImmediatePropagation();if(e.code!=='Escape'){if(!setKeyBinding(bindWait,e.code)){toast('Essa tecla é reservada ou não pode ser usada. Escolha outra, ou Esc para cancelar.');return}try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(_){}}for(const k in keys)keys[k]=false;bindWait=null;refreshKeyLabels();keysView()},true);
-addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].includes(e0.target.tagName))return;if(e0.repeat)return;keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyL'&&started&&$('dead').hidden){modalOpen?closeModal():journeyView();return}if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyP'&&started&&$('dead').hidden){modalOpen?closeModal():bagView('char');return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
+addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].includes(e0.target.tagName))return;if(e0.repeat)return;if(e0.target?.closest?.('#history95,#tb')&&['Space','Enter','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'].includes(e0.code))return;if(e0.code==='Escape'&&!$('gameMenu95').hidden){toggleGameMenu95(false);$('bMenu').focus();return}keys[e0.code]=true;const e={code:remapCode(e0.code),preventDefault:()=>e0.preventDefault()};if(e.code==='KeyL'&&started&&$('dead').hidden){modalOpen?closeModal():journeyView();return}if(e.code==='KeyK'&&started&&$('dead').hidden){modalOpen?closeModal():albumView();return}if(e.code==='KeyN'&&started&&$('dead').hidden){modalOpen?closeModal():newsView();return}if(e.code==='KeyO'&&started&&!paused){cycleOrder();return}if(e.code==='KeyZ'&&started&&!paused){useSovereign();return}if(e.code==='KeyP'&&started&&$('dead').hidden){modalOpen?closeModal():bagView('char');return}if(e.code==='KeyX'){toggleStyle();return}if(e.code==='KeyJ'&&started&&$('dead').hidden){modalOpen?closeModal():bestView();return}
   if(e.code==='Escape'&&modalOpen){closeModal();return}
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
@@ -3581,20 +3616,20 @@ $('bSnd').addEventListener('click',()=>{audioInit();setSound(!AU.on)});setSound(
 function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'leve':'hd')}catch(e){}renderer.setPixelRatio(lite?1:Math.min(devicePixelRatio,1.6));resize();$('bGfx').textContent=lite?'LEVE':'HD';
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
-function applyCfg(){CFG.moveLimit=CFG.moveLimit===true;CFG.moveCap=Number.isFinite(+CFG.moveCap)?Math.max(50,Math.min(400,+CFG.moveCap)):100;if(AU.master)AU.master.gain.value=AU.on?1:0;CFG.music=Math.max(0,Math.min(1,Number(CFG.music)||0));CFG.effects=Math.max(0,Math.min(1,Number(CFG.effects)||0));if(AU.mus)AU.mus.gain.value=.24*CFG.music;if(AU.fx)AU.fx.gain.value=.75*CFG.effects;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
+function applyCfg(){CFG.moveLimit=CFG.moveLimit===true;CFG.moveCap=Number.isFinite(+CFG.moveCap)?Math.max(50,Math.min(400,+CFG.moveCap)):100;if(AU.master)AU.master.gain.value=AU.on?1:0;CFG.music=Math.max(0,Math.min(1,Number(CFG.music)||0));CFG.effects=Math.max(0,Math.min(1,Number(CFG.effects)||0));if(AU.mus)AU.mus.gain.value=.24*CFG.music;if(AU.fx)AU.fx.gain.value=.75*CFG.effects;CFG.cues=Math.max(0,Math.min(1,Number(CFG.cues??CFG.effects)||0));if(AU.cues)AU.cues.gain.value=.75*CFG.cues;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
 
 const CUE_NAMES=['Sem aviso','Sino','Duplo agudo','Ascendente','Grave','Descendente','Triplo','Pulso','Cristal'];
 const CUE_NOTES=[[],[880],[1047,1047],[523,784],[330,440],[988,659],[660,660,880],[440,880,440],[1319,1760]];
 let cueStates93=new WeakMap(),cueNext93=0;
-function playReadySound(id,preview=false){if(!Number.isInteger(id)||!CUE_NOTES[id]?.length)return;if(preview)audioInit();if(!AU.ctx||!AU.on||CFG.effects<=0)return;const t=Math.max(AU.ctx.currentTime,cueNext93);cueNext93=t+.3;CUE_NOTES[id].forEach((f,i)=>tone(f,t+i*.075,.12,{type:id===4?'triangle':'sine',v:.12,rev:.08}))}
+function playReadySound(id,preview=false){if(!Number.isInteger(id)||!CUE_NOTES[id]?.length)return;if(preview)audioInit();if(!AU.ctx||!AU.on||CFG.cues<=0)return;const t=Math.max(AU.ctx.currentTime,cueNext93);cueNext93=t+.3;CUE_NOTES[id].forEach((f,i)=>tone(f,t+i*.075,.12,{type:id===4?'triangle':'sine',v:.12,dest:AU.cues}))}
 function normalizeReadySounds(){CFG.slotSounds=Array.from({length:8},(_,i)=>Number.isInteger(CFG.slotSounds?.[i])&&CFG.slotSounds[i]>=0&&CFG.slotSounds[i]<=8?CFG.slotSounds[i]:0);delete CFG.readySounds}
 function updateReadySounds(){if(!player||player.dead){cueStates93=new WeakMap();return}const skills=[...player.skills,run.sovSk];skills.forEach((sk,i)=>{if(!sk||sk.empty||sk.lockedRank)return;const left=Math.max(0,Number(sk.cdT)||0),old=cueStates93.get(sk);cueStates93.set(sk,left);if(old>0&&left===0&&CFG.slotSounds[i]>0)playReadySound(CFG.slotSounds[i])})}
 function setSlotSound(i,v){v=Number(v);if(!Number.isInteger(i)||i<0||i>7||!Number.isInteger(v)||v<0||v>8)return;CFG.slotSounds[i]=v;store.set('pds_cfg',CFG);playReadySound(v,true)}
-function readySoundSettings(){let h='<div class="guide93"><strong>Avisos de recarga</strong><p>Escolha um som para ouvir quando a habilidade desse espaço terminar de recarregar. Para desligar, escolha Sem aviso.</p><p>Usa o volume de efeitos e respeita o som mudo. O aviso não verifica mana ou alcance.</p></div>';
+function readySoundSettings(){let h='<div class="guide93"><strong>Avisos de recarga</strong><p>Escolha um som para ouvir quando a habilidade desse espaço terminar de recarregar. Para desligar, escolha Sem aviso.</p><p>Usa o volume Avisos de recarga e respeita o som mudo. O aviso não verifica mana ou alcance.</p></div>';
  const acts=['sk0','sk1','sk2','sk3','sk4','sk5','sk6','sovereign'];acts.forEach((act,i)=>{const sk=i===7?run.sovSk:player.skills[i];if(i===7&&profile.rank!==9||i<7&&(!sk||sk.lockedRank)||i===3&&!run.adv)return;const title=(i===7?'Domínio':i===3?'Evolução':'Espaço '+([1,2,3,0,4,5,6][i]))+' · '+keyLabel(keyOf(act));h+=row(title,sk&&!sk.empty?safeText(sk.n):'Espaço liberado','<div class="cue93"><select aria-label="Som '+title+'" onchange="setSlotSound('+i+',this.value)">'+CUE_NAMES.map((n,j)=>'<option value="'+j+'" '+(CFG.slotSounds[i]===j?'selected':'')+'>'+n+'</option>').join('')+'</select><button class="btn" onclick="playReadySound(CFG.slotSounds['+i+'],true)">Ouvir</button></div>')});return h}
 
-function audioSettings(){return '<div class="sec">ÁUDIO</div>'+[['music','Música'],['effects','Efeitos e avisos']].map(([k,n])=>'<label for="audio_'+k+'">'+n+' <span id="av_'+k+'">'+Math.round(CFG[k]*100)+'%</span></label><input id="audio_'+k+'" aria-label="'+n+'" type="range" min="0" max="1" step=".05" value="'+CFG[k]+'" oninput="setAudioVolume(\''+k+'\',this.value)" style="width:100%">').join('')+'<div class="sysline">Zere a música para ouvir sua playlist mantendo os efeitos e avisos do jogo.</div>'}
-function setAudioVolume(k,v){if(!['music','effects'].includes(k))return;CFG[k]=Math.max(0,Math.min(1,Number(v)||0));AU.on=true;try{localStorage.setItem('pds_sound','1')}catch(e){}applyCfg();const label=$('av_'+k);if(label)label.textContent=Math.round(CFG[k]*100)+'%'}
+function audioSettings(){return '<div class="sec">ÁUDIO</div>'+[['music','Música'],['effects','Efeitos de combate e ambiente'],['cues','Avisos de recarga']].map(([k,n])=>'<label for="audio_'+k+'">'+n+' <span id="av_'+k+'">'+Math.round(CFG[k]*100)+'%</span></label><input id="audio_'+k+'" aria-label="'+n+'" type="range" min="0" max="1" step=".05" value="'+CFG[k]+'" oninput="setAudioVolume(\''+k+'\',this.value)" style="width:100%">').join('')+'<div class="sysline">Ajuste os avisos de recarga separadamente para destacá-los durante o combate.</div>'}
+function setAudioVolume(k,v){if(!['music','effects','cues'].includes(k))return;CFG[k]=Math.max(0,Math.min(1,Number(v)||0));AU.on=true;try{localStorage.setItem('pds_sound','1')}catch(e){}applyCfg();const label=$('av_'+k);if(label)label.textContent=Math.round(CFG[k]*100)+'%'}
 function safeText(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function creationDraft(){return profile.creationDraft91||(profile.creationDraft91={name:'',skill:0,stats:{for:0,agi:0,per:0,int:0,vit:0}})}
 function creationUsed(){return Object.values(creationDraft().stats).reduce((a,b)=>a+b,0)}
@@ -3610,6 +3645,16 @@ function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE<
   
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
+$('gameMenu95').addEventListener('click',e=>{if(e.target.closest('button'))toggleGameMenu95(false)});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#tb'))toggleGameMenu95(false)});
+$('historyBody95').addEventListener('scroll',()=>{if(!CFG.historyCollapsed95&&historyAtEnd95($('historyBody95'))){historyUnread95=0;historyBadge95()}},{passive:true});
+let historyDrag95=null;
+$('historyResize95').addEventListener('pointerdown',e=>{e.preventDefault();const b=$('history95').getBoundingClientRect();historyDrag95={x:e.clientX,y:e.clientY,w:b.width,h:b.height};e.currentTarget.setPointerCapture(e.pointerId)});
+$('historyResize95').addEventListener('pointermove',e=>{if(!historyDrag95)return;const d=historyDrag95,size=sizeHistory95(d.w+e.clientX-d.x,d.h+(touch?e.clientY-d.y:d.y-e.clientY));CFG.historyW95=size.w;CFG.historyH95=size.h;applyHistory95()});
+for(const type of ['pointerup','pointercancel'])$('historyResize95').addEventListener(type,()=>{if(historyDrag95){historyDrag95=null;store.set('pds_cfg',CFG)}});
+$('historyResize95').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code))return;e.preventDefault();e.stopPropagation();const b=$('history95').getBoundingClientRect(),size=sizeHistory95(b.width+(e.code==='ArrowRight'?20:e.code==='ArrowLeft'?-20:0),b.height+(e.code==='ArrowUp'?20:e.code==='ArrowDown'?-20:0));CFG.historyW95=size.w;CFG.historyH95=size.h;applyHistory95();store.set('pds_cfg',CFG)});
+addEventListener('resize',applyHistory95);
+
 const PETP={tiro:{n:'Disparo',d:'dispara em um monstro'},cura:{n:'Cura',d:'cura você aos poucos'},gelo:{n:'Gelo',d:'dispara e atordoa'},raio:{n:'Raio',d:'acerta até 3 monstros'}};
 function newPet(){const r=wpick([55,27,12,4.5,1.2,.25,.05].map((w,i)=>({i,w}))).i;return{rar:r,pow:pick(Object.keys(PETP)),lvl:1}}
 function petMul(){const p=run.pet;return RAR[p.rar].m*(1+.08*(p.lvl-1))}
@@ -3678,9 +3723,9 @@ function startGame(){
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   restoreSummons();
-  for(const id of['stat','obj','mm','tb','pad','btns'])$(id).hidden=false;showG();
+  for(const id of['stat','obj','mm','tb','pad','btns','history95'])$(id).hidden=false;showG();
   if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
-  started=true;paused=false;cam.x=player.x;cam.z=player.z;
+  started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;
   const rk=RANKS[rankOf()];
   logNews('<b>[NARRADOR]</b> Caçador rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
   logNews('<b>[NARRADOR]</b> Portais abertos nas planícies. Veja no MAPA.');
@@ -3699,9 +3744,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v94</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v95</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=94;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=95;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
