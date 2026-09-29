@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/../game.html','utf8');
 function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(src);assert(m,n);let b=src.indexOf('{',m.index),d=0,q=null,e=false;for(let i=b;i<src.length;i++){let c=src[i];if(q){if(e)e=false;else if(c==='\\')e=true;else if(c===q)q=null;continue}if(c==='"'||c==="'"||c==='`'){q=c;continue}if(c==='{')d++;if(c==='}'&&!--d)return src.slice(m.index,i+1)}}
-const c={classSlotCount:()=>6,rankTalentRows:()=>'',rankTrialReady:()=>true,profile:{},run:{},row:(...a)=>a.join(' '),btn:(...a)=>a.join(' ')};vm.createContext(c);
+const c={classSlotCount:()=>6,rankTalentRows:()=>'',rankTrialReady:()=>true,rankPortalCount:()=>10,profile:{},run:{},row:(...a)=>a.join(' '),btn:(...a)=>a.join(' ')};vm.createContext(c);
 vm.runInContext(src.slice(src.indexOf('const RANKS='),src.indexOf('const S='))+src.slice(src.indexOf('const GR='),src.indexOf('const ELIX='))+src.slice(src.indexOf('const MAIN_ACTS='),src.indexOf('function finishTowerStory')),c);
 for(const n of ['migrateRankProfile','migrateRankRun','newRun','rankTab','itemAtk','cryUp','spendCry'])vm.runInContext(extract(n),c);
 assert.equal(vm.runInContext('RANKS.map(r=>r.id).join(",")',c),'F,E,D,C,B,A,S,SS,SS+,★');

@@ -672,7 +672,11 @@ function rankTalentRows(){const points=rankPoints();let h='<div class="sec">ESCO
 function bounceBasic(p){if(!p.bounces)return false;let target=null,dist=7;for(const e of enemies){if(e.dead||e.sleep||e.invuln||p.hit.has(e))continue;const d=Math.hypot(e.x-p.x,e.z-p.z);if(d<dist){dist=d;target=e}}if(!target)return false;const a=Math.atan2(target.x-p.x,target.z-p.z),speed=Math.hypot(p.vx,p.vz);p.vx=Math.sin(a)*speed;p.vz=Math.cos(a)*speed;p.mesh.rotation.y=a;p.bounces--;p.dmg*=.7;p.life=Math.max(p.life,.5);return true}
 function classTraining(){const n=jobsOf().filter(i=>!CLASSES[i].rare).length;return {level:5+10*n,bosses:2*n,gold:500*n*n}}
 function classTrainingReady(){const q=classTraining();return run.level>=q.level&&(profile.bossKills||0)>=q.bosses&&run.gold>=q.gold&&L.mode==='world'&&!!inCity(player.x,player.z)}
-function rankTrialReady(nx){return nx===profile.rank+1&&nx<=TOPR&&run.level>=GR[nx].lvl&&(profile.guildClaims||0)>=nx*2&&(profile.bossKills||0)>=nx}
+function rankPortalCount(rank){return Math.max(0,Number(profile.closedPortalsByRank?.[rank])||0)}
+function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;g.rankCounted=true;profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
+function rankTrialReady(nx){return nx===profile.rank+1&&nx<=TOPR&&run.level>=GR[nx].lvl&&(profile.guildClaims||0)>=nx*2&&rankPortalCount(nx)>=10}
+function updateRankExaminer(S){if(!L.rankTrial)return false;if(S.stage===0&&S.t>2.5){S.stage=3;const b=spawnBoss(0,-8,S.gr,{n:'Examinador do Rank '+RANKS[L.rankTrial].id,types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)});b.aggro=true;bossAggro(b);toast('<b>[ORDEM]</b> Derrote o Examinador para conquistar o rank '+RANKS[L.rankTrial].id+'.')}S.msg=S.stage===0?'Prepare-se para o Examinador':'Derrote o Examinador do Rank '+RANKS[L.rankTrial].id;return true}
+
 
 const CLASS_SLOTS=[0,1,2,4,5,6],CLASS_SLOT_KEYS=['Q','R','T','Y','U','5'];
 function classSkill(ci,si){const c=CLASSES[ci];if(!c)return null;const base=ci===3&&run.elem&&ELEM[run.elem]?ELEM[run.elem].sk:c.sk;const sk=base[si];return sk?{...sk,sourceClass:ci,skillId:ci+':'+si}:null}
@@ -1384,7 +1388,7 @@ function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1+(run?run.level:1)/10;
   if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
   return {t:'pvp',n:1,got:0,rw:Math.round(160*GR[pr].gold*lvM),d:'Derrote um caçador hostil'}}
 function genQuests(){return[genQuest('kill'),genQuest('clear'),genQuest('pvp')]}
-function qev(type,val){if(type==='clear'){npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[ORÁCULO]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}}
+function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[ORÁCULO]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}}
 
 /* ================= EFEITOS ================= */
 function fxRing(x,z,col,r,dur=.45){const o=new THREE.Mesh(geo('fxr',()=>new THREE.RingGeometry(.2,.6,32)),glow(col,.9));o.rotation.x=-Math.PI/2;o.position.set(x,.08,z);scene.add(o);fxs.push({o,t:0,dur,kind:'ring',r})}
@@ -2271,6 +2275,7 @@ function updSpecial(dt){
   if(L.bossDead&&S.kind==='tower'){S.msg='Andar '+S.floor+' limpo · suba ou saia';return}
   if(L.bossDead){S.msg='Concluído · saia pelo portal · fecha em '+fmtT(L.closeT);return}
   if(S.kind==='job'){
+    if(updateRankExaminer(S))return;
     const alive=enemies.filter(e=>!e.dead&&!e.isBoss).length;
     if(S.stage===0&&S.t>2.5){S.stage=1;spawnWave(8,0);toast('<b>[ORÁCULO]</b> Missão de troca de classe: onda 1 de 3.')}
     else if(S.stage===1&&alive===0){S.stage=2;spawnWave(12,3);toast('<b>[ORÁCULO]</b> Onda 2 de 3. Elites chegando.')}
@@ -2523,7 +2528,7 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
 function journeyObjectives(){const list=[],nx=profile.rank+1;
-  if(nx<=TOPR){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos da prova. Procure Lyra na Ordem da Fenda; enfrente as três ondas e o Examinador.':'Requisitos: nível '+need+', '+(nx*2)+' missões concluídas com recompensa recebida e '+nx+' guardiões derrotados. Procure Lyra.',progress:'nível '+run.level+'/'+need+' · missões '+(profile.guildClaims||0)+'/'+(nx*2)+' · guardiões '+(profile.bossKills||0)+'/'+nx+(ready?' · prova disponível':''),ready})}
+  if(nx<=TOPR){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos da prova. Procure Lyra na Ordem da Fenda; enfrente diretamente o Examinador.':'Requisitos: nível '+need+', '+(nx*2)+' missões concluídas com recompensa recebida e 10 portais rank '+RANKS[nx].id+' fechados. Procure Lyra.',progress:'nível '+run.level+'/'+need+' · missões '+(profile.guildClaims||0)+'/'+(nx*2)+' · portais '+RANKS[nx].id+' '+Math.min(10,rankPortalCount(nx))+'/10'+(ready?' · prova disponível':''),ready})}
   else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre do Oráculo para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
@@ -2765,9 +2770,10 @@ const MAIN_ACTS=[null,
  ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
 function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
 function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
-function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank de E a SS+ concede <b>1 escolha de combate</b>. De E a A, libera também mais <b>1 espaço de habilidade</b>, até seis. O bônus de dano e vida continua. Complete missões da Ordem, derrote guardiões e faça a prova final.</div>';
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank de E a SS+ concede <b>1 escolha de combate</b>. De E a A, libera também mais <b>1 espaço de habilidade</b>, até seis. O bônus de dano e vida continua. Complete as tarefas da Ordem e feche 10 portais do rank que deseja alcançar. Depois, enfrente diretamente o Examinador do próximo rank.</div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
-  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Requisito: nível '+need+' (você está no '+run.level+') · '+(nx*2)+' missões concluídas com recompensa recebida na Ordem (atual '+(profile.guildClaims||0)+') · '+nx+' guardiões derrotados (atual '+(profile.bossKills||0)+') · 3 ondas de monstros rank '+RANKS[nx].id+' e o Examinador do Rank. Sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));
+  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Tarefas da Ordem concluídas e recebidas: '+(profile.guildClaims||0)+'/'+(nx*2)+'.<br>Portais rank '+RANKS[nx].id+' fechados: '+Math.min(10,rankPortalCount(nx))+'/10. Apenas esse rank conta.<br>Prova final: duelo contra o Examinador do Rank '+RANKS[nx].id+'. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));
+
   else h+=row(r>TOPR?'Rank raro ★':'Rank máximo da Ordem','As provas terminam no SS+. O rank raro ★ é um despertar especial.','');
   h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=rankTalentRows();h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
   for(let i=1;i<MAIN_ACTS.length;i++)if(acts.includes(i)||profile.rank>=i){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
@@ -3177,7 +3183,7 @@ function extraActions3(a,v){
   if(a==='joblearn'){if(!CLASSES[+v]||CLASSES[+v].rare||!learnClass(+v))return;sfx('level');toast('<b>[CLASSE]</b> '+CLASSES[+v].n+' aprendida. Suas habilidades estão disponíveis para combinar.',6000);return true}
   if(a==='jobrare'){if(!canLearnClass(+v)||!CLASSES[+v].rare)return;openModal('ESCOLHER CLASSE RARA','<div class="sysline">Desbloquear <b>'+CLASSES[+v].n+'</b> ocupa sua única vaga rara. Ela complementa as classes comuns. Essa escolha não pode ser trocada; outras raras serão adicionadas depois.</div>'+btn('Confirmar '+CLASSES[+v].n,'rareconfirm',v,true,'hot'));return 'close0'}
   if(a==='rareconfirm'){if(!CLASSES[+v]||!CLASSES[+v].rare||!learnClass(+v))return;guildView('jobs');return 'close0'}
-  if(a==='rktrial'){const nx=+v;if(!rankTrialReady(nx))return;closeModal();L.rankTrial=nx;buildSpecial('job');L.rankTrial=nx;toast('<b>[ORDEM]</b> Prova para o rank '+RANKS[nx].id+'. Sobreviva às 3 ondas e derrote o Examinador.',6000);return 'close'}
+  if(a==='rktrial'){const nx=+v;if(!rankTrialReady(nx))return;closeModal();L.rankTrial=nx;buildSpecial('job');L.rankTrial=nx;toast('<b>[ORDEM]</b> Prova para o rank '+RANKS[nx].id+'. Derrote o Examinador. Não há ondas de monstros antes do duelo.',6000);return 'close'}
   if(a==='pbup'){const l=pb(v);if(l>=10||(run.spts||0)<1||run.gold<pbCost(l))return;run.spts--;run.gold-=pbCost(l);run.pbook=run.pbook||{};run.pbook[v]=l+1;refreshStats();sfx('level');return true}
   if(a==='innup'){const l=innLv(),up=20000*(l+1)*(l+1);if(l>=5||run.gold<up)return;run.gold-=up;const c=nearestCity(player.x,player.z).c;profile.innLv=profile.innLv||{};profile.innLv[c.id]=l+1;store.set('pds2_profile',profile);sfx('level');toast('<b>[POUSADA]</b> Pousada melhorada para o nível '+(l+1)+'.');return true}
   if(a==='rest'){if(run.gold<100)return;run.gold-=100;const il=innLv();run.rested=il?{t:600,l:il}:null;refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('Você descansou até o amanhecer.');return 'close'}
