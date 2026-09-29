@@ -231,6 +231,46 @@ const SOVEREIGNS=[
  {n:'Soberano das Feras',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
 const ALLBOSS=()=>[...BOSSES,...BOSSES_HIGH,...SOVEREIGNS];
 const KINDS={
+ slime:{mon:'slime',gk:'Skeleton_Minion',n:'Slime Rosa',hp:22,dmg:5,spd:3.2,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0xff8ab0,wep:'none',r:0.55,rk:0},
+ gosma:{mon:'gosma',gk:'Skeleton_Minion',n:'Gosma Verde',hp:24,dmg:5,spd:3,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0x6fe36f,wep:'none',r:0.55,rk:0,bio:'pantano'},
+ cogu:{mon:'cogu',gk:'Skeleton_Minion',n:'Cogumelinho',hp:20,dmg:6,spd:3.4,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0xd05050,wep:'none',r:0.55,rk:0,bio:'floresta'},
+ passaro:{mon:'passaro',gk:'Skeleton_Minion',n:'Pássaro Bravo',hp:18,dmg:6,spd:5,ai:'lunge',range:1.5,wind:0.35,atkCd:1.4,xp:6,scale:1,body:0x6fb0ff,wep:'none',r:0.57,rk:0,bio:'flores'},
+ espinhosa:{mon:'espinhosa',gk:'Skeleton_Minion',n:'Gosma Espinhosa',hp:40,dmg:9,spd:3,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x4aa04a,wep:'none',r:0.59,rk:1,bio:'pantano'},
+ cactinho:{mon:'cactinho',gk:'Skeleton_Minion',n:'Cactoro',hp:36,dmg:9,spd:3.2,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:7,scale:1,body:0x5a9a4a,wep:'none',r:0.59,rk:1,bio:'deserto'},
+ magote:{mon:'magote',gk:'Skeleton_Minion',n:'Magote',hp:28,dmg:9,spd:3.2,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:6,scale:1,body:0x7a5aff,wep:'none',r:0.59,rk:1},
+ orcinho:{mon:'orcinho',gk:'Skeleton_Minion',n:'Orc Pequeno',hp:44,dmg:9,spd:3.6,ai:'melee',range:1.5,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x5a8a3a,wep:'none',r:0.59,rk:1},
+ ninjinha:{mon:'ninjinha',gk:'Skeleton_Minion',n:'Ninja Mirim',hp:30,dmg:10,spd:5,ai:'lunge',range:1.5,wind:0.35,atkCd:1.4,xp:6,scale:1,body:0x333344,wep:'none',r:0.57,rk:1,bio:'floresta'},
+ visitante:{mon:'visitante',gk:'Skeleton_Minion',n:'Visitante',hp:34,dmg:9,spd:3.4,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0x7fe0a0,wep:'none',r:0.59,rk:1,bio:'cristal'},
+ yetinho:{mon:'yetinho',gk:'Skeleton_Minion',n:'Filhote de Yeti',hp:46,dmg:9,spd:3.2,ai:'melee',range:1.5,wind:0.5,atkCd:1.4,xp:9,scale:1,body:0xe0f0ff,wep:'none',r:0.59,rk:1,bio:'neve'},
+ peixinho:{mon:'peixinho',gk:'Skeleton_Minion',n:'Peixe Andante',hp:36,dmg:8,spd:3.2,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:7,scale:1,body:0x4f9fd8,wep:'none',r:0.57,rk:1,bio:'pantano'},
+ fantasma:{mon:'fantasma',gk:'Skeleton_Mage',n:'Fantasma',hp:50,dmg:12,spd:3.6,ai:'wraith',range:8,wind:0.5,atkCd:1.9,xp:10,scale:1,body:0xd8e0ff,wep:'none',r:0.67,rk:2,bio:'floresta'},
+ abelha:{mon:'abelha',gk:'Skeleton_Mage',n:'Abelha Blindada',hp:55,dmg:12,spd:4.6,ai:'lunge',range:1.6,wind:0.35,atkCd:1.4,xp:11,scale:1,body:0xffc040,wep:'none',r:0.63,rk:2,bio:'flores'},
+ glub:{mon:'glub',gk:'Skeleton_Mage',n:'Glub',hp:48,dmg:12,spd:3.4,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:9,scale:1,body:0x9a6aff,wep:'none',r:0.65,rk:2},
+ golenzinho:{mon:'golenzinho',gk:'Skeleton_Mage',n:'Golenzinho',hp:90,dmg:12,spd:2.4,ai:'melee',range:1.8,wind:0.5,atkCd:1.4,xp:18,scale:1,body:0x9a8a7a,wep:'none',r:0.67,rk:2,bio:'cristal'},
+ cogufuria:{mon:'cogufuria',gk:'Skeleton_Minion',n:'Cogumelo Furioso',hp:70,dmg:13,spd:3.4,ai:'melee',range:1.6,wind:0.5,atkCd:1.4,xp:14,scale:1,body:0xa03030,wep:'none',r:0.65,rk:2,bio:'floresta'},
+ sapo:{mon:'sapo',gk:'Skeleton_Warrior',n:'Sapo Guerreiro',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.4,xp:16,scale:1,body:0x5aa05a,wep:'none',r:0.73,rk:2,bio:'pantano'},
+ coelho:{mon:'coelho',gk:'Skeleton_Warrior',n:'Coelho Assassino',hp:60,dmg:15,spd:5.5,ai:'lunge',range:1.7,wind:0.35,atkCd:1.4,xp:12,scale:1,body:0xf0e0e0,wep:'none',r:0.71,rk:2,bio:'flores'},
+ caveira:{mon:'caveira',gk:'Skeleton_Mage',n:'Caveira Fantasma',hp:80,dmg:16,spd:3.8,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:16,scale:1,body:0xe0e0d0,wep:'none',r:0.69,rk:3},
+ redemoinho:{mon:'redemoinho',gk:'Skeleton_Mage',n:'Redemoinho',hp:90,dmg:16,spd:5,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:18,scale:1,body:0x9fe8ff,wep:'none',r:0.69,rk:3,bio:'cristal'},
+ mono:{mon:'mono',gk:'Skeleton_Warrior',n:'Monkroose',hp:120,dmg:17,spd:4,ai:'melee',range:1.9,wind:0.5,atkCd:1.4,xp:24,scale:1,body:0xb07a4a,wep:'none',r:0.75,rk:3,bio:'floresta'},
+ ninja:{mon:'ninja',gk:'Skeleton_Warrior',n:'Ninja Sombrio',hp:100,dmg:19,spd:5.5,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:20,scale:1,body:0x2a2a3a,wep:'none',r:0.75,rk:3,bio:'floresta'},
+ cactogig:{mon:'cactogig',gk:'Skeleton_Warrior',n:'Cactoro Gigante',hp:150,dmg:17,spd:3,ai:'melee',range:2,wind:0.5,atkCd:1.4,xp:30,scale:1,body:0x4a8a3a,wep:'none',r:0.81,rk:3,bio:'deserto'},
+ homempeixe:{mon:'homempeixe',gk:'Skeleton_Warrior',n:'Homem-Peixe',hp:130,dmg:16,spd:3.6,ai:'melee',range:1.9,wind:0.5,atkCd:1.4,xp:26,scale:1,body:0x3a7ab0,wep:'none',r:0.77,rk:3,bio:'pantano'},
+ alpaca:{mon:'alpaca',gk:'Skeleton_Mage',n:'Alpaca Real',hp:110,dmg:16,spd:3.8,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:22,scale:1,body:0xf0d8a0,wep:'none',r:0.71,rk:3,bio:'flores'},
+ abelharainha:{mon:'abelharainha',gk:'Skeleton_Mage',n:'Abelha Rainha Blindada',hp:130,dmg:20,spd:4.6,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:26,scale:1,body:0xffb020,wep:'none',r:0.71,rk:4,bio:'flores'},
+ glubancio:{mon:'glubancio',gk:'Skeleton_Mage',n:'Glub Ancião',hp:120,dmg:21,spd:3.4,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:24,scale:1,body:0x7a4aff,wep:'none',r:0.73,rk:4},
+ golempedra:{mon:'golempedra',gk:'Skeleton_Mage',n:'Golem de Pedra',hp:260,dmg:22,spd:2.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:52,scale:1,body:0x8a8a9a,wep:'none',r:0.87,rk:4,bio:'cristal'},
+ lula:{mon:'lula',gk:'Skeleton_Mage',n:'Lula do Vazio',hp:140,dmg:21,spd:3.6,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:28,scale:1,body:0x6a3a8a,wep:'none',r:0.73,rk:4},
+ invasor:{mon:'invasor',gk:'Skeleton_Warrior',n:'Invasor',hp:160,dmg:22,spd:4,ai:'melee',range:1.9,wind:0.5,atkCd:1.4,xp:32,scale:1,body:0x6fe0a0,wep:'none',r:0.77,rk:4,bio:'cristal'},
+ dino:{mon:'dino',gk:'Skeleton_Warrior',n:'Dino',hp:200,dmg:22,spd:4.4,ai:'lunge',range:2,wind:0.35,atkCd:1.4,xp:40,scale:1,body:0x6a9a4a,wep:'none',r:0.83,rk:4,bio:'vulcao'},
+ diabrete:{mon:'diabrete',gk:'Skeleton_Mage',n:'Diabrete',hp:130,dmg:22,spd:4.2,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:26,scale:1,body:0xd04030,wep:'none',r:0.69,rk:4,bio:'vulcao'},
+ tribal:{mon:'tribal',gk:'Skeleton_Mage',n:'Máscara Tribal',hp:200,dmg:26,spd:3.6,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:40,scale:1,body:0xc08040,wep:'none',r:0.75,rk:5},
+ alpacaimp:{mon:'alpacaimp',gk:'Skeleton_Mage',n:'Alpaca Imperial',hp:260,dmg:26,spd:4,ai:'lunge',range:2,wind:0.35,atkCd:1.4,xp:52,scale:1,body:0xffe0a0,wep:'none',r:0.79,rk:5,bio:'flores'},
+ chifrudo:{mon:'chifrudo',gk:'Skeleton_Warrior',n:'Demônio Chifrudo',hp:300,dmg:28,spd:4,ai:'melee',range:2.1,wind:0.5,atkCd:1.4,xp:60,scale:1,body:0xb02020,wep:'none',r:0.85,rk:5,bio:'vulcao'},
+ reicogu:{mon:'reicogu',gk:'Skeleton_Warrior',n:'Rei Cogumelo',hp:340,dmg:27,spd:3.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:68,scale:1,body:0xc03a3a,wep:'none',r:0.91,rk:5,bio:'floresta'},
+ dragonete:{mon:'dragonete',gk:'Skeleton_Mage',n:'Dragonete',hp:300,dmg:30,spd:4,ai:'wraith',range:11,wind:0.5,atkCd:1.9,xp:60,scale:1,body:0xd05030,wep:'none',r:0.83,rk:6,bio:'vulcao'},
+ dragaoancio:{mon:'dragaoancio',gk:'Skeleton_Mage',n:'Dragão Ancião',hp:480,dmg:36,spd:3.8,ai:'wraith',range:12,wind:0.5,atkCd:1.9,xp:96,scale:1,body:0x8a1a1a,wep:'none',r:0.99,rk:7,bio:'vulcao'},
+
  minion:{gk:'Skeleton_Minion',n:'Esqueleto',hp:26,dmg:6,spd:3.6,ai:'melee',range:1.6,wind:.4,atkCd:1.1,xp:6,scale:.72,body:0xd9d2bf,wep:'none',r:.45},
  mage:{gk:'Skeleton_Mage',n:'Esqueleto Mago',hp:32,dmg:9,spd:2.8,ai:'ranged',range:10,wind:.6,atkCd:2.3,xp:11,scale:.95,body:0x5a3d8a,wep:'staff',r:.55},
  warrior:{gk:'Skeleton_Warrior',clip:'1H_Melee_Attack_Chop',n:'Esqueleto Guarda',hp:85,dmg:13,spd:2.1,ai:'melee',range:2.1,wind:.7,atkCd:1.7,xp:16,scale:1.15,body:0x8a8f99,wep:'axe',shield:true,r:.7},
@@ -444,7 +484,49 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   dragao:{h:3.4,a:{Idle:'Dragon_Flying',Running_A:'Dragon_Flying',Death_A:'Dragon_Death',ATK:'Dragon_Attack',Hit:'Dragon_Hit'}},
   gigante:{h:3.6,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}},
   yeti:{h:2.6,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Punch',Hit:'HitReact'}},
-  vespa:{h:1.4,a:{Idle:'Wasp_Flying',Running_A:'Wasp_Flying',Death_A:'Wasp_Death',ATK:'Wasp_Attack'}}};
+  vespa:{h:1.4,a:{Idle:'Wasp_Flying',Running_A:'Wasp_Flying',Death_A:'Wasp_Death',ATK:'Wasp_Attack'}},
+  slime:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  gosma:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  cogu:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  passaro:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  espinhosa:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  cactinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  magote:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  orcinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  ninjinha:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  visitante:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  yetinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  peixinho:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  fantasma:{h:1.6,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  abelha:{h:1.4,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  glub:{h:1.5,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  golenzinho:{h:1.6,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  cogufuria:{h:1.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  sapo:{h:1.9,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  coelho:{h:1.8,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  caveira:{h:1.7,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  redemoinho:{h:1.7,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  mono:{h:2.0,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  ninja:{h:2.0,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  cactogig:{h:2.3,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  homempeixe:{h:2.1,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  alpaca:{h:1.8,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  abelharainha:{h:1.8,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  glubancio:{h:1.9,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  golempedra:{h:2.6,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  lula:{h:1.9,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  invasor:{h:2.1,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  dino:{h:2.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Punch',Hit:'HitReact'}},
+  diabrete:{h:1.7,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  tribal:{h:2.0,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  alpacaimp:{h:2.2,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  chifrudo:{h:2.5,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  reicogu:{h:2.8,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Weapon',Hit:'HitReact'}},
+  dragonete:{h:2.4,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  dragaoancio:{h:3.2,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
+  gato:{h:0.7,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
   for(const k in MON_DEF)ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})});
 function makeMonster(o){
@@ -1120,7 +1202,8 @@ function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
     cd:rnd(.5,1.5),act:null,stun:0,slow:0,dotT:0,dotD:0,flash:0,dead:false,deadT:0,aggro:false,kb:{x:0,z:0},t:Math.random()*9,team:'enemy',gold:0,...extra};
   enemies.push(e);return e;
 }
-function kindsFor(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
+function kindsFor(gr,bio){const X=[];for(const k in KINDS){const K=KINDS[k];if(K.rk==null||gr<K.rk)continue;if(K.bio&&bio&&K.bio!==bio)continue;X.push({k,w:K.bio&&bio===K.bio?22:K.bio&&bio?0:9})}return kindsFor0(gr).concat(X.filter(x=>x.w>0))}
+function kindsFor0(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
 /* Masmorras comuns acompanham o jogador (pedido do Ian): se você está acima do nível do rank, os monstros sobem até o seu nível (e dão mais XP/ouro). */
 function dunLvl(gr){const G=GR[Math.min(8,gr)];return (L&&L.mode==='dungeon'&&!L.special&&run)?Math.max(G.lvl,run.level):G.lvl}
 function dunScale(e,gr){const G=GR[Math.min(8,gr)],lv=dunLvl(gr);if(lv<=G.lvl)return;const mh=eHP(lv)/G.hp,md=eDMG(lv)/G.dmg,rw=Math.sqrt(mh);e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.xp*=rw;e.gold*=rw;e.lvl=lv+(e.elite?3:0)+(e.isBoss?5:0)}
@@ -1733,14 +1816,14 @@ function updWorld(dt){updEcon(dt);
   L.spawnT-=dt;
   if(L.spawnT<=0){L.spawnT=2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
     if(wild<10&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48||!worldFree(x,z,1.5))continue;
-      const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,8);const k=wpick(kindsFor(gr)).k;const n=k==='minion'?3:Math.random()<.4?2:1;
+      const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,8);const k=wpick(kindsFor(gr,biomeAt(x,z))).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.gold*=1.5}bioMob(e,biomeAt(x,z))}break}}}
   for(const e of enemies)if(e.wild&&!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)>(e.breaker?220:90)){scene.remove(e.m.root);e.gone=true}
   if(safe&&!P.dead){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.08*dt);P.mp=Math.min(P.maxmp,P.mp+P.maxmp*.1*dt);for(const a of allies)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.1*dt)}
   if(safe&&L.lastCity!==nc.c){L.lastCity=nc.c;if(nc.c.name!=='Aster')unlockLore('city');bigText(nc.c.name.toUpperCase(),1200);toast('<b>[SISTEMA]</b> Zona segura: cidade de '+nc.c.name+'.');L.cands=genCands()}
   if(!safe&&nc.d>40)L.lastCity=null;
   L.turT=(L.turT||0)-dt;if(L.turT<=0){L.turT=1;for(const e of enemies){if(e.dead||!e.breaker)continue;const n=nearestCity(e.x,e.z);if(n.d<60&&cityL(n.c)>=5&&!cityFallen(n.c)){hurtEnemy(e,e.maxhp*.06,n.c.x,n.c.z,{kb:0,pierce:true});fxLine([{x:n.c.x+(e.x-n.c.x)/n.d*34,z:n.c.z+(e.z-n.c.z)/n.d*34},{x:e.x,z:e.z}],0xffd070)}}}
-  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city)))spawnCitizen(ch.city);for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
+  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city))){spawnCitizen(ch.city);if(npcs.filter(n=>n.critter&&!n.gone&&n.home===ch.city).length<3)spawnCritter(ch.city)}for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
 }
 function updDungeon(dt){
   for(const it of L.exits)it.ring.rotation.z+=dt*.8;
@@ -2464,6 +2547,9 @@ function festival(){const d=new Date(),m=d.getMonth()+1,dd=d.getDate(),w=d.getDa
   if((m===10&&dd>=25)||(m===11&&dd<=2))return{n:'Noite das Sombras',d:'XP +50% à noite',xp:isNight()?.5:0,shop:0,line:'Na Noite das Sombras os portais ficam inquietos...'};
   if((m===12&&dd>=20)||(m===1&&dd<=6))return{n:'Festival de Inverno',d:'lojas 20% mais baratas e XP +25%',xp:.25,shop:.2,line:'Feliz Festival de Inverno!'};
   if(w===0||w===6)return{n:'Feira de Fim de Semana',d:'lojas 15% mais baratas e estandartes na praça',xp:0,shop:.15,line:'Aproveita a feira! Tudo mais barato hoje.'};return null}
+const CRIT=['gato','galinha','pombo'],CRIT_N={gato:'Miau.',galinha:'Có-có-có!',pombo:'Pruu.'};
+function spawnCritter(c){const k=pick(CRIT);if(!MON.list[k])return;const m=makeChibi({mon:k,gk:'Skeleton_Minion',scale:1});const a=rnd(0,TAU),d=rnd(4,20),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);
+  const n={kind:'citizen',critter:true,home:c,m,x,z,face:0,r:.3,name:'',short:'',col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],noLabel:true,label:'F · FAZER CARINHO'};n.use=()=>{floater(n.x,n.z,CRIT_N[k],'#ffd9a0');sfx('ding')};npcs.push(n);return n}
 function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4a,0x2f7a4a,0xb39a6a,0x7a5a9a]),hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0xd8b060]),wep:'none',gk:pick(['Knight','Barbarian','Mage','Rogue']),tint:pick([0xffffff,0xffe0c0,0xd0e0ff,0xe0ffd0]),scale:.88});
   const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(CNAMES);
   const n={kind:'citizen',home:c,m,x,z,face:0,r:.45,name:nm,short:nm,col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · CONVERSAR COM '+nm.toUpperCase()};
@@ -3090,9 +3176,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v55</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v56</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=55;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=56;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
