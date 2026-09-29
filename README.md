@@ -39,3 +39,11 @@ Créditos e licenças dos modelos 3D ficam em `models/`. Os pacotes abaixo usam 
 - Montaria (Lobo de Mana): modelo **Fox** do glTF Sample Assets — modelo de PixelMannen (CC0), rig e animação de tomkranis (CC-BY 4.0), conversão AsoboStudio e scurest (CC-BY 4.0).
 
 O arquivo `models/env.glb` junta os modelos de cenário já convertidos (cores assadas nos vértices, sem texturas) para carregar rápido.
+
+
+### Atualização v71 — personalização
+- Aprenda classes comuns na Ordem e combine seis habilidades em Personagem → Combinação.
+- Passivas de todas as classes aprendidas se somam; consulte Personagem → Ver passivas.
+- Equipe quantos títulos conquistados quiser.
+- Depois de aprender uma classe mágica, X alterna o ataque básico físico/arcano, mesmo começando como guerreiro. As habilidades equipadas funcionam em ambos os estilos.
+- Combinações e recargas persistem no save. Necromantes existentes são preservados; a jornada para novas classes raras será uma etapa posterior.

@@ -219,3 +219,22 @@ Ian identificou movimento travado/deslizante no Escaravelho e aprovou usar um ca
 
 1. Câmera mais próxima por trás do personagem, quase em primeira pessoa, com roda do mouse para afastar e ampliar o campo de visão. Manter leitura dos perigos no chão. Ian pediu concluir os modelos primeiro; ângulo, colisão e controles precisam de protótipo.
 2. Segundo Despertar muito raro: 10 classes iniciais e escolha entre 10 classes especiais, incluindo Necromante e Mago do Tempo. Ideia do Mago do Tempo: reduzir nível/força do oponente e ultimate que devolve dano/reflete projéteis. Sugestão discutida: redução temporária limitada de atributos e resistência de chefes, sem números aprovados. Falta decidir se a especialização complementa ou substitui a classe inicial, condições de desbloqueio e as outras oito classes. A seleção atual do Necromante permanece até implementar a decisão futura.
+
+### Revisão solicitada por Ian — 29/09/2026, após v70
+
+Decisões posteriores: aprender classes comuns e combinar habilidades; mais espaços de habilidades; somar todas as passivas aprendidas. Especialização rara será adicional, com uma única escolha por personagem. Proposta de títulos sem o limite atual de três; distinguir equipar todos de criar conteúdo ilimitado.
+
+Implementação local em andamento em game.html/index.html: seis espaços de classe, passivas acumuladas e painel, títulos sem teto de equipados, magias diferenciadas e separação inicial da especialização. Ainda sem publicação ou validação completa no navegador; verificar migração, recargas, remapeamento e desbloqueio raro antes de fechar entrega. sw.js permanece v70.
+
+Ian pediu comparar os prints e áudios antigos com o jogo e continuar por partes. Revisão identificou: compensação de pontos antigos estimada; arma viva descrita como +3% mas calculada como +2%; espólios sem uso na forja; tomo de alcance restrito ao corpo a corpo; missão do Segundo Despertar ausente; raios de cidade divergentes; torre sem temas por blocos. Persistência de poderes não pertencentes à lista de chefes e rank das recompensas genéricas da torre precisam de teste dirigido. Câmera próxima e multiplayer continuam pendentes. Relatório entregue em outputs/Revisao-Ecos-da-Fenda-v70.md no workspace do chat. Nenhuma publicação nesta revisão.
+
+
+## Parte 1 — personalização, v71
+
+Ian pediu entregas por partes e ajuda para desenvolver a história quando chegarmos nessa etapa. Esta entrega fecha seis habilidades de classes aprendidas (Q/R/T/Y/U/5), evolução separada (G), passivas acumuladas e painel, e títulos conquistados sem limite de equipados. Magias de fogo/gelo/terra/raio ganharam diferenças iniciais de projétil e comportamento. Todas as classes comuns podem ser aprendidas na Ordem; Necromante existente é preservado. Novos desbloqueios raros aguardam a jornada do Segundo Despertar, sem escolha provisória irreversível por rank. Acesso antigo a erguer ecos no rank @ foi preservado.
+
+Correção pedida durante a etapa: personagem de origem física que aprende magia pode alternar o ataque básico com X; habilidades equipadas independem do estilo. Ian pediu esconder o botão de estilo e explicar no tutorial. Implementado aviso contextual único, tutorial e ajuda de PC. Estilo fica salvo; projétil arcano usa uma classe mágica aprendida, priorizando a combinação equipada.
+
+Proteção do progresso: combinação e recargas salvas, recarga preservada ao retirar/recolocar e trocar classe, restauração de poderes de evolução da biblioteca, cópia local única do save anterior em pds3_backup_v70 antes da primeira migração. Trocar repetidamente de classe não melhora de graça a mesma evolução já aprendida. Descrição de arma viva corrigida para +2% por nível, sem alterar o cálculo.
+
+Validação: 14 cenários nas funções reais (incluindo save antigo, poderes de evolução, passivas, títulos, recarga e ataque arcano de personagem físico), regressões v68/v69 e análise dos scripts. No navegador PC: combinação equipada/reaberta, painel de passivas e alternância X verificados. Não é uma sessão extensa de balanceamento. Próxima parte: combate/recompensas; aguardar Ian antes de iniciar. História e câmera permanecem posteriores.
