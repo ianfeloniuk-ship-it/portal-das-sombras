@@ -175,3 +175,16 @@ Próximos passos sugeridos: trocar a paleta azul-sistema por uma própria, e a h
 
 ## Ranks e paleta (29/09/2026)
 Ranks públicos: **F, E, D, C, B, A, \*\*, \*\*\***; rank secreto: **@** (antigo Arconte/Soberano). Paleta própria: âmbar (#ffb347 / #ffd08a) sobre violeta escuro (#0e0710), no lugar do azul-sistema. Lore: há cem anos o céu rachou; das Fendas saem ecos de mundos mortos; o Oráculo escolhe quem os enfrenta.
+
+## Continuação no Codex — 29/09/2026, v68
+
+Base: revisão pública `7e90abc` (v67), mais recente que a cópia antiga de PC. Feedback enviado por Ian: explicar Pacto Sombrio e limite das invocações, preservar esqueletos nas transições, mostrar a recarga com Arcano e evitar o nome repetido na mira.
+
+- Pacto: descrição dos efeitos, sem custo quando não há ecos/invocações; em `Sem cura`, fortalece sem recuperar vida. Invocações respeitam o teto de mana, renovam duração/vida ao conjurar novamente (vida bloqueada em `Sem cura`) e substituem apenas as mais antigas necessárias. Contratados, convidados e caravanas não entram nesse limite.
+- Invocações temporárias acompanham entrada/saída/subida de andar com vida, tempo restante e buffs preservados. Continuam temporárias: não são restauradas ao reabrir o jogo. Contador de ecos e invocações no painel, também em orientação retrato; nessa orientação, botões do topo ficam em duas filas, sem cobrir o personagem.
+- `skillCooldown` compartilha a conta entre execução, janela, tooltip e barra, incluindo Arcano e seu ápice. O overlay de alvo não repete o nome de elites/rivais que já está na barra.
+- Domínio Absoluto ganhou botão de toque, recarga e tecla configurável, visível apenas depois do rank secreto. Seleção inicial mostra F, e o modo local `?dev` foi corrigido.
+- Decisão atual de Ian: **manter o Necromante na escolha inicial e decidir a proposta de classe especial depois**. Nenhum ajuste de dano geral nesta rodada.
+- **Foco da entrega: PC.** A prévia principal deve mostrar a interface com mouse/teclado em tela larga; a captura em retrato serviu apenas à revisão complementar de toque.
+
+Validação: scripts inline dos dois HTMLs analisados; regressão nas funções reais de mana/recarga, invocações, transições e descrições aprovada; revisão no navegador da interface de PC em 1280×720, dos controles de toque em 390×844 e da janela mostrando 11,1s com Arcano 5. Não foi feita uma sessão extensa de balanceamento. Ian autorizou publicar a v68 e continuar o projeto em 29/09, após confirmar que a tela em retrato era a prévia de celular. O foco da versão continua sendo PC.
