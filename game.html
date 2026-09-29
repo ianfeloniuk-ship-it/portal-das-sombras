@@ -113,7 +113,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="obj" class="ui panel" hidden></div>
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
-<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()">ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bSnd">SOM</button><button class="mini" id="bGfx">HD</button><button class="mini" id="bCfg">⚙</button></div>
+<div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bPot" onclick="usePot()">POÇÃO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">⚙</button></div>
 <div id="mission" class="ui panel" hidden></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
@@ -244,9 +244,11 @@ const GR=[
 /* Portais altos mais duros (feedback do Ian e do Irror: estava fácil): vida +25% e dano +15% por rank acima do E. */
 /* SISTEMA 2.0 (feedback do Irror): vida e dano dos monstros saem do JOGADOR ESPERADO naquele nível — mesma conta dos dois lados.
    Jogador esperado = nível + 1 ponto por nível no atributo principal + equipamento do rank daquele nível + ~35% de bônus. */
-const WATK=[6,14,26,44,70,105,150,210,290],AHPV=[30,70,130,220,340,500,720,1000,1400],AARM=[5,10,16,24,34,46,60,76,95];
+const WATK=[6,14,30,60,110,190,320,520,850],AHPV=[30,70,150,300,550,950,1600,2600,4200],AARM=[5,10,16,24,34,46,60,76,95];
 const tierAt=L=>{let t=0;GR.forEach((g,i)=>{if(L>=g.lvl)t=i});return Math.min(8,t)};
-const expAtk=L=>(10+4*L+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
+/* statK: quanto vale 1 ponto de atributo no nível L (cresce 2% por nível). */
+const statK=L=>1+L/50;
+const expAtk=L=>(10+2*L+2*L*statK(L)+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
 const eHP=L=>expAtk(L)/20,eDMG=L=>expHp(L)/110;
 GR.forEach(g=>{g.hp=eHP(g.lvl);g.dmg=eDMG(g.lvl)});
 const gid=i=>i===8?'Ω':GR[i].id;
@@ -486,16 +488,16 @@ const SHV=AHPV.map(v=>Math.round(v*1.6));
 function itemSh(it){return it&&it.slot==='a'?Math.round(SHV[Math.min(8,it.tier)]*gearQ(it)):0}
 function itemArm(it){return it&&it.slot==='a'?Math.round(AARM[Math.min(8,it.tier)]*gearQ(it)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
-function atkOf(kind){const s=run.stats||{};return 10+2*run.level+2*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w)}
+function atkOf(kind){const s=run.stats||{};return Math.round(10+2*run.level+2*statK(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w))}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===8?.8:rk*.05;
   const src=[['Rank '+RANKS[rk].id,rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
-  const maxhp=(100+10*run.level+12*(s.vit||0))*(1+bp.ehp)*cb2.hp;
+  const maxhp=(100+10*run.level+15*statK(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
   const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh'));
-  const maxmp=(50+3*run.level+3*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
+  const maxmp=(50+3*run.level+4*statK(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
   const spd=6.4*(1+Math.min(.25,.005*(s.agi||0))+affB().spd/100+(cb.spd||0));
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
@@ -1173,7 +1175,7 @@ function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt)
 function shake(a){shakeA=Math.max(shakeA,a)}
 function hitstop(s){freeze=Math.max(freeze,s)}
 /* NOTÍCIAS: todo aviso fica guardado para reler (tecla N, botão NOTÍCIAS, ou clicar no aviso). */
-function logNews(html){try{if(!profile)return;profile.news=profile.news||[];const t=new Date();profile.news.unshift({h:html,t:String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')});if(profile.news.length>100)profile.news.length=100;store.set('pds2_profile',profile)}catch(e){}}
+function logNews(html){try{if(!profile)return;if(/Nível aumentou|Item na bolsa|Equipado:|Bolsa cheia|vendido por|Recompensa: \+|O efeito d|Você pescou|cristal|Ataque furtivo|RECARGA|Sem poções|Veio de mana/.test(html)||!/\[[A-ZÇÃÉÍÓÚÊÔ ]+\]/.test(html))return;profile.news=profile.news||[];const t=new Date();profile.news.unshift({h:html,t:String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')});if(profile.news.length>100)profile.news.length=100;store.set('pds2_profile',profile)}catch(e){}}
 function newsView(){view=newsView;const n=(profile&&profile.news)||[];let h='<div class="sysline">As últimas '+n.length+' mensagens do Sistema e eventos do mundo, da mais nova para a mais antiga.</div>';
   if(!n.length)h+='<div class="it"><div class="d"><small>Nenhuma notícia ainda.</small></div></div>';
   for(const x of n)h+='<div class="it"><div class="d" style="white-space:normal">'+x.h+'<small>'+x.t+'</small></div></div>';openModal('NOTÍCIAS',h)}
@@ -1260,7 +1262,7 @@ function skillFx(sk,P){
 }
 
 /* ================= PERIGOS ================= */
-function hazard(x,z,r,dur,dmg,team,col){
+function hazard(x,z,r,dur,dmg,team,col){if(team==='enemy'&&r>8){r=8;dur=Math.max(dur,1.2)}
   const g=new THREE.Group();g.position.set(x,.06,z);
   const ring=new THREE.Mesh(new THREE.RingGeometry(r-.12,r,40),glow(col,.9));ring.rotation.x=-Math.PI/2;g.add(ring);
   const fill=new THREE.Mesh(new THREE.CircleGeometry(r,40),glow(col,.28));fill.rotation.x=-Math.PI/2;fill.scale.setScalar(.01);g.add(fill);
@@ -1279,6 +1281,9 @@ function updHazards(dt){
 
 /* ================= COMBATE ================= */
 function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e.dead||e.sleep||e.invuln)continue;const d=Math.hypot(e.x-x,e.z-z);if(d<bd&&los(x,z,e.x,e.z)){bd=d;best=e}}return best}
+/* Nível do monstro: rank da masmorra (ou andar da torre) e perigo do mundo. Caveira: amarela 2×, laranja 5×, vermelha 10× o seu nível. */
+function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(8,e.gr||0)];let l=g.lvl;if(e.wild)l=Math.round(l*(1+.15*Math.max(0,(e.gr||0)-1)));if(e.elite)l+=3;if(e.isBoss)l+=5;return e.lvl=Math.max(1,l)}
+function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>=2?'#ffd54f':null}
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
   let blocked=false;
@@ -1286,12 +1291,12 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
-  if(player.stealth>0&&o.fromPlayer){amt*=3;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
+  if(player.stealth>0&&o.fromPlayer){amt*=3;o.sneak=true;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   if(o.fromPlayer&&profile.cls===4&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
-  const cc=o.fromPlayer?critChance():.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
+  const cc=o.fromPlayer?Math.min(2,critChance()):.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
   if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
-  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*.06);amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
+  if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+'!!!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
@@ -1354,7 +1359,7 @@ function onBossDeath(b){unlockLore('boss');npcEv('boss');storyEv('boss');if(b.bo
   for(const x of enemies)if(!x.dead&&x!==b&&!x.rival&&Math.hypot(x.x-b.x,x.z-b.z)<20)killEnemy(x);
   const ex=exitPortal(b.x,b.z+6,false);
   for(const it of L.exits)if(it!==ex&&it.locked){it.locked=false;it.ring.material=glowS(0x4fc3ff,1);it.grp.remove(it.sg)}
-  addChest(b.x+4,b.z+1,L.gate.rank,true);addVein(b.x-4,b.z+1,L.gate.rank,7,0xffd070);L.closeT=150;
+  addChest(b.x+4,b.z+1,L.gate.rank,true);addVein(b.x-4,b.z+1,L.gate.rank,7,0xffd070);if(!b.world){run.spts=(run.spts||0)+1;const bg=Math.round(b.gold*2);run.gold+=bg;floater(b.x,b.z,'+1 PONTO DE HABILIDADE · +'+fmt(bg)+' ouro','#b18cff',true,4)}L.closeT=150;
   toast('<b>[SISTEMA]</b> Guardião derrotado. A masmorra vai se fechar em 2:30. Minere os cristais, abra o baú e saia.',5000);
   if(!L.special&&L.gate.double){const r=L.rooms[L.bossRoom],G=L.grid,dz=G.oz+(r.y+.5)*G.CS+1.2,dx=r.wx;
     const door=new THREE.Group();door.position.set(dx,0,dz);const st=mesh(geo('sdoor',()=>new THREE.BoxGeometry(3,3.4,.4)),toonS(0x3a3a46));st.position.y=1.7;door.add(st);
@@ -1385,6 +1390,7 @@ function hurtPlayer(amt){
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
+  if(curAtk&&curAtk.kind){if(['mage','wraith','vespa','yeti'].includes(curAtk.kind)&&!player.slowT){player.slowT=2;floater(player.x,player.z,'LENTO','#8fe3ff')}else if(['rogue','aranha','lobo','raptor'].includes(curAtk.kind)&&Math.random()<.35){player.bleedT=3;player.bleedD=amt*.08;floater(player.x,player.z,'SANGRANDO','#ff4d6a')}}
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
@@ -1513,7 +1519,7 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
-  if(L.mode==='world'){const nc=nearestCity(e.x,e.z);if(nc.d<38&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*38;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*38;e.aggro=false}}
+  if(L.mode==='world'){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);if(nc.d<R2&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*R2;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*R2;e.aggro=false}}}
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
   if(e.isBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
@@ -1524,7 +1530,7 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
   const spd=e.speed*(e.slow>0?.5:1)*(L.mode==='world'&&WX.type==='snow'?.8:1);
   if(e.act){
     const A=e.act;A.t+=dt;
-    if(A.type==='swing'){wind=Math.min(1,A.t/A.wind);if(A.t<A.wind)turnTo(e,ang,dt,4);
+    if(A.type==='swing'){wind=Math.min(1,A.t/A.wind);if(A.t<A.wind)turnTo(e,ang,dt,e.isBoss?9:4);
       if(!A.done&&A.t>=A.wind){A.done=true;if(e.isBoss||e.rival)sfx('swing');let da=ang-e.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<e.range+1+(T.r||.5)&&Math.abs(da)<1.2)dmgTo(T,e.dmg*(A.mul||1));fxSlash(e.x,e.z,e.face,e.isBoss?0xff4040:0xff8a8a,e.range+.8)}
       if(A.done){wind=0;atk=(A.t-A.wind)/.3}if(A.t>A.wind+.3){e.act=null;e.cd=e.atkCd}}
     else if(A.type==='shoot'){wind=Math.min(1,A.t/A.wind);turnTo(e,ang,dt,8);if(!A.done&&A.t>=A.wind){A.done=true;if(A.spread){for(const o of[-.25,0,.25])shoot(e.x,e.z,e.face+o,13,e.dmg,'enemy',0x9cf0ff,'orb')}else shoot(e.x,e.z,e.face,12,e.dmg,'enemy',0xb06bff,'orb')}if(A.t>A.wind+.25){e.act=null;e.cd=e.atkCd}}
@@ -1535,7 +1541,8 @@ function updEnemy(e,dt){curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.h
     else if(A.type==='slam'){wind=Math.min(1,A.t/A.wind);if(A.t>A.wind+.3){e.act=null;e.cd=e.atkCd}}
     else if(A.type==='cast'){wind=Math.min(1,A.t/.6);if(A.t>1.1){e.act=null;e.cd=.6}}
   }else{
-    turnTo(e,ang,dt);
+    turnTo(e,ang,dt,e.isBoss?7+(e.gr||0)*.6:undefined);
+    if(e.isBoss&&!e.world){e.volT=(e.volT??3)-dt;if(e.volT<=0&&d<22){const g=e.gr||0;e.volT=Math.max(1.4,4-g*.3)*(e.phase>=2?.75:1);const n=6+g*2+(e.phase>=2?4:0),off=Math.random()*TAU;for(let i=0;i<n;i++)shoot(e.x,e.z,off+i/n*TAU,9+g*.6,e.dmg*.45,'enemy',0xff5d7a,'orb');sfx('swing')}}
     if(e.ai==='melee'||e.ai==='boss'||e.ai==='rival'){
       if(e.ai==='boss'){e.spT-=dt;if(e.spT<=0&&d<20){e.spT=(e.phase>=2?4.2:6.5)*(e.phase>=3?.7:1)*((e.boss.types||[]).length>2?.8:1);bossSpecial(e,T);return}}
       if(e.ai==='rival'){e.dashCd-=dt;if(e.dashCd<=0&&d>4&&d<10){e.dashCd=rnd(2.5,4);e.act={type:'lunge',t:0,wind:.3};return}if(player.atkT>0&&d<3&&Math.random()<.02){e.kb.x=-dx/d*9;e.kb.z=-dz/d*9}}
@@ -1641,6 +1648,7 @@ function update(dt){
     P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
     if(P.stealth>0){P.stealth-=dt;if(P.stealth<=0)setStealth(false)}
     P.mp=Math.min(P.maxmp,P.mp+dt*(3+P.maxmp*.03));
+    if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0){P.bleedT-=dt;P.hp-=P.bleedD*dt;if(P.hp<=0&&!P.dead)die()}
     if(P.shT>0)P.shT-=dt;else if(P.shield<P.maxsh)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.2*dt*(hasT('brk30')?1.3:1));
     if(hasT('brk600')&&P.hp<P.maxhp&&!P.dead)P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.01*dt);
     if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
@@ -1649,7 +1657,7 @@ function update(dt){
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=P.spd*(P.atkCd>.15?.45:1)*(run.mounted?1.8:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
+    else if(il>.1){const sp=P.spd*(P.atkCd>.15?.45:1)*(run.mounted?1.8:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
@@ -1737,7 +1745,8 @@ function drawOverlay(){
   oc.clearRect(0,0,W,H);if(!started)return;oc.textAlign='center';
   const P=player;
   for(const e of enemies){if(e.dead||e.isBoss||e.sleep||e.invuln)continue;if(Math.hypot(e.x-P.x,e.z-P.z)>24)continue;if(!e.aggro&&e.hp>=e.maxhp&&!e.rival&&!e.elite)continue;const p=proj(e.x,2.1*(e.m.sc||1)+.1,e.z);if(!p.ok)continue;
-    bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0')}
+    bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0');
+    {const lv=eLvl(e),th=threat(lv);oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.85)';const t='Nv '+lv+(th?' ☠':'');const tx=p.x-(e.rival?23:17)-4;oc.textAlign='right';oc.strokeText(t,tx,p.y+4);oc.fillStyle=th||'#c9d3de';oc.fillText(t,tx,p.y+4);oc.textAlign='center'}}
   for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff')}
   if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a');oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
@@ -1800,13 +1809,14 @@ function hud(){
   else if(L.special)obj=L.special.msg;
   else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'QUEBRA DE MASMORRA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Quebra da masmorra em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
   $('obj').textContent=obj;
-  if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent+=' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
+  if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
-  const ordh=allies.some(a=>a.shadow&&!a.dead)?'[SOMBRAS: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1])+(touch?' · toque aqui':' (O)')+'] ':'';
-  const sth='['+(basicIsMagic()?'ARCANO':'FÍSICO')+(styleOff()?' 70%':'')+(touch?'':' (X)')+'] ';
-  const dmd=sth+ordh+invs+(run.demand?'[EXIGÊNCIA: '+({nododge:'sem esquivar',nopot:'sem poção',night:'à noite'}[run.demand.t]||'')+' '+run.demand.got+'/'+run.demand.n+'] ':''),dl=run.daily&&!run.daily.done?'[DIÁRIA '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4] ':'',pt=run.pts?'[+'+run.pts+' PONTOS] ':'';
-  $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s) · receba na Associação':q?'[MISSÃO] '+q.d+': '+q.got+'/'+q.n:'');$('mission').hidden=!(done||q||dl||pt||dmd);
+  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Sombras: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
+  const sth=isMagic()?'Ataque básico: '+(basicIsMagic()?'mágico':'físico 70%')+(touch?'':' (X)')+' · ':'';
+  const dmd=sth+ordh+invs+(run.demand?'Desafio do Sistema: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' (C)')+' · ':'';
+  $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · H');
+  $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Associação':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');$('mission').hidden=!(done||q||dl||pt||dmd);
   drawMap(mmc,192,false);
 }
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">★</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
@@ -2045,7 +2055,7 @@ function bankView(){
 
 /* ================= SISTEMAS: STATUS, DIÁRIA, SOMBRAS, GUILDA, FORJA, MONTARIA, DIA/NOITE, EVENTOS, APARÊNCIA, DIÁRIO ================= */
 const STATN={for:'Força',agi:'Agilidade',per:'Percepção',int:'Inteligência',vit:'Vitalidade'};
-const STATD={for:'+2 de ataque físico',agi:'Ataque, movimento e esquiva mais rápidos',per:'+0,25% de chance de crítico (acima de 100%, o que sobra é chance de crítico triplo)',int:'+2 de ataque mágico e +3 de mana',vit:'+12 de vida'};
+const STATD={for:'',agi:'',per:'',int:'',vit:''};
 const DAILY=[['run','Correr',1000,'m'],['atk','Golpes',100,''],['dodge','Esquivas',20,''],['kill','Monstros',30,'']];
 const todayKey=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 const SHNAMES=['Kaizen','Vorn','Ignar','Velmor','Durak','Grimm','Nyx','Morvak','Sombra Alfa','Rurik','Zael','Orsk'];
@@ -2100,7 +2110,7 @@ function bestInfo(k,n){const K=KINDS[k];let t='';
   return t+'<br><span style="color:var(--dim)">Traços possíveis em portais altos: '+Object.values(TRAITS).map(x=>x.n).join(', ')+'.</span>'}
 function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS);let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies encontradas: <b>'+ks.filter(k=>b[k]).length+'/'+ks.length+'</b>. Cada espécie estudada dá dano extra contra ela, para sempre (10, 50, 200 e 1000 abates).</div>';
   for(const k of ks){const n=b[k]||0,l=bestLvl(k),nx=BEST_STEPS.find(s=>n<s[0]);
-    h+=n?row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+bestInfo(k,n),''):row('<span style="color:#56607a">???</span>','Espécie ainda não encontrada','')}
+    h+=n?row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+(()=>{const g=Math.min(8,rankOf()),K=KINDS[k];return '<br><span style="color:var(--dim)">No rank '+rkN(g)+' (nível '+GR[g].lvl+'): vida ~'+fmt(K.hp*GR[g].hp)+' · dano ~'+fmt(K.dmg*GR[g].dmg)+' por golpe</span>'})()+bestInfo(k,n),''):row('<span style="color:#56607a">???</span>','Espécie ainda não encontrada','')}
   openModal('BESTIÁRIO',h)}
 /* VIAGEM RÁPIDA: pelos Portais de Viagem das cidades já visitadas (Associação → Viagem). */
 function markVisited(){if(!started||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d<30){profile.visited=profile.visited||{};if(!profile.visited[n.c.id]){profile.visited[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z};store.set('pds2_profile',profile);toast('<b>[SISTEMA]</b> Portal de Viagem de <b>'+n.c.name+'</b> registrado. Viaje pela Associação (aba Viagem).',4500)}}}
@@ -2128,7 +2138,11 @@ function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SIST
 /* Texto da Agilidade com os valores atuais e os limites (pedido do Irror: jogador precisa saber dos limites). */
 function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',','),mx=b=>b?' <b style="color:#ffd54f">· MÁXIMO</b>':'';
   return 'Velocidade de ataque: +0,4% por ponto · agora <b>+'+Math.round(Math.min(30,.4*g))+'%</b>'+mx(g>=75)+' (máx. +30% no ponto 75)<br>Movimento: +0,5% por ponto · agora <b>+'+Math.round(Math.min(25,.5*g))+'%</b>'+mx(g>=50)+' (máx. +25% no ponto 50)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b>'+mx(g>=50)+' (1,50 s sem pontos, −0,01 s por ponto, mínimo 1,00 s)'}
-function statDesc(){const m=isMagic(),bm=basicIsMagic();return{for:'+2 de ataque <b style="color:#ff6b6b">físico</b>'+(!m?' · suas habilidades':'')+(!bm?' · seu ataque básico agora':''),agi:agiDesc(),per:STATD.per,int:'+2 de ataque <b style="color:#6fb8ff">mágico</b> e +3 de mana'+(m?' · suas habilidades':'')+(bm?' · seu ataque básico agora':''),vit:STATD.vit}}
+function statDesc(){const m=isMagic(),bm=basicIsMagic(),k=statK(run.level),n=v=>String(Math.round(v*10)/10).replace('.',','),s=run.stats||{},cc=critChance();
+  return{for:'+'+n(2*k)+' de ataque <b style="color:#ff6b6b">físico</b> por ponto'+(!m?' · usado nas suas habilidades':'')+(!bm?' e no ataque básico':''),agi:agiDesc(),
+   per:'+0,25% de chance de crítico por ponto · agora <b>'+Math.round(cc*100)+'%</b>. Até 100%: chance de dano ×2. De 100% a 200%: o que passa vira chance de ×3. <b>Limite: 200%</b>'+(cc>=2?' <b style="color:#ffd54f">· MÁXIMO</b>':''),
+   int:'+'+n(2*k)+' de ataque <b style="color:#6fb8ff">mágico</b> e +'+n(4*k)+' de mana por ponto'+(m?' · usado nas suas habilidades':'')+(bm?' e no ataque básico':''),
+   vit:'+'+n(15*k)+' de vida por ponto'}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2180,6 +2194,7 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
 /* janelas novas */
 function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   const pv=passiveOf();let h=(pv?'<div class="sysline">Passiva da classe: <b style="color:#ffd54f">'+pv.n+'</b> — '+pv.d+'</div>':'')+'<div class="sysline"><b>[SISTEMA]</b> Pontos livres: <b>'+run.pts+'</b> · Pontos de habilidade: <b>'+run.spts+'</b></div><div class="sec">STATUS</div>';
+  h+='<div class="sysline" style="font-size:12px">No nível <b>'+run.level+'</b> cada ponto vale <b>×'+String(Math.round(statK(run.level)*100)/100).replace('.',',')+'</b> (cresce 2% por nível). Pontos antigos também sobem de valor.</div>';
   for(const k in STATN)h+=row(STATN[k]+': <b>'+s[k]+'</b>',statDesc()[k],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));
   if(profile.cls===3){h+='<div class="sec">ELEMENTO DO MAGO</div>';if(run.level<20)h+='<div class="sysline">No nível 20 você escolhe seu elemento: Fogo, Água e Gelo, Terra ou Ar e Raio.</div>';else for(const k in ELEM){const E=ELEM[k],cur=run.elem===k;h+=row('<b style="color:'+E.c+'">'+E.n+'</b>',E.d+' · '+E.sk.map(x=>x.n).join(', '),cur?'<b>Atual</b>':btn(run.elem?'Trocar · 20.000':'Escolher','elem',k,!run.elem||run.gold>=20000,'hot'))}}
   h+='<div class="sec">HABILIDADES (NÍVEL MÁX. 11)</div>';
@@ -2505,8 +2520,8 @@ function specialSetup2(kind,S,arg){
 function updSpecial2(S,dt){
   const alive=enemies.filter(e=>!e.dead&&!e.totem).length;
   if(S.kind==='tower'){
-    if(!S.spawned&&S.t>1.5){S.spawned=true;if(S.boss){const pool=S.floor>=100||S.gr>=8?SOVEREIGNS:S.gr>=6?BOSSES_HIGH:BOSSES;const b=spawnBoss(0,-8,S.gr,pick(pool));const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;b.hp*=mh;b.maxhp*=mh;b.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;if(S.floor>=100)b.bars=5;b.aggro=true;bossAggro(b)}
-      else{const n=6+Math.floor(S.floor/3);for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(8,16);x=Math.cos(a)*d;z=Math.sin(a)*d-3;if(freeAt(x,z,.6))break}const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;e.hp*=mh;e.maxhp*=mh;e.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;e.aggro=true;if(i<Math.floor(S.floor/5))makeElite(e)}}}
+    if(!S.spawned&&S.t>1.5){S.spawned=true;if(S.boss){const pool=S.floor>=100||S.gr>=8?SOVEREIGNS:S.gr>=6?BOSSES_HIGH:BOSSES;const b=spawnBoss(0,-8,S.gr,pick(pool));const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;b.hp*=mh;b.maxhp*=mh;b.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;b.lvl=tLvl(S.floor)+5;if(S.floor>=100)b.bars=5;b.aggro=true;bossAggro(b)}
+      else{const n=6+Math.floor(S.floor/3);for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(8,16);x=Math.cos(a)*d;z=Math.sin(a)*d-3;if(freeAt(x,z,.6))break}const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;e.hp*=mh;e.maxhp*=mh;e.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;e.lvl=tLvl(S.floor)+(e.elite?3:0);e.aggro=true;if(i<Math.floor(S.floor/5))makeElite(e)}}}
     S.msg='TORRE · andar '+S.floor+(S.boss?' · CHEFE':'')+' · inimigos '+alive;
     /* Conta de novo: 'alive' foi medido antes dos inimigos do andar nascerem (bug: andar limpava sozinho). */
     if(S.spawned&&!S.cleared&&S.t>2&&enemies.filter(e=>!e.dead&&!e.totem).length===0&&!(bossE&&!bossE.dead))towerClear(S)}
@@ -2653,14 +2668,14 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   line=(n,v,d)=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(79,195,255,.12)"><span>'+n+(d?'<br><small style="color:var(--dim)">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div class="sysline" style="font-size:12px">Regra do Sistema: atributos e equipamento dão <b>números fixos</b>. Tudo que é <b>%</b> entra numa soma só (lá embaixo).</div><div style="font-size:13px">';
-  h+=line('Ataque físico',fmt(atkOf('phy')),'10 + nível 2×'+run.level+' + Força 2×'+(s.for||0)+' + arma '+itemAtk(w));
-  h+=line('Ataque mágico',fmt(atkOf('mag')),'10 + nível 2×'+run.level+' + Inteligência 2×'+(s.int||0)+' + arma '+itemAtk(w));
+  h+=line('Ataque físico',fmt(atkOf('phy')),'10 + nível 2×'+run.level+' + Força '+(s.for||0)+' × '+String(Math.round(2*statK(run.level)*10)/10).replace('.',',')+' + arma '+itemAtk(w));
+  h+=line('Ataque mágico',fmt(atkOf('mag')),'10 + nível 2×'+run.level+' + Inteligência '+(s.int||0)+' × '+String(Math.round(2*statK(run.level)*10)/10).replace('.',',')+' + arma '+itemAtk(w));
   h+=line('Dano final ('+(m?'mágico':'físico')+')',fmt(player.dmg),'ataque '+(m?'mágico':'físico')+' × (1 '+P(bp.edmg)+' bônus) × classe '+X(cb.dmg));
-  h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade 12×'+(s.vit||0)+' + armadura '+itemHp(a)+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
-  h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência 3×'+(s.int||0));
+  h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade '+(s.vit||0)+' × '+String(Math.round(15*statK(run.level)*10)/10).replace('.',',')+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
+  h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência '+(s.int||0)+' × '+String(Math.round(4*statK(run.level)*10)/10).replace('.',','));
   h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','armadura '+itemArm(a)+' pontos = '+Math.round(armRed(itemArm(a))*100)+'% · classe '+Math.round(cb.def*100)+'%'+(npcHas('Brann')?' · Brann 8%':'')+' · máximo 70%');
   h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')?' · Fúria '+(cons('fur')+(cons('fur')>=10?10:0))+'%':''));
-  h+=line('Dano crítico','×2'+(cc>1?' / ×3':''),'crítico sempre dobra'+(cc>1?' · o que passa de 100% ('+Math.round((cc-1)*100)+'%) é chance de TRIPLICAR':' · acima de 100% de chance, o que sobra vira chance de triplicar'));
+  h+=line('Dano crítico','×2'+(cc>1?' / ×3':''),'crítico sempre dobra'+(cc>1?' · o que passa de 100% ('+Math.round((cc-1)*100)+'%) é chance de TRIPLICAR':' · acima de 100%, o que sobra vira chance de triplicar (limite 200%)'));
   h+=line('Velocidade de ataque','+'+Math.round(Math.min(30,.4*g))+'%','Agilidade 0,4%×'+g+' · máximo +30%');
   h+=line('Velocidade de movimento','+'+Math.round(Math.min(25,.5*g)+af.spd)+'%','Agilidade 0,5%×'+g+' (máx. +25%)'+(af.spd?' · afixos '+af.spd+'%':''));
   h+=line('Recarga da esquiva',dodgeCdVal().toFixed(2).replace('.',',')+' s','1,50 s − 0,01 s × Agilidade '+g+' · mínimo 1,00 s');
@@ -2671,7 +2686,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+='<div class="sec">MARCAS</div><div class="sysline" style="font-size:12px">Habilidades de ataque <b>marcam</b> os alvos por 6 s. O próximo golpe normal num alvo marcado causa <b>+50%</b> e tira <b>1 s</b> da recarga de todas as habilidades.</div>';
   const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
   return h+'</div>'+profRows()}
-function bagTabs(cur){return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes'],['itens','Itens'],['world','Mundo']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
+function bagTabs(cur){return '<div class="tabs">'+(cur==='world'?[['world','Mundo']]:[['char','Personagem'],['pow','Poderes'],['itens','Itens']]).map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+='<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=charSheet();
@@ -2806,7 +2821,7 @@ function bagItems(){
   let h='<div class="sysline">Ouro <b class="gold">'+fmt(run.gold)+'</b> · Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'%</div>';
   {const rw=bestInBag('w'),ra=bestInBag('a'),up=[];if(rw&&itemScore(rw)>itemScore(run.equip.w))up.push('<b style="color:'+RAR[rw.rar].c+'">'+rw.name+'</b>');if(ra&&itemScore(ra)>itemScore(run.equip.a))up.push('<b style="color:'+RAR[ra.rar].c+'">'+ra.name+'</b>');
     h+='<div class="sysline"><b>[SISTEMA]</b> '+(up.length?'Recomendo equipar '+up.join(' e ')+'.</div><div style="display:flex;justify-content:flex-end">'+btn('EQUIPAR O MELHOR','equipbest',0,true,'hot')+'</div>':'Você já está com o melhor equipamento da bolsa.</div>')}
-  h+='<div class="sec">EQUIPADO</div>';
+  h+='<div class="sysline" style="font-size:12px"><b>Poder</b> = número para comparar itens. Arma: o ataque dela. Armadura: o escudo ÷ 6. Afixos aumentam um pouco. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
   for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · <b>'+itemScore(it)+' de poder</b> · '+statTxt(it):'Compre na cidade ou ache em baús','')}
   h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Baús e guardiões dão equipamentos.</small></div></div>';
@@ -2908,7 +2923,7 @@ function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'lev
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
 function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
-function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
+function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'<div class="sec">COLEÇÃO</div><button class="mini" onclick="albumView()">Coleção de sombras</button> <button class="mini" onclick="bestView()">Bestiário</button>')}
