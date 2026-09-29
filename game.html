@@ -193,7 +193,7 @@ const CLASSES=[
  {n:'Arqueiro',w:13,ranged:true,body:0x2f6b3a,hair:0x6b4a2a,wep:'bow',sk:[S('Chuva de Flechas','rain',8,20,1.4,0xbfff8f),S('Salto Evasivo','blink',5,8,0,0x8fffc8),S('Flecha Perfurante','bolt',4,12,3.2,0xe0ffb0)]},
  {n:'Curandeiro',w:11,ranged:true,body:0xe8d9a8,hair:0xffe08a,wep:'wand',sk:[S('Luz Curativa','heal',9,20,.35,0xfff3a0),S('Julgamento','nova',6,16,1.8,0xffe066),S('Bênção','guard',14,18,.4,0xfff9d0)]},
  {n:'Invocador',w:8,ranged:true,body:0x1f7f86,hair:0xd8f4ff,wep:'tome',sk:[S('Lobo Espiritual','summon',14,25,1,0x6ff4ff),S('Elo Arcano','chain',6,16,1.6,0x6ff4ff),S('Pacto','heal',12,15,.25,0x9fffe8)]},
- {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'bonestaff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Explosão de Almas','nova',7,18,2.2,0xb98cff)]},
+ {n:'Necromante',w:3,ranged:true,body:0x2a1840,hair:0x0c0c14,wep:'bonestaff',arise:true,sk:[S('Soldado Esquelético','summon',12,22,2,0xa26bff),S('Praga','dot',7,14,1.4,0x9cff6b),S('Pacto Sombrio','minionbuff',12,20,1.5,0xb98cff)]},
  {n:'Mago de Fogo',w:3.5,ranged:true,body:0xb8321a,hair:0xffd08a,wep:'staff',elem:'fogo',pt:'fire',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
  {n:'Mago de Gelo',w:3.5,ranged:true,body:0x2f7fb8,hair:0xe8f8ff,wep:'staff',elem:'gelo',pt:'orb',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x8fe3ff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
  {n:'Mago da Terra',w:3.5,ranged:true,body:0x6a5234,hair:0x3a2a1a,wep:'staff',elem:'terra',pt:'orb',sk:[S('Estaca de Pedra','cone',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
@@ -616,6 +616,8 @@ function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
     shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
 }
+/* jogador mais forte (feedback de diversão): +35% dano, +30% vida */
+{const _sf=statsFor;statsFor=function(){const s=_sf();s.dmg*=1.35;s.maxhp=Math.round(s.maxhp*1.3);return s}}
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 /* Visual do equipamento (pedido do Irror): a arma e a roupa mudam com o que você usa.
    Arma: metal na cor do rank; do rank A em diante vira a versão grande (espada/machado de duas mãos, cajado longo, besta grande, facas duplas).
@@ -1125,7 +1127,7 @@ function buildDungeon(g){
   // afixos
   const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark')){scene.fog.density=.07;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[SISTEMA]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
-  const en=rooms[0];exitPortal(en.wx,en.wz-3.5,g.red);
+  const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;
 }
 function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[SISTEMA]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
@@ -1513,7 +1515,7 @@ function hurtPlayer(amt){
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
-function hurtAlly(a,amt){if(a.dead)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
+function hurtAlly(a,amt){if(a.dead)return;if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
   if(a.shadow){const i=run.shadows.indexOf(a.rec);if(i>=0)run.shadows.splice(i,1);toast('<b>[SISTEMA]</b> Uma sombra foi destruída.')}
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[SISTEMA]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
@@ -1586,6 +1588,7 @@ function runSkill(sk){
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[SISTEMA]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
     case 'guard':{P.guard=5;P.guardVal=sk.pow;toast('<b>[SISTEMA]</b> '+sk.n+': dano recebido reduzido');break}
     case 'stealth':{P.stealth=5;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;toast('<b>[SISTEMA]</b> Furtivo por 5s. Próximo golpe x3');break}
+    case 'minionbuff':{const mine=allies.filter(a=>!a.dead&&!a.guest&&!a.party&&!a.caravan);if(!mine.length){floater(P.x,P.z,'SEM INVOCAÇÕES','#9fb0c4');break}for(const a of mine){a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+' curadas e fortalecidas','#b18cff');break}
     case 'summon':{const n=Math.round(sk.pow),mine=allies.filter(a=>a.life&&!a.dead&&!a.shadow&&!a.party);for(const a of mine){a.t=0;a.hp=a.maxhp;fxRing(a.x,a.z,0xa26bff,1.2,.3)}
       let room=summonCap()-mine.length;while(room<n&&mine.length){const o=mine.shift();o.dead=true;scene.remove(o.m.root);room++}if(mine.length)floater(P.x,P.z,'INVOCAÇÕES RENOVADAS','#b18cff');
       for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,22);if(sk.giant){a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}break}
@@ -1698,7 +1701,7 @@ function bossSpecial(b,T){
   else if(tp==='legion'){const n=p2?4:3;for(let i=0;i<n;i++){const a=i/n*TAU;let x=b.x+Math.cos(a)*3.5,z=b.z+Math.sin(a)*3.5;if(!freeAt(x,z,.5)){x=b.x;z=b.z}const m=spawnKind(b.gr>=6?(i%2?'demon':'wraith'):(i%2?'minion':'rogue'),x,z,b.gr,{room:b.room});m.aggro=true;fxRing(m.x,m.z,0xd0d0d0,1.5)}hazard(b.x,b.z,5,1,b.dmg,'enemy',0xff3030);toast('<b>[SISTEMA]</b> '+b.name+': Legião',1400)}
 }
 function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
-  if(a.dead)return;a.t+=dt;a.cd-=dt;a.life-=dt;a.healCd=(a.healCd||0)-dt;
+  if(a.dead)return;a.t+=dt;a.cd-=dt;a.life-=dt;if(a.buffT>0){a.buffT-=dt;if(Math.random()<dt*3)fxBurst(a.x,1.2,a.z,0xb98cff,1,1)}a.healCd=(a.healCd||0)-dt;
   if(a.life<=0){a.dead=true;scene.remove(a.m.root);fxBurst(a.x,1,a.z,0x6ff4ff,6,3);return}
   if(a.flash>0){a.flash-=dt;flashMats(a.m,a.flash>0?1:0,0x550000)}
   const P=player,pdist=Math.hypot(P.x-a.x,P.z-a.z);
@@ -1708,13 +1711,14 @@ function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
   if(ord==='seguir')e=null;else if(ord==='defender'){e=nearestEnemy(P.x,P.z,8)}
   let mv=0,atk=0;
   if(a.act){a.act.t+=dt;atk=a.act.t/.3;if(!a.act.done&&a.act.t>.15){a.act.done=true;const t=a.act.e;
-      if(a.ranged){if(t&&!t.dead)shoot(a.x,a.z,a.face,20,a.dmg,'player',a.col,'orb',{fromPlayer:false})}
-      else{if(t&&!t.dead&&Math.hypot(t.x-a.x,t.z-a.z)<a.range+t.r+.6)hurtEnemy(t,a.dmg,a.x,a.z,{kb:1.2});fxSlash(a.x,a.z,a.face,a.shadow?0xa26bff:(a.col||0x6ff4ff),2)}}
+      if(a.ranged){if(t&&!t.dead)shoot(a.x,a.z,a.face,20,a.dmg*(a.buffT>0?1.6:1),'player',a.col,'orb',{fromPlayer:false})}
+      else{if(t&&!t.dead&&Math.hypot(t.x-a.x,t.z-a.z)<a.range+t.r+.6)hurtEnemy(t,a.dmg*(a.buffT>0?1.6:1),a.x,a.z,{kb:1.2});fxSlash(a.x,a.z,a.face,a.shadow?0xa26bff:(a.col||0x6ff4ff),2)}}
     if(a.act.t>.3){a.act=null;a.cd=a.shadow?.7:a.ranged?1.1:.9}}
   else if(e&&(pdist<18||a.guest)){const dx=e.x-a.x,dz=e.z-a.z,d=Math.hypot(dx,dz);turnTo(a,Math.atan2(dx,dz),dt);
     if(a.ranged){if(d<5){moveEnt(a,-dx/d*a.speed*dt,-dz/d*a.speed*dt);mv=1}else if(d>a.range){moveEnt(a,dx/d*a.speed*dt,dz/d*a.speed*dt);mv=1}else if(a.cd<=0)a.act={t:0,e}}
     else if(d>a.range+e.r){moveEnt(a,dx/d*a.speed*dt,dz/d*a.speed*dt);mv=1}else if(a.cd<=0)a.act={t:0,e}}
-  else if(!a.guest||pdist<14){const dx=P.x-a.x,dz=P.z-a.z,d=Math.hypot(dx,dz);if(d>3){turnTo(a,Math.atan2(dx,dz),dt);const s=d>10?a.speed*1.6:a.speed;moveEnt(a,dx/d*s*dt,dz/d*s*dt);mv=1}
+  else if(!a.guest||pdist<14){let tx=P.x,tz=P.z,near=3;if(!a.guest&&!a.party){const F=allies.filter(o=>!o.dead&&!o.guest&&!o.party&&!o.caravan),i=F.indexOf(a),row=Math.floor(i/4),cn=Math.min(4,F.length-row*4),col=i%4-(cn-1)/2,bx=col*1.6,bz=-(2.2+row*1.6),sf=Math.sin(P.face),cf=Math.cos(P.face);tx=P.x+bx*cf+bz*sf;tz=P.z-bx*sf+bz*cf;near=.35}
+    const dx=tx-a.x,dz=tz-a.z,d=Math.hypot(dx,dz);if(d>near){turnTo(a,Math.atan2(dx,dz),dt);const s=d>10?a.speed*1.6:d<1.5?a.speed*.7:a.speed;moveEnt(a,dx/d*Math.min(s*dt,d),dz/d*Math.min(s*dt,d));mv=d>.6?1:.4}else turnTo(a,P.face,dt)
     if(a.guest&&!a.joined){a.joined=true;toast('<b>[SISTEMA]</b> '+a.short+' e o grupo dele vão lutar com você nesta masmorra.')}
     if(d>28&&!a.guest){a.x=P.x+rnd(-1,1);a.z=P.z+1;if(L.grid&&!freeAt(a.x,a.z,.4)){a.x=P.x;a.z=P.z}}}
   animChibi(a.m,{move:mv,atk:clamp(atk,0,1),dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face;
@@ -1933,7 +1937,7 @@ function hud(){
   if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
-  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Sombras: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
+  const ordh=allies.some(a=>a.shadow&&!a.dead)?'Sombras ('+allies.filter(a=>a.shadow&&!a.dead).length+'): '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
   const sth='';
   const dmd=sth+ordh+invs+(run.demand?'Desafio do Sistema: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' (C)')+' · ':'';
   $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · H');
