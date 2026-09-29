@@ -315,8 +315,8 @@ const POTS=[{n:'Poção de Vida',d:'Recupera 50% da vida',price:40,give:{pots:1}
 const SHOPS=[
  {id:'guild',n:'ORDEM DE CAÇADORES',sign:'ORDEM',vendor:'Lyra',x:-19,z:-19,w:12,d:9,h:7,col:0x2a5fb0,roof:0x1b3a70,sc:'#ffb347',vb:0x2a5fb0,vh:0xe8e8ff,vw:'staff'},
  {id:'pot',n:'LOJA DE POÇÕES',sign:'POÇÕES',vendor:'Mira',x:19,z:-19,w:8,d:7,h:5,col:0x8a2b4a,roof:0x4a1426,sc:'#ff8fa3',vb:0x8a2b4a,vh:0xffb0c8,vw:'staff'},
- {id:'wep',n:'ARMAS DO KAEL',sign:'ARMAS',vendor:'Kael',x:19,z:19,w:9,d:7,h:5.5,col:0x7a4a2a,roof:0x3a2414,sc:'#ffb84d',vb:0x7a4a2a,vh:0xc85a1e,vw:'axe'},
- {id:'arm',n:'ARMADURAS',sign:'ARMADURAS',vendor:'Brann',x:-19,z:19,w:9,d:7,h:5.5,col:0x5f6f86,roof:0x2b3446,sc:'#c9d3de',vb:0x5f6f86,vh:0x2b2b2b,vw:'sword'}];
+ {id:'wep',n:'EQUIPAMENTOS DO KAEL',sign:'EQUIPAMENTOS',vendor:'Kael',x:19,z:19,w:9,d:7,h:5.5,col:0x7a4a2a,roof:0x3a2414,sc:'#ffb84d',vb:0x7a4a2a,vh:0xc85a1e,vw:'axe'},
+ {id:'arm',n:'DEFESA DA VILA',sign:'DEFESA',vendor:'Brann',x:-19,z:19,w:9,d:7,h:5.5,col:0x5f6f86,roof:0x2b3446,sc:'#c9d3de',vb:0x5f6f86,vh:0x2b2b2b,vw:'sword'}];
 const NAMES=['Voss','Ryuga','Mirae','Taeho','Selin','Kargan','Yuna','Draven','Hyejin','Oren','Aiko','Bastian','Dara','Ekko','Juno','Kenji','Lior','Nayra','Rurik','Soren','Talia','Vega'];
 const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Viu um portal vermelho? Lá dentro não tem saída até o guardião cair. Mas paga o dobro.','Se um portal de rank D ou maior fecha sem ninguém limpar, os monstros escapam. Transbordo da fenda.','A Ordem paga bem pelas missões do quadro.','O Kael só vende as armas do seu rank. Suba primeiro.','Morreu lá dentro, perdeu tudo. Eu sempre levo um pergaminho de retorno.','Tem caçador que entra nas masmorras só para caçar outros caçadores.','Contrate um curandeiro na Ordem. Faz diferença no guardião.','Baú de guardião sempre traz equipamento.','Masmorra rank A? Vi uma vez. O trono lá dentro brilha dourado.','Quanto mais longe da muralha, mais fortes os monstros das planícies.','Guardas de escudo bloqueiam de frente. Pegue pelas costas.'];
 
@@ -366,6 +366,7 @@ function inst(g,mat,list,outline,parent){parent=parent||L.group;
     im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;parent.add(im);return im};
   mk(g,mat);if(outline){const og=g.clone();og.scale(1.07,1.07,1.07);mk(og,OUT)}
 }
+function makeCitySign(){return new THREE.Group()}
 function makeSign(text,col,scale=1){
   const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
   x.fillStyle='rgba(6,18,38,.88)';x.fillRect(4,14,504,100);x.strokeStyle=col;x.lineWidth=6;x.strokeRect(4,14,504,100);
@@ -1042,21 +1043,21 @@ function buildCity(c,g,addCol,R){
   const plaza=new THREE.Mesh(geo('plaza',()=>new THREE.RingGeometry(12.6,13.2,48)),glowS(0xffb347,.35));plaza.rotation.x=-Math.PI/2;plaza.position.set(X,.03,Z);g.add(plaza);
   const cr=new THREE.Mesh(geo('crys',()=>new THREE.OctahedronGeometry(.9,0)),glowS(0xffd08a,.95));cr.position.set(X,6,Z);g.add(cr);g.userData.crystal=cr;
   const cl=new THREE.PointLight(0xffd08a,1.2,26,1.5);cl.position.set(X,6,Z);g.add(cl);
-  const nm=makeSign(fallen?c.name.toUpperCase()+' · CAÍDA':c.name.toUpperCase(),fallen?'#ff4d6a':'#ffd08a',.9);nm.position.set(X,9,Z);g.add(nm);
+  const nm=makeCitySign(fallen?c.name.toUpperCase()+' · CAÍDA':c.name.toUpperCase(),fallen?'#ff4d6a':'#ffd08a',.9);nm.position.set(X,9,Z);g.add(nm);
   if(cLv>=3){const rr=new THREE.Mesh(new THREE.TorusGeometry(34,.35,6,80),glowS(0xffd070,.8));rr.rotation.x=Math.PI/2;rr.position.set(X,4.2,Z);g.add(rr)}
   if(fallen){L.inter.push({type:'rebuild',city:c,x:X,z:Z+4,r:3,label:'F · RECONSTRUIR '+c.name.toUpperCase(),use:()=>rebuildView(c)});const fog=new THREE.Mesh(new THREE.CylinderGeometry(33,33,12,32,1,true),glowS(0xff2020,.12));fog.position.set(X,6,Z);g.add(fog)}
-  for(const s of SHOPS){const sx=X+s.x,sz=Z+s.z;if(E){const ry=Math.atan2(-s.x,-s.z),sn=makeSign(s.sign,s.sc,.8);sn.position.set(sx+Math.sin(ry)*(s.d/2+.6),Math.min((shopH[s.id]||6)*.72,6.2),sz+Math.cos(ry)*(s.d/2+.6));g.add(sn)}else{const sg=new THREE.Group();sg.position.set(sx,0,sz);sg.rotation.y=Math.atan2(-s.x,-s.z);
+  for(const s of SHOPS){const sx=X+s.x,sz=Z+s.z;if(E){const ry=Math.atan2(-s.x,-s.z),sn=makeCitySign(s.sign,s.sc,.8);sn.position.set(sx+Math.sin(ry)*(s.d/2+.6),Math.min((shopH[s.id]||6)*.72,6.2),sz+Math.cos(ry)*(s.d/2+.6));g.add(sn)}else{const sg=new THREE.Group();sg.position.set(sx,0,sz);sg.rotation.y=Math.atan2(-s.x,-s.z);
     const b=mesh(new THREE.BoxGeometry(s.w,s.h,s.d),toonS(s.col));b.position.y=s.h/2;sg.add(b);
     const r=mesh(geo('hr',()=>0),toonS(s.roof));r.scale.set(s.w*.82,1.6,s.d*.82);r.position.y=s.h+1.7;sg.add(r);
     const door=new THREE.Mesh(geo('door',()=>new THREE.PlaneGeometry(1.8,2.6)),new THREE.MeshBasicMaterial({color:0x0a0f1c}));door.position.set(0,1.3,s.d/2+.02);sg.add(door);
-    const sn=makeSign(s.sign,s.sc,.8);sn.position.set(0,s.h+.1,s.d/2+.6);sg.add(sn);g.add(sg)}addCol({x:sx,z:sz,r:Math.max(s.w,s.d)*.55});{const ry=Math.atan2(-s.x,-s.z),cs=Math.cos(ry),sn=Math.sin(ry);for(const [lx,lz] of[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,-1]]){const dx=lx*s.w*.42,dz=lz*s.d*.4;addCol({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs,r:2.4})}}
+    const sn=makeCitySign(s.sign,s.sc,.8);sn.position.set(0,s.h+.1,s.d/2+.6);sg.add(sn);g.add(sg)}addCol({x:sx,z:sz,r:Math.max(s.w,s.d)*.55});{const ry=Math.atan2(-s.x,-s.z),cs=Math.cos(ry),sn=Math.sin(ry);for(const [lx,lz] of[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,-1]]){const dx=lx*s.w*.42,dz=lz*s.d*.4;addCol({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs,r:2.4})}}
     const dir=Math.hypot(s.x,s.z),off=Math.max(s.w,s.d)*.55+1.6,vx=sx-s.x/dir*off,vz=sz-s.z/dir*off;
-    addVendor(c,s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
+    addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
     L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView})}
   buildHouse(c,g,E);
-  if(!cityFallen(c)){const lx=X-16,lz=Z-1;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeSign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
-  {const inn=makeSign('POUSADA','#ffd9a0',.5);if(E)inn.position.set(X+6.4,5.7,Z-5.9);else inn.position.set(X+7,2.6,Z-6);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}L.inter.push({type:'inn',city:c,x:X+7,z:Z-4.6,r:2.6,label:'F · POUSADA',use:innView})}
+  if(!cityFallen(c)){const lx=X-16,lz=Z-1;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
+  {const inn=makeCitySign('POUSADA','#ffd9a0',.5);if(E)inn.position.set(X+6.4,5.7,Z-5.9);else inn.position.set(X+7,2.6,Z-6);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}L.inter.push({type:'inn',city:c,x:X+7,z:Z-4.6,r:2.6,label:'F · POUSADA',use:innView})}
   if(profile.retired&&profile.retired.length&&!cityFallen(c)){const ri=c.name==='Aster'?profile.retired.length-1:((c.cx*7+c.cz*13)%(profile.retired.length+2)+profile.retired.length+2)%(profile.retired.length+2);if(ri<profile.retired.length){const r=profile.retired[ri];const cc=CLASSES[r.cls];const m=makeChibi({body:cc.body,hair:cc.hair,wep:cc.wep,wcol:0xffd08a,eye:0xffd08a,gk:CLASS_GK[r.cls],tint:0xffd08a});m.mats.forEach(mt=>{mt.transparent=true;mt.opacity=.55});m.root.position.set(X,0,Z-14);scene.add(m.root);npcs.push({kind:'vendor',home:c,m,x:X,z:Z-14,face:0,r:.5,name:r.name,short:r.name,shop:'ret'+ri,t:0,col:'#ffd08a',sign:'VIDA PASSADA',label:'F · FALAR COM '+r.name.toUpperCase(),use:()=>retiredView(ri)})}}
   if(!E){const stall=mesh(geo('stall',()=>new THREE.BoxGeometry(3,1.1,1.4)),toonS(0x6b4a2a));stall.position.set(X+5,.55,Z+6.5);g.add(stall);
   const aw=mesh(geo('awn',()=>new THREE.BoxGeometry(3.4,.15,2)),toonS(0x8a2b8a));aw.position.set(X+5,2.6,Z+6.5);g.add(aw)}
@@ -1067,7 +1068,7 @@ function buildCity(c,g,addCol,R){
   for(let i=0;i<5;i++)spawnHunter(c,true);}
 }
 function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const m=makeChibi(look);m.root.position.set(x,0,z);scene.add(m.root);
-  npcs.push({kind:'vendor',home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+sign,use:()=>openShop(shop)})}
+  npcs.push({kind:'vendor',noLabel:true,home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+name.toUpperCase()+' — '+sign,use:()=>openShop(shop)})}
 function buildWorld(seed){
   seed=seed??profile.seed;if(WSEED!==(seed|0))gates=[];
   worldInit(seed);clearLevel();
@@ -1900,7 +1901,7 @@ function updWorld(dt){updEcon(dt);
   if(safe&&!P.dead){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.08*dt);P.mp=Math.min(P.maxmp,P.mp+P.maxmp*.1*dt);for(const a of allies)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.1*dt)}
   if(safe&&L.lastCity!==nc.c){L.lastCity=nc.c;if(nc.c.name!=='Aster')unlockLore('city');bigText(nc.c.name.toUpperCase(),1200);toast('<b>[ORÁCULO]</b> Zona segura: cidade de '+nc.c.name+'.');L.cands=genCands()}
   if(!safe&&nc.d>40)L.lastCity=null;
-  L.turT=(L.turT||0)-dt;if(L.turT<=0){L.turT=1;for(const e of enemies){if(e.dead||!e.breaker)continue;const n=nearestCity(e.x,e.z);if(n.d<60&&cityL(n.c)>=5&&!cityFallen(n.c)){hurtEnemy(e,e.maxhp*.06,n.c.x,n.c.z,{kb:0,pierce:true});fxLine([{x:n.c.x+(e.x-n.c.x)/n.d*34,z:n.c.z+(e.z-n.c.z)/n.d*34},{x:e.x,z:e.z}],0xffd070)}}}
+  L.turT=(L.turT||0)-dt;if(L.turT<=0){L.turT=1;for(const e of enemies){if(e.dead||!e.breaker)continue;const n=nearestCity(e.x,e.z);if(n.d<defenseRange(n.c)&&cityL(n.c)>=5&&!cityFallen(n.c)){hurtEnemy(e,e.maxhp*.06,n.c.x,n.c.z,{kb:0,pierce:true});fxLine([{x:n.c.x+(e.x-n.c.x)/Math.max(.01,n.d)*34,z:n.c.z+(e.z-n.c.z)/Math.max(.01,n.d)*34},{x:e.x,z:e.z}],0xffd070)}}}
   L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city))){spawnCitizen(ch.city);if(npcs.filter(n=>n.critter&&!n.gone&&n.home===ch.city).length<3)spawnCritter(ch.city)}for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
 }
 function updDungeon(dt){
@@ -2253,6 +2254,7 @@ function bankView(){
   h+=row('Depositar','Guarda o ouro com segurança',btn('100','dep','100',run.gold>=100)+btn('1.000','dep','1000',run.gold>=1000)+btn('Tudo','dep','all',run.gold>0,'hot'));
   h+=(affL('Selene')?row('Juros','Coletar '+(affL('Selene')*.15).toFixed(2).replace('.',',')+'% do saldo (uma vez por dia)',btn('Coletar','interest',0,profile.intDay!==todayKey()&&b>0)):'')+affRow('Selene');
   h+=row('Sacar','Leva o ouro de volta para a bolsa',btn('100','wd','100',b>=100)+btn('1.000','wd','1000',b>=1000)+btn('Tudo','wd','all',b>0));
+  h+='<div class="sec">RECURSOS DA VILA</div>'+row('Preparar a defesa','Brann organiza guardas e vigias; os investimentos ficam nesta vila.',btn('Defesas','defense',0))+row('Desenvolvimento da vila','Consulte melhorias, doações e renda.',btn('Ver evolução','gtab','city'));
   openModal('BANCO DE '+nearestCity(player.x,player.z).c.name.toUpperCase(),h);
 }
 
@@ -2390,7 +2392,7 @@ function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updSiege
     for(const e of enemies)if(e.breaker&&!e.dead&&Math.hypot(e.x-x,e.z-z)<10)e.inv=true;L.inv={c,t:150};
     toast('<b>[EVENTO] INVASÃO!</b> Monstros cercam a cidade de <b>'+c.name+'</b>. Mate todos em <b>2:30</b> (marcados no mapa). Se salvar: a cidade fica grata e os preços caem. Se não: os preços lá ficam <b>20% mais caros</b> até você salvá-la numa próxima invasão.',12000);
     showSys('INVASÃO em '+c.name+'. Vá até lá e derrote todos os monstros antes do tempo acabar. O resultado muda os preços da cidade (veja em NOTÍCIAS).');
-    if(cityL(c)>=4){for(let i=0;i<3;i++)makeHunterAlly({name:'Guarda',cls:[0,2,4][i],rank:clamp(pr,0,7),lvl:run.level+5,hair:0x333333},c.x+Math.cos(a)*38+rnd(-2,2),c.z+Math.sin(a)*38+rnd(-2,2),true);toast('<b>[CIDADE]</b> Os guardas de '+c.name+' saíram para lutar.')}bigText('INVASÃO',1200)}
+    if(spawnCityDefenders(c,c.x+Math.cos(a)*38,c.z+Math.sin(a)*38)){toast('<b>[CIDADE]</b> Os guardas de '+c.name+' saíram para lutar.')}bigText('INVASÃO',1200)}
   else if(r<.67){const a=rnd(0,TAU),x=P.x+Math.cos(a)*38,z=P.z+Math.sin(a)*38;const e=spawnRival(x,z,clamp(pr+1,0,8),{wild:true,breaker:true});e.name='Lendário '+e.name;e.legend=true;e.hp*=4;e.maxhp*=4;e.gold*=6;e.xp*=4;e.m.body.scale.multiplyScalar(1.25);
     const dir=['leste','sudeste','sul','sudoeste','oeste','noroeste','norte','nordeste'][((Math.round(Math.atan2(z-P.z,x-P.x)/(Math.PI/4))%8)+8)%8];
     toast('<b>[EVENTO]</b> Um <b style="color:#ffd54f">caçador lendário</b> foi visto a '+Math.round(Math.hypot(x-P.x,z-P.z))+'m ao <b>'+dir+'</b> (estrela dourada no MAPA). Recompensa enorme, perigo enorme.',9000)}
@@ -2565,16 +2567,28 @@ function aquaRows(){const A=profile.aqua||{};let h='<div class="sec">AQUÁRIO ('
 function cookRows(){let h=aquaRows()+'<div class="sec">COZINHA</div>';const f=run.fish||{};h+='<div class="sysline" style="font-size:12px">Seus peixes: '+(Object.keys(f).filter(k=>f[k]).map(k=>f[k]+' '+k).join(', ')||'nenhum. Pesque no lago da praça.')+'</div>';
   RECIPES.forEach((r,i)=>{const ok=Object.entries(r.need).every(([k,n])=>(f[k]||0)>=n);h+=row(r.n,r.d+' · precisa '+Object.entries(r.need).map(([k,n])=>n+' '+k).join(' + '),btn('Cozinhar','cook',i,ok))});return h}
 /* afinidade */
-const AFF_PERK={Mira:'Poções 4% mais baratas por nível',Kael:'Armas 3% mais baratas por nível',Brann:'Armaduras 3% mais baratas por nível',Dorian:'Recursos vendidos por 3% a mais por nível',Selene:'Juros diários de 0,15% por nível no banco',Lyra:'Missões pagam 5% a mais por nível'};
+const AFF_PERK={Mira:'Poções 4% mais baratas por nível',Kael:'Armas e armaduras 3% mais baratas por nível',Brann:'Mantém seu desconto de armaduras com Kael (vale a maior afinidade)',Dorian:'Recursos vendidos por 3% a mais por nível',Selene:'Juros diários de 0,15% por nível no banco',Lyra:'Missões pagam 5% a mais por nível'};
 const affL=n=>{if(profile.aff&&!profile.aff10){profile.aff10=1;for(const k in profile.aff)profile.aff[k]=Math.min(10,profile.aff[k]*2)}return (profile.aff||{})[n]||0};
 function affRow(n){const l=affL(n),c=1000*(l+1)*(l+1);return '<div class="sec">AFINIDADE COM '+n.toUpperCase()+'</div>'+row('<span style="color:#ff8fa3">'+'♥'.repeat(l)+'♡'.repeat(10-l)+' '+l+'/10</span>',AFF_PERK[n],l<10?btn('Presentear '+fmt(c),'gift',n,run.gold>=c):'<b>Máxima</b>')+npcRows(n)}
 function innLv(){return player?((profile.innLv||{})[nearestCity(player.x,player.z).c.id]||0):0}
 function innB(){return run&&run.rested&&run.rested.t>0?run.rested.l:0}
 function cityLv(){return (profile.cityLv||{})[nearestCity(player.x,player.z).c.id]||0}
-function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?affL('Brann')*.03:0;return choiceMul()*Math.max(.4,1-a-Math.min(5,cityLv())*.04-(hasT('founder')?.1:0)-((festival()||{}).shop||0))}
+function priceMul(kind){const a=kind==='pot'?affL('Mira')*.04:kind==='wep'?affL('Kael')*.03:kind==='arm'?Math.max(affL('Kael'),affL('Brann'))*.03:0;return choiceMul()*Math.max(.4,1-a-Math.min(5,cityLv())*.04-(hasT('founder')?.1:0)-((festival()||{}).shop||0))}
 const CITY_U=[['1','Bandeiras nas torres · lojas 4% mais baratas por nível'],['2','Carroça e depósito · elixires na loja de Poções'],['3','Muralhas brilhantes e colunas na praça'],['4','Estandartes na muralha, feira na praça · guardas defendem nas invasões'],['5','Postes de luz nas ruas · torres da muralha atiram nos monstros'],['6','BAIRRO NOVO fora da muralha · renda diária da cidade'],['7','Moinhos e serraria nos campos · renda maior'],['8','Segundo bairro e catedral · renda maior'],['9','Monumentos dos heróis e obelisco aceso · renda maior'],['10','Capital: praça dourada · renda máxima e título Fundador']];
 const cityNeed=l=>({cry:20*(l+1),gold:l>=5?50000*(l-3)*(l-3):0});
 const cityIncome=l=>l>=6?Math.round(2000*(l-5)*(l-5)*GR[Math.min(8,rankOf())].gold*(hasT('protector')?1.5:1)):0;
+/* Preparação permanente, separada para cada cidade. */
+function defenseLevel(c,k){return Math.max(0,Math.min(3,Math.floor(Number(((profile.defenses||{})[c.id]||{})[k])||0)))}
+function defenseCost(c,k){const n=defenseLevel(c,k)+1;return {gold:1500*n*n,core:8*n}}
+function defenseGuards(c){return (cityL(c)>=4?3:0)+defenseLevel(c,'guards')}
+function defenseRange(c){return 60+8*defenseLevel(c,'watch')}
+function upgradeDefense(k){if(!['guards','watch'].includes(k)||L.mode!=='world'||!inCity(player.x,player.z))return false;const c=nearestCity(player.x,player.z).c,lv=defenseLevel(c,k),cost=defenseCost(c,k);if(cityFallen(c)||cityL(c)<2||lv>=3||L.siege||run.gold<cost.gold||run.res.core.reduce((a,b)=>a+b,0)<cost.core)return false;run.gold-=cost.gold;let need=cost.core;for(let i=0;i<run.res.core.length&&need;i++){const n=Math.min(need,run.res.core[i]);run.res.core[i]-=n;need-=n}profile.defenses=profile.defenses||{};profile.defenses[c.id]={...(profile.defenses[c.id]||{}),[k]:lv+1};store.set('pds2_profile',profile);saveRun();toast('<b>[VILA]</b> '+c.name+': '+(k==='guards'?'Guarnição':'Vigia')+' melhorada para '+(lv+1)+'.');return true}
+function spawnCityDefenders(c,x,z){const n=defenseGuards(c);for(let i=0;i<n;i++)makeHunterAlly({name:'Guarda de '+c.name,cls:[0,2,4][i%3],rank:clamp(rankOf(),0,7),lvl:run.level+5,hair:0x333333},x+(i%3-1)*2,z+Math.floor(i/3)*2,true);return n}
+function defenseView(){view=defenseView;const c=nearestCity(player.x,player.z).c;let h='<div class="sysline"><b>Brann · Defesa de '+c.name+'</b><br>Prepare a vila antes das invasões. Selene guarda o ouro; Kael fornece armas e armaduras. As melhorias abaixo pertencem a esta vila e permanecem no seu progresso.</div>';
+  h+=row('Guarnição atual',defenseGuards(c)+' guardas respondem a transbordos e ao Dragão Sitiante.','');
+  for(const [k,n,d] of [['guards','Treinar guarnição','Cada nível acrescenta 1 guarda às respostas de defesa.'],['watch','Postos de vigia','Cada nível amplia em 8m o alcance das torres; torres funcionam a partir do nível 5 da vila.']]){const lv=defenseLevel(c,k),cost=defenseCost(c,k);h+=row(n+' · '+lv+'/3',d+(lv<3?'<br>Custo: '+fmt(cost.gold)+' ouro e '+cost.core+' núcleos (consome os menores ranks primeiro).':''),lv>=3?'<b>Concluído</b>':btn(cityL(c)<2?'Vila nível 2':L.siege?'Cerco em andamento':'Melhorar','defup',k,cityL(c)>=2&&!L.siege&&!cityFallen(c)&&run.gold>=cost.gold&&run.res.core.reduce((a,b)=>a+b,0)>=cost.core))}
+  h+='<div class="sec">PREPARAÇÃO</div>'+row('Torres',cityL(c)>=5?'Ativas · alcance '+defenseRange(c)+'m':'Liberadas no nível 5 da vila','')+row('Próximo passo',cityL(c)<2?'Evolua a vila até o nível 2 para organizar a defesa.':'Reúna núcleos nas Fendas e invista antes de uma invasão.',btn('Evolução da vila','gtab','city'))+affRow('Brann');openModal('DEFESA DA VILA',h)}
+
 function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l),tot=run.res.cry.reduce((a,b)=>a+b,0),inc=cityIncome(l),got=((profile.cityDay||{})[c.id])===todayKey();
   return '<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(inc?row('Renda da cidade',fmt(inc)+' ouro por dia',btn(got?'Coletado hoje':'Coletar','cityinc',0,!got,'hot')):'')
@@ -2660,8 +2674,8 @@ function houseAct(a,v){const H=profile.house;
   if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=24)return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
 function buildHouse(c,g,E){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
   if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT))}
-    const sg=makeSign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
-  else{const sg=makeSign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT))}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
+    const sg=makeCitySign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
+  else{const sg=makeCitySign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT))}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
 
 /* ===== MORADORES E FESTIVAIS ===== */
 const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu um eco andando sozinha.'];
@@ -2681,7 +2695,7 @@ function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4
 /* ===== ATAQUE À CIDADE (chefe de mundo marcado) ===== */
 function startSiege(c){const a=rnd(0,TAU),x=c.x+Math.cos(a)*60,z=c.z+Math.sin(a)*60;const b=spawnBoss(x,z,clamp(rankOf()+1,0,8),{...WBOSS,n:'Dragão Sitiante'});b.wild=true;b.breaker=true;b.world=true;b.siege=c;b.hp*=5;b.maxhp*=5;b.gold*=6;b.bars=5;b.roam={x:c.x,z:c.z};b.aggro=true;
   for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
-  L.siege={b,c,t:300};bigText('ATAQUE À CIDADE',1600);sfx('gong');shake(.6);showSys('Um DRAGÃO SITIANTE ataca '+c.name+'! Derrote-o em 5 minutos. Recompensa: ouro, troféu e renda dobrada hoje.')}
+  spawnCityDefenders(c,c.x+Math.cos(a)*38,c.z+Math.sin(a)*38);L.siege={b,c,t:300};bigText('ATAQUE À CIDADE',1600);sfx('gong');shake(.6);showSys('Um DRAGÃO SITIANTE ataca '+c.name+'! Derrote-o em 5 minutos. Recompensa: ouro, troféu e nova coleta da renda de hoje.')}
 function updSiege(dt){const P=player;run.siegeT=(run.siegeT||0)+dt;
   if(!L.siege&&run.siegeT>1500&&!bossE){const nc=nearestCity(P.x,P.z);if(nc.d<120&&cityL(nc.c)>=5&&!cityFallen(nc.c)){run.siegeT=0;startSiege(nc.c)}}
   const S=L.siege;if(!S)return;S.t-=dt;if(S.b.dead){L.siege=null;return}
@@ -2832,7 +2846,7 @@ const NPCQ={Lyra:{d:'Feche 3 portais',t:'clear',n:3,sk:'Bênção de Lyra: +10% 
 const NPCTALK={Lyra:['Mais um caçador novo... cuidado lá fora.','Você voltou inteiro. Isso é raro.','Sabe, eu também quis ser caçadora. Não tinha mana suficiente.','Guardei um relatório só para você ver primeiro.','Se um dia você sumir num portal, eu vou atrás. Sério.','Já pedi à Ordem: seu nome vai na parede dos lendários. Não me faça tirar ele de lá.'],
   Mira:['Poção? Poção.','Você de novo. Gostei.','Minha avó fazia poções com peixe. Não pergunte.','Estou testando uma receita nova. Quer provar?','Você é meu cliente favorito. Não conta pros outros.','Essa aqui eu nunca vendi pra ninguém. Leva. É por minha conta, hoje e sempre.'],
   Kael:['Arma boa não perdoa mão fraca.','Hm. Você segura a lâmina direito agora.','Eu forjei a espada de um SS uma vez. Ele morreu. A espada não.','Traga metal de guardião e eu faço milagre.','Você é o único que eu deixaria usar minhas melhores peças.','Forjei uma lâmina só pra você, com o meu nome gravado embaixo do seu. Nunca fiz isso antes.'],
-  Brann:['Armadura. Compra ou sai.','Ainda vivo? Bom material.','Perdi um olho num portal C. Por isso eu faço armadura.','Ajustei as placas pro seu jeito de lutar.','Se precisar, eu fecho a loja e vou com você.','Não é mais armadura. É uma promessa de metal: enquanto eu viver, nada te atravessa.'],
+  Brann:['Kael cuida dos equipamentos. Eu preparo os guardas.','Ainda vivo? Bom material.','Perdi um olho num portal C. Por isso eu faço armadura.','Ajustei as placas pro seu jeito de lutar.','Se precisar, os guardas estarão ao seu lado.','Não é mais armadura. É uma promessa de metal: enquanto eu viver, nada te atravessa.'],
   Dorian:['Núcleos, cristais, compro tudo.','Você tem olho pra coisa boa.','Sabia que cristal de rank A canta de noite?','Tenho um comprador secreto. Paga mais.','Sócio? Sócio.','Sócio, amigo, irmão. Escolhe o título, a metade do lucro já é sua.'],
   Selene:['Depósitos e saques, só isso.','Seu saldo está bonito.','O banco guarda mais que ouro. Guarda nomes de quem não voltou.','Abri uma conta especial pra você.','Se você morrer, eu cuido do que é seu. Prometo.','Seu cofre agora tem duas chaves. A outra fica comigo, junto do coração.']};
 const npcHas=n=>!!(profile.npcSk||{})[n];
@@ -2995,6 +3009,9 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
   openModal('BOLSA',h)}
 function extraActions3(a,v){
+  if(a==='equipshop'){if(v==='wep'||v==='arm')openShop(v);return 'close0'}
+  if(a==='defense'){defenseView();return 'close0'}
+  if(a==='defup'){if(upgradeDefense(v))defenseView();return 'close0'}
   if(a==='rebuild'){doRebuild(v);return 'close'}
   if(a==='bagtab'){L.bagTab=v;bagView(v);return 'close0'}
   if(a==='consv'){consView();return 'close0'}
@@ -3057,13 +3074,14 @@ function mktView(){
   openModal('MERCADO DE RECURSOS',h);
 }
 function openShop(id){
-  if(id==='guild')return guildView('quests');if(id==='mkt')return mktView();if(id==='bank')return bankView();
-  view=()=>openShop(id);const S=SHOPS.find(s=>s.id===id);const pr=rankOf();
+  if(id==='defense')return defenseView();if(id==='guild')return guildView('quests');if(id==='mkt')return mktView();if(id==='bank')return bankView();
+  view=()=>openShop(id);const S=SHOPS.find(s=>s.id===(id==='arm'?'wep':id));const pr=rankOf();
   let h='<div class="sysline">'+S.vendor+': '+(id==='pot'?'Poção boa salva vida lá dentro.':id==='wep'?'Só vendo o que o seu rank aguenta.':'Armadura pesada, dano leve.')+' · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';
+  if(id==='wep'||id==='arm')h='<div class="tabs">'+btn('Armas','equipshop','wep',true,id==='wep'?'on':'')+btn('Armaduras','equipshop','arm',true,id==='arm'?'on':'')+'</div>'+h;
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
     for(let t=0;t<Math.min(profile.rank===8?9:8,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);

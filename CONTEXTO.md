@@ -238,3 +238,12 @@ Correção pedida durante a etapa: personagem de origem física que aprende magi
 Proteção do progresso: combinação e recargas salvas, recarga preservada ao retirar/recolocar e trocar classe, restauração de poderes de evolução da biblioteca, cópia local única do save anterior em pds3_backup_v70 antes da primeira migração. Trocar repetidamente de classe não melhora de graça a mesma evolução já aprendida. Descrição de arma viva corrigida para +2% por nível, sem alterar o cálculo.
 
 Validação: 14 cenários nas funções reais (incluindo save antigo, poderes de evolução, passivas, títulos, recarga e ataque arcano de personagem físico), regressões v68/v69 e análise dos scripts. No navegador PC: combinação equipada/reaberta, painel de passivas e alternância X verificados. Não é uma sessão extensa de balanceamento. Próxima parte: combate/recompensas; aguardar Ian antes de iniciar. História e câmera permanecem posteriores.
+
+
+## Vila e preparação defensiva — v72
+
+Ian pediu reunir armas/armaduras no mesmo personagem, remover nomes flutuantes dos serviços e ampliar as funções/evoluções da vila. Escolheu começar por defesa contra as Fendas. Kael passa a vender e aprimorar ambos os equipamentos em abas; Brann assume a defesa. Afinidade antiga com Brann preserva desconto de armaduras; aplica-se a maior entre ela e Kael. Placas flutuantes de cidade, lojas, casa, biblioteca e pousada removidas; vendedores sem rótulos permanentes, com nome/serviço no aviso de interação próximo. Placas de portais/saídas permanecem.
+
+Selene mantém banco e ganha acesso às defesas e ao desenvolvimento da vila. Defesa permanente por cidade, disponível no nível 2: guarnição (3 níveis, +1 guarda por nível) e vigia (3 níveis, +8m de alcance das torres por nível; torres requerem cidade nível 5). Custos por nível n: 1500*n² ouro e 8*n núcleos, menores ranks primeiro. Guardas participam de transbordos e cercos; melhorias bloqueadas durante cerco ativo. Não foi criada nova história canônica: esta etapa prepara funções para desenvolver a narrativa com Ian depois.
+
+Validação: 6 cenários específicos de custos, limites, saves, cidades independentes e integração da defesa; regressões v71/v69. Navegador: loja única com abas, compra da guarnição e permanência após recarregar, cerco com quatro guardas após uma melhoria, vila sem placas. Balanceamento prolongado continua pendente. Próxima etapa ainda depende de Ian.
