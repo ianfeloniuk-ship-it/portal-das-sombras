@@ -267,3 +267,9 @@ Invocações de habilidades permanecem até morrer, acompanham transições e s�
 Eco despertado morto permanece no exército: nível 0, XP 0, guardado, podendo ser chamado novamente. Não ganha XP enquanto morto; nível zero requer 80 XP para subir. Libertar e consumir um eco manualmente continuam ações próprias, distintas de morrer. Atordoamentos por acertos/passivas/básicos limitados a 0,3s, com resistência de 3s por alvo; chefes não recebem esse controle. Domínio Absoluto mantém seu efeito específico de habilidade suprema.
 
 Validação: 8 cenários específicos de capacidade, limite sem custo, morte/XP do eco, persistência, resistência e marca; regressões v73/v71/v69. No navegador: lobo invocado, eco morto mantido em nível zero e chamado novamente. Balanceamento extenso continua pendente. Não iniciada outra etapa de história.
+
+
+## v75 — aparência do Lobo Espiritual
+- Corrigido o uso acidental do humano genérico: invocações wolf usam o lobo quadrúpede animado já incluído no projeto, com tonalidade espiritual.
+- Modelo carregado antes de restaurar invocações salvas; alternativa geométrica quadrúpede se o arquivo falhar. Sem novos serviços ou compras.
+- Verificação: regressões v74 e v69 aprovadas; prévia no navegador sem erros.

@@ -562,8 +562,10 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   escaravelho:{h:2.1,actor:true},monarca:{h:2.8,actor:true},guardiao:{h:2,st:1,a:{}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
+const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
+MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor)continue;ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON.list[k])continue;ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -591,6 +593,7 @@ function animGlb(m,st){
 }
 
 function animChibi(m,st,t){
+  if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
   if(m.glb){animGlb(m,st);return}
   const sw=Math.sin(t*11)*.7*st.move;
   m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;
@@ -1312,9 +1315,22 @@ function spawnShadow(B,x,z,rec){
 }
 function savedSummons(){return allies.filter(a=>a.permanentSummon&&!a.dead&&a.hp>0).map(a=>({kind:a.summonKind,hp:a.hp,maxhp:a.maxhp,dmg:a.dmg,giant:!!a.giant,buffT:Math.max(0,a.buffT||0)}))}
 function restoreSummons(){for(const r of run.summons||[]){if(!['wolf','skel'].includes(r.kind)||!(r.hp>0))continue;const a=spawnSummon(r.kind,player.x+1,player.z+1,1e9);a.maxhp=Math.max(1,Number(r.maxhp)||a.maxhp);a.hp=Math.min(a.maxhp,r.hp);a.dmg=Math.max(1,Number(r.dmg)||a.dmg);a.buffT=Math.max(0,Number(r.buffT)||0);if(r.giant){a.giant=true;a.m.body.scale.setScalar(2);a.r=1}}}
+function makeSpiritWolf(){
+  if(MON.list.lobo){const m=makeMonster({mon:'lobo',scale:.85,tint:0x78ccd8});m.locomotion=true;m.gaitSpeed=6.2;return m}
+  // Quadruped fallback also works when the optional model cannot be loaded.
+  const root=new THREE.Group(),body=new THREE.Group();root.add(body);
+  const fur=toon(0x719eab,0x08252c),dark=toon(0x244550),mats=[fur,dark];
+  const part=(w,h,d,x,y,z,mat=fur)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);body.add(m);return m};
+  part(.56,.52,1.12,0,.74,0);part(.65,.58,.46,0,.88,.43);
+  part(.46,.45,.48,0,1.15,.65);part(.3,.22,.4,0,1.05,.99);part(.27,.16,.09,0,1.07,1.22,dark);
+  for(const x of[-.17,.17]){const ear=mesh(new THREE.ConeGeometry(.15,.35,4),fur);ear.position.set(x,1.5,.6);body.add(ear);part(.04,.075,.1,x*1.4,1.23,.87,dark)}
+  const paws=[];for(const x of[-.22,.22])for(const z of[-.4,.4]){const leg=new THREE.Group();leg.position.set(x,.65,z);const foot=mesh(new THREE.BoxGeometry(.17,.6,.23),fur);foot.position.y=-.3;leg.add(foot);body.add(leg);paws.push(leg)}
+  const tail=part(.22,.22,.75,0,.8,-.84);tail.rotation.x=-.5;
+  return{root,body,mats,paws,tail,quadruped:true,sc:1};
+}
 function spawnSummon(kind,x,z,life){
   const wolf=kind==='wolf',col=wolf?0x6ff4ff:0xa26bff;const pm=toon(wolf?0x1f7f86:0x3a2466,wolf?0x0a3a40:0x1a0a33);
-  const m=makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:col,wep:wolf?'none':'sword',scale:wolf?.8:.9,gk:wolf?null:'Skeleton_Minion',tint:0x7a4ac0,emis:0x1a0a33});m.root.position.set(x,0,z);scene.add(m.root);
+  const m=wolf?makeSpiritWolf():makeChibi({mat:pm,skinMat:pm,legMat:pm,eye:col,wep:'sword',scale:.9,gk:'Skeleton_Minion',tint:0x7a4ac0,emis:0x1a0a33});m.root.position.set(x,0,z);scene.add(m.root);
   const mh=80*RANKS[rankOf()].mult*(1+run.level*.04);
   const a={m,mats:m.mats,x,z,face:0,name:wolf?'Lobo Espiritual':'Soldado',hp:mh,maxhp:mh,dmg:player.dmg*.7,speed:6.2,range:1.8,r:.5,cd:0,act:null,stun:0,team:'ally',life:1e9,permanentSummon:true,summonKind:kind,t:0,buffT:0,kb:{x:0,z:0},flash:0,slow:0};
   allies.push(a);fxRing(x,z,col,2.5,.5);return a;
@@ -3382,9 +3398,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v74</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v75</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=74;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=75;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
