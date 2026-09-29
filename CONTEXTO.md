@@ -143,6 +143,9 @@ Ideia do Irror: cada sistema faz UMA coisa, para não existir estratégia única
 
 - **Atributos em números inteiros (Irror):** valor de 1 ponto sobe a cada 25 níveis (`pStep`): Força/Int +2 +1 a cada 25 níveis de ataque (`atkPer`), Vitalidade 15 +8 (`hpPer`), mana 4 +2 (`mpPer`). Substitui o fator 1 + nível/50. Janela de Status mostra só o total (ex.: 'Ataque físico +12') e a explicação fica em dica (`tipRow`: passar o mouse ou tocar no nome); habilidades também.
 
+- **Tela (Irror, 28/09):** botões no topo direito, mapa no canto inferior direito no PC (em cima no celular), linha de objetivos abaixo do painel com ✕ (volta pelo ⚙ → Tela), atalhos do teclado só no ⚙. BOLSA só com itens; PERSONAGEM tem as abas Personagem/Poderes. Todas as explicações (status, maestria, habilidades, ficha) em dica ao tocar/passar o mouse, formatadas em lista (`tipRow`, `tipFmt`).
+- **Necromante/invocações:** limite de sombras pela mana (`shadowCap` = 2 + mana máx ÷ 50, mínimo 3); invocações também (`summonCap` = 2 + mana ÷ 60); usar a habilidade de novo renova as que estão vivas (vida cheia e tempo zerado) e troca as mais antigas se passar do limite.
+
 ## Decisões do Ian (não mudar sem perguntar)
 - Rank **Soberano** é secreto: não sai no sorteio do despertar; só é obtido no templo escondido dentro de uma masmorra comum (teste dos mandamentos, como no anime). Ranks públicos até SSS.
 - 5 guildas pré-existentes com história. Fundar guilda: **50 bilhões de ouro e nível 50**. Andar 100 da torre paga **5 milhões**.

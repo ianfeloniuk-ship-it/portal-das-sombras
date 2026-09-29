@@ -21,8 +21,9 @@ body{font-family:"Chakra Petch",system-ui,sans-serif;color:var(--ink)}
 #obj{top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-size:11px;padding:4px 10px;white-space:nowrap;max-width:44vw;overflow:hidden;text-overflow:ellipsis;text-align:center}
 #boss{top:calc(38px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(38vw,420px);padding:4px 8px;text-align:center;font-size:12px;letter-spacing:.1em}
 #boss .bar{height:9px}
-#mm{top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));width:96px;height:96px;pointer-events:auto}
-#tb{position:fixed;top:calc(110px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:7}
+#mm{top:calc(48px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));width:96px;height:96px;pointer-events:auto}
+body.pc #mm{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:150px;height:150px}
+#tb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:7}
 .mini{font:700 10px "Chakra Petch",sans-serif;letter-spacing:.08em;color:var(--ink);background:var(--panel);border:1px solid rgba(79,195,255,.55);border-radius:4px;padding:7px 8px;touch-action:none;cursor:pointer}
 #toasts{top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:5px;align-items:center;width:min(90vw,440px)}
 .toast{padding:6px 12px;font-size:12px;animation:tin .25s ease-out;text-align:center}
@@ -56,7 +57,7 @@ body.pc #btns .b[hidden]{display:none}
 #steal .b{position:relative;width:50px;height:50px;border-color:#ffb84d}
 #bF{position:fixed;right:calc(250px + env(safe-area-inset-right,0px));bottom:calc(130px + env(safe-area-inset-bottom,0px));width:auto;height:auto;border-radius:6px;padding:10px 14px;font-size:13px;z-index:7;border-color:#d7b8ff;box-shadow:0 0 16px rgba(162,107,255,.6);animation:pulse 1.2s infinite}
 @keyframes pulse{50%{box-shadow:0 0 26px rgba(162,107,255,.9)}}
-#keys{position:fixed;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);z-index:5;white-space:nowrap}
+#keys{display:none!important;position:fixed;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);z-index:5;white-space:nowrap}
 .scr{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding-inline:16px;background:radial-gradient(ellipse at 50% 30%,rgba(30,60,120,.5),rgba(2,6,14,.92) 70%);overflow:auto}
 .card{max-width:520px;width:100%;padding:18px;text-align:center}
 .card h1{font-family:"Russo One",sans-serif;font-size:clamp(26px,7vw,44px);margin:0 0 4px;letter-spacing:.06em;color:#dff4ff;text-shadow:0 0 16px var(--sys),0 0 36px #1d5bd6;text-wrap:balance}
@@ -114,7 +115,7 @@ body.pc #btns .b[hidden]{display:none}
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div class="bar"><i id="bb" style="background:linear-gradient(90deg,#ff2d55,#ff8a4d)"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
 <div id="tb" hidden><button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bNews" onclick="modalOpen?closeModal():newsView()">NOTÍCIAS</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bPot" onclick="usePot()">POÇÃO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">⚙</button></div>
-<div id="mission" class="ui panel" hidden></div>
+<div id="mission" class="ui panel" hidden style="pointer-events:auto"></div>
 <div id="toasts" class="ui"></div>
 <div id="big" class="ui">LEVANTE-SE</div>
 <div id="dlg" class="ui panel" hidden></div>
@@ -1435,7 +1436,7 @@ function applyPassive(e,amt,crit,o){const c=profile.cls,P=player;
   else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}
 /* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
-const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você'};
+const SKD={bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva de ataques numa área à frente',dot:'Dano contínuo nos inimigos por perto',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (máximo pela sua mana; usar de novo renova os que estão vivos)'};
 function skillDesc(sk){if(!sk)return '';const nat=['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':(isMagic()?' · mágica (Inteligência)':' · física (Força)');return (SKD[sk.t]||'Habilidade')+nat+(['heal','guard','buff_dmg','stealth','blink'].includes(sk.t)?'':' · <b>marca</b> os alvos')+' · poder x'+sk.pow+' · '+sk.mp+' de mana · recarga '+sk.cd+'s'}
 function killEnemy(e){
   if(profile&&profile.cls===7&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
@@ -1568,7 +1569,9 @@ function runSkill(sk){
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[SISTEMA]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
     case 'guard':{P.guard=5;P.guardVal=sk.pow;toast('<b>[SISTEMA]</b> '+sk.n+': dano recebido reduzido');break}
     case 'stealth':{P.stealth=5;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;toast('<b>[SISTEMA]</b> Furtivo por 5s. Próximo golpe x3');break}
-    case 'summon':{const n=Math.round(sk.pow);for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,22);if(sk.giant){a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}break}
+    case 'summon':{const n=Math.round(sk.pow),mine=allies.filter(a=>a.life&&!a.dead&&!a.shadow&&!a.party);for(const a of mine){a.t=0;a.hp=a.maxhp;fxRing(a.x,a.z,0xa26bff,1.2,.3)}
+      let room=summonCap()-mine.length;while(room<n&&mine.length){const o=mine.shift();o.dead=true;scene.remove(o.m.root);room++}if(mine.length)floater(P.x,P.z,'INVOCAÇÕES RENOVADAS','#b18cff');
+      for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,22);if(sk.giant){a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}break}
     case 'rain':{const cx=tgt?tgt.x:P.x+Math.sin(P.face)*6,cz=tgt?tgt.z:P.z+Math.cos(P.face)*6;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.06:.1);hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);fallFx(hx,hz,du,fk,col)}break}
     case 'dot':{let n=0;for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<5.5){e.dotT=5;e.dotD=dmg/5;e.aggro=true;n++}if(!n)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
   }
@@ -1917,7 +1920,9 @@ function hud(){
   const sth=isMagic()?'Ataque básico: '+(basicIsMagic()?'mágico':'físico 70%')+(touch?'':' (X)')+' · ':'';
   const dmd=sth+ordh+invs+(run.demand?'Desafio do Sistema: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' (C)')+' · ':'';
   $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · H');
-  $('mission').textContent=dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Associação':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');$('mission').hidden=!(done||q||dl||pt||dmd);
+  const _mt=dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Associação':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
+  if($('mission').dataset.t!==_mt){$('mission').dataset.t=_mt;$('mission').innerHTML='<span style="float:right;cursor:pointer;margin-left:6px;opacity:.7" title="Esconder (volta pelo ⚙)" onclick="try{localStorage.setItem(\'pds_hidemis\',\'1\')}catch(e){}$(\'mission\').hidden=true">✕</span>'+_mt}
+  $('mission').hidden=_hm||!(done||q||dl||pt||dmd);{const r=$('stat').getBoundingClientRect();if(r.bottom>0)$('mission').style.top=(r.bottom+6)+'px'}
   drawMap(mmc,192,false);
 }
 function buildSteal(){const box=$('steal');box.innerHTML='';if(run.fused){const b=document.createElement('div');b.className='b';b.id='stF';b.style.borderColor='#d7b8ff';b.innerHTML='<div class="cd"></div><span class="k">★</span><span class="nm">'+run.fused.n+'</span>';bindBtn(b,()=>useSkill(run.fused));box.appendChild(b)}run.stolen.forEach((s,i)=>{const b=document.createElement('div');b.className='b';b.id='st'+i;b.innerHTML='<div class="cd"></div><span class="k">'+(i+1)+'</span><span class="nm">'+s.n+'</span>';bindBtn(b,()=>useSkill(run.stolen[i]));box.appendChild(b)})}
@@ -2194,7 +2199,8 @@ function ensureRun(){run.lamps=run.lamps||0;
 function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=>q[0]===k);const b=d.p[k];d.p[k]=Math.min(g[2],b+v);
   if(b<g[2]&&d.p[k]>=g[2])toast('<b>[DIÁRIA]</b> '+g[1]+' concluído.');
   if(DAILY.every(q=>d.p[q[0]]>=q[2])){d.done=true;run.pts+=1;player.hp=player.maxhp;player.mp=player.maxmp;bigText('DIÁRIA COMPLETA',1400);sfx('level');toast('<b>[SISTEMA]</b> Missão diária concluída: +1 ponto de status e recuperação total.',5000)}}
-function shadowCap(){return 3+Math.floor(rankOf()/2)}
+function shadowCap(){return Math.max(3,2+Math.floor(((player&&player.maxmp)||60)/50))+(profile.rank===8?3:0)}
+function summonCap(){return 2+Math.floor(((player&&player.maxmp)||60)/60)}
 function shadowRecs(){return run.shadows}
 const ORDERS=[['atacar','ATACAR','caçam os inimigos por perto'],['defender','DEFENDER','ficam perto e só atacam quem chega em você'],['seguir','SEGUIR','não lutam, só seguem você']];
 function cycleOrder(){if(!allies.some(a=>a.shadow&&!a.dead)){toast('Você não tem sombras ativas.');return}const i=(ORDERS.findIndex(o=>o[0]===(run.order||'atacar'))+1)%ORDERS.length;run.order=ORDERS[i][0];bigText('SOMBRAS: '+ORDERS[i][1],900);toast('<b>[SISTEMA]</b> Ordem ao exército: <b>'+ORDERS[i][1]+'</b> — '+ORDERS[i][2]+'.');sfx('arise')}
@@ -2250,7 +2256,8 @@ function statDesc(){const m=isMagic(),bm=basicIsMagic(),L=run.level,s=run.stats|
    int:['Ataque mágico <b>+'+fmt(atkPer(L)*(s.int||0))+'</b> · mana <b>+'+fmt(mpPer(L)*(s.int||0))+'</b>','Cada ponto de Inteligência = <b>+'+atkPer(L)+' de ataque mágico</b> e <b>+'+mpPer(L)+' de mana</b>. '+up+(m?' Usado nas suas habilidades.':'')],
    vit:['Vida <b>+'+fmt(hpPer(L)*(s.vit||0))+'</b>','Cada ponto de Vitalidade = <b>+'+hpPer(L)+' de vida</b>. '+up]}}
 /* Linha com dica: passe o mouse (PC) ou toque no nome (celular) para ver a explicação. */
-function tipRow(name,short,tip,btns){return '<div class="it" title="'+String(tip).replace(/<[^>]+>/g,'').replace(/"/g,"'")+'"><div class="d" style="cursor:help" onclick="const t=this.lastElementChild;t.hidden=!t.hidden">'+name+' <span style="opacity:.55">ⓘ</span><small>'+short+'</small><small class="tip" hidden style="color:#bfe8ff">'+tip+'</small></div><div class="acts">'+btns+'</div></div>'}
+function tipFmt(t){const p=String(t).split(/(?<=[.!])\s+(?=[A-ZÀ-Ú<(+−0-9])/).filter(x=>x.trim());return p.length>1?'<span style="display:block;margin-top:3px">• '+p.join('<br>• ')+'</span>':t}
+function tipRow(name,short,tip,btns){return '<div class="it" title="'+String(tip).replace(/<[^>]+>/g,'').replace(/"/g,"'")+'"><div class="d" style="cursor:help" onclick="const t=this.lastElementChild;t.hidden=!t.hidden">'+name+' <span style="opacity:.55">ⓘ</span><small>'+short+'</small><small class="tip" hidden style="color:#bfe8ff">'+tipFmt(tip)+'</small></div><div class="acts">'+btns+'</div></div>'}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
 function guildNeed(l){return 25000*l*l}
 const GUILD_LVL=50;function guildCost(){return 50e9}
@@ -2308,7 +2315,7 @@ function statusView(){view=statusView;const s=run.stats,b=statsBonus();
   h+='<div class="sec">HABILIDADES (ATÉ O NÍVEL 10)</div>';
   for(const sk of player.skills){const l=run.skl[sk.n]||0;h+=tipRow(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>','Poder <b>+'+(15*l)+'%</b> · recarga <b>'+String(Math.round(sk.cd*(1-.05*l)*10)/10).replace('.',',')+' s</b>',skillDesc(sk)+'. Cada nível: +15% de poder e −5% de recarga (recarga base '+sk.cd+' s).',btn('+1','skup',sk.n,run.spts>0&&l<10))}
   if(powLib().length){h+='<div class="sec">PODERES ABSORVIDOS (2 PONTOS POR NÍVEL)</div>';for(const sk of powLib()){const l=run.skl[sk.n]||0;h+=row(sk.n+' <b>NV '+l+(l>=10?' · MÁXIMO':'/10')+'</b>',skillDesc(sk)+'<br><span style="color:var(--dim)">Não é da sua classe: cada nível custa 2 pontos</span>',btn('+1 (2 pts)','skup2',sk.n,run.spts>=2&&l<10))}}
-  {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+row('Maestria <b>'+ms+'</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida (entra no bônus somado), para sempre nesta vida. Use quando suas habilidades estiverem no máximo. Agora: <b>+'+(ms/2).toString().replace('.',',')+'%</b>',btn('+1','mast',0,run.spts>0))}
+  {const ms=run.mastery||0;h+='<div class="sec">MAESTRIA (SEM LIMITE)</div>'+tipRow('Maestria <b>'+ms+'</b>','Dano e vida <b>+'+(ms/2).toString().replace('.',',')+'%</b>','Cada ponto de habilidade aqui dá +0,5% de dano e +0,5% de vida. Entra no bônus somado (veja a ficha do personagem). Vale para sempre nesta vida. Use quando as habilidades estiverem no máximo.',btn('+1','mast',0,run.spts>0))}
   h+='<div class="sec">DIÁRIA DE HOJE</div>';const d=run.daily;
   for(const q of DAILY)h+=row(q[1],Math.floor(d.p[q[0]])+q[3]+' / '+q[2]+q[3],d.p[q[0]]>=q[2]?'<b style="color:#6fe39a">OK</b>':'');
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">'+(d.done?'Concluída hoje.':'Complete tudo até a meia-noite. Se começar e não terminar, o Sistema manda você para a Zona de Penalidade.')+'</div>';
@@ -2810,7 +2817,7 @@ function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur
 function critMul(){return 2}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
-  line=(n,v,d)=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(79,195,255,.12)"><span>'+n+(d?'<br><small style="color:var(--dim)">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
+  line=(n,v,d)=>'<div title="'+String(d||'').replace(/<[^>]+>/g,'').replace(/"/g,"'")+'" '+(d?'onclick="const t=this.querySelector(\'small\');if(t)t.hidden=!t.hidden" ':'')+'style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(79,195,255,.12)'+(d?';cursor:help':'')+'"><span>'+n+(d?' <span style="opacity:.55">ⓘ</span><br><small hidden style="color:#bfe8ff">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div class="sysline" style="font-size:12px">Regra do Sistema: atributos e equipamento dão <b>números fixos</b>. Tudo que é <b>%</b> entra numa soma só (lá embaixo).</div><div style="font-size:13px">';
   h+=line('Ataque físico',fmt(atkOf('phy')),'10 + nível 2×'+run.level+' + Força '+(s.for||0)+' × '+atkPer(run.level)+' + arma '+itemAtk(w));
   h+=line('Ataque mágico',fmt(atkOf('mag')),'10 + nível 2×'+run.level+' + Inteligência '+(s.int||0)+' × '+atkPer(run.level)+' + arma '+itemAtk(w));
@@ -2830,7 +2837,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+='<div class="sec">MARCAS</div><div class="sysline" style="font-size:12px">Habilidades de ataque <b>marcam</b> os alvos por 6 s. O próximo golpe normal num alvo marcado causa <b>+50%</b> e tira <b>1 s</b> da recarga de todas as habilidades.</div>';
   const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
   return h+'</div>'+profRows()}
-function bagTabs(cur){return '<div class="tabs">'+(cur==='world'?[['world','Mundo']]:[['char','Personagem'],['pow','Poderes'],['itens','Itens']]).map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
+function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+='<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=charSheet();
@@ -3070,7 +3077,7 @@ function setGfx(lite){ENV.lite=lite;try{localStorage.setItem('pds_gfx',lite?'lev
   if(started&&L.mode==='world'&&ENV.ok){for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}}
 $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráficos leves: menos grama e resolução menor. Melhor para celular fraco.':'Gráficos em alta qualidade.')});$('bGfx').textContent=ENV.lite?'LEVE':'HD';
 function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
-function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
+function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="toast(document.getElementById(\'keys\').textContent,8000)">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'<div class="sec">COLEÇÃO</div><button class="mini" onclick="albumView()">Coleção de sombras</button> <button class="mini" onclick="bestView()">Bestiário</button>')}
