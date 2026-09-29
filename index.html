@@ -1360,11 +1360,12 @@ function makeItem(slot,tier,rar){
 function rollItem(tier,boss){const _rk=rankOf(),_ex=Math.max(0,tier-_rk);tier=Math.min(tier,_rk);const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,wpick(w.map((w,i)=>({i,w}))).i+Math.ceil(_ex/3));const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+gearRuneText(it)}
 function addItem(it){
-  const cur=run.equip[it.slot];
-  if(rankOf()>=it.tier&&(!cur||itemScore(it)>itemScore(cur))){if(cur)run.items.push(cur);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: <b style="color:'+RAR[it.rar].c+'">'+it.name+'</b> ('+statTxt(it)+')',3500)}
-  else if(run.items.length>=24){run.gold+=it.value;toast('<b>[ORÁCULO]</b> Bolsa cheia. '+it.name+' vendido por '+fmt(it.value)+' ouro.')}
-  else{run.items.push(it);toast('<b>[ORÁCULO]</b> Item na bolsa: <b style="color:'+RAR[it.rar].c+'">'+RAR[it.rar].n+' · '+it.name+'</b>',3200)}
+  if(run.items.length>=24){run.gold+=it.value;toast('<b>[ORÁCULO]</b> Bolsa cheia. '+it.name+' vendido por '+fmt(it.value)+' ouro.');return false}
+  run.items.push(it);toast('<b>[ORÁCULO]</b> Item na bolsa: <b style="color:'+RAR[it.rar].c+'">'+RAR[it.rar].n+' · '+it.name+'</b>. Abra a Bolsa para equipar.',3500);return true
 }
+function equipmentBagRoom(){if(run.items.length<24)return true;toast('<b>[ORÁCULO]</b> Bolsa cheia. Libere um espaço antes de comprar ou forjar equipamentos.');return false}
+function buyEquipment(sl,t){if(!['w','a'].includes(sl)||!Number.isInteger(t)||t<0||t>rankOf()||!PRICE[t])return false;const pp=Math.round(PRICE[t]*priceMul(sl==='w'?'wep':'arm'));if(run.gold<pp||!equipmentBagRoom())return false;const it=makeItem(sl,t,0);run.gold-=pp;addItem(it);return true}
+function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const it=run.items[i];if(!['w','a'].includes(it.slot)||rankOf()<it.tier)return false;run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: '+it.name);return true}
 
 /* ================= MISSÕES ================= */
 function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1+(run?run.level:1)/10;
@@ -2605,7 +2606,7 @@ function extraActions(a,v){
   if(a==='gmake'){const c=guildCost();if(run.gold<c||run.level<GUILD_LVL)return;run.gold-=c;profile.guild={name:'Guilda de '+pick(SHNAMES),lvl:1,don:0,own:true};store.set('pds2_profile',profile);toast('<b>[ORÁCULO]</b> Guilda fundada: '+profile.guild.name);return true}
   if(a==='gdon'){const g=profile.guild,amt=+v;if(run.gold<amt)return;run.gold-=amt;g.don+=amt;while(g.lvl<10&&g.don>=guildNeed(g.lvl)){g.don-=guildNeed(g.lvl);g.lvl++;toast('<b>[ORÁCULO]</b> Guilda subiu para o nível '+g.lvl+'.')}store.set('pds2_profile',profile);return true}
   if(a==='gleave'){profile.guild=null;store.set('pds2_profile',profile);return true}
-  if(a==='forge'){const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const fl=profLv('forge');const rar=wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i;profXp('forge',10+t*5);sfx('boom');addItem(makeItem(sl,t,rar));return true}
+  if(a==='forge'){if(!equipmentBagRoom())return 'close0';const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const fl=profLv('forge');const rar=wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i;profXp('forge',10+t*5);sfx('boom');addItem(makeItem(sl,t,rar));return true}
   if(a==='elem'){if(run.elem&&run.gold<20000)return;if(run.elem)run.gold-=20000;run.elem=v;AFFC=null;player.skills=pSkills();refreshStats();bigText(ELEM[v].n.toUpperCase(),1300);toast('<b>[ORÁCULO]</b> Você despertou o elemento '+ELEM[v].n+'.');return true}
   if(a==='buypet'){if(run.gold<8000)return;run.gold-=8000;const np=newPet();if(!run.pet||typeof run.pet!=='object'||np.rar>=run.pet.rar){run.pet=np;if(PET){scene.remove(PET);PET=null}toast('<b>[ORÁCULO]</b> Novo companheiro: <b style="color:'+RAR[np.rar].c+'">'+RAR[np.rar].n+' · '+PETP[np.pow].n+'</b>',4500)}else{run.pet.lvl+=3;toast('<b>[ORÁCULO]</b> O ovo era '+RAR[np.rar].n+'. Seu companheiro absorveu a energia: +3 níveis.')}return true}
   if(a==='trainpet'){const c=petTrainCost();if(!run.pet||run.gold<c)return;run.gold-=c;run.pet.lvl++;toast('<b>[ORÁCULO]</b> Companheiro subiu para o nível '+run.pet.lvl+'.');return true}
@@ -3146,7 +3147,7 @@ function extraActions3(a,v){
   if(a==='rebirth'){if(run.level<100*((profile.rebirths||0)+1))return;if(!L.rbOk||time-L.rbOk>6){L.rbOk=time||1;toast('<b>[ORÁCULO]</b> Tem certeza? Toque em Reencarnar de novo para confirmar.',4000);return 'close0'}L.rbOk=0;profile.rebirths=(profile.rebirths||0)+1;store.set('pds2_profile',profile);run.level=1;run.xp=0;run.pts=5*profile.rebirths;run.spts=0;run.cpts=0;run.mastery=0;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.skl={};run.cons={fur:0,mur:0,arc:0};refreshStats();player.hp=player.maxhp;closeModal();bigText('REENCARNAÇÃO '+profile.rebirths,2000);sfx('arise');showSys('De volta ao começo. Mas você não é mais o mesmo.');return 'close'}
   if(a==='caravan'){closeModal();startCaravan();return 'close'}
   if(a==='tmap'){if(run.gold<5000)return;if(buyMap())run.gold-=5000;return true}
-  if(a==='buyret'){const r=profile.retired[+v],t=Math.min(9,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price)return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
+  if(a==='buyret'){const r=profile.retired[+v],t=Math.min(9,r.rank),price=Math.round(PRICE[t]*2);if(r.sold||run.gold<price||!equipmentBagRoom())return;run.gold-=price;r.sold=true;store.set('pds2_profile',profile);addItem(makeItem(Math.random()<.5?'w':'a',t,2));return true}
   if(['housebuy','furn','hsleep','haltar','hput','hget'].includes(a))return houseAct(a,v);
   if(a==='loadout'){loadoutView();return 'close0'}
   if(a==='loadslot'){loadoutView(+v);return 'close0'}
@@ -3260,7 +3261,7 @@ function bagItems(){
   let h='<div class="sysline">Ouro <b class="gold">'+fmt(run.gold)+'</b> · Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'%</div>';
   {const rw=bestInBag('w'),ra=bestInBag('a'),up=[];if(rw&&itemScore(rw)>itemScore(run.equip.w))up.push('<b style="color:'+RAR[rw.rar].c+'">'+rw.name+'</b>');if(ra&&itemScore(ra)>itemScore(run.equip.a))up.push('<b style="color:'+RAR[ra.rar].c+'">'+ra.name+'</b>');
     h+='<div class="sysline"><b>[ORÁCULO]</b> '+(up.length?'Recomendo equipar '+up.join(' e ')+'.</div><div style="display:flex;justify-content:flex-end">'+btn('EQUIPAR O MELHOR','equipbest',0,true,'hot')+'</div>':'Você já está com o melhor equipamento da bolsa.</div>')}
-  h+='<div class="sysline" style="font-size:12px">Arma dá <b>ataque</b>, armadura dá <b>escudo</b>. A seta mostra quanto a mais ou a menos que o seu. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
+  h+='<div class="sysline" style="font-size:12px">Itens comprados e encontrados ficam na bolsa. Clique em <b>Equipar</b> para escolher o que usar.<br>Arma dá <b>ataque</b>, armadura dá <b>escudo</b>. A seta mostra quanto a mais ou a menos que o seu. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
   for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · '+statTxt(it):'Compre na cidade ou ache em baús','')}
   h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Baús e guardiões dão equipamentos.</small></div></div>';
@@ -3302,9 +3303,9 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='enter'){const g=gates.find(x=>x.id==v);if(g&&!g.dead)enterGate(g);return}
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[ORÁCULO]</b> Comprado: '+p.n)}
-  if(a==='buyi'){const sl=v[0],t=+v.slice(1),pp=Math.round(PRICE[t]*priceMul(sl==='w'?'wep':'arm'));if(run.gold<pp)return;run.gold-=pp;addItem(makeItem(sl,t,0))}
+  if(a==='buyi')buyEquipment(v[0],+v.slice(1));
   if(a==='equipbest'){for(const sl of['w','a']){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[ORÁCULO]</b> Equipamento otimizado.');}
-  if(a==='equip'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;const it=run.items[i];run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: '+it.name)}
+  if(a==='equip')equipBagItem(v);
   if(a==='sell'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;run.gold+=run.items[i].value;toast('<b>[ORÁCULO]</b> Vendido por '+fmt(run.items[i].value)+' ouro');run.items.splice(i,1)}
   if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[ORÁCULO]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);run.quests[+v]=genQuest(q.t)}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[ORÁCULO]</b> '+p.name+' entrou no seu grupo.')}
@@ -3467,9 +3468,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v78</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v79</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=78;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=79;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
