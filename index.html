@@ -634,9 +634,22 @@ function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
     shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
 }
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
-function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a;
-  for(const mt of m.wmats){if(!mt.emissive)continue;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar}else mt.emissive.set(0)}
-  for(const n of m.wnodes||[]){n.visible=!!w;n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1)}
+/* Visual do equipamento (pedido do Irror): a arma e a roupa mudam com o que você usa.
+   Arma: metal na cor do rank; do rank A em diante vira a versão grande (espada/machado de duas mãos, cajado longo, besta grande, facas duplas).
+   Armadura: sem armadura = sem capa e sem elmo; com armadura = capa; do rank B em diante = elmo/chapéu; roupa tingida na cor do rank. */
+const TIER_COL=[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xf4f0ff];
+const BIGW={sword:['2H_Sword'],axe:['2H_Axe'],bow:['2H_Crossbow'],dagger:['Knife','Knife_Offhand'],staff:['2H_Staff'],bonestaff:['2H_Staff']};
+function tintTo(mt,col,k){if(!mt.color)return;if(!mt.userData.c0)mt.userData.c0=mt.color.clone();mt.color.copy(mt.userData.c0);if(col!=null)mt.color.lerp(new THREE.Color(col),k)}
+function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a,wc=w?TIER_COL[Math.min(8,w.tier)]:null,ac=a?TIER_COL[Math.min(8,a.tier)]:null;
+  const glow=mt=>{if(!mt.emissive)return;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar+(w.tier>=5?.25:0)}else mt.emissive.set(0)};
+  const big=m.model&&w&&w.tier>=4?(BIGW[CLASSES[profile.cls].wep]||[]):[];let bigShown=false;
+  if(m.model)m.model.traverse(c=>{if(!c.isMesh)return;const nm=c.name;
+    if(c.parent&&/^handslot/.test(c.parent.name)&&!/Spellbook|Wand/.test(nm)&&!(m.wnodes||[]).some(n=>n===c||n.getObjectById&&n.getObjectById(c.id))){const on=big.includes(nm);c.visible=on;if(on){bigShown=true;tintTo(c.material,wc,.45);glow(c.material)}}
+    if(/_Cape$/.test(nm))c.visible=!!a;
+    if(/_Helmet$|_Hat$/.test(nm))c.visible=!!a&&a.tier>=3;
+    if(/_(Body|ArmLeft|ArmRight|LegLeft|LegRight|Cape|Helmet|Hat)$/.test(nm))tintTo(c.material,ac,a?.12+.04*Math.min(8,a.tier):0)});
+  for(const mt of m.wmats){tintTo(mt,wc,.45);glow(mt)}
+  for(const n of m.wnodes||[]){n.visible=!!w&&!bigShown;n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1)}
   for(const mt of m.mats){if(m.wmats.includes(mt)||!mt.emissive)continue;if(a&&a.rar>0){mt.emissive.set(RAR[a.rar].c);mt.emissiveIntensity=.03+.035*a.rar}else if(!mt.userData.keepEm)mt.emissive.set(0)}}
 function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp,fs=player.maxsh?player.shield/player.maxsh:1;Object.assign(player,st);player.shield=Math.round(st.maxsh*Math.min(1,fs));player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp);try{gearLook()}catch(e){}}
 
@@ -3187,9 +3200,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v59</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v60</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=59;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=60;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
