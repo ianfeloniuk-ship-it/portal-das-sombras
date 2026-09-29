@@ -148,6 +148,10 @@ Ideia do Irror: cada sistema faz UMA coisa, para não existir estratégia única
 
 - **Polimento (Irror, 28/09 21:50):** prédios das lojas com colisão nos cantos (não dá para entrar na Associação); Selene e Dorian atrás das barracas (antes a estaca atravessava); loja e bolsa mostram diferença em ataque/escudo em vez de 'poder'; a arma só aparece na mão quando há arma equipada; a linha de objetivos não mostra mais 'Ataque básico: mágico (X)'.
 
+- **Visual do equipamento (Irror):** sem armadura = sem capa/elmo; com armadura = capa; rank B+ = elmo/chapéu; roupa e metal tingidos pela cor do rank (`TIER_COL`); arma rank A+ troca para a versão grande embutida no modelo (`BIGW`).
+- **Estradas entre cidades (Irror):** cada cidade liga à vizinha do leste e do sul por estrada em L (`roadSegs`/`onRoad`), no chão (cinza, sem tinta de bioma) e no mapa.
+- Profissões no topo da ficha (PERSONAGEM). ⚙ sem Coleção/Bestiário (ficam em PERSONAGEM) e sem seção de gráficos duplicada.
+
 ## Decisões do Ian (não mudar sem perguntar)
 - Rank **Soberano** é secreto: não sai no sorteio do despertar; só é obtido no templo escondido dentro de uma masmorra comum (teste dos mandamentos, como no anime). Ranks públicos até SSS.
 - 5 guildas pré-existentes com história. Fundar guilda: **50 bilhões de ouro e nível 50**. Andar 100 da torre paga **5 milhões**.

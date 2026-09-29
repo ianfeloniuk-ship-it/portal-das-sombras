@@ -953,6 +953,10 @@ function nearestCity(x,z){const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floo
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(rx+i,rz+j),d=Math.hypot(x-c.x,z-c.z);if(d<bd){bd=d;best=c}}return{c:best,d:bd}}
 function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG),n=Math.ceil(rad/(CH*REG))+1;
   for(let i=-n;i<=n;i++)for(let j=-n;j<=n;j++){const c=regionCity(rx+i,rz+j);if(Math.hypot(c.x-x,c.z-z)<rad)out.push(c)}return out}
+/* ESTRADAS (pedido do Irror): cada cidade liga à cidade vizinha do leste e do sul por uma estrada em L. */
+function roadSegs(x,z,n){const RX=Math.floor(Math.round(x/CH)/REG),RZ=Math.floor(Math.round(z/CH)/REG),out=[];
+  for(let i=-n;i<=n;i++)for(let j=-n;j<=n;j++){const c=regionCity(RX+i,RZ+j),e=regionCity(RX+i+1,RZ+j),so=regionCity(RX+i,RZ+j+1);out.push([c.x,c.z,e.x,c.z],[e.x,c.z,e.x,e.z],[c.x,c.z,c.x,so.z],[c.x,so.z,so.x,so.z])}return out}
+function onRoad(segs,x,z,w=4.5){for(const [x1,z1,x2,z2] of segs){if(z1===z2){if(Math.abs(z-z1)<w&&x>=Math.min(x1,x2)-w&&x<=Math.max(x1,x2)+w)return true}else if(Math.abs(x-x1)<w&&z>=Math.min(z1,z2)-w&&z<=Math.max(z1,z2)+w)return true}return false}
 function danger(x,z){const n=nearestCity(x,z);return clamp(Math.floor((n.d-46)/26)+Math.floor(Math.hypot(x,z)/900),0,8)}
 function worldInit(seed){if(WSEED===(seed|0)&&WN)return;WSEED=seed|0;WN=makeNoise(seed);cityCache.clear();
   const RK=mulberry32(seed+5);ranking=[];for(let i=0;i<14;i++){const ri=Math.min(TOPR,Math.floor(Math.pow(RK(),2.2)*8));ranking.push({name:NAMES[Math.floor(RK()*NAMES.length)],rank:ri,lvl:Math.round(8+RK()*30+ri*18)})}}
@@ -962,13 +966,13 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const cityD=(x,z)=>{let m=1e9,road=false;for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cl>=8?30:cl>=7?22:cl>=6?16:0;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<125)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road}};
+  const RSEG=roadSegs(x0,z0,2);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cl>=8?30:cl>=7?22:cl>=6?16:0;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),q=cityD(x,z);
     if(q.d<14)tmp.copy(cd);else if(q.d<35)tmp.copy(cc);else if(q.road)tmp.copy(cc).multiplyScalar(.9);else tmp.copy(ca).lerp(cb,WN(x*.03,z*.03));
-    if(q.d>40){const bg=BIO_G[biomeAt(x,z)];if(bg){BGC.setHex(bg[0]);tmp.lerp(BGC,bg[1]*clamp((q.d-40)/30,0,1))}}tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);if(SEAC[seasonI()])tmp.lerp(SEAC[seasonI()][0],SEAC[seasonI()][1]);cols.push(tmp.r,tmp.g,tmp.b)}
+    if(q.d>40&&!q.road){const bg=BIO_G[biomeAt(x,z)];if(bg){BGC.setHex(bg[0]);tmp.lerp(BGC,bg[1]*clamp((q.d-40)/30,0,1))}}if(q.road)tmp.setHex(0x5a5f70);else tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);if(SEAC[seasonI()])tmp.lerp(SEAC[seasonI()][0],SEAC[seasonI()][1]);cols.push(tmp.r,tmp.g,tmp.b)}
   pg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
   g.add(new THREE.Mesh(pg,GROUNDMAT));
   const trees=[],rocks=[];const st=CH/12;
@@ -1900,7 +1904,7 @@ function drawMap(ctx,S,full){
   const P=player;ctx.textAlign='center';ctx.textBaseline='middle';
   if(L.mode==='world'){
     const k=full?S/560:2.2,cx=P.x,cz=P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
-    for(const c of citiesAround(P.x,P.z,full?520:160)){ctx.strokeStyle='rgba(143,227,255,.22)';ctx.lineWidth=Math.max(2,4*k);ctx.beginPath();ctx.moveTo(tx(c.x-125),tz(c.z));ctx.lineTo(tx(c.x+125),tz(c.z));ctx.moveTo(tx(c.x),tz(c.z-125));ctx.lineTo(tx(c.x),tz(c.z+125));ctx.stroke();
+    for(const c of citiesAround(P.x,P.z,full?520:160)){ctx.strokeStyle='rgba(143,227,255,.22)';ctx.lineWidth=Math.max(2,4*k);ctx.beginPath();const e=regionCity(Math.floor(c.cx/REG)+1,Math.floor(c.cz/REG)),so=regionCity(Math.floor(c.cx/REG),Math.floor(c.cz/REG)+1);ctx.moveTo(tx(c.x),tz(c.z));ctx.lineTo(tx(e.x),tz(c.z));ctx.lineTo(tx(e.x),tz(e.z));ctx.moveTo(tx(c.x),tz(c.z));ctx.lineTo(tx(c.x),tz(so.z));ctx.lineTo(tx(so.x),tz(so.z));ctx.stroke();
       const cf=cityFallen(c);ctx.fillStyle=cf?'rgba(255,45,85,.25)':'rgba(79,195,255,.22)';ctx.strokeStyle=cf?'#ff4d6a':'#4fc3ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(tx(c.x),tz(c.z),Math.max(5,34*k),0,TAU);ctx.fill();ctx.stroke();
       if(full){ctx.fillStyle='#dff4ff';ctx.font='700 15px "Chakra Petch",sans-serif';ctx.fillText(c.name,tx(c.x),tz(c.z)-Math.max(5,34*k)-10)}}
     for(const g of gates){if(g.dead)continue;const col=g.secret?'#ffd070':g.red?'#ff2030':RANKS[g.rank].c;const r=full?10:6;ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(tx(g.x),tz(g.z),r,0,TAU);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=full?3:2;ctx.stroke();
@@ -2593,7 +2597,7 @@ function siegeWin(b){const c=b.siege;profile.cityDay=profile.cityDay||{};delete 
 /* ===== PROFISSÕES ===== */
 const PROFN={mine:'Mineração',forge:'Forja',fish:'Pesca'};
 function profLv(k){return Math.floor(Math.sqrt((((profile.prof||{})[k])||0)/20))}
-function profXp(k,v){profile.prof=profile.prof||{};const l0=profLv(k);profile.prof[k]=(profile.prof[k]||0)+v;const l1=profLv(k);if(l1>l0){toast('<b>[PROFISSÃO]</b> '+PROFN[k]+' subiu para o nível <b>'+l1+'</b>.',4500);sfx('level')}}
+function profXp(k,v){profile.prof=profile.prof||{};const l0=profLv(k);profile.prof[k]=(profile.prof[k]||0)+v;const l1=profLv(k);if(l1>l0){toast('<b>[PROFISSÃO]</b> '+PROFN[k]+' subiu para o nível <b>'+l1+'</b>. Veja em PERSONAGEM (topo da ficha).',5000);sfx('level')}}
 function profRows(){const D={mine:l=>'+'+Math.min(100,l*5)+'% de chance de +1 cristal por golpe',forge:l=>'raridades melhores ao forjar (+'+l+' nível de sorte)',fish:l=>'faixa da pesca +'+String(Math.min(10,l*.5)).replace('.',',')+'%'};let h='<div class="sec">PROFISSÕES</div>';
   for(const k in PROFN){const l=profLv(k),x=((profile.prof||{})[k])||0,nx=20*(l+1)*(l+1);h+=row(PROFN[k]+' <b>NV '+l+'</b>',D[k](l)+' · '+fmt(x)+'/'+fmt(nx)+' XP','')}return h}
 
@@ -2866,10 +2870,10 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Soma → efetivo',P(bp.dmg)+' → <span style="color:#ffd54f">'+P(bp.edmg)+'</span> dano · '+P(bp.hp)+' → <span style="color:#ffd54f">'+P(bp.ehp)+'</span> vida','quanto maior a soma, menos cada % rende: efetivo = 3×soma ÷ (3 + soma), nunca passa de +300%');
   h+='<div class="sec">MARCAS</div><div class="sysline" style="font-size:12px">Habilidades de ataque <b>marcam</b> os alvos por 6 s. O próximo golpe normal num alvo marcado causa <b>+50%</b> e tira <b>1 s</b> da recarga de todas as habilidades.</div>';
   const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
-  return h+'</div>'+profRows()}
+  return h+'</div>'}
 function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
-  if(tab==='char'){h+='<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
+  if(tab==='char'){h+=profRows()+'<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=charSheet();
     h+=row('Status e habilidades',run.pts?'<b>'+run.pts+' pontos livres</b>':'Distribuir pontos',unl('status')?btn('Abrir','status',0,true,run.pts?'hot':''):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
@@ -3109,8 +3113,8 @@ $('bGfx').addEventListener('click',()=>{setGfx(!ENV.lite);toast(ENV.lite?'Gráfi
 function applyCfg(){if(AU.master)AU.master.gain.value=AU.on?CFG.vol:0;document.documentElement.style.setProperty('--bs',CFG.btn);store.set('pds_cfg',CFG)}
 function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="toast(document.getElementById(\'keys\').textContent,8000)">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div><div class="sec">VOLUME</div><input type="range" min="0" max="1" step=".05" value="'+CFG.vol+'" oninput="CFG.vol=+this.value;applyCfg()" style="width:100%">'+
   '<div class="sec">TAMANHO DOS BOTÕES</div><input type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
-  '<div class="sec">GRÁFICOS</div><button class="mini" onclick="setGfx(!ENV.lite);cfgView()">'+(ENV.lite?'LEVE · tocar para HD':'HD · tocar para LEVE')+'</button>'+
-  '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'<div class="sec">COLEÇÃO</div><button class="mini" onclick="albumView()">Coleção de sombras</button> <button class="mini" onclick="bestView()">Bestiário</button>')}
+  
+  '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
 const PETP={tiro:{n:'Disparo',d:'dispara em um monstro'},cura:{n:'Cura',d:'cura você aos poucos'},gelo:{n:'Gelo',d:'dispara e atordoa'},raio:{n:'Raio',d:'acerta até 3 monstros'}};
 function newPet(){const r=wpick([55,27,12,4.5,1.2,.25,.05].map((w,i)=>({i,w}))).i;return{rar:r,pow:pick(Object.keys(PETP)),lvl:1}}
@@ -3200,9 +3204,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v60</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v61</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=60;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=61;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
