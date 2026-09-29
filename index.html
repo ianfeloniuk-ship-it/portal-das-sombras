@@ -221,6 +221,7 @@ const BOSSES=[
  {n:'Berserker Rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
  {n:'General Esqueleto',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
 const BOSSES_HIGH=[
+ {n:'O Monarca Oco',mon:'monarca',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
  {n:'Rei Demônio Vharok',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
  {n:'Dragão do Caos Kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
  {n:'Rainha Aranha Nhyssa',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
@@ -237,6 +238,8 @@ const KINDS={
  cogu:{mon:'cogu',gk:'Skeleton_Minion',n:'Cogumelinho',hp:20,dmg:6,spd:3.4,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0xd05050,wep:'none',r:0.55,rk:0,bio:'floresta'},
  passaro:{mon:'passaro',gk:'Skeleton_Minion',n:'Pássaro Bravo',hp:18,dmg:6,spd:5,ai:'lunge',range:1.5,wind:0.35,atkCd:1.4,xp:6,scale:1,body:0x6fb0ff,wep:'none',r:0.57,rk:0,bio:'flores'},
  espinhosa:{mon:'espinhosa',gk:'Skeleton_Minion',n:'Gosma Espinhosa',hp:40,dmg:9,spd:3,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x4aa04a,wep:'none',r:0.59,rk:1,bio:'pantano'},
+ escaravelho:{mon:'escaravelho',gk:'Skeleton_Warrior',n:'Cavaleiro Escaravelho',hp:70,dmg:12,spd:3.4,ai:'melee',range:1.8,wind:0.55,atkCd:1.3,xp:14,scale:1,body:0xc8a050,wep:'none',r:0.7,rk:2,bio:'deserto'},
+ guardiao:{mon:'guardiao',gk:'Knight',n:'Guardião Corrompido',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.2,xp:16,scale:1,body:0x3a8a8a,wep:'none',r:0.6,rk:3},
  cactinho:{mon:'cactinho',gk:'Skeleton_Minion',n:'Cactoro',hp:36,dmg:9,spd:3.2,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:7,scale:1,body:0x5a9a4a,wep:'none',r:0.59,rk:1,bio:'deserto'},
  magote:{mon:'magote',gk:'Skeleton_Minion',n:'Magote',hp:28,dmg:9,spd:3.2,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:6,scale:1,body:0x7a5aff,wep:'none',r:0.59,rk:1},
  orcinho:{mon:'orcinho',gk:'Skeleton_Minion',n:'Orc Pequeno',hp:44,dmg:9,spd:3.6,ai:'melee',range:1.5,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x5a8a3a,wep:'none',r:0.59,rk:1},
@@ -528,6 +531,7 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   dragaoancio:{h:3.2,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
   gato:{h:0.7,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  escaravelho:{h:2.1,st:1,a:{}},monarca:{h:2.8,st:1,a:{}},guardiao:{h:2,st:1,a:{}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
   for(const k in MON_DEF)ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})});
@@ -538,7 +542,7 @@ function makeMonster(o){
   const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=toToon(c.material,c.isSkinnedMesh,.16);if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
-  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k};
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
 }
 function gAct(m,n){if(m.act[n])return m.act[n];let c;
   if(m.alias){const nm=m.alias[n]||(n==='Hit_A'?m.alias.Hit:null)||m.alias.Idle;c=m.clips.find(a=>a.name===nm||a.name.endsWith('|'+nm))}
@@ -546,6 +550,8 @@ function gAct(m,n){if(m.act[n])return m.act[n];let c;
   if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
 function gPlay(m,n,once,spd){const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
+  if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
+    b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
   m.body.position.y=0;m.body.rotation.set(0,0,0);
   if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,1.2)}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
@@ -1235,7 +1241,7 @@ function spawnRival(x,z,gr,extra={}){
 }
 function spawnBoss(x,z,gr,B){
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
-  const K={gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:900,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
+  const K={mon:B.mon,gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:900,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
   const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;dunScale(e,gr);
   if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(Object.keys(BMECH));e.mechT=8}return e;
 }
@@ -3214,9 +3220,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v64</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v65</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=64;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=65;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
