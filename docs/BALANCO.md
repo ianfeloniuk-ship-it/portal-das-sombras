@@ -62,7 +62,7 @@ Cada ponto vale mais conforme o nível: fator = 1 + nível/50.
 | 200 | 5.00 | 10.0 | 75 | 20.0 |
 | 300 | 7.00 | 14.0 | 105 | 28.0 |
 
-Agilidade: +0,4% de vel. de ataque (máx. +30% no ponto 75), +0,5% de movimento (máx. +25% no ponto 50), esquiva 1,50 s − 0,01 s por ponto (mín. 1,00 s). Percepção: +0,25% de crítico; crítico ×2; de 100% a 200% o excedente é chance de ×3; limite 200%.
+Agilidade (sem limite): +0,4% de vel. de ataque e +0,5% de movimento por ponto; esquiva = 1,50 s ÷ (1 + 1% por ponto). Percepção (sem limite): +0,25% de crítico por ponto; cada 100% garante +1 multiplicador e o resto é chance de mais um (250% = sempre ×3, 50% de chance de ×4).
 
 ## Chefes
 

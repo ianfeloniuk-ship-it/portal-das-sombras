@@ -516,7 +516,7 @@ function statsFor(){
   const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh'));
   const maxmp=(50+3*run.level+4*statK(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
-  const spd=6.4*(1+Math.min(.25,.005*(s.agi||0))+affB().spd/100+(cb.spd||0));
+  const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0));
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -1311,12 +1311,12 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(player.stealth>0&&o.fromPlayer){amt*=3;o.sneak=true;player.stealth=0;setStealth(false);toast('<b>[SISTEMA]</b> Ataque furtivo: dano x3')}
   if(o.fromPlayer&&profile.cls===4&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
-  const cc=o.fromPlayer?Math.min(2,critChance()):.05,crit=!blocked&&Math.random()<cc,crit3=crit&&cc>1&&Math.random()<cc-1;if(crit)amt*=crit3?3:2;if(e.res)amt*=1-e.res;
+  const cc=o.fromPlayer?critChance():.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn;if(e.res)amt*=1-e.res;
   if(o.fromPlayer&&!o.passive&&!o.pet){if(time<(L.markWin||0))e.mark=time+6;else if(e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}}
   if(e.isBoss&&o.fromPlayer)amt*=1+(titleB().boss||0)+trophyB();if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=Math.max(1,Math.round(amt));const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
-  floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+'!!!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
+  floater(e.x,e.z,blocked?'BLOQUEIO '+amt:crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
@@ -1454,8 +1454,8 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
   projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player'});
 }
-/* Recarga da esquiva ligada à Agilidade: 1,4 s sem pontos, cai 1,2% por ponto, mínimo 0,55 s. */
-function dodgeCdVal(){return Math.max(1,1.5-.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0)}
+/* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
+function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
@@ -2145,7 +2145,7 @@ function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=
 function shadowXp(x){for(const a of allies)if(a.shadow&&a.rec){const r=a.rec;r.xp+=x*.35;const need=80*r.lvl;if(r.xp>=need){r.xp-=need;r.lvl++;fxRing(a.x,a.z,0xa26bff,2,.5);floater(a.x,a.z,'SOMBRA NV '+r.lvl,'#b18cff');const f=1.08;a.maxhp*=f;a.hp=a.maxhp;a.dmg*=f}}}
 /* Classes mágicas usam INT para ataque e habilidades; físicas usam FOR para os dois. */
 const MAGIC_CLS=[3,5,6,7,8,9,10,11];const isMagic=()=>MAGIC_CLS.includes(profile.cls);
-function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1,hp:1,mp:1,phys:1,mag:1,spd:1+Math.min(.25,.005*(s.agi||0)),atk:1/(1+Math.min(.3,.004*(s.agi||0))),crit:.0025*(s.per||0)}}
+function statsBonus(){const s=run.stats||{};return{dmg:1,skill:1,hp:1,mp:1,phys:1,mag:1,spd:1+.005*(s.agi||0),atk:1/(1+.004*(s.agi||0)),crit:.0025*(s.per||0)}}
 /* ESTILO DE LUTA: natural da classe (100%) ou o outro (70%). Físico usa Força, arcano usa Inteligência. */
 function styleOff(){return run.style==='off'&&isMagic()}
 function basicIsMagic(){return isMagic()!==styleOff()}
@@ -2153,11 +2153,12 @@ function basicDmgMul(){return atkOf(basicIsMagic()?'mag':'phy')/atkOf(isMagic()?
 function toggleStyle(){if(!started||paused)return;if(!isMagic()){toast('<b>[SISTEMA]</b> Classes físicas não usam magia. Só magos podem guardar a varinha e lutar no braço.');return}run.style=styleOff()?'nat':'off';const m=basicIsMagic();bigText('ESTILO: '+(m?'ARCANO':'FÍSICO'),900);
   toast('<b>[SISTEMA]</b> Ataque básico agora é <b>'+(m?'ARCANO (usa Inteligência)':'FÍSICO (usa Força)')+'</b>'+(styleOff()?' · estilo fora da sua classe: 70% de eficiência':' · estilo natural da classe')+'. Habilidades Q/R/T não mudam.',5000);sfx('arise');hud()}
 /* Texto da Agilidade com os valores atuais e os limites (pedido do Irror: jogador precisa saber dos limites). */
-function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',','),mx=b=>b?' <b style="color:#ffd54f">· MÁXIMO</b>':'';
-  return 'Velocidade de ataque: +0,4% por ponto · agora <b>+'+Math.round(Math.min(30,.4*g))+'%</b>'+mx(g>=75)+' (máx. +30% no ponto 75)<br>Movimento: +0,5% por ponto · agora <b>+'+Math.round(Math.min(25,.5*g))+'%</b>'+mx(g>=50)+' (máx. +25% no ponto 50)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b>'+mx(g>=50)+' (1,50 s sem pontos, −0,01 s por ponto, mínimo 1,00 s)'}
+function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',',');
+  return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
+
 function statDesc(){const m=isMagic(),bm=basicIsMagic(),k=statK(run.level),n=v=>String(Math.round(v*10)/10).replace('.',','),s=run.stats||{},cc=critChance();
   return{for:'+'+n(2*k)+' de ataque <b style="color:#ff6b6b">físico</b> por ponto'+(!m?' · usado nas suas habilidades':'')+(!bm?' e no ataque básico':''),agi:agiDesc(),
-   per:'+0,25% de chance de crítico por ponto · agora <b>'+Math.round(cc*100)+'%</b>. Até 100%: chance de dano ×2. De 100% a 200%: o que passa vira chance de ×3. <b>Limite: 200%</b>'+(cc>=2?' <b style="color:#ffd54f">· MÁXIMO</b>':''),
+   per:'+0,25% de chance de crítico por ponto · agora <b>'+Math.round(cc*100)+'%</b>. <b>Sem limite:</b> cada 100% garante +1 multiplicador e o resto é chance de mais um (ex.: 250% = sempre ×3, com 50% de chance de ×4).',
    int:'+'+n(2*k)+' de ataque <b style="color:#6fb8ff">mágico</b> e +'+n(4*k)+' de mana por ponto'+(m?' · usado nas suas habilidades':'')+(bm?' e no ataque básico':''),
    vit:'+'+n(15*k)+' de vida por ponto'}}
 function guildBonus(){const g=profile.guild;return g?.03*g.lvl:0}
@@ -2692,10 +2693,10 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência '+(s.int||0)+' × '+String(Math.round(4*statK(run.level)*10)/10).replace('.',','));
   h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','armadura '+itemArm(a)+' pontos = '+Math.round(armRed(itemArm(a))*100)+'% · classe '+Math.round(cb.def*100)+'%'+(npcHas('Brann')?' · Brann 8%':'')+' · máximo 70%');
   h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')?' · Fúria '+(cons('fur')+(cons('fur')>=10?10:0))+'%':''));
-  h+=line('Dano crítico','×2'+(cc>1?' / ×3':''),'crítico sempre dobra'+(cc>1?' · o que passa de 100% ('+Math.round((cc-1)*100)+'%) é chance de TRIPLICAR':' · acima de 100%, o que sobra vira chance de triplicar (limite 200%)'));
-  h+=line('Velocidade de ataque','+'+Math.round(Math.min(30,.4*g))+'%','Agilidade 0,4%×'+g+' · máximo +30%');
-  h+=line('Velocidade de movimento','+'+Math.round(Math.min(25,.5*g)+af.spd)+'%','Agilidade 0,5%×'+g+' (máx. +25%)'+(af.spd?' · afixos '+af.spd+'%':''));
-  h+=line('Recarga da esquiva',dodgeCdVal().toFixed(2).replace('.',',')+' s','1,50 s − 0,01 s × Agilidade '+g+' · mínimo 1,00 s');
+  h+=line('Dano crítico',cc<1?'×2':'×'+(1+Math.floor(cc))+(cc%1?' / ×'+(2+Math.floor(cc)):''),'sem limite: cada 100% de chance garante +1 multiplicador; o resto é chance de mais um');
+  h+=line('Velocidade de ataque','+'+Math.round(.4*g)+'%','Agilidade 0,4% × '+g+' · sem limite');
+  h+=line('Velocidade de movimento','+'+Math.round(.5*g+af.spd)+'%','Agilidade 0,5% × '+g+(af.spd?' · afixos '+af.spd+'%':'')+' · sem limite');
+  h+=line('Recarga da esquiva',dodgeCdVal().toFixed(2).replace('.',',')+' s','1,50 s ÷ (1 + 1% × Agilidade '+g+') · sem limite');
   h+=line('Roubo de vida',Math.round(af.ls||0)+'%','afixos');
   h+='<div class="sec">BÔNUS EM % (SOMADOS)</div>';
   for(const x of bp.src)if(x[1]||x[2])h+=line(x[0],(x[1]?P(x[1])+' dano':'')+(x[1]&&x[2]?' · ':'')+(x[2]?P(x[2])+' vida':''),'');
@@ -3029,9 +3030,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v50</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v51</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=50;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=51;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
