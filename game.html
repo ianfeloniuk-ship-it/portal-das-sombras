@@ -101,6 +101,7 @@ body.pc #btns .b[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.toast,#bF{animation:none}}
 small.tip{font-size:12px;line-height:1.55}
 #mission .objective-row{margin:0 0 7px}#mission .objective-row:last-child{margin-bottom:0}#mission .objective-row strong{display:block;color:var(--ink)}#mission .objective-row small{display:block;font-size:inherit;color:var(--dim)}
+.gear-layout{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin:12px 0}.gear-slot{border:1px solid #80623c;border-radius:8px;padding:8px;min-width:0;background:#1a1423}.gear-slot button{white-space:normal;width:100%;margin-bottom:5px}.gear-slot small{display:block;font-size:11px;line-height:1.5;color:#c6bfb4}.gear-h{grid-column:2;grid-row:1}.gear-w{grid-column:1;grid-row:2}.gear-a{grid-column:3;grid-row:2}.gear-g{grid-column:1;grid-row:3}.gear-b{grid-column:3;grid-row:3}.gear-figure{grid-column:2;grid-row:2/4;text-align:center;color:#dfbc7c}.gear-figure svg{width:100%;max-height:230px}.gear-slot:has(button:hover){border-color:#ffe3aa}@media(max-width:520px){.gear-layout{grid-template-columns:1fr 70px 1fr;gap:5px}.gear-slot{padding:5px}.gear-slot button{font-size:10px}.gear-slot small{font-size:10px}}
 </style>
 
 <canvas id="c"></canvas>
@@ -618,11 +619,22 @@ const CLS_BAL=[{hp:1.35,dmg:1.25,def:.12},{hp:1.05,dmg:1.4,def:0},{hp:1.6,dmg:1,
    Vida = 100 + 10 por nível + 12 por Vitalidade + armadura. Todo bônus em % vai para UMA soma (bonusPool) com retorno decrescente. */
 const effB=t=>t<=0?t:3*t/(3+t);
 function gearQ(it){return (1+.06*(it.rar||0))*(1+.08*(it.up||0))*(1+.02*(it.wlv||0))*(it.curse?1.3:1)}
+const EQUIP_SLOTS=['w','a','h','g','b'];
+const EQUIP_LABEL={w:'Arma',a:'Armadura',h:'Elmo',g:'Luvas',b:'Botas'};
+function equipFactor(sl){return sl==='h'||sl==='g'||sl==='b'?.2:1}
+function equippedItems(){return Object.values(run?.equip||{}).filter(Boolean)}
+function equipmentShield(){return equippedItems().reduce((n,it)=>n+itemSh(it),0)}
+function unequipItem(sl){const it=run.equip[sl];if(!it||run.items.length>=24){toast('Libere um espaço na bolsa para retirar a peça.');return false}run.items.push(it);run.equip[sl]=null;refreshStats();saveRun();return true}
+function dropEquipment(uid,sl){const it=run.items.find(it=>it.uid===uid);if(!it||it.slot!==sl)return false;return equipBagItem(uid)}
+function gearText(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function equipmentPanel(){let h='<div class="sec">SEU EQUIPAMENTO</div><div class="gear-layout">';for(const sl of EQUIP_SLOTS){const it=run.equip[sl];h+='<div class="gear-slot gear-'+sl+'" data-gear-slot="'+sl+'"><button class="mini" data-a="gearpick" data-v="'+sl+'"><b>'+EQUIP_LABEL[sl]+'</b><br><span style="color:'+(it?RAR[it.rar].c:'#89929d')+'">'+(it?gearText(it.name):'Vazio')+'</span></button>'+(it?'<small>'+gearText(statTxt(it).replace(/<[^>]*>/g,''))+'</small>'+btn('Retirar','unequip',sl,run.items.length<24):'<small>Escolha ou arraste uma peça</small>')+'</div>'}h+='<div class="gear-figure"><svg viewBox="0 0 100 190" role="img" aria-label="Silhueta do personagem com espaços de equipamento"><circle cx="50" cy="25" r="17" fill="'+(run.equip.h?'#e7bd6a':'#657080')+'"/><path d="M30 49 L70 49 L78 100 L62 115 L38 115 L22 100 Z" fill="'+(run.equip.a?'#aa8957':'#394354')+'"/><path d="M28 53 L14 62 L8 109 L21 111 L35 71 M72 53 L86 62 L92 109 L79 111 L65 71" fill="'+(run.equip.g?'#d8ad62':'#657080')+'"/><path d="M37 113 L48 113 L46 159 L31 159 Z M52 113 L63 113 L69 159 L54 159 Z" fill="#657080"/><path d="M31 154 H46 V175 H24 V163 Z M54 154 H69 L76 163 V175 H54 Z" fill="'+(run.equip.b?'#d8ad62':'#394354')+'"/>'+(run.equip.w?'<path d="M10 103 L5 49 L10 32 L15 49 Z" fill="#d9e4ef"/>':'')+'</svg><small>'+gearText(CLASSES[profile.cls].n)+'</small></div></div><div class="sysline">Clique em uma posição para escolher a peça. No PC, também pode arrastar da bolsa para a posição correspondente. Sua armadura atual mantém todos os bônus; elmo, luvas e botas são complementos.</div>';return h}
+function gearPicker(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>gearPicker(sl);let h=equipmentPanel()+'<div class="sec">ESCOLHER '+EQUIP_LABEL[sl].toUpperCase()+'</div>';const items=run.items.filter(it=>it.slot===sl);for(const it of items)h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab">'+gearText(it.name)+'</b>',statTxt(it),btn('Equipar','equip',it.uid,rankOf()>=it.tier));if(!items.length)h+='<div class="sysline">Nenhuma peça desta posição na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';h+=btn('Voltar à bolsa','gearbag',0);openModal('EQUIPAMENTOS',h)}
+
 function itemAtk(it){return it&&it.slot==='w'?Math.round(WATK[Math.min(9,it.tier)]*gearQ(it)):0}
-function itemHp(it){return it&&it.slot==='a'?Math.round(AHPV[Math.min(9,it.tier)]*gearQ(it)):0}
+function itemHp(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(AHPV[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
 const SHV=AHPV.map(v=>Math.round(v*1.6));
-function itemSh(it){return it&&it.slot==='a'?Math.round(SHV[Math.min(9,it.tier)]*gearQ(it)):0}
-function itemArm(it){return it&&it.slot==='a'?Math.round(AARM[Math.min(9,it.tier)]*gearQ(it)):0}
+function itemSh(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(SHV[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
+function itemArm(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(AARM[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
 function atkOf(kind){const s=run.stats||{};return 10+2*run.level+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===9?1:rk*.1;
@@ -632,7 +644,7 @@ function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
   const maxhp=(100+10*run.level+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
-  const maxsh=itemSh(a)*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
+  const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(50+3*run.level+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
   const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
@@ -680,8 +692,8 @@ const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n
 function rollAff2(tier,rar){const n=[0,0,1,1,2,2,2][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
   out.push({k:a.k,v:Math.max(1,Math.round((1+tier*.4)*(1+rar*.15)*(a.f||1)*(.7+Math.random()*.6)))})}return out}
 function affTxt(it){return it.aff&&it.aff.length?it.aff.map(a=>{const A=AFX.find(x=>x.k===a.k);return'+'+a.v+'% '+A.t}).join(' · ')+' · ':''}
-let AFFC=null,AFFK='';function affB(){const w=run&&run.equip&&run.equip.w,a=run&&run.equip&&run.equip.a,key=(w?w.uid+(w.up||0):'')+(a?a.uid:'')+(run?run.elem:'');if(AFFC&&AFFK===key)return AFFC;
-  const o={dmg:0,hp:0,mp:0,crit:0,ls:0,spd:0};for(const it of[w,a])if(it&&it.aff)for(const x of it.aff){if(o[x.k]!=null)o[x.k]+=x.v;else o.dmg+=x.v*(run.elem===x.k?1:.35)}AFFK=key;return AFFC=o}
+let AFFC=null,AFFK='';function affB(){const items=equippedItems(),key=JSON.stringify(items.map(it=>[it.uid,it.up,it.aff]))+(run?run.elem:'');if(AFFC&&AFFK===key)return AFFC;const o={dmg:0,hp:0,mp:0,crit:0,ls:0,spd:0};for(const it of items)if(it.aff)for(const x of it.aff){if(o[x.k]!=null)o[x.k]+=x.v;else o.dmg+=x.v*(run.elem===x.k?1:.35)}AFFK=key;return AFFC=o}
+
 function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
@@ -1354,17 +1366,17 @@ function makeHunterAlly(p,x,z,guest){
 /* ================= ITENS ================= */
 function makeItem(slot,tier,rar){
   const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Besta',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
-  return {slot,tier,rar,name:(slot==='w'?wn:'Armadura')+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
+  return {slot,tier,rar,name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*equipFactor(slot)*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
 }
-function rollItem(tier,boss){const _rk=rankOf(),_ex=Math.max(0,tier-_rk);tier=Math.min(tier,_rk);const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,wpick(w.map((w,i)=>({i,w}))).i+Math.ceil(_ex/3));const it=makeItem(Math.random()<.5?'w':'a',tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
+function rollItem(tier,boss){const _rk=rankOf(),_ex=Math.max(0,tier-_rk);tier=Math.min(tier,_rk);const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,wpick(w.map((w,i)=>({i,w}))).i+Math.ceil(_ex/3));const it=makeItem(pick(EQUIP_SLOTS),tier,rar);if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque':'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+gearRuneText(it)}
 function addItem(it){
   if(run.items.length>=24){run.gold+=it.value;toast('<b>[ORÁCULO]</b> Bolsa cheia. '+it.name+' vendido por '+fmt(it.value)+' ouro.');return false}
   run.items.push(it);toast('<b>[ORÁCULO]</b> Item na bolsa: <b style="color:'+RAR[it.rar].c+'">'+RAR[it.rar].n+' · '+it.name+'</b>. Abra a Bolsa para equipar.',3500);return true
 }
 function equipmentBagRoom(){if(run.items.length<24)return true;toast('<b>[ORÁCULO]</b> Bolsa cheia. Libere um espaço antes de comprar ou forjar equipamentos.');return false}
-function buyEquipment(sl,t){if(!['w','a'].includes(sl)||!Number.isInteger(t)||t<0||t>rankOf()||!PRICE[t])return false;const pp=Math.round(PRICE[t]*priceMul(sl==='w'?'wep':'arm'));if(run.gold<pp||!equipmentBagRoom())return false;const it=makeItem(sl,t,0);run.gold-=pp;addItem(it);return true}
-function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const it=run.items[i];if(!['w','a'].includes(it.slot)||rankOf()<it.tier)return false;run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: '+it.name);return true}
+function buyEquipment(sl,t){if(!EQUIP_SLOTS.includes(sl)||!Number.isInteger(t)||t<0||t>rankOf()||!PRICE[t])return false;const pp=Math.round(PRICE[t]*equipFactor(sl)*priceMul(sl==='w'?'wep':'arm'));if(run.gold<pp||!equipmentBagRoom())return false;const it=makeItem(sl,t,0);run.gold-=pp;addItem(it);return true}
+function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const it=run.items[i];if(!EQUIP_SLOTS.includes(it.slot)||rankOf()<it.tier)return false;run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;refreshStats();toast('<b>[ORÁCULO]</b> Equipado: '+it.name);return true}
 
 /* ================= MISSÕES ================= */
 function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1+(run?run.level:1)/10;
@@ -2554,16 +2566,16 @@ const GEAR_RUNES={
  command:{n:'Vínculo do Guardião',d:'+8% ao dano dos seus ecos e invocações. Não afeta caçadores contratados.'}
 };
 function lootRune(key){if(run.loot?.[key]?.b)return 'command';const prefix=key.split(' de ')[0];if(['Presa','Garra','Chifre'].includes(prefix))return 'fang';if(['Couro','Escama','Osso'].includes(prefix))return 'shell';if(['Essência','Olho','Fragmento'].includes(prefix))return 'arcane';if(prefix==='Pena')return 'stride';return 'vigor'}
-function gearRuneCount(id){return ['w','a'].reduce((n,sl)=>n+(run?.equip?.[sl]?.rune===id?1:0),0)}
+function gearRuneCount(id){return EQUIP_SLOTS.reduce((n,sl)=>n+(run?.equip?.[sl]?.rune===id?1:0),0)}
 function gearRuneText(it){const r=GEAR_RUNES[it?.rune];return r?' · Passiva gravada: '+r.n+' — '+r.d:''}
 function applyGearRuneHit(e,amt){const n=gearRuneCount('fang');if(!n||e.dead||e.hp<=0)return;e.basicDots=e.basicDots||{};const old=e.basicDots.rune;e.basicDots.rune={t:3,d:Math.max(old?.d||0,amt*.1*n/3),acc:old?.acc||0}}
-function equipmentUpgradeCost(eq){const up=eq.up||0;return{gold:Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cry:3*(up+1)}}
+function equipmentUpgradeCost(eq){const up=eq.up||0;return{gold:Math.round(PRICE[eq.tier]*equipFactor(eq.slot)*.25*(up+1)*Math.pow(1.12,up)),cry:3*(up+1)}}
 function finishEquipmentUpgrade(eq,safe=false){const up=eq.up||0;if(!safe&&up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[FORJA]</b> O aprimoramento falhou. Materiais perdidos; equipamento preservado.');sfx('block');return false}eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[FORJA]</b> '+eq.name+': '+statTxt(eq));return true}
 function lootForgeQuote(sl,key,mode){
-  const material=Object.prototype.hasOwnProperty.call(run.loot||{},key)?run.loot[key]:null;if(!['w','a'].includes(sl)||!material||!['new','up','rune'].includes(mode))return null;
+  const material=Object.prototype.hasOwnProperty.call(run.loot||{},key)?run.loot[key]:null;if(!EQUIP_SLOTS.includes(sl)||!material||!['new','up','rune'].includes(mode))return null;
   const eq=run.equip[sl];if(mode!=='new'&&!eq)return null;
-  if(mode==='rune')return{tier:eq.tier,gold:Math.round(PRICE[eq.tier]*.2),cry:3,parts:material.b?3:12,rune:lootRune(key)};
-  const tier=mode==='new'?rankOf():eq.tier,up=eq?.up||0,base=mode==='up'?equipmentUpgradeCost(eq):{gold:Math.round(PRICE[tier]*.3),cry:5};
+  if(mode==='rune')return{tier:eq.tier,gold:Math.round(PRICE[eq.tier]*equipFactor(sl)*.2),cry:3,parts:material.b?3:12,rune:lootRune(key)};
+  const tier=mode==='new'?rankOf():eq.tier,up=eq?.up||0,base=mode==='up'?equipmentUpgradeCost(eq):{gold:Math.round(PRICE[tier]*equipFactor(sl)*.3),cry:5};
   return{tier,gold:mode==='up'&&!material.b?Math.ceil(base.gold*.75):base.gold,cry:mode==='up'&&!material.b?Math.max(1,Math.ceil(base.cry*.75)):base.cry,parts:mode==='new'?(material.b?3:10):(material.b?3+Math.floor(up/5):5+up),rar:material.b?2:1,safe:!!material.b};
 }
 function canLootForge(sl,key,mode,q=lootForgeQuote(sl,key,mode)){
@@ -2576,17 +2588,17 @@ function craftWithLoot(sl,key,mode){const q=lootForgeQuote(sl,key,mode);if(!canL
   else finishEquipmentUpgrade(run.equip[sl],q.safe);
   saveRun();return true;
 }
-function lootForgeView(sl){if(!['w','a'].includes(sl))return;view=()=>lootForgeView(sl);const keys=Object.keys(run.loot||{}).filter(k=>run.loot[k].n>0),eq=run.equip[sl];
-  let h='<div class="tabs">'+btn('Armas','lootforge','w',true,sl==='w'?'on':'')+btn('Armaduras','lootforge','a',true,sl==='a'?'on':'')+btn('Voltar ao Kael','equipshop',sl==='w'?'wep':'arm')+'</div><div class="sysline">Seu ouro: <b>'+fmt(run.gold)+'</b> · Forja liberada no nível 12. Escolha o espólio: só a espécie indicada será consumida. Os materiais antigos também servem.</div><div class="sysline">Novo equipamento: rank <b>'+RANKS[rankOf()].id+'</b>, vai para a bolsa sem trocar o equipado. Partes comuns garantem raridade mínima Rara; relíquias garantem Épica. Cristais do rank indicado ou maiores, consumindo primeiro os menores.</div>';
-  h+='<div class="sysline">Aprimorar: '+(eq?eq.name+' → +'+((eq.up||0)+1):'equipe uma '+(sl==='w'?'arma':'armadura')+' primeiro')+'. Partes comuns reduzem em 25% o custo de ouro e cristais (arredondado para cima); relíquias garantem sucesso. Após +10, sem relíquia pode falhar e perder os materiais, mas nunca o equipamento.</div>';
+function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForgeView(sl);const keys=Object.keys(run.loot||{}).filter(k=>run.loot[k].n>0),eq=run.equip[sl];
+  let h='<div class="tabs">'+EQUIP_SLOTS.map(k=>btn(EQUIP_LABEL[k],'lootforge',k,true,sl===k?'on':'')).join('')+btn('Voltar ao Kael','equipshop',sl==='w'?'wep':'arm')+'</div><div class="sysline">Seu ouro: <b>'+fmt(run.gold)+'</b> · Forja liberada no nível 12. Escolha o espólio: só a espécie indicada será consumida. Os materiais antigos também servem.</div><div class="sysline">Novo equipamento: rank <b>'+RANKS[rankOf()].id+'</b>, vai para a bolsa sem trocar o equipado. Partes comuns garantem raridade mínima Rara; relíquias garantem Épica. Cristais do rank indicado ou maiores, consumindo primeiro os menores.</div>';
+  h+='<div class="sysline">Aprimorar: '+(eq?eq.name+' → +'+((eq.up||0)+1):'equipe '+EQUIP_LABEL[sl].toLowerCase()+' primeiro')+'. Partes comuns reduzem em 25% o custo de ouro e cristais (arredondado para cima); relíquias garantem sucesso. Após +10, sem relíquia pode falhar e perder os materiais, mas nunca o equipamento.</div>';
   h+='<div class="sec">PASSIVAS GRAVADAS</div><div class="sysline">Cada peça tem 1 espaço de passiva, separado dos afixos. Gravar outra substitui a anterior e consome os materiais exibidos. Duas peças com a mesma passiva somam o efeito; desequipar remove o bônus. Atualmente: '+(GEAR_RUNES[eq?.rune]?.n||'nenhuma nesta peça')+'.</div>';
   if(run.items.length>=24)h+='<div class="sysline">Bolsa cheia: libere um espaço para fabricar.</div>';
   if(!keys.length)h+='<div class="sysline">Você não tem espólios. Derrote monstros para obter partes; chefes deixam relíquias.</div>';
-  keys.forEach(k=>{const name=k.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));h+='<div class="sec">'+name+' · você tem '+run.loot[k].n+'</div>';for(const mode of ['new','up','rune']){const q=lootForgeQuote(sl,k,mode);if(!q)continue;h+=row(mode==='new'?'Fabricar '+(sl==='w'?'arma':'armadura')+' · mínimo '+RAR[q.rar].n:mode==='rune'?'Gravar '+GEAR_RUNES[q.rune].n+(eq.rune?' · substitui '+GEAR_RUNES[eq.rune]?.n:''):'Aprimorar equipado · '+(q.safe?'sucesso garantido':'custo reduzido'),(mode==='rune'?GEAR_RUNES[q.rune].d+'<br>':'')+q.parts+' × '+name+' + '+fmt(q.gold)+' ouro + '+q.cry+' cristais '+RANKS[q.tier].id+' ou maiores',btn(mode==='new'?'Fabricar':mode==='rune'?'Gravar passiva':'Aprimorar','lootcraft',sl+'|'+mode+'|'+encodeURIComponent(k),canLootForge(sl,k,mode,q)))}});
+  keys.forEach(k=>{const name=k.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));h+='<div class="sec">'+name+' · você tem '+run.loot[k].n+'</div>';for(const mode of ['new','up','rune']){const q=lootForgeQuote(sl,k,mode);if(!q)continue;h+=row(mode==='new'?'Fabricar '+EQUIP_LABEL[sl].toLowerCase()+' · mínimo '+RAR[q.rar].n:mode==='rune'?'Gravar '+GEAR_RUNES[q.rune].n+(eq.rune?' · substitui '+GEAR_RUNES[eq.rune]?.n:''):'Aprimorar equipado · '+(q.safe?'sucesso garantido':'custo reduzido'),(mode==='rune'?GEAR_RUNES[q.rune].d+'<br>':'')+q.parts+' × '+name+' + '+fmt(q.gold)+' ouro + '+q.cry+' cristais '+RANKS[q.tier].id+' ou maiores',btn(mode==='new'?'Fabricar':mode==='rune'?'Gravar passiva':'Aprimorar','lootcraft',sl+'|'+mode+'|'+encodeURIComponent(k),canLootForge(sl,k,mode,q)))}});
   openModal('KAEL · FORJA DE ESPÓLIOS',h);
 }
-function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(9,pr);t++){const gc=Math.round(PRICE[t]*.3),nc=run.res.core[t],cc=run.res.cry[t];
-  h+=row('Forjar '+(sl==='w'?'arma':'armadura')+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
+function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=Math.min(9,pr);t++){const gc=Math.round(PRICE[t]*equipFactor(sl)*.3),nc=run.res.core[t],cc=run.res.cry[t];
+  h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
 function extraActions(a,v){
   if(a==='lootforge'){lootForgeView(v);return 'close0'}
   if(a==='lootcraft'){const [sl,mode,key]=v.split('|');try{craftWithLoot(sl,decodeURIComponent(key),mode)}catch(e){console.warn('Receita inválida',e)}lootForgeView(sl);return 'close0'}
@@ -2605,7 +2617,7 @@ function extraActions(a,v){
   if(a==='gmake'){const c=guildCost();if(run.gold<c||run.level<GUILD_LVL)return;run.gold-=c;profile.guild={name:'Guilda de '+pick(SHNAMES),lvl:1,don:0,own:true};store.set('pds2_profile',profile);toast('<b>[ORÁCULO]</b> Guilda fundada: '+profile.guild.name);return true}
   if(a==='gdon'){const g=profile.guild,amt=+v;if(run.gold<amt)return;run.gold-=amt;g.don+=amt;while(g.lvl<10&&g.don>=guildNeed(g.lvl)){g.don-=guildNeed(g.lvl);g.lvl++;toast('<b>[ORÁCULO]</b> Guilda subiu para o nível '+g.lvl+'.')}store.set('pds2_profile',profile);return true}
   if(a==='gleave'){profile.guild=null;store.set('pds2_profile',profile);return true}
-  if(a==='forge'){if(!equipmentBagRoom())return 'close0';const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const fl=profLv('forge');const rar=wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i;profXp('forge',10+t*5);sfx('boom');addItem(makeItem(sl,t,rar));return true}
+  if(a==='forge'){if(!equipmentBagRoom())return 'close0';const sl=v[0],t=+v.slice(1),gc=Math.round(PRICE[t]*equipFactor(sl)*.3);if(run.res.core[t]<5||run.res.cry[t]<5||run.gold<gc)return;run.res.core[t]-=5;run.res.cry[t]-=5;run.gold-=gc;const fl=profLv('forge');const rar=wpick([Math.max(4,30-fl*2),40,22+fl,8+fl*.8,fl*.25].map((w,i)=>({i,w}))).i;profXp('forge',10+t*5);sfx('boom');addItem(makeItem(sl,t,rar));return true}
   if(a==='elem'){if(run.elem&&run.gold<20000)return;if(run.elem)run.gold-=20000;run.elem=v;AFFC=null;player.skills=pSkills();refreshStats();bigText(ELEM[v].n.toUpperCase(),1300);toast('<b>[ORÁCULO]</b> Você despertou o elemento '+ELEM[v].n+'.');return true}
   if(a==='buypet'){if(run.gold<8000)return;run.gold-=8000;const np=newPet();if(!run.pet||typeof run.pet!=='object'||np.rar>=run.pet.rar){run.pet=np;if(PET){scene.remove(PET);PET=null}toast('<b>[ORÁCULO]</b> Novo companheiro: <b style="color:'+RAR[np.rar].c+'">'+RAR[np.rar].n+' · '+PETP[np.pow].n+'</b>',4500)}else{run.pet.lvl+=3;toast('<b>[ORÁCULO]</b> O ovo era '+RAR[np.rar].n+'. Seu companheiro absorveu a energia: +3 níveis.')}return true}
   if(a==='trainpet'){const c=petTrainCost();if(!run.pet||run.gold<c)return;run.gold-=c;run.pet.lvl++;toast('<b>[ORÁCULO]</b> Companheiro subiu para o nível '+run.pet.lvl+'.');return true}
@@ -2663,7 +2675,7 @@ function titleB(){const o={};for(const id of eqTitles()){const t=TITLES.find(x=>
 function checkTitles(){profile.ach=profile.ach||[];for(const t of TITLES)if(!profile.ach.includes(t.id)&&t.c()){profile.ach.push(t.id);store.set('pds2_profile',profile);toast('<b>[CONQUISTA]</b> Título desbloqueado: <b>'+t.n+'</b>. Equipe na BOLSA.',5000);sfx('level')}}
 /* maldições */
 const CURSES=[{n:'Sede de Sangue',d:'−20% vida máxima',hp:-.2},{n:'Mente Rachada',d:'−30% mana',mp:-.3},{n:'Fardo',d:'−10% velocidade',spd:-.1}];
-function curseB(){const o={hp:0,mp:0,spd:0};for(const s of['w','a']){const it=run.equip[s];if(it&&it.curse){for(const k in o)o[k]+=it.curse[k]||0}}return o}
+function curseB(){const o={hp:0,mp:0,spd:0};for(const s of EQUIP_SLOTS){const it=run.equip[s];if(it&&it.curse){for(const k in o)o[k]+=it.curse[k]||0}}return o}
 /* comida */
 /* PESCA 2.0: espécies dependem de hora, clima e bioma; cada peixe tem peso (recorde por espécie); vara melhora a faixa. */
 const FISH=[{n:'Peixe-lua',w:55,c:'#c9d3de',kg:[.3,1.2],v:20,d:0},{n:'Carpa de Mana',w:28,c:'#ffb347',kg:[.8,3],v:45,d:1},{n:'Enguia Relâmpago',w:13,c:'#b18cff',kg:[1,4],v:90,d:2,wx:'rain'},{n:'Peixe Dourado',w:4,c:'#ffb84d',kg:[.5,2],v:300,d:3},
@@ -2999,7 +3011,9 @@ function weaponXp(x){if(!unl('living'))return;const w=run.equip.w;if(!w)return;w
     if(w.wlv===5&&w.rar>=2&&!w.soul){w.soul=pick(SOULS);bigText('A ARMA DESPERTOU',1500);sfx('arise');toast('<b>['+w.soul.toUpperCase()+']</b> Finalmente acordei. Me chame de '+w.soul+'.',6000)}}
   if(w.soul&&Math.random()<.02&&(!L.wtalk||time-L.wtalk>60)){L.wtalk=time;toast('<b>['+w.soul.toUpperCase()+']</b> '+pick(WLINES),4000)}}
 const SETS=[{n:'Caçador Noturno',d:'+15% de dano',b:{dmg:.15}},{n:'Guardião',d:'+20% de vida',b:{hp:.2}},{n:'Arcano',d:'+25% de mana e +15% de dano de habilidade',b:{mp:.25,skill:.15}}];
-function setB(){const w=run.equip.w,a=run.equip.a;return w&&a&&w.set&&w.set===a.set?SETS.find(s=>s.n===w.set).b:{}}
+function activeSets(){const counts={};for(const it of equippedItems())if(it.set)counts[it.set]=(counts[it.set]||0)+1;return SETS.filter(s=>counts[s.n]>=2)}
+function setB(){const out={};for(const s of activeSets())for(const [k,v] of Object.entries(s.b))out[k]=(out[k]||0)+v;return out}
+
 const CONS=[['fur','Fúria','+1% de chance de crítico por ponto','Ápice: mais +10% de chance de crítico'],['mur','Muralha','+3% de escudo máximo por ponto','Ápice: revive uma vez por masmorra'],['arc','Arcano','−1,5% de recarga das habilidades por ponto','Ápice: mais −20% de recarga']];
 const cons=k=>(run.cons||{})[k]||0;
 function consFull(){const c=run.cons||{};return CONS.every(([k,,,cap])=>(c[k]||0)>=10)}
@@ -3085,7 +3099,7 @@ function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur
 function critMul(){return 2}
 function passivesView(){view=passivesView;let h='<div class="sysline">Todas as passivas das classes aprendidas se somam automaticamente, independentemente da classe-base ou das habilidades equipadas.</div><div class="sec">PASSIVAS DAS CLASSES APRENDIDAS</div>';for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');h+='<div class="sec">MELHORIAS DE RANK</div>';for(const [k,t] of Object.entries(RANK_TALENTS))if(rankTalent(k))h+=row(t.n+' · '+rankTalent(k),t.d,'Ativa');h+=row('Escolhas disponíveis',rankPoints()+(rankPoints()===1?' ponto':' pontos'),btn('Ver ranks','gtab','prova'));h+='<div class="sec">PASSIVAS DA LIVRARIA</div>';for(const b of PBOOK){const lv=pb(b.k);h+=row(b.n+' · NV '+lv,lv?b.d(lv):'Ainda não aprendida',lv?'<b>Ativa</b>':'')}
   h+='<div class="sysline">Aprenda e melhore os tomos na Livraria da praça.</div><div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),lv?'<b>Ativa</b>':'Ainda sem pontos')}
-  h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of ['w','a']){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row((sl==='w'?'Arma':'Armadura')+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
+  h+='<div class="sec">PASSIVAS DO EQUIPAMENTO</div>';for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)h+=row(EQUIP_LABEL[sl]+' · '+r.n,r.d,'<b>Ativa</b>')}h+='<div class="sysline">Grave ou substitua passivas na forja de espólios do Kael.</div>';h+='<div class="sec">TÍTULOS ATIVOS</div>';for(const id of eqTitles()){const t=TITLES.find(t=>t.id===id);if(t)h+=row(t.n,t.m,'<b>Ativo</b>')}if(!eqTitles().length)h+='<div class="sysline">Nenhum título ativo.</div>';openModal('PASSIVAS E EFEITOS PERMANENTES',h)}
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   line=(n,v,d)=>'<div title="'+String(d||'').replace(/<[^>]+>/g,'').replace(/"/g,"'")+'" '+(d?'onclick="const t=this.querySelector(\'small\');if(t)t.hidden=!t.hidden" ':'')+'style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(255,179,71,.12)'+(d?';cursor:help':'')+'"><span>'+n+(d?' <span style="opacity:.55">ⓘ</span><br><small hidden style="color:#bfe8ff">'+d+'</small>':'')+'</span><b style="white-space:nowrap">'+v+'</b></div>';
@@ -3095,7 +3109,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Dano final ('+(m?'mágico':'físico')+')',fmt(player.dmg),'ataque '+(m?'mágico':'físico')+' × (1 '+P(bp.edmg)+' bônus) × classe '+X(cb.dmg));
   h+=line('Vida',fmt(player.maxhp),'(100 + nível 10×'+run.level+' + Vitalidade '+(s.vit||0)+' × '+hpPer(run.level)+') × (1 '+P(bp.ehp)+' bônus) × classe '+X(cb.hp));
   h+=line('Mana',fmt(player.maxmp),'50 + nível 3×'+run.level+' + Inteligência '+(s.int||0)+' × '+mpPer(run.level));
-  h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','armadura '+itemArm(a)+' pontos = '+Math.round(armRed(itemArm(a))*100)+'% · classe '+Math.round(cb.def*100)+'%'+(npcHas('Brann')?' · Brann 8%':'')+' · máximo 70%');
+  h+=line('Escudo',fmt(player.maxsh),'Peças equipadas: '+equipmentShield()+' de escudo base, mais bônus de escudo.');h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','Classe e passivas de defesa · máximo 70%. As peças de armadura fornecem escudo.');
   h+=line('Chance de crítico',Math.round(cc*1000)/10+'%','base 5% · Percepção 0,25%×'+(s.per||0)+' · afixos '+(af.crit||0)+'%'+(cons('fur')?' · Fúria '+(cons('fur')+(cons('fur')>=10?10:0))+'%':''));
   h+=line('Dano crítico',cc<1?'×2':'×'+(1+Math.floor(cc))+(cc%1?' / ×'+(2+Math.floor(cc)):''),'sem limite: cada 100% de chance garante +1 multiplicador; o resto é chance de mais um');
   h+=line('Velocidade de ataque','+'+Math.round(.4*g)+'%','Agilidade 0,4% × '+g+' · sem limite');
@@ -3112,7 +3126,7 @@ function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div cla
 function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')return bagItems();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+=profRows()+'<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=row('Ataque básico',CLASSES[basicAttackId()].n+' · '+basicAttackDesc(basicAttackId()),btn('Escolher estilo','basicview',0));
-    h+=row('Combinação de habilidades','Monte até '+classSlotCount()+' habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=charSheet();
+    h+=row('Combinação de habilidades','Monte até '+classSlotCount()+' habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=equipmentPanel();h+=charSheet();
     h+=row('Status e habilidades',run.pts?'<b>'+run.pts+' pontos livres</b>':'Distribuir pontos',unl('status')?btn('Abrir','status',0,true,run.pts?'hot':''):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
     h+=row('Títulos','Bônus de conquistas',unl('titles')?btn('Abrir','titles',0):'Derrote um guardião');
@@ -3125,7 +3139,7 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Ordem','');
     h+=row('Ecos',run.shadows.length+' no exército',btn('Exército','army',0));
     h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10'+((w.wlv||0)>=10?' · MÁXIMO':' · '+Math.floor(w.wxp||0)+' XP')+' · bônus da arma +'+2*(w.wlv||0)+'%'+(w.rar<2?' · só Épicas ou melhores despertam uma alma':'')+'<br><span style="color:var(--dim)">A arma que você usa ganha XP quando você mata: cada nível acrescenta +2% ao bônus de arma viva (até o 10). No nível 5, armas Épicas+ despertam uma alma que fala com você. A XP fica na arma: trocar de arma recomeça.</span>':'Sem arma','');
-    h+=row('Conjunto',!unl('sets')?lockMsg('sets'):(Object.keys(setB()).length?'<b>'+run.equip.w.set+'</b> ativo: '+SETS.find(s=>s.n===run.equip.w.set).d:'Arma e armadura do mesmo conjunto ativam o bônus'),'');
+    h+=row('Conjunto',!unl('sets')?lockMsg('sets'):(Object.keys(setB()).length?activeSets().map(s=>'<b>'+s.n+'</b>: '+s.d).join('<br>'):'Duas peças do mesmo conjunto ativam o bônus uma vez'),'');
     h+=row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Ordem','')}
   else if(tab==='world'){h+=row('Diário','Páginas da história',btn('Ler','diary',0));
     h+=run.mount?row('Montaria','Lobo de Mana',btn(run.mounted?'Desmontar':'Montar','mount',0)):row('Montaria','Compre no Mercado','');
@@ -3134,6 +3148,11 @@ function bagView(tab){tab=tab||L.bagTab||'itens';L.bagTab=tab;if(tab==='itens')r
     h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
   openModal('BOLSA',h)}
 function extraActions3(a,v){
+ if(a==='armorpart'){if(EQUIP_SLOTS.includes(v)&&v!=='w'){L.armorSlot=v;openShop('arm')}return 'close0'}
+ if(a==='gearpick'){gearPicker(v);return 'close0'}
+ if(a==='gearbag'){bagItems();return 'close0'}
+ if(a==='unequip'){unequipItem(v);return true}
+
   if(a==='ranktalent'){chooseRankTalent(v);guildView('prova');return 'close0'}
   if(a==='rankreset'){if(L.mode==='world'&&inCity(player.x,player.z)){profile.rankTalents=[];saveRun()}guildView('prova');return 'close0'}
   if(a==='basicview'){basicAttackView();return 'close0'}
@@ -3209,10 +3228,10 @@ function openShop(id){
   if(id==='wep'||id==='arm')h='<div class="tabs">'+btn('Armas','equipshop','wep',true,id==='wep'?'on':'')+btn('Armaduras','equipshop','arm',true,id==='arm'?'on':'')+'</div>'+h;
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
-  else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
-    for(let t=0;t<Math.min(profile.rank===9?10:9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
-  if((id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':'a'))+forgeRows(id==='wep'?'w':'a',pr);
+  else{const sl=id==='wep'?'w':(EQUIP_SLOTS.includes(L.armorSlot)&&L.armorSlot!=='w'?L.armorSlot:'a');if(id==='arm')h+='<div class="tabs">'+EQUIP_SLOTS.filter(k=>k!=='w').map(k=>btn(EQUIP_LABEL[k],'armorpart',k,true,sl===k?'on':'')).join('')+'</div>';const eq=run.equip[sl];
+    if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*equipFactor(eq.slot)*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
+    for(let t=0;t<Math.min(profile.rank===9?10:9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+EQUIP_LABEL[sl].toLowerCase()+' nesta posição</b>'})(),btn(fmt(Math.round(PRICE[t]*equipFactor(sl)*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*equipFactor(sl)*priceMul(id))))}}
+  if((id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':(L.armorSlot||'a')))+forgeRows(id==='wep'?'w':(L.armorSlot||'a'),pr);
   h+=affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
   openModal(S.n,h);
@@ -3251,22 +3270,22 @@ function guildView(tab){
 const AFW={dmg:1,crit:.8,ls:.6,spd:.5,hp:.5,mp:.3};
 function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?itemAtk(it):itemSh(it)/6;
   for(const a of it.aff||[])sc*=1+a.v*(AFW[a.k]??(run.elem===a.k?1:.35))/100;
-  if(it.set){const o=run.equip[it.slot==='w'?'a':'w'];if(o&&o.set===it.set)sc*=1.05}
+  if(it.set){const o=equippedItems().find(x=>x.uid!==it.uid&&x.set===it.set);if(o)sc*=1.05}
   if(it.curse)sc*=.9;return Math.round(sc)}
 function bestInBag(slot){const pr=rankOf();let b=null;for(const it of run.items)if(it.slot===slot&&pr>=it.tier&&(!b||itemScore(it)>itemScore(b)))b=it;return b}
 function recoTag(it){const cur=run.equip[it.slot],w=it.slot==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(cur):itemSh(it)-itemSh(cur);if(rankOf()<it.tier)return '<span style="color:#9fb0c4">🔒 rank '+rkN(it.tier)+' necessário</span>';
   if(d>0&&bestInBag(it.slot)===it)return '<b style="color:#6fe39a">▲ RECOMENDADO: +'+fmt(d)+u+'</b>';if(d>0)return '<span style="color:#6fe39a">▲ +'+fmt(d)+u+'</span>';if(d<0)return '<span style="color:#ff8a9a">▼ '+fmt(d)+u+'</span>';return '<span style="color:#9fb0c4">= igual ao seu</span>'}
 function bagItems(){
-  for(const it of[...run.items,run.equip.w,run.equip.a])if(it&&/^undefined/.test(it.name))it.name=it.name.replace(/^undefined/,'Arma');
+  for(const it of[...run.items,...equippedItems()])if(it&&/^undefined/.test(it.name))it.name=it.name.replace(/^undefined/,'Arma');
   view=bagItems;const city=inCity(player.x,player.z),pr=rankOf();
   let h='<div class="sysline">Ouro <b class="gold">'+fmt(run.gold)+'</b> · Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'%</div>';
-  {const rw=bestInBag('w'),ra=bestInBag('a'),up=[];if(rw&&itemScore(rw)>itemScore(run.equip.w))up.push('<b style="color:'+RAR[rw.rar].c+'">'+rw.name+'</b>');if(ra&&itemScore(ra)>itemScore(run.equip.a))up.push('<b style="color:'+RAR[ra.rar].c+'">'+ra.name+'</b>');
-    h+='<div class="sysline"><b>[ORÁCULO]</b> '+(up.length?'Recomendo equipar '+up.join(' e ')+'.</div><div style="display:flex;justify-content:flex-end">'+btn('EQUIPAR O MELHOR','equipbest',0,true,'hot')+'</div>':'Você já está com o melhor equipamento da bolsa.</div>')}
-  h+='<div class="sysline" style="font-size:12px">Itens comprados e encontrados ficam na bolsa. Clique em <b>Equipar</b> para escolher o que usar.<br>Arma dá <b>ataque</b>, armadura dá <b>escudo</b>. A seta mostra quanto a mais ou a menos que o seu. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
-  for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · '+statTxt(it):'Compre na cidade ou ache em baús','')}
+  {const up=EQUIP_SLOTS.map(sl=>bestInBag(sl)).filter(it=>it&&itemScore(it)>itemScore(run.equip[it.slot]));if(up.length)h+=row('Melhorias na bolsa',up.map(it=>gearText(it.name)).join(', '),btn('EQUIPAR O MELHOR','equipbest',0,true,'hot'))}
+
+  h+='<div class="sysline" style="font-size:12px">Itens comprados e encontrados ficam na bolsa. Clique em <b>Equipar</b> para escolher o que usar.<br>Arma dá <b>ataque</b>, armadura dá <b>escudo</b>. A seta mostra quanto a mais ou a menos que o seu. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div>';
+  h+=equipmentPanel();
   h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Baús e guardiões dão equipamentos.</small></div></div>';
-  run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{const lock=pr<it.tier;h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b><br>'+recoTag(it),(it.slot==='w'?'Arma':'Armadura')+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · '+statTxt(it),btn(lock?'Rank '+rkN(it.tier):'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
+  run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{const lock=pr<it.tier;h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab;color:'+RAR[it.rar].c+'">'+gearText(it.name)+'</b><br>'+recoTag(it),EQUIP_LABEL[it.slot]+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · '+statTxt(it),btn(lock?'Rank '+rkN(it.tier):'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
   h+=row('Banco',fmt(profile.bank||0)+' ouro guardado · não se perde na morte','');
   h+='<div class="sec">RECURSOS</div>';const rs=[];for(let r=0;r<10;r++){if(run.res.core[r])rs.push(run.res.core[r]+' núcleo '+GR[r].id);if(run.res.cry[r])rs.push(run.res.cry[r]+' cristal '+GR[r].id)}
   h+=row('Núcleos e cristais',rs.length?rs.join(' · '):'Nada ainda. Venda no Mercado de qualquer cidade.','');
@@ -3298,6 +3317,11 @@ function gateModal(g){
   h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','close',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>';
   openModal('PORTAL RANK '+G.id,h);
 }
+let gearDrag=null;
+$('mb').addEventListener('dragstart',e=>{if(e.target.closest('[data-gear-uid]'))e.preventDefault()});
+$('mb').addEventListener('pointerdown',e=>{const el=e.target.closest('[data-gear-uid]');if(!el||e.button!==0||e.pointerType==='touch')return;e.preventDefault();gearDrag={uid:el.dataset.gearUid,x:e.clientX,y:e.clientY};$('mb').setPointerCapture(e.pointerId);el.style.opacity='.5'});
+$('mb').addEventListener('pointerup',e=>{if(!gearDrag)return;const drag=gearDrag;gearDrag=null;const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-gear-slot]');if(el&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>5){if(dropEquipment(drag.uid,el.dataset.gearSlot))saveRun();else toast('Arraste uma peça compatível com esta posição e com seu rank.')}rerender()});
+$('mb').addEventListener('pointercancel',()=>{if(gearDrag){gearDrag=null;rerender()}});
 $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const a=b.dataset.a,v=b.dataset.v;
   const xr=extraActions(a,v)||extraActions2(a,v)||extraActions3(a,v);if(xr==='close'||xr==='close0')return;if(xr){saveRun();rerender();return}
   if(a==='close')return closeModal();
@@ -3305,7 +3329,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[ORÁCULO]</b> Comprado: '+p.n)}
   if(a==='buyi')buyEquipment(v[0],+v.slice(1));
-  if(a==='equipbest'){for(const sl of['w','a']){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[ORÁCULO]</b> Equipamento otimizado.');}
+  if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}refreshStats();toast('<b>[ORÁCULO]</b> Equipamento otimizado.');}
   if(a==='equip')equipBagItem(v);
   if(a==='sell'){const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;run.gold+=run.items[i].value;toast('<b>[ORÁCULO]</b> Vendido por '+fmt(run.items[i].value)+' ouro');run.items.splice(i,1)}
   if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[ORÁCULO]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);profile.guildClaims=(profile.guildClaims||0)+1;run.quests[+v]=genQuest(q.t)}
