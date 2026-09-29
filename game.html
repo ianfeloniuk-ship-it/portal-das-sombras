@@ -406,7 +406,7 @@ function makeActor(o){
 }
 let ADT=0;
 /* monstros de bioma */
-const BIOM={neve:{p:'Gélido',c:0x9fd8ff,hp:1.3,dmg:1,spd:.85,gold:1.3},deserto:{p:'das Areias',c:0xe0b060,hp:1,dmg:1.25,spd:1.1,gold:1.3,suf:true},pantano:{p:'do Pântano',c:0x6a8a3a,hp:1.15,dmg:1.1,spd:1,gold:1.3,suf:true}};
+const BIOM={vulcao:{p:'Ígneo',c:0xff6a3a,hp:1.1,dmg:1.35,spd:1,gold:1.5},cristal:{p:'Cristalino',c:0x9fe8ff,hp:1.45,dmg:1,spd:.95,gold:1.6},floresta:{p:'Sombrio',c:0x3a5a3a,hp:1.2,dmg:1.15,spd:1.1,gold:1.4,suf:true},neve:{p:'Gélido',c:0x9fd8ff,hp:1.3,dmg:1,spd:.85,gold:1.3},deserto:{p:'das Areias',c:0xe0b060,hp:1,dmg:1.25,spd:1.1,gold:1.3,suf:true},pantano:{p:'do Pântano',c:0x6a8a3a,hp:1.15,dmg:1.1,spd:1,gold:1.3,suf:true}};
 function bioMob(e,b){const B=BIOM[b];if(!B||e.isBoss)return;e.hp*=B.hp;e.maxhp*=B.hp;e.dmg*=B.dmg;e.speed=(e.speed||3)*B.spd;e.gold*=B.gold;e.name=B.suf?e.name+' '+B.p:e.name+' '+B.p;
   if(e.mats)for(const m of e.mats)if(m.color)m.color.lerp(new THREE.Color(B.c),.35)}
 /* montaria: Lobo de Mana (modelo Fox, CC0/CC-BY) */
@@ -629,14 +629,16 @@ function envMesh(k,mat){const m=ENV.m[k];if(!m)return new THREE.Group();if(!ENVG
 function envOwn(parent,m){if(m){m.userData.own=1;parent.add(m)}return m}
 function envDispose(root){root.traverse(o=>{if(o.userData&&o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material&&o.material.map){o.material.map.dispose();o.material.dispose()}})}
 let GMAT2=null;const envGroundMat=()=>GMAT2||(GMAT2=new THREE.MeshLambertMaterial({vertexColors:true,map:envGroundTex()}));
+const BGC=new THREE.Color();
 const SEAC=[[new THREE.Color(0x2f6a4a),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
 const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed','tree_pineDefaultA','tree_cone'],
   leaf:['tree_default','tree_oak','tree_detailed','tree_fat','tree_tall','tree_simple','tree_thin','tree_plateau','tree_default_dark','tree_oak_dark'],
   fall:['tree_default_fall','tree_oak_fall','tree_default_fall','tree_thin','tree_oak','tree_default'],
   dead:['tree_dead_large','tree_dead_medium','tree_dead_small']};
 const ROCKS=['rock_largeA','rock_largeB','rock_largeC','rock_largeD','rock_tallA','rock_tallB','rock_tallC','stone_tallA','stone_largeA'];
-function biomeAt(x,z){const b=WN(x*.0016+311,z*.0016+733);if(b<.3)return'neve';if(b>.7)return'deserto';return WN(x*.003+91,z*.003+57)>.68?'pantano':'campos'}
-const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens'};
+function biomeAt(x,z){const b=WN(x*.0028+311,z*.0028+733),b2=WN(x*.004+91,z*.004+57);if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.005+17,z*.005+29)>.74?'flores':'campos'}
+const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens',vulcao:'Terras Vulcânicas',cristal:'Geleira de Cristal',floresta:'Floresta Sombria',flores:'Campos Floridos'};
+const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x10261a,.45],flores:[0x3a7a3a,.25]};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
@@ -658,13 +660,15 @@ const TINTS=[0xffffff,0xeef5d6,0xdcebdc,0xf5eccc,0xe2e8d2];
 function tintB(h,k){return(Math.min(255,((h>>16)&255)*k)<<16)|(Math.min(255,((h>>8)&255)*k)<<8)|Math.min(255,(h&255)*k)}
 function envChunk(g,R,x0,z0,cityD,addCol){
   const Q=()=>[0,1,2,3].map(()=>new EnvBatch()),TR=Q(),FL=Q(),SO=Q(),qi=(x,z)=>(x>x0?1:0)+(z>z0?2:0),dg=danger(x0,z0),bio=WN(x0*.004+900,z0*.004+900),st=CH/12,lite=ENV.lite;let tr,fl,so;const at=(x,z)=>{const i=qi(x,z);tr=TR[i];fl=FL[i];so=SO[i]};
-  const B=biomeAt(x0,z0),SE=seasonI(),set=B==='neve'?TREES.pine:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
+  const B=biomeAt(x0,z0),SE=seasonI(),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44||q.road)continue;
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'&&(n>.56||R()<.035)){if(R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
-    else if(n>.56||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45);const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);
+    else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);
       EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();EW(so,pk(R,ROCKS),px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
+  if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<40)continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
+  if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<44)continue;at(px,pz);const s2=.7+R()*.9;EW(so,pk(R,['rock_tallA','rock_tallB','stone_tallA']),px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2})}
   for(let k=0,nc=lite?60:150;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<37)continue;
     const fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
     if(B==='deserto'){if(r<.5)EW(so,pk(R,['rock_smallA','rock_smallC','rock_largeA','stone_smallA']),px,-.03,pz,ry,.6+R()*1.2,0xe8d2a0);else if(r<.62)EH(so,pk(R,['bone_A','skull','ribcage']),px,0,pz,ry,.4+R()*.3);else if(r<.8)EH(fl,'plant_bushSmall',px,0,pz,ry,.5+R()*.3,0xc9a86a);continue}
@@ -822,11 +826,15 @@ function envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,rank){const b=new EnvBat
 /* ================= MUNDO INFINITO ================= */
 const CH=64,REG=6;
 let chunks=new Map(),HASH=new Map(),WN=null,WSEED=null,ranking=[],cityCache=new Map();
+const CN_A=['Val','Ny','Se','Dra','Lu','Kal','Vey','Or','Tes','Mi','Gwy','Sol','Ar','Ki','Hol','Ze','Ob','Mar','El','Syl','Bri','Cor','Tha','Um','Ra','Is','Fen','Gal','Mor','Zar','Aur','Bel','Cai','Dun','Eri','Fal','Hae','Ith','Jor','Lor','Nar','Pel','Qui','Rho','Sar','Tor','Ul','Var','Wyn','Xan'];
+const CN_B=['kor','mera','ran','moor','men','dera','ra','ion','sar','rath','dun','lace','dent','rin','low','phyr','sidia','row','dran','var','sa','vo','los','bra','heim','vale','gard','polis','thas','mir','tia','nor','wen','bur','dell','crest','fall','hold','reach','spire'];
+const CN_C=['',' Alta',' do Norte',' Nova',' Velha',' do Sul',' dos Ventos',' das Brumas',' de Cristal',' do Vale','','',''];
+function cityNameGen(R){return CN_A[Math.floor(R()*CN_A.length)]+CN_B[Math.floor(R()*CN_B.length)]+CN_C[Math.floor(R()*CN_C.length)]}
 const CITY_NAMES=['Valkor','Nymeria','Seoran','Drakemoor','Lumen','Kaldera','Veyra','Orion','Tessar','Mirath','Gwyn','Solace','Ardent','Kirin','Hollow','Zephyr','Obsidia','Marrow','Eldran','Sylvar','Brisa','Corvo','Thalos','Umbra'];
 function rh(a,b,c=0){return (Math.imul(a|0,73856093)^Math.imul(b|0,19349663)^Math.imul(c|0,83492791)^WSEED)>>>0}
 function regionCity(rx,rz){const k=rx+','+rz;let c=cityCache.get(k);if(c)return c;const R=mulberry32(rh(rx,rz,7));
   const o=(rx===0&&rz===0)?{x:0,z:0}:{x:1+Math.floor(R()*(REG-2)),z:1+Math.floor(R()*(REG-2))};const cx=rx*REG+o.x,cz=rz*REG+o.z;
-  c={id:k,cx,cz,x:cx*CH,z:cz*CH,name:(rx===0&&rz===0)?'Aster':CITY_NAMES[Math.floor(R()*CITY_NAMES.length)]+(R()<.35?' '+['Alta','do Norte','Nova','Velha'][Math.floor(R()*4)]:'')};cityCache.set(k,c);return c}
+  c={id:k,cx,cz,x:cx*CH,z:cz*CH,name:(rx===0&&rz===0)?'Aster':cityNameGen(R)};cityCache.set(k,c);return c}
 function nearestCity(x,z){const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG);let best=null,bd=1e12;
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(rx+i,rz+j),d=Math.hypot(x-c.x,z-c.z);if(d<bd){bd=d;best=c}}return{c:best,d:bd}}
 function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG),n=Math.ceil(rad/(CH*REG))+1;
@@ -846,7 +854,7 @@ function loadChunk(cx,cz){
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),q=cityD(x,z);
     if(q.d<14)tmp.copy(cd);else if(q.d<35)tmp.copy(cc);else if(q.road)tmp.copy(cc).multiplyScalar(.9);else tmp.copy(ca).lerp(cb,WN(x*.03,z*.03));
-    tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);if(SEAC[seasonI()])tmp.lerp(SEAC[seasonI()][0],SEAC[seasonI()][1]);cols.push(tmp.r,tmp.g,tmp.b)}
+    if(q.d>40){const bg=BIO_G[biomeAt(x,z)];if(bg){BGC.setHex(bg[0]);tmp.lerp(BGC,bg[1]*clamp((q.d-40)/30,0,1))}}tmp.lerp(red,clamp((q.d-46)/160,0,1)*.4);if(SEAC[seasonI()])tmp.lerp(SEAC[seasonI()][0],SEAC[seasonI()][1]);cols.push(tmp.r,tmp.g,tmp.b)}
   pg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
   g.add(new THREE.Mesh(pg,GROUNDMAT));
   const trees=[],rocks=[];const st=CH/12;
@@ -1096,7 +1104,10 @@ function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
   enemies.push(e);return e;
 }
 function kindsFor(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
-function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;return e}
+/* Masmorras comuns acompanham o jogador (pedido do Ian): se você está acima do nível do rank, os monstros sobem até o seu nível (e dão mais XP/ouro). */
+function dunLvl(gr){const G=GR[Math.min(8,gr)];return (L&&L.mode==='dungeon'&&!L.special&&run)?Math.max(G.lvl,run.level):G.lvl}
+function dunScale(e,gr){const G=GR[Math.min(8,gr)],lv=dunLvl(gr);if(lv<=G.lvl)return;const mh=eHP(lv)/G.hp,md=eDMG(lv)/G.dmg,rw=Math.sqrt(mh);e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.xp*=rw;e.gold*=rw;e.lvl=lv+(e.elite?3:0)+(e.isBoss?5:0)}
+function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;if(!extra.wild)dunScale(e,gr);return e}
 function spawnRival(x,z,gr,extra={}){
   const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
   const K={gk:CLASS_GK[CLASSES.indexOf(cl)],gtint:CLASS_TINT[CLASSES.indexOf(cl)],n:'',hp:150,dmg:13,spd:3.4,ai:'rival',range:1.9,wind:.38,atkCd:.9,xp:0,scale:1,r:.55,body:cl.body,wep:['bow','staff','wand','tome','bonestaff'].includes(cl.wep)?'sword':cl.wep,skin:0xffd8b8,eye:0x111111,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a])};
@@ -1106,7 +1117,7 @@ function spawnRival(x,z,gr,extra={}){
 function spawnBoss(x,z,gr,B){
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
   const K={gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:900,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
-  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;
+  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;dunScale(e,gr);
   if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(Object.keys(BMECH));e.mechT=8}return e;
 }
 /* MECÂNICAS DE CHEFE: cada chefe pode vir com um "quebra-cabeça" próprio. */
@@ -2319,7 +2330,7 @@ function curseB(){const o={hp:0,mp:0,spd:0};for(const s of['w','a']){const it=ru
 const FISH=[{n:'Peixe-lua',w:55,c:'#c9d3de',kg:[.3,1.2],v:20,d:0},{n:'Carpa de Mana',w:28,c:'#4fc3ff',kg:[.8,3],v:45,d:1},{n:'Enguia Relâmpago',w:13,c:'#b18cff',kg:[1,4],v:90,d:2,wx:'rain'},{n:'Peixe Dourado',w:4,c:'#ffb84d',kg:[.5,2],v:300,d:3},
  {n:'Peixe Sombrio',w:10,c:'#7a55ff',kg:[1,5],v:150,d:2,night:true},{n:'Truta Glacial',w:12,c:'#8fe3ff',kg:[1,6],v:120,d:2,bio:'neve'},{n:'Bagre do Pântano',w:14,c:'#8a9a70',kg:[2,12],v:80,d:1,bio:'pantano'},
  {n:'Escorpião-d’água',w:10,c:'#d9b36a',kg:[.5,3],v:110,d:2,bio:'deserto'},{n:'Salmão de Tempestade',w:8,c:'#fff36b',kg:[3,9],v:220,d:3,wx:'rain'},{n:'Filhote de Leviatã',w:.6,c:'#ff3d1e',kg:[40,160],v:5000,d:4}];
-function fishPool(){const P=player,b=biomeAt(P.x,P.z),n=isNight(),w=WX.type;return FISH.filter(f=>(!f.night||n)&&(!f.bio||f.bio===b)&&(!f.wx||f.wx===w))}
+function fishPool(){const P=player,b={cristal:'neve',vulcao:'deserto',floresta:'pantano',flores:'campos'}[biomeAt(P.x,P.z)]||biomeAt(P.x,P.z),n=isNight(),w=WX.type;return FISH.filter(f=>(!f.night||n)&&(!f.bio||f.bio===b)&&(!f.wx||f.wx===w))}
 const ROD=[{n:'Vara de Bambu',z:18,t:3,p:0},{n:'Vara Reforçada',z:22,t:4,p:4000},{n:'Vara de Mana',z:26,t:4,p:25000},{n:'Vara do Caçador',z:30,t:5,p:120000}];
 const RECIPES_X=[{n:'Elixir de Fúria',need:null,d:'+25% de dano por 3 min',b:{dmg:.25},t:180},{n:'Elixir de Ferro',need:null,d:'+30% de vida por 3 min',b:{hp:.3},t:180}];
 const RECIPES=[{n:'Ensopado de Peixe',need:{'Peixe-lua':2},d:'+25% vida por 5 min',b:{hp:.25},t:300},{n:'Sushi de Mana',need:{'Carpa de Mana':1,'Peixe-lua':1},d:'+30% mana por 5 min',b:{mp:.3},t:300},{n:'Espeto Relâmpago',need:{'Enguia Relâmpago':1},d:'+20% dano por 5 min',b:{dmg:.2},t:300},{n:'Banquete Dourado',need:{'Peixe Dourado':1},d:'+20% vida, dano e mana por 10 min',b:{hp:.2,dmg:.2,mp:.2},t:600}];
