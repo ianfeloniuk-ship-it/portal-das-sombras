@@ -614,12 +614,12 @@ let AFFC=null,AFFK='';function affB(){const w=run&&run.equip&&run.equip.w,a=run&
 function makePlayer(){const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
-    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};
+    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
 }
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a;
   for(const mt of m.wmats){if(!mt.emissive)continue;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar}else mt.emissive.set(0)}
-  for(const n of m.wnodes||[])n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1);
+  for(const n of m.wnodes||[]){n.visible=!!w;n.scale.setScalar(w?1+.04*Math.min(8,w.tier):1)}
   for(const mt of m.mats){if(m.wmats.includes(mt)||!mt.emissive)continue;if(a&&a.rar>0){mt.emissive.set(RAR[a.rar].c);mt.emissiveIntensity=.03+.035*a.rar}else if(!mt.userData.keepEm)mt.emissive.set(0)}}
 function refreshStats(){const st=statsFor();const f=player.hp/player.maxhp,fs=player.maxsh?player.shield/player.maxsh:1;Object.assign(player,st);player.shield=Math.round(st.maxsh*Math.min(1,fs));player.hp=Math.max(1,Math.round(st.maxhp*f));player.mp=Math.min(player.mp,player.maxmp);try{gearLook()}catch(e){}}
 
@@ -986,7 +986,7 @@ function buildCity(c,g,addCol,R){
     const b=mesh(new THREE.BoxGeometry(s.w,s.h,s.d),toonS(s.col));b.position.y=s.h/2;sg.add(b);
     const r=mesh(geo('hr',()=>0),toonS(s.roof));r.scale.set(s.w*.82,1.6,s.d*.82);r.position.y=s.h+1.7;sg.add(r);
     const door=new THREE.Mesh(geo('door',()=>new THREE.PlaneGeometry(1.8,2.6)),new THREE.MeshBasicMaterial({color:0x0a0f1c}));door.position.set(0,1.3,s.d/2+.02);sg.add(door);
-    const sn=makeSign(s.sign,s.sc,.8);sn.position.set(0,s.h+.1,s.d/2+.6);sg.add(sn);g.add(sg)}addCol({x:sx,z:sz,r:Math.max(s.w,s.d)*.55});
+    const sn=makeSign(s.sign,s.sc,.8);sn.position.set(0,s.h+.1,s.d/2+.6);sg.add(sn);g.add(sg)}addCol({x:sx,z:sz,r:Math.max(s.w,s.d)*.55});{const ry=Math.atan2(-s.x,-s.z),cs=Math.cos(ry),sn=Math.sin(ry);for(const [lx,lz] of[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,-1]]){const dx=lx*s.w*.42,dz=lz*s.d*.4;addCol({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs,r:2.4})}}
     const dir=Math.hypot(s.x,s.z),off=Math.max(s.w,s.d)*.55+1.6,vx=sx-s.x/dir*off,vz=sz-s.z/dir*off;
     addVendor(c,s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0x8fe3ff,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
@@ -998,9 +998,9 @@ function buildCity(c,g,addCol,R){
   if(!E){const stall=mesh(geo('stall',()=>new THREE.BoxGeometry(3,1.1,1.4)),toonS(0x6b4a2a));stall.position.set(X+5,.55,Z+6.5);g.add(stall);
   const aw=mesh(geo('awn',()=>new THREE.BoxGeometry(3.4,.15,2)),toonS(0x8a2b8a));aw.position.set(X+5,2.6,Z+6.5);g.add(aw)}
   if(!fallen){
-  addVendor(c,'mkt','Dorian','MERCADO','#b18cff',X+5,Z+8,{body:0x5a2a6a,hair:0xd0b070,wep:'none',gk:'Rogue'});
+  addVendor(c,'mkt','Dorian','MERCADO','#b18cff',X+5,Z+9.6,{body:0x5a2a6a,hair:0xd0b070,wep:'none',gk:'Rogue'});
   if(!E){const st2=mesh(geo('stall',()=>0),toonS(0x3a3a4a));st2.position.set(X-5,.55,Z+6.5);g.add(st2);const aw2=mesh(geo('awn',()=>0),toonS(0xb08a2a));aw2.position.set(X-5,2.6,Z+6.5);g.add(aw2)}
-  addVendor(c,'bank','Selene','BANCO','#ffd54f',X-5,Z+8,{body:0x2a3a5a,hair:0xffe08a,wep:'none',gk:'Mage',tint:0xffe08a});
+  addVendor(c,'bank','Selene','BANCO','#ffd54f',X-5,Z+9.6,{body:0x2a3a5a,hair:0xffe08a,wep:'none',gk:'Mage',tint:0xffe08a});
   for(let i=0;i<5;i++)spawnHunter(c,true);}
 }
 function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const m=makeChibi(look);m.root.position.set(x,0,z);scene.add(m.root);
@@ -1917,7 +1917,7 @@ function hud(){
   const q=run.quests&&run.quests.find(q=>q.got<q.n),done=run.quests&&run.quests.filter(q=>q.got>=q.n).length;
   const invs=L.inv?'[INVASÃO '+L.inv.c.name+' '+Math.floor(Math.max(0,L.inv.t)/60)+':'+String(Math.floor(Math.max(0,L.inv.t)%60)).padStart(2,'0')+' · '+enemies.filter(e=>e.inv&&!e.dead).length+' monstros] ':'';
   const ordh=allies.some(a=>a.shadow&&!a.dead)?'Sombras: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))[1]).toLowerCase()+(touch?' (toque)':' (O)')+' · ':'';
-  const sth=isMagic()?'Ataque básico: '+(basicIsMagic()?'mágico':'físico 70%')+(touch?'':' (X)')+' · ':'';
+  const sth='';
   const dmd=sth+ordh+invs+(run.demand?'Desafio do Sistema: mate '+run.demand.n+' '+({nododge:'sem esquivar',nopot:'sem usar poção',night:'à noite'}[run.demand.t]||'')+' ('+run.demand.got+'/'+run.demand.n+') · ':''),dl=run.daily&&!run.daily.done?'Diária '+DAILY.filter(q=>run.daily.p[q[0]]>=q[2]).length+'/4 · ':'',pt=run.pts?run.pts+' pontos para distribuir'+(touch?'':' (C)')+' · ':'';
   $('bStyle').hidden=!isMagic();$('bPot').textContent='POÇÃO ('+run.pots+')'+(touch?'':' · H');
   const _mt=dmd+dl+pt+(done?done+' missão(ões) pronta(s): receba na Associação':q?'Missão: '+q.d+' ('+q.got+'/'+q.n+')':'');let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
@@ -2924,7 +2924,7 @@ function openShop(id){
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':'a';const eq=run.equip[sl];
     if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),up>=10?'Nível máximo':'+10% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')',btn('Aprimorar','upg',sl,up<10&&run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
-    for(let t=0;t<Math.min(profile.rank===8?9:8,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const d=itemScore(it)-itemScore(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+d+' de poder</b> sobre a sua '+eq.name:' · <b style="color:#ff8a9a">▼ '+d+' de poder</b> — a sua '+eq.name+' é melhor'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
+    for(let t=0;t<Math.min(profile.rank===8?9:8,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+(sl==='w'?'arma':'armadura')+' equipada</b>'})(),btn(fmt(Math.round(PRICE[t]*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*priceMul(id))))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=forgeRows(id==='wep'?'w':'a',pr);
   h+=affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
@@ -2967,19 +2967,19 @@ function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?itemAtk(it):itemSh(i
   if(it.set){const o=run.equip[it.slot==='w'?'a':'w'];if(o&&o.set===it.set)sc*=1.05}
   if(it.curse)sc*=.9;return Math.round(sc)}
 function bestInBag(slot){const pr=rankOf();let b=null;for(const it of run.items)if(it.slot===slot&&pr>=it.tier&&(!b||itemScore(it)>itemScore(b)))b=it;return b}
-function recoTag(it){const cur=run.equip[it.slot],d=itemScore(it)-itemScore(cur);if(rankOf()<it.tier)return '<span style="color:#9fb0c4">🔒 rank '+rkN(it.tier)+' necessário</span>';
-  if(d>0&&bestInBag(it.slot)===it)return '<b style="color:#6fe39a">▲ RECOMENDADO +'+d+' de poder</b>';if(d>0)return '<span style="color:#6fe39a">▲ +'+d+' de poder</span>';if(d<0)return '<span style="color:#ff8a9a">▼ '+d+' de poder</span>';return '<span style="color:#9fb0c4">= igual ao seu</span>'}
+function recoTag(it){const cur=run.equip[it.slot],w=it.slot==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(cur):itemSh(it)-itemSh(cur);if(rankOf()<it.tier)return '<span style="color:#9fb0c4">🔒 rank '+rkN(it.tier)+' necessário</span>';
+  if(d>0&&bestInBag(it.slot)===it)return '<b style="color:#6fe39a">▲ RECOMENDADO: +'+fmt(d)+u+'</b>';if(d>0)return '<span style="color:#6fe39a">▲ +'+fmt(d)+u+'</span>';if(d<0)return '<span style="color:#ff8a9a">▼ '+fmt(d)+u+'</span>';return '<span style="color:#9fb0c4">= igual ao seu</span>'}
 function bagItems(){
   for(const it of[...run.items,run.equip.w,run.equip.a])if(it&&/^undefined/.test(it.name))it.name=it.name.replace(/^undefined/,'Arma');
   view=bagItems;const city=inCity(player.x,player.z),pr=rankOf();
   let h='<div class="sysline">Ouro <b class="gold">'+fmt(run.gold)+'</b> · Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'%</div>';
   {const rw=bestInBag('w'),ra=bestInBag('a'),up=[];if(rw&&itemScore(rw)>itemScore(run.equip.w))up.push('<b style="color:'+RAR[rw.rar].c+'">'+rw.name+'</b>');if(ra&&itemScore(ra)>itemScore(run.equip.a))up.push('<b style="color:'+RAR[ra.rar].c+'">'+ra.name+'</b>');
     h+='<div class="sysline"><b>[SISTEMA]</b> '+(up.length?'Recomendo equipar '+up.join(' e ')+'.</div><div style="display:flex;justify-content:flex-end">'+btn('EQUIPAR O MELHOR','equipbest',0,true,'hot')+'</div>':'Você já está com o melhor equipamento da bolsa.</div>')}
-  h+='<div class="sysline" style="font-size:12px"><b>Poder</b> = número para comparar itens. Arma: o ataque dela. Armadura: o escudo ÷ 6. Afixos aumentam um pouco. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
-  for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · <b>'+itemScore(it)+' de poder</b> · '+statTxt(it):'Compre na cidade ou ache em baús','')}
+  h+='<div class="sysline" style="font-size:12px">Arma dá <b>ataque</b>, armadura dá <b>escudo</b>. A seta mostra quanto a mais ou a menos que o seu. Rank manda (um item de rank maior é muito mais forte); aprimorar dá +8% por nível.</div><div class="sec">EQUIPADO</div>';
+  for(const [sl,lab] of[['w','Arma'],['a','Armadura']]){const it=run.equip[sl];h+=row(lab+': '+(it?'<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>':'nenhuma'),it?RAR[it.rar].n+' · '+statTxt(it):'Compre na cidade ou ache em baús','')}
   h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Baús e guardiões dão equipamentos.</small></div></div>';
-  run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{const lock=pr<it.tier;h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b><br>'+recoTag(it),(it.slot==='w'?'Arma':'Armadura')+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · <b>'+itemScore(it)+' de poder</b> · '+statTxt(it),btn(lock?'Rank '+rkN(it.tier):'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
+  run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{const lock=pr<it.tier;h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b><br>'+recoTag(it),(it.slot==='w'?'Arma':'Armadura')+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · '+statTxt(it),btn(lock?'Rank '+rkN(it.tier):'Equipar','equip',it.uid,!lock)+(city?btn('Vender '+fmt(it.value),'sell',it.uid):''))});
   h+=row('Banco',fmt(profile.bank||0)+' ouro guardado · não se perde na morte','');
   h+='<div class="sec">RECURSOS</div>';const rs=[];for(let r=0;r<9;r++){if(run.res.core[r])rs.push(run.res.core[r]+' núcleo '+GR[r].id);if(run.res.cry[r])rs.push(run.res.cry[r]+' cristal '+GR[r].id)}
   h+=row('Núcleos e cristais',rs.length?rs.join(' · '):'Nada ainda. Venda no Mercado de qualquer cidade.','');

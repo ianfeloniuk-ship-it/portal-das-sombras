@@ -146,6 +146,8 @@ Ideia do Irror: cada sistema faz UMA coisa, para não existir estratégia única
 - **Tela (Irror, 28/09):** botões no topo direito, mapa no canto inferior direito no PC (em cima no celular), linha de objetivos abaixo do painel com ✕ (volta pelo ⚙ → Tela), atalhos do teclado só no ⚙. BOLSA só com itens; PERSONAGEM tem as abas Personagem/Poderes. Todas as explicações (status, maestria, habilidades, ficha) em dica ao tocar/passar o mouse, formatadas em lista (`tipRow`, `tipFmt`).
 - **Necromante/invocações:** limite de sombras pela mana (`shadowCap` = 2 + mana máx ÷ 50, mínimo 3); invocações também (`summonCap` = 2 + mana ÷ 60); usar a habilidade de novo renova as que estão vivas (vida cheia e tempo zerado) e troca as mais antigas se passar do limite.
 
+- **Polimento (Irror, 28/09 21:50):** prédios das lojas com colisão nos cantos (não dá para entrar na Associação); Selene e Dorian atrás das barracas (antes a estaca atravessava); loja e bolsa mostram diferença em ataque/escudo em vez de 'poder'; a arma só aparece na mão quando há arma equipada; a linha de objetivos não mostra mais 'Ataque básico: mágico (X)'.
+
 ## Decisões do Ian (não mudar sem perguntar)
 - Rank **Soberano** é secreto: não sai no sorteio do despertar; só é obtido no templo escondido dentro de uma masmorra comum (teste dos mandamentos, como no anime). Ranks públicos até SSS.
 - 5 guildas pré-existentes com história. Fundar guilda: **50 bilhões de ouro e nível 50**. Andar 100 da torre paga **5 milhões**.
