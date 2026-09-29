@@ -1,4 +1,4 @@
-# Contexto do projeto Portal das Sombras (para outra conversa/IA continuar)
+# Contexto do projeto Ecos da Fenda (antigo Portal das Sombras) (para outra conversa/IA continuar)
 
 Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, do gênero caçadores/portais/sombras (fantasia de 'dungeon' moderna). Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes (ex.: não usar "ARISE"; a ação é **ERGUER SOMBRA**).
 Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-das-sombras/ (GitHub Pages, branch `main`, pasta raiz).
@@ -168,3 +168,7 @@ Save no `localStorage`: `pds2_profile` (perfil permanente) e `pds3_run` (vida at
 - Multiplayer e save na nuvem: plano é Supabase (Ian manda só Project URL + anon key; nunca service_role).
 - Balanceamento depende do Ian jogar e dizer onde ficou fácil/difícil.
 - O repositório é público: o segredo do Soberano está visível no código.
+
+## Identidade própria (29/09/2026) — decisão do Ian
+Para evitar cópia de Solo Leveling, os termos visíveis foram trocados: Portal das Sombras → **Ecos da Fenda**; Sistema → **Oráculo**; Soberano → **Arconte**; Associação de Caçadores → **Ordem da Fenda**; sombras → **ecos**; "Levante-se" → **Desperte**; quebra de masmorra → **transbordo da fenda**. Não reintroduzir os nomes antigos. Personagens e monstros novos devem ser originais (não usar protagonista de casaco preto e olhos azuis com adagas).
+Próximos passos sugeridos: trocar a paleta azul-sistema por uma própria, e a história da origem das fendas.

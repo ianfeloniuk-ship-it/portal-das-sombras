@@ -1,4 +1,4 @@
-# Portal das Sombras
+# Ecos da Fenda
 
 RPG de ação 3D para celular, inspirado na fantasia de caçadores, portais e sombras. Roda no navegador e pode ser instalado como app.
 
