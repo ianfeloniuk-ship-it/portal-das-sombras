@@ -20,7 +20,7 @@ function kitHit111(e,d,s){return hurtEnemy(e,d,player.x,player.z,{fromPlayer:tru
 function kitHeal111(a,f){if(a.dead||hasAff('nocure'))return;const h=Math.min(a.maxhp-a.hp,a.maxhp*f);a.hp+=Math.max(0,h);if(h>0){narratorEvent105(a===player?'healself':'support');floater(a.x,a.z,'+'+fmt(h),'#9fffc0')}}
 function kitWard111(a,f,d){const old=healingShield(a),amount=a.maxhp*f;if(old>amount)return;a.healShield=amount;a.healShieldCap=f;a.healShieldUntil=time+d}
 function kitZone111(s,extra={}){const p=kitPoint111(s);kitState111().zones.push({x:p.x,z:p.z,r:kitRadius111(s),until:time+s.duration,at:time,col:s.col,...extra});fxRing(p.x,p.z,s.col,kitRadius111(s),s.duration)}
-function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoint111(s),targets=kitTargets111(s,pt),f=kitAmount111(s),duration=s.duration;fxRing(pt.x,pt.z,s.col,Math.min(kitRadius111(s),6),.4);
+function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoint111(s),targets=kitTargets111(s,pt),f=kitAmount111(s),duration=s.duration;if(s.skillId==='5:1'||s.n==='Julgamento'){fxRing(P.x,P.z,0xffe066,kitRadius111(s),.6);pillar(P.x,P.z,0xffe066,1.2,.8);for(const e of targets)pillar(e.x,e.z,0xffe066,.7)}else fxRing(pt.x,pt.z,s.col,Math.min(kitRadius111(s),6),.4);
  switch(s.effect){
  case 'area':case 'target':for(const e of targets)kitHit111(e,d,s);break;
  case 'execute':{const e=targets[0];if(e)kitHit111(e,d*(e.hp/e.maxhp<=.35?1.5:1),s);break}

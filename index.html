@@ -2587,7 +2587,7 @@ function makeCitySign(){return new THREE.Group()}
 function makeSign(text,col,scale=1){
   const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
   x.fillStyle='rgba(6,18,38,.88)';x.fillRect(4,14,504,100);x.strokeStyle=col;x.lineWidth=6;x.strokeRect(4,14,504,100);
-  x.fillStyle=col;x.font='700 60px "Russo One","Chakra Petch",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text,256,66);
+  x.fillStyle=col;x.font='700 60px "Russo One","Chakra Petch",sans-serif';x.textAlign='center';x.textBaseline='middle';const size=Math.max(18,Math.min(60,Math.floor(60*472/Math.max(1,x.measureText(text).width))));x.font='700 '+size+'px "Russo One","Chakra Petch",sans-serif';x.fillText(text,256,66,472);
   const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,fog:false}));s.scale.set(7*scale,1.75*scale,1);return s;
 }
 
@@ -6150,7 +6150,7 @@ function kitHit111(e,d,s){return hurtEnemy(e,d,player.x,player.z,{fromPlayer:tru
 function kitHeal111(a,f){if(a.dead||hasAff('nocure'))return;const h=Math.min(a.maxhp-a.hp,a.maxhp*f);a.hp+=Math.max(0,h);if(h>0){narratorEvent105(a===player?'healself':'support');floater(a.x,a.z,'+'+fmt(h),'#9fffc0')}}
 function kitWard111(a,f,d){const old=healingShield(a),amount=a.maxhp*f;if(old>amount)return;a.healShield=amount;a.healShieldCap=f;a.healShieldUntil=time+d}
 function kitZone111(s,extra={}){const p=kitPoint111(s);kitState111().zones.push({x:p.x,z:p.z,r:kitRadius111(s),until:time+s.duration,at:time,col:s.col,...extra});fxRing(p.x,p.z,s.col,kitRadius111(s),s.duration)}
-function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoint111(s),targets=kitTargets111(s,pt),f=kitAmount111(s),duration=s.duration;fxRing(pt.x,pt.z,s.col,Math.min(kitRadius111(s),6),.4);
+function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoint111(s),targets=kitTargets111(s,pt),f=kitAmount111(s),duration=s.duration;if(s.skillId==='5:1'||s.n==='Julgamento'){fxRing(P.x,P.z,0xffe066,kitRadius111(s),.6);pillar(P.x,P.z,0xffe066,1.2,.8);for(const e of targets)pillar(e.x,e.z,0xffe066,.7)}else fxRing(pt.x,pt.z,s.col,Math.min(kitRadius111(s),6),.4);
  switch(s.effect){
  case 'area':case 'target':for(const e of targets)kitHit111(e,d,s);break;
  case 'execute':{const e=targets[0];if(e)kitHit111(e,d*(e.hp/e.maxhp<=.35?1.5:1),s);break}
@@ -6358,9 +6358,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v114</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v115</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=114;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=115;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
