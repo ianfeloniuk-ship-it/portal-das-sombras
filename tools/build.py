@@ -5,6 +5,10 @@ subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=Tru
 subprocess.run([sys.executable,str(root/'tools'/'sync-ecology124.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-crystals125.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-environment128.py')],check=True)
+# Ensure the detailed citizen models included by the current game scripts ship with Pages.
+for name in ['dorian133.glb','selene133.glb','cacador-veterano138.glb']:
+    model=root/'models'/name
+    if not model.is_file(): raise FileNotFoundError(model)
 game=(root/'game.html').read_text(encoding='utf-8')
 ver=re.search(r"pds-v(\d+)",(root/'sw.js').read_text(encoding='utf-8')).group(1)
 head='''<!doctype html>
