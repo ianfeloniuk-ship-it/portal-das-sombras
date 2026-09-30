@@ -241,6 +241,449 @@ const CLASSES=[
  {n:'Mago da Terra',w:3.5,ranged:true,body:0x6a5234,hair:0x3a2a1a,wep:'staff',elem:'terra',pt:'stone',sk:[S('Estaca de Pedra','stone_lance',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
  {n:'Mago do Raio',w:3.5,ranged:true,body:0x5a4ab8,hair:0xfff8c0,wep:'staff',elem:'raio',pt:'spark',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','thunderstorm',10,28,1.9,0xfff36b)]}];
 /* Segundo Despertar — capítulo inicial e três caminhos jogáveis. */
+const NR_LINES105={
+ "victory": [
+  "A passagem fechou. Você ficou deste lado.",
+  "Mais uma Fenda deixou de ameaçar o caminho.",
+  "Guarde o fôlego. Agora podemos sair andando.",
+  "O silêncio depois da luta ainda me surpreende.",
+  "Terminou. Pode baixar a guarda por um instante.",
+  "O portal cedeu antes de você.",
+  "Esse confronto já pertence ao passado.",
+  "Você deixou menos perigo atrás de si.",
+  "A saída parece diferente depois de uma vitória.",
+  "Conseguimos chegar ao outro lado desta história.",
+  "Há uma Fenda a menos para vigiar.",
+  "Hoje, a volta tem gosto de trabalho concluído.",
+  "A ameaça acabou. A viagem continua.",
+  "Pode respirar. Esta parte você resolveu.",
+  "O caminho de volta também faz parte da vitória.",
+  "Você saiu com uma conclusão, desta vez.",
+  "Eu tinha mais um aviso. Ficou sem utilidade.",
+  "Esse portal não vai reclamar da sua visita.",
+  "Admito: gostei mais do final do que da entrada.",
+  "Pronto. Agora posso parar de olhar para a saída."
+ ],
+ "hard": [
+  "Você voltou de uma Fenda acima do seu rank.",
+  "O registro da Ordem ainda não conta tudo sobre você.",
+  "Esse desafio estava acima da sua classificação. Você venceu.",
+  "A diferença de rank existia. A vitória também.",
+  "A Ordem terá trabalho para acompanhar seus passos.",
+  "Você atravessou um limite sem receber uma promoção automática.",
+  "Seu rank permanece. Essa experiência fica junto dele.",
+  "Foi uma vitória além do que seu emblema anuncia.",
+  "O perigo era maior que o seu rank. Você voltou.",
+  "Guarde essa experiência para a próxima prova.",
+  "Hoje seu emblema parece uma descrição incompleta.",
+  "Você saiu de onde seu rank recomendava cautela.",
+  "A classificação previa dificuldade. Não decidia o resultado.",
+  "Essa Fenda exigia mais. Você encontrou uma resposta.",
+  "A próxima prova ainda espera, mesmo depois desta conquista.",
+  "Já posso dizer: o aviso de perigo estava correto.",
+  "Você anda dando trabalho aos critérios da Ordem.",
+  "Seu emblema ficou esperando enquanto você foi mais longe.",
+  "Vou precisar de avisos melhores que números de rank.",
+  "A placa dizia perigo. Você leu e entrou mesmo assim."
+ ],
+ "narrow": [
+  "Você saiu com pouca vida. Vamos cuidar disso.",
+  "Essa volta foi por pouco.",
+  "Ainda há caminho pela frente. Primeiro, recupere o fôlego.",
+  "A Fenda fechou, mas seu corpo sentiu o preço.",
+  "Você conseguiu sair. Agora merece uma pausa.",
+  "Não vou apressar seus próximos passos.",
+  "A margem foi pequena. Você está aqui.",
+  "Podemos discutir a próxima aventura depois de uma cura.",
+  "A vitória chegou com feridas abertas.",
+  "Hoje, atravessar a saída já foi um alívio.",
+  "Sua vida ficou por um fio na volta.",
+  "O portal acabou. A recuperação ainda falta.",
+  "Eu vi como você saiu dessa passagem.",
+  "Antes de outro desafio, olhe para essas feridas.",
+  "Fechamos a Fenda. Falta cuidar de quem a fechou.",
+  "Da próxima vez, aceito um final menos apertado.",
+  "Você deixou pouquíssimo espaço para o meu otimismo.",
+  "Essa foi uma maneira trabalhosa de voltar vivo.",
+  "Prefiro quando sobra um pouco mais de você na saída.",
+  "Vou comemorar depois que sua vida melhorar."
+ ],
+ "retreat": [
+  "Você saiu antes de concluir. O caminho pode esperar.",
+  "Recuar também deixa uma próxima tentativa possível.",
+  "A Fenda ficou para depois. Você voltou agora.",
+  "Não precisamos encerrar todos os desafios na primeira visita.",
+  "A saída serviu ao propósito dela.",
+  "Você escolheu interromper a expedição.",
+  "Ainda há tempo para preparar outra abordagem.",
+  "Essa incursão terminou sem vitória. A jornada continua.",
+  "Podemos olhar o equipamento antes de tentar outra vez.",
+  "Hoje você voltou com uma questão em aberto.",
+  "O desafio permanece além da passagem.",
+  "Você não concluiu essa Fenda. Eu me lembro.",
+  "Não vou confundir essa volta com uma conclusão.",
+  "Uma tentativa interrompida também ensina o caminho.",
+  "A próxima entrada pode ser diferente.",
+  "Eu estava começando a achar a saída decorativa.",
+  "Pronto. Uma decisão que não exige remendar você.",
+  "Podemos chamar isso de visita preliminar, se quiser.",
+  "Eu guardo o comentário heroico para a próxima tentativa.",
+  "A Fenda terá de esperar pela sua insistência."
+ ],
+ "death": [
+  "Você caiu. Vamos retomar de onde ainda é possível.",
+  "Eu me lembro da queda. Não preciso anunciá-la outra vez.",
+  "A derrota ficou na jornada. Você continua nela.",
+  "Esse confronto terminou mal. O próximo ainda não aconteceu.",
+  "Voltar depois de cair também faz parte daqui.",
+  "Dê um instante a si antes de escolher outro perigo.",
+  "Temos uma derrota para lembrar, sem fazer dela uma sentença.",
+  "Seu caminho não acabou naquele golpe.",
+  "Vamos olhar para o que vem depois da queda.",
+  "Posso acompanhar a próxima tentativa sem prometer o resultado.",
+  "A história continua com as marcas dessa derrota.",
+  "Você ainda tem escolhas depois de perder.",
+  "Aquele fim de combate não foi o fim da viagem.",
+  "Não vou transformar uma queda em um nome para você.",
+  "O mundo continua aqui. Podemos começar pela recuperação.",
+  "Hoje não tenho uma provocação para isso.",
+  "Eu preferia ter contado outra volta.",
+  "A próxima tentativa merece seu tempo.",
+  "O que aconteceu fica na memória. Não precisa virar rotina.",
+  "Vamos devagar até você estar pronto para seguir."
+ ],
+ "returnwin": [
+  "Você já caiu em uma Fenda deste rank. Hoje voltou vencedor.",
+  "Lembro da derrota neste rank. Esta saída foi diferente.",
+  "Desta vez, o desafio desse rank terminou com sua volta.",
+  "Uma memória difícil acaba de ganhar companhia melhor.",
+  "Você venceu um rank de Fenda que já custou uma queda.",
+  "Eu não esqueci aquela derrota. Agora também tenho esta vitória.",
+  "O mesmo rank, outro resultado.",
+  "Essa classificação já marcou uma queda sua. Hoje marcou uma vitória.",
+  "Seu histórico neste rank ficou menos pesado.",
+  "Essa vitória responde a uma parte do caminho que doeu.",
+  "Antes houve uma queda em desafio deste rank. Hoje houve conclusão.",
+  "Você acrescentou uma vitória onde eu lembrava uma derrota.",
+  "Podemos olhar para esse rank com outra lembrança agora.",
+  "A derrota anterior continua real. Esta vitória também.",
+  "Você voltou vencedor de um perigo que já havia te derrubado.",
+  "Vou atualizar minha lista de preocupações.",
+  "Esse rank perdeu um pouco do direito de intimidar.",
+  "Eu tinha uma lembrança ruim desse emblema. Você ajudou.",
+  "Desta vez, o comentário ficou para a saída certa.",
+  "O rank é conhecido. Gostei mais deste desfecho."
+ ],
+ "higher": [
+  "Você entrou em uma Fenda acima do seu rank.",
+  "Seu emblema ficou abaixo do desafio desta passagem.",
+  "Há uma diferença de rank aqui. Vale manter a saída em mente.",
+  "Esse portal pede mais do que sua classificação atual.",
+  "A Ordem classificaria esta entrada como arriscada.",
+  "Estamos além do perigo indicado pelo seu rank.",
+  "Você atravessou uma passagem mais alta que seu emblema.",
+  "Neste desafio, sua classificação recomenda atenção.",
+  "A dificuldade subiu antes da sua próxima prova.",
+  "Esse rank ainda está à frente do seu. A entrada já ficou atrás.",
+  "Você escolheu um desafio maior que sua classificação.",
+  "O portal abriu. Isso não torna o confronto simples.",
+  "Podemos observar o terreno antes de avançar mais.",
+  "O rank desta Fenda merece respeito.",
+  "Seu próximo golpe encontrará um desafio acima do habitual.",
+  "Só confirmando: você viu o rank na entrada.",
+  "Seu emblema não veio com uma garantia para isto.",
+  "Eu li o aviso. Imagino que você também.",
+  "A parte fácil foi atravessar a porta.",
+  "Vou guardar o entusiasmo até ver como saímos."
+ ],
+ "red": [
+  "A passagem vermelha se fechou atrás de você.",
+  "Esse portal cobra atenção ao caminho de volta.",
+  "Aqui, a saída tem condições. Lembre disso.",
+  "Entramos em uma Fenda vermelha. Vamos observar antes de avançar.",
+  "A cor já avisava que a volta seria diferente.",
+  "O retorno daqui exige resolver o desafio.",
+  "Guarde a posição da entrada.",
+  "Esta Fenda não oferece uma retirada comum.",
+  "Agora temos de lidar com o que está deste lado.",
+  "O vermelho da passagem não era enfeite.",
+  "Observe o terreno. Esta incursão exige uma conclusão.",
+  "A volta começa pelo desafio à frente.",
+  "Não vou tratar essa passagem como uma porta qualquer.",
+  "Uma entrada dessas merece passos atentos.",
+  "A saída existe, mas ainda precisamos alcançá-la nas condições certas.",
+  "A decoração já tinha feito o aviso por mim.",
+  "Vermelho. Uma escolha discreta para anunciar problemas.",
+  "Eu teria preferido uma porta menos exigente.",
+  "Esse portal tem uma ideia bastante rígida de hospitalidade.",
+  "Vamos tentar não confirmar todas as minhas preocupações."
+ ],
+ "explore": [
+  "Este trecho ainda não tinha entrado nas minhas lembranças com você.",
+  "Mais um pedaço do mundo ganhou seus passos.",
+  "Você está deixando os caminhos conhecidos para trás.",
+  "Ainda há terreno que não percorremos juntos.",
+  "O mapa cresce à medida que você anda.",
+  "Uma região nova. Vamos ver o que ela oferece.",
+  "Essa paisagem ainda é novidade na nossa viagem.",
+  "Seu caminho alcançou outro trecho das terras selvagens.",
+  "Conhecer um lugar também começa por observar.",
+  "Há mais mundo além dos portais que você conhece.",
+  "Chegamos a uma parte nova do percurso.",
+  "Vou guardar este trecho junto aos outros.",
+  "Cada desvio acrescenta alguma coisa à viagem.",
+  "Ainda podemos encontrar caminhos que não reconhecemos.",
+  "Hoje a jornada ganhou mais um lugar.",
+  "Você tem um talento para aumentar o tamanho do caminho.",
+  "O mapa vai precisar de espaço para essa curiosidade.",
+  "Eu acompanho. Só não espere que eu conheça cada pedra.",
+  "Mais terreno para você decidir atravessar.",
+  "Se havia uma rota curta, passamos longe dela agora."
+ ],
+ "city": [
+  "Você chegou à cidade. Podemos diminuir o ritmo.",
+  "Há espaço para preparar o próximo trecho aqui.",
+  "As ruas oferecem uma pausa entre as Fendas.",
+  "Você voltou a ter lojas e abrigo por perto.",
+  "Podemos cuidar do equipamento antes de partir.",
+  "A cidade é um bom lugar para rever suas escolhas.",
+  "Há vida fora das passagens também.",
+  "A viagem pode esperar enquanto você se prepara.",
+  "Chegamos a ruas conhecidas por outros viajantes.",
+  "Aqui podemos pensar na próxima expedição com calma.",
+  "Seu equipamento merece atenção entre uma luta e outra.",
+  "Uma pausa na cidade também faz parte da jornada.",
+  "Você tem um lugar para organizar o que trouxe.",
+  "Agora podemos olhar os caminhos disponíveis.",
+  "A próxima Fenda não precisa ser escolhida às pressas.",
+  "Finalmente, portas que não levam direto a monstros.",
+  "Podemos conversar sem um portal querendo nossa atenção.",
+  "Por alguns instantes, aceito que o perigo fique longe.",
+  "Uma visita em que o balcão costuma ser mais útil que a lâmina.",
+  "Vou aproveitar enquanto você não escolhe outro portal."
+ ],
+ "support": [
+  "Sua cura alcançou um aliado ferido.",
+  "Você abriu espaço para alguém continuar lutando.",
+  "Aquela recuperação também faz parte da vitória do grupo.",
+  "Um companheiro recebeu o cuidado que precisava.",
+  "Você dedicou poder à sobrevivência de outro.",
+  "A vida que voltou ali não foi a sua.",
+  "Seu grupo ganhou fôlego com aquela cura.",
+  "Você ajudou a manter alguém de pé.",
+  "Havia uma ferida em outro. Sua habilidade chegou até ela.",
+  "Esse cuidado mudou a condição de um companheiro.",
+  "Uma cura pode sustentar mais que o próximo golpe.",
+  "Seu poder alcançou quem lutava ao lado.",
+  "O grupo recebeu mais tempo para continuar.",
+  "Aquele aliado estava ferido. Você ajudou.",
+  "Também lembro de como você cuida de quem acompanha.",
+  "Desta vez, posso elogiar sem contar inimigos caídos.",
+  "Um companheiro deve a você um pouco desse fôlego.",
+  "Seu grupo acaba de ganhar uma boa razão para ficar perto.",
+  "Gosto quando sobra poder para cuidar dos outros.",
+  "Você fez alguém durar mais. Isso conta na minha memória."
+ ],
+ "necro": [
+  "Outro eco passou a acompanhar seus passos.",
+  "Você deu forma a uma presença que ficou para trás.",
+  "Essa companhia veio de um vestígio.",
+  "A jornada ganhou um eco sob sua ordem.",
+  "Você escolheu trazer uma essência para perto.",
+  "Agora há mais uma presença no seu caminho.",
+  "Esse eco tem lugar entre os que acompanham você.",
+  "Uma vontade recebeu forma ao seu lado.",
+  "O vestígio deixou de ser apenas lembrança.",
+  "Você tornou aquela essência uma companhia de combate.",
+  "Há um novo eco respondendo à sua convocação.",
+  "Seus passos agora dividem o caminho com essa presença.",
+  "A passagem deixou vestígios. Você soube erguer um deles.",
+  "A essência que você guardou encontrou uma forma.",
+  "Você trouxe um eco para esta parte da viagem.",
+  "Sua comitiva anda aceitando membros pouco convencionais.",
+  "Eu ia perguntar de onde veio. Já vi a resposta.",
+  "Você tem uma maneira particular de aumentar o grupo.",
+  "Mais companhia. Menos motivos para fingir que viaja só.",
+  "Admito: seus convites são difíceis de ignorar."
+ ],
+ "time": [
+  "Você retornou à posição marcada.",
+  "A âncora deu outro fim àquele deslocamento.",
+  "Seu passo de volta atravessou um instante guardado.",
+  "Você usou o ponto que havia deixado no tempo.",
+  "A marca temporal serviu de retorno.",
+  "Você voltou para onde havia preparado uma possibilidade.",
+  "Um instante guardado virou caminho de volta.",
+  "Seu retorno encontrou a posição que você registrou.",
+  "A âncora fechou seu ciclo.",
+  "Você recuperou a posição que havia deixado para trás.",
+  "Eu vi você partir daquele ponto e retornar a ele.",
+  "A preparação de antes acabou de fazer diferença.",
+  "O tempo ofereceu um retorno dentro da sua marca.",
+  "Você encerrou a janela da âncora voltando por ela.",
+  "A posição foi recuperada. A jornada segue daqui.",
+  "Vou evitar chamar aquele passo de definitivo.",
+  "Acompanhar sua posição ficou um pouco mais trabalhoso.",
+  "Eu ia dizer que você estava longe. Já passou.",
+  "Você guardou a volta antes de precisar dela.",
+  "Dessa vez, voltar atrás foi uma habilidade literal."
+ ],
+ "fenda": [
+  "Você abriu uma passagem acima do seu rank.",
+  "A energia reunida ganhou a forma de outro portal.",
+  "Agora existe uma Fenda onde você decidiu abri-la.",
+  "Você preparou um desafio maior com energia das Fendas.",
+  "A passagem nasceu da energia que você guardou.",
+  "Seu rank permanece. O destino deste portal está acima dele.",
+  "Você construiu uma entrada para um perigo maior.",
+  "A próxima travessia já tem um lugar.",
+  "A energia acumulada deixou de ser reserva e virou passagem.",
+  "Essa Fenda começou com uma decisão sua.",
+  "Você abriu o caminho. Ainda falta enfrentar o destino.",
+  "O portal responde ao seu poder, sem prometer a vitória.",
+  "Há uma entrada nova no mundo, criada por você.",
+  "A passagem está pronta para quando você decidir atravessar.",
+  "Você fez da energia uma oportunidade de ir além.",
+  "Os portais disponíveis não bastaram, então.",
+  "Agora você também fabrica motivos para eu me preocupar.",
+  "Antes você procurava perigo. Acaba de abrir um.",
+  "Seu mapa ganhou um problema por iniciativa própria.",
+  "Vou dar crédito: desta vez você providenciou a porta."
+ ],
+ "fissure": [
+  "O portal fechou. A fissura continuou ali.",
+  "Alguma coisa permaneceu onde a passagem deveria terminar.",
+  "Eu vi o fechamento. Ainda não sei explicar o vestígio.",
+  "Essa abertura não acompanhou o fim do portal.",
+  "Há algo sustentando o que deveria ter desaparecido.",
+  "A fissura ficou. Podemos voltar a ela quando você decidir.",
+  "O encerramento deixou uma pergunta no mundo.",
+  "Ainda não tenho uma explicação para essa permanência.",
+  "A passagem acabou, mas seu vestígio continua acessível.",
+  "Você deixou uma fissura para investigar naquele lugar.",
+  "O portal sumiu sem levar tudo consigo.",
+  "Alguma parte daquela abertura resiste ao fim.",
+  "Há uma investigação possível onde antes havia um portal.",
+  "A fissura ainda responde. O motivo continua incerto.",
+  "Posso reconhecer o vestígio sem fingir entender sua origem.",
+  "Essa passagem esqueceu de terminar junto com o portal.",
+  "Eu tinha uma explicação simples. Ela acabou de ficar menor.",
+  "Mais uma coisa que não cabe nos meus avisos habituais.",
+  "O mundo deixou uma pergunta aberta. Literalmente.",
+  "Não vou inventar uma resposta só para parecer informado."
+ ],
+ "trial": [
+  "Você sustentou a manifestação até o fim.",
+  "A escolha que fez naquela fissura ficou na sua jornada.",
+  "Seu caminho ganhou mais uma experiência de afinidade.",
+  "A investigação terminou. O que você aprendeu permanece.",
+  "Você conseguiu manter a manifestação enquanto enfrentava as ameaças.",
+  "Mais uma fissura revelou como você escolhe agir.",
+  "A afinidade cresceu a partir do que você fez.",
+  "Seu aprendizado ganhou uma experiência concreta.",
+  "Você sustentou uma possibilidade entre as que encontrou.",
+  "Essa investigação acrescentou algo ao seu caminho.",
+  "A manifestação cedeu depois que você a sustentou.",
+  "A escolha foi sua. Eu me lembro do resultado.",
+  "Seu contato com as fissuras ganhou outra etapa.",
+  "Você saiu dessa investigação com mais afinidade.",
+  "Outra manifestação passou a fazer parte da sua história.",
+  "Você está ficando melhor em lidar com perguntas armadas.",
+  "A fissura exigiu uma resposta. Você ficou para dar uma.",
+  "Gostei de ver uma escolha sobreviver ao próprio desafio.",
+  "Vou guardar essa. Você trabalhou para concluí-la.",
+  "Mais uma investigação em que as ameaças perderam a discussão."
+ ],
+ "awakening": [
+  "Você concluiu o Segundo Despertar. Seu rank continua o mesmo.",
+  "Há um novo despertar na sua história, além do emblema da Ordem.",
+  "As três investigações abriram outra etapa do seu caminho.",
+  "Você despertou outra vez. A próxima prova de rank ainda é outra conquista.",
+  "Seu poder ganhou caminhos que seu rank sozinho não descreve.",
+  "O Segundo Despertar está concluído. Agora há mais formas de continuar.",
+  "Você chegou a essa mudança sustentando as manifestações.",
+  "Esse despertar veio das experiências que você viveu nas fissuras.",
+  "A Ordem registra seu rank. Sua jornada acaba de ganhar outra dimensão.",
+  "As investigações levaram você ao Segundo Despertar.",
+  "Você continua com seu emblema e carrega um novo despertar.",
+  "O aprendizado das fissuras abriu novas possibilidades.",
+  "Há mais caminhos disponíveis para o que você pode se tornar.",
+  "Você concluiu uma etapa que não cabe na sequência de ranks.",
+  "Seu Segundo Despertar agora faz parte do que vivemos.",
+  "Vou precisar de mais palavras para apresentar você.",
+  "Seu emblema não ganhou outra estrela por conta própria.",
+  "A Ordem cuida dos ranks. Você acaba de complicar o resto.",
+  "Duas vezes despertado. Vou me acostumar com isso.",
+  "Você trouxe uma resposta. Ela veio com vários caminhos novos."
+ ],
+ "rank": [
+  "Seu emblema mudou depois da prova.",
+  "A Ordem reconheceu mais um passo da sua jornada.",
+  "Você venceu a prova e conquistou outro rank.",
+  "Essa promoção tem um confronto concluído por trás.",
+  "Seu registro na Ordem acaba de avançar.",
+  "O novo rank acompanha uma prova que você venceu.",
+  "Agora seu emblema conta outra parte do caminho.",
+  "Você cumpriu os requisitos e enfrentou o Examinador.",
+  "A promoção chegou pelo caminho da prova.",
+  "Seu nome carrega um rank maior agora.",
+  "Mais uma etapa da Ordem ficou para trás.",
+  "Você ganhou essa mudança de emblema.",
+  "A prova acabou. O reconhecimento permanece.",
+  "Seu próximo desafio começa com outro rank.",
+  "A Ordem confirmou o avanço que você buscou.",
+  "O Examinador acabou de perder uma discussão bastante física.",
+  "Pronto. Agora seu emblema também sabe da novidade.",
+  "Uma promoção com menos papelada do que golpes.",
+  "Vou atualizar a apresentação antes da próxima entrada.",
+  "Desta vez, você e a Ordem concordaram sobre o resultado."
+ ],
+ "shift": [
+  "Seu modo de usar habilidades mudou nos últimos confrontos.",
+  "Você vem dando espaço a outras classes na combinação.",
+  "As habilidades recentes contam uma mudança no seu caminho.",
+  "Sua combinação começou a mostrar outro ritmo.",
+  "Você está usando outro repertório com mais frequência.",
+  "Eu tinha me acostumado com um conjunto. Você ampliou a conversa.",
+  "As últimas habilidades vieram de outro caminho.",
+  "Seu estilo recente já não é o mesmo que eu vinha vendo.",
+  "Há uma mudança no conjunto de poderes que você usa.",
+  "Você encontrou espaço para experimentar outra direção.",
+  "O repertório usado nos confrontos ganhou outro centro.",
+  "Você mudou a maneira de conduzir suas habilidades.",
+  "Sua jornada não ficou presa ao primeiro conjunto.",
+  "As escolhas recentes estão desenhando outra combinação.",
+  "Estou acompanhando essa mudança no que você usa.",
+  "Eu estava aprendendo seu ritmo. Você resolveu trocar a música.",
+  "Vou parar de achar que já conheço sua próxima habilidade.",
+  "Você tem pouco apego às minhas previsões.",
+  "O repertório mudou antes que eu terminasse de decorá-lo.",
+  "Gosto dessa liberdade de me obrigar a prestar atenção de novo."
+ ],
+ "veteran": [
+  "Já acompanhamos muitas Fendas fechando depois da sua passagem.",
+  "Há bastante caminho percorrido entre nós agora.",
+  "Suas expedições já formam uma coleção de lembranças.",
+  "Você voltou de muitas passagens desde que começamos.",
+  "A jornada acumulou vitórias suficientes para deixar marcas.",
+  "Eu já vi esse caminho crescer com suas expedições.",
+  "Temos mais lembranças compartilhadas do que no começo.",
+  "Sua história com as Fendas já tem muitos retornos.",
+  "Você construiu uma jornada que vai além de uma só vitória.",
+  "Cada expedição concluída acrescentou algo ao que lembro.",
+  "Há uma longa sequência de passagens fechadas no seu caminho.",
+  "A experiência veio de muitas travessias concluídas.",
+  "Você já trouxe bastante mundo para estas lembranças.",
+  "Nossa viagem deixou de caber em poucos acontecimentos.",
+  "Você fez muitas Fendas virarem parte do passado.",
+  "Já perdi o direito de fingir surpresa a cada retorno.",
+  "Você está aumentando bastante o tamanho das minhas memórias.",
+  "Eu deveria ter começado a contar essas voltas mais cedo.",
+  "Nosso repertório de despedidas de portais ficou respeitável.",
+  "A esta altura, já reconheço o trabalho de uma boa saída."
+ ]
+};
+let NR105={queue:[],quietFor:0,tick:0,city:null};
 const RARE103=[
  {id:7,n:'Necromante',ready:true,choice:'Sustentar a vontade do eco',exclusive:'1 eco especial ativo; 2 com afinidade.'},
  {id:12,n:'Mago do Tempo',ready:true,choice:'Conter o instante do colapso',exclusive:'Reserva temporal de 3s; 6s com afinidade.'},
@@ -1472,7 +1915,7 @@ function enterGate(g){if(g.dead||g.coreFailed103)return;
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
   if(g.time){closeModal();curGate=g;buildSpecial('past',g);return}
-  closeModal();curGate=g;buildDungeon(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
+  closeModal();curGate=g;buildDungeon(g);narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
   cam.x=player.x;cam.z=player.z;
   bigText('RANK '+GR[g.rank].id,1300);
   toast('<b>[NARRADOR]</b> '+GR[g.rank].th.n+' · '+L.rooms.length+' salas'+(g.red?' · <b style="color:#ff4d6a">PORTAL VERMELHO</b>':''),3500);
@@ -1487,7 +1930,7 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
       const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
 function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
-  const g=L.gate,cleared=L.bossDead&&!L.failed103;
+  const g=L.gate,cleared=L.bossDead&&!L.failed103;narratorPortal105(g,cleared);
   if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);rareOnPortal103(g);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
   curGate=null;
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
@@ -1627,7 +2070,7 @@ function applyHistory95(){const box=$('history95'),size=sizeHistory95(CFG.histor
 function toggleHistory95(){CFG.historyCollapsed95=!CFG.historyCollapsed95;applyHistory95();store.set('pds_cfg',CFG)}
 function latestHistory95(){CFG.historyCollapsed95=false;applyHistory95();$('historyBody95').scrollTop=$('historyBody95').scrollHeight;historyUnread95=0;historyBadge95();store.set('pds_cfg',CFG)}
 function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory95();store.set('pds_cfg',CFG);$('historyBody95').focus()}
-function toast(html,ms=2600){logNews(html);if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
+function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
 function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
 
@@ -1743,7 +2186,7 @@ function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(9,e.gr||0)];let l=g.l
 function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>=2?'#ffd54f':null}
 function identityHitDamage(e,amt,o){if(!o.fromPlayer||o.pet||o.passive)return amt;if(o.execute&&e.hp<=e.maxhp*.35)amt*=1.5;if(o.longshot&&Math.hypot(e.x-o.originX,e.z-o.originZ)>=8)amt*=1.25;return amt}
 function applyWeaponVenom(e,amt){const P=player;if(!(P.venomUntil>time)||!(P.venomCharges>0))return;P.venomCharges--;e.basicDots=e.basicDots||{};const old=e.basicDots.venom;e.basicDots.venom={t:4,d:Math.max(old?.d||0,amt*.6/4),acc:old?.acc||0};floater(e.x,e.z,'ENVENENADO','#8de06a')}
-function judgmentRelief(P,r,sk){if(hasAff('nocure'))return;for(const a of [P,...allies])if(!a.dead&&(a===P||a.life>0)&&Math.hypot(a.x-P.x,a.z-P.z)<=r){const h=Math.min(a.maxhp-a.hp,a.maxhp*judgmentHealing(sk||{n:'Julgamento'}));if(h>0){a.hp+=h;floater(a.x,a.z,'+'+fmt(h),'#fff3a0');fxRing(a.x,a.z,0xfff3a0,1,.4)}}}
+function judgmentRelief(P,r,sk){if(hasAff('nocure'))return;for(const a of [P,...allies])if(!a.dead&&(a===P||a.life>0)&&Math.hypot(a.x-P.x,a.z-P.z)<=r){const h=Math.min(a.maxhp-a.hp,a.maxhp*judgmentHealing(sk||{n:'Julgamento'}));if(h>0){a.hp+=h;if(a!==P)narratorEvent105('support');floater(a.x,a.z,'+'+fmt(h),'#fff3a0');fxRing(a.x,a.z,0xfff3a0,1,.4)}}}
 function resolveEnemyStun(e,oldStun){if(e.stun>oldStun){if(e.isBoss||time<(e.stunResistUntil||0))e.stun=oldStun;else{e.stun=Math.min(e.stun,.3);e.stunResistUntil=time+3}}}
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;const oldStun=e.stun||0;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
@@ -1813,7 +2256,7 @@ function healingFraction(sk){return sk.n==='Luz Curativa'?.5:sk.pow}
 function healingShieldCap(sk){return .2+.02*healerLevel(sk)}
 function healingShield(a){if(a.dead||!(a.healShieldUntil>time)){a.healShield=0;return 0}return Math.max(0,Math.min(a.healShield||0,a.maxhp*(a.healShieldCap||0)))}
 function absorbHealingShield(a,amt){const shield=healingShield(a),blocked=Math.min(shield,Math.max(0,amt));a.healShield=shield-blocked;return amt-blocked}
-function applyHealingLight(a,sk){if(a.dead||hasAff('nocure'))return;const amount=a.maxhp*healingFraction(sk),missing=Math.max(0,a.maxhp-a.hp),healed=Math.min(amount,missing);a.hp=Math.min(a.maxhp,a.hp+healed);
+function applyHealingLight(a,sk){if(a.dead||hasAff('nocure'))return;const amount=a.maxhp*healingFraction(sk),missing=Math.max(0,a.maxhp-a.hp),healed=Math.min(amount,missing);a.hp=Math.min(a.maxhp,a.hp+healed);if(a!==player&&healed>0)narratorEvent105('support');
   if(sk.n==='Luz Curativa'){a.slowT=0;a.bleedT=0;a.bleedD=0;a.slow=0;a.stun=0;const cap=healingShieldCap(sk),extra=Math.min(a.maxhp*cap,Math.max(0,amount-healed)),previous=healingShield(a);if(extra>0){a.healShieldCap=Math.max(extra>=previous?cap:(a.healShieldCap||0),cap);a.healShield=Math.max(previous,extra);a.healShieldUntil=time+6;floater(a.x,a.z,'ESCUDO +'+fmt(extra),'#9fe8ff')}}
   if(healed>0)floater(a.x,a.z,'+'+fmt(healed),'#9fffc0');fxRing(a.x,a.z,0xfff3a0,1,.4)}
 function blessAllies(P){for(const a of allies)if(!a.dead&&a.life>0&&Math.hypot(a.x-P.x,a.z-P.z)<=8)a.blessingUntil=time+5}
@@ -1990,14 +2433,14 @@ function potionDescription(){const p=potionHealFraction();return 'Cura '+String(
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk||sk.empty)return;
-  if(sk.rare103){const returning=sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time;if(sk.cdT>0&&!returning)return;const error=rareCastCheck103(sk);if(error){toast(error);return}if(sk.t==='rare_gate'){rareGateView103();return}const cost=rareMana103(sk);if(player.mp<cost){floater(player.x,player.z,'SEM MANA','#4f8dff');return}player.mp-=cost;if(!returning){sk.cdT=sk.cdMax=skillCooldown(sk);player.lastSpellAt=time}rareSkillRun103(sk);player.atkT=.001;return}
+  if(sk.rare103){const returning=sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time;if(sk.cdT>0&&!returning)return;const error=rareCastCheck103(sk);if(error){toast(error);return}if(sk.t==='rare_gate'){rareGateView103();return}const cost=rareMana103(sk);if(player.mp<cost){floater(player.x,player.z,'SEM MANA','#4f8dff');return}player.mp-=cost;if(!returning){sk.cdT=sk.cdMax=skillCooldown(sk);player.lastSpellAt=time}rareSkillRun103(sk);narratorSkill105(sk);player.atkT=.001;return}
   if(sk.cdT>0)return;
    if(sk.t==='summon'&&minionAllies().length>=summonCap()&&(sk.n!=='Matilha Espiritual'||!allies.some(a=>!a.dead&&a.summonKind==='wolf'))){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
    if(sk.t==='heal'&&hasAff('nocure')){floater(player.x,player.z,'SEM CURA','#ff8fa3');return}
    if(sk.t==='minionbuff'&&!minionAllies(true).length){floater(player.x,player.z,'SEM INVOCADOS','#9fb0c4');return}
   if(sk.t==='chain'&&sk.n!=='Fúria dos Céus'&&!nearestEnemy(player.x,player.z,12)){floater(player.x,player.z,'SEM ALVO','#9fb0c4');return}
   if(player.mp<sk.mp){floater(player.x,player.z,'SEM MANA','#4f8dff');return}
-  player.lastSpellAt=time;player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;if(['nova','cone','bolt','chain','rain','dot','stone_lance','thunderstorm'].includes(sk.t)&&sk.n!=='Lâmina Envenenada')AR103.lastAttack={...sk};runSkill(sk);player.atkT=.001;
+  player.lastSpellAt=time;player.mp-=sk.mp;sk.cdT=skillCooldown(sk);sk.cdMax=sk.cdT;if(['nova','cone','bolt','chain','rain','dot','stone_lance','thunderstorm'].includes(sk.t)&&sk.n!=='Lâmina Envenenada')AR103.lastAttack={...sk};runSkill(sk);narratorSkill105(sk);player.atkT=.001;
 }
 function setStealth(on){player.m.mats.forEach(m=>{m.transparent=on;m.opacity=on?.35:1})}
 function skillGroundPoint(max=14,fallback=7){const ap=aimPoint();if(ap){const dx=ap.x-player.x,dz=ap.z-player.z,d=Math.hypot(dx,dz),k=d>max?max/d:1;return{x:player.x+dx*k,z:player.z+dz*k}}return{x:player.x+Math.sin(player.face)*fallback,z:player.z+Math.cos(player.face)*fallback}}
@@ -2060,7 +2503,7 @@ function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use
 function die(){
   if(cons('mur')>=10&&L.mode==='dungeon'&&!L.revived){L.revived=true;player.hp=player.maxhp*.5;player.iT=2;bigText('RENASCIDO',1200);sfx('arise');toast('<b>[CONSTELAÇÃO]</b> Muralha: você se levantou.');return}
   /* PROGRESSÃO CONTÍNUA (decisão do Ian): morrer custa ouro e XP; personagem, itens, trabalhos e rank ficam. */
-  const redBroken=failRedPortalOnDeath();expAbandon();player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
+  const redBroken=failRedPortalOnDeath();expAbandon();player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;narratorDeath105();store.set('pds2_profile',profile);
   const rk=RANKS[profile.rank];
   $('deadtxt').innerHTML='<b>[NARRADOR]</b> Você caiu no nível '+run.level+'. Perdeu <b class="gold">'+fmt(lostG)+' de ouro</b> e metade da XP do nível atual.<br>Seu personagem, itens, trabalhos e o <b style="color:'+rk.c+'">rank '+rkN(profile.rank)+'</b> continuam. Mortes: '+profile.deaths+'.'+(redBroken?'<br><b>O portal vermelho rompeu.</b> Monstros escaparam para o mundo; essa entrada foi perdida.':'');
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
@@ -2206,7 +2649,7 @@ function frame(now){
   if(L.lampT>0&&L.lampL&&player){L.lampT-=dt;L.lampL.position.set(player.x,3,player.z);if(L.lampT<=0||L.mode!=='dungeon'){scene.remove(L.lampL);L.lampL=null;L.lampT=0;if(L.mode==='dungeon'){scene.fog.density=.07;toast('<b>[NARRADOR]</b> O Lampião apagou.')}}}
   if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
-  time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0){rareUpdate103(dt);update(dt);updateReadySounds();tutorialTick93(dt)}
+  time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0){rareUpdate103(dt);update(dt);narratorUpdate105(dt);updateReadySounds();tutorialTick93(dt)}
   camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
 }
 let tcA=0;function titleCam(dt){tcA+=dt*.06;camera.position.set(Math.sin(tcA)*46,24,Math.cos(tcA)*46);camera.lookAt(0,2,0);if(L.crystal)L.crystal.rotation.y+=dt}
@@ -2625,7 +3068,7 @@ function canArise(){return !!CLASSES[profile.cls].arise||ownsRare(7)||profile.ra
 function completeTier(){run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
   bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[NARRADOR]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% no bônus somado (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}
 function completeJob(){
-  if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);rememberClassCooldowns();player.skills=pSkills();showG();store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
+  if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);narratorEvent105('rank',{rank:r});rememberClassCooldowns();player.skills=pSkills();showG();store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
     toast('<b>[ORDEM]</b> Prova concluída: você agora é <b style="color:'+RANKS[r].c+'">rank '+RANKS[r].id+'</b>. '+(r===9?'Você superou SS+ e alcançou Arconte.':'<b>Uma nova escolha de combate</b> disponível em Prova de Rank. Veja também seus espaços de habilidades.'),8000);setTimeout(()=>storyAct(r),2500);saveRun();return}
   if(L.tierTrial){L.tierTrial=false;completeTier();return}
   const A=ADV[profile.cls];run.adv=true;player.skills[3]={...A.sk,sourceClass:profile.cls,cdT:0};refreshStats();player.hp=player.maxhp;
@@ -2840,7 +3283,7 @@ function journeyObjectives(){const list=[],nx=profile.rank+1;const first=firstEq
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
-function journeyView(tab='goals'){view=()=>journeyView(tab);let h=row('Segundo Despertar','A fissura que permaneceu · caminhos e afinidades.',btn('Abrir jornada','awakening',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h=row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+row('Segundo Despertar','A fissura que permaneceu · caminhos e afinidades.',btn('Abrir jornada','awakening',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){if(profile.firstEquipment92?.done)h+=row('Seu primeiro equipamento · concluído','Você conquistou ouro, comprou uma peça e aprendeu a equipá-la.','✓');h+='<div class="sysline">Acompanhe um objetivo no painel do personagem. Histórias iniciadas na Ordem e missões continuam registradas aqui; as recompensas são recebidas com Lyra.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
@@ -3486,7 +3929,7 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return characterView('sta
     h+=row('Mapa do tesouro',run.tmap?'Um X marcado no seu mapa':'Compre com Dorian no Mercado','');
     h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
   openModal(tab==='world'?'MUNDO':'PERSONAGEM',h)}
-function extraActions3(a,v){const rareAction=rareActions103(a,v);if(rareAction)return rareAction;
+function extraActions3(a,v){if(a==='narrator105'){narratorView105();return true}const rareAction=rareActions103(a,v);if(rareAction)return rareAction;
  if(a==='character'){characterView(v);return 'close0'}
  if(a==='resetattributes'){redistributeAttributes();statusView();return 'close0'}
  if(a==='armorpart'){if(EQUIP_SLOTS.includes(v)&&v!=='w'){L.armorSlot=v;openShop('arm')}return 'close0'}
@@ -3766,7 +4209,7 @@ function transmigratorBonus(){return .10*Math.max(0,Math.min(10,profile.transmig
 function improveTransmigrator(){const lv=profile.transmigratorLv||0;if(lv>=10||(run.spts||0)<1)return false;run.spts--;profile.transmigratorLv=lv+1;saveRun();passivesView();return true}
 function transmigratorRow(){const lv=profile.transmigratorLv||0;return '<div class="sec">ORIGEM</div>'+row('Transmigrador · NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões. XP de missões não muda.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>')}
 function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
-  movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input aria-label="Tamanho dos botões" type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
+  narratorSettings105()+movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input aria-label="Tamanho dos botões" type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
 $('bCfg').addEventListener('click',cfgView);applyCfg();
@@ -3863,11 +4306,83 @@ function startGame(){
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in keys)keys[k]=false;input.x=input.z=0;saveRun()}});
 addEventListener('pagehide',()=>{if(started)saveRun()});
 setInterval(()=>{if(started&&!paused)saveRun()},15000);
+/* Narrador pessoal: fatos locais, nenhuma chamada de IA. */
+function narratorMemory105(){
+ if(!profile)return null;
+ if(!profile.narrator105||profile.narrator105.v!==1)profile.narrator105={v:1,seed:Math.floor(Math.random()*2147483646)+1,clock:0,counts:{},seen:{},last:{},recent:[],facts:[],failed:{},regions:[],skills:[],dominant:null,lastSpoke:-120,sequence:0};
+ return profile.narrator105;
+}
+function narratorTone105(m){const n=k=>m.recent.filter(x=>x===k).length;
+ if(n('death')+n('narrow')>=3)return 'careful';
+ if(n('support')>=3||n('returnwin')>=2)return 'warm';
+ if(n('hard')>=3||n('trial')>=3)return 'warm';
+ return CFG.narratorTease105===true&&m.recent.length>=12?'playful':'calm';
+}
+function narratorEvent105(kind,data={}){
+ if(!profile||!NR_LINES105[kind])return;const m=narratorMemory105();
+ const gap={support:20,necro:30,time:30,shift:120,city:180,explore:90}[kind]||0;
+ if(m.last['event:'+kind]!==undefined&&m.clock-m.last['event:'+kind]<gap)return;
+ m.last['event:'+kind]=m.clock;m.counts[kind]=Math.min(1000000,(m.counts[kind]||0)+1);m.sequence++;
+ m.recent.push(kind);m.recent=m.recent.slice(-64);
+ m.facts.push({kind,rank:Number.isInteger(data.rank)?data.rank:null,at:Math.floor(m.clock)});m.facts=m.facts.slice(-24);
+ if(CFG.narrator105==='off')return;
+ if(kind==='awakening'&&Object.keys(m.seen).some(k=>k.startsWith('awakening:')))return;
+ const priority={awakening:100,rank:95,returnwin:90,death:85,fissure:80,narrow:75,hard:70,trial:65,support:50,shift:50,veteran:45}[kind]||30;
+ if(kind==='death')NR105.queue=[];
+ NR105.queue=NR105.queue.filter(e=>e.kind!==kind);
+ NR105.queue.push({kind,data,priority,at:m.clock,expires:m.clock+(priority>=80?180:60)});
+ NR105.queue.sort((a,b)=>b.priority-a.priority||b.at-a.at);NR105.queue=NR105.queue.slice(0,4);
+}
+function narratorChoose105(event,m){const bank=NR_LINES105[event.kind],tone=narratorTone105(m),once=event.kind==='awakening';
+ const allowed=bank.map((text,i)=>({text,id:event.kind+':'+i,tone:event.kind==='death'?'careful':i>=15?'playful':i>=10?'warm':i<5?'careful':'calm'})).filter(l=>l.tone!=='playful'||CFG.narratorTease105===true);
+ let pool=allowed.filter(l=>m.seen[l.id]===undefined);
+ if(!pool.length&&!once)pool=allowed.filter(l=>m.clock-m.seen[l.id]>=3600);
+ if(!pool.length)return null;
+ const matched=pool.filter(l=>l.tone===tone);if(matched.length)pool=matched;
+ const h=(Math.imul(m.seed|0,1664525)+Math.imul(m.sequence|0,1013904223))>>>0;return pool[h%pool.length];
+}
+function narratorSkill105(sk){if(!profile||!Number.isInteger(sk.sourceClass)||!nearestEnemy(player.x,player.z,18))return;const m=narratorMemory105();m.skills.push(sk.sourceClass);m.skills=m.skills.slice(-24);if(m.skills.length<24)return;
+ const scores={};for(const c of m.skills)scores[c]=(scores[c]||0)+1;const best=Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];if(scores[best]<16)return;
+ if(m.dominant!==null&&m.dominant!==+best)narratorEvent105('shift');m.dominant=+best;
+}
+function narratorPortal105(g,cleared){if(!g||g.narratorExit105)return;g.narratorExit105=true;const m=narratorMemory105();if(!m)return;
+ if(!cleared){if(!player.dead&&!g.coreFailed103&&!g.deathBreak103)narratorEvent105('retreat',{rank:g.rank});return}
+ m.clears=(m.clears||0)+1;
+ const kind=m.failed[g.rank]?'returnwin':player.hp/player.maxhp<.25?'narrow':g.rank>profile.rank?'hard':'victory';narratorEvent105(kind,{rank:g.rank});if(kind==='returnwin')delete m.failed[g.rank];
+ if(m.clears>=20&&m.clears%10===0)narratorEvent105('veteran');
+}
+function narratorEnter105(g){g.narratorExit105=false;const m=narratorMemory105();const key=[g.id,g.seed].join(':');if(m.entry===key)return;m.entry=key;
+ if(g.red)narratorEvent105('red',{rank:g.rank,gate:key});else if(g.rank>profile.rank)narratorEvent105('higher',{rank:g.rank,gate:key});
+}
+function narratorDeath105(){const m=narratorMemory105();const g=L.special?L.gate?.ref:L.gate;if(L.mode==='dungeon'&&g&&Number.isInteger(g.rank))m.failed[g.rank]=Math.min(999,(m.failed[g.rank]||0)+1);narratorEvent105('death',{rank:g?.rank})}
+function narratorContext105(e){if(['red','higher'].includes(e.kind))return L.mode==='dungeon'&&L.gate&&[L.gate.id,L.gate.seed].join(':')===e.data.gate;if(e.kind==='city')return !!inCity(player.x,player.z);if(e.kind==='explore')return L.mode==='world'&&!inCity(player.x,player.z);if(e.kind==='narrow')return player.hp/player.maxhp<.5;if(e.kind==='fissure')return !!profile.awakening103?.pending;return true}
+function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.dead)return;const m=narratorMemory105();m.clock+=Math.max(0,Math.min(dt,1));NR105.quietFor=Math.max(0,NR105.quietFor-dt);NR105.tick=(NR105.tick||0)+dt;if(NR105.tick<1)return;NR105.tick=0;
+ if(L.mode==='world'){
+ const city=inCity(player.x,player.z),key=city?String(nearestCity(player.x,player.z).c.id):null;
+ if(key&&key!==NR105.city)narratorEvent105('city');NR105.city=key;
+ if(!city){const cell=Math.floor(player.x/400)+','+Math.floor(player.z/400);if(!m.regions.includes(cell)&&m.regions.length<256){m.regions.push(cell);if(m.regions.length>1)narratorEvent105('explore')}}
+ }else NR105.city=null;
+ NR105.queue=NR105.queue.filter(e=>e.expires>=m.clock&&narratorContext105(e));
+ if(CFG.narrator105==='off'){NR105.queue=[];return}
+ const interval=CFG.narrator105==='quiet'?150:CFG.narrator105==='chatty'?45:90;
+ if(modalOpen||NR105.quietFor>0||m.clock-m.lastSpoke<interval||nearestEnemy(player.x,player.z,18)||AR103.trial)return;
+ for(let i=0;i<NR105.queue.length;i++){const e=NR105.queue[i];if(m.clock-e.at<6||m.clock-(m.last['said:'+e.kind]??-1000)<600)continue;const line=narratorChoose105(e,m);if(!line)continue;
+ m.seen[line.id]=m.clock;m.last['said:'+e.kind]=m.clock;m.lastSpoke=m.clock;NR105.queue.splice(i,1);
+ logNews('<b>[NARRADOR]</b> '+line.text,'narratorPersonal105');return;
+ }
+}
+function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105">Frequência de comentários pessoais</label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label><div class="sysline">Comentários em texto no histórico, nos momentos de respiro. Avisos de perigo, regras e objetivos continuam ativos. As memórias acompanham o save; nenhuma IA ou serviço externo recebe sua jornada.</div>'+btn('Ver lembranças','narrator105',0,!!m)}
+function narratorView105(){const m=narratorMemory105();if(!m)return;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa. Memórias começaram a ser registradas com esta atualização.</p></div>';
+ h+=row('Experiências compartilhadas','Fendas concluídas: '+(m.clears||0)+' · Quedas acompanhadas: '+(m.counts.death||0)+' · Falas diferentes ouvidas: '+Object.keys(m.seen).length+'.','');
+ const names={victory:'Fenda concluída',hard:'Vitória acima do seu rank',narrow:'Volta com pouca vida',retreat:'Expedição interrompida',death:'Queda',returnwin:'Vitória em rank de Fenda com derrota anterior',higher:'Entrada acima do seu rank',red:'Entrada em portal vermelho',explore:'Novo trecho explorado',city:'Chegada à cidade',support:'Cura de aliado ferido',necro:'Eco especial convocado',time:'Retorno à âncora temporal',fenda:'Portal superior criado',fissure:'Fissura persistente descoberta',trial:'Investigação concluída',awakening:'Segundo Despertar concluído',rank:'Promoção pela prova',shift:'Mudança no uso de classes',veteran:'Marco de expedições concluídas'};
+ for(const f of m.facts.slice(-12).reverse())h+=row(names[f.kind]||'Experiência',f.rank!==null&&RANKS[f.rank]?'Rank da experiência: '+RANKS[f.rank].id:'Registrado durante sua jornada.','');openModal('O NARRADOR E VOCÊ',h)}
+
+function setNarrator105(value){if(!["off","quiet","normal","chatty"].includes(value))return;CFG.narrator105=value;if(value==="off")NR105.queue=[];applyCfg()}
 let AR103={};
 function awakening103(){const a=profile.awakening103||(profile.awakening103={});a.points=a.points&&typeof a.points==='object'?a.points:{};a.unlocked=Array.isArray(a.unlocked)?a.unlocked.filter(i=>[7,12,13].includes(i)):[];a.energy=Math.max(0,Number(a.energy)||0);a.total=Math.max(0,Number(a.total)||0);a.essences=Array.isArray(a.essences)?a.essences.slice(-20):[];return a}
 function rareActive103(ci){return !!player&&player.skills.some(s=>!s.empty&&s.sourceClass===ci&&s.rare103)}
 function affinity103(ci){return awakening103().affinity===ci&&rareActive103(ci)?2:1}
-function rareOnPortal103(g){if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id)};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Investigue no local ou acompanhe pelo Diário.',7000);store.set('pds2_profile',profile)}
+function rareOnPortal103(g){if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id)};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Investigue no local ou acompanhe pelo Diário.',7000);store.set('pds2_profile',profile)}
 function isTwiceAwakened103(){return awakening103().total>=3}
 function rareEligible103(ci){const a=awakening103();return [7,12,13].includes(ci)&&a.total>=3&&(a.points[ci]||0)>0&&!a.unlocked.includes(ci)}
 function rareLearn103(ci){if(!rareEligible103(ci)||!canRedistribute())return false;const a=awakening103();a.unlocked.push(ci);profile.jobs=[...new Set([...jobsOf(),ci])];store.set('pds2_profile',profile);saveRun();return true}
@@ -3880,24 +4395,24 @@ function awakeningView103(){view=awakeningView103;const a=awakening103();let h='
  h+='<div class="sysline">Cada investigação concluída desenvolve o caminho escolhido. A afinidade principal pode ser escolhida entre os caminhos mais desenvolvidos. Para mudar depois, conclua mais três investigações e desenvolva o novo caminho até ele estar entre suas maiores afinidades. Não perde nenhuma classe. Aprendizado e escolha de afinidade são feitos na cidade. Ecos e habilidades antigos permanecem disponíveis.</div>';openModal('SEGUNDO DESPERTAR',h)}
 function inspectFissure103(){const a=awakening103(),p=a.pending;if(!p||L.mode!=='world'||Math.hypot(player.x-p.x,player.z-p.z)>5||AR103.trial)return;let h='<div class="guide93"><strong>A PASSAGEM AINDA RESPONDE</strong><p>O eco tenta permanecer, o instante do colapso se repete e as bordas da fissura se afastam. Você consegue sustentar uma dessas manifestações.</p><p>Permaneça a até 8 m durante 12s e derrote as três manifestações hostis. Sair da área interrompe a tentativa; o vestígio permanece para tentar novamente.</p></div>';for(const c of RARE103.filter(c=>c.ready))h+=row(c.choice,'Desenvolve afinidade com '+c.n+'.',btn('Sustentar','awtrial',c.id));openModal('FISSURA PERSISTENTE',h)}
 function startTrial103(ci){const a=awakening103(),p=a.pending;if(!p||![7,12,13].includes(ci)||L.mode!=='world'||player.dead||Math.hypot(player.x-p.x,player.z-p.z)>5||AR103.trial)return false;const spots=[];for(let i=0;i<3;i++){const ang=i*Math.PI*2/3,x=p.x+Math.sin(ang)*6,z=p.z+Math.cos(ang)*6;if(!freeAt(x,z,.6)){toast('Não há espaço para sustentar a manifestação aqui. Tente se aproximar pelo outro lado.');return false}spots.push({x,z})}closeModal();AR103.trial={ci,x:p.x,z:p.z,t:0,targets:spots.map(s=>spawnKind(kindsFor(p.rank)[0].k,s.x,s.z,p.rank,{aggro:true,noExpLoot:true,aw103:true}))};fxRing(p.x,p.z,0xc2a2ff,8,12);if(ci===7){const helper=spawnShadow({n:'Vestígio Guardião'},p.x,p.z);helper.awTrial=true;AR103.trial.helper=helper}else if(ci===12)AR103.zone={x:p.x,z:p.z,r:8,until:time+12};else for(const e of AR103.trial.targets){e.slow=4;e.hp*=.8;e.maxhp=e.hp}return true}
-function finishTrial103(success){const t=AR103.trial;if(!t)return;for(const e of t.targets){e.dead=true;e.gone=true;if(e.m)scene.remove(e.m.root)}if(t.helper){t.helper.dead=true;scene.remove(t.helper.m.root)}AR103.trial=null;if(!success){toast('A fissura permanece. Você pode investigar novamente quando estiver pronto.');return}const a=awakening103();if(!a.pending)return;a.pending=null;a.total++;a.points[t.ci]=(a.points[t.ci]||0)+1;store.set('pds2_profile',profile);saveRun();toast('<b>[DESPERTAR]</b> Você sustentou a manifestação. Afinidade com '+CLASSES[t.ci].n+' +1.'+(a.total===3?' Volte à cidade e abra Diário → Segundo Despertar para aprender seus caminhos.':''),7000)}
+function finishTrial103(success){const t=AR103.trial;if(!t)return;for(const e of t.targets){e.dead=true;e.gone=true;if(e.m)scene.remove(e.m.root)}if(t.helper){t.helper.dead=true;scene.remove(t.helper.m.root)}AR103.trial=null;if(!success){toast('A fissura permanece. Você pode investigar novamente quando estiver pronto.');return}const a=awakening103();if(!a.pending)return;a.pending=null;a.total++;a.points[t.ci]=(a.points[t.ci]||0)+1;narratorEvent105(a.total===3?'awakening':'trial');store.set('pds2_profile',profile);saveRun();toast('<b>[DESPERTAR]</b> Você sustentou a manifestação. Afinidade com '+CLASSES[t.ci].n+' +1.'+(a.total===3?' Volte à cidade e abra Diário → Segundo Despertar para aprender seus caminhos.':''),7000)}
 function rememberVestige103(e){if(!e.noExpLoot&&!e.rival&&!e.statue&&e.kind&&(e.elite||e.isBoss)&&awakening103().unlocked.includes(7))AR103.corpse={x:e.x,z:e.z,until:time+30,n:e.name,kind:e.kind,role:e.ai==='ranged'||e.ai==='wraith'?'arqueiro':e.shield?'tanque':'atacante'}}
 function specialEcos103(){return allies.filter(a=>a.rareEcho103&&!a.dead)}
-function spawnRareEcho103(rec){const a=spawnShadow({n:rec.n},player.x+1,player.z+1);a.rareEcho103=true;a.role=rec.role;a.ranged=rec.role==='arqueiro';a.range=a.ranged?9:2.2;a.col=0xb98cff;return a}
+function spawnRareEcho103(rec){const a=spawnShadow({n:rec.n},player.x+1,player.z+1);a.rareEcho103=true;a.role=rec.role;a.ranged=rec.role==='arqueiro';a.range=a.ranged?9:2.2;a.col=0xb98cff;narratorEvent105('necro');return a}
 function rareMana103(sk){return sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time?0:sk.mp}
 function rareCastCheck103(sk){if(AR103.region!==L)AR103={region:L,reserve:0};const P=player,a=awakening103();if(!sk.rare103)return '';if(!a.unlocked.includes(sk.sourceClass))return 'Classe rara ainda não aprendida.';switch(sk.t){case 'rare_echo':if(specialEcos103().length>=affinity103(7))return 'Limite de ecos especiais atingido.';if(!(AR103.corpse&&AR103.corpse.until>time&&Math.hypot(P.x-AR103.corpse.x,P.z-AR103.corpse.z)<=10)&&!a.essences.length)return 'Derrote um inimigo de elite e use perto do vestígio.';break;case 'rare_order':case 'rare_pact':if(!allies.some(x=>!x.dead&&x.shadow))return 'Você precisa de um eco vivo.';if(sk.t==='rare_pact'&&P.hp<=P.maxhp*.1)return 'Vida insuficiente para o pacto.';break;case 'rare_anchor':if(AR103.anchor&&AR103.anchor.until>time&&(!freeAt(AR103.anchor.x,AR103.anchor.z,P.r)||!los(P.x,P.z,AR103.anchor.x,AR103.anchor.z)))return 'O caminho de retorno está bloqueado.';break;case 'rare_reprise':if(!AR103.lastAttack)return 'Use primeiro uma habilidade ofensiva compatível nesta região.';break;case 'rare_passage':{const pt=skillGroundPoint(8);if(!freeAt(pt.x,pt.z,.6)||!los(P.x,P.z,pt.x,pt.z)||Math.hypot(P.x-pt.x,P.z-pt.z)<2)return 'Escolha um ponto livre e visível, de 2 a 8 m.';break}case 'rare_gate':if(L.mode!=='world'||inCity(P.x,P.z)||nearestEnemy(P.x,P.z,20))return 'Abra a Fenda fora da cidade e de combate.';if(profile.rank>=8)return 'Você já alcançou o teto dos portais comuns. ★ exige sua própria jornada.';if(a.energy<3)return 'Você precisa de 3 energias de Fenda.';break}return ''}
 function rareSkillRun103(sk){const P=player,a=awakening103(),dmg=skillDamage(sk);switch(sk.t){
  case 'rare_echo':{let rec=a.essences.at(-1);if(AR103.corpse&&AR103.corpse.until>time&&Math.hypot(P.x-AR103.corpse.x,P.z-AR103.corpse.z)<=10){rec={n:AR103.corpse.n,kind:AR103.corpse.kind,role:AR103.corpse.role};if(!a.essences.some(r=>r.kind===rec.kind)){a.essences.push(rec);a.essences=a.essences.slice(-20)}AR103.corpse=null}if(rec)spawnRareEcho103(rec);saveRun();break}
  case 'rare_order':{const pt=skillGroundPoint(),target=nearestEnemy(pt.x,pt.z,5);for(const al of allies.filter(x=>x.shadow&&!x.dead)){al.rareOrder103={x:pt.x,z:pt.z,target,until:time+8};if(al.rareEcho103){if(al.role==='tanque'){al.fortressUntil=time+4;for(const e of enemies)if(!e.dead&&Math.hypot(e.x-al.x,e.z-al.z)<4)hurtEnemy(e,dmg*.6,al.x,al.z,{kb:4,stun:.3})}else if(target){if(al.ranged)shoot(al.x,al.z,Math.atan2(target.x-al.x,target.z-al.z),25,dmg,'player',0xb98cff,'soul',{fromPlayer:false});else if(Math.hypot(target.x-al.x,target.z-al.z)<4)hurtEnemy(target,dmg,al.x,al.z,{kb:1})}}}break}
  case 'rare_pact':P.hp-=P.maxhp*.1;for(const al of allies)if(al.shadow&&!al.dead){if(!hasAff('nocure'))al.hp=Math.min(al.maxhp,al.hp+al.maxhp*.35);al.buffT=8;fxRing(al.x,al.z,sk.col,1.5)}break;
- case 'rare_anchor':if(AR103.anchor&&AR103.anchor.until>time){const m=AR103.anchor;if(!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+Math.max(0,m.hp-P.hp)*.5);P.x=m.x;P.z=m.z;AR103.anchor=null;fxRing(P.x,P.z,sk.col,2)}else{const extra=Math.min(AR103.reserve||0,3*affinity103(12));AR103.reserve=Math.max(0,(AR103.reserve||0)-extra);AR103.anchor={x:P.x,z:P.z,hp:P.hp,until:time+3+extra};fxRing(P.x,P.z,sk.col,2,3+extra)}break;
+ case 'rare_anchor':if(AR103.anchor&&AR103.anchor.until>time){const m=AR103.anchor;if(!hasAff('nocure'))P.hp=Math.min(P.maxhp,P.hp+Math.max(0,m.hp-P.hp)*.5);P.x=m.x;P.z=m.z;AR103.anchor=null;narratorEvent105('time');fxRing(P.x,P.z,sk.col,2)}else{const extra=Math.min(AR103.reserve||0,3*affinity103(12));AR103.reserve=Math.max(0,(AR103.reserve||0)-extra);AR103.anchor={x:P.x,z:P.z,hp:P.hp,until:time+3+extra};fxRing(P.x,P.z,sk.col,2,3+extra)}break;
  case 'rare_dilate':{const pt=skillGroundPoint(),extra=Math.min(AR103.reserve||0,3*affinity103(12));AR103.reserve=Math.max(0,(AR103.reserve||0)-extra);AR103.zone={x:pt.x,z:pt.z,r:5,until:time+3+extra};fxRing(pt.x,pt.z,sk.col,5,3+extra);break}
  case 'rare_reprise':{const replay={...AR103.lastAttack,pow:AR103.lastAttack.pow*.6,repeat103:true};runSkill(replay);break}
  case 'rare_passage':{const pt=skillGroundPoint(8);AR103.passages={a:{x:P.x,z:P.z},b:pt,until:time+8};for(const pt0 of [AR103.passages.a,pt])fxRing(pt0.x,pt0.z,sk.col,1.2,8);break}
  case 'rare_cut':{const dx=Math.sin(P.face),dz=Math.cos(P.face),cx=P.x+dx*5,cz=P.z+dz*5;waveFwd(P.x,P.z,P.face,sk.col,10,2);for(const e of enemies){const ex=e.x-P.x,ez=e.z-P.z,along=ex*dx+ez*dz;if(!e.dead&&along>=0&&along<=10+e.r&&Math.abs(ex*dz-ez*dx)<1.5+e.r){const hit=hurtEnemy(e,dmg,P.x,P.z,{fromPlayer:true,skillHit:true,kb:0,stun:0});if(hit>0&&!e.dead&&!e.isBoss&&los(e.x,e.z,cx,cz))moveEnt(e,(cx-e.x)*.35,(cz-e.z)*.35)}}break}
  }sfx('skill')}
 function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,GR[r].th.n+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
-function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk||sk.cdT>0||rareCastCheck103(sk)||!Number.isInteger(n)||n<1||n>affinity103(13)||profile.rank+n>8||awakening103().energy<n*3)return false;let pt=null;for(let i=0;i<12;i++){const ang=i*Math.PI/6,x=player.x+Math.sin(ang)*7,z=player.z+Math.cos(ang)*7;if(worldFree(x,z,3)&&!inCity(x,z)&&gates.every(g=>g.dead||Math.hypot(g.x-x,g.z-z)>7)){pt={x,z};break}}if(!pt){toast('Não há espaço livre para o portal. Procure uma área aberta.');return false}const g=newGate();Object.assign(g,{...pt,rank:profile.rank+n,aff:[],red:false,double:false,secret:false,inverse:false,time:false,life:900,custom:true,rareCreated103:true});awakening103().energy-=n*3;gates.push(g);gateMesh(g);sk.cdT=sk.cdMax=skillCooldown(sk);saveRun();closeModal();toast('Fenda rank '+GR[g.rank].id+' aberta.');return true}
+function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk||sk.cdT>0||rareCastCheck103(sk)||!Number.isInteger(n)||n<1||n>affinity103(13)||profile.rank+n>8||awakening103().energy<n*3)return false;let pt=null;for(let i=0;i<12;i++){const ang=i*Math.PI/6,x=player.x+Math.sin(ang)*7,z=player.z+Math.cos(ang)*7;if(worldFree(x,z,3)&&!inCity(x,z)&&gates.every(g=>g.dead||Math.hypot(g.x-x,g.z-z)>7)){pt={x,z};break}}if(!pt){toast('Não há espaço livre para o portal. Procure uma área aberta.');return false}const g=newGate();Object.assign(g,{...pt,rank:profile.rank+n,aff:[],red:false,double:false,secret:false,inverse:false,time:false,life:900,custom:true,rareCreated103:true});awakening103().energy-=n*3;gates.push(g);gateMesh(g);narratorEvent105('fenda',{rank:g.rank});sk.cdT=sk.cdMax=skillCooldown(sk);saveRun();closeModal();toast('Fenda rank '+GR[g.rank].id+' aberta.');return true}
 function rareAreaTime103(x,z,boss=false){const z0=AR103.zone;return z0&&z0.until>time&&Math.hypot(x-z0.x,z-z0.z)<=z0.r?(boss?.8:.5):1}
 function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;const hud103=document.getElementById('rare-status103');if(hud103)hud103.textContent=rareHud103();if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
  if(!rareActive103(13))AR103.passages=null;const cap=rareActive103(7)?affinity103(7):0;for(const al of specialEcos103().slice(cap)){al.dead=true;scene.remove(al.m.root)}
