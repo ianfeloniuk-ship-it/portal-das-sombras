@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/../game.html','utf8');
 const base=fs.readFileSync(__dirname+'/verify-v95.cjs','utf8');eval(base.slice(base.indexOf('function extract('),base.indexOf('const notes=')));
-const c={narratorEvent105(){},player:{},time:10,run:{skl:{}},hasAff:()=>false,fmt:Math.round,floater(){},fxRing(){},sfx(){},shake(){},gearRuneCount:()=>0,pb:()=>0,hasT:()=>false,curAtk:null,flashMats(){},setTimeout(){},$:()=>({style:{}}),die(){throw Error('Unexpected death')}};vm.createContext(c);
+const c={narratorEvent105(){},player:{},time:10,run:{skl:{}},hasAff:()=>false,fmt:Math.round,floater(){},fxRing(){},sfx(){},shake(){},gearRuneCount:()=>0,pb:()=>0,hasT:()=>false,curAtk:null,flashMats(){},setTimeout(){},$:()=>({style:{}}),die(){throw Error('Unexpected death')}};c.guardianDamage108=(a,n)=>n;vm.createContext(c);
 for(const n of ['healerLevel','healingFraction','healingShieldCap','healingShield','absorbHealingShield','applyHealingLight','allyProtection','hurtAlly','hurtPlayer'])vm.runInContext(extract(n),c);
 const sk={n:'Luz Curativa',pow:.35},unit=()=>({hp:100,maxhp:100,x:0,z:0,def:0,shield:30,maxsh:30,slowT:2,bleedT:3,bleedD:8});
 let a=unit();a.hp=10;c.applyHealingLight(a,sk);assert.equal(a.hp,60);assert.equal(c.healingShield(a),0);assert.equal(a.slowT,0);assert.equal(a.bleedT,0);assert.equal(a.bleedD,0);
@@ -10,5 +10,5 @@ c.run.skl[sk.n]=10;c.applyHealingLight(a,sk);assert.equal(c.healingShield(a),40)
 c.hasAff=()=>true;a=unit();a.hp=20;c.applyHealingLight(a,sk);assert.equal(a.hp,20);assert.equal(a.bleedT,3);assert.equal(c.healingShield(a),0);c.hasAff=()=>false;a.dead=true;c.applyHealingLight(a,sk);assert.equal(a.hp,20);
 c.player=unit();c.applyHealingLight(c.player,sk);c.hurtPlayer(25);assert.equal(c.player.hp,100);assert.equal(c.player.shield,30);assert.equal(c.healingShield(c.player),15);c.hurtPlayer(30);assert.equal(c.player.shield,15);assert.equal(c.player.hp,100);c.hurtPlayer(20);assert.equal(c.player.hp,95);assert.equal(c.player.shield,0);
 a=unit();c.applyHealingLight(a,sk);a.blessingUntil=30;c.hurtAlly(a,100);assert.equal(a.hp,70);assert.equal(c.healingShield(a),0);
-assert(extract('skillUpgradeText').includes('+2 pontos percentuais'));assert(src.includes('P.hp-=absorbHealingShield(P,P.bleedD*dt)'));assert(!extract('saveRun').includes('healShield'));
+assert(extract('skillUpgradeText').includes('+2 pontos percentuais'));assert(src.includes('P.hp-=guardianDamage108(P,absorbHealingShield(P,P.bleedD*dt))'));assert(!extract('saveRun').includes('healShield'));
 console.log('PASS 50% base heal, cleansing, overheal caps 20→40%, no stacking, absorption and residual damage, 6s expiry/refresh, separate equipment shield, dead/no-cure exclusions, player and ally combat paths, bleeding shield path, upgrade description and runtime-only shield');
