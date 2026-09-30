@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/../game.html','utf8');
 const base=fs.readFileSync(__dirname+'/verify-v95.cjs','utf8');eval(base.slice(base.indexOf('function extract('),base.indexOf('const notes=')));
-const c={time:10,run:{skl:{}},hasAff:()=>false,fmt:Math.round,floater(){},fxRing(){},sfx(){},shake(){},gearRuneCount:()=>0,pb:()=>0,hasT:()=>false,curAtk:null,flashMats(){},setTimeout(){},$:()=>({style:{}}),die(){throw Error('Unexpected death')}};vm.createContext(c);
+const c={narratorEvent105(){},player:{},time:10,run:{skl:{}},hasAff:()=>false,fmt:Math.round,floater(){},fxRing(){},sfx(){},shake(){},gearRuneCount:()=>0,pb:()=>0,hasT:()=>false,curAtk:null,flashMats(){},setTimeout(){},$:()=>({style:{}}),die(){throw Error('Unexpected death')}};vm.createContext(c);
 for(const n of ['healerLevel','healingFraction','healingShieldCap','healingShield','absorbHealingShield','applyHealingLight','allyProtection','hurtAlly','hurtPlayer'])vm.runInContext(extract(n),c);
 const sk={n:'Luz Curativa',pow:.35},unit=()=>({hp:100,maxhp:100,x:0,z:0,def:0,shield:30,maxsh:30,slowT:2,bleedT:3,bleedD:8});
 let a=unit();a.hp=10;c.applyHealingLight(a,sk);assert.equal(a.hp,60);assert.equal(c.healingShield(a),0);assert.equal(a.slowT,0);assert.equal(a.bleedT,0);assert.equal(a.bleedD,0);
