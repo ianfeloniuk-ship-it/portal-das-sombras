@@ -614,3 +614,6 @@ Publicação autorizada diretamente por Ian nesta conversa: “pode aprovar”. 
 
 ## 2026-09-30 — v125: cristais por rank
 Publicação autorizada por Ian. Veios existentes usam GLB próprio gerado por TripoSR, reduzido a 8.000 triângulos, com pedra e mineral separados. Mineral, partículas e identificação seguem as dez cores RANKS. Carregamento compartilhado, fallback procedural e proteção contra recompensa repetida após esgotamento. Layout, chances e economia preservados. Fonte tools/crystals125.js sincronizada pelo build. Testes verify-crystals125, ecology124 e v118 aprovados; fixture privada no navegador validou mineração nos dez ranks e aparência na dungeon. Fixture não publicada.
+
+## v126 — colisão dos cristais
+Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do ator; movimento respeita veios ativos e atores sobrepostos são deslocados ao espaço livre mais próximo, respeitando paredes e outros veios. Esgotamento libera passagem. Teste verify-crystal-collision126 cobre surgimento central, três portes, travessia, esgotamento e veios vizinhos; regressões crystals125/v118 aprovadas.

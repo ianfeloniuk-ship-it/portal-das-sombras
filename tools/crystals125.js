@@ -28,3 +28,14 @@ function attachCrystal125(group,rank){
  model.traverse(o=>{if(o.isMesh)o.material=crystalMaterial125(rank,o.userData.mineral125)});
  group.add(model);group.userData.rankCrystal125=true;group.userData.rank125=crystalRank125(rank);return true;
 }
+
+// Solid footprint covers the 1.30 x 1.99m base, including actor radius.
+function crystalFree126(x,z,r){return !(L.inter||[]).some(it=>it.type==='vein'&&!it.hidden&&Math.hypot(x-it.x,z-it.z)<1.2+r)}
+function crystalUnstuck126(e){
+ const r=e.r||.5;if(crystalFree126(e.x,e.z,r))return;
+ const x=e.x,z=e.z;
+ for(let d=.25;d<=8;d+=.25)for(let i=0;i<32;i++){
+  const a=i*Math.PI/16,nx=x+Math.cos(a)*d,nz=z+Math.sin(a)*d;
+  if(freeAt(nx,nz,r)){e.x=nx;e.z=nz;return}
+ }
+}

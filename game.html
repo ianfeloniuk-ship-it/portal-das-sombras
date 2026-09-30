@@ -3523,8 +3523,8 @@ function worldFree(x,z,r){let ok=true;hnear(HASH,x,z,c=>{if(Math.hypot(x-c.x,z-c
 function pushOut(e){const r=e.r||.5;hnear(HASH,e.x,e.z,c=>{const dx=e.x-c.x,dz=e.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m&&d>0){e.x=c.x+dx/d*m;e.z=c.z+dz/d*m}})}
 function cellIdx(x,z){const G=L.grid;const cx=Math.floor((x-G.ox)/G.CS),cz=Math.floor((z-G.oz)/G.CS);if(cx<0||cz<0||cx>=G.W||cz>=G.H)return -1;return cz*G.W+cx}
 function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
-function freeAt(x,z,r){if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
-function moveEnt(e,dx,dz){if(!Number.isFinite(dx)||!Number.isFinite(dz))return;const dist=Math.hypot(dx,dz);if(!dist)return;const limit=32,scale=dist>limit?limit/dist:1;dx*=scale;dz*=scale;const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dz))/.25));dx/=steps;dz/=steps;for(let i=0;i<steps;i++){if(kitBlocked111(e,e.x+dx,e.z+dz))break;if(L.grid){const r=(e.r||.5)*.85;if(freeAt(e.x+dx,e.z,r))e.x+=dx;if(freeAt(e.x,e.z+dz,r))e.z+=dz}else{e.x+=dx;e.z+=dz;pushOut(e)}}}
+function freeAt(x,z,r){if(!crystalFree126(x,z,r))return false;if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
+function moveEnt(e,dx,dz){crystalUnstuck126(e);if(!Number.isFinite(dx)||!Number.isFinite(dz))return;const dist=Math.hypot(dx,dz);if(!dist)return;const limit=32,scale=dist>limit?limit/dist:1;dx*=scale;dz*=scale;const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dz))/.25));dx/=steps;dz/=steps;for(let i=0;i<steps;i++){if(kitBlocked111(e,e.x+dx,e.z+dz))break;if(L.grid){const r=(e.r||.5)*.85;if(crystalFree126(e.x+dx,e.z,e.r||.5)&&freeAt(e.x+dx,e.z,r))e.x+=dx;if(crystalFree126(e.x,e.z+dz,e.r||.5)&&freeAt(e.x,e.z+dz,r))e.z+=dz}else{e.x+=dx;e.z+=dz;pushOut(e);crystalUnstuck126(e)}}}
 function movementSpeed(raw){if(!Number.isFinite(raw))return 0;return Math.max(0,CFG.moveLimit?Math.min(raw,6.4*CFG.moveCap/100):raw)}
 function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
 function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> Limitar minha velocidade de movimento</label><div class="sysline">100% é a velocidade inicial. O limite não aumenta sua velocidade nem reduz agilidade, ataques ou esquiva. Vale também para a montaria.</div><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%"><div class="sysline">Em velocidades de ataque extremas, o dano excedente é concentrado nos golpes visíveis. Efeitos por acerto continuam ocorrendo por golpe visível.</div>'}
@@ -4227,12 +4227,24 @@ function attachCrystal125(group,rank){
  group.add(model);group.userData.rankCrystal125=true;group.userData.rank125=crystalRank125(rank);return true;
 }
 
+// Solid footprint covers the 1.30 x 1.99m base, including actor radius.
+function crystalFree126(x,z,r){return !(L.inter||[]).some(it=>it.type==='vein'&&!it.hidden&&Math.hypot(x-it.x,z-it.z)<1.2+r)}
+function crystalUnstuck126(e){
+ const r=e.r||.5;if(crystalFree126(e.x,e.z,r))return;
+ const x=e.x,z=e.z;
+ for(let d=.25;d<=8;d+=.25)for(let i=0;i<32;i++){
+  const a=i*Math.PI/16,nx=x+Math.cos(a)*d,nz=z+Math.sin(a)*d;
+  if(freeAt(nx,nz,r)){e.x=nx;e.z=nz;return}
+ }
+}
+
 // END CRYSTALS125
 function addVein(x,z,rank,charges,col){
   rank=crystalRank125(rank);col=crystalColor125(rank).getHex();
   const owner=L.group;const g=new THREE.Group();for(let i=0;i<5;i++){const m=new THREE.Mesh(geo('vein',()=>new THREE.OctahedronGeometry(.5,0)),glowS(col,.9));m.position.set(rnd(-.6,.6),.5+rnd(0,.5),rnd(-.6,.6));m.scale.set(.6,rnd(1.2,2.2),.6);m.rotation.set(rnd(-.4,.4),rnd(0,3),rnd(-.4,.4));g.add(m)}
   const base=mesh(geo('vbase',()=>new THREE.DodecahedronGeometry(.9,0)),toonS(0x2a2a3a));base.position.y=.3;g.add(base);g.position.set(x,0,z);L.group.add(g);
   const it={type:'vein',x,z,r:2.4,charges,g,rank125:rank,label:'F · MINERAR CRISTAL · RANK '+RANKS[rank].id,use:()=>mine(it,rank)};L.inter.push(it);
+  for(const e of enemies)if(!e.dead)crystalUnstuck126(e);
   if(!attachCrystal125(g,rank))crystalReady125.then(ok=>{if(ok&&!it.hidden&&L.group===owner&&g.parent===owner)attachCrystal125(g,rank)});return it;
 }
 function mine(it,rank){
@@ -4868,7 +4880,7 @@ function pickTarget(e){if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypo
   return best?{t:best,d:bd}:null;
 }
 function dmgTo(t,amt){amt=kitWeakDamage111(curAtk,amt);if(t.defenseCore){hurtDefenseCore(amt);return}if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
-function updEnemy(e,dt){if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
+function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
