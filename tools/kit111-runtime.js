@@ -18,7 +18,7 @@ function kitCheck111(s){const k=kitState111();if(!kitUnlocked111(s.sourceClass,N
 function kitCast111(s){faceTarget(s.range||12);const k=kitState111(),returning=s.effect==='anchor'&&k.anchor?.until>time;if(s.cdT>0&&!returning)return;const error=kitCheck111(s);if(error){toast(error);return}if(s.effect==='gate'){rareGateView103();return}const cost=returning?0:s.mp;if(player.mp<cost){floater(player.x,player.z,'SEM MANA','#4f8dff');return}player.mp-=cost;k.energy-=s.energy||0;if(!returning){s.cdT=s.cdMax=skillCooldown(s);player.lastSpellAt=time}if(s.pow>0&&['area','target','line','cone','bolt','fan','chain','pulses'].includes(s.effect)&&!s.rare103)k.lastAttack={...s};kitRun111(s);if(typeof castFluid139==='function')castFluid139(s);narratorSkill105(s);player.atkT=.001;sfx('skill')}
 function kitHit111(e,d,s){return hurtEnemy(e,d,player.x,player.z,{fromPlayer:true,skillHit:true,kb:0,stun:0})}
 function kitHeal111(a,f){if(a.dead||hasAff('nocure'))return;const h=Math.min(a.maxhp-a.hp,a.maxhp*f);a.hp+=Math.max(0,h);if(h>0){narratorEvent105(a===player?'healself':'support');floater(a.x,a.z,'+'+fmt(h),'#9fffc0')}}
-function kitWard111(a,f,d){const old=healingShield(a),amount=a.maxhp*f;if(old>amount)return;a.healShield=amount;a.healShieldCap=f;a.healShieldUntil=time+d}
+function kitWard111(a,f,d){const old=healingShield(a),amount=a.maxhp*f;if(old>amount)return;a.healShield=amount;a.healShieldCap=f;a.healShieldUntil=time+d;floater(a.x,a.z,'+'+fmt(amount)+' ESCUDO','#9fe8ff')}
 function kitZone111(s,extra={}){const p=kitPoint111(s);kitState111().zones.push({x:p.x,z:p.z,r:kitRadius111(s),until:time+s.duration,at:time,col:s.col,...extra});fxRing(p.x,p.z,s.col,kitRadius111(s),s.duration)}
 function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoint111(s),targets=kitTargets111(s,pt),f=kitAmount111(s),duration=s.duration;if(s.skillId==='5:1'||s.n==='Julgamento'){fxRing(P.x,P.z,0xffe066,kitRadius111(s),.6);pillar(P.x,P.z,0xffe066,1.2,.8);for(const e of targets)pillar(e.x,e.z,0xffe066,.7)}else fxRing(pt.x,pt.z,s.col,Math.min(kitRadius111(s),6),.4);
  switch(s.effect){
@@ -32,7 +32,7 @@ function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoin
  case 'move':{const p=kitLanding111(s);if(p){P.x=p.x;P.z=p.z;P.act=null}break}
  case 'heal':for(const a of kitAllies111(s))kitHeal111(a,f);break;
  case 'healzone':for(const a of kitAllies111(s))kitHeal111(a,f/2);kitZone111(s,{kind:'heal',fraction:f/6,left:3,at:time+1,interval:1,until:time+3.1});break;
- case 'guard':for(const a of kitAllies111(s)){const amount=a===P?s.selfAmount||f:f;if(!(a.kitGuard111?.until>time&&a.kitGuard111.amount>amount))a.kitGuard111={until:time+duration,amount}}break;
+ case 'guard':for(const a of kitAllies111(s)){const amount=a===P?s.selfAmount||f:f;if(!(a.kitGuard111?.until>time&&a.kitGuard111.amount>amount)){a.kitGuard111={until:time+duration,amount};floater(a.x,a.z,'DEFESA','#8bdcff')}}break;
  case 'ward':for(const a of kitAllies111(s))kitWard111(a,f,duration);break;
  case 'cleanse':for(const a of kitAllies111({...s,scope:'group'})){a.slowT=a.bleedT=a.bleedD=a.slow=a.stun=0}break;
  case 'buff':P.buff=duration;P.buffMul=1+f;break;
