@@ -8,7 +8,7 @@ window.AsterMaterials130=(()=>{
  const sampling=`
  uniform sampler2D asterAtlas130;
  vec3 asterSample130(vec2 uv,vec2 tile){return texture2D(asterAtlas130,tile+vec2(.012)+fract(uv)*.476).rgb;}
- vec3 asterDetail130(vec2 uv,vec2 tile,vec3 average){return clamp(asterSample130(uv,tile)/average,vec3(.38),vec3(1.7));}
+ vec3 asterDetail130(vec2 uv,vec2 tile,vec3 average){return clamp(asterSample130(uv,tile)/average,vec3(.22),vec3(2.15));}
  `;
  function chain(material,type){
   if(material.userData.aster130)return material;
@@ -24,21 +24,24 @@ window.AsterMaterials130=(()=>{
      float area130=1.;
      float mx130=max(vColor.r,max(vColor.g,vColor.b));
      float glass130=step(.90,vColor.r)*step(.50,vColor.g)*(1.-step(.53,vColor.b));
-     vec2 tile130=vec2(0.,.5);vec3 avg130=vec3(.56,.535,.48);float scale130=.48;float shade130=.92;
-     if(vColor.r>vColor.b*1.40&&mx130<.57){tile130=vec2(.5,.5);avg130=vec3(.365,.28,.19);scale130=.48;shade130=.86;}
-     else if(vColor.b>vColor.r*1.16&&mx130<.60){tile130=vec2(.5,0.);avg130=vec3(.28,.32,.36);scale130=.55;shade130=.92;}
-     else if(mx130>.64&&mx130<.95){tile130=vec2(0.,0.);avg130=vec3(.76,.66,.51);scale130=.27;shade130=.88;}
+     vec2 tile130=vec2(0.,.5);vec3 avg130=vec3(.56,.535,.48);float scale130=.48;float shade130=.76;vec3 materialHue130=vec3(1.02,.99,.91);
+     if(vColor.r>vColor.b*1.40&&mx130<.57){tile130=vec2(.5,.5);avg130=vec3(.365,.28,.19);scale130=.48;shade130=.72;materialHue130=vec3(1.04,.86,.70);}
+     else if(vColor.b>vColor.r*1.16&&mx130<.60){tile130=vec2(.5,0.);avg130=vec3(.28,.32,.36);scale130=.55;shade130=.78;materialHue130=vec3(.70,.96,1.14);}
+     else if(mx130>.64&&mx130<.95){tile130=vec2(0.,0.);avg130=vec3(.76,.66,.51);scale130=.27;shade130=.83;materialHue130=vec3(1.06,.98,.80);}
      vec3 weights130=pow(abs(asterNormal130),vec3(6.));weights130/=max(dot(weights130,vec3(1.)),.001);
      vec3 wear130=asterDetail130(villageP129.yz*scale130,tile130,avg130)*weights130.x
        +asterDetail130(villageP129.xz*scale130,tile130,avg130)*weights130.y
        +asterDetail130(villageP129.xy*scale130,tile130,avg130)*weights130.z;
-     diffuseColor.rgb*=mix(vec3(1.),wear130*shade130,area130*(1.-glass130)*.88);
+     diffuseColor.rgb*=mix(vec3(1.),wear130*shade130*materialHue130,area130*(1.-glass130));
+     float damp130=(1.-smoothstep(.05,.75,villageP129.y))*(1.-glass130);
+     diffuseColor.rgb*=mix(vec3(1.),vec3(.66,.77,.54),damp130*.38);
+
     `);
    }else{
     s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
      float area130=smoothstep(.8,1.,road128);
      vec3 wear130=asterDetail130(terrainWorld128.xz*.60,vec2(0.,.5),vec3(.56,.535,.48));
-     diffuseColor.rgb*=mix(vec3(1.),wear130*.90,area130*.88);
+     diffuseColor.rgb*=mix(vec3(1.),wear130*.70,area130);
     `);
    }
   };

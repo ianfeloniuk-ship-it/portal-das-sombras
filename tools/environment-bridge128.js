@@ -23,3 +23,5 @@ envGroundColors=function(pg,near){
 envGroundMat=function(){return GMAT2||(GMAT2=Environment128.groundMaterial())};
 // Natural dungeon floors use the same stone/soil finish with their existing biome colors.
 habitatFloor124=function(bio){return HABITAT_FLOORS124[bio]||(HABITAT_FLOORS124[bio]=Environment128.groundMaterial(bio))};
+
+if(window.BiomeMaterials132)BiomeMaterials132.tree(TREEMAT);

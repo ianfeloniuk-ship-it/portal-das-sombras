@@ -66,11 +66,11 @@ const Environment128=(()=>{
    stain131=mix(stain131,vec3(.57,.54,.53),ash131*crack*natural131*.6);
    stain131=mix(stain131,vec3(.65,.91,1.07),crystal131*stone*natural131*.35);
    diffuseColor.rgb*=detail*(.88+broad*.22)*stain131;
-  
+
   `);
   s.fragmentShader=s.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
    float damp131=(1.-smoothstep(.1,.5,abs(biome131-3.)))*(1.-smoothstep(.15,.8,road128))*smoothstep(.38,.68,noise128(terrainWorld128.xz*.31));
    roughnessFactor=mix(roughnessFactor,.38,damp131);
-  `);};m.customProgramCacheKey=()=> 'biome-terrain131';return m}
+  `);};m.customProgramCacheKey=()=> 'biome-terrain131';return typeof window!=='undefined'&&window.BiomeMaterials132?window.BiomeMaterials132.ground(m):m}
  return{tree,groundMaterial,cache};
 })();
