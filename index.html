@@ -1209,7 +1209,7 @@ function buildWorld(seed){
   updChunks(true);
   if(!gates.length)for(let i=0;i<10;i++)gates.push(newGate());
   for(const g of gates)if(!g.dead)gateMesh(g);
-  L.cands=genCands();
+  L.cands=genCands();releaseRedPortalBreaks();
 }
 function newGate(){
   const P=player||{x:0,z:0};let x=P.x+80,z=P.z;
@@ -1219,7 +1219,7 @@ function newGate(){
   else{let r=Math.random()*GATE_W.reduce((a,b)=>a+b,0);rank=0;for(;rank<9;rank++){if(r<GATE_W[rank])break;r-=GATE_W[rank]}rank=clamp(Math.min(rank,danger(x,z)+(Math.random()<.15?1:0)),0,9)}
   if(rank===9&&Math.random()<(pr>=9?.3:danger(x,z)>=9?.5:.8))rank=8;
   const life=rnd(420,900);
-  return {id:++gateSeq,x,z,rank,aff:rollAff(rank),double:Math.random()<(rank<=1?.03:.012),red:rank>0&&Math.random()<.12,life,max:life,seed:(Math.random()*2**31)|0,cleared:false,dead:false};
+  return {id:++gateSeq,x,z,rank,aff:rollAff(rank),double:Math.random()<(rank<=1?.03:.012),red:rank>0&&Math.random()<.12,life,max:life,seed:(Math.random()*2**31)|0,layout103:pick(['core','floors',null,null,null]),cleared:false,dead:false};
 }
 function gateMesh(g){if(expeditionType(g)==='extract')g.red=false;
   const col=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
@@ -1247,6 +1247,22 @@ function dungeonBreak(g){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   const n=4+g.rank;for(let i=0;i<n;i++){const e=spawnKind(wpick(kindsFor(g.rank)).k,g.x+rnd(-4,4),g.z+rnd(-4,4),g.rank,{wild:true,breaker:true});e.gold*=2}
   toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: portal rank '+GR[g.rank].id+' a '+Math.round(Math.hypot(g.x-player.x,g.z-player.z))+'m. Monstros soltos.',5000);bigText('QUEBRA',1100);
 }
+function failRedPortalOnDeath(){
+ if(L.mode!=='dungeon')return false;const g=L.special?L.gate?.ref:L.gate;
+ if(!g||!g.red||g.id<0)return false;
+ L.failed103=true;g.dead=true;g.cleared=false;
+ if(g.deathBreak103)return true;g.deathBreak103=true;
+ const pending=profile.pendingRedBreaks103||(profile.pendingRedBreaks103=[]),key=[g.id,g.seed,g.x,g.z].join(':');
+ if(!pending.some(p=>p.key===key))pending.push({key,x:g.x,z:g.z,rank:g.rank});
+ store.set('pds2_profile',profile);return true;
+}
+function releaseRedPortalBreaks(){
+ if(L.mode!=='world')return;const pending=profile.pendingRedBreaks103;
+ if(!Array.isArray(pending)||!pending.length)return;
+ profile.pendingRedBreaks103=[];store.set('pds2_profile',profile);
+ for(const g of pending)if(Number.isFinite(g.x)&&Number.isFinite(g.z)&&Number.isInteger(g.rank)&&g.rank>=0&&g.rank<GR.length)dungeonBreak(g);
+}
+
 function genCands(){const pr=Math.min(9,run?rankOf():0);const out=[];for(let i=0;i<3;i++){const rank=clamp(pr+Math.floor(rnd(-1,2)),0,TOPR);const lvl=Math.max(1,(run?run.level:1)+Math.floor(rnd(-3,5)));out.push({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank,lvl,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),cost:Math.round(HIRE[rank]*(1+lvl*.03))})}return out}
 function spawnHunter(c,inside){
   const cl=CLASSES[Math.floor(Math.random()*7)],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
@@ -1262,18 +1278,22 @@ function talk(n){logNews('<b>'+n.name+':</b> '+pick(HLINES)+'<small>Caçador de 
 function buildDungeon(g){
   if(expeditionType(g)==='extract'){g.red=false;g.double=false}clearLevel();
   const G=GR[g.rank],th=G.th,R=mulberry32(g.seed);
-  const Wd=G.size,Hd=G.size,CS=2,ox=-Wd*CS/2,oz=-Hd*CS/2,cells=new Uint8Array(Wd*Hd);
-  const rooms=[];let tries=0;
+  const variant=expeditionType(g),CS=2;let Wd,Hd,cells,rooms,bi;
+  if(['core','floors'].includes(variant)){const v=variantLayout103(variant,R);Wd=v.W;Hd=v.H;cells=v.cells;rooms=v.rooms;bi=v.bi}else{
+  Wd=G.size;Hd=G.size;cells=new Uint8Array(Wd*Hd);
+  rooms=[];let tries=0;
   while(rooms.length<(g.rooms||G.rooms)&&tries++<1200){const w=6+Math.floor(R()*6),h=6+Math.floor(R()*6),x=2+Math.floor(R()*(Wd-w-4)),y=2+Math.floor(R()*(Hd-h-4));if(rooms.some(r=>x<r.x+r.w+2&&x+w+2>r.x&&y<r.y+r.h+2&&y+h+2>r.y))continue;rooms.push({x,y,w,h})}
   const carve=(x,y)=>{if(x>0&&y>0&&x<Wd-1&&y<Hd-1)cells[y*Wd+x]=1};
   const cen=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
-  if(rooms.length<2)rooms.push({x:2,y:2,w:6,h:6});const c0=cen(rooms[0]);let bi=1,bd=-1;rooms.forEach((r,i)=>{const c=cen(r),d=Math.hypot(c.x-c0.x,c.y-c0.y);if(d>bd){bd=d;bi=i}});
+  if(rooms.length<2)rooms.push({x:2,y:2,w:6,h:6});const c0=cen(rooms[0]);bi=1;let bd=-1;rooms.forEach((r,i)=>{const c=cen(r),d=Math.hypot(c.x-c0.x,c.y-c0.y);if(d>bd){bd=d;bi=i}});
   const br=rooms[bi];br.x=Math.max(1,br.x-2);br.y=Math.max(1,br.y-2);br.w=Math.min(Wd-2-br.x,br.w+4);br.h=Math.min(Hd-2-br.y,br.h+4);
   for(const r of rooms)for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++)carve(x,y);
   const corr=(a,b)=>{const A=cen(a),B=cen(b);const hl=(x1,x2,y)=>{for(let x=Math.min(x1,x2);x<=Math.max(x1,x2)+1;x++){carve(x,y);carve(x,y+1)}};const vl=(y1,y2,x)=>{for(let y=Math.min(y1,y2);y<=Math.max(y1,y2)+1;y++){carve(x,y);carve(x+1,y)}};if(R()<.5){hl(A.x,B.x,A.y);vl(A.y,B.y,B.x)}else{vl(A.y,B.y,A.x);hl(A.x,B.x,B.y)}};
   for(let i=1;i<rooms.length;i++){let j=0,jd=1e9;for(let k=0;k<i;k++){const a=cen(rooms[i]),b=cen(rooms[k]),d=Math.hypot(a.x-b.x,a.y-b.y);if(d<jd){jd=d;j=k}}corr(rooms[i],rooms[j])}
   for(let k=0;k<2;k++){const a=rooms[Math.floor(R()*rooms.length)],b=rooms[Math.floor(R()*rooms.length)];if(a!==b)corr(a,b)}
   rooms.forEach((r,i)=>{if(i===0||i===bi||r.w<9||r.h<9)return;for(const [px,py] of[[r.x+2,r.y+2],[r.x+r.w-3,r.y+2],[r.x+2,r.y+r.h-3],[r.x+r.w-3,r.y+r.h-3]])cells[py*Wd+px]=2});
+  }
+  const ox=-Wd*CS/2,oz=-Hd*CS/2,br=rooms[bi],cen=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
   L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[]};scene.add(L.group);
   scene.background=new THREE.Color(th.fog);scene.fog=new THREE.FogExp2(th.fog,.03);
   hemi.color.setHex(th.light);hemi.intensity=.5;sun.color.setHex(th.light);sun.intensity=.35;pLight.color.setHex(th.light);pLight.intensity=1.3;
@@ -1283,35 +1303,35 @@ function buildDungeon(g){
   rooms.forEach((r,i)=>{r.i=i;const c=cellPos(cen(r).x,cen(r).y);r.wx=c.x;r.wz=c.z});
   const KW=kindsFor(g.rank);
   const redM=g.red?1.3:1;
-  const mids=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==bi);if(mids.length<2)g.expType='standard';
+  const mids=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==bi&&!rooms[i].entry);if(mids.length<2&&!['core','floors'].includes(variant))g.expType='standard';
   // monstros
   for(const i of mids){const r=rooms[i];const n=clamp(Math.round(r.w*r.h/22*G.dens*1.6),3,12);let first=null;
     for(let k=0;k<n;k++){const kind=wpick(KW).k;const reps=kind==='minion'?2:1;for(let q=0;q<reps;q++){const p=randIn(r);const e=spawnKind(kind,p.x,p.z,g.rank,{room:i});e.hp*=redM;e.maxhp*=redM;if(!first)first=e}}
     if(first&&R()<.3+Math.max(0,g.rank-5)*.25)makeElite(first)}
   // caçadores dentro
-  const RR=mulberry32(g.seed+99);g.hostile=RR()<.3+g.rank*.08;g.friends=RR()<.3;
+  const RR=mulberry32(g.seed+99);g.hostile=variant!=='core'&&RR()<.3+g.rank*.08;g.friends=!['core','floors'].includes(variant)&&RR()<.3;
   if(g.hostile&&mids.length>1){const i=mids[Math.floor(R()*mids.length)];const r=rooms[i];const n=2+(R()<.5?1:0);const grp='hg'+g.id;for(let k=0;k<n;k++){const p=randIn(r);spawnRival(p.x,p.z,g.rank,{room:i,group:grp})}rooms[i].hostile=true}
   if(g.friends&&mids.length>2){const i=mids[Math.floor(R()*mids.length)];const r=rooms[i];for(let k=0;k<2;k++){const p=randIn(r);const pr=Math.min(TOPR,g.rank+(Math.random()<.3?1:0));makeHunterAlly({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank:pr,lvl:Math.max(1,GR[g.rank].lvl+Math.floor(rnd(0,8))),hair:pick([0x222222,0xc85a1e,0xe8e8ff])},p.x,p.z,true).room=i}rooms[i].friends=true}
   // baús
   const chestN=1+(rooms.length>8?1:0)+(g.red?1:0);const used=new Set();
   for(let k=0;k<chestN&&k<mids.length;k++){let i;let t=0;do{i=mids[Math.floor(R()*mids.length)]}while(used.has(i)&&t++<20);used.add(i);const r=rooms[i];addChest(r.wx+(R()<.5?1.5:-1.5),r.wz,g.rank,false)}
   // guardião
-  const pool=g.rank>=9?SOVEREIGNS:g.rank>=6?BOSSES_HIGH:BOSSES;if(expeditionType(g)!=='extract'){let B=pool[Math.floor(R()*pool.length)];if(expeditionType(g)==='hunt'){const sp=expState(g).species;B={n:sp?'Devorador de Mana':'Predador da Fenda',mon:sp?'aranha':'lobo',types:['fury'],body:sp?0x765398:0x8b735b,scale:1.6,skill:S('Instinto da Caçada','dash_strike',8,20,2.5,0xdba77d)}}const b=spawnBoss(br.wx,br.wz,g.rank,B);b.room=bi;b.hp*=redM;b.maxhp*=redM;}
+  const pool=g.rank>=9?SOVEREIGNS:g.rank>=6?BOSSES_HIGH:BOSSES;if(!['extract','core'].includes(variant)){let B=pool[Math.floor(R()*pool.length)];if(expeditionType(g)==='hunt'){const sp=expState(g).species;B={n:sp?'Devorador de Mana':'Predador da Fenda',mon:sp?'aranha':'lobo',types:['fury'],body:sp?0x765398:0x8b735b,scale:1.6,skill:S('Instinto da Caçada','dash_strike',8,20,2.5,0xdba77d)}}const b=spawnBoss(br.wx,br.wz,g.rank,B);b.room=bi;b.hp*=redM;b.maxhp*=redM;}
   // veios de cristal
   for(const i of mids){if(R()<.55){const r=rooms[i];const p=randIn(r);addVein(p.x,p.z,g.rank,3+Math.floor(R()*3),th.trim)}}
   // afixos
   const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark')){scene.fog.density=.07;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[NARRADOR]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
   const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
-  setupExpedition(g,mids);
+  if(variant==='core')setupCoreDefense();else if(variant==='floors')setupDungeonFloors();else setupExpedition(g,mids);
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;
 }
 /* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
-const EXP_TYPES={rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},extract:{n:'Extração',d:'Recolha materiais em uma carga separada de 12 espaços. Envie ao menos 6 espaços de carga para concluir. Cada envio exige defender um ponto por 12s e derrotar seus invasores. Pode continuar depois. Ao morrer, sair ou recarregar, perde a carga não enviada. Os materiais enviados ficam guardados; as penalidades normais de morte continuam.'}};
+const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Ative o núcleo e proteja-o durante 60s contra quatro ondas. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. Uma única saída, na entrada.'},floors:{n:'Calabouço de Andares',d:'Três andares ligados por escadas. Vença os defensores das escadas para subir. O guardião está no terceiro andar; a única saída fica no primeiro. Volte antes do transbordo, 60s após vencer.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},extract:{n:'Extração',d:'Recolha materiais em uma carga separada de 12 espaços. Envie ao menos 6 espaços de carga para concluir. Cada envio exige defender um ponto por 12s e derrotar seus invasores. Pode continuar depois. Ao morrer, sair ou recarregar, perde a carga não enviada. Os materiais enviados ficam guardados; as penalidades normais de morte continuam.'}};
 const EXP_MATS={ward:{n:'Essência de Proteção',rune:'ward',v:80},echo:{n:'Essência de Duplicação',rune:'reprise',v:100},storm:{n:'Essência de Assalto',rune:'arcane',v:80},fang:{n:'Presa do Predador',rune:'fang',v:70},stalker:{n:'Glândula do Caçador',rune:'stalker',v:100},ore:{n:'Minério de Ressonância',rune:'shell',v:35,w:1},core:{n:'Núcleo Estável',rune:'vigor',v:70,w:2},heart:{n:'Coração de Cristal',rune:'arcane',v:140,w:3}};
 const EXP_FOCI=[{id:'ward',n:'Proteção',d:'Aliados do foco próximos recebem 40% menos dano. No chefe: escudo de 6% da vida máxima por foco, renovado a cada 16s.',c:0x70ddff},{id:'echo',n:'Duplicação',d:'Cria cópias frágeis na sala. No chefe: duas cópias por ativação, com limite de quatro vivas.',c:0xb98cff},{id:'storm',n:'Assalto',d:'Projeta impactos em linha na sala. No chefe: linhas anunciadas por 1,2s, sem bloquear a arena inteira.',c:0xff8750}];
-function expeditionType(g){if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'extract'}
-function expState(g){if(g.expState)return g.expState;const type=expeditionType(g);if(!type)return null;const R=mulberry32(g.seed^0x33a7);return g.expState={type,foci:Array.from({length:3},(_,i)=>({kind:i===2?Math.floor(R()*3):(Math.floor(R()*3)+i)%3,status:'active'})),nests:[false,false],bait:false,baitTaken:false,traps:[false,false],trapSpent:[false,false],species:R()<.5?0:1,retreats:0,rewarded:false,cargo:[],sent:0,instability:0,deposits:Array(9).fill(2)}}
+function expeditionType(g){if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;if(['core','floors'].includes(g.layout103))return g.layout103;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'extract'}
+function expState(g){if(['core','floors'].includes(expeditionType(g)))return null;if(g.expState)return g.expState;const type=expeditionType(g);if(!type)return null;const R=mulberry32(g.seed^0x33a7);return g.expState={type,foci:Array.from({length:3},(_,i)=>({kind:i===2?Math.floor(R()*3):(Math.floor(R()*3)+i)%3,status:'active'})),nests:[false,false],bait:false,baitTaken:false,traps:[false,false],trapSpent:[false,false],species:R()<.5?0:1,retreats:0,rewarded:false,cargo:[],sent:0,instability:0,deposits:Array(9).fill(2)}}
 function expReward(key,n){const m=EXP_MATS[key];if(!m||n<=0)return;run.loot=run.loot||{};const r=run.loot[m.n]||(run.loot[m.n]={n:0,v:m.v,b:false,rune:m.rune,recipeParts:3});r.n+=n;r.rune=m.rune;r.recipeParts=3;toast('<b>[EXPEDIÇÃO]</b> +'+n+' '+m.n+' · grave '+GEAR_RUNES[m.rune].n+' na forja.');saveRun()}
 function expRecipe(key){const m=EXP_MATS[key];return m.n+' → '+GEAR_RUNES[m.rune].n+': '+GEAR_RUNES[m.rune].d+' (3 materiais por inscrição, mais ouro e cristais).'}
 function expCargoWeight(s){return s.cargo.reduce((n,k)=>n+EXP_MATS[k].w,0)}
@@ -1382,7 +1402,54 @@ function expeditionObjective(){const ex=L.expedition;if(!ex)return '';const s=ex
 function expHazard(...args){const h=hazard(...args);h.owner=null;return h}
 function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[NARRADOR]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
 function makeElite(e){e.elite=true;e.res=.2;e.maxhp=e.hp=e.hp*1.8;e.dmg*=1.3;e.name='Elite '+e.name;e.xp*=2.5;e.gold*=3;e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
+/* Variações de calabouço: uma saída real, escadas internas e defesa de núcleo. */
+function variantLayout103(type,R){
+ const count=type==='floors'?3:1,W=36,H=count*40-4,cells=new Uint8Array(W*H),rooms=[];
+ const carve=(x,y)=>{if(x>0&&y>0&&x<W-1&&y<H-1)cells[y*W+x]=1};
+ for(let f=0;f<count;f++){
+  const offset=f*40,flip=R()<.5,base=type==='core'?[[14,26,8,7],[5,3,26,21]]:[[3,3,8,8],[22,3,10,9],[3,22,9,10],[22,22,10,10]],start=rooms.length;
+  for(const [bx,y,w,h] of base){const x=flip?W-bx-w:bx,r={x,y:y+offset,w,h,floor:f,entry:rooms.length===start};rooms.push(r);for(let yy=r.y;yy<r.y+h;yy++)for(let xx=x;xx<x+w;xx++)carve(xx,yy)}
+  const center=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
+  for(let i=start+1;i<rooms.length;i++){const a=center(rooms[i-1]),b=center(rooms[i]);for(let x=Math.min(a.x,b.x);x<=Math.max(a.x,b.x);x++){carve(x,a.y);carve(x,a.y+1)}for(let y=Math.min(a.y,b.y);y<=Math.max(a.y,b.y);y++){carve(b.x,y);carve(b.x+1,y)}}
+  rooms.at(-1).floorEnd=true;
+ }
+ return {W,H,cells,rooms,bi:rooms.length-1};
+}
+function unlockDungeonExit(){for(const it of L.exits)if(it.type==='exit'&&it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg);it.sg=makeSign('SAÍDA','#ffb347',.55);it.sg.position.y=5.5;it.grp.add(it.sg)}}
+function beginDungeonEscape(){L.closeT=60;L.warn30=false;unlockDungeonExit()}
+function dungeonFloorAt(z){return L.floors?Math.max(0,Math.min(2,Math.floor(((z-L.grid.oz)/L.grid.CS)/40))):0}
+function floorMapCenter(){return L.floors?L.grid.oz+(L.floors.current*40+18)*L.grid.CS:0}
+function setupDungeonFloors(){
+ L.floors={current:0,count:3};
+ const starts=L.rooms.filter(r=>r.entry),ends=L.rooms.filter(r=>r.floorEnd);
+ const stair=(r,to,landing,forward)=>{const grp=new THREE.Group();grp.position.set(r.wx,0,r.wz);for(let i=0;i<5;i++){const step=mesh(geo('step103_'+i,()=>new THREE.BoxGeometry(3,.3*(i+1),.7)),toonS(0x758394));step.position.set(0,.15*(i+1),i*.7-1.4);grp.add(step)}const sg=makeSign((forward?'SUBIR · ':'DESCER · ')+(to+1)+'º','#8de6ff',.5);sg.position.y=3.7;grp.add(sg);L.group.add(grp);const it={type:'stairs',x:r.wx,z:r.wz,r:3,room:r.i,to,landing,forward,grp,label:'F · '+(forward?'SUBIR':'DESCER')+' PARA O '+(to+1)+'º ANDAR'};it.use=()=>useDungeonStairs(it);L.inter.push(it)};
+ for(let f=0;f<2;f++){stair(ends[f],f+1,starts[f+1],true);stair(starts[f+1],f,ends[f],false)}
+}
+function useDungeonStairs(it){
+ if(!L.floors||player.dead||!L.inter.includes(it)||Math.hypot(player.x-it.x,player.z-it.z)>it.r+.2)return false;
+ if(it.forward&&enemies.some(e=>!e.dead&&e.room===it.room)){toast('Derrote os defensores desta sala para liberar a escada.');return false}
+ for(const p of projs)scene.remove(p.mesh);for(const h of hazards)scene.remove(h.g);projs=[];hazards=[];
+ L.floors.current=it.to;player.x=it.landing.wx;player.z=it.landing.wz+2;player.dodgeT=0;player.dashDmg=null;player.bowT=0;placeAllies();cam.x=player.x;cam.z=player.z;bossLight.intensity=0;$('boss').hidden=true;
+ for(const e of enemies)e.m.root.visible=!e.gone&&dungeonFloorAt(e.z)===it.to;
+ bigText('ANDAR '+(it.to+1)+' / 3',1200);sfx('step');return true;
+}
+function setupCoreDefense(){
+ const r=L.rooms[L.bossRoom],grp=new THREE.Group();grp.position.set(r.wx,0,r.wz);
+ const base=mesh(geo('coreBase103',()=>new THREE.CylinderGeometry(2.1,2.5,.6,8)),toonS(0x536a86));base.position.y=.3;grp.add(base);
+ const crystal=mesh(geo('core103',()=>new THREE.OctahedronGeometry(1.7)),glowS(0x78e6ff,.8));crystal.position.y=2.5;grp.add(crystal);const sg=makeSign('NÚCLEO SELADO','#8de6ff',.55);sg.position.y=5;grp.add(sg);L.group.add(grp);
+ const maxhp=600*L.G.dmg;L.defense={core:{x:r.wx,z:r.wz,r:2,hp:maxhp,maxhp,defenseCore:true},grp,crystal,sg,started:false,failed:false,done:false,t:0,wave:0,duration:60};
+ const it={type:'core',x:r.wx,z:r.wz,r:4,label:'F · INICIAR DEFESA DO NÚCLEO',use:()=>startCoreDefense()};L.defense.inter=it;L.inter.push(it);
+}
+function coreLabel(text){const d=L.defense;if(!d?.grp)return;d.grp.remove(d.sg);d.sg=makeSign(text,'#8de6ff',.55);d.sg.position.y=5;d.grp.add(d.sg)}
+function startCoreDefense(){const d=L.defense;if(!d||d.started||d.failed||d.done||player.dead||Math.hypot(player.x-d.core.x,player.z-d.core.z)>4.2)return false;d.started=true;d.inter.hidden=true;toast('Defenda o núcleo por 60s e elimine as quatro ondas. Inimigos próximos de você podem ser interceptados.');sfx('gong');return true}
+function hurtDefenseCore(amt){const d=L.defense;if(!d||!d.started||d.failed||d.done||amt<=0)return;d.core.hp=Math.max(0,d.core.hp-amt);fxRing(d.core.x,d.core.z,0xff5060,2,.2);if(d.core.hp<=0){d.failed=true;d.crystal.visible=false;coreLabel('NÚCLEO DESTRUÍDO');L.gate.coreFailed103=true;L.gate.dead=true;bigText('NÚCLEO DESTRUÍDO',1700);startBreak();toast('Defesa falhou. Sem recompensa de conclusão. Fuja pela única saída; este portal será perdido.',5500)}}
+function coreWave(){const d=L.defense;d.wave++;const n=Math.min(6,3+Math.floor(L.gate.rank/2));for(let i=0;i<n;i++){const side=(d.wave+i)%4,a=side*Math.PI/2,x=d.core.x+Math.sin(a)*15,z=d.core.z+Math.cos(a)*15;const e=spawnKind(i%2?'rogue':'warrior',x,z,L.gate.rank,{room:L.bossRoom});e.ai='melee';e.range=1.5;e.aggro=true;e.coreRaider=true;e.speed=Math.max(2.5,e.speed);if(L.gate.red){e.hp*=1.3;e.maxhp*=1.3}for(const aff of L.gate.aff||[]){if(aff==='armor'){e.hp*=1.5;e.maxhp*=1.5}if(aff==='frenzy')e.speed*=1.3;if(aff==='expl')e.expl=true;e.gold*=1.5}fxRing(x,z,0xff7b66,1.5,.7)}toast('Onda '+d.wave+' / 4 · proteja o núcleo.')}
+function completeCoreDefense(){const d=L.defense;if(!d||d.done||d.failed||!d.started||d.t<d.duration||d.wave<4||enemies.some(e=>e.coreRaider&&!e.dead))return false;d.done=true;coreLabel('NÚCLEO ABERTO');L.bossDead=true;beginDungeonEscape();run.spts=(run.spts||0)+1;run.res.core[L.gate.rank]+=3;addChest(d.core.x+4,d.core.z,L.gate.rank,true);addVein(d.core.x-4,d.core.z,L.gate.rank,7,0x78e6ff);bigText('NÚCLEO ABERTO',1500);toast('Defesa concluída: +1 ponto de habilidade e 3 núcleos. Recolha o tesouro e volte à única saída. Transbordo em 60s.',5500);saveRun();return true}
+function updateCoreDefense(dt){const d=L.defense;if(!d||!d.started||d.failed||d.done||player.dead)return;d.t+=dt;while(d.wave<4&&d.t>=d.wave*15)coreWave();completeCoreDefense()}
+function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruído · fuja pela única saída';if(d.done)return 'Núcleo aberto · transbordo em '+fmtT(Math.max(0,L.closeT))+' · volte à entrada';if(!d.started)return 'Encontre o núcleo e interaja para iniciar a defesa';return 'NÚCLEO '+Math.ceil(100*d.core.hp/d.core.maxhp)+'% · '+Math.ceil(Math.max(0,d.duration-d.t))+'s · onda '+d.wave+'/4 · '+enemies.filter(e=>e.coreRaider&&!e.dead).length+' inimigos restantes'}
+
 function exitPortal(x,z,locked){
+  const existing=L.exits.find(it=>it.type==='exit');if(existing)return existing;
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:0x04101e,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
@@ -1416,8 +1483,9 @@ function mine(it,rank){
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,'#ffd08a');fxBurst(it.x,1,it.z,0xffd08a,6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}
 }
-function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead){toast('<b>[NARRADOR]</b> Portal vermelho: não há saída até o guardião cair.');return}leaveDungeon(false)}
-function enterGate(g){
+function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead&&!L.brk){toast('<b>[NARRADOR]</b> Portal vermelho: conclua o objetivo para destrancar a única saída.');return}leaveDungeon(false)}
+function enterGate(g){if(g.dead||g.coreFailed103)return;
+
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
   if(g.time){closeModal();curGate=g;buildSpecial('past',g);return}
@@ -1435,15 +1503,15 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
 function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
-  if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
-  const g=L.gate,cleared=L.bossDead;
+  if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
+  const g=L.gate,cleared=L.bossDead&&!L.failed103;
   if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);rareOnPortal103(g);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
   curGate=null;
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
   buildWorld();
   for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}
   placeAllies();cam.x=player.x;cam.z=player.z;
-  toast(cleared?'<b>[NARRADOR]</b> O portal rank '+GR[g.rank].id+' se fechou e sumiu. Venda seus recursos no Mercado de qualquer cidade.':'<b>[NARRADOR]</b> Você saiu da masmorra. O portal continua aberto.',4000);
+  toast(g.deathBreak103?'<b>[NARRADOR]</b> O portal vermelho rompeu. Monstros escaparam para o mundo; a entrada foi perdida.':g.coreFailed103?'<b>[NARRADOR]</b> Você escapou. O núcleo foi perdido e o portal se fechou.':cleared?'<b>[NARRADOR]</b> O portal rank '+GR[g.rank].id+' se fechou e sumiu. Venda seus recursos no Mercado de qualquer cidade.':'<b>[NARRADOR]</b> Você saiu da masmorra. O portal continua aberto.',4000);
   saveRun();
 }
 function placeAllies(){for(const a of allies){if(a.guest)continue;a.x=player.x+rnd(-1.5,1.5);a.z=player.z+rnd(.5,2);if(L.grid&&!freeAt(a.x,a.z,.4)){a.x=player.x;a.z=player.z}a.act=null;a.m.root.position.set(a.x,0,a.z)}}
@@ -1844,10 +1912,9 @@ function killEnemy(e){rememberVestige103(e);if(e.noExpLoot){e.dead=true;e.deadT=
 function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;$('boss').hidden=true;
   for(const x of enemies)if(!x.dead&&x!==b&&!x.rival&&Math.hypot(x.x-b.x,x.z-b.z)<20)killEnemy(x);
-  const ex=exitPortal(b.x,b.z+6,false);
-  for(const it of L.exits)if(it!==ex&&it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
-  addChest(b.x+4,b.z+1,L.gate.rank,true);addVein(b.x-4,b.z+1,L.gate.rank,7,0xffd070);if(!b.world){run.spts=(run.spts||0)+1;const bg=Math.round(b.gold*2);run.gold+=bg;floater(b.x,b.z,'+1 PONTO DE HABILIDADE · +'+fmt(bg)+' ouro','#b18cff',true,4)}L.closeT=150;
-  toast('<b>[NARRADOR]</b> Guardião derrotado. A masmorra vai se fechar em 2:30. Minere os cristais, abra o baú e saia.',5000);
+  unlockDungeonExit();
+  addChest(b.x+4,b.z+1,L.gate.rank,true);addVein(b.x-4,b.z+1,L.gate.rank,7,0xffd070);if(!b.world){run.spts=(run.spts||0)+1;const bg=Math.round(b.gold*2);run.gold+=bg;floater(b.x,b.z,'+1 PONTO DE HABILIDADE · +'+fmt(bg)+' ouro','#b18cff',true,4)}beginDungeonEscape();
+  toast('<b>[NARRADOR]</b> Guardião derrotado. Transbordo em 60s. Recolha o tesouro e volte à única saída, na entrada.',5000);
   if(!L.special&&L.gate.double){const r=L.rooms[L.bossRoom],G=L.grid,dz=G.oz+(r.y+.5)*G.CS+1.2,dx=r.wx;
     const door=new THREE.Group();door.position.set(dx,0,dz);const st=mesh(geo('sdoor',()=>new THREE.BoxGeometry(3,3.4,.4)),toonS(0x3a3a46));st.position.y=1.7;door.add(st);
     const cr=new THREE.Mesh(geo('scrack',()=>new THREE.BoxGeometry(.12,2.6,.45)),glowS(0xffd070,.35));cr.position.y=1.5;door.add(cr);L.group.add(door);
@@ -2010,22 +2077,23 @@ function interact(){if(player.dead||paused)return;const c=ctxTarget();if(c)c.use
 function die(){
   if(cons('mur')>=10&&L.mode==='dungeon'&&!L.revived){L.revived=true;player.hp=player.maxhp*.5;player.iT=2;bigText('RENASCIDO',1200);sfx('arise');toast('<b>[CONSTELAÇÃO]</b> Muralha: você se levantou.');return}
   /* PROGRESSÃO CONTÍNUA (decisão do Ian): morrer custa ouro e XP; personagem, itens, trabalhos e rank ficam. */
-  expAbandon();player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
+  const redBroken=failRedPortalOnDeath();expAbandon();player.dead=true;player.hp=0;recordNemesis();const lostG=Math.round(run.gold*(npcHas('Selene')?.1:.2)),lostX=Math.round(run.xp*.5);run.gold-=lostG;run.xp-=lostX;profile.deaths=(profile.deaths||0)+1;store.set('pds2_profile',profile);
   const rk=RANKS[profile.rank];
-  $('deadtxt').innerHTML='<b>[NARRADOR]</b> Você caiu no nível '+run.level+'. Perdeu <b class="gold">'+fmt(lostG)+' de ouro</b> e metade da XP do nível atual.<br>Seu personagem, itens, trabalhos e o <b style="color:'+rk.c+'">rank '+rkN(profile.rank)+'</b> continuam. Mortes: '+profile.deaths+'.';
+  $('deadtxt').innerHTML='<b>[NARRADOR]</b> Você caiu no nível '+run.level+'. Perdeu <b class="gold">'+fmt(lostG)+' de ouro</b> e metade da XP do nível atual.<br>Seu personagem, itens, trabalhos e o <b style="color:'+rk.c+'">rank '+rkN(profile.rank)+'</b> continuam. Mortes: '+profile.deaths+'.'+(redBroken?'<br><b>O portal vermelho rompeu.</b> Monstros escaparam para o mundo; essa entrada foi perdida.':'');
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
 }
 
 /* ================= IA ================= */
 function turnTo(e,a,dt,s=10){let d=a-e.face;d=Math.atan2(Math.sin(d),Math.cos(d));e.face+=d*Math.min(1,dt*s)}
 function pickTarget(e){
+  if(e.coreRaider&&L.defense?.started&&!L.defense.failed&&!L.defense.done){const c=L.defense.core,pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<4)return {t:player,d:pd};const ally=allies.find(a=>!a.dead&&Math.hypot(a.x-e.x,a.z-e.z)<3);if(ally)return {t:ally,d:Math.hypot(ally.x-e.x,ally.z-e.z)};return {t:c,d:Math.hypot(c.x-e.x,c.z-e.z)}}
   let best=null,bd=1e9;
   if(!player.dead&&player.stealth<=0&&!inCity(player.x,player.z)){bd=Math.hypot(player.x-e.x,player.z-e.z);best=player}
   for(const a of allies){if(a.dead)continue;const d=Math.hypot(a.x-e.x,a.z-e.z)+1.5;if(d<bd){bd=d;best=a}}
   return best?{t:best,d:bd}:null;
 }
-function dmgTo(t,amt){if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
-function updEnemy(e,dt){dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
+function dmgTo(t,amt){if(t.defenseCore){hurtDefenseCore(amt);return}if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
+function updEnemy(e,dt){if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
@@ -2232,14 +2300,14 @@ function updWorld(dt){updEcon(dt);
 }
 function updDungeon(dt){
   for(const it of L.exits)it.ring.rotation.z+=dt*.8;
-  updSpecial(dt);expeditionUpdate(dt);
+  updSpecial(dt);expeditionUpdate(dt);updateCoreDefense(dt);
   if(L.brk){updBreak(dt)}else if(L.bossDead&&L.expedition?.s.type!=='extract'){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[NARRADOR]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
   const G=L.grid,P=player,cx=Math.floor((P.x-G.ox)/G.CS),cz=Math.floor((P.z-G.oz)/G.CS);
   for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){if(dx*dx+dy*dy>36)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
   L.rooms.forEach((r,i)=>{if(L.seen.has(i))return;if(cx>=r.x&&cx<r.x+r.w&&cz>=r.y&&cz<r.y+r.h){L.seen.add(i);
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
-    if(i===L.bossRoom)bigText('GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
+    if(i===L.bossRoom)bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
 /* Câmera livre no PC: botão direito arrasta para girar, roda aproxima/afasta, botão do meio volta ao padrão. */
 const pcCam={yaw:0,zoom:1,drag:false};
@@ -2299,16 +2367,16 @@ function drawMap(ctx,S,full){
     for(const e of enemies)if(e.world&&!e.dead){ctx.fillStyle='#ff5a1e';ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),6,0,TAU);ctx.fill()}
     for(const n of npcs)if(n.kind==='hunter'){ctx.fillStyle='rgba(232,246,255,.7)';ctx.fillRect(tx(n.x)-1.5,tz(n.z)-1.5,3,3)}
   }else{
-    const G=L.grid,k=full?S/(G.W*G.CS):2.6,cx=full?0:P.x,cz=full?0:P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
+    const G=L.grid,k=full?S/(G.W*G.CS):2.6,cx=full?0:P.x,cz=full?floorMapCenter():P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
     const half=S/2/k;const x0=Math.max(0,Math.floor((cx-half-G.ox)/G.CS)),x1=Math.min(G.W-1,Math.ceil((cx+half-G.ox)/G.CS)),y0=Math.max(0,Math.floor((cz-half-G.oz)/G.CS)),y1=Math.min(G.H-1,Math.ceil((cz+half-G.oz)/G.CS));
     ctx.fillStyle='rgba(255,208,138,.35)';const cs=G.CS*k+.6;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*G.W+x;if(L.visited[i]&&G.cells[i])ctx.fillRect(tx(G.ox+x*G.CS),tz(G.oz+y*G.CS),cs,cs)}
-    const vis=(x,z)=>{const i=cellIdx(x,z);return i>=0&&L.visited[i]};
-    for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='expedition'){ctx.fillStyle='#7ce6cf';ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?5:3,0,TAU);ctx.fill()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
-    if(bossE&&!bossE.dead&&L.seen.has(L.bossRoom)){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
-    for(const e of enemies){if(e.dead||!e.aggro)continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
+    const vis=(x,z)=>{const i=cellIdx(x,z);return i>=0&&L.visited[i]&&(!L.floors||dungeonFloorAt(z)===L.floors.current)};
+    for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='stairs'||it.type==='core'||it.type==='expedition'){ctx.fillStyle='#7ce6cf';ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?5:3,0,TAU);ctx.fill()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
+    if(bossE&&!bossE.dead&&L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z)){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
+    for(const e of enemies){if(e.dead||!e.aggro||!vis(e.x,e.z))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
   }
-  const tx=full&&L.mode!=='world'?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'?S/2+P.z*S/(L.grid.H*L.grid.CS):S/2;
+  const tx=full&&L.mode!=='world'?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'?S/2+(P.z-floorMapCenter())*S/(L.grid.W*L.grid.CS):S/2;
   for(const a of allies){const k=full?(L.mode==='world'?S/560:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}
   ctx.save();ctx.translate(tx,tz);ctx.rotate(-P.face+Math.PI);ctx.fillStyle='#ffd08a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.restore();
 }
@@ -2344,8 +2412,9 @@ function hud(){
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
   else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
-  if(L.expedition&&!L.brk)obj=expeditionObjective();$('obj').textContent=obj;
-  if(bossE&&!bossE.dead&&bossE.aggro){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
+  if(L.expedition&&!L.brk)obj=expeditionObjective();if(L.defense&&!L.brk)obj=coreObjective();if(L.floors)obj='Andar '+(L.floors.current+1)+'/3 · '+(L.bossDead||L.brk?obj+' · saída no 1º andar':'encontre a escada e derrote seus defensores'+(L.floors.current===2?' · guardião neste andar':''));$('obj').textContent=obj;
+  if(L.defense){const d=L.defense;$('boss').hidden=d.done||d.failed;$('bn').textContent='NÚCLEO · '+Math.ceil(d.core.hp)+' / '+Math.ceil(d.core.maxhp);$('bb').style.width=(100*d.core.hp/d.core.maxhp)+'%'}
+  if(bossE&&!bossE.dead&&bossE.aggro&&(!L.floors||dungeonFloorAt(bossE.z)===L.floors.current)){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent+' · BARRA '+Math.max(1,Math.ceil(bossE.hp/bossE.maxhp*(bossE.bars||3)))+'/'+(bossE.bars||3);$('bb').style.width=(100*(((Math.max(0,bossE.hp)/bossE.maxhp*(bossE.bars||3))%1)||(bossE.hp>0?1:0)))+'%'}
   const _mt=missionPanelText();
   $('bStyle').hidden=true;
   let _hm=false;try{_hm=localStorage.getItem('pds_hidemis')==='1'}catch(e){}
@@ -2561,7 +2630,7 @@ function finishTemple(){unlockLore('temple');
   for(const e of S.statues){e.dead=true;e.gone=true;scene.remove(e.m.root);fxBurst(e.x,1,e.z,0xffd070,8,3)}
   S.god.eyeMat.color.setHex(0xffd070);bossLight.color.setHex(0xffd070);bossLight.intensity=2;sfx('arise');sfx('gong');
   profile.templeCompleted103=true;store.set('pds2_profile',profile);bigText('PROTOCOLOS CONCLUÍDOS',2600);toast('<b>[NARRADOR]</b> O templo reconheceu sua vitória. A promoção a ★ exige rank SS+, Segundo Despertar e a prova da Ordem.',6000);
-  L.bossDead=true;L.closeT=150;
+  L.bossDead=true;L.closeT=60;
   for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
   addChest(0,S.az+4,9,true);
 }
@@ -3590,7 +3659,7 @@ function mapView(){
   view=null;const P=player;
   let h='<canvas id="bigmap" width="600" height="600" style="width:100%;max-width:min(420px,56vh);aspect-ratio:1;display:block;margin:0 auto;border-radius:4px"></canvas>';
   if(L.mode==='world'){h+='<div class="sec">CIDADES PRÓXIMAS</div>';citiesAround(P.x,P.z,700).map(c=>({c,d:Math.hypot(c.x-P.x,c.z-P.z)})).sort((a,b)=>a.d-b.d).slice(0,5).forEach(({c,d})=>{h+=row(c.name,Math.round(d)+'m · zona segura com lojas','')});h+='<div class="sec">PORTAIS ABERTOS</div>';gates.filter(g=>!g.dead).map(g=>({g,d:Math.hypot(g.x-P.x,g.z-P.z)})).sort((a,b)=>a.d-b.d).forEach(({g,d})=>{if(g.secret){h+=row('<span class="rl" style="color:#ffd070">???</span> · portal desconhecido',Math.round(d)+'m · fecha em '+fmtT(g.life)+' · o Oráculo não consegue medir','');return}h+=row('<span class="rl" style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+GR[g.rank].id+'</span>'+(g.red?' · vermelho':'')+' · '+GR[g.rank].th.n,Math.round(d)+'m · fecha em '+fmtT(g.life)+' · nível recomendado '+GR[g.rank].lvl+'+','')})}
-  else h+='<div class="sysline" style="font-size:12px">Salas exploradas '+L.seen.size+'/'+L.rooms.length+'. Azul: saída. Dourado: baú e guardião.</div>';
+  else h+='<div class="sysline" style="font-size:12px">'+(L.floors?'Andar '+(L.floors.current+1)+'/3 · escadas em verde · saída somente no 1º andar. ':'')+'Salas exploradas '+L.seen.size+'/'+L.rooms.length+'. Azul: saída. Dourado: baú e guardião.</div>';
   openModal(L.mode==='world'?'MAPA · TERRAS DESPERTAS':L.special?'MAPA · '+L.special.name.toUpperCase():'MAPA · MASMORRA RANK '+L.G.id,h);
   drawMap($('bigmap').getContext('2d'),600,true);
 }
@@ -3600,10 +3669,11 @@ function gateModal(g){
   let h='<div class="sysline"><b>[NARRADOR]</b> Portal <b style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+G.id+'</b> · '+G.th.n+(g.red?' · <b style="color:#ff4d6a">PORTAL VERMELHO</b>':'')+'</div>';
   if((g.aff||[]).length)h+=row('Afixos','<span style="color:#ffb84d">'+(g.aff.map(i=>{const a=AFFIX.find(x=>x.id===i);return a.n+' ('+a.d+')'}).join(', '))+'</span> · ouro +'+g.aff.length*50+'%','');
   h+=row('Nível recomendado',(warn?'<span style="color:#ff8fa3">Você está abaixo do recomendado</span>':'Você está pronto'),'<b>'+G.lvl+'+</b>');
-  const et=expeditionType(g);if(et){h+=row('Tipo: '+EXP_TYPES[et].n,EXP_TYPES[et].d,'');const keys=et==='rupture'?['ward','echo','storm']:et==='hunt'?['fang','stalker']:['ore','core','heart'];h+=row('Materiais e receitas',keys.map(expRecipe).join('<br>'),'');if(et==='hunt')h+=row('Desafio opcional','Vencer sem usar isca: +2 Glândulas. Ninhos e colunas não reduzem a recompensa.','')}h+=row('Tamanho','~'+G.rooms+' salas'+(et==='extract'?' · depósitos e pontos de envio':' · guardião e baús'),'');
+  const et=expeditionType(g);if(et){h+=row('Tipo: '+EXP_TYPES[et].n,EXP_TYPES[et].d,'');if(!['core','floors'].includes(et)){const keys=et==='rupture'?['ward','echo','storm']:et==='hunt'?['fang','stalker']:['ore','core','heart'];h+=row('Materiais e receitas',keys.map(expRecipe).join('<br>'),'');if(et==='hunt')h+=row('Desafio opcional','Vencer sem usar isca: +2 Glândulas. Ninhos e colunas não reduzem a recompensa.','')}}h+=row('Tamanho',(et==='floors'?'3 andares · 4 salas por andar':et==='core'?'Arena de defesa e entrada':'~'+G.rooms+' salas')+(et==='extract'?' · depósitos e pontos de envio':et==='core'?' · 4 ondas':' · guardião e baús'),'');
+  h+=row('Saída','Uma única porta, na entrada.'+(et==='extract'?' Extração permite sair para concluir após enviar a carga.':' Vencer libera a saída existente; não cria outra junto ao chefe. Transbordo após 60s.'),'');
   h+=row('Fecha em',fmtT(g.life)+(g.rank>=2?' · se fechar sem ser limpo, os monstros escapam':''),'');
   h+=row('Seu grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Sozinho'+(run.shadows.length?' + '+run.shadows.length+' eco(s)':''),'');
-  if(g.red)h+='<div class="sysline" style="color:#ffb3c0">Portal vermelho: não há saída até derrotar o guardião. Monstros 30% mais fortes, recompensas em dobro. Pergaminho de retorno não funciona.</div>';
+  if(g.red)h+='<div class="sysline" style="color:#ffb3c0">Portal vermelho: a única saída fica trancada até concluir o objetivo. Monstros 30% mais fortes, recompensas em dobro. Pergaminho de retorno não funciona. Morrer rompe o portal e solta monstros no mundo; essa entrada é perdida.</div>';
   h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','close',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>';
   openModal('PORTAL RANK '+G.id,h);
 }
