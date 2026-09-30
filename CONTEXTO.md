@@ -596,3 +596,6 @@ Próximo: feedback de Ian sobre esta amostra suave; ajustar estilo antes de expa
 
 
 Publicação final v119 integra e735728 (extração opcional na Ordem/combate no mundo) preservando seus testes e fluxos. Sufixos118 dos modelos são internos.
+
+## v120 — movimentos próprios dos goblins
+Ian apontou caminhada/ataque iguais. Cinco coreografias procedurais distintas por papel: guerreiro ágil/corte lateral, escudeiro passos curtos/proteção, arqueiro postura baixa/puxada e soltura, xamã passos lentos/conjuração, bruto balanço pesado/golpe alto. Mesma função na galeria e jogo, tempos de combate preservados. Validados resets de pose e transformações finitas, regressão v118. Próximo: avaliação visual da amostra antes de expandir famílias.
