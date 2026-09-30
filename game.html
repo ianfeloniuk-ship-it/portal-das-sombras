@@ -1597,7 +1597,7 @@ function skillFx(sk,P){
   const n=sk.n,c=sk.col,x=P.x,z=P.z,f=P.face;
   if(/Giratório/.test(n)){spinRing(x,z,c,4.2);spinRing(x,z,0xffffff,3,.3)}
   else if(/Gelo|Inverno|Era do/.test(n)&&sk.t!=='bolt'){spikes(x,z,20,1.5,/Inverno|Era/.test(n)?8:6,0xbfefff,2.4);fxRing(x,z,0x70ddff,5,.4)}
-  else if(/Julgamento/.test(n)&&sk.t==='nova'){pillar(x,z,0xffe066,1.2,.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<6.5)pillar(e.x,e.z,0xffe066,.7)}
+  else if(/Julgamento/.test(n)&&sk.t==='nova'){const r=sk.n==='Julgamento'?judgmentRadius(sk):6;fxRing(x,z,0xffe066,r,.6);pillar(x,z,0xffe066,1.2,.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<r+e.r)pillar(e.x,e.z,0xffe066,.7)}
   else if(/Almas/.test(n)&&sk.t==='nova'){for(let i=0;i<12;i++){const a=i/12*TAU,o=projModel('soul',0xb98cff);o.rotation.y=a;const sx=x,sz=z;fxCustom(o,.6,(ff,k)=>{o.position.set(sx+Math.sin(a)*6*k,1+Math.sin(k*Math.PI)*.8,sz+Math.cos(a)*6*k);fadeAll(o,1-k)})}}
   else if(/Domínio/.test(n)){spikes(x,z,22,1.2,6.5,0x1a0a33,2.8,true);spikes(x,z,10,1,5,0xb98cff,2)}
   else if(/Mil Cortes/.test(n)){slashes(x,z,12,c);spinRing(x,z,c,4,.4)}
@@ -1703,10 +1703,17 @@ function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldow
 function skillButtonState(sk,mp){if(sk.empty)return {kind:'empty',text:sk.lockedRank?'BLOQUEADO':'VAZIO'};if(sk.cdT>0)return {kind:'cooldown',text:(sk.cdT<10?sk.cdT.toFixed(1):Math.ceil(sk.cdT))+'s'};if(mp<sk.mp)return {kind:'mana',text:'SEM MANA'};return {kind:'ready',text:'PRONTA'}}
 function renderSkillButton(b,sk,mp){const state=skillButtonState(sk,mp);b.dataset.state=state.kind;let label=b.querySelector('.state');if(!label){label=document.createElement('span');label.className='state';b.appendChild(label)}if(label.textContent!==state.text)label.textContent=state.text;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(sk)+')';b.style.opacity='1';b.setAttribute('aria-label',sk.n+' · '+state.text);}
 function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atkOf(MAGIC_CLS.includes(sk.sourceClass)?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0))}
-function skillUpgradeText(sk){return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
+function healerLevel(sk){return Math.max(0,Math.min(10,Number(run.skl[sk.n])||0))}
+function judgmentRadius(sk){return 6+.4*healerLevel(sk)}
+function healingFraction(sk){return sk.pow+(sk.n==='Luz Curativa'?.015*healerLevel(sk):0)}
+function blessAllies(P){for(const a of allies)if(!a.dead&&a.life>0&&Math.hypot(a.x-P.x,a.z-P.z)<=8)a.blessingUntil=time+5}
+function allyProtection(a){return Math.min(a.fortressUntil>time?.5:1,a.blessingUntil>time?.7:1)}
+function skillUpgradeText(sk){if(sk.n==='Julgamento')return 'Melhorar: +0,4 m de raio, +15% do dano base e −5% da recarga base por nível.';if(sk.n==='Luz Curativa')return 'Melhorar: +1,5 ponto percentual de cura e −5% da recarga base por nível.';return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
   let d=SKD[sk.t]||'Habilidade';
-  if(sk.n==='Meteoro')d='Um grande meteoro cai na região da mira após 0,9s. Atinge todos em um raio de 5 m. Pode lançar no chão vazio, a até 14 m.';
+  if(sk.n==='Julgamento')d='Explosão sagrada ao seu redor: raio de '+String(judgmentRadius(sk)).replace('.',',')+' m.';
+  else if(sk.n==='Bênção')d='Por 5s, você recebe 60% menos dano e aliados a até 8 m recebem 30% menos dano. A proteção acompanha os aliados; não acumula com Fortaleza Viva.';
+  else if(sk.n==='Meteoro')d='Um grande meteoro cai na região da mira após 0,9s. Atinge todos em um raio de 5 m. Pode lançar no chão vazio, a até 14 m.';
   else if(sk.n==='Sol Negro')d='Cria uma área de fogo de 4 m na mira, a até 14 m. Causa cinco pulsos, um por segundo, inclusive em inimigos que entrarem depois. Cada pulso causa um quinto do dano total.';
   else if(sk.n==='Era do Gelo')d='Cria uma área de gelo de 6 m na mira, a até 14 m. Quatro pulsos durante 2,4s causam dano e reduzem o movimento dos inimigos pela metade por 2s. Não atordoa. Cada pulso causa um quarto do dano total.';
   else if(sk.n==='Fúria dos Céus')d='Três raios atingem a mesma região da mira durante 1,1s, em um raio de 3 m. Cada raio causa um terço do dano total. Pode lançar no chão vazio, a até 14 m.';
@@ -1719,7 +1726,7 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.n==='Fortaleza Viva')d='Por 5s, você recebe '+Math.round((1-sk.pow)*100)+'% menos dano. Aliados a até 6 m no momento do uso recebem 50% menos dano por 5s, mesmo se saírem de perto. Reaplicar renova a duração, sem multiplicar a proteção.';
   else if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
   else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso. Ativos: '+minionAllies().length+'/'+summonCap()+'. Permanecem até morrer. O limite aumenta com a mana máxima; só ocupa vagas livres.';
-  else if(sk.t==='heal')d='Recupera '+Math.round(player.maxhp*sk.pow)+' da sua vida ('+Math.round(sk.pow*100)+'% da vida máxima) e a mesma porcentagem da vida dos aliados.';
+  else if(sk.t==='heal')d='Cura você e os aliados em '+String(Math.round(healingFraction(sk)*1000)/10).replace('.',',')+'% da vida máxima ('+fmt(Math.round(player.maxhp*healingFraction(sk)))+' PV em você).';
   else if(sk.t==='guard')d='Recebe '+Math.round((1-sk.pow)*100)+'% menos dano por 5s.';
   else if(sk.t==='buff_dmg')d='Aumenta seu dano em '+Math.round((sk.pow-1)*100)+'% por 8s.';
   else if(sk.t==='stealth')d='Fica furtivo por 5s; o próximo ataque causa o triplo do dano.';
@@ -1797,7 +1804,7 @@ function hurtPlayer(amt){
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
-function hurtAlly(a,amt){if(a.dead)return;if(a.fortressUntil>time)amt*=.5;if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
+function hurtAlly(a,amt){if(a.dead)return;amt*=allyProtection(a);if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
   if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[NARRADOR]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
@@ -1850,7 +1857,9 @@ function dodge(){
   if(Math.hypot(dx,dz)<.2){dx=Math.sin(player.face);dz=Math.cos(player.face)}const l=Math.hypot(dx,dz);
   player.dir={x:dx/l,z:dz/l};player.face=Math.atan2(dx,dz);player.dodgeT=.32;player.iT=.38;player.dodgeCd=dodgeCdVal();player.ghostT=0;sfx('dodge');dprog('dodge',1);demandBreak('nododge');
 }
-function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*(npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1));if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
+function potionHealFraction(){return (npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1)}
+function potionDescription(){const p=potionHealFraction();return 'Cura '+String(Math.round(p*10000)/100).replace('.',',')+'% da vida máxima ('+fmt(Math.round(player.maxhp*p))+' PV). Sem mana nem recarga.'+(hasT('lakeg')?' Recupera também 30% do escudo máximo.':'')}
+function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
   if(player.dead||paused||!sk||sk.empty)return;if(sk.cdT>0)return;
    if(sk.t==='summon'&&minionAllies().length>=summonCap()&&(sk.n!=='Matilha Espiritual'||!allies.some(a=>!a.dead&&a.summonKind==='wolf'))){floater(player.x,player.z,'LIMITE DE INVOCAÇÕES','#b18cff');return}
@@ -1880,16 +1889,16 @@ function runSkill(sk){
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){sfx('skill');return}skillFx(sk,P);
   switch(sk.t){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
-    case 'nova':{const r=sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
+    case 'nova':{const r=sk.n==='Julgamento'?judgmentRadius(sk):sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
     case 'chain':{let cur={x:P.x,z:P.z};const hs=new Set(),pts=[{x:P.x,z:P.z}];for(let i=0;i<5;i++){let best=null,bd=i?7:12;for(const e of enemies){if(e.dead||hs.has(e))continue;const d=Math.hypot(e.x-cur.x,e.z-cur.z);if(d<bd){bd=d;best=e}}if(!best)break;hs.add(best);pts.push({x:best.x,z:best.z});hurtEnemy(best,dmg*(1-i*.12),cur.x,cur.z,{kb:1,pierce:true,fromPlayer:true,skillHit:true});cur=best}zig(pts,col);if(pts.length===1)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
     case 'bolt':{if(sk.n==='Flecha Estelar'){for(const offset of [-.2,0,.2])shoot(P.x,P.z,P.face+offset,30,dmg/3,'player',0xb8a2ff,'sarrow',{skillHit:true,pierce:true,kb:1,sc:1.8});break}const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
     case 'stone_lance':{const dx=Math.sin(P.face),dz=Math.cos(P.face);for(let i=1;i<=5;i++){const x=P.x+dx*i*1.5,z=P.z+dz*i*1.5;spikes(x,z,3,0,.5,col,1.5+i*.1);cracks(x,z,.7,col)}for(const e of enemies){if(e.dead)continue;const x=e.x-P.x,z=e.z-P.z,along=x*dx+z*dz,across=Math.abs(x*dz-z*dx);if(along>0&&along<8+e.r&&across<.8+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:e.isBoss?.2:.8,pierce:true,fromPlayer:true,skillHit:true})}shake(.25);break}
     case 'thunderstorm':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);if(!targets.length)for(let i=0;i<5;i++)targets.push({x:cx+(i?Math.sin(i*Math.PI/2)*2.5:0),z:cz+(i?Math.cos(i*Math.PI/2)*2.5:0)});for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
     case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,hit:new Set()};P.dashSpd=30;break}
     case 'blink':{for(let d=7;d>0;d-=1){const bx=P.x-Math.sin(P.face)*d,bz=P.z-Math.cos(P.face)*d;if(freeAt(bx,bz,.5)){fxBurst(P.x,1,P.z,col,10,4);P.x=bx;P.z=bz;break}}P.iT=.6;fxRing(P.x,P.z,col,2);break}
-    case 'heal':{const h=P.maxhp*sk.pow;P.hp=Math.min(P.maxhp,P.hp+h);floater(P.x,P.z,'+'+fmt(h),'#9fffc0');for(const a of allies)if(!a.dead&&a.life>0)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*sk.pow);break}
+    case 'heal':{const fraction=healingFraction(sk),h=P.maxhp*fraction;P.hp=Math.min(P.maxhp,P.hp+h);floater(P.x,P.z,'+'+fmt(h),'#9fffc0');for(const a of allies)if(!a.dead&&a.life>0)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*fraction);break}
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[NARRADOR]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
-    case 'guard':{P.guard=5;P.guardVal=sk.pow;toast('<b>[NARRADOR]</b> '+sk.n+': dano recebido reduzido');break}
+    case 'guard':{P.guard=5;P.guardVal=sk.pow;if(sk.n==='Bênção')blessAllies(P);toast('<b>[NARRADOR]</b> '+sk.n+': dano recebido reduzido');break}
     case 'stealth':{P.stealth=5;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;toast('<b>[NARRADOR]</b> Furtivo por 5s. Próximo golpe x3');break}
     case 'minionbuff':{const mine=minionAllies(true),blocked=hasAff('nocure');for(const a of mine){if(!blocked)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+(blocked?' fortalecidas (sem cura)':' curadas e fortalecidas'),'#b18cff');break}
     case 'summon':{const n=Math.min(Math.round(sk.pow),Math.max(0,summonCap()-minionAllies().length));
@@ -2248,7 +2257,7 @@ function hud(){
   $('bZ').hidden=profile.rank!==9;
   for(const [id,s] of[['bQ',P.skills[0]],['bR',P.skills[1]],['bT',P.skills[2]],['bG',P.skills[3]],['bY',P.skills[4]],['bU',P.skills[5]],['b5',P.skills[6]],['bZ',profile.rank===9?(run.sovSk||SOV_SK):null]]){if(!s)continue;const b=$(id);b.querySelector('.nm').textContent=s.n;renderSkillButton(b,s,P.mp);const tip=skillButtonTip(s);if(b.title!==tip)b.title=tip}
   if(run.fused&&$('stF'))renderSkillButton($('stF'),run.fused,P.mp);run.stolen.forEach((s,i)=>{const b=$('st'+i);if(b)renderSkillButton(b,s,P.mp)});
-  $('potn').textContent=run.pots;
+  $('potn').textContent=run.pots;$('bH').title=potionDescription();$('bH').setAttribute('aria-label','Poção de vida. '+potionDescription());
   let obj='';
   if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · lojas, Mercado e Ordem · portais lá fora';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' a '+Math.round(bd)+'m · cidade '+nc.c.name+' a '+Math.round(pd)+'m':'Explore'}}
   else if(L.special)obj=L.special.msg;
@@ -3427,7 +3436,7 @@ function openShop(id){
   let h='<div class="sysline">'+S.vendor+': '+(id==='pot'?'Poção boa salva vida lá dentro.':id==='wep'?'Só vendo o que o seu rank aguenta.':'Armadura pesada, dano leve.')+' · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';
   if(id==='wep'||id==='arm')h='<div class="tabs">'+btn('Armas','equipshop','wep',true,id==='wep'?'on':'')+btn('Armaduras','equipshop','arm',true,id==='arm'?'on':'')+'</div>'+h;
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
-  if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
+  if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.give.pots?(p.give.pots>1?'Cada poção: ':'')+potionDescription():p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':(EQUIP_SLOTS.includes(L.armorSlot)&&L.armorSlot!=='w'?L.armorSlot:'a');if(id==='arm')h+='<div class="tabs">'+EQUIP_SLOTS.filter(k=>k!=='w').map(k=>btn(EQUIP_LABEL[k],'armorpart',k,true,sl===k?'on':'')).join('')+'</div>';const eq=run.equip[sl];
     if(eq){const up=eq.up||0,gc=Math.round(PRICE[eq.tier]*equipFactor(eq.slot)*.25*(up+1)*Math.pow(1.12,up)),cc=3*(up+1),have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
     for(let t=0;t<Math.min(profile.rank===9?10:9,pr+3);t++){const it=makeItem(sl,t,0);const lock=pr<t;const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+(lock?' · exige rank '+RANKS[t].id:'')+(()=>{const w=sl==='w',u=w?' de ataque':' de escudo',d=w?itemAtk(it)-itemAtk(eq):itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+EQUIP_LABEL[sl].toLowerCase()+' nesta posição</b>'})(),btn(fmt(Math.round(PRICE[t]*equipFactor(sl)*priceMul(id)))+' ouro','buyi',sl+t,!lock&&run.gold>=Math.round(PRICE[t]*equipFactor(sl)*priceMul(id))))}}
@@ -3492,7 +3501,7 @@ function bagItems(){
   h+='<div class="sec">CONSUMÍVEIS</div>';
   {const fo=run.foods||{};const ks=Object.keys(fo).filter(k=>fo[k]>0);h+=row('Comida'+(run.food&&run.food.t>0?' · ativo: '+run.food.n+' ('+fmtT(run.food.t)+')':''),ks.length?'':'Cozinhe no Mercado com peixes do lago',ks.map(k=>btn('Comer '+k+' ×'+fo[k],'eat',k)).join(''))}
   const canScroll=L.mode==='dungeon'&&!(L.gate.red&&!L.bossDead)&&run.scrolls>0;
-  h+=row('Poções de vida: '+run.pots,'Botão ✚ ou tecla H','')+row('Pergaminhos de retorno: '+run.scrolls,'Leva você da masmorra para a cidade',btn('USAR','scroll',0,canScroll));
+  h+=row('Poções de vida: '+run.pots,potionDescription()+' Consome 1 poção. Botão ✚ ou tecla '+keyLabel(keyOf('pot'))+'.','')+row('Pergaminhos de retorno: '+run.scrolls,'Leva você da masmorra para a cidade',btn('USAR','scroll',0,canScroll));
   h+='<div class="sec">PODERES</div>'+row('Habilidades roubadas',run.stolen.length?run.stolen.map(s=>s.n).join(', '):'Nenhuma ainda. Absorva essências de guardiões.','')+row('Ecos',run.shadows.length?run.shadows.map(b=>b.n).join(', '):(CLASSES[profile.cls].arise?'Use ERGUER ECO nos guardiões':'Só o Necromante levanta ecos'),'')+row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Ordem','');
   if(!city)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Venda de itens só dentro de uma cidade.</div>';
   openModal('BOLSA',bagTabs('itens')+h);
