@@ -1619,6 +1619,7 @@ function skillFx(sk,P){
   else if(sk.t==='buff_dmg'){for(let i=0;i<24;i++){const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(i%2?0xff3322:0xff8a1e,1));const a=rnd(0,TAU);o.position.set(x+Math.cos(a)*.7,rnd(0,.5),z+Math.sin(a)*.7);scene.add(o);fxs.push({o,t:0,dur:rnd(.5,.9),kind:'p',v:{x:0,y:rnd(4,7),z:0}})}}
   else if(sk.t==='stealth'){for(let i=0;i<10;i++){const o=new THREE.Mesh(geo('cl',()=>new THREE.SphereGeometry(.5,8,6)),glow(0x6a6a7a,.4));o.position.set(x+rnd(-.8,.8),rnd(.3,1.5),z+rnd(-.8,.8));scene.add(o);fxs.push({o,t:0,dur:.8,kind:'p',v:{x:rnd(-2,2),y:1,z:rnd(-2,2)}})}}
   else if(sk.t==='summon')circle(x,z,c);
+  else if(sk.n==='Lâmina Envenenada'){cloud({x,z},c)}
   else if(sk.t==='dot'){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<5.5)cloud(e,c);cloud({x,z},c)}
 }
 
@@ -1649,7 +1650,9 @@ function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e
 /* Nível do monstro: rank da masmorra (ou andar da torre) e perigo do mundo. Caveira: amarela 2×, laranja 5×, vermelha 10× o seu nível. */
 function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(9,e.gr||0)];let l=g.lvl;if(e.wild)l=Math.round(l*(1+.15*Math.max(0,(e.gr||0)-1)));if(e.elite)l+=3;if(e.isBoss)l+=5;return e.lvl=Math.max(1,l)}
 function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>=2?'#ffd54f':null}
-function applySkillMark(e,amt,o){if(!o.fromPlayer||o.pet)return amt;if(o.skillHit)e.mark=time+6;else if(!o.passive&&Number.isInteger(o.basicClass)&&e.mark>time){e.mark=0;amt*=1.5;for(const sk of player.skills)sk.cdT=Math.max(0,sk.cdT-1);floater(e.x,e.z,'MARCA!','#b18cff',true)}return amt}
+function identityHitDamage(e,amt,o){if(!o.fromPlayer||o.pet||o.passive)return amt;if(o.execute&&e.hp<=e.maxhp*.35)amt*=1.5;if(o.longshot&&Math.hypot(e.x-o.originX,e.z-o.originZ)>=8)amt*=1.25;return amt}
+function applyWeaponVenom(e,amt){const P=player;if(!(P.venomUntil>time)||!(P.venomCharges>0))return;P.venomCharges--;e.basicDots=e.basicDots||{};const old=e.basicDots.venom;e.basicDots.venom={t:4,d:Math.max(old?.d||0,amt*.6/4),acc:old?.acc||0};floater(e.x,e.z,'ENVENENADO','#8de06a')}
+function judgmentRelief(P,r){if(hasAff('nocure'))return;for(const a of [P,...allies])if(!a.dead&&(a===P||a.life>0)&&Math.hypot(a.x-P.x,a.z-P.z)<=r){const h=Math.min(a.maxhp-a.hp,a.maxhp*.08);if(h>0){a.hp+=h;floater(a.x,a.z,'+'+fmt(h),'#fff3a0');fxRing(a.x,a.z,0xfff3a0,1,.4)}}}
 function resolveEnemyStun(e,oldStun){if(e.stun>oldStun){if(e.isBoss||time<(e.stunResistUntil||0))e.stun=oldStun;else{e.stun=Math.min(e.stun,.3);e.stunResistUntil=time+3}}}
 function hurtEnemy(e,amt,sx,sz,o={}){
   if(e.dead)return;const oldStun=e.stun||0;if(e.invuln){if(Math.random()<.3)floater(e.x,e.z,'IMUNE','#9fb0c4');return}
@@ -1662,21 +1665,21 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance():.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn;if(e.res)amt*=1-e.res;
-  if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=applySkillMark(e,amt,o);
+  if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=identityHitDamage(e,amt,o);
   if(o.fromPlayer)amt*=1+titleHitBonus(e)+(e.isBoss?trophyB():0);if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(1,Math.round(amt)));if(amt<=0)return;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+fmt(Math.trunc(amt)):crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(crit&&o.fromPlayer){shake(.12);hitstop(.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
-  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyGearRuneHit(e,amt)}
+  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyWeaponVenom(e,amt);applyGearRuneHit(e,amt)}
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
   resolveEnemyStun(e,oldStun);
   sfx(blocked?'block':'hit',crit);
   if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true;
   if(e.hp<=0)killEnemy(e);
   else if(e.isBoss&&e.phase===1&&e.hp<e.maxhp*.5)enrage(e);
-  else if(e.isBoss&&e.phase===2&&e.boss.p3&&e.hp<e.maxhp*.25)awaken3(e);
+  else if(e.isBoss&&e.phase===2&&e.boss.p3&&e.hp<e.maxhp*.25)awaken3(e);return amt;
 }
 /* PASSIVAS DE CLASSE: funcionam sozinhas a cada acerto do jogador (feedback do Irror). */
 const PASSIVES=[
@@ -1724,10 +1727,14 @@ function applyHealingLight(a,sk){if(a.dead||hasAff('nocure'))return;const amount
   if(healed>0)floater(a.x,a.z,'+'+fmt(healed),'#9fffc0');fxRing(a.x,a.z,0xfff3a0,1,.4)}
 function blessAllies(P){for(const a of allies)if(!a.dead&&a.life>0&&Math.hypot(a.x-P.x,a.z-P.z)<=8)a.blessingUntil=time+5}
 function allyProtection(a){return Math.min(a.fortressUntil>time?.5:1,a.blessingUntil>time?.7:1)}
-function skillUpgradeText(sk){if(sk.n==='Julgamento')return 'Melhorar: +0,4 m de raio, +15% do dano base e −5% da recarga base por nível.';if(sk.n==='Luz Curativa')return 'Melhorar: +2 pontos percentuais no limite do escudo e −5% da recarga base por nível.';return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
-function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
+function skillUpgradeText(sk){if(sk.n==='Lâmina Envenenada')return 'Melhorar: −5% da recarga base por nível. Veneno acompanha o dano real do ataque básico.';if(sk.n==='Julgamento')return 'Melhorar: +0,4 m de raio, +15% do dano base e −5% da recarga base por nível.';if(sk.n==='Luz Curativa')return 'Melhorar: +2 pontos percentuais no limite do escudo e −5% da recarga base por nível.';return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
+function skillDesc(sk){if(!sk)return '';const support=sk.n==='Lâmina Envenenada'||['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
   let d=SKD[sk.t]||'Habilidade';
-  if(sk.n==='Julgamento')d='Explosão sagrada ao seu redor: raio de '+String(judgmentRadius(sk)).replace('.',',')+' m.';
+  if(sk.n==='Julgamento')d='Explosão sagrada ao seu redor: raio de '+String(judgmentRadius(sk)).replace('.',',')+' m. Ao acertar um inimigo, cura você e aliados nesse raio em 8% da vida máxima, uma vez por uso. Sem cura bloqueia apenas a cura.';
+  else if(sk.n==='Passo Sombrio')d='Avança golpeando inimigos. Causa +50% de dano contra alvos com até 35% de vida; chefes mantêm seu limite de dano por golpe.';
+  else if(sk.n==='Lâmina Envenenada')d='Por 8s, seus próximos 3 acertos de ataque básico aplicam veneno: 60% do dano do acerto ao longo de 4s. Reaplicar no mesmo alvo renova sem somar venenos. Cada inimigo atingido consome uma carga.';
+  else if(sk.n==='Flecha Perfurante')d='Flecha que atravessa inimigos. Causa +25% de dano em alvos a pelo menos 8 m do ponto do disparo.';
+  else if(sk.n==='Chuva de Flechas')d='Chuva na mira, a até 14 m. Cada impacto reduz o movimento dos inimigos pela metade por 2s. Use para impedir aproximações.';
   else if(sk.n==='Bênção')d='Por 5s, você recebe 60% menos dano e aliados a até 8 m recebem 30% menos dano. A proteção acompanha os aliados; não acumula com Fortaleza Viva.';
   else if(sk.n==='Meteoro')d='Um grande meteoro cai na região da mira após 0,9s. Atinge todos em um raio de 5 m. Pode lançar no chão vazio, a até 14 m.';
   else if(sk.n==='Sol Negro')d='Cria uma área de fogo de 4 m na mira, a até 14 m. Causa cinco pulsos, um por segundo, inclusive em inimigos que entrarem depois. Cada pulso causa um quinto do dano total.';
@@ -1753,7 +1760,7 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.n==='Lança de Gelo')d='Projétil que atravessa inimigos e causa lentidão por 3s.';
   else if(sk.n==='Bola de Fogo')d='Projétil de fogo; a queimadura causa mais 25% do dano ao longo de 3s.';
   lines.push('<b>Efeito:</b> '+d);
-  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Sol Negro'?1/5:sk.n==='Era do Gelo'?1/4:sk.n==='Fúria dos Céus'?1/3:sk.n==='Mil Cortes'?1/6:sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Sol Negro'?' por pulso (5 pulsos)':sk.n==='Era do Gelo'?' por pulso (4 pulsos)':sk.n==='Fúria dos Céus'?' por raio (3 raios)':sk.n==='Meteoro'?' por inimigo atingido':sk.n==='Mil Cortes'?' por golpe (6 golpes)':sk.n==='Lâmina Rúnica'?' por explosão (3 explosões)':sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');lines.push('<b>Marca:</b> dura 6s. Seu próximo ataque básico nesse alvo causa +50% de dano e reduz em 1s a recarga das habilidades de classe.');}
+  if(!support){const dmg=skillDamage(sk),value=Math.round(dmg*(sk.n==='Sol Negro'?1/5:sk.n==='Era do Gelo'?1/4:sk.n==='Fúria dos Céus'?1/3:sk.n==='Mil Cortes'?1/6:sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?1/3:1)*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:sk.t==='dot'?.2:1)),unit=sk.n==='Sol Negro'?' por pulso (5 pulsos)':sk.n==='Era do Gelo'?' por pulso (4 pulsos)':sk.n==='Fúria dos Céus'?' por raio (3 raios)':sk.n==='Meteoro'?' por inimigo atingido':sk.n==='Mil Cortes'?' por golpe (6 golpes)':sk.n==='Lâmina Rúnica'?' por explosão (3 explosões)':sk.n==='Flecha Estelar'?' por flecha (3 flechas)':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso (5 pulsos)':sk.t==='chain'?' no primeiro alvo; cada salto perde 12% do dano inicial':' por inimigo atingido';lines.push('<b>Dano atual:</b> '+value+unit+'. Antes da defesa e dos críticos.');}
   lines.push('<b>Custo:</b> '+sk.mp+' de mana.','<b>Recarga atual:</b> '+skillCooldownText(sk)+'s.');return lines.join('<br>');
 }
 /* espólio de monstros */
@@ -1863,7 +1870,7 @@ function attack(){
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const holder=projModel(type,col,sc);holder.position.set(x,1.1,z);holder.rotation.y=a;scene.add(holder);
-  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
+  projs.push({mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
 function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
@@ -1906,12 +1913,12 @@ function runSkill(sk){
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){sfx('skill');return}skillFx(sk,P);
   switch(sk.t){
     case 'cone':{for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<4.5+e.r&&Math.abs(da)<.95)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:.8,pierce:true,fromPlayer:true,skillHit:true})}hitstop(.08);shake(.3);break}
-    case 'nova':{const r=sk.n==='Julgamento'?judgmentRadius(sk):sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});hitstop(.08);shake(.35);break}
+    case 'nova':{let landed=false;const r=sk.n==='Julgamento'?judgmentRadius(sk):sk.n==='Golpe Sísmico'?8:6;const ice=sk.n.includes('Gelo');for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<r+e.r){const hit=hurtEnemy(e,dmg,P.x,P.z,{kb:4,slow:ice?4:0,pierce:true,fromPlayer:true,skillHit:true});if(hit>0)landed=true}if(sk.n==='Julgamento'&&landed)judgmentRelief(P,r);hitstop(.08);shake(.35);break}
     case 'chain':{let cur={x:P.x,z:P.z};const hs=new Set(),pts=[{x:P.x,z:P.z}];for(let i=0;i<5;i++){let best=null,bd=i?7:12;for(const e of enemies){if(e.dead||hs.has(e))continue;const d=Math.hypot(e.x-cur.x,e.z-cur.z);if(d<bd){bd=d;best=e}}if(!best)break;hs.add(best);pts.push({x:best.x,z:best.z});hurtEnemy(best,dmg*(1-i*.12),cur.x,cur.z,{kb:1,pierce:true,fromPlayer:true,skillHit:true});cur=best}zig(pts,col);if(pts.length===1)floater(P.x,P.z,'SEM ALVO','#8aa6c0');break}
-    case 'bolt':{if(sk.n==='Flecha Estelar'){for(const offset of [-.2,0,.2])shoot(P.x,P.z,P.face+offset,30,dmg/3,'player',0xb8a2ff,'sarrow',{skillHit:true,pierce:true,kb:1,sc:1.8});break}const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
+    case 'bolt':{if(sk.n==='Flecha Estelar'){for(const offset of [-.2,0,.2])shoot(P.x,P.z,P.face+offset,30,dmg/3,'player',0xb8a2ff,'sarrow',{skillHit:true,pierce:true,kb:1,sc:1.8});break}const ar=sk.n.includes('Flecha'),ice=/Gelo/.test(sk.n),fire=/Fogo|Chama/.test(sk.n);shoot(P.x,P.z,P.face,ar?30:ice?27:20,dmg,'player',col,ar?'sarrow':ice?'ice':fire?'fire':'orb',{longshot:sk.n==='Flecha Perfurante',skillHit:true,pierce:ar||ice,kb:ice?1:3,slow:ice?3:0,burn:fire?.25:0,sc:ar?1.6:ice?1.35:1.8});break}
     case 'stone_lance':{const dx=Math.sin(P.face),dz=Math.cos(P.face);for(let i=1;i<=5;i++){const x=P.x+dx*i*1.5,z=P.z+dz*i*1.5;spikes(x,z,3,0,.5,col,1.5+i*.1);cracks(x,z,.7,col)}for(const e of enemies){if(e.dead)continue;const x=e.x-P.x,z=e.z-P.z,along=x*dx+z*dz,across=Math.abs(x*dz-z*dx);if(along>0&&along<8+e.r&&across<.8+e.r)hurtEnemy(e,dmg,P.x,P.z,{kb:5,stun:e.isBoss?.2:.8,pierce:true,fromPlayer:true,skillHit:true})}shake(.25);break}
     case 'thunderstorm':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);if(!targets.length)for(let i=0;i<5;i++)targets.push({x:cx+(i?Math.sin(i*Math.PI/2)*2.5:0),z:cz+(i?Math.cos(i*Math.PI/2)*2.5:0)});for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
-    case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,hit:new Set()};P.dashSpd=30;break}
+    case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,execute:sk.n==='Passo Sombrio',hit:new Set()};P.dashSpd=30;break}
     case 'blink':{for(let d=7;d>0;d-=1){const bx=P.x-Math.sin(P.face)*d,bz=P.z-Math.cos(P.face)*d;if(freeAt(bx,bz,.5)){fxBurst(P.x,1,P.z,col,10,4);P.x=bx;P.z=bz;break}}P.iT=.6;fxRing(P.x,P.z,col,2);break}
     case 'heal':{applyHealingLight(P,sk);for(const a of allies)if(!a.dead&&a.life>0)applyHealingLight(a,sk);break}
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[NARRADOR]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
@@ -1920,8 +1927,8 @@ function runSkill(sk){
     case 'minionbuff':{const mine=minionAllies(true),blocked=hasAff('nocure');for(const a of mine){if(!blocked)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+(blocked?' fortalecidas (sem cura)':' curadas e fortalecidas'),'#b18cff');break}
     case 'summon':{const n=Math.min(Math.round(sk.pow),Math.max(0,summonCap()-minionAllies().length));
       for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,1e9);if(sk.giant){a2.giant=true;a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}saveRun();break}
-    case 'rain':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.28:.35);hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);fallFx(hx,hz,du,fk,col)}break}
-    case 'dot':{const pt=skillGroundPoint(11,5);for(let i=0;i<5;i++){const h=hazard(pt.x,pt.z,5.5,.5+i,dmg/5,'player',col);h.kb=0;h.passive=true}break}
+    case 'rain':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.28:.35);const h=hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);if(sk.n==='Chuva de Flechas')h.slow=2;fallFx(hx,hz,du,fk,col)}break}
+    case 'dot':{if(sk.n==='Lâmina Envenenada'){P.venomCharges=3;P.venomUntil=time+8;fxRing(P.x,P.z,col,1.5);break}const pt=skillGroundPoint(11,5);for(let i=0;i<5;i++){const h=hazard(pt.x,pt.z,5.5,.5+i,dmg/5,'player',col);h.kb=0;h.passive=true}break}
   }
   sfx('skill');
 }
@@ -2112,7 +2119,7 @@ function update(dt){
     for(const c of Object.values(run.classCooldowns||{}))c.left=Math.max(0,c.left-dt);for(const s of P.skills)s.cdT=Math.max(0,s.cdT-dt);for(const s of run.stolen)s.cdT-=dt;if(run.fused)run.fused.cdT-=dt;if(run.food&&run.food.t>0){run.food.t-=dt;if(run.food.t<=0){refreshStats();toast('O efeito da comida acabou.')}}
     let mv=0;
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
-      if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
+      if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{execute:P.dashDmg.execute,kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
     else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));moveEnt(P,ix*sp*dt,iz*sp*dt);if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
@@ -2127,7 +2134,7 @@ function update(dt){
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.mesh.position.set(p.x,1.1,p.z);let done=p.life<=0;if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
-    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
+    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
     else{if(!P.dead&&Math.hypot(P.x-p.x,P.z-p.z)<P.r+p.r){hurtPlayer(p.dmg);done=true}else for(const a of allies)if(Math.hypot(a.x-p.x,a.z-p.z)<a.r+p.r){hurtAlly(a,p.dmg);done=true;break}}
     if(!done){if(L.grid){if(!gfree(p.x,p.z))done=true}else if(!worldFree(p.x,p.z,.1))done=true}
     if(done){scene.remove(p.mesh);projs.splice(i,1)}}
@@ -2265,7 +2272,7 @@ function hud(){
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):'Masmorra '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
   $('lv').textContent='NV '+run.level+' · '+where2;
-  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' LUZ ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
+  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' LUZ ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp)+(P.venomUntil>time&&P.venomCharges>0?' · VENENO '+P.venomCharges+' ('+Math.ceil(P.venomUntil-time)+'s)':'');
   $('mpb').style.width=(100*P.mp/P.maxmp)+'%';$('mpt').textContent=Math.floor(P.mp)+' / '+P.maxmp;
   $('xpb').style.width=(100*run.xp/xpNeed())+'%';$('gold').textContent=fmt(run.gold);
   const mi=minionAllies().length,ec=allies.filter(a=>a.shadow&&!a.dead).length,showArmy=mi>0||ec>0||canArise()||P.skills.some(s=>s&&['summon','minionbuff'].includes(s.t));$('armyline').style.display=showArmy?'flex':'none';$('ecot').textContent='ECOS '+ec+'/'+shadowCap();$('armyt').textContent='INVOCADOS '+mi+'/'+summonCap();
@@ -3346,7 +3353,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+='<div class="sec">BÔNUS EM % (SOMADOS)</div>';
   for(const x of bp.src)if(x[1]||x[2])h+=line(x[0],(x[1]?P(x[1])+' dano':'')+(x[1]&&x[2]?' · ':'')+(x[2]?P(x[2])+' vida':''),'');
   h+=line('Soma → efetivo',P(bp.dmg)+' → <span style="color:#ffd54f">'+P(bp.edmg)+'</span> dano · '+P(bp.hp)+' → <span style="color:#ffd54f">'+P(bp.ehp)+'</span> vida','quanto maior a soma, menos cada % rende: efetivo = 3×soma ÷ (3 + soma), nunca passa de +300%');
-  h+='<div class="sec">MARCAS</div><div class="sysline" style="font-size:12px">Habilidades de ataque <b>marcam</b> os alvos por 6 s. O próximo golpe normal num alvo marcado causa <b>+50%</b> e tira <b>1 s</b> da recarga de todas as habilidades.</div>';
+  h+='<div class="sec">IDENTIDADE DAS CLASSES</div><div class="sysline"><b>Assassino:</b> veneno preparado e finalização de feridos.<br><b>Arqueiro:</b> distância, perfuração e contenção.<br><b>Curandeiro:</b> cura, purificação e proteção; Julgamento sustenta o grupo.<br><b>Guerreiro/Tanque:</b> pressão no corpo a corpo e defesa.<br><b>Magos:</b> queimadura, lentidão, impacto ou ataques em cadeia.<br><b>Invocador/Necromante:</b> comando de criaturas e ecos. Suas marcas específicas permanecem.</div>';
   const pv=passiveOf();if(pv)h+=line('Passiva: '+pv.n,'',pv.d);
   return h+'</div>'}
 function bagTabs(cur){if(cur==='itens'||cur==='world')return '';return '<div class="tabs">'+[['char','Personagem'],['pow','Poderes'],['titles','Títulos']].map(([k,n])=>btn(n,'bagtab',k,true,k===cur?'on':'')).join('')+'</div>'}
@@ -3718,7 +3725,7 @@ $('goBtn').addEventListener('click',()=>{
   startGame();
 });
 $('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
-$('again').addEventListener('click',()=>{$('dead').hidden=true;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=2;player.slowT=0;player.bleedT=0;player.healShield=0;player.healShieldUntil=0;
+$('again').addEventListener('click',()=>{$('dead').hidden=true;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=2;player.slowT=0;player.bleedT=0;player.healShield=0;player.healShieldUntil=0;player.venomCharges=0;player.venomUntil=0;
   if(L.mode!=='world'){if(L.special)leaveDungeon(false);else leaveDungeon(true)}const c=nearestCity(player.x,player.z).c;player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);paused=false;saveRun();toast('<b>[NARRADOR]</b> Você acordou em '+c.name+'.')});
 function newGame(){if(!confirm('Começar um jogo novo? O save atual será APAGADO deste navegador. Se quiser guardar, cancele e use "Exportar save" antes.'))return;if(!confirm('Tem certeza? Não dá para desfazer.'))return;window._wipe=1;started=false;paused=true;store.set=()=>{};store.del('pds2_profile');store.del('pds3_run');removeEventListener('pagehide',saveRunPH);location.reload()}
 function saveRunPH(){saveRun()}

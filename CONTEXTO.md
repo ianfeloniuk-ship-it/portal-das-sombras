@@ -405,3 +405,11 @@ Validação: verify-v98 testa cura, purificação, excedente, limites, reaplica�
 
 ## Integração final da reputação — v99
 Ian confirmou nesta conversa: «eu aprovo». Integrada a v98 publicada b86b3ff (Luz Curativa com purificação e escudo de excesso), preservando a reputação desenvolvida como v97. Versão final de publicação: v99 para evitar colisão com o outro chat. Bloqueio anterior de autorização superado pela confirmação atual.
+
+
+## Identidade de Assassino, Arqueiro e Curandeiro — v100
+Ian autorizou seguir com identidade após a lista de pendências. Removida a marca universal de habilidades (+50% no próximo básico e −1s em todas as recargas), inclusive explicações repetidas. Marcas específicas de comando das invocações/ecos preservadas. Outros efeitos próprios de guerreiros, tanques e magos continuam; não afirmar revisão completa do equilíbrio de todas as classes.
+Assassino: Passo Sombrio causa +50% contra alvos com até 35% de vida, respeitando o limite de chefes. Lâmina Envenenada prepara 3 acertos básicos por até 8s: cada alvo acertado gasta uma carga e recebe veneno de 60% do dano do acerto ao longo de 4s. Renova sem somar cópias; mantém veneno mais forte. Não cria mais área igual à Praga. Melhoria reduz recarga; dano acompanha ataque básico. Cargas/tempo visíveis no HUD. Efeito temporário não entra no save, morte limpa.
+Arqueiro: Flecha Perfurante causa +25% a pelo menos 8m do ponto de disparo, preservado durante voo; Chuva de Flechas aplica lentidão de 50% por 2s em cada impacto. Perfurar, Salto Evasivo e terceira flecha preservados.
+Curandeiro: Julgamento mantém dano e raio crescente; causar dano real em pelo menos um inimigo cura jogador/aliados vivos dentro do raio em 8% da vida máxima, uma vez por uso. Imunes/chão vazio não curam. Sem cura bloqueia só a cura, mantendo dano. Luz Curativa/Bênção preservadas.
+Validação: v100 testa execução, disparos, veneno/4 pulsos/cargas/expiração, distinção de Praga/chuvas e Julgamento em grupo; integração usa hurtEnemy real e confirma imunidade/ausência de marca/refund. v76 atualizado para regra nova; v96/v98/v97/v86/v87 passaram. Scripts fonte/gerado analisados, sem playtest humano ou campanha longa. Valores iniciais requerem feedback. Base remota v99 f91abd8 incorporada; reputação preservada. Publicação autorizada neste chat.
