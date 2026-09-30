@@ -28,7 +28,7 @@
     return material;
   }
   API.create=function(options){
-    const model=T.SkeletonUtils.clone(asset.scene),root=new T.Group(),body=new T.Group();root.add(body);body.add(model);
+    const model=T.SkeletonUtils.clone(options.modelScene||asset.scene),root=new T.Group(),body=new T.Group();root.add(body);body.add(model);
     model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;
     const uniforms={gearArmor:{value:new T.Color(1,1,1)},gearGloves:{value:new T.Color(1,1,1)},gearBoots:{value:new T.Color(1,1,1)},gearAmounts:{value:new T.Vector3()}};
     const mats=[],bones={};model.traverse(o=>{if(o.isBone)bones[o.name]=o;if(o.isMesh)mats.push(setupMaterial(o,uniforms,options.legacyLinearOutput));});

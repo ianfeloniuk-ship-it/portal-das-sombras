@@ -236,6 +236,7 @@ body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js"></script>
+<script src="tools/hunters138.js"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/biome-materials132.js"></script>
 <script src="tools/citizens133.js"></script>
@@ -4320,7 +4321,7 @@ function spawnHunter(c,inside){
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
   m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);
   const n={kind:'hunter',home:c,m,x,z,face:0,r:.5,name:nm+' ['+RANKS[ri].id+']',short:nm,rank:ri,col:RANKS[ri].c,t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · FALAR COM '+nm.toUpperCase()};
-  n.use=()=>talk(n);npcs.push(n);return n;
+  n.use=()=>talk(n);npcs.push(n);Hunters138.attach(n,CLASSES.indexOf(cl),ri,()=>npcs.includes(n)&&L.mode==='world');return n;
 }
 function talk(n){logNews('<b>'+n.name+':</b> '+(regionLine116(n.home)||pick(HLINES))+'<small>Caçador de '+n.home.name+'</small>','dialogue')}
 
@@ -4717,7 +4718,7 @@ function makeHunterAlly(p,x,z,guest){
   const mult=RANKS[p.rank].mult,maxhp=(95+p.lvl*9)*mult*1.1;
   const a={m,mats:m.mats,x,z,face:0,name:p.name+' ['+RANKS[p.rank].id+']',short:p.name,hp:maxhp,maxhp,dmg:(10+p.lvl*1.6)*mult*.85,speed:6.2,range:c.ranged?9:2,ranged:c.ranged,healer:c.n==='Paladino',col:c.sk[0].col,
     r:.5,cd:0,healCd:0,buffT:0,act:null,stun:0,team:'ally',party:!guest,guest:!!guest,life:1e9,t:0,kb:{x:0,z:0},flash:0,slow:0,data:p};
-  allies.push(a);return a;
+  allies.push(a);Hunters138.attach(a,p.cls,p.rank,()=>allies.includes(a));return a;
 }
 
 /* ================= ITENS ================= */
@@ -7361,9 +7362,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v137</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v138</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=137;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=138;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
