@@ -36,4 +36,25 @@ for(const n of ['extractionOffer117','extractionMissionRow117','startExtractionM
 assert.equal(c.expeditionType({missionExtract117:true,expType:'extract'}),'extract');assert.equal(c.expeditionType({expType:'extract'}),'combat');
 assert.equal(c.startExtractionMission117(),true);assert(c.startedGate.missionExtract117&&c.startedGate.expType==='extract');c.run.extractMission117.completed=true;
 assert.equal(c.claimExtractionMission117(),true);assert.equal(c.run.extractMission117,undefined);assert.equal(c.claimExtractionMission117(),false);assert.equal(c.profile.guildClaims,1);
-console.log('PASS v117: extract migration idempotent; loot untouched; no extract classification; core/floors/hunt preserved; boss waits for dead/gone initial targets, ignores extra spawns, applies red/affix scaling once, and does not respawn after complete/break/death');
+// City guards, actual serialization of partial progress and prevention of re-entry after completion.
+c.run.extractMission117={rank:2,repRank97:2,sent:3,completed:false,rw:100,seed:777};
+c.run=JSON.parse(JSON.stringify(c.run));c.startedGate=null;c.inCity=()=>false;
+assert.equal(c.startExtractionMission117(),false);assert.equal(c.startedGate,null);
+c.inCity=()=>true;assert.equal(c.startExtractionMission117(),true);
+assert.equal(c.startedGate.seed,777);assert.equal(c.run.extractMission117.sent,3);
+c.run.extractMission117.completed=true;c.startedGate=null;
+assert.equal(c.startExtractionMission117(),false);assert.equal(c.startedGate,null);
+c.inCity=()=>false;assert.equal(c.claimExtractionMission117(),false);assert(c.run.extractMission117);
+c.inCity=()=>true;const beforeGold=c.run.gold;assert(c.claimExtractionMission117());
+assert.equal(c.run.gold,beforeGold+100);assert.equal(c.claimExtractionMission117(),false);assert.equal(c.run.gold,beforeGold+100);
+assert.equal(c.retireExtraction117({missionExtract117:true,expType:'extract'}),false);
+assert.equal(c.expeditionType({missionExtract117:false,expType:'extract'}),'combat');
+
+// Finished extraction stops all outstanding threats and cannot spawn instability again.
+Object.assign(c,{run:{extractMission117:{sent:6,completed:false}},player:{dead:false},L:{gate:{missionExtract117:true},expedition:{s:{type:'extract',sent:6,completed:false,instability:99},nodes:[{grp:{visible:true}}],timer:0}},enemies:[{m:{root:{}},act:{}}],hazards:[{g:{}}],projs:[{mesh:{}}],scene:{remove(){}},unlockDungeonExit(){},expStage:()=>3,expSpawn(){throw new Error('Unexpected spawn after completion')},expHazard(){throw new Error('Unexpected hazard after completion')}});
+for(const n of ['finishExtraction117','expeditionUpdate'])vm.runInContext(extract(n),c);
+assert(c.finishExtraction117());assert.equal(c.finishExtraction117(),false);
+assert(c.run.extractMission117.completed);assert(c.L.bossDead);assert(c.enemies.every(e=>e.dead&&e.gone&&!e.act));
+assert.equal(c.hazards.length,0);assert.equal(c.projs.length,0);assert(c.L.expedition.nodes.every(n=>n.hidden&&!n.grp.visible));
+for(let i=0;i<20;i++)c.expeditionUpdate(10);
+console.log('PASS: world combat gating and single boss; explicit city-only extraction mission; partial save/resume; one claim; completed-state cleanup and no repeated threats.');
