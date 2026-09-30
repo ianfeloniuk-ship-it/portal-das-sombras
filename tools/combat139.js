@@ -21,7 +21,7 @@ window.Combat139=(()=>{
 
  const families=['steel','shadow','earth','fire','wind','holy','arcane','shadow','fire','ice','earth','lightning','time','rift','holy','wild','arcane','shadow','arcane','rift','void'];
  const modes={steel:0,fire:1,ice:2,earth:3,holy:4,shadow:5,arcane:6,wind:7,lightning:8,time:9,rift:10,wild:7,void:5};
- const shapes={};let earthMap;const noise=`float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(p+vec2(0.,1.)),h(i+1.),f.x),f.y);}float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=n(p)*a;p=mat2(.8,-.6,.6,.8)*p*2.03+3.7;a*=.5;}return v;}`;
+ const shapes={};let earthMap;const noise=`float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+1.),f.x),f.y);}float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=n(p)*a;p=mat2(.8,-.6,.6,.8)*p*2.03+3.7;a*=.5;}return v;}`;
  function surface(color,family,form){const sphere=form==='orb'||form==='guard';const key=sphere?'sphere':'plane';if(!shapes[key])shapes[key]=sphere?new THREE.SphereGeometry(1,20,14):new THREE.PlaneGeometry(2,2);const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.NormalBlending,uniforms:{clock:{value:0},opacity:{value:1},tint:{value:new THREE.Color(color)},mode:{value:modes[family]??6},disc:{value:sphere?0:1}},vertexShader:`varying vec2 uv139;void main(){uv139=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:noise+`
  varying vec2 uv139;uniform float clock,opacity,mode,disc;uniform vec3 tint;
  void main(){vec2 p=uv139*2.-1.;float r=length(p),angle=atan(p.y,p.x);float rate=mode==2.?.24:mode==3.?.35:mode==8.?2.8:mode==4.?.55:1.;float t=clock*rate;
@@ -59,13 +59,37 @@ window.Combat139=(()=>{
   if(['holy','time','rift','arcane'].includes(family)){const ringGeo=shapes.ring||(shapes.ring=new THREE.TorusGeometry(.38,.025,5,20)),halo=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:.55}));halo.rotation.y=Math.PI/2;halo.scale.setScalar(family==='holy'?.8:.65);group.add(halo)}
   group.scale.setScalar(scale);group.addEventListener('removed',()=>{core.material.dispose();for(const child of group.children)if(child!==core&&child.material)child.material.dispose()});return group;
  }
+ function motifGeometry(family){
+  const key='motif_'+family;if(shapes[key])return shapes[key];
+  return shapes[key]=family==='earth'?rockGeometry():family==='ice'?new THREE.OctahedronGeometry(1,0):family==='fire'?new THREE.ConeGeometry(.58,1.3,5):family==='wind'||family==='wild'?new THREE.ConeGeometry(.24,1.15,4):family==='lightning'||family==='holy'?new THREE.OctahedronGeometry(.8,0):family==='arcane'||family==='rift'||family==='time'?new THREE.IcosahedronGeometry(.72,0):new THREE.DodecahedronGeometry(.72,0);
+ }
+ function motifs(group,family,color,radius,ground,guard,skill){
+  const layer=new THREE.Group(),parts=[],rings=[],name=skill?.n||'',count=ground?(family==='earth'?3:5):guard?4:2,geo=motifGeometry(family),r=ground?radius*.78:guard?.82:.30;
+  const detailCount=/Chuva|Tempestade|Meteoro|Domínio/.test(name)?7:/Estaca|Lança|Flecha|Projétil/.test(name)?1:count;
+  for(let i=0;i<detailCount;i++){
+   const m=surface(color,family,'orb');m.geometry=geo;const a=i/detailCount*Math.PI*2+(family==='wind'||family==='wild'?.2:0),y=ground?.13:guard?.25+(i%2)*.48:.50+(i%2)*.22;
+   m.position.set(detailCount===1?0:Math.cos(a)*r,y,detailCount===1?0:Math.sin(a)*r);
+   if(family==='earth')m.scale.set(.22+(i%2)*.08,.22+(i%3)*.04,.27+(i%2)*.10);
+   else if(family==='ice'||family==='fire'||family==='wind'||family==='wild')m.scale.set(.13,.34,.13);
+   else m.scale.setScalar(.16+(i%2)*.045);
+   m.rotation.set(.12*i,a,.18*i);m.userData.base=m.scale.clone();layer.add(m);parts.push(m);
+  }
+  if(['holy','arcane','time','rift','lightning'].includes(family)){
+   const geom=shapes['motifRing_'+family]||(shapes['motifRing_'+family]=new THREE.TorusGeometry(radius*(ground?.78:.43),family==='holy'?.045:.026,5,32));
+   const ring=new THREE.Mesh(geom,new THREE.MeshBasicMaterial({color,transparent:true,opacity:.6,depthWrite:false}));ring.rotation.x=ground?-Math.PI/2:0;ring.position.y=ground?.08:guard?.92:.55;layer.add(ring);rings.push(ring);
+   if(family==='time'||family==='rift'){const inner=new THREE.Mesh(geom,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.32,depthWrite:false}));inner.rotation.copy(ring.rotation);inner.position.copy(ring.position);inner.scale.setScalar(.68);layer.add(inner);rings.push(inner)}
+  }
+  group.add(layer);
+  return k=>{layer.rotation.y=(family==='time'?-1:1)*k*1.35;const pulse=.72+.28*Math.sin(k*Math.PI);for(const m of parts){m.scale.copy(m.userData.base).multiplyScalar(pulse);m.material.uniforms.opacity.value=Math.sin(Math.PI*k)*.78}for(const ring of rings){ring.rotation.z+=.025;ring.material.opacity=.6*Math.sin(Math.PI*k)}};
+ }
  function cast(skill,cls){const family=families[cls]||'arcane',type=skill.effect||skill.t,color=skill.col??0xb6a0ff;
  if(cls===0&&(/Giratório/.test(skill.n)||type==='nova'))return create(color,4.2,true);
- if(['cone','dash_strike','line','target','execute','push','pull','counter','interrupt'].includes(type)&&[0,1,2,4,14,15].includes(cls))return create(color,2.5,false);
+ if(['cone','dash_strike','line','target','execute','push','pull','counter','interrupt'].includes(type)&&[0,1,2,4,14].includes(cls))return create(color,2.5,false);
  const group=new THREE.Group(),ground=['area','nova','rain','dot','pulses','field','zone','healzone','trap','barrier','slowzone'].includes(type),guard=['guard','ward','holy_shield','minionbuff','buff_dmg','heal','cleanse','stealth','allybuff'].includes(type),form=guard?'guard':'disc',mesh=surface(color,family,form),radius=ground?(type==='nova'||type==='healzone'?2.5:1.8):1.05;
  if(form==='guard'){mesh.position.y=.95;mesh.scale.set(radius,1.2,radius)}else{mesh.rotation.x=-Math.PI/2;mesh.position.y=.12;mesh.scale.setScalar(radius)}group.add(mesh);
- const lift=surface(color,family,'orb');lift.position.y=guard?1.05:ground?.24:.68;if(guard)lift.scale.set(.33,.72,.33);else if(ground)lift.scale.setScalar(.19);else lift.scale.set(.33,.48,.33);lift.material.uniforms.opacity.value=.24;group.add(lift);
- return{group,update(k){const fade=Math.sin(Math.PI*Math.min(1,k));mesh.material.uniforms.opacity.value=fade*(ground?.88:.72);lift.material.uniforms.opacity.value=fade*.38;if(ground)mesh.scale.setScalar(radius*(.55+k*.48));lift.rotation.y=k*1.3;}};
+ const lift=surface(color,family,'orb');lift.position.y=guard?1.05:ground?.24:.68;if(guard)lift.scale.set(.33,.72,.33);else if(ground)lift.scale.setScalar(.19);else lift.scale.set(.33,.48,.33);lift.material.uniforms.opacity.value=family==='earth'?0:.24;group.add(lift);
+ const detailUpdate=motifs(group,family,color,radius,ground,guard,skill);
+ return{group,update(k){const fade=Math.sin(Math.PI*Math.min(1,k));mesh.material.uniforms.opacity.value=fade*(ground?.88:.72);lift.material.uniforms.opacity.value=fade*(family==='earth'?0:.38);if(ground)mesh.scale.setScalar(radius*(.55+k*.48));lift.rotation.y=k*1.3;detailUpdate(k)}};
  }
  return{create,basicMelee,cast,projectile,families};
 })();
