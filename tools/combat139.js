@@ -82,14 +82,46 @@ window.Combat139=(()=>{
   group.add(layer);
   return k=>{layer.rotation.y=(family==='time'?-1:1)*k*1.35;const pulse=.72+.28*Math.sin(k*Math.PI);for(const m of parts){m.scale.copy(m.userData.base).multiplyScalar(pulse);m.material.uniforms.opacity.value=Math.sin(Math.PI*k)*.78}for(const ring of rings){ring.rotation.z+=.025;ring.material.opacity=.6*Math.sin(Math.PI*k)}};
  }
+ // Class-signature silhouettes sit on top of existing spell material; gameplay stays untouched.
+ function signature(skill,cls,color){
+  const root=new THREE.Group(),parts=[],rings=[],arcs=[];const mat=(c=color,opacity=.82)=>new THREE.MeshStandardMaterial({color:c,roughness:.76,metalness:.08,transparent:true,opacity,depthWrite:false,emissive:c,emissiveIntensity:.12});
+  const add=(geo,pos,scale,c=color,opacity=.82,rot=null)=>{const m=new THREE.Mesh(geo,mat(c,opacity));m.position.set(...pos);m.scale.set(...scale);if(rot)m.rotation.set(...rot);root.add(m);parts.push(m);return m};
+  const ring=(r,t,c=color,y=.55)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(r,t,5,32),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.72,depthWrite:false}));m.position.y=y;root.add(m);rings.push(m);return m};
+  const shard=shapes.sigShard||(shapes.sigShard=new THREE.ConeGeometry(.16,.68,5));
+  switch(cls){
+   case 0: return null; // Keep the approved Warrior sword sweep intact.
+   case 1: for(let i=0;i<3;i++){const a=arc(color,1.0-i*.13,.13,-.95+i*.78,1.08,.72+i*.18);root.add(a);arcs.push(a)}break;
+   case 2: add(shapes.sigShield||(shapes.sigShield=new THREE.CylinderGeometry(.58,.66,.16,6)),[0,.88,.38],[1,1,1],0x9fd3ff,.84,[Math.PI/2,0,0]);add(shapes.sigShield||(shapes.sigShield=new THREE.CylinderGeometry(.58,.66,.16,6)),[0,.88,.40],[.68,.68,.68],color,.8,[Math.PI/2,0,0]);break;
+   case 3: ring(.66,.035,color,.58);for(let i=0;i<3;i++)add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.13,0)),[Math.cos(i*2.094)*.68,.56,Math.sin(i*2.094)*.68],[1,1,1],i===0?0xff8752:i===1?0x70ddff:0xfff36b,.95);break;
+   case 4: for(let i=0;i<5;i++)add(shard,[(i-2)*.22,.62,.40+Math.abs(i-2)*.08],[.46,.72,.38],i%2?color:0xe5ffd0,.9,[0,0,(i-2)*-.22]);break;
+   case 5: ring(.58,.035,0xffe49b,.5);add(shapes.sigBeam||(shapes.sigBeam=new THREE.CylinderGeometry(.045,.13,.92,8)),[0,1.05,.2],[1,1,1],0xffefbd,.72);add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.13,0)),[0,.52,.2],[1.1,1.1,1.1],0xfff3c4,.95);break;
+   case 6: ring(.48,.045,color,.18);for(let i=0;i<4;i++)add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.13,0)),[(i-1.5)*.2,.40,.38],[.76,.76,.76],0x9bdcff,.9);break;
+   case 7: add(shapes.sigSkull||(shapes.sigSkull=new THREE.DodecahedronGeometry(.30,0)),[0,.72,.38],[.86,1.08,.72],0xe2d8c8,.92);for(let i=0;i<2;i++)add(shapes.sigBone||(shapes.sigBone=new THREE.CylinderGeometry(.035,.035,.78,5)),[i?-.31:.31,.64,.36],[1,1,1],0xd7c7a8,.88,[0,0,i?-.48:.48]);ring(.57,.022,0x955cff,.62);break;
+   case 8: for(let i=0;i<3;i++)add(shapes.sigMeteor||(shapes.sigMeteor=new THREE.DodecahedronGeometry(.22,0)),[(i-1)*.38,.72+Math.abs(i-1)*.18,.28],[1.2,1.45,1],i===1?0xffd08a:0xff7040,.92,[.4*i,.3*i,.7*i]);break;
+   case 9: for(let i=0;i<5;i++)add(shard,[(i-2)*.24,.68,.30+Math.abs(i-2)*.07],[.54,1.0,.44],i%2?0xb9f1ff:0x70ddff,.86,[0,0,(i-2)*-.13]);ring(.72,.018,0xb9f1ff,.28);break;
+   case 10: {const rock=add(rockGeometry(),[0,.54,.34],[.38,.30,.40],color,.96,[.22,.1,.18]);rock.material= new THREE.MeshStandardMaterial({color:0xc6aa74,map:earthTexture(),vertexColors:true,flatShading:true,roughness:1});const edge=new THREE.LineSegments(shapes.rockEdges||(shapes.rockEdges=new THREE.EdgesGeometry(rockGeometry(),24)),new THREE.LineBasicMaterial({color:0x382d20,transparent:true,opacity:.88}));edge.position.copy(rock.position);edge.scale.copy(rock.scale);root.add(edge);break;}
+   case 11: ring(.50,.025,0xfff36b,.7);for(let i=0;i<3;i++){const curve=new THREE.QuadraticBezierCurve3(new THREE.Vector3((i-1)*.38,.42,.35),new THREE.Vector3((i-1)*.2,.95,.30),new THREE.Vector3((1-i)*.34,1.30,.30));const line=new THREE.Mesh(new THREE.TubeGeometry(curve,8,.025,4,false),mat(0xfff36b,.95));root.add(line);parts.push(line)}break;
+   case 12: {const r=ring(.62,.025,0x9bcaff,.65);for(let i=0;i<8;i++){const a=i*Math.PI/4;add(shapes.sigTick||(shapes.sigTick=new THREE.BoxGeometry(.045,.18,.035)),[Math.cos(a)*.61,.65+Math.sin(a)*.61,.25],[1,1,1],0xe4efff,.9,[0,0,a])}const hand=add(shapes.sigHand||(shapes.sigHand=new THREE.BoxGeometry(.035,.47,.035)),[0,.65,.29],[1,1,1],0xffffff,.95);hand.userData.hand=true;break;}
+   case 13: ring(.62,.035,0x9c65ff,.72);ring(.46,.018,0xe0caff,.72);add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.12,0)),[0,.72,.30],[1,1,1],0xd7b4ff,.9);break;
+   case 14: for(let i=0;i<3;i++)ring(.34,.035,i===1?0xffe7a6:color,.46+i*.23);break;
+   case 15: for(let i=0;i<3;i++){const a=arc(color,.92-i*.14,.14,-.80+i*.58,1.0,.62+i*.12);root.add(a);arcs.push(a)}break;
+   case 16: ring(.58,.022,0x8fe8ff,.62);for(let i=0;i<4;i++)add(shapes.sigTick||(shapes.sigTick=new THREE.BoxGeometry(.045,.18,.035)),[Math.cos(i*Math.PI/2)*.56,.62,Math.sin(i*Math.PI/2)*.56],[1,1,1],0x8fe8ff,.94,[0,i*Math.PI/2,0]);add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.13,0)),[0,.62,.25],[1,1,1],0x8fe8ff,.95);break;
+   case 17: ring(.48,.03,0xbda2ff,.62);for(let i=0;i<2;i++){const a=arc(i?0xf3edff:color,.9-i*.25,.11,-.7+i*.55,1.15,.75+i*.28);root.add(a);arcs.push(a)}break;
+   case 18: add(shapes.sigCore||(shapes.sigCore=new THREE.IcosahedronGeometry(.22,1)),[0,.73,.32],[1,1,1],0xffe978,.96);ring(.47,.025,0x8defff,.73);for(let i=0;i<3;i++){const a=arc(0x8defff,.78,.07,-.78+i*.55,.58,.68+i*.10);root.add(a);arcs.push(a)}break;
+   case 19: ring(.52,.025,0xc8b4ff,.66);ring(.25,.018,0xffe6a3,.66);add(shapes.sigEye||(shapes.sigEye=new THREE.SphereGeometry(.11,12,8)),[0,.66,.22],[1.4,.72,.7],0xffe6a3,.94);break;
+   case 20: add(shapes.sigVoid||(shapes.sigVoid=new THREE.IcosahedronGeometry(.26,1)),[0,.70,.32],[1,1,1],0x34184e,.96);ring(.45,.03,0xb071ed,.7);ring(.65,.018,0x6f38a6,.7);break;
+  }
+  for(const m of parts)m.userData.sigBase=m.scale.clone();root.userData.parts=parts;root.userData.rings=rings;root.userData.arcs=arcs;return{group:root,update(k){const pulse=.9+.1*Math.sin(k*Math.PI*2);for(const m of parts){if(m.userData.hand)m.rotation.z=-k*Math.PI*3;else m.rotation.y+=.012;m.scale.copy(m.userData.sigBase).multiplyScalar(pulse)}for(let i=0;i<rings.length;i++){rings[i].rotation.y+=(i%2?-.025:.035);rings[i].material.opacity=.45+.3*Math.sin(k*Math.PI)}for(const a of arcs){a.material.uniforms.t.value=k;a.rotation.z+=.012;a.scale.setScalar(.9+k*.14)}}};
+ }
+ function decorate(result,skill,cls,color){const s=signature(skill,cls,color);if(!s)return result;result.group.add(s.group);const update=result.update;result.update=k=>{update(k);s.update(k)};return result;}
  function cast(skill,cls){const family=families[cls]||'arcane',type=skill.effect||skill.t,color=skill.col??0xb6a0ff;
  if(cls===0&&(/Giratório/.test(skill.n)||type==='nova'))return create(color,4.2,true);
- if(['cone','dash_strike','line','target','execute','push','pull','counter','interrupt'].includes(type)&&[0,1,2,4,14].includes(cls))return create(color,2.5,false);
+ if(['cone','dash_strike','line','target','execute','push','pull','counter','interrupt'].includes(type)&&[0,1,2,4,14].includes(cls))return decorate(create(color,2.5,false),skill,cls,color);
  const group=new THREE.Group(),ground=['area','nova','rain','dot','pulses','field','zone','healzone','trap','barrier','slowzone'].includes(type),guard=['guard','ward','holy_shield','minionbuff','buff_dmg','heal','cleanse','stealth','allybuff'].includes(type),form=guard?'guard':'disc',mesh=surface(color,family,form),radius=ground?(type==='nova'||type==='healzone'?2.5:1.8):1.05;
  if(form==='guard'){mesh.position.y=.95;mesh.scale.set(radius,1.2,radius)}else{mesh.rotation.x=-Math.PI/2;mesh.position.y=.12;mesh.scale.setScalar(radius)}group.add(mesh);
  const lift=surface(color,family,'orb');lift.position.y=guard?1.05:ground?.24:.68;if(guard)lift.scale.set(.33,.72,.33);else if(ground)lift.scale.setScalar(.19);else lift.scale.set(.33,.48,.33);lift.material.uniforms.opacity.value=family==='earth'?0:.24;group.add(lift);
  const detailUpdate=motifs(group,family,color,radius,ground,guard,skill);
- return{group,update(k){const fade=Math.sin(Math.PI*Math.min(1,k));mesh.material.uniforms.opacity.value=fade*(ground?.88:.72);lift.material.uniforms.opacity.value=fade*(family==='earth'?0:.38);if(ground)mesh.scale.setScalar(radius*(.55+k*.48));lift.rotation.y=k*1.3;detailUpdate(k)}};
+ return decorate({group,update(k){const fade=Math.sin(Math.PI*Math.min(1,k));mesh.material.uniforms.opacity.value=fade*(ground?.88:.72);lift.material.uniforms.opacity.value=fade*(family==='earth'?0:.38);if(ground)mesh.scale.setScalar(radius*(.55+k*.48));lift.rotation.y=k*1.3;detailUpdate(k)}},skill,cls,color);
  }
  return{create,basicMelee,cast,projectile,families};
 })();
