@@ -217,6 +217,13 @@ body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="tools/warrior-equipment127.js"></script>
+<script src="tools/warrior-player127.js"></script>
+<script src="tools/aster-materials130.js"></script>
+<script src="tools/rift131.js"></script>
+<script src="tools/rift-audio131.js"></script>
+<script>window.RIFT131_ENABLE=window.RIFT131_ENABLE!==false;</script>
+<script>window.WARRIOR127_ENABLE=window.WARRIOR127_ENABLE!==false;</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
 <script>
 'use strict';
@@ -2556,6 +2563,8 @@ renderer.setPixelRatio((()=>{try{return localStorage.getItem('pds_gfx')==='leve'
 const ULTRA=!(matchMedia('(hover:none)').matches||('ontouchstart' in window))&&(()=>{try{return localStorage.getItem('pds_gfx')!=='leve'}catch(e){return true}})();
 if(ULTRA){renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15}
 const scene=new THREE.Scene();
+const riftLight131=window.RIFT131_ENABLE?new THREE.PointLight(0x9566ed,0,13,2):null;if(riftLight131)scene.add(riftLight131);
+let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(document.hidden&&riftSound131)riftSound131.silence()});addEventListener('pagehide',()=>{if(riftSound131)riftSound131.dispose()});
 const camera=new THREE.PerspectiveCamera(50,1,.1,260);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
@@ -3340,6 +3349,7 @@ function animGlb(m,st){
 }
 
 function animChibi(m,st,t){
+  if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
   if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
   if(m.glb){animGlb(m,st);return}
@@ -3429,7 +3439,8 @@ function statsFor(){
   return{maxhp:Math.round(maxhp),maxmp:Math.round(maxmp),maxsh:Math.round(maxsh),dmg,def,spd}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
-  const m=makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
+  const equip=run&&run.equip||{};
+  const m=window.WARRIOR127_ENABLE&&profile.cls===0&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,defaultWeapon:{tier:0,visual:{shape:"broad"}},tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
   if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
@@ -3502,7 +3513,7 @@ function makePlayer(){kitMigrate111();kitArchive111();const c=CLASSES[profile.cl
 const TIER_COL=[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
 const BIGW={sword:['2H_Sword'],axe:['2H_Axe'],bow:['2H_Crossbow'],dagger:['Knife','Knife_Offhand'],staff:['2H_Staff'],bonestaff:['2H_Staff']};
 function tintTo(mt,col,k){if(!mt.color)return;if(!mt.userData.c0)mt.userData.c0=mt.color.clone();mt.color.copy(mt.userData.c0);if(col!=null)mt.color.lerp(new THREE.Color(col),k)}
-function gearLook(){const m=player&&player.m;if(!m||!m.wmats)return;const w=run.equip.w,a=run.equip.a,wc=w?TIER_COL[Math.min(9,w.tier)]:null,ac=a?TIER_COL[Math.min(9,a.tier)]:null;
+function gearLook(){const m=player&&player.m;if(!m)return;if(m.warrior127&&window.Warrior127){Warrior127.gear(m,run.equip,{tierColors:TIER_COL,rarities:RAR,look:profile.look||{}});return}if(!m.wmats)return;const w=run.equip.w,a=run.equip.a,wc=w?TIER_COL[Math.min(9,w.tier)]:null,ac=a?TIER_COL[Math.min(9,a.tier)]:null;
   const glow=mt=>{if(!mt.emissive)return;if(w&&w.rar>0){mt.emissive.set(RAR[w.rar].c);mt.emissiveIntensity=.12+.13*w.rar+(w.tier>=5?.25:0)}else mt.emissive.set(0)};
   const big=m.model&&w&&w.tier>=4?(BIGW[CLASSES[profile.cls].wep]||[]):[];let bigShown=false;
   if(m.model)m.model.traverse(c=>{if(!c.isMesh)return;const nm=c.name;
@@ -3533,7 +3544,8 @@ function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2
 const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);return n.d<36&&!cityFallen(n.c)};
 
 /* ================= NÍVEL: LIMPEZA ================= */
-function clearLevel(){FX2.inv=0;
+function clearLevel(){FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
+  if(window.Rift131){for(const gate of gates)if(gate.mesh?.userData.rift131)Rift131.dispose(gate.mesh);if(L&&L.exits)for(const it of L.exits)if(it.grp?.userData.rift131)Rift131.dispose(it.grp);}if(riftLight131)riftLight131.intensity=0;if(riftSound131)riftSound131.silence();
   if(player&&player.mountM){scene.remove(player.mountM.root);player.mountM=null;run.mounted=false}
   if(L&&L.group)envDispose(L.group);scene.remove(L.group);chunks.clear();HASH.clear();
   for(const e of enemies)scene.remove(e.m.root);for(const n of npcs)scene.remove(n.m.root);
@@ -3756,7 +3768,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/80){if(gate(a)<.16)continue;addCol({x:X+Math.cos(a)*34,z:Z+Math.sin(a)*34,r:1.6})}
   for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const s of[-1,1]){const aa=a+s*.2,x=X+Math.cos(aa)*34,z=Z+Math.sin(aa)*34;
-    EH(b,s>0?'building_tower_A_blue':'building_tower_B_blue',x,0,z,Math.atan2(X-x,Z-z),8.6,dark);addCol({x,z,r:2.2});ENV.cast.push({x:x+.8,z:z-.6,r:3.4,k:.45});glowL.push({x,y:9.4,z});
+    EH(b,s>0?'building_tower_A_blue':'building_tower_B_blue',x,0,z,Math.atan2(X-x,Z-z),8.6,dark);addCol({x,z,r:2.2});ENV.cast.push({x:x+.8,z:z-.6,r:3.4,k:.45});/* Tower windows provide local amber light. */
     if(cLv>=1&&!fallen)EH(b,'flag_blue',x,8.2,z,-aa,2.2)}
   for(const a of[20,70,110,160,200,250,290,340]){const r=a*Math.PI/180,x=X+Math.cos(r)*27,z=Z+Math.sin(r)*27,ry=Math.atan2(X-x,Z-z);
     const W=5.4+R()*1.2;EW(b,fallen?'building_destroyed':HOUSES[Math.floor(R()*HOUSES.length)],x,0,z,ry,W,fallen?.8:1);addCol({x,z,r:3.4});ENV.cast.push({x:x+.8,z:z-.6,r:W*.7,k:.5});
@@ -3801,6 +3813,115 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   if(cLv>=3&&!fallen)inst(geo('wglow2',()=>new THREE.OctahedronGeometry(.32,0)),toonS(0x6fd8ff),glowL.filter(o=>o.w),false,g);
   inst(geo('lampg',()=>new THREE.SphereGeometry(.28,8,6)),glowS(fallen?0x803040:0xffd9a0,1),glowL.filter(o=>o.s),false,g);
   return shopH}
+// BEGIN VILLAGE129
+/* Original local village architecture: masonry, timber, slate, warm recessed windows. */
+const Village129=(()=>{
+ const cache=new Map();
+ const C={stone:0x807b6c,stoneDark:0x585c55,mortar:0x464b46,plaster:0xc1ae88,wood:0x4b382c,woodLight:0x70513a,roof:0x35474c,iron:0x303738,bronze:0x987443,window:0xffbe68,snow:0xd6e1e1};
+ function seed(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
+ function rng(n){return()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296}}
+ function make(kind,snow=false){const id=kind+':'+snow;if(cache.has(id))return cache.get(id);const R=rng(seed(kind)),P=[],N=[],COL=[],IND=[];let parts=0;
+  function append(g,color,pos=[0,0,0],rot=[0,0,0],shade=1){const m=new THREE.Matrix4().compose(new THREE.Vector3(...pos),new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)),new THREE.Vector3(1,1,1));g.applyMatrix4(m);const a=g.attributes.position,n=g.attributes.normal,co=new THREE.Color(color),off=P.length/3;for(let i=0;i<a.count;i++){P.push(a.getX(i),a.getY(i),a.getZ(i));N.push(n.getX(i),n.getY(i),n.getZ(i));let k=shade*(.94+.06*Math.max(0,n.getY(i)));COL.push(co.r*k,co.g*k,co.b*k)}if(g.index)for(const i of g.index.array)IND.push(i+off);else for(let i=0;i<a.count;i++)IND.push(i+off);g.dispose();parts++}
+  function box(x,y,z,w,h,d,col=C.wood,ry=0){append(new THREE.BoxGeometry(w,h,d),col,[x,y,z],[0,ry,0])}
+  function bevel(x,y,z,w,h,d,col=C.stone,b=.035){b=Math.min(b,w*.16,h*.16,d*.16);const shape=new THREE.Shape();shape.moveTo(-w/2+b,-h/2+b);shape.lineTo(w/2-b,-h/2+b);shape.lineTo(w/2-b,h/2-b);shape.lineTo(-w/2+b,h/2-b);shape.closePath();const geo=new THREE.ExtrudeGeometry(shape,{depth:d-2*b,bevelEnabled:true,bevelSize:b,bevelThickness:b,bevelSegments:1,steps:1,curveSegments:1});geo.translate(0,0,-d/2+b);append(geo,col,[x,y,z])}
+  function beam(a,b,w=.105,d=.12,col=C.wood){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va),g=new THREE.BoxGeometry(w,delta.length(),d);g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize())));append(g,col,va.add(vb).multiplyScalar(.5).toArray())}
+  function quad(a,b,c,d,col,thick=.0){const ps=[...a,...b,...c,...d],g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(ps,3));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();append(g,col);if(thick){quad([a[0],a[1]-thick,a[2]],[d[0],d[1]-thick,d[2]],d,a,C.roof);quad([b[0],b[1]-thick,b[2]],b,c,[c[0],c[1]-thick,c[2]],C.roof)}}
+  function masonry(w,d,h){box(0,h/2,0,w,h,d,C.mortar);const rows=Math.ceil(h/.28);for(let row=0;row<rows;row++){const bh=h/rows,off=row%2?.5:0;for(const front of [-1,1]){const count=Math.ceil(w/.52);for(let i=0;i<count;i++){const step=w/count,x=-w/2+(i+.5)*step;box(x,(row+.5)*bh,front*(d/2+.018),step-.022,bh-.018,.045,new THREE.Color(C.stone).multiplyScalar(.85+R()*.25).getHex())}}for(const side of [-1,1]){const count=Math.ceil(d/.5);for(let i=0;i<count;i++){const step=d/count,z=-d/2+(i+.5)*step;box(side*(w/2+.018),(row+.5)*bh,z,.045,bh-.02,step-.026,new THREE.Color(C.stone).multiplyScalar(.8+R()*.22).getHex())}}}
+   for(const x of [-w/2,w/2])for(const z of [-d/2,d/2])for(let row=0;row<rows;row+=2)bevel(x,(row+.5)*h/rows,z,.19,h/rows-.016,.19,C.stone,.025);
+  }
+  function roof(w,d,eave,rise,col=C.roof){const rows=7,cols=Math.ceil(d/.39),pitch=rise/(w/2),y=x=>eave+rise*(1-Math.abs(x)/(w/2))+.06*Math.sin(Math.abs(x)/w*6.28);
+   // Small independent slates, with overlapping courses, curved eaves, and varied edges.
+   for(const side of [-1,1])for(let row=0;row<rows;row++){const x0=side*(w/2)*(row/rows),x1=side*(w/2)*Math.min(1,(row+1.08)/rows);for(let i=0;i<cols;i++){const z0=-d/2+i*d/cols+.009,z1=-d/2+(i+1)*d/cols-.009,shade=.82+R()*.32,co=new THREE.Color(snow?C.snow:col).multiplyScalar(shade).getHex(),a=[x0,y(x0)+.018,z0],b=[x1,y(x1)+.022,z0],c=[x1,y(x1)+.022,z1],dd=[x0,y(x0)+.018,z1];if(side>0)quad(dd,c,b,a,co,.045);else quad(a,b,c,dd,co,.045)}}
+   for(const z of [-d/2-.012,d/2+.012]){beam([-w/2,eave,z],[0,eave+rise,z],.12,.13,C.woodLight);beam([0,eave+rise,z],[w/2,eave,z],.12,.13,C.woodLight)}
+   beam([0,eave+rise+.065,-d/2-.1],[0,eave+rise+.065,d/2+.1],.13,.15,C.iron);
+   for(const x of [-w/2,w/2])beam([x,eave,-d/2],[x,eave,d/2],.12,.12,C.woodLight);
+  }
+  function gable(w,d,base,rise){const s=new THREE.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(0,rise);s.closePath();const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:false,steps:1,curveSegments:1});g.translate(0,base,-d/2);append(g,C.plaster);for(const z of [-d/2-.022,d/2+.022]){beam([0,base,z],[0,base+rise-.07,z],.1,.09);beam([-w*.38,base,z],[0,base+rise*.75,z],.08,.09);beam([w*.38,base,z],[0,base+rise*.75,z],.08,.09)}}
+  function windowAt(x,y,z,w=.50,h=.68,ry=0){const G=new THREE.Group(),cs=Math.cos(ry),sn=Math.sin(ry),at=(dx,dy,dz)=>[x+dx*cs+dz*sn,y+dy,z-dx*sn+dz*cs];function b(dx,dy,dz,bw,bh,bd,col){const p=at(dx,dy,dz);box(...p,bw,bh,bd,col,ry)}
+   b(0,0,0,w+.12,h+.12,.045,C.wood);b(0,0,.028,w,h,.025,C.window);b(0,0,.06,.055,h,.045,C.wood);b(0,-h*.12,.06,w,.045,.05,C.wood);b(0,-h/2-.07,.065,w+.2,.10,.16,C.stone);for(const s of [-1,1]){b(s*(w*.5+.09),0,.05,.12,h+.05,.065,C.woodLight);for(let j=0;j<4;j++)b(s*(w*.5+.09),-.25+j*.16,.091,.13,.022,.02,C.wood)}
+  }
+  function door(x,y,z){bevel(x,y+.7,z,.95,1.45,.16,C.stone,.05);box(x,y+.65,z+.10,.69,1.29,.04,C.wood);for(let i=0;i<5;i++)box(x+(i-2)*.13,y+.65,z+.127,.117,1.27,.014,C.woodLight);for(const yy of [.31,.99])box(x,y+yy,z+.15,.67,.05,.04,C.iron);append(new THREE.TorusGeometry(.047,.012,4,10),C.bronze,[x+.21,y+.66,z+.18]);bevel(x,y+.045,z+.21,1.08,.12,.46,C.stone,.035)}
+  function lamp(x,y,z){box(x,y,z,.19,.29,.18,C.window);for(const sx of [-1,1])for(const sz of [-1,1])box(x+sx*.105,y,z+sz*.1,.028,.37,.028,C.iron);box(x,y-.18,z,.25,.04,.25,C.iron);append(new THREE.ConeGeometry(.20,.16,4),C.iron,[x,y+.23,z],[0,Math.PI/4,0]);beam([x,y+.3,z],[x,y+.45,z-.17],.033,.033,C.iron)}
+  function sign(x,y,z,symbol){box(x,y,z,.55,.45,.09,C.wood);box(x,y,z+.048,.46,.35,.015,C.bronze);if(symbol==='forge'){box(x,y-.055,z+.063,.30,.085,.018,C.iron);box(x,y+.03,z+.066,.12,.13,.02,C.iron);box(x,y+.1,z+.068,.34,.05,.02,C.iron)}else if(symbol==='potion'){append(new THREE.SphereGeometry(.105,8,6),0x738d89,[x,y-.04,z+.072]);box(x,y+.08,z+.075,.07,.14,.025,0x738d89)}else{beam([x-.13,y-.14,z+.07],[x+.13,y+.14,z+.07],.045,.02,C.iron);beam([x+.13,y-.14,z+.07],[x-.13,y+.14,z+.07],.045,.02,C.iron)}}
+  if(kind==='wall'){
+   masonry(3.95,.70,2.55);bevel(0,2.61,0,4.02,.18,.90,C.stone,.03);for(let i=0;i<6;i++)bevel(-1.70+i*.68,2.96,0,.48,.58,.81,C.stone,.045);if(snow)box(0,2.715,0,3.98,.055,.86,C.snow);
+  }else if(kind==='tower'){
+   masonry(2.1,2.1,4.25);for(const x of [-.99,.99])for(const z of [-.99,.99])bevel(x,2.1,z,.28,4.2,.28,C.stone,.04);bevel(0,4.30,0,2.42,.24,2.42,C.stone,.04);box(0,4.74,0,2.12,.68,2.12,C.plaster);windowAt(0,4.73,1.09,.30,.45);windowAt(-1.09,4.73,0,.30,.45,-Math.PI/2);windowAt(1.09,4.73,0,.30,.45,Math.PI/2);gable(2.12,2.12,5.1,1.15);roof(2.66,2.6,5.1,1.27);for(const y of [1.2,2.7]){box(0,y,1.071,.16,.7,.028,C.iron);bevel(0,y+.39,1.08,.34,.12,.13,C.stone,.02)}
+  }else if(kind==='lantern'){
+   bevel(0,.10,0,.54,.20,.54,C.stone,.035);bevel(0,.29,0,.32,.23,.32,C.stoneDark,.025);append(new THREE.CylinderGeometry(.045,.085,2.35,8),C.iron,[0,1.58,0]);for(const y of [.45,2.44])append(new THREE.TorusGeometry(.09,.027,4,8),C.bronze,[0,y,0],[Math.PI/2,0,0]);lamp(0,2.98,0);box(0,2.69,0,.21,.08,.21,C.iron);
+  }else if(kind==='fountain'){
+   append(new THREE.CylinderGeometry(2.20,2.27,.22,16),C.stoneDark,[0,.11,0]);append(new THREE.CylinderGeometry(1.98,2.09,.36,16,1,true),C.stone,[0,.39,0]);append(new THREE.CylinderGeometry(1.96,1.96,.035,32),0x3d6568,[0,.40,0]);for(let k=0;k<16;k++){const a=k*Math.PI/8;append(new THREE.BoxGeometry(.80,.17,.31),new THREE.Color(C.stone).multiplyScalar(.88+R()*.18).getHex(),[Math.sin(a)*2.06,.64,Math.cos(a)*2.06],[0,a,0]);append(new THREE.BoxGeometry(.026,.22,.05),C.mortar,[Math.sin(a+.19)*2.12,.40,Math.cos(a+.19)*2.12],[0,a+.19,0])}append(new THREE.CylinderGeometry(.52,.61,.70,8),C.stoneDark,[0,.35,0]);
+  }else if(kind==='obelisk'){
+   bevel(0,.14,0,1.15,.28,1.15,C.stone,.06);bevel(0,.36,0,.86,.17,.86,C.stoneDark,.035);append(new THREE.CylinderGeometry(.19,.36,2.65,4),C.stone,[0,1.77,0],[0,Math.PI/4,0]);append(new THREE.ConeGeometry(.27,.50,4),C.stoneDark,[0,3.33,0],[0,Math.PI/4,0]);for(const z of [-.27,.27]){beam([-.08,.75,z],[.02,2.6,z*.75],.032,.018,C.bronze);beam([.08,.77,z],[.12,2.45,z*.76],.019,.018,C.bronze)}
+  }else if(kind==='well'){
+   append(new THREE.CylinderGeometry(.78,.85,.64,12,1,true),C.stone,[0,.32,0]);append(new THREE.TorusGeometry(.80,.095,4,12),C.stone,[0,.67,0],[Math.PI/2,0,0]);for(const x of [-.94,.94])box(x,1.15,0,.16,2.3,.17);roof(2.4,1.7,2.25,.65);beam([-.94,1.52,0],[.94,1.52,0],.10,.12,C.woodLight);beam([0,1.55,0],[0,.25,0],.025,.025,C.bronze);
+  }else if(kind==='stall'){
+   for(const x of [-1.25,1.25])for(const z of [-.68,.68])box(x,1.05,z,.105,2.1,.105);box(0,.62,0,2.55,1.1,1.30,C.woodLight);for(let i=0;i<12;i++)box(-1.19+i*.216,.65,.663,.19,1.05,.035,C.wood);box(0,1.22,0,2.70,.09,1.42,C.woodLight);for(let i=0;i<8;i++){const x=-1.45+i*.365;quad([x,2.11,1],[x+.365,2.11,1],[x+.365,2.38,-.9],[x,2.38,-.9],snow?C.snow:i%2?0xb2a184:0x675447);box(x+.182,2.04,1,.355,.17,.025,snow?C.snow:i%2?0xb2a184:0x675447)}
+   for(let i=0;i<5;i++){append(new THREE.SphereGeometry(.15,8,5),[0x91864c,0x795746,0x947253][i%3],[-.85+i*.4,1.37,.22]);}lamp(1.22,1.9,.75);
+  }else if(kind==='forge'){
+   masonry(3.8,2.8,.50);box(-1.22,1.20,-.18,1.25,1.42,2.33,C.stoneDark);bevel(-1.23,1.02,1.01,1.34,1.36,.28,C.stone,.05);box(-1.23,.97,1.17,.84,.68,.035,C.iron);box(-1.23,.87,1.20,.67,.39,.03,C.window);for(let i=0;i<5;i++)box(-1.50+i*.14,.86,1.23,.048,.48,.027,C.iron);
+   for(const x of [-1.85,1.85])for(const z of [-1.32,1.32])box(x,1.28,z,.16,2.25,.16);roof(4.5,3.4,2.40,.85);box(-1.23,2.9,-.35,.76,2.4,.78,C.stoneDark);for(let i=0;i<8;i++)box(-1.23,1.85+i*.29,.055,.77,.025,.025,C.mortar);bevel(-1.23,4.14,-.35,.94,.18,.96,C.stone,.04);box(-1.23,4.24,-.35,.55,.018,.56,C.iron);
+   bevel(.77,.72,.66,.69,.46,.61,C.wood,.05);box(.77,1.06,.66,.48,.25,.40,C.iron);bevel(.73,1.23,.66,.93,.16,.50,C.iron,.035);append(new THREE.ConeGeometry(.20,.52,4),C.iron,[1.36,1.23,.66],[0,0,-Math.PI/2]);beam([.50,1.39,.49],[.99,1.39,.97],.05,.05,C.woodLight);box(.49,1.4,.49,.22,.12,.18,C.iron);sign(.3,2.01,1.57,'forge');lamp(1.84,2.0,1.45);
+  }else if(kind==='defense'){
+   masonry(3.75,2.85,3.30);bevel(0,3.40,0,4.0,.23,3.10,C.stone,.04);box(0,3.54,0,3.66,.035,2.76,snow?C.snow:C.stoneDark);for(const z of [-1.45,1.45])for(let i=0;i<6;i++)bevel(-1.62+i*.65,3.80,z,.44,.48,.28,C.stone,.03);for(const x of [-1.84,1.84])for(let i=0;i<3;i++)bevel(x,3.80,-.82+i*.82,.28,.48,.43,C.stone,.03);door(0,0,1.53);for(const x of [-1.15,1.15]){windowAt(x,2.15,1.48,.27,.64);box(x,1.17,1.51,.38,.72,.026,0x4c5259);box(x,1.2,1.53,.05,.49,.015,C.bronze)}lamp(-.7,1.56,1.63);lamp(.7,1.56,1.63);
+  }else{
+   const guild=kind==='guild',forge=false,potion=kind==='potion',inn=kind==='inn',church=kind==='church',mill=kind==='mill',cottage=kind==='home-b',variant=seed(kind)%3,w=guild?4.3:inn?4.5:potion?2.65:3.35,d=guild?3.2:2.65,ground=cottage?.70:1.25,top=guild?3.65:potion?3.35:cottage?1.95:inn?3.12:2.88,winY=ground+(top-ground)*.53;
+   masonry(w,d,ground);box(0,(ground+top)/2,0,w-.03,top-ground,d-.03,C.plaster);gable(w-.02,d-.02,top,church?1.7:1.25);
+   for(const y of [ground,top,ground+.82])box(0,y,d/2+.035,w+.06,.10,.12);
+   for(const x of [-w/2+.035,0,w/2-.035])for(const z of [-d/2-.035,d/2+.035])box(x,(ground+top)/2,z,.13,top-ground+.12,.13);
+   for(const x of [-w/2-.025,w/2+.025]){for(const y of [ground,top])box(x,y,0,.12,.11,d+.04);for(const z of [-d*.25,d*.25])box(x,(ground+top)/2,z,.13,top-ground,.12);beam([x,ground+.08,-d/2],[x,top-.06,-d*.25],.10,.10);beam([x,ground+.08,d/2],[x,top-.06,d*.25],.10,.10)}
+   for(const z of [-d/2-.072,d/2+.072]){beam([-w/2+.04,ground+.08,z],[-.08,top-.08,z],.085,.08);beam([.08,top-.08,z],[w/2-.04,ground+.08,z],.085,.08)}
+   door(0,0,d/2+.085);windowAt(-w*.30,winY,d/2+.10,.48,.60);windowAt(w*.30,winY,d/2+.10,.48,.60);windowAt(-w/2-.1,winY,0,.58,.65,-Math.PI/2);windowAt(w/2+.1,winY,0,.58,.65,Math.PI/2);windowAt(0,top+.35,d/2+.075,.36,.43);
+   roof(w+.62,d+.68,top,church?1.76:1.38,variant===1?0x414b48:variant===2?0x4d4743:C.roof);
+   // Masonry chimney with a black opening and a thick coping.
+   const cx=w*.28,cz=-d*.20,cy=top+.98;box(cx,cy,cz,.48,1.34,.47,C.stoneDark);for(let i=0;i<5;i++)box(cx,cy-.55+i*.25,cz+.245,.49,.022,.025,C.mortar);bevel(cx,cy+.71,cz,.64,.15,.63,C.stone,.035);box(cx,cy+.792,cz,.39,.018,.39,C.iron);lamp(-.69,1.35,d/2+.31);if(guild||inn)lamp(.69,1.35,d/2+.31);
+   if(forge){sign(-w*.36,1.3,d/2+.15,'forge');bevel(w*.32,.48,d/2+.18,.70,.82,.46,C.stoneDark,.06);box(w*.32,.50,d/2+.421,.39,.48,.028,C.window);box(w*.32,.23,d/2+.46,.48,.10,.09,C.iron)}
+   if(potion)sign(w*.34,1.22,d/2+.14,'potion');
+   if(guild||church){for(const x of [-w*.4,w*.4]){box(x,2.65,d/2+.14,.31,.86,.028,0x33474e);box(x,2.66,d/2+.16,.045,.49,.01,C.bronze)}sign(0,2.14,d/2+.18,'order')}
+   if(inn){box(w*.48,2.45,d/2+.14,.10,.1,.9);sign(w*.48,2.1,d/2+.48,'inn');box(0,1.82,d/2+.26,2.18,.14,.49,C.woodLight);for(let i=0;i<9;i++)box(-.98+i*.245,2.10,d/2+.48,.045,.47,.045,C.wood);box(0,2.34,d/2+.48,2.20,.07,.085,C.wood);for(const x of [-.95,.95])beam([x,1.13,d/2+.06],[x,1.78,d/2+.44],.10,.10)}
+   if(guild){const x=-w*.31;box(x,4.06,-.6,1.03,2.60,1.04,C.stoneDark);bevel(x,5.39,-.6,1.18,.20,1.20,C.stone,.03);append(new THREE.ConeGeometry(.90,1.06,4),snow?C.snow:C.roof,[x,6.03,-.6],[0,Math.PI/4,0]);windowAt(x,4.94,-.04,.29,.50)}
+   if(church){box(0,4.60,-.38,.74,.77,.74,C.stone);append(new THREE.ConeGeometry(.61,1.42,4),snow?C.snow:C.roof,[0,5.68,-.38],[0,Math.PI/4,0]);beam([0,6.35,-.38],[0,6.72,-.38],.048,.048,C.bronze)}
+   if(mill){const z=d/2+.48;for(let k=0;k<4;k++){const a=k*Math.PI/2+.4;beam([0,2.9,z],[Math.cos(a)*1.7,2.9+Math.sin(a)*1.7,z],.11,.11,C.wood);for(let i=0;i<4;i++){const r=.66+i*.29,xx=Math.cos(a)*r,yy=2.9+Math.sin(a)*r;beam([xx-Math.sin(a)*.19,yy+Math.cos(a)*.19,z],[xx+Math.sin(a)*.19,yy-Math.cos(a)*.19,z],.11,.06,C.plaster)}}}
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.computeBoundingBox();const b=g.boundingBox;g.dispose();const result={p:new Float32Array(P),n:new Float32Array(N),c:new Float32Array(COL),i:P.length/3>65535?new Uint32Array(IND):new Uint16Array(IND),nv:P.length/3,min:b.min.toArray(),max:b.max.toArray(),w:Math.max(b.max.x-b.min.x,b.max.z-b.min.z),h:b.max.y-b.min.y,parts};cache.set(id,result);return result;
+ }
+ function classify(key){if(key==='wall_straight')return'wall';if(key==='lantern'||key==='lantern_standing')return'lantern';if(key==='fountain-round')return'fountain';if(key==='statue_obelisk')return'obelisk';if(/^building_tower_/.test(key))return'tower';if(key==='building_destroyed')return null;if(key.startsWith('building_well'))return'well';if(/^stall(?:-|$)/.test(key))return'stall';if(!key.startsWith('building_'))return null;if(key.includes('barracks'))return'guild';if(key.includes('blacksmith'))return'forge';if(key.includes('tavern'))return'inn';if(key.includes('church'))return'church';if(key.includes('windmill'))return'mill';if(key.includes('home_B_red'))return'potion';if(key.includes('market'))return'defense';return key.includes('home_B')?'home-b':key.includes('lumbermill')?'lumber':'home-a'}
+ return{make,classify,cache,C};
+})();
+
+
+const villageCityBase129=envCity;
+envCity=function(c,g,addCol,R,fallen,cLv){
+ const bio=biomeAt(c.x,c.z),snow=['neve','cristal'].includes(bio)||(seasonI()===3&&!['deserto','vulcao'].includes(bio));
+ for(const key of Object.keys(ENV.m)){const kind=Village129.classify(key);if(kind)ENV.m[key]=Village129.make(kind,snow)}
+ return villageCityBase129(c,g,addCol,R,fallen,cLv);
+};
+// Keep the established building occlusion shader; add subtle surface grain and warm window emission.
+const villageShaderBase129=BLDMAT.onBeforeCompile;
+BLDMAT.onBeforeCompile=function(shader){
+ villageShaderBase129(shader);
+ shader.vertexShader='varying vec3 villageP129;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvillageP129=(modelMatrix*vec4(position,1.)).xyz;');
+ shader.fragmentShader='varying vec3 villageP129;\n'+shader.fragmentShader;
+ shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+  float window129=step(.90,vColor.r)*step(.50,vColor.g)*(1.-step(.53,vColor.b));
+  float grain129=fract(sin(dot(floor(villageP129*42.),vec3(17.13,81.71,47.23)))*43758.5453);
+  diffuseColor.rgb*=mix(.92+grain129*.10,1.,window129);
+ `).replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+  totalEmissiveRadiance+=vec3(1.,.40,.09)*window129*.48;
+ `);
+};
+BLDMAT.customProgramCacheKey=()=> 'village129-occlusion-grain-amber';
+BLDMAT.needsUpdate=true;
+
+// END VILLAGE129
+// BEGIN ASTER MATERIALS130 — only the local Warrior study in Aster.
+if(window.WARRIOR127_ENABLE&&window.AsterMaterials130){
+ AsterMaterials130.buildings(BLDMAT);
+ const asterGroundBase130=envGroundMat;
+ envGroundMat=function(){return AsterMaterials130.ground(asterGroundBase130())};
+}
+// END ASTER MATERIALS130
+
 /* ruína no meio do mapa */
 function envRuin(g,x0,z0,addCol){const b=new EnvBatch(),R=mulberry32((x0*7+z0*13)|0);
   for(let i=0;i<8;i++){const a=i/8*TAU;if(i===3)continue;const x=x0+Math.cos(a)*7,z=z0+Math.sin(a)*7;EH(b,R()<.5?'statue_columnDamaged':'statue_column',x,0,z,R()*TAU,1.8+R()*3.2);addCol({x,z,r:.8});ENV.cast.push({x:x+.3,z:z-.2,r:1.4,k:.3})}
@@ -3951,7 +4072,7 @@ function buildCity(c,g,addCol,R){
     const b=mesh(geo('hb',()=>new THREE.BoxGeometry(5,3.2,4.5)),toonS(0x39456a));b.position.y=1.6;hg.add(b);const rf=mesh(geo('hr',()=>{const q=new THREE.ConeGeometry(1,2.2,4);q.rotateY(Math.PI/4);return q}),toonS(0x1f2a44));rf.scale.set(4.1,1,3.7);rf.position.y=4.3;hg.add(rf);
     const w=new THREE.Mesh(geo('hw',()=>new THREE.PlaneGeometry(.8,.8)),glowS(0xffd9a0,.9));w.position.set(1.2,2,2.27);hg.add(w);g.add(hg);addCol({x,z,r:3.4})}
   }
-  const plaza=new THREE.Mesh(geo('plaza',()=>new THREE.RingGeometry(12.6,13.2,48)),glowS(0xffb347,.35));plaza.rotation.x=-Math.PI/2;plaza.position.set(X,.03,Z);g.add(plaza);
+  const plaza=new THREE.Mesh(geo('plaza',()=>new THREE.RingGeometry(12.6,13.2,48)),toonS(0x8e846a));plaza.rotation.x=-Math.PI/2;plaza.position.set(X,.03,Z);g.add(plaza);
   const cr=new THREE.Mesh(geo('crys',()=>new THREE.OctahedronGeometry(.9,0)),glowS(0xffd08a,.95));cr.position.set(X,6,Z);g.add(cr);g.userData.crystal=cr;
   const cl=new THREE.PointLight(0xffd08a,1.2,26,1.5);cl.position.set(X,6,Z);g.add(cl);
   const nm=makeCitySign(fallen?c.name.toUpperCase()+' · CAÍDA':c.name.toUpperCase(),fallen?'#ff4d6a':'#ffd08a',.9);nm.position.set(X,9,Z);g.add(nm);
@@ -4002,7 +4123,30 @@ function newGate(){
   const life=rnd(420,900);
   return {id:++gateSeq,x,z,rank,aff:rollAff(rank),double:Math.random()<(rank<=1?.03:.012),red:rank>0&&Math.random()<.12,life,max:life,seed:(Math.random()*2**31)|0,layout103:pick(['core','floors',null,null,null]),cleared:false,dead:false};
 }
+let riftPrevious131=null,riftArrival131=0;
+function riftEnter131(g){if(!started||paused||!player||player.dead||L.mode!=='world'||!g||g.dead||g.coreFailed103||!g.mesh)return false;mouseHeld=false;keys[keyOf('attack')]=false;riftPrevious131=null;enterGate(g);return L.mode!=='world';}
+function riftContact131(){
+ if(!window.RIFT131_ENABLE||!player||player.dead||paused)return false;
+ const now=[player.x,1.05,player.z],old=riftPrevious131||now;riftPrevious131=now;
+ if(performance.now()<riftArrival131||Math.hypot(now[0]-old[0],now[2]-old[2])>8)return false;
+ const entries=L.mode==='world'?gates.filter(g=>!g.dead&&!g.coreFailed103&&g.mesh?.userData.rift131).map(g=>({root:g.mesh,g,x:g.x,z:g.z})):L.mode==='dungeon'?(L.exits||[]).filter(it=>it.type==='exit'&&it.grp?.userData.rift131).map(it=>({root:it.grp,it,x:it.x,z:it.z})):[];
+ for(const e of entries){if(Math.hypot(e.x-player.x,e.z-player.z)>6)continue;e.root.updateMatrixWorld(true);const a=e.root.worldToLocal(new THREE.Vector3(...old)),b=e.root.worldToLocal(new THREE.Vector3(...now));if(!Rift131.crosses(a.toArray(),b.toArray()))continue;if(e.g)return riftEnter131(e.g);const before=L;if(!e.it.locked||performance.now()>(e.it.riftNotice131||0)){e.it.riftNotice131=performance.now()+2500;tryExit(e.it);}return L!==before;}
+ return false;
+}
+function riftExitVisual131(it){
+ if(!it.grp?.userData.rift131||it.riftLocked131===it.locked)return;
+ it.riftLocked131=it.locked;Rift131.setPalette(it.grp,{red:it.locked,secret:!it.locked});
+ if(it.sg){it.grp.remove(it.sg);it.sg.material.map.dispose();it.sg.material.dispose();}
+ it.sg=Rift131.label({exit:true,locked:it.locked},L.G?.id||GR[L.gate?.rank||0].id);it.grp.add(it.sg);
+}
+
 function gateMesh(g){retireExtraction117(g);
+  // Approved rift: walking through the membrane enters the dungeon.
+  if(window.RIFT131_ENABLE&&window.Rift131){
+    const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
+    grp.add(Rift131.label(g,GR[g.rank].id));L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();
+    return;
+  }
   const col=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
   const grp=new THREE.Group();grp.position.set(g.x,0,g.z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
@@ -4014,7 +4158,7 @@ function gateMesh(g){retireExtraction117(g);
   L.group.add(grp);g.mesh=grp;g.ring=ring;g.sw=sw;
   L.inter.push({type:'gate',g,x:g.x,z:g.z,r:3.6,label:g.secret?'F · PORTAL ???':'F · PORTAL RANK '+GR[g.rank].id,use:()=>gateModal(g)});
 }
-function removeGateMesh(g){if(g.mesh){L.group.remove(g.mesh);g.mesh=null}L.inter=L.inter.filter(i=>i.g!==g)}
+function removeGateMesh(g){if(g.mesh){if(g.mesh.userData.rift131){Rift131.dispose(g.mesh);envDispose(g.mesh)}L.group.remove(g.mesh);g.mesh=null}L.inter=L.inter.filter(i=>i.g!==g)}
 function tickGates(dt){
   const P=player;
   for(const g of gates){if(g.dead||g===curGate)continue;g.life-=dt;
@@ -4209,7 +4353,8 @@ function variantLayout103(type,R){
  }
  return {W,H,cells,rooms,bi:rooms.length-1};
 }
-function unlockDungeonExit(){for(const it of L.exits)if(it.type==='exit'&&it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg);it.sg=makeSign('SAÍDA','#ffb347',.55);it.sg.position.y=5.5;it.grp.add(it.sg)}}
+function unlockExitModel131(it){it.locked=false;if(it.grp?.userData.rift131){riftExitVisual131(it);return;}it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg);if(it.type==='exit'){it.sg=makeSign('SAÍDA','#ffb347',.55);it.sg.position.y=5.5;it.grp.add(it.sg)}}
+function unlockDungeonExit(){for(const it of L.exits)if(it.type==='exit'&&it.locked)unlockExitModel131(it)}
 function beginDungeonEscape(){L.closeT=60;L.warn30=false;unlockDungeonExit()}
 function dungeonFloorAt(z){return L.floors?Math.max(0,Math.min(2,Math.floor(((z-L.grid.oz)/L.grid.CS)/40))):0}
 function floorMapCenter(){return L.floors?L.grid.oz+(L.floors.current*40+18)*L.grid.CS:0}
@@ -4247,6 +4392,12 @@ function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruíd
 
 function exitPortal(x,z,locked){
   const existing=L.exits.find(it=>it.type==='exit');if(existing)return existing;
+  if(window.RIFT131_ENABLE&&window.Rift131){
+    const grp=Rift131.create({seed:131,red:locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
+    const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
+    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.exits.push(it);return it;
+  }
+
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:0x04101e,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
@@ -4341,7 +4492,7 @@ function enterGate(g){if(g.dead||g.coreFailed103)return;
   if(g.hostile)setTimeout(()=>toast('<b>[NARRADOR]</b> Caçadores hostis detectados nesta masmorra.'),1500);
   if(g.friends)setTimeout(()=>toast('<b>[NARRADOR]</b> Outro grupo de caçadores está lá dentro.'),2600);
 }
-function startBreak(){L.brk={t:0,sp:1};for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
+function startBreak(){L.brk={t:0,sp:1};for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
   bigText('TRANSBORDO DA FENDA',2200);sfx('gong');shake(.8);showSys('A masmorra está quebrando. Os monstros não param de vir. Quanto mais você aguentar, maior o recorde. A saída continua aberta: chegue nela para sair vivo.')}
 function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)>(profile.brkBest||0)){profile.brkBest=Math.floor(B.t);if(profile.brkBest%10===0){store.set('pds2_profile',profile);checkTitles();storyEv('brk')}}
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(9,L.gate.rank);
@@ -4447,7 +4598,8 @@ function makeHunterAlly(p,x,z,guest){
 /* ================= ITENS ================= */
 function makeItem(slot,tier,rar){
   const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Besta',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
-  return {slot,tier,rar,name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*equipFactor(slot)*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar)};
+  const visual=slot==='w'&&window.Warrior127&&Warrior127.visualWeapon?Warrior127.visualWeapon(tier,CLASSES[profile.cls].wep):undefined;
+  return {slot,tier,rar,name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*equipFactor(slot)*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar),...(visual?{visual}: {})};
 }
 function rollItem(tier,boss,depth=0,minRarity=0){tier=Math.max(0,Math.min(9,tier));depth=Math.max(0,Math.min(2,depth));const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const rar=Math.min(6,Math.max(minRarity,wpick(w.map((w,i)=>({i,w}))).i+depth));const it=makeItem(pick(EQUIP_SLOTS),tier,rar);if(depth)it.depth105=depth;if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function dungeonEquipmentChance(e){if(L.mode!=='dungeon'||L.special||e.noExpLoot||e.rival||e.isBoss)return 0;const depth=dungeonFloorAt(e.z);return e.elite?.35+.1*depth:.08+.04*depth}
@@ -5078,6 +5230,7 @@ function frame(now){
   requestAnimationFrame(frame);
   const rdt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   AU.want=wantTrack();
+  if(riftSound131&&(!started||paused||document.hidden||!AU.on||player?.dead))riftSound131.silence();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
   if(started&&!paused&&!touch&&(mouseHeld||keys[keyOf('attack')]))attack();
@@ -5121,6 +5274,7 @@ function update(dt){
   for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
   for(const a of allies)updAlly(a,dt);allies=allies.filter(a=>!a.dead);
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
+  if(riftContact131())return;
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z));p.life-=pdt;p.x+=p.vx*pdt;p.z+=p.vz*pdt;p.mesh.position.set(p.x,p.originY??1.1,p.z);let done=p.life<=0;if(kitCapture111(p,pdt)){scene.remove(p.mesh);projs.splice(i,1);continue}if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
     if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
@@ -5148,7 +5302,10 @@ function updWorld(dt){updEcon(dt);
   L.loadT-=dt;if(L.loadT<=0){L.loadT=.35;updChunks(false)}
   if(L.moon)L.moon.position.set(P.x-80,70,P.z-150);
   for(const ch of chunks.values())if(ch.group.userData.crystal)ch.group.userData.crystal.rotation.y+=dt;
-  for(const g of gates)if(g.mesh){g.ring.rotation.z+=dt*.6;g.sw.rotation.z-=dt*2.5}
+  for(const g of gates)if(g.mesh){if(g.mesh.userData.rift131)Rift131.update(g.mesh,dt);else{g.ring.rotation.z+=dt*.6;g.sw.rotation.z-=dt*2.5}}
+  if(riftLight131){let nearest=null,dist=22;for(const g of gates){const d=Math.hypot(g.x-P.x,g.z-P.z);if(g.mesh?.userData.rift131&&d<dist){nearest=g;dist=d}}riftLight131.intensity=nearest?(4.2+Math.sin(time*1.4)*.65)*clamp((22-dist)/12,0,1):0;if(nearest){riftLight131.position.set(nearest.x,2.4,nearest.z+.8);riftLight131.color.copy(nearest.mesh.userData.rift131.color)}
+   if(AU.ctx&&AU.on&&window.RiftAudio131&&!document.hidden&&!P.dead){if(!riftSound131)riftSound131=RiftAudio131.create(AU.ctx,AU.fx);if(nearest){const dx=nearest.x-P.x,dz=nearest.z-P.z,pan=(dx*camera.matrixWorld.elements[0]+dz*camera.matrixWorld.elements[2])/12;riftSound131.update(nearest.mesh.userData.rift131.time,Math.pow(clamp((22-dist)/17,0,1),1.6),pan);}else riftSound131.silence();}else if(riftSound131)riftSound131.silence();
+  }
   L.spawnT-=dt;
   if(L.spawnT<=0){L.spawnT=2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
     if(wild<10&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48||!worldFree(x,z,1.5))continue;
@@ -5162,7 +5319,9 @@ function updWorld(dt){updEcon(dt);
   L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city))){spawnCitizen(ch.city);if(npcs.filter(n=>n.critter&&!n.gone&&n.home===ch.city).length<3)spawnCritter(ch.city)}for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
 }
 function updDungeon(dt){
-  for(const it of L.exits)it.ring.rotation.z+=dt*.8;
+  for(const it of L.exits){if(it.grp?.userData.rift131){riftExitVisual131(it);Rift131.update(it.grp,dt);}else it.ring.rotation.z+=dt*.8;}
+  if(riftLight131){const e=L.exits.filter(it=>it.grp?.userData.rift131).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0],dist=e?Math.hypot(e.x-player.x,e.z-player.z):100;riftLight131.intensity=e?(4.2+Math.sin(time*1.4)*.65)*clamp((22-dist)/12,0,1):0;if(e){riftLight131.position.set(e.x,2.1,e.z+.7);riftLight131.color.copy(e.grp.userData.rift131.color);}if(AU.ctx&&AU.on&&window.RiftAudio131&&!document.hidden&&!player.dead){if(!riftSound131)riftSound131=RiftAudio131.create(AU.ctx,AU.fx);if(e)riftSound131.update(e.grp.userData.rift131.time,Math.pow(clamp((22-dist)/17,0,1),1.6));else riftSound131.silence();}}
+
   updSpecial(dt);expeditionUpdate(dt);updateCoreDefense(dt);updateCombat117();
   if(L.brk){updBreak(dt)}else if(L.bossDead&&L.expedition?.s.type!=='extract'){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[NARRADOR]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
@@ -5496,7 +5655,7 @@ function finishTemple(){unlockLore('temple');
   S.god.eyeMat.color.setHex(0xffd070);bossLight.color.setHex(0xffd070);bossLight.intensity=2;sfx('arise');sfx('gong');
   profile.templeCompleted103=true;store.set('pds2_profile',profile);bigText('PROTOCOLOS CONCLUÍDOS',2600);toast('<b>[NARRADOR]</b> O templo reconheceu sua vitória. A promoção a ★ exige rank SS+, Segundo Despertar e a prova da Ordem.',6000);
   L.bossDead=true;L.closeT=60;
-  for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
+  for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
   addChest(0,S.az+4,9,true);
 }
 /* PROVAÇÃO DA CLASSE: depois da evolução (nível 30), a cada 100 níveis a classe pode evoluir de novo. */
@@ -5691,7 +5850,7 @@ function rebuildLook(){const P=player;if(!P)return;const st={x:P.x,z:P.z,face:P.
 /* penalidade */
 function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PENALIDADE · sobreviva '+fmtT(left);
   if(S.sp<=0&&left>0){S.sp=3.5;for(let i=0;i<4;i++){const a=rnd(0,TAU);let x=Math.cos(a)*16,z=Math.sin(a)*16;if(!freeAt(x,z,.6)){x=0;z=0}const e=spawnKind(pick(['rogue','demon','minion']),x,z,S.gr,{});e.aggro=true;fxRing(x,z,0xff8a1e,1.5)}}
-  if(left<=0){for(const e of enemies)if(!e.dead){e.dead=true;e.gone=true;scene.remove(e.m.root)}L.bossDead=true;L.closeT=30;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}
+  if(left<=0){for(const e of enemies)if(!e.dead){e.dead=true;e.gone=true;scene.remove(e.m.root)}L.bossDead=true;L.closeT=30;for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
     bigText('PENALIDADE CUMPRIDA',1600);toast('<b>[NARRADOR]</b> Penalidade cumprida. Não ignore o treino de novo.',4000)}}
 /* janelas novas */
 function characterTabs(tab){return '<div class="tabs">'+[['status','Status'],['skills','Habilidades'],['passives','Passivas'],...(profile.rank>0||profile.rankTalents?.length?[['rank','Rank']]:[]),['titles','Títulos'],['build','Build'],...(awakeningDiscovered109()?[['awakening',isTwiceAwakened103()?'Despertar':'A Fissura']]:[])].map(([k,n])=>btn(n,'character',k,true,k===tab?'on':'')).join('')+'</div>'}
@@ -6190,12 +6349,12 @@ function updSpecial2(S,dt){
   else if(S.kind==='defend'){S.msg='Defenda seu domínio · invasores '+alive;if(alive===0&&S.t>2&&!S.cleared){S.cleared=true;profile.owned[S.dom].att=false;store.set('pds2_profile',profile);winSpecial('Domínio defendido. Os invasores fugiram.',false)}}
   else if(S.kind==='primordial'){S.msg=bossE&&!bossE.dead?'Portal Primordial · '+bossE.name:'Portal Primordial'}
 }
-function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[NARRADOR]</b> '+msg,4000)}
+function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){unlockExitModel131(it)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[NARRADOR]</b> '+msg,4000)}
 const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>1e9;
 function towerClear(S){if(S.cleared)return;const beforeMarks=towerMilestones();S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);const earned=towerMilestones()-beforeMarks;if(earned>0){refreshStats();toast('<b>[TORRE]</b> Legado da Torre: +'+earned+'% ao bônus permanente de dano e vida. Vale em qualquer lugar. Consulte Personagem → Build.',6000)}
   const storyEnd=finishTowerStory();
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
-  if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){it.locked=false;it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg)}L.bossDead=true;L.closeT=9999;
+  if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){unlockExitModel131(it)}L.bossDead=true;L.closeT=9999;
   if(S.floor===100&&!profile.tower100){profile.tower100=1;store.set('pds2_profile',profile);run.gold+=5e6;profile.ach=profile.ach||[];addChest(0,0,9,true);addChest(4,0,9,true);bigText('TOPO DA TORRE',2500);sfx('arise');showSys(storyEnd?'<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia em DIÁRIO → História.</small>':'Cem andares. Você chegou onde eu parei.');toast('<b>[TORRE]</b> Você conquistou os 100 andares. A torre continua, sem fim.',6000)}else if(storyEnd)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]);
   if(S.floor>=towerCap()){bigText('LIMITE DA TORRE',1500);toast('<b>[TORRE]</b> Andar '+S.floor+' é o seu limite. Cada reencarnação libera mais 50 andares.',6000);return}
   const gold=Math.round(80*S.floor*GR[S.gr].gold);run.gold+=gold;floater(player.x,player.z,'+'+fmt(gold)+' ouro','#ffd54f',true);
@@ -6744,6 +6903,7 @@ $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
+  if(window.WARRIOR127_ENABLE&&profile&&profile.cls===0&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load('models/guerreiro-rig127.glb').then(()=>startGame());return}
   $('title').hidden=true;
   if(!loadRun())newRun();ensureRun();if(!run.quests)run.quests=genQuests();
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
@@ -7062,6 +7222,12 @@ function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(fa
 }
 function rareHud103(){const a=profile.awakening103;if(!a||!a.discovered)return '';const t=AR103.trial;return (t?trialHud113(t):'')+guardianHud108()+kitHud111()+(rareActive103(12)?' · TEMPO '+preciseNumber(AR103.reserve||0)+'/'+3*affinity103(12)+'s':'')+(AR103.anchor&&AR103.anchor.until>time?' · ÂNCORA '+Math.ceil(AR103.anchor.until-time)+'s':'')}
 function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'close0'}if(a==='awinspect'){inspectFissure103();return 'close0'}if(a==='awtrial'){startTrial103(+v);return 'close0'}if(a==='awlearn'){rareLearn103(+v);awakeningView103();return 'close0'}if(a==='awattune'){rareAttune103(+v);awakeningView103();return 'close0'}if(a==='awgate'){rareOpenGate103(+v);return 'close0'}return null}
+
+// Local rift review controls131 — explicitly requested test URL only.
+if(window.RIFT131_ENABLE&&new URLSearchParams(location.search).get('fendas')==='teste'){
+ const review=document.createElement('button');review.id='riftReview131';review.textContent='VER FENDA';review.style.cssText='position:fixed;right:12px;top:55px;z-index:90;background:#292035;color:#dfcfef;border:1px solid #9470bd;padding:8px;font-size:11px';
+ review.onclick=()=>{if(!started||!player||L.mode!=='world'){toast('Entre na partida, em Aster, para ver a fenda.');return}const g=gates.filter(x=>!x.dead&&x.mesh).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];if(!g)return;player.x=g.x;player.z=g.z+3.2;player.face=Math.PI;player.act=null;player.m.root.position.set(player.x,0,player.z);updChunks(true);riftPrevious131=null;toast('Atravesse a superfície colorida para entrar.',3000);};document.body.appendChild(review);
+}
 
 // cenário da tela inicial
 function titleWorld(){const real=profile;profile=real||{rank:0,cls:0,seed:20260927};newRun();buildWorld(profile.seed);profile=real;run=null}
