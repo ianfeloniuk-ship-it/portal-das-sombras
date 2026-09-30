@@ -1722,10 +1722,16 @@ function renderSkillButton(b,sk,mp){const state=skillButtonState(sk,mp);b.datase
 function skillDamage(sk){const P=player;return P.dmg*(sk.sourceClass==null?1:atkOf(MAGIC_CLS.includes(sk.sourceClass)?'mag':'phy')/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(run.skl[sk.n]||0))*statsBonus().skill*(1+(setB().skill||0))}
 function healerLevel(sk){return Math.max(0,Math.min(10,Number(run.skl[sk.n])||0))}
 function judgmentRadius(sk){return 6+.4*healerLevel(sk)}
-function healingFraction(sk){return sk.pow+(sk.n==='Luz Curativa'?.015*healerLevel(sk):0)}
+function healingFraction(sk){return sk.n==='Luz Curativa'?.5:sk.pow}
+function healingShieldCap(sk){return .2+.02*healerLevel(sk)}
+function healingShield(a){if(a.dead||!(a.healShieldUntil>time)){a.healShield=0;return 0}return Math.max(0,Math.min(a.healShield||0,a.maxhp*(a.healShieldCap||0)))}
+function absorbHealingShield(a,amt){const shield=healingShield(a),blocked=Math.min(shield,Math.max(0,amt));a.healShield=shield-blocked;return amt-blocked}
+function applyHealingLight(a,sk){if(a.dead||hasAff('nocure'))return;const amount=a.maxhp*healingFraction(sk),missing=Math.max(0,a.maxhp-a.hp),healed=Math.min(amount,missing);a.hp=Math.min(a.maxhp,a.hp+healed);
+  if(sk.n==='Luz Curativa'){a.slowT=0;a.bleedT=0;a.bleedD=0;a.slow=0;a.stun=0;const cap=healingShieldCap(sk),extra=Math.min(a.maxhp*cap,Math.max(0,amount-healed)),previous=healingShield(a);if(extra>0){a.healShieldCap=Math.max(extra>=previous?cap:(a.healShieldCap||0),cap);a.healShield=Math.max(previous,extra);a.healShieldUntil=time+6;floater(a.x,a.z,'ESCUDO +'+fmt(extra),'#9fe8ff')}}
+  if(healed>0)floater(a.x,a.z,'+'+fmt(healed),'#9fffc0');fxRing(a.x,a.z,0xfff3a0,1,.4)}
 function blessAllies(P){for(const a of allies)if(!a.dead&&a.life>0&&Math.hypot(a.x-P.x,a.z-P.z)<=8)a.blessingUntil=time+5}
 function allyProtection(a){return Math.min(a.fortressUntil>time?.5:1,a.blessingUntil>time?.7:1)}
-function skillUpgradeText(sk){if(sk.n==='Julgamento')return 'Melhorar: +0,4 m de raio, +15% do dano base e −5% da recarga base por nível.';if(sk.n==='Luz Curativa')return 'Melhorar: +1,5 ponto percentual de cura e −5% da recarga base por nível.';return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
+function skillUpgradeText(sk){if(sk.n==='Julgamento')return 'Melhorar: +0,4 m de raio, +15% do dano base e −5% da recarga base por nível.';if(sk.n==='Luz Curativa')return 'Melhorar: +2 pontos percentuais no limite do escudo e −5% da recarga base por nível.';return ['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t)?'Melhorar: −5% da recarga base por nível. Não altera o efeito desta habilidade.':'Melhorar: +15% do dano base e −5% da recarga base por nível.'}
 function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg','stealth','blink','minionbuff','summon'].includes(sk.t),lines=[];
   let d=SKD[sk.t]||'Habilidade';
   if(sk.n==='Julgamento')d='Explosão sagrada ao seu redor: raio de '+String(judgmentRadius(sk)).replace('.',',')+' m.';
@@ -1743,6 +1749,7 @@ function skillDesc(sk){if(!sk)return '';const support=['heal','guard','buff_dmg'
   else if(sk.n==='Fortaleza Viva')d='Por 5s, você recebe '+Math.round((1-sk.pow)*100)+'% menos dano. Aliados a até 6 m no momento do uso recebem 50% menos dano por 5s, mesmo se saírem de perto. Reaplicar renova a duração, sem multiplicar a proteção.';
   else if(sk.t==='minionbuff')d='Recupera 45% da vida máxima dos ecos e invocações. Por '+(8+(sk.pow-1.5)*4)+'s, eles causam +60% de dano e recebem 45% menos dano. Sem cura bloqueia só a recuperação de vida.';
   else if(sk.t==='summon')d='Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados por uso. Ativos: '+minionAllies().length+'/'+summonCap()+'. Permanecem até morrer. O limite aumenta com a mana máxima; só ocupa vagas livres.';
+  else if(sk.n==='Luz Curativa')d='Cura você e aliados em 50% da vida máxima ('+fmt(Math.round(player.maxhp*.5))+' PV em você). Remove sangramento e lentidão. Cura excedente vira escudo por 6s, até '+Math.round(healingShieldCap(sk)*100)+'% da vida máxima. Reaplicar renova sem somar escudos. Sem cura bloqueia esta habilidade.';
   else if(sk.t==='heal')d='Cura você e os aliados em '+String(Math.round(healingFraction(sk)*1000)/10).replace('.',',')+'% da vida máxima ('+fmt(Math.round(player.maxhp*healingFraction(sk)))+' PV em você).';
   else if(sk.t==='guard')d='Recebe '+Math.round((1-sk.pow)*100)+'% menos dano por 5s.';
   else if(sk.t==='buff_dmg')d='Aumenta seu dano em '+Math.round((sk.pow-1)*100)+'% por 8s.';
@@ -1814,14 +1821,14 @@ function hurtPlayer(amt){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
-  player.shT=4;if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
+  player.shT=4;amt=absorbHealingShield(player,amt);if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0)floater(player.x,player.z,'-'+fmt(ab),'#9fe8ff');if(amt<=0){sfx('block');return}}
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   if(curAtk&&curAtk.kind){if(['mage','wraith','vespa','yeti'].includes(curAtk.kind)&&!player.slowT){player.slowT=2;floater(player.x,player.z,'LENTO','#ffd08a')}else if(['rogue','aranha','lobo','raptor'].includes(curAtk.kind)&&Math.random()<.35){player.bleedT=3;player.bleedD=amt*.08;floater(player.x,player.z,'SANGRANDO','#ff4d6a')}}
   player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
-function hurtAlly(a,amt){if(a.dead)return;amt*=allyProtection(a);if(a.buffT>0)amt*=.55;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
+function hurtAlly(a,amt){if(a.dead)return;amt*=allyProtection(a);if(a.buffT>0)amt*=.55;amt=absorbHealingShield(a,amt);if(amt<=0)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
   if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[NARRADOR]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
@@ -1913,7 +1920,7 @@ function runSkill(sk){
     case 'thunderstorm':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z,targets=enemies.filter(e=>!e.dead&&Math.hypot(e.x-cx,e.z-cz)<5).slice(0,5);if(!targets.length)for(let i=0;i<5;i++)targets.push({x:cx+(i?Math.sin(i*Math.PI/2)*2.5:0),z:cz+(i?Math.cos(i*Math.PI/2)*2.5:0)});for(const [i,e] of targets.entries()){const h=hazard(e.x,e.z,.85,.5+i*.12,dmg,'player',col);h.lightning=true;}break}
     case 'dash_strike':{P.dodgeT=.28;P.iT=.34;P.dir={x:Math.sin(P.face),z:Math.cos(P.face)};P.dashDmg={dmg,hit:new Set()};P.dashSpd=30;break}
     case 'blink':{for(let d=7;d>0;d-=1){const bx=P.x-Math.sin(P.face)*d,bz=P.z-Math.cos(P.face)*d;if(freeAt(bx,bz,.5)){fxBurst(P.x,1,P.z,col,10,4);P.x=bx;P.z=bz;break}}P.iT=.6;fxRing(P.x,P.z,col,2);break}
-    case 'heal':{const fraction=healingFraction(sk),h=P.maxhp*fraction;P.hp=Math.min(P.maxhp,P.hp+h);floater(P.x,P.z,'+'+fmt(h),'#9fffc0');for(const a of allies)if(!a.dead&&a.life>0)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*fraction);break}
+    case 'heal':{applyHealingLight(P,sk);for(const a of allies)if(!a.dead&&a.life>0)applyHealingLight(a,sk);break}
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[NARRADOR]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
     case 'guard':{P.guard=5;P.guardVal=sk.pow;if(sk.n==='Bênção')blessAllies(P);toast('<b>[NARRADOR]</b> '+sk.n+': dano recebido reduzido');break}
     case 'stealth':{P.stealth=5;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;toast('<b>[NARRADOR]</b> Furtivo por 5s. Próximo golpe x3');break}
@@ -2105,7 +2112,7 @@ function update(dt){
     P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
     if(P.stealth>0){P.stealth-=dt;if(P.stealth<=0)setStealth(false)}
     P.mp=Math.min(P.maxmp,P.mp+dt*(3+P.maxmp*.03));
-    if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0){P.bleedT-=dt;P.hp-=P.bleedD*dt;if(P.hp<=0&&!P.dead)die()}
+    if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0){P.bleedT-=dt;P.hp-=absorbHealingShield(P,P.bleedD*dt);if(P.hp<=0&&!P.dead)die()}
     if(P.shT>0)P.shT-=dt;else if(P.shield<P.maxsh)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.2*dt*(hasT('brk30')?1.3:1));
     if(hasT('brk600')&&P.hp<P.maxhp&&!P.dead)P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.01*dt);
     if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
@@ -2204,7 +2211,7 @@ function drawOverlay(){
   for(const e of enemies){if(e.dead||e.isBoss||e.sleep||e.invuln)continue;if(Math.hypot(e.x-P.x,e.z-P.z)>24)continue;if(!e.aggro&&e.hp>=e.maxhp&&!e.rival&&!e.elite)continue;const p=proj(e.x,2.1*(e.m.sc||1)+.1,e.z);if(!p.ok)continue;
     bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0');
     {const lv=eLvl(e),th=threat(lv);oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.85)';const t='Nv '+lv+(th?' ☠':'');const tx=p.x-(e.rival?23:17)-4;oc.textAlign='right';oc.strokeText(t,tx,p.y+4);oc.fillStyle=th||'#c9d3de';oc.fillText(t,tx,p.y+4);oc.textAlign='center'}}
-  for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff')}
+  for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',healingShield(a)>0?(a.name||a.short||'Aliado')+' · escudo '+fmt(Math.ceil(healingShield(a))):(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff')}
   if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a');oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
   for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;const s=f.big?22:15;oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
@@ -2265,7 +2272,7 @@ function hud(){
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):'Masmorra '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
   $('lv').textContent='NV '+run.level+' · '+where2;
-  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0);$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
+  $('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' LUZ ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp);
   $('mpb').style.width=(100*P.mp/P.maxmp)+'%';$('mpt').textContent=Math.floor(P.mp)+' / '+P.maxmp;
   $('xpb').style.width=(100*run.xp/xpNeed())+'%';$('gold').textContent=fmt(run.gold);
   const mi=minionAllies().length,ec=allies.filter(a=>a.shadow&&!a.dead).length,showArmy=mi>0||ec>0||canArise()||P.skills.some(s=>s&&['summon','minionbuff'].includes(s.t));$('armyline').style.display=showArmy?'flex':'none';$('ecot').textContent='ECOS '+ec+'/'+shadowCap();$('armyt').textContent='INVOCADOS '+mi+'/'+summonCap();
@@ -3718,7 +3725,7 @@ $('goBtn').addEventListener('click',()=>{
   startGame();
 });
 $('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
-$('again').addEventListener('click',()=>{$('dead').hidden=true;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=2;player.slowT=0;player.bleedT=0;
+$('again').addEventListener('click',()=>{$('dead').hidden=true;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=2;player.slowT=0;player.bleedT=0;player.healShield=0;player.healShieldUntil=0;
   if(L.mode!=='world'){if(L.special)leaveDungeon(false);else leaveDungeon(true)}const c=nearestCity(player.x,player.z).c;player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);paused=false;saveRun();toast('<b>[NARRADOR]</b> Você acordou em '+c.name+'.')});
 function newGame(){if(!confirm('Começar um jogo novo? O save atual será APAGADO deste navegador. Se quiser guardar, cancele e use "Exportar save" antes.'))return;if(!confirm('Tem certeza? Não dá para desfazer.'))return;window._wipe=1;started=false;paused=true;store.set=()=>{};store.del('pds2_profile');store.del('pds3_run');removeEventListener('pagehide',saveRunPH);location.reload()}
 function saveRunPH(){saveRun()}
@@ -3753,9 +3760,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v96</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v98</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=96;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=98;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
