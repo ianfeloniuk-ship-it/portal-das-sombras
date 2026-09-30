@@ -534,3 +534,9 @@ Integrada v111 remota1f3fa52 (núcleo ao fundo, ondas frontais8/10/12/14 e escal
 
 Encadear três habilidades permanece expansão futura de combate, não implementada aqui. As2.000 falas em60 contextos do Narrador já foram entregues na v107. Próximo foco recomendado: encontros e história da jornada, não mais classes.
 
+
+## v113 — pontos por nível, inversão e clareza de extração (30/09/2026)
+Ian escolheu explicitamente 1 ponto de habilidade por nível, com compensação retroativa. A regra anterior era 1/5 níveis. Migração única por run acrescenta (nível−1−floor(nível/5)); NV17 recebe +13, preservando saldo/recompensas/melhorias existentes. Reencarnação continua zerando os pontos do ciclo; níveis novos dão +1.
+Inversão só entra no sorteio de chefes cujo ataque principal é soulrain. Área fixa de 2,5m, aviso de 1,2s, alcance14m e visibilidade; sair/esquivar evita, morte do chefe cancela. Esquiva usa a direção invertida ao iniciar e mantém a trajetória; morte/troca de região limpa o efeito.
+Extração: transmissores visualmente distintos, placa ENVIAR CARGA, círculo real de6m e E no mapa; instruções apontam enviar6 espaços, conclusão explícita. Fluxo real de coleta e envio funcionou em QA; não foi reproduzido bloqueio de lógica. Defensores mortos e tempo avançado por fixture para checar conclusão, não teste de equilíbrio. Pequena marca acima da habilidade no print ainda sem identificação segura.
+verify-v113 cobre migração1–500, idempotência, inversão/parede/esquiva/morte, envio/tempo/inimigos/conclusão; verify-v112 preserva160 habilidades. Fixture qa-v113.html local, não publicar. Captura outputs/pontos-habilidade-v113.png no workspace.
