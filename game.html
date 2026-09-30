@@ -3440,7 +3440,7 @@ function statsFor(){
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
   const equip=run&&run.equip||{};
-  const m=window.WARRIOR127_ENABLE&&profile.cls===0&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,defaultWeapon:{tier:0,visual:{shape:"broad"}},tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
+  const m=window.WARRIOR127_ENABLE&&profile.cls===0&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
   if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
