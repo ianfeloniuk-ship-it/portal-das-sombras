@@ -4734,7 +4734,7 @@ function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');s
 /* ================= EFEITOS ================= */
 function fxRing(x,z,col,r,dur=.45){const o=new THREE.Mesh(geo('fxr',()=>new THREE.RingGeometry(.2,.6,32)),glow(col,.9));o.rotation.x=-Math.PI/2;o.position.set(x,.08,z);scene.add(o);fxs.push({o,t:0,dur,kind:'ring',r})}
 function fxBurst(x,y,z,col,n=8,sp=5){for(let i=0;i<n;i++){const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(col,1));o.scale.setScalar(rnd(.6,1.4));o.position.set(x,y,z);scene.add(o);fxs.push({o,t:0,dur:rnd(.3,.6),kind:'p',v:{x:rnd(-1,1)*sp,y:rnd(.5,1.5)*sp,z:rnd(-1,1)*sp}})}}
-function fxSlash(x,z,ang,col,r=2.4,big=false){if(window.Combat139){const f=Combat139.create(col,r,false);f.group.position.set(x,0,z);f.group.rotation.y=-ang+Math.PI/2-.9;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
+function fxSlash(x,z,ang,col,r=2.4,big=false){if(window.Combat139){const f=Combat139.create(col,r,false);f.group.position.set(x,0,z);f.group.rotation.y=ang-Math.PI/2;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
 function fxLine(pts,col){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(p.x,1.1,p.z)));const o=new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,blending:THREE.AdditiveBlending}));scene.add(o);fxs.push({o,t:0,dur:.3,kind:'line',own:true})}
 function fxGhost(){const o=new THREE.Mesh(geo('ghost',()=>new THREE.CylinderGeometry(.35,.4,1.9,8)),glow(0xffd08a,.35));o.position.set(player.x,1,player.z);scene.add(o);fxs.push({o,t:0,dur:.3,kind:'ghost'})}
 function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt),col,t:0,big})}
@@ -4842,7 +4842,7 @@ function skillFx(sk,P){
   else if(sk.n==='Lâmina Envenenada'){cloud({x,z},c)}
   else if(sk.t==='dot'){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<5.5)cloud(e,c);cloud({x,z},c)}
 }
-function castFluid139(sk){if(!window.Combat139||!player)return;const v=Combat139.cast(sk,sk.sourceClass??profile.cls);if(!v)return;let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=-player.face;fxCustom(v.group,.7,(_,k)=>v.update(k))}
+function castFluid139(sk){if(!window.Combat139||!player)return;const v=Combat139.cast(sk,sk.sourceClass??profile.cls);if(!v)return;let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}
 
 /* ================= PERIGOS ================= */
 function hazard(x,z,r,dur,dmg,team,col){if(team==='enemy'&&r>8){r=8;dur=Math.max(dur,1.2)}

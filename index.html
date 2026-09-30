@@ -4751,7 +4751,7 @@ function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');s
 /* ================= EFEITOS ================= */
 function fxRing(x,z,col,r,dur=.45){const o=new THREE.Mesh(geo('fxr',()=>new THREE.RingGeometry(.2,.6,32)),glow(col,.9));o.rotation.x=-Math.PI/2;o.position.set(x,.08,z);scene.add(o);fxs.push({o,t:0,dur,kind:'ring',r})}
 function fxBurst(x,y,z,col,n=8,sp=5){for(let i=0;i<n;i++){const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(col,1));o.scale.setScalar(rnd(.6,1.4));o.position.set(x,y,z);scene.add(o);fxs.push({o,t:0,dur:rnd(.3,.6),kind:'p',v:{x:rnd(-1,1)*sp,y:rnd(.5,1.5)*sp,z:rnd(-1,1)*sp}})}}
-function fxSlash(x,z,ang,col,r=2.4,big=false){if(window.Combat139){const f=Combat139.create(col,r,false);f.group.position.set(x,0,z);f.group.rotation.y=-ang+Math.PI/2-.9;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
+function fxSlash(x,z,ang,col,r=2.4,big=false){if(window.Combat139){const f=Combat139.create(col,r,false);f.group.position.set(x,0,z);f.group.rotation.y=ang-Math.PI/2;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
 function fxLine(pts,col){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(p.x,1.1,p.z)));const o=new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,blending:THREE.AdditiveBlending}));scene.add(o);fxs.push({o,t:0,dur:.3,kind:'line',own:true})}
 function fxGhost(){const o=new THREE.Mesh(geo('ghost',()=>new THREE.CylinderGeometry(.35,.4,1.9,8)),glow(0xffd08a,.35));o.position.set(player.x,1,player.z);scene.add(o);fxs.push({o,t:0,dur:.3,kind:'ghost'})}
 function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt),col,t:0,big})}
@@ -4842,7 +4842,7 @@ function zig(pts,col){for(let r=0;r<2;r++){const out=[];for(let i=0;i<pts.length
 function slashes(x,z,n,col){for(let i=0;i<n;i++)setTimeout(()=>{if(!player)return;const a=rnd(0,TAU);fxSlash(x+rnd(-2.5,2.5),z+rnd(-2.5,2.5),a,col,rnd(1.6,2.6))},i*45)}
 function skillFx(sk,P){
   const n=sk.n,c=sk.col,x=P.x,z=P.z,f=P.face;
-  if(/Giratório/.test(n)){const v=Combat139.create(c,4.2,true);v.group.position.set(x,0,z);fxCustom(v.group,.48,(_,k)=>v.update(k))}
+  if(/Giratório/.test(n)){spinRing(x,z,c,4.2);spinRing(x,z,0xffffff,3,.3)}
   else if(/Gelo|Inverno|Era do/.test(n)&&sk.t!=='bolt'){spikes(x,z,20,1.5,/Inverno|Era/.test(n)?8:6,0xbfefff,2.4);fxRing(x,z,0x70ddff,5,.4)}
   else if(/Julgamento/.test(n)&&sk.t==='nova'){const r=sk.n==='Julgamento'?judgmentRadius(sk):6;fxRing(x,z,0xffe066,r,.6);pillar(x,z,0xffe066,1.2,.8);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<r+e.r)pillar(e.x,e.z,0xffe066,.7)}
   else if(/Almas/.test(n)&&sk.t==='nova'){for(let i=0;i<12;i++){const a=i/12*TAU,o=projModel('soul',0xb98cff);o.rotation.y=a;const sx=x,sz=z;fxCustom(o,.6,(ff,k)=>{o.position.set(sx+Math.sin(a)*6*k,1+Math.sin(k*Math.PI)*.8,sz+Math.cos(a)*6*k);fadeAll(o,1-k)})}}
@@ -4859,7 +4859,7 @@ function skillFx(sk,P){
   else if(sk.n==='Lâmina Envenenada'){cloud({x,z},c)}
   else if(sk.t==='dot'){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<5.5)cloud(e,c);cloud({x,z},c)}
 }
-function castFluid139(sk){if(!window.Combat139||!player)return;const v=Combat139.cast(sk,sk.sourceClass??profile.cls);if(!v)return;let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=-player.face;fxCustom(v.group,.7,(_,k)=>v.update(k))}
+function castFluid139(sk){if(!window.Combat139||!player)return;const v=Combat139.cast(sk,sk.sourceClass??profile.cls);if(!v)return;let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}
 
 /* ================= PERIGOS ================= */
 function hazard(x,z,r,dur,dmg,team,col){if(team==='enemy'&&r>8){r=8;dur=Math.max(dur,1.2)}
@@ -7365,9 +7365,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v139</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v140</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=139;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=140;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
