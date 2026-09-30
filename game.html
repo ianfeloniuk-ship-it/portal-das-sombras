@@ -4446,7 +4446,7 @@ function exitPortal(x,z,locked){
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({seed:131,red:locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
     const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
-    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.exits.push(it);return it;
+    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
   }
 
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);

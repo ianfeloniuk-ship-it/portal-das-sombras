@@ -4463,7 +4463,7 @@ function exitPortal(x,z,locked){
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({seed:131,red:locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
     const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
-    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.exits.push(it);return it;
+    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
   }
 
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);
@@ -7304,9 +7304,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v135</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v136</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=135;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=136;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
