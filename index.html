@@ -4751,7 +4751,7 @@ function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');s
 /* ================= EFEITOS ================= */
 function fxRing(x,z,col,r,dur=.45){const o=new THREE.Mesh(geo('fxr',()=>new THREE.RingGeometry(.2,.6,32)),glow(col,.9));o.rotation.x=-Math.PI/2;o.position.set(x,.08,z);scene.add(o);fxs.push({o,t:0,dur,kind:'ring',r})}
 function fxBurst(x,y,z,col,n=8,sp=5){for(let i=0;i<n;i++){const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(col,1));o.scale.setScalar(rnd(.6,1.4));o.position.set(x,y,z);scene.add(o);fxs.push({o,t:0,dur:rnd(.3,.6),kind:'p',v:{x:rnd(-1,1)*sp,y:rnd(.5,1.5)*sp,z:rnd(-1,1)*sp}})}}
-function fxSlash(x,z,ang,col,r=2.4,big=false){if(window.Combat139){const f=Combat139.create(col,r,false);f.group.position.set(x,0,z);f.group.rotation.y=ang-Math.PI/2;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
+function fxSlash(x,z,ang,col,r=2.4,big=false,cls=null){if(window.Combat139){const f=cls==null?Combat139.create(col,r,false):Combat139.basicMelee(cls,col,r,big);f.group.position.set(x,0,z);f.group.rotation.y=ang-Math.PI/2;fxCustom(f.group,big?.30:.24,(_,k)=>f.update(k));return}const o=new THREE.Mesh(new THREE.RingGeometry(r*.55,r,24,1,-.9,1.8),glow(col,.85));o.rotation.x=-Math.PI/2;o.rotation.z=ang-Math.PI/2;o.position.set(x,.9,z);scene.add(o);fxs.push({o,t:0,dur:big?.28:.2,kind:'slash',own:true})}
 function fxLine(pts,col){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(p.x,1.1,p.z)));const o=new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,blending:THREE.AdditiveBlending}));scene.add(o);fxs.push({o,t:0,dur:.3,kind:'line',own:true})}
 function fxGhost(){const o=new THREE.Mesh(geo('ghost',()=>new THREE.CylinderGeometry(.35,.4,1.9,8)),glow(0xffd08a,.35));o.position.set(player.x,1,player.z);scene.add(o);fxs.push({o,t:0,dur:.3,kind:'ghost'})}
 function floater(x,z,txt,col,big=false,y=2.4){floats.push({x,y,z,txt:String(txt),col,t:0,big})}
@@ -4788,8 +4788,8 @@ function arrowModel(col,glowy){
   if(glowy){const t=new THREE.Mesh(geo('atrail',()=>new THREE.CylinderGeometry(.09,.01,1.2,6)),glowS(col,.55));t.rotation.x=Math.PI/2;t.position.z=-.3;g.add(t)}
   return g;
 }
-function projModel(type,col,sc=1){
-  const fluid139=window.Combat139&&Combat139.projectile(type,col,sc);if(fluid139)return fluid139;
+function projModel(type,col,sc=1,cls=null){
+  const fluid139=window.Combat139&&Combat139.projectile(type,col,sc,cls);if(fluid139)return fluid139;
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
   else if(type==='fire'){g.add(new THREE.Mesh(geo('fcore',()=>new THREE.SphereGeometry(.22,10,8)),glowS(0xfff0a0,1)));g.add(new THREE.Mesh(geo('fout',()=>new THREE.SphereGeometry(.36,10,8)),glowS(0xff6a1e,.7)));const t=new THREE.Mesh(geo('ftail',()=>new THREE.ConeGeometry(.3,.9,8)),glowS(0xff3d0e,.5));t.rotation.x=-Math.PI/2;t.position.z=-.55;g.add(t)}
@@ -4816,6 +4816,19 @@ function spikes(x,z,n,r0,r1,col,h=2.2,dark=false){
   const g=new THREE.Group();g.position.set(x,0,z);
   for(let i=0;i<n;i++){const a=i/n*TAU+rnd(-.2,.2),r=rnd(r0,r1);const m=new THREE.Mesh(geo('spk',()=>new THREE.ConeGeometry(.35,1,6)),dark?new THREE.MeshBasicMaterial({color:col,transparent:true}):gl(col,.85));m.position.set(Math.cos(a)*r,0,Math.sin(a)*r);m.scale.set(1,.01,1);m.userData.h=h*rnd(.7,1.3);m.rotation.set(rnd(-.25,.25),0,rnd(-.25,.25));g.add(m)}
   fxCustom(g,.9,(f,k)=>{const up=Math.min(1,k*5);for(const m of g.children){m.scale.y=m.userData.h*up;m.position.y=m.userData.h*up/2}if(k>.55)fadeAll(g,(1-k)/.45)});
+}
+function groundFacet(x,z,size,col,angle=0){
+  const g=new THREE.Group(),points=[],top=[],topColors=[],sides=[],sideColors=[],n=7,base=new THREE.Color(col),seed=Math.sin(x*12.7+z*4.1+angle)*43758.5;
+  for(let i=0;i<n;i++){const a=i/n*TAU,noise=.82+.18*Math.sin(seed+i*8.31),r=size*noise;points.push(new THREE.Vector3(Math.cos(a)*r,.10+Math.sin(seed+i*2.8)*.025,Math.sin(a)*r))}
+  const push=(arr,colors,a,b,c,colorScale)=>{arr.push(...a.toArray(),...b.toArray(),...c.toArray());const tint=base.clone().multiplyScalar(colorScale);for(let j=0;j<3;j++)colors.push(tint.r,tint.g,tint.b)};
+  const center=new THREE.Vector3(0,.23,0);for(let i=0;i<n;i++)push(top,topColors,center,points[i],points[(i+1)%n],.84+(i%3)*.10);
+  const floor=points.map(p=>new THREE.Vector3(p.x*.88,.015,p.z*.88));for(let i=0;i<n;i++){const j=(i+1)%n;push(sides,sideColors,points[i],floor[i],points[j],.48);push(sides,sideColors,points[j],floor[i],floor[j],.40)}
+  const makeGeo=(positions,colors)=>{const q=new THREE.BufferGeometry();q.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));q.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));q.computeVertexNormals();return q};
+  const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.96,metalness:0,side:THREE.DoubleSide,transparent:true,opacity:.96});
+  const topMesh=new THREE.Mesh(makeGeo(top,topColors),mat),sideMesh=new THREE.Mesh(makeGeo(sides,sideColors),mat);g.add(sideMesh,topMesh);
+  const edgePts=points.map(p=>new THREE.Vector3(p.x,.235,p.z));const edge=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(edgePts),new THREE.LineBasicMaterial({color:0x30271e,transparent:true,opacity:.88}));g.add(edge);
+  const veins=[];for(let i=0;i<3;i++){const a=points[(i*2+1)%n],b=new THREE.Vector3(a.x*.30,.238,a.z*.30);veins.push(b,a)}g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(veins),new THREE.LineBasicMaterial({color:0x70583d,transparent:true,opacity:.55})));
+  g.position.set(x,.025,z);g.rotation.y=angle;g.scale.set(1,.04,1);g.addEventListener('removed',()=>g.traverse(m=>{if(m.geometry)m.geometry.dispose();if(m.material&&!m.material.userData.shared)m.material.dispose()}));fxCustom(g,.50,(f,k)=>{const pop=k<.28?.04+.96*k/.28:1;g.scale.set(1,pop,1);const fade=k>.72?(1-k)/.28:1;mat.opacity=.96*fade;edge.material.opacity=.88*fade;g.children[3].material.opacity=.55*fade});
 }
 function pillar(x,z,col,w=.8,dur=.7){
   const g=new THREE.Group();const c=new THREE.Mesh(geo('pil',()=>new THREE.CylinderGeometry(1,1,24,12,1,true)),gl(col,.75));c.position.y=12;g.add(c);const core=new THREE.Mesh(geo('pil',()=>0),gl(0xffffff,.9));core.position.y=12;core.scale.set(.35,1,.35);g.add(core);g.position.set(x,0,z);g.scale.set(w,1,w);
@@ -4848,6 +4861,7 @@ function skillFx(sk,P){
   else if(/Almas/.test(n)&&sk.t==='nova'){for(let i=0;i<12;i++){const a=i/12*TAU,o=projModel('soul',0xb98cff);o.rotation.y=a;const sx=x,sz=z;fxCustom(o,.6,(ff,k)=>{o.position.set(sx+Math.sin(a)*6*k,1+Math.sin(k*Math.PI)*.8,sz+Math.cos(a)*6*k);fadeAll(o,1-k)})}}
   else if(/Domínio/.test(n)){spikes(x,z,22,1.2,6.5,0x1a0a33,2.8,true);spikes(x,z,10,1,5,0xb98cff,2)}
   else if(/Mil Cortes/.test(n)){slashes(x,z,12,c);spinRing(x,z,c,4,.4)}
+  else if(sk.t==='nova'&&(sk.sourceClass===10||/Sísmico/.test(n))){for(let i=0;i<9;i++){const a=i/9*TAU+f*.35,r=1.4+(i%3)*1.15;groundFacet(x+Math.cos(a)*r,z+Math.sin(a)*r,.34+(i%3)*.09,i%2?c:0x9a7b50,a)}rocks(x,z,4,0x766044)}
   else if(/Impacto|Sísmico/.test(n)){cracks(x,z,/Sísmico/.test(n)?8:6,c);rocks(x,z,10,0x5a5a6a)}
   else if(/Chama/.test(n)){for(let i=0;i<8;i++){const a=i/8*TAU;pillar(x+Math.cos(a)*4,z+Math.sin(a)*4,0xff5a1e,.6,.8)}pillar(x,z,0xffa040,1,.6)}
   else if(sk.t==='cone'){waveFwd(x,z,f,c,/Autoridade/.test(n)?7:5,/Autoridade/.test(n)?4:3);if(/Rúnica/.test(n))circle(x+Math.sin(f)*2,z+Math.cos(f)*2,c);if(/Escudo/.test(n))rocks(x+Math.sin(f)*2,z+Math.cos(f)*2,5,0x6a6a7a)}
@@ -5120,13 +5134,13 @@ function attack(){
   const shootsNow=basicIsMagic()||(!MAGIC_CLS.includes(ci)&&c.ranged);
   if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');for(let i=0;i<n;i++)shoot(player.x,player.z,player.face+(i===0?0:(i%2?-1:1)*Math.ceil(i/2)*.18),22*(1+.15*rankTalent('reach')),dmg*(i===0?1:.4),'player',col,c.wep==='bow'?'arrow':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Paladino'?'holy':c.n==='Necromante'?'soul':'orb',{basicClass:ci,third,pierce:!!rankTalent('piercing')||(ci===4&&third),bounces:rankTalent('bounce')});beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area'))*(1+.25*rankTalent('sweep')),arc=(third?1.3:1.0)+rankTalent('sweep')*Math.PI/9;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
-    fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third);sfx('swing');
+    fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third,ci);sfx('swing');
     let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2)continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:ci});hit=true}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
 }
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   if(team!=='player'){dmg=kitWeakDamage111(curAtk,dmg);o.fromBoss111=!!curAtk?.isBoss}const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
-  const holder=projModel(type,col,sc);holder.position.set(x,o.originY??1.1,z);holder.rotation.y=a;scene.add(holder);
+  const holder=projModel(type,col,sc,o.basicClass);holder.position.set(x,o.originY??1.1,z);holder.rotation.y=a;scene.add(holder);
   projs.push({originY:o.originY??1.1,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
@@ -5405,8 +5419,8 @@ function update(dt){
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(riftContact131())return;
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
-  for(let i=projs.length-1;i>=0;i--){const p=projs[i],pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z));p.life-=pdt;p.x+=p.vx*pdt;p.z+=p.vz*pdt;p.mesh.position.set(p.x,p.originY??1.1,p.z);let done=p.life<=0;if(kitCapture111(p,pdt)){scene.remove(p.mesh);projs.splice(i,1);continue}if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
-    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
+  for(let i=projs.length-1;i>=0;i--){const p=projs[i],pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z));p.life-=pdt;p.x+=p.vx*pdt;p.z+=p.vz*pdt;p.mesh.position.set(p.x,p.originY??1.1,p.z);if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;let done=p.life<=0;if(kitCapture111(p,pdt)){scene.remove(p.mesh);projs.splice(i,1);continue}if(p.ptype==='fire'||p.ptype==='soul'||p.ptype==='sarrow'){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p)}}
+    if(p.team==='player'){for(const e of enemies){if(e.dead||p.hit.has(e))continue;if(Math.hypot(e.x-p.x,e.z-p.z)<e.r+p.r){p.hit.add(e);hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3)}if(p.ptype==='stone'||p.basicClass===10){groundFacet(p.x,p.z,.38,p.col,p.mesh.rotation.y);rocks(p.x,p.z,3,0x8b704c)}else fxBurst(p.x,1.1,p.z,p.col,5,3);if(bounceBasic(p))break;if(!p.pierce){done=true;break}}}}
     else{if(!P.dead&&Math.hypot(P.x-p.x,P.z-p.z)<P.r+p.r){hurtPlayer(p.dmg,!p.fromBoss111);done=true}else for(const a of allies)if(Math.hypot(a.x-p.x,a.z-p.z)<a.r+p.r){hurtAlly(a,p.dmg);done=true;break}}
     if(!done){if(L.grid){if(!gfree(p.x,p.z))done=true}else if(!worldFree(p.x,p.z,.1))done=true}
     if(done){scene.remove(p.mesh);projs.splice(i,1)}}
@@ -7365,9 +7379,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v140</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v141</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=140;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=141;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
