@@ -551,3 +551,6 @@ Validação: verify-v114 cobre dez objetivos sem raras no rankF, pulsos/ordem/in
 
 Próximo objetivo: consequências nas cidades e reputação regional, com respostas às ações do jogador. Permanecem o arco maior da história (origem do Narrador não definida), variedade/progressão da torre, playtest de equilíbrio, modelos/câmera/equipamentos3D e multiplayer/save em nuvem futuro. Classes/habilidades do catálogo v112 seguem concluídas; encadeamento de habilidades continua futuro.
 
+
+## 2026-09-30 — v115: escolha por sensação
+Ian corrigiu a apresentação das investigações: títulos/descrições entregavam o caminho e tornavam a escolha forçada. Tela de escolha agora usa Ecos, Instante, Distância, Presença, Mudança, Fragmentos, Reflexo, Impulso, Sinais e Silêncio, com pistas sensoriais breves e botão Aproximar-se. Não mostra objetivos nem classe/afinidade, inclusive após despertar. Instruções práticas e regra de interrupção aparecem após escolher. Encontros, recompensas e saves preservados. verify-v114 passou com verificações atualizadas de não antecipar os caminhos.
