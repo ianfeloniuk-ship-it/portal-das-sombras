@@ -2856,7 +2856,7 @@ const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
 let modalRoute118='';
 const MODAL_NAV118={current:null,back:[],returning:false,restore:null,serial:0};
 function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout'))return skillsView;if(modalRoute118==='constel')return passivesView;return null}
-function modalBack118(){if(profile?.creationPending91&&started)return;const prev=MODAL_NAV118.back.pop(),parent=modalParent118();if(!prev&&!parent)return;MODAL_NAV118.returning=true;MODAL_NAV118.restore=prev?prev.scroll:null;try{(prev?prev.render:parent)()}finally{MODAL_NAV118.returning=false;MODAL_NAV118.restore=null}}
+function modalBack118(){if(profile?.creationPending91&&started)return;bindWait=null;const prev=MODAL_NAV118.back.pop(),parent=modalParent118();if(!prev&&!parent)return;MODAL_NAV118.returning=true;MODAL_NAV118.restore=prev?prev.scroll:null;try{(prev?prev.render:parent)()}finally{MODAL_NAV118.returning=false;MODAL_NAV118.restore=null}}
 function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:'+route:title+'|'+String(view);if(!modalOpen){nav.current=null;nav.back=[]}const old=nav.current;if(old)old.scroll=$('mb').scrollTop;let scroll=route?CHAR_UI118.scroll[route]||0:0;
  if(old&&old.key===key)scroll=old.scroll;
  if(!nav.returning&&old&&old.key!==key){const index=nav.back.findIndex(p=>p.key===key);if(index>=0){scroll=nav.back[index].scroll;nav.back.length=index}else if(old.render){nav.back.push(old);if(nav.back.length>30)nav.back.shift()}}
@@ -5802,7 +5802,7 @@ function extraActions3(a,v){if(a==='goblin118'){enterGoblin118();return 'close0'
 
 /* ================= JANELAS ================= */
 function openModal(title,html,route=''){if(profile?.creationPending91&&started&&title!=='CRIAÇÃO DO PERSONAGEM')return;rememberCharacter118();const restoredScroll=enterModal118(title,route);$('mx').hidden=!!(profile?.creationPending91&&started);toggleGameMenu95(false);if(!modalOpen||$('mt').textContent!==title)$('modalNotice95').hidden=true;$('mt').textContent=title;$('mb').innerHTML=html;$('modal').hidden=false;modalOpen=true;paused=true;$('dlg').hidden=true;modalRoute118=route;if(route)CHAR_UI118.route=route;const scroll=restoredScroll,serial=MODAL_NAV118.serial;$('mback118').hidden=!!profile?.creationPending91||!(MODAL_NAV118.back.length||modalParent118());$('mb').scrollTop=scroll;requestAnimationFrame(()=>{if(modalOpen&&MODAL_NAV118.serial===serial)$('mb').scrollTop=scroll})}
-function closeModal(){if(profile?.creationPending91&&started)return;rememberCharacter118();modalRoute118='';MODAL_NAV118.current=null;MODAL_NAV118.back=[];MODAL_NAV118.serial++;$('modal').hidden=true;modalOpen=false;view=null;if(player&&!player.dead&&$('dead').hidden)paused=false}
+function closeModal(){if(profile?.creationPending91&&started)return;rememberCharacter118();bindWait=null;modalRoute118='';MODAL_NAV118.current=null;MODAL_NAV118.back=[];MODAL_NAV118.serial++;$('modal').hidden=true;modalOpen=false;view=null;if(player&&!player.dead&&$('dead').hidden)paused=false}
 function rerender(){if(view)view()}
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+name+'<small>'+desc+'</small></div><div class="acts">'+btns+'</div></div>';
 const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" data-v="'+v+'" '+(en?'':'disabled')+'>'+txt+'</button>';
