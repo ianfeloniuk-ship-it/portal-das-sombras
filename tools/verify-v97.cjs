@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/../game.html','utf8');
 function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(src);assert(m,n);let b=src.indexOf('{',m.index),d=0,q=null,e=false;for(let i=b;i<src.length;i++){let c=src[i];if(q){if(e)e=false;else if(c==='\\')e=true;else if(c===q)q=null;continue}if(c==='"'||c==="'"||c==='`'){q=c;continue}if(c==='{')d++;if(c==='}'&&!--d)return src.slice(m.index,i+1)}}
 const saved=[],notes=[];
-const c={isTwiceAwakened103:()=>false,profile:{rank:0},run:{level:999,gold:0,quests:[]},L:{},TOPR:8,GR:Array.from({length:10},(_,i)=>({lvl:i*10})),RANKS:'F E D C B A S SS SS+ ★'.split(' ').map(id=>({id})),store:{set(){}},fmt:String,toast:x=>notes.push(x),saveRun(){saved.push(JSON.stringify({p:c.profile,r:c.run}))},rankOf:()=>c.profile.rank,affL:()=>0,beep(){}};
+const c={regionPortal116:()=>{},isTwiceAwakened103:()=>false,profile:{rank:0},run:{level:999,gold:0,quests:[]},L:{},TOPR:8,GR:Array.from({length:10},(_,i)=>({lvl:i*10})),RANKS:'F E D C B A S SS SS+ ★'.split(' ').map(id=>({id})),store:{set(){}},fmt:String,toast:x=>notes.push(x),saveRun(){saved.push(JSON.stringify({p:c.profile,r:c.run}))},rankOf:()=>c.profile.rank,affL:()=>0,beep(){}};
 Object.assign(c,{narratorEvent105(){},narratorSkill105(){},narratorDeath105(){},narratorPortal105(){}});vm.createContext(c);vm.runInContext(src.slice(src.indexOf('const ORDER_REP_NEED='),src.indexOf('function rankPortalCount')),c);
 for(const n of ['rankPortalCount','qualifyingRankPortals','rankTrialReady','recordRankPortal','recordSpecialOrderRep','genQuest','completeJob','dprog'])vm.runInContext(extract(n),c);
 assert.equal(c.orderRep(),0);
