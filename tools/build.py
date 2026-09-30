@@ -1,6 +1,7 @@
-"""Gera index.html (site instalável) a partir de game.html (fonte também usada no Artifact)."""
-import pathlib,re
+"""Gera index.html (site instalável) a partir de game.html."""
+import pathlib,re,subprocess,sys
 root=pathlib.Path(__file__).resolve().parent.parent
+subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
 game=(root/'game.html').read_text(encoding='utf-8')
 ver=re.search(r"pds-v(\d+)",(root/'sw.js').read_text(encoding='utf-8')).group(1)
 head='''<!doctype html>
