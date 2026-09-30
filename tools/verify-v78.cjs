@@ -3,7 +3,7 @@ const src=fs.readFileSync(__dirname+'/../game.html','utf8');
 function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(src);assert(m,n);let b=src.indexOf('{',m.index),d=0,q=null,e=false;for(let i=b;i<src.length;i++){let c=src[i];if(q){if(e)e=false;else if(c==='\\')e=true;else if(c===q)q=null;continue}if(c==='"'||c==="'"||c==='`'){q=c;continue}if(c==='{')d++;if(c==='}'&&!--d)return src.slice(m.index,i+1)}}
 const c={isTwiceAwakened103:()=>false,orderRep:()=>12000,orderRepNeed:()=>12000,orderRepReward:()=>10,fmt:String,classSlotCount:()=>6,rankTalentRows:()=>'',rankPoints:()=>0,rankTrialReady:()=>true,rankPortalCount:()=>10,qualifyingRankPortals:()=>3,profile:{},run:{},row:(...a)=>a.join(' '),btn:(...a)=>a.join(' ')};vm.createContext(c);
 vm.runInContext(src.slice(src.indexOf('const RANKS='),src.indexOf('const S='))+src.slice(src.indexOf('const GR='),src.indexOf('const ELIX='))+src.slice(src.indexOf('const MAIN_ACTS='),src.indexOf('function finishTowerStory')),c);
-for(const n of ['migrateRankProfile','migrateRankRun','newRun','rankTab','itemAtk','cryUp','spendCry'])vm.runInContext(extract(n),c);
+for(const n of ['awakeningDiscovered109','migrateRankProfile','migrateRankRun','newRun','rankTab','itemAtk','cryUp','spendCry'])vm.runInContext(extract(n),c);
 assert.equal(vm.runInContext('RANKS.map(r=>r.id).join(",")',c),'F,E,D,C,B,A,S,SS,SS+,★');
 assert(vm.runInContext('TOPR===8 && RANKS[9].secret && !RANKS[8].secret && GR[8].lvl===220 && GR[9].lvl===260',c));
 for(const a of ['RANKS','GR','WATK','AHPV','AARM','PRICE','CORE_P','CRY_P','HIRE','TIERN','WBON','ADEF'])assert.equal(vm.runInContext(a+'.length',c),10,a);
