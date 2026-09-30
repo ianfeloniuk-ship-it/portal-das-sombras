@@ -3456,13 +3456,14 @@ function learnPower(sk){const lib=powLib();
   else toast('<b>[NARRADOR]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
 function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 1–3). Escolha qual vai em cada tecla.</div>';
   lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,slot!==k)).join(''))});return h}
+function sellMonsterLoot(){const gold=lootTotal();if(gold<=0)return false;run.loot={};run.gold+=gold;toast('<b>[MERCADO]</b> Espólios vendidos: +'+fmt(gold)+' ouro. Cristais e núcleos preservados.');beep(990,.15,.05);return true}
 function mktView(){
-  view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false,tot=0;
-  for(const [k,nm,P] of[['core','Núcleo mágico',CORE_P],['cry','Cristal de mana',CRY_P]])for(let r=0;r<10;r++){const n=run.res[k][r];if(!n)continue;any=true;tot+=n*sellP(k,r);h+=row(nm+' <span class="rl" style="color:'+RANKS[r].c+'">'+GR[r].id+'</span> × '+n,fmt(sellP(k,r))+' ouro cada ('+arrow(r)+') · total '+fmt(n*sellP(k,r)),btn('Vender','sellres',k+r))}
-  {const lt=run.loot||{},ks=Object.keys(lt).filter(k=>lt[k].n);if(ks.length){any=true;tot+=lootTotal();h+='<div class="sec">ESPÓLIOS DE MONSTROS</div>';for(const k of ks)h+=row((lt[k].b?'<b style="color:#ffb84d">'+k+'</b>':k)+' × '+lt[k].n,fmt(lt[k].v)+' ouro cada','')}}
+  view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false;
+  for(const [k,nm,P] of[['core','Núcleo mágico',CORE_P],['cry','Cristal de mana',CRY_P]])for(let r=0;r<10;r++){const n=run.res[k][r];if(!n)continue;any=true;h+=row(nm+' <span class="rl" style="color:'+RANKS[r].c+'">'+GR[r].id+'</span> × '+n,fmt(sellP(k,r))+' ouro cada ('+arrow(r)+') · total '+fmt(n*sellP(k,r)),btn('Vender estes '+n,'sellres',k+r))}
+  {const lt=run.loot||{},ks=Object.keys(lt).filter(k=>lt[k].n);if(ks.length){any=true;h+='<div class="sec">ESPÓLIOS DE MONSTROS</div>';for(const k of ks)h+=row((lt[k].b?'<b style="color:#ffb84d">'+k+'</b>':k)+' × '+lt[k].n,fmt(lt[k].v)+' ouro cada','')}}
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
-  else h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER TUDO · '+fmt(tot)+' ouro','sellall',0,true,'hot')+'</div>';
-  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Cristais e espólios servem na forja do Kael. Vender tudo também vende as partes e relíquias; guarde o que pretende usar.</div>';
+  if(lootTotal()>0)h+='<div style="display:flex;justify-content:flex-end;margin-top:8px">'+btn('VENDER ESPÓLIOS · '+fmt(lootTotal())+' ouro','sellall',0,true,'hot')+'</div>';
+  h+='<div class="sysline" style="font-size:12px;color:var(--dim)">VENDER ESPÓLIOS vende somente as partes e relíquias listadas acima. Cristais de mana e núcleos mágicos ficam guardados; só são vendidos pelos botões de cada recurso. Espólios também servem na forja do Kael; guarde os que pretende usar.</div>';
   h+='<div class="sec">COMPRAR CRISTAIS (PACOTE DE 10)</div><div class="sysline" style="font-size:12px">Dorian compra por 1x e vende por 3x o preço base. Só até o seu rank.</div>';
   for(let t=0;t<=Math.min(9,rankOf());t++){const p=CRY_P[t]*30;h+=row('10 cristais <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','Você tem '+run.res.cry[t],btn(fmt(p)+' ouro','buycry',t,run.gold>=p))}
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Tomos de passivas e de guardiões agora ficam na <b>LIVRARIA</b> da praça.</div>';
@@ -3587,7 +3588,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[NARRADOR]</b> '+p.name+' entrou no seu grupo.')}
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[NARRADOR]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
-  if(a==='sellall'){let g=lootTotal();run.loot={};for(let r=0;r<10;r++){g+=run.res.core[r]*sellP('core',r)+run.res.cry[r]*sellP('cry',r);run.res.core[r]=0;run.res.cry[r]=0}run.gold+=g;toast('<b>[NARRADOR]</b> Recursos vendidos: +'+fmt(g)+' ouro');beep(990,.15,.05)}
+  if(a==='sellall'){if(!sellMonsterLoot())return}
   if(a==='upg'){const eq=run.equip[v];if(!eq)return;const q=equipmentUpgradeCost(eq);if(run.gold<q.gold||cryUp(eq.tier)<q.cry)return;run.gold-=q.gold;spendCry(eq.tier,q.cry);finishEquipmentUpgrade(eq)}
   if(a==='job'){if(run.level<JOB_LVL||run.adv)return;closeModal();buildSpecial('job');return}
   if(a==='tier'){if(!run.adv||run.level<tierNeed())return;closeModal();L.tierTrial=true;buildSpecial('job');return}
@@ -3777,9 +3778,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v100</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v101</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=100;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=101;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
