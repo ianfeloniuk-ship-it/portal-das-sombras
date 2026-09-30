@@ -421,3 +421,5 @@ Teste v101: inventário misto, todos os dez ranks de cristais/núcleos intocados
 A versão antiga não mantinha recibo/quantidades por venda. Não há acesso ao save real de Irror. Backups antigos de migração podem existir no navegador, mas não provam as quantidades anteriores à venda; nenhuma restituição foi inventada ou executada. Para recuperação exata, seria necessário um save anterior válido do jogador. Base 544e471/v100 preservada.
 
 Publicação v101 pendente: revisão automática bloqueou push para main, interpretando a aprovação anterior nesta conversa como limitada à entrega anterior. Correção está no commit 6fc2cf2, pronta/testada. Exige nova confirmação de Ian. Não declarar v101 publicada.
+
+Autorização permanente confirmada diretamente por Ian neste chat após o bloqueio da v101: «sempre permito». Abrange publicar as próximas correções do Ecos da Fenda neste mesmo site. O bloqueio anterior fica superado; não pedir novamente por rotina dentro desse escopo.
