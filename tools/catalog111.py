@@ -33,5 +33,5 @@ for ci,skills in catalog.items():
  for si,d in enumerate(skills):
   d['sourceClass']=int(ci);d['skillId']=ci+':'+str(si);d['kit111']=True
   d['rare103']=int(ci)>=12 or int(ci)==7 and si>=3
-  d['t']='kit111';d['mp']=0 if 'energy' in d else d['mp']
+  d['t']='rare_gate' if d['effect']=='gate' else 'kit111';d['mp']=0 if 'energy' in d else d['mp']
 Path('tools/class-catalog111.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2),encoding='utf-8')

@@ -497,3 +497,40 @@ Durante publicação detectada v109 remota 1cc0137, de outro trabalho. Integrada
 ## Defesa frontal do núcleo — v111
 Feedback de Irror enviado por Ian: núcleo no meio obriga defender todos os lados e quatro invasores por onda eram poucos. Núcleo deslocado para o fundo da arena, com chegada frontal no lado oposto (30m entre núcleo e linha de chegada), sinalizada no chão. Cinco posições laterais e fileiras espaçadas; nenhum spawn lateral/traseiro. Jogador e aliados mantêm interceptação próxima. Ondas agora 8/10/12/14 nos ranks F/E; acrescenta floor(rank/2) em cada onda, chegando a 12/14/16/18 no rank ★ (44–60 invasores totais). Quatro ondas a cada 15s, duração de 60s, vida do núcleo, afixos, recompensas, saída única e derrota permanecem. Vitória continua exigindo eliminar sobreviventes. Valores iniciais precisam de feedback de dificuldade; não alegar campanha humana de equilíbrio.
 verify-v111 cobre dez ranks e ambas orientações da arena: núcleo/visual/interação no fundo, quantidades crescentes, distância/posição frontal, pontos distintos/livres, caminho direto e afixos/vermelho. verify-v103 atualizado para novas quantidades mantém cobertura de alvos, vitória única, derrota, saída e retorno de 60s. Navegador separado confirmou primeira onda de 8, segunda de 10, terceira de 12 e chegada frontal com interceptação; sem erros observados. Avatar QA com vida aumentada e limpeza acelerada da primeira onda; não teste de balanceamento natural. Captura outputs/defesa-frontal-v111.png. Base v110 3300647 preservada, fixtures qa-v*.html não publicar. Publicação autorizada por «sempre permito».
+
+# Ecos da Fenda — catálogo completo v112
+
+Ian autorizou concluir todas as classes e as do Segundo Despertar sem novas perguntas, usando o contexto. Mantida autorização permanente de publicação no mesmo site. Esta entrega substitui a pendência v110 de remodelar somente Guerreiro/Tanque antes de seguir.
+
+## Implementado
+
+20 classes × 8 ativas = 160. Dez comuns e dez raras, incluindo as seis pendentes: Metamorfo, Artífice Rúnico, Duelista Espectral, Condutor das Tempestades, Oráculo dos Vestígios e Devorador do Vazio. Paladino permanece no lugar de Curandeiro. Cada ativa tem uma função principal; utilidades não ganham dano/escudo/cura adicionais implicitamente. Evoluções das comuns fazem parte das oito escolhas e ocupam um dos seis espaços de classe. Poderes absorvidos de chefes mantêm seu sistema próprio.
+
+Guerreiro/Tanque/Assassino/Arqueiro: deslocar, causar dano, controlar e proteger separados. Magos: fogo separa queimadura de projétil, gelo separa dano de controle, terra separa barreira de dano, raio separa velocidade/repulsão de dano. Invocador separa convocar, ordenar, curar, fortalecer e proteger. Necromante preserva seis técnicas existentes por índice e acrescenta evolução/Mortalha; pactos deixam de misturar cura, dano e proteção. Tempo separa retorno de posição e recuperação de vida; Reprise repete dano compatível. Corte Espacial não puxa. Guardião separa vínculo, âncora, deslocamento, redução e escudo; Juramento não acumula carga nem dispara onda.
+
+Metamorfo: quatro formas alteram ataque básico (garras, projétil, golpe amplo lento, golpes rápidos), preparo de 2/4 na cidade, mesma forma sai e restaura escolha anterior. Artífice: 2/4 construções imóveis, visuais próprios, vida e duração30s; torre ataca, armadilha prende e desaparece, emissor concede escudo; reparo, desmontagem, explosão e reposicionamento separados. Duelista guarda 1/2 respostas de aparos contra golpes/projéteis comuns; áreas/chefes incompatíveis. Condutor gasta energia, nunca mana; deslocamento efetivamente percorrido andando perto de inimigos gera 1 por4m, reserva3/6; teleporte/habilidade de movimento não gera energia. Oráculo realça ações já em preparação na janela1/2s, não inventa futuros; revelação/mapeamento reais. Devorador armazena1/2 projéteis comuns por captura com trajeto; chefes/áreas excluídos, devolução usa atributos do jogador, consumir recupera mana.
+
+Afinidade principal dobra só o traço exclusivo, ativo quando habilidade rara da classe equipada. Todas dez raras aprendíveis. Primeiro aprendizado: três investigações totais e ponto no caminho, inclusive rankF. Raras12–20 têm três técnicas iniciais e mais cinco com2–6 investigações do próprio caminho; Necromante preserva legado, Mortalha exige caminho e nível80. Comuns: técnicas adicionais por níveis30/45/80/100 e prova de evolução; Paladino mantém marcos v110. Conquistas persistentes após reencarnação; melhorias continuam resetadas pela regra antiga de reencarnação. Filtros por classe no repertório/equipamento; formas configuráveis na cidade.
+
+## Compatibilidade e limites
+
+Índices e níveis investidos em habilidades existentes preservados na atualização. Migração do Mago Elemental legado para escola escolhida, repertório misto preservado quando sem elemento e investimento de Meteoro levado à evolução correspondente. Evoluções antigas reconhecidas pelo histórico/biblioteca; cópias de classe arquivadas, sem botão adicional ou recarga independente. Poder de chefe homônimo (Era do Gelo) distinguido por origem/definição, mantido na biblioteca. Estados temporários não entram no save; recursos especiais limpos por morte, região e retirada da classe. Escudos menores não prolongam escudos maiores. Barreiras só afetam inimigos comuns; chefes resistem a deslocamento/interrupção/imobilização das utilidades comuns.
+
+Rank segue independente do Despertar. ★ continua após SS+ e seus requisitos. Descoberta pessoal na aba A Fissura/Despertar preservada, sem antecipar o segredo antes do evento. Passivas já existentes e sistemas de equipamentos/básico preservados; não afirmar uma revisão completa das passivas nem novos modelos corporais das formas. As seis novas raras usam a investigação existente como entrada; encontros exclusivos variados ainda são próximo objetivo narrativo.
+
+## Validação
+
+verify-v112:160 handlers/descrições,20×8, raras no rankF, aprendizado persistente, seis espaços/evolução/recarga única, cura/escudo/movimento isolados, Sem cura, paredes, retorno temporal, entrada real de dano/transferência, energia, aparo, captura, construções, formas, barreiras, migração, homônimo absorvido e limpeza. Regressões v95/v97/v103/v105/v106/v107/v109/v111 passaram. Navegador com save QA separado executou160 rotas no motor real sem exceções; verificou dano/aparo/captura/forma/escudo/save e recarga do personagem após reload. Filtros e catálogo visíveis conferidos. Não é campanha humana longa nem teste auditivo humano. Valores iniciais de equilíbrio.
+
+Integrada v111 remota1f3fa52 (núcleo ao fundo, ondas frontais8/10/12/14 e escala por rank), preservando o trabalho paralelo. game.html é fonte, index gerado, sw v112. Catálogo consultável em outputs/catalogo-completo-v112.html; fontes canônicas tools/catalog111.py, class-catalog111.json e kit111-runtime.js (nomes111 internos estáveis); sync-kit111.py reinjeta runtime antes de build. QA/work ficam locais, não publicar.
+
+## Pendências fora de habilidades/classes
+
+1. Variar encontros, decisões e consequências das investigações do Segundo Despertar; concluir seus capítulos/revelação sem fixar por conta própria origem ou intenção do Narrador.
+2. História de ranks e defesa das vilas; expandir reputação regional com consequências de Fendas, reações/serviços/acesso e reparação. Sistemas locais existentes não equivalem ao arco completo.
+3. Variedade da torre infinita e progressão longa de conteúdo; playtest de ritmo/recompensas/dificuldade, inclusive novas ondas do núcleo.
+4. Identidade/modelos, câmera próxima/zoom e representação3D individual das cinco peças de equipamento.
+5. Multiplayer/save em nuvem continuam etapa futura, não implementados nesta entrega; escalar encontros para grupos de níveis diferentes ainda exige desenho.
+
+Encadear três habilidades permanece expansão futura de combate, não implementada aqui. As2.000 falas em60 contextos do Narrador já foram entregues na v107. Próximo foco recomendado: encontros e história da jornada, não mais classes.
+
