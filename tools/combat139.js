@@ -1,6 +1,6 @@
 /* Short-lived, layered melee trails. Shared geometry, no textures or extra lights. */
 window.Combat139=(()=>{
- let strip,sparks;
+ let strip,sparks,sequenceQueue=[];
  function geometry(){if(strip)return strip;const p=[],uv=[],ix=[];for(let i=0;i<=64;i++){for(let side=0;side<2;side++){p.push(0,0,0);uv.push(i/64,side)}if(i<64){const a=i*2;ix.push(a,a+1,a+2,a+1,a+3,a+2)}}strip=new THREE.BufferGeometry();strip.setAttribute('position',new THREE.Float32BufferAttribute(p,3));strip.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));strip.setIndex(ix);return strip;}
  function arc(color,radius,width,start,span){const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,uniforms:{t:{value:0},tint:{value:new THREE.Color(color)},radius:{value:radius},width:{value:width},start:{value:start},span:{value:span}},vertexShader:`varying vec2 v;uniform float radius,width,start,span,t;void main(){v=uv;float a=start+uv.x*span;float r=radius-width*uv.y*(.45+.55*sin(uv.x*3.14159));vec3 p=vec3(cos(a)*r,sin(a)*r,0.);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,fragmentShader:`varying vec2 v;uniform vec3 tint;uniform float t;void main(){float taper=pow(max(0.,sin(v.x*3.14159)),.7);float edge=exp(-v.y*7.);float threads=.65+.35*sin(v.x*85.-v.y*24.-t*11.);float alpha=taper*(edge*.8+pow(1.-v.y,2.)*.25*threads)*pow(1.-t,1.4)*smoothstep(0.,.07,t);vec3 color=mix(tint,vec3(1.,.96,.85),edge*.78);gl_FragColor=vec4(color,alpha);}`});const mesh=new THREE.Mesh(geometry(),material);mesh.frustumCulled=false;mesh.rotation.x=-Math.PI/2;return mesh;}
  function particles(color,spin){if(!sparks){const p=[],v=[];for(let i=0;i<18;i++){const a=i*2.399;p.push(0,0,0);v.push(Math.cos(a)*(1.5+(i%4)),.5+(i%5)*.35,Math.sin(a)*(1.5+(i%4)))}sparks=new THREE.BufferGeometry();sparks.setAttribute('position',new THREE.Float32BufferAttribute(p,3));sparks.setAttribute('velocity',new THREE.Float32BufferAttribute(v,3));}
@@ -114,6 +114,24 @@ window.Combat139=(()=>{
   for(const m of parts)m.userData.sigBase=m.scale.clone();root.userData.parts=parts;root.userData.rings=rings;root.userData.arcs=arcs;return{group:root,update(k){const pulse=.9+.1*Math.sin(k*Math.PI*2);for(const m of parts){if(m.userData.hand)m.rotation.z=-k*Math.PI*3;else m.rotation.y+=.012;m.scale.copy(m.userData.sigBase).multiplyScalar(pulse)}for(let i=0;i<rings.length;i++){rings[i].rotation.y+=(i%2?-.025:.035);rings[i].material.opacity=.45+.3*Math.sin(k*Math.PI)}for(const a of arcs){a.material.uniforms.t.value=k;a.rotation.z+=.012;a.scale.setScalar(.9+k*.14)}}};
  }
  function decorate(result,skill,cls,color){const s=signature(skill,cls,color);if(!s)return result;result.group.add(s.group);const update=result.update;result.update=k=>{update(k);s.update(k)};return result;}
+ function sequence(skill,cls){
+  const now=performance.now(),key=(skill.skillId||skill.n||'skill')+':'+cls,entry={key,color:skill.col??0xb6a0ff,family:families[cls]||'arcane'};
+  if(!sequenceQueue.length||now-sequenceQueue[sequenceQueue.length-1].at>6500)sequenceQueue=[];
+  if(sequenceQueue.at(-1)?.key===key){sequenceQueue=[{...entry,at:now}];return null}
+  sequenceQueue=sequenceQueue.filter(x=>x.key!==key);sequenceQueue.push({...entry,at:now});if(sequenceQueue.length<3)return null;
+  const trio=sequenceQueue.slice(-3);sequenceQueue=[{...trio[2],at:now}];
+  const group=new THREE.Group(),nodes=[],rings=[],lines=[],radius=1.22;
+  for(let i=0;i<3;i++){
+   const a=-Math.PI/2+i*Math.PI*2/3,x=Math.cos(a)*radius,z=Math.sin(a)*radius,item=trio[i];
+   const ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.026,5,24),new THREE.MeshBasicMaterial({color:item.color,transparent:true,opacity:.82,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(x,.22,z);group.add(ring);rings.push(ring);
+   const core=new THREE.Mesh(motifGeometry(item.family),new THREE.MeshStandardMaterial({color:item.color,emissive:item.color,emissiveIntensity:.22,roughness:.65,transparent:true,opacity:.92,depthWrite:false}));core.position.set(x,.72,z);core.scale.setScalar(.18);core.userData.home=core.position.clone();group.add(core);nodes.push(core);
+  }
+  for(let i=0;i<3;i++){
+   const a=-Math.PI/2+i*Math.PI*2/3,b=-Math.PI/2+(i+1)*Math.PI*2/3,p1=new THREE.Vector3(Math.cos(a)*radius,.42,Math.sin(a)*radius),p2=new THREE.Vector3(Math.cos(b)*radius,.42,Math.sin(b)*radius),mid=new THREE.Vector3((p1.x+p2.x)*.20,.8,(p1.z+p2.z)*.20),curve=new THREE.QuadraticBezierCurve3(p1,mid,p2),line=new THREE.Mesh(new THREE.TubeGeometry(curve,16,.024,4,false),new THREE.MeshBasicMaterial({color:0xe5d8ff,transparent:true,opacity:.65,depthWrite:false}));group.add(line);lines.push(line)
+  }
+  const center=new THREE.Mesh(new THREE.IcosahedronGeometry(.20,1),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,depthWrite:false}));center.position.y=.52;group.add(center);nodes.push(center);
+  return{group,update(k){const fade=Math.sin(Math.PI*k),pulse=.84+.16*Math.sin(k*Math.PI*4);for(const m of nodes){m.material.opacity=.92*fade;m.scale.setScalar((m===center?.20:.18)*pulse);m.rotation.y+=.045}for(const r of rings){r.material.opacity=.82*fade;r.rotation.z+=.035}for(const l of lines)l.material.opacity=.65*fade}};
+ }
  function cast(skill,cls){const family=families[cls]||'arcane',type=skill.effect||skill.t,color=skill.col??0xb6a0ff;
  if(cls===0&&(/Giratório/.test(skill.n)||type==='nova'))return create(color,4.2,true);
  if(['cone','dash_strike','line','target','execute','push','pull','counter','interrupt'].includes(type)&&[0,1,2,4,14].includes(cls))return decorate(create(color,2.5,false),skill,cls,color);
@@ -123,5 +141,5 @@ window.Combat139=(()=>{
  const detailUpdate=motifs(group,family,color,radius,ground,guard,skill);
  return decorate({group,update(k){const fade=Math.sin(Math.PI*Math.min(1,k));mesh.material.uniforms.opacity.value=fade*(ground?.88:.72);lift.material.uniforms.opacity.value=fade*(family==='earth'?0:.38);if(ground)mesh.scale.setScalar(radius*(.55+k*.48));lift.rotation.y=k*1.3;detailUpdate(k)}},skill,cls,color);
  }
- return{create,basicMelee,cast,projectile,families};
+ return{create,basicMelee,cast,projectile,sequence,families};
 })();

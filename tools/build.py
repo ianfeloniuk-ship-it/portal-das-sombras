@@ -2,6 +2,7 @@
 import pathlib,re,subprocess,sys
 root=pathlib.Path(__file__).resolve().parent.parent
 subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
+subprocess.run([sys.executable,str(root/'tools'/'sync-kit111.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-ecology124.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-crystals125.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-environment128.py')],check=True)
