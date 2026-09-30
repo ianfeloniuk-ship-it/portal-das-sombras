@@ -4,6 +4,7 @@ root=pathlib.Path(__file__).resolve().parent.parent
 subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-ecology124.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-crystals125.py')],check=True)
+subprocess.run([sys.executable,str(root/'tools'/'sync-environment128.py')],check=True)
 game=(root/'game.html').read_text(encoding='utf-8')
 ver=re.search(r"pds-v(\d+)",(root/'sw.js').read_text(encoding='utf-8')).group(1)
 head='''<!doctype html>
