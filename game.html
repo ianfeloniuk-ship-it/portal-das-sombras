@@ -134,6 +134,21 @@ small.tip{font-size:12px;line-height:1.55}
 body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-width:calc(100vw - 120px)}
 @media(orientation:portrait){#tb{left:auto;right:8px;display:block}#tb .mini{padding:9px 12px;font-size:11px}}
 .skill114{border-bottom:1px solid #d5a34b40;padding:12px 2px}.skill114 summary{cursor:pointer;font-weight:700}.skill114 summary span{float:right;color:#b8b3aa;font-size:12px}.title-progress114{margin-top:8px;font-size:12px}.title-progress114 progress{display:block;width:100%;margin-top:4px;accent-color:#e9b35e}
+/* v118: títulos e caminhos de navegação do Personagem. */
+.title-card118{padding:12px 0;border-bottom:1px solid #d5a34b40}
+.title-heading118{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.title-heading118 strong{min-width:0;overflow-wrap:anywhere;color:var(--ink)}
+.title-heading118 .acts{flex-shrink:0;display:flex;gap:6px}
+.title-effect118{color:var(--dim);font-size:12px;line-height:1.5;margin-top:6px}
+.title-card118 .title-progress114{margin-top:10px;color:var(--ink)}
+.title-card118 progress{appearance:none;height:7px;border:0;border-radius:4px;overflow:hidden;background:#ffffff18}
+.title-card118 progress::-webkit-progress-bar{background:#ffffff18;border-radius:4px}
+.title-card118 progress::-webkit-progress-value{background:#e9b35e;border-radius:4px}
+.title-card118 progress::-moz-progress-bar{background:#e9b35e;border-radius:4px}
+.character-path118{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.character-path118 strong{color:var(--sys2)}
+#mhead{flex-wrap:wrap}#mt{flex:1;min-width:100px}#mback118{flex-shrink:0}
+@media(max-width:520px){#mhead .btn{font-size:11px;padding:7px 8px}#mt{font-size:14px}}
 </style>
 
 <canvas id="c"></canvas>
@@ -177,12 +192,12 @@ body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-
 <div id="steal"></div>
 <div class="b" id="bF" hidden>F</div>
 
-<div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="modalNotice95" role="status" hidden style="font-size:12px;padding:8px;border-left:2px solid #d5a34b;margin-bottom:6px;max-height:90px;overflow:auto"></div><div id="mb"></div></div></div>
+<div id="modal" hidden><div id="mbox" class="panel"><div id="mhead"><button class="btn" id="mback118" onclick="modalBack118()" hidden>← VOLTAR</button><div id="mt"></div><button class="btn" id="mx">FECHAR</button></div><div id="modalNotice95" role="status" hidden style="font-size:12px;padding:8px;border-left:2px solid #d5a34b;margin-bottom:6px;max-height:90px;overflow:auto"></div><div id="mb"></div></div></div>
 
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">ECOS DA FENDA</h1>
-    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Escolha sua classe para começar a jornada. Todo caçador começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. Ao morrer, perde parte do ouro e da XP, mas o personagem continua.</div>
+    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Escolha sua classe para começar a jornada. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. Ao morrer, perde parte do ouro e da XP, mas o personagem continua.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -894,89 +909,89 @@ const NR_LINES105={
   "Hoje o núcleo virou uma lição cara."
  ],
  "stairs_up": [
-  "Você alcançou o andar seguinte.",
-  "A escada abriu outra parte da incursão.",
-  "O caminho continuou acima da sala vencida.",
+  "Você desceu ao andar seguinte.",
+  "A escada abriu uma parte mais profunda da incursão.",
+  "O caminho continuou abaixo da sala vencida.",
   "Mais um piso entrou na sua expedição.",
   "Você deixou o andar anterior para trás.",
-  "A masmorra ainda tem altura para mostrar.",
+  "A masmorra ainda tem profundidade para mostrar.",
   "Seu avanço encontrou outra camada do desafio.",
   "Chegamos ao próximo andar.",
-  "A sala defendida ficou abaixo de você.",
+  "A sala defendida ficou acima de você.",
   "A escada levou a um novo trecho.",
-  "Você ganhou acesso à parte superior.",
+  "Você ganhou acesso à parte inferior.",
   "O percurso acaba de mudar de piso.",
   "Mais um andar para observar com atenção.",
-  "A subida acrescentou terreno à incursão.",
+  "A descida acrescentou terreno à incursão.",
   "Você avançou além daquela escadaria.",
   "O próximo trecho começa neste piso.",
   "Seu caminho atravessou mais um limite da masmorra.",
-  "A expedição ganhou outra altura.",
+  "A expedição ganhou outra profundidade.",
   "Este andar ainda pede sua atenção.",
-  "Você conquistou a passagem para cima.",
+  "Você conquistou a passagem para baixo.",
   "Há novas salas depois desses degraus.",
   "O andar anterior já faz parte do percurso.",
   "Você passou pela ligação entre os pisos.",
   "O desafio continua em outra parte da estrutura.",
-  "A subida levou você mais fundo na incursão.",
+  "A descida levou você mais fundo na incursão.",
   "As salas seguintes estão deste lado da escada.",
-  "Você deixou para baixo uma etapa do caminho.",
-  "O terreno mudou depois da subida.",
+  "Você deixou acima uma etapa do caminho.",
+  "O terreno mudou depois da descida.",
   "Outro piso passou a fazer parte da jornada.",
   "A masmorra ainda não terminou de se apresentar.",
-  "Até os perigos daqui exigem subir escadas.",
+  "Até os perigos daqui exigem descer escadas.",
   "Você venceu a sala e ganhou mais degraus.",
-  "A arquitetura tem ambições verticais.",
+  "A arquitetura tem ambições subterrâneas.",
   "Se havia elevador, ninguém nos avisou.",
-  "Subir foi simples depois de discutir com os guardas.",
+  "Descer foi simples depois de discutir com os guardas.",
   "Essa masmorra gosta de distribuir problemas por andar.",
-  "Mais altura, mesma pouca hospitalidade.",
+  "Mais profundidade, mesma pouca hospitalidade.",
   "Os degraus foram a parte educada da recepção.",
   "A escada cumpriu exatamente o que prometeu.",
-  "Você chegou acima. Os problemas não ficaram todos abaixo."
- ],
+  "Você chegou abaixo. Os problemas não ficaram todos acima."
+],
  "stairs_down": [
   "Você voltou ao andar anterior.",
-  "A descida refez parte do percurso.",
+  "A subida refez parte do percurso.",
   "Estamos novamente num piso já alcançado.",
   "A escada conduziu você de volta.",
   "O caminho conhecido ficou mais perto.",
   "Você retornou por aquela ligação entre andares.",
   "A incursão também permite rever os passos.",
-  "Descemos para uma parte anterior da masmorra.",
-  "Seu percurso agora aponta para baixo.",
+  "Subimos para uma parte anterior da masmorra.",
+  "Seu percurso agora aponta para cima.",
   "Você escolheu voltar um andar.",
-  "A subida ficou para trás por enquanto.",
+  "A descida ficou para trás por enquanto.",
   "Esse piso já faz parte da nossa passagem.",
   "A escadaria trouxe você a uma etapa anterior.",
   "Voltamos a salas daquele outro andar.",
   "A masmorra continua ligada pelo caminho percorrido.",
-  "Você retomou um trecho abaixo.",
+  "Você retomou um trecho acima.",
   "O andar anterior recebeu seus passos outra vez.",
   "A volta atravessou a mesma ligação.",
-  "Sua rota agora inclui essa descida.",
+  "Sua rota agora inclui essa subida.",
   "Rever o percurso pode fazer parte da incursão.",
-  "Você deixou o piso superior por enquanto.",
+  "Você deixou o piso inferior por enquanto.",
   "A escada serviu também para retornar.",
-  "Estamos mais abaixo na estrutura.",
+  "Estamos mais acima na estrutura.",
   "O caminho de volta ganhou alguns degraus.",
   "Você regressou à parte anterior do trajeto.",
-  "A descida terminou neste andar.",
-  "Esse retorno não apaga a subida que fizemos.",
+  "A subida terminou neste andar.",
+  "Esse retorno não apaga a descida que fizemos.",
   "Voltamos a um trecho já atravessado.",
   "O próximo passo começa de um piso conhecido.",
   "Você refez a ligação entre esses andares.",
   "Bom saber que as escadas trabalham nos dois sentidos.",
   "A arquitetura finalmente colaborou com a volta.",
   "Os degraus continuam onde os deixamos.",
-  "Descendo, os problemas pelo menos não exigem subida.",
+  "Subindo, os problemas pelo menos não exigem descida.",
   "Você encontrou a função menos ambiciosa da escada.",
-  "O andar de baixo não saiu do lugar.",
+  "O andar de cima não saiu do lugar.",
   "Gosto de caminhos que lembram como se volta.",
   "Por um momento, a gravidade ajuda na viagem.",
   "Podemos agradecer aos construtores pela ligação de retorno.",
   "Você ainda não precisa fazer das escadas uma residência."
- ],
+],
  "dodge": [
   "Aquele golpe passou sem encontrar você.",
   "Você saiu da trajetória no instante certo.",
@@ -2364,7 +2379,7 @@ const NR_LINES105={
   "A criatura vai precisar de outro plano para aquela recuperação."
  ]
 };
-const NR_META107={"order_kill": {"name": "Missão de abates entregue", "priority": 45, "gap": 30}, "order_clear": {"name": "Missão de Fendas entregue", "priority": 45, "gap": 30}, "order_pvp": {"name": "Missão contra caçadores entregue", "priority": 45, "gap": 30}, "core_win": {"name": "Núcleo defendido", "priority": 65, "gap": 30}, "core_fail": {"name": "Núcleo perdido", "priority": 85, "gap": 30}, "stairs_up": {"name": "Subida de andar", "priority": 45, "gap": 30}, "stairs_down": {"name": "Retorno ao andar anterior", "priority": 45, "gap": 30}, "dodge": {"name": "Esquiva perfeita", "priority": 45, "gap": 30}, "healself": {"name": "Cura própria por habilidade", "priority": 20, "gap": 30}, "potion": {"name": "Poção de vida utilizada", "priority": 20, "gap": 30}, "boss": {"name": "Chefe derrotado", "priority": 65, "gap": 30}, "elite": {"name": "Elite derrotada", "priority": 20, "gap": 30}, "nemesis": {"name": "Nêmesis derrotada", "priority": 85, "gap": 30}, "buy": {"name": "Equipamento comprado", "priority": 45, "gap": 30}, "craft": {"name": "Equipamento forjado", "priority": 45, "gap": 30}, "upgrade_win": {"name": "Reforço concluído", "priority": 45, "gap": 30}, "upgrade_fail": {"name": "Reforço sem sucesso", "priority": 45, "gap": 30}, "rune": {"name": "Passiva rúnica gravada", "priority": 45, "gap": 30}, "tier": {"name": "Provação de classe concluída", "priority": 85, "gap": 30}, "job": {"name": "Evolução inicial da classe", "priority": 85, "gap": 30}, "trial_necro": {"name": "Manifestação do eco sustentada", "priority": 65, "gap": 30}, "trial_time": {"name": "Manifestação temporal sustentada", "priority": 65, "gap": 30}, "trial_fenda": {"name": "Passagem da fissura sustentada", "priority": 65, "gap": 30}, "affinity": {"name": "Afinidade principal escolhida", "priority": 85, "gap": 30}, "learnrare": {"name": "Classe rara aprendida", "priority": 85, "gap": 30}, "siege": {"name": "Cerco vencido", "priority": 85, "gap": 30}, "hire": {"name": "Companheiro contratado", "priority": 45, "gap": 30}, "travel": {"name": "Viagem entre cidades", "priority": 45, "gap": 30}, "rest": {"name": "Descanso concluído", "priority": 45, "gap": 30}, "title": {"name": "Título conquistado", "priority": 45, "gap": 30}, "night": {"name": "Chegada da noite", "priority": 20, "gap": 90}, "dawn": {"name": "Volta da luz do dia", "priority": 20, "gap": 90}, "rain": {"name": "Início de chuva", "priority": 20, "gap": 90}, "snow": {"name": "Início de neve", "priority": 20, "gap": 90}, "mimic": {"name": "Mímico revelado", "priority": 45, "gap": 30}, "treasure": {"name": "Baú de recompensa aberto", "priority": 45, "gap": 30}, "purify": {"name": "Foco purificado", "priority": 45, "gap": 30}, "destroyfocus": {"name": "Foco destruído", "priority": 45, "gap": 30}, "sendcargo": {"name": "Carga de extração enviada", "priority": 45, "gap": 30}, "nest": {"name": "Ninho destruído", "priority": 45, "gap": 30}};
+const NR_META107={"order_kill": {"name": "Missão de abates entregue", "priority": 45, "gap": 30}, "order_clear": {"name": "Missão de Fendas entregue", "priority": 45, "gap": 30}, "order_pvp": {"name": "Missão contra caçadores entregue", "priority": 45, "gap": 30}, "core_win": {"name": "Núcleo defendido", "priority": 65, "gap": 30}, "core_fail": {"name": "Núcleo perdido", "priority": 85, "gap": 30}, "stairs_up": {"name": "Descida ao próximo andar", "priority": 45, "gap": 30}, "stairs_down": {"name": "Retorno ao andar anterior", "priority": 45, "gap": 30}, "dodge": {"name": "Esquiva perfeita", "priority": 45, "gap": 30}, "healself": {"name": "Cura própria por habilidade", "priority": 20, "gap": 30}, "potion": {"name": "Poção de vida utilizada", "priority": 20, "gap": 30}, "boss": {"name": "Chefe derrotado", "priority": 65, "gap": 30}, "elite": {"name": "Elite derrotada", "priority": 20, "gap": 30}, "nemesis": {"name": "Nêmesis derrotada", "priority": 85, "gap": 30}, "buy": {"name": "Equipamento comprado", "priority": 45, "gap": 30}, "craft": {"name": "Equipamento forjado", "priority": 45, "gap": 30}, "upgrade_win": {"name": "Reforço concluído", "priority": 45, "gap": 30}, "upgrade_fail": {"name": "Reforço sem sucesso", "priority": 45, "gap": 30}, "rune": {"name": "Passiva rúnica gravada", "priority": 45, "gap": 30}, "tier": {"name": "Provação de classe concluída", "priority": 85, "gap": 30}, "job": {"name": "Evolução inicial da classe", "priority": 85, "gap": 30}, "trial_necro": {"name": "Manifestação do eco sustentada", "priority": 65, "gap": 30}, "trial_time": {"name": "Manifestação temporal sustentada", "priority": 65, "gap": 30}, "trial_fenda": {"name": "Passagem da fissura sustentada", "priority": 65, "gap": 30}, "affinity": {"name": "Afinidade principal escolhida", "priority": 85, "gap": 30}, "learnrare": {"name": "Classe rara aprendida", "priority": 85, "gap": 30}, "siege": {"name": "Cerco vencido", "priority": 85, "gap": 30}, "hire": {"name": "Companheiro contratado", "priority": 45, "gap": 30}, "travel": {"name": "Viagem entre cidades", "priority": 45, "gap": 30}, "rest": {"name": "Descanso concluído", "priority": 45, "gap": 30}, "title": {"name": "Título conquistado", "priority": 45, "gap": 30}, "night": {"name": "Chegada da noite", "priority": 20, "gap": 90}, "dawn": {"name": "Volta da luz do dia", "priority": 20, "gap": 90}, "rain": {"name": "Início de chuva", "priority": 20, "gap": 90}, "snow": {"name": "Início de neve", "priority": 20, "gap": 90}, "mimic": {"name": "Mímico revelado", "priority": 45, "gap": 30}, "treasure": {"name": "Baú de recompensa aberto", "priority": 45, "gap": 30}, "purify": {"name": "Foco purificado", "priority": 45, "gap": 30}, "destroyfocus": {"name": "Foco destruído", "priority": 45, "gap": 30}, "sendcargo": {"name": "Carga de extração enviada", "priority": 45, "gap": 30}, "nest": {"name": "Ninho destruído", "priority": 45, "gap": 30}};
 let NR105={queue:[],quietFor:0,tick:0,city:null};
 const RARE103=[
  {id:7,n:'Necromante',ready:true,choice:'Sustentar a vontade do eco',exclusive:'1 eco especial ativo; 2 com afinidade.'},
@@ -2792,6 +2807,21 @@ function flashMats(m,v,col=0xffffff){for(const mt of m.mats){if(mt.userData.e0==
 let L={mode:'none',group:new THREE.Group(),inter:[]};scene.add(L.group);
 let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[],bossE=null,gates=[],curGate=null,gateSeq=0,WL=null;
 let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,dlgT=0,view=null;
+const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
+let modalRoute118='';
+const MODAL_NAV118={current:null,back:[],returning:false,restore:null,serial:0};
+function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout'))return skillsView;if(modalRoute118==='constel')return passivesView;return null}
+function modalBack118(){if(profile?.creationPending91&&started)return;const prev=MODAL_NAV118.back.pop(),parent=modalParent118();if(!prev&&!parent)return;MODAL_NAV118.returning=true;MODAL_NAV118.restore=prev?prev.scroll:null;try{(prev?prev.render:parent)()}finally{MODAL_NAV118.returning=false;MODAL_NAV118.restore=null}}
+function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:'+route:title+'|'+String(view);if(!modalOpen){nav.current=null;nav.back=[]}const old=nav.current;if(old)old.scroll=$('mb').scrollTop;let scroll=route?CHAR_UI118.scroll[route]||0:0;
+ if(old&&old.key===key)scroll=old.scroll;
+ if(!nav.returning&&old&&old.key!==key){const index=nav.back.findIndex(p=>p.key===key);if(index>=0){scroll=nav.back[index].scroll;nav.back.length=index}else if(old.render){nav.back.push(old);if(nav.back.length>30)nav.back.shift()}}
+ if(nav.restore!==null)scroll=nav.restore;nav.current={key,render:typeof view==='function'?view:null,scroll};nav.serial++;return scroll}
+
+function rememberCharacter118(){if(modalOpen&&modalRoute118)CHAR_UI118.scroll[modalRoute118]=$('mb').scrollTop}
+function openCharacter118(){const [page,slot]=CHAR_UI118.route.split(':');if(page==='loadout')return loadoutView(slot===undefined?undefined:Number(slot));if(page==='basic')return basicAttackView();if(page==='constel')return consView();return characterView(page)}
+function characterBack118(label){return '<div class="character-path118"><strong>'+label+'</strong></div>'}
+function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 ao subir de nível e também ao derrotar guardiões de calabouços.</p><p>Habilidades e Transmigrador usam este mesmo saldo. Cada melhoria do Transmigrador custa 1 ponto.</p></div>'}
+
 const keys={},input={x:0,z:0},cam={x:0,z:0};
 
 // v78 inserts public SS+ before the legacy secret rank. Migrate each save part once.
@@ -2899,10 +2929,10 @@ function rememberClassCooldowns(){if(!run||!player||!player.skills)return;run.cl
 function pSkills(){if(CLASSES[profile.cls].elem&&run)run.elem=CLASSES[profile.cls].elem;const known=new Map(learnedSkills().map(s=>[s.skillId,s])),slots=classLoadout(),out=Array.from({length:7},()=>({empty:true,n:'Espaço vazio',t:'empty',cd:1,mp:0,cdT:0}));slots.forEach((id,i)=>{if(i>=classSlotCount()){out[CLASS_SLOTS[i]].n='Rank '+RANKS[i].id;out[CLASS_SLOTS[i]].lockedRank=RANKS[i].id;return}const sk=known.get(id);if(sk)out[CLASS_SLOTS[i]]={...sk,cdT:0}});if(run.adv&&profile.cls===3)out[3]={...ADV[profile.cls].sk,sourceClass:profile.cls,cdT:0};for(const sk of out){const c=run.classCooldowns&&run.classCooldowns[sk.n];if(c){sk.cdT=Math.max(0,Number(c.left)||0);sk.cdMax=Number(c.max)||sk.cd}}return out}
 function equipClassSkill(slot,id){if(!Number.isInteger(slot)||slot<0||slot>=classSlotCount()||L.mode!=='world'||!inCity(player.x,player.z))return false;const known=learnedSkills(),chosen=id?known.find(s=>s.skillId===id):null;if(id&&!chosen)return false;const slots=classLoadout();if(chosen){const other=slots.findIndex(s=>{const k=known.find(x=>x.skillId===s);return k&&k.n===chosen.n});if(other>=0&&other!==slot)slots[other]=slots[slot]}slots[slot]=id||null;
   rememberClassCooldowns();const old=player.skills;player.skills=pSkills();for(const sk of player.skills){const prev=old.find(x=>!x.empty&&x.n===sk.n);if(prev){sk.cdT=prev.cdT;sk.cdMax=prev.cdMax}}showG();saveRun();return true}
-function loadoutView(slot){view=()=>loadoutView(slot);let h=characterTabs('skills')+'<div class="sysline">Combine até <b>'+classSlotCount()+' habilidades</b> das classes aprendidas. Troque a combinação dentro da cidade. Cada habilidade mantém sua origem física/mágica. '+'As evoluções também ocupam um destes espaços.'+'</div>';const slots=classLoadout(),known=learnedSkills(),city=L.mode==='world'&&inCity(player.x,player.z);
+function loadoutView(slot){view=()=>loadoutView(slot);L.characterTab='skills';let h=characterTabs('skills')+characterBack118('Equipar habilidades')+'<div class="sysline">Combine até <b>'+classSlotCount()+(classSlotCount()===1?' habilidade':' habilidades')+'</b> das classes aprendidas. Troque a combinação dentro da cidade. Cada habilidade mantém sua origem física/mágica. '+'As evoluções também ocupam um destes espaços.'+'</div>';const slots=classLoadout(),known=learnedSkills(),city=L.mode==='world'&&inCity(player.x,player.z);
   slots.forEach((id,i)=>{const sk=known.find(x=>x.skillId===id);if(i>=classSlotCount()){h+=row('Espaço '+(i+1),'Desbloqueia no rank '+RANKS[i].id,'Bloqueado');return}h+=row('Espaço '+(i+1)+' · '+keyLabel(keyOf('sk'+CLASS_SLOTS[i])),sk?'<b>'+sk.n+'</b> · '+CLASSES[sk.sourceClass].n:'Vazio',btn('Escolher','loadslot',i,city)+(id?btn('Limpar','loadset',i+'|',city):''))});
   if(Number.isInteger(slot)&&slot>=0&&slot<classSlotCount()){h+='<div class="sec">HABILIDADES DISPONÍVEIS · ESPAÇO '+(slot+1)+'</div>';h+=kitFilter111(slot);for(const sk of known.filter(s=>kitVisible111(s,true)))h+=row(sk.n+' · '+CLASSES[sk.sourceClass].n,skillDesc(sk),btn('Equipar','loadset',slot+'|'+sk.skillId,city))}
-  openModal('COMBINAÇÃO DE HABILIDADES',h)}
+  openModal('PERSONAGEM',h,'loadout'+(Number.isInteger(slot)&&slot>=0&&slot<classSlotCount()?':'+slot:''))}
 /* afixos dos itens */
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
 function rollAff2(tier,rar){const n=[0,0,1,1,2,2,2][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
@@ -3550,7 +3580,7 @@ function floorMapCenter(){return L.floors?L.grid.oz+(L.floors.current*40+18)*L.g
 function setupDungeonFloors(){
  L.floors={current:0,count:3};
  const starts=L.rooms.filter(r=>r.entry),ends=L.rooms.filter(r=>r.floorEnd);
- const stair=(r,to,landing,forward)=>{const grp=new THREE.Group();grp.position.set(r.wx,0,r.wz);for(let i=0;i<5;i++){const step=mesh(geo('step103_'+i,()=>new THREE.BoxGeometry(3,.3*(i+1),.7)),toonS(0x758394));step.position.set(0,.15*(i+1),i*.7-1.4);grp.add(step)}const sg=makeSign((forward?'SUBIR · ':'DESCER · ')+(to+1)+'º','#8de6ff',.5);sg.position.y=3.7;grp.add(sg);L.group.add(grp);const it={type:'stairs',x:r.wx,z:r.wz,r:3,room:r.i,to,landing,forward,grp,label:'F · '+(forward?'SUBIR':'DESCER')+' PARA O '+(to+1)+'º ANDAR'};it.use=()=>useDungeonStairs(it);L.inter.push(it)};
+ const stair=(r,to,landing,forward)=>{const grp=new THREE.Group();grp.position.set(r.wx,0,r.wz);for(let i=0;i<5;i++){const level=forward?5-i:i+1;const step=mesh(geo('step103_'+(forward?'down':'up')+'_'+level,()=>new THREE.BoxGeometry(3,.3*level,.7)),toonS(0x758394));step.position.set(0,.15*level,i*.7-1.4);grp.add(step)}const sg=makeSign((forward?'DESCER · ':'SUBIR · ')+(to+1)+'º','#8de6ff',.5);sg.position.y=3.7;grp.add(sg);L.group.add(grp);const it={type:'stairs',x:r.wx,z:r.wz,r:3,room:r.i,to,landing,forward,grp,label:'F · '+(forward?'DESCER':'SUBIR')+' PARA O '+(to+1)+'º ANDAR'};it.use=()=>useDungeonStairs(it);L.inter.push(it)};
  for(let f=0;f<2;f++){stair(ends[f],f+1,starts[f+1],true);stair(starts[f+1],f,ends[f],false)}
 }
 function useDungeonStairs(it){
@@ -4903,7 +4933,7 @@ function basicAttackId(){const magic=basicIsMagic(),known=jobsOf(),saved=(run.ba
 function basicAttackClass(){return CLASSES[basicAttackId()]}
 function basicAttackDesc(ci){const mode=MAGIC_CLS.includes(ci)?'Mágico · usa Inteligência':CLASSES[ci].ranged?'Físico à distância · usa Força':'Corpo a corpo · usa Força';const effects={0:'3º golpe causa impacto curto; inimigos resistem a atordoamentos repetidos',1:'sangra por 30% do dano em 3s',2:'3º golpe recupera 2% do escudo máximo',4:'3ª flechada atravessa inimigos',5:'cada acerto cura 0,5% da sua vida máxima',6:'marca o alvo para suas invocações por 4s; +1 vaga a cada 30 de mana máxima',7:'marca o alvo por 4s: seus ecos causam +20% de dano nele',8:'queima por 25% do dano em 3s',9:'lentidão por 2s',10:'3º projétil causa impacto curto; inimigos resistem a atordoamentos repetidos',11:'3º disparo salta para mais um alvo com 25% do dano'};return mode+' · '+(effects[ci]||'projétil elemental')}
 function selectBasicAttack(ci){if(!Number.isInteger(ci)||!jobsOf().includes(ci))return false;const magic=MAGIC_CLS.includes(ci);run.basicChoices=run.basicChoices||{};run.basicChoices[magic?'mag':'phy']=ci;run.style=isMagic()?(magic?'nat':'off'):(magic?'arc':'nat');player.combo=0;player.comboT=0;saveRun();return true}
-function basicAttackView(){view=basicAttackView;const active=basicAttackId();let h='<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. '+keyLabel(keyOf('style'))+' alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('ATAQUE BÁSICO',h)}
+function basicAttackView(){view=basicAttackView;const active=basicAttackId();L.characterTab='skills';let h=characterTabs('skills')+characterBack118('Ataque básico')+'<div class="sysline">Escolha o ataque básico entre as classes aprendidas. Vale para o clique e para o ataque contínuo. '+keyLabel(keyOf('style'))+' alterna entre sua última escolha física e mágica. As seis habilidades e as passivas aprendidas continuam disponíveis.</div>';for(const ci of jobsOf())h+=row(CLASSES[ci].n,basicAttackDesc(ci),ci===active?'<b>Em uso</b>':btn('Usar ataque','basicset',ci));h+='<div class="sysline">Sangramento e queimadura do ataque básico renovam a duração, sem acumular várias cópias do mesmo efeito. Efeitos de passivas continuam funcionando.</div>';openModal('PERSONAGEM',h,'basic')}
 function applyBasicAttackEffect(e,ci,amt,third){if(e.dead)return;const P=player;
   if(ci===0&&third&&!e.isBoss)e.stun=Math.max(e.stun||0,.9);
   if(ci===2&&third)P.shield=Math.min(P.maxsh,P.shield+P.maxsh*.02);
@@ -4982,21 +5012,21 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
 /* janelas novas */
 function characterTabs(tab){return '<div class="tabs">'+[['status','Status'],['skills','Habilidades'],['passives','Passivas'],...(profile.rank>0||profile.rankTalents?.length?[['rank','Rank']]:[]),['titles','Títulos'],['build','Build'],...(awakeningDiscovered109()?[['awakening',isTwiceAwakened103()?'Despertar':'A Fissura']]:[])].map(([k,n])=>btn(n,'character',k,true,k===tab?'on':'')).join('')+'</div>'}
 function characterView(tab='status'){L.characterTab=tab;if(tab==='awakening')return awakeningView103();if(tab==='rank')return rankView114();if(tab==='skills')return skillsView();if(tab==='passives')return passivesView();if(tab==='titles')return titlesView();if(tab==='build')return buildView();return statusView()}
-function rankView114(){if(!(profile.rank>0||profile.rankTalents?.length))return statusView();view=rankView114;L.characterTab='rank';openModal('PERSONAGEM',characterTabs('rank')+rankTalentRows())}
+function rankView114(){if(!(profile.rank>0||profile.rankTalents?.length))return statusView();view=rankView114;L.characterTab='rank';openModal('PERSONAGEM',characterTabs('rank')+rankTalentRows(),'rank')}
 function masteryReady114(){const skills=learnedSkills();return skills.length>0&&skills.every(sk=>(run.skl[sk.n]||0)>=10)}
 function canRedistribute(){return !player.dead&&L.mode==='world'&&!!inCity(player.x,player.z)}
 function redistributeAttributes(){if(!canRedistribute())return false;let points=0;for(const k in STATN)points+=Math.max(0,Math.floor(run.stats[k]||0));if(!points)return false;for(const k in STATN)run.stats[k]=0;run.pts+=points;refreshStats();saveRun();return true}
 function resetRankTalents(){if(!canRedistribute())return false;profile.rankTalents=[];saveRun();return true}
-function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+CLASSES[profile.cls].n+'</p><p><b>'+run.pts+' pontos de atributo disponíveis</b></p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+run.stats[k]+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));h+=row('Redistribuir atributos','Devolve os pontos investidos. Gratuito durante os testes, dentro de uma cidade.',btn('Redistribuir','resetattributes',0,canRedistribute()&&Object.values(run.stats).some(v=>v>0)));h+='<div class="tabs">'+btn('Equipamento','gearbag',0)+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h)}
-function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),key=encodeURIComponent(sk.n);return '<details class="skill114" data-skill114="'+key+'" '+(L.skillOpen114?.[key]?'open':'')+'><summary>'+safeText(sk.n)+' <span>NV '+lv+(lv>=10?' · MÁXIMO':'/10')+'</span></summary>'+row('',skillDesc(sk)+(up?'<div class="skill-next">'+up+'</div>':''),lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost))+'</details>'}
+function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+CLASSES[profile.cls].n+'</p><p><b>'+run.pts+' pontos de atributo disponíveis</b></p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+run.stats[k]+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));h+=row('Redistribuir atributos','Devolve os pontos investidos. Gratuito durante os testes, dentro de uma cidade.',btn('Redistribuir','resetattributes',0,canRedistribute()&&Object.values(run.stats).some(v=>v>0)));h+='<div class="tabs">'+btn('Equipamento','gearbag',0)+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
+function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),key=encodeURIComponent(sk.n);return '<details class="skill114" data-skill114="'+key+'" '+(CHAR_UI118.details[key]?'open':'')+'><summary>'+safeText(sk.n)+' <span>NV '+lv+(lv>=10?' · MÁXIMO':'/10')+'</span></summary>'+row('',skillDesc(sk)+(up?'<div class="skill-next">'+up+'</div>':''),lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost))+'</details>'}
 function skillsView(){view=skillsView;L.characterTab='skills';let h=characterTabs('skills')+'<div class="sysline"><b>'+run.spts+' pontos disponíveis</b> · +1 por nível</div><div class="tabs">'+btn('Ataque básico','basicview',0)+btn('Equipar habilidades · '+classSlotCount()+(classSlotCount()===1?' espaço':' espaços'),'loadout',0)+'</div>';if(jobsOf().length>1)h+=kitFilter111();const seen=new Set();for(const sk of [...learnedSkills(),...player.skills.filter(s=>!s.empty)]){if(seen.has(sk.n))continue;seen.add(sk.n);if(jobsOf().length===1||kitVisible111(sk))h+=skillUpgradeRow(sk)}
  if(profile.cls===3&&run.level>=20){h+='<details><summary>Elemento</summary>';for(const k in ELEM){const E=ELEM[k];h+=row(E.n,E.d,run.elem===k?'Atual':btn(run.elem?'Trocar · 20.000 ouro':'Escolher','elem',k,!run.elem||run.gold>=20000))}h+='</details>'}
  h+=kitProgress111();const lib=powLib();if(lib.length){h+='<details><summary>Poderes absorvidos · '+lib.length+'</summary>'+libRows();for(const sk of lib)if(!seen.has(sk.n))h+=skillUpgradeRow(sk,2);h+='</details>'}if(run.fused)h+=row(run.fused.n,run.fused.tag,'');if(run.shadows.length)h+=btn('Exército de ecos','army',0);
- const ready=masteryReady114(),mastery=run.mastery||0;if(ready||mastery>0)h+=row('Maestria · '+mastery,'+'+preciseNumber(mastery*.5)+'% de dano e vida.'+(ready?'':' Maximize as habilidades aprendidas para voltar a investir.'),btn('Melhorar · 1 ponto','mast',0,ready&&run.spts>0));openModal('PERSONAGEM',h)}
+ const ready=masteryReady114(),mastery=run.mastery||0;if(ready||mastery>0)h+=row('Maestria · '+mastery,'+'+preciseNumber(mastery*.5)+'% de dano e vida.'+(ready?'':' Maximize as habilidades aprendidas para voltar a investir.'),btn('Melhorar · 1 ponto','mast',0,ready&&run.spts>0));openModal('PERSONAGEM',h,'skills')}
 
 function naturalRegen(P=player,safe=false){return {hp:P.maxhp*((hasT('brk600')?.01:0)+(safe?.08:0)),mp:3+P.maxmp*(.03+(safe?.1:0)),shield:P.maxsh*.2*(hasT('brk30')?1.3:1),shieldWait:Math.max(0,P.shT||0)}}
 function regenRows(){const P=player,nc=L.mode==='world'?nearestCity(P.x,P.z):null,safe=!!nc&&nc.d<36&&!cityFallen(nc.c),base=naturalRegen(P,false),city=naturalRegen(P,true),unit=(v,max)=>preciseNumber(v)+'/s ('+preciseNumber(max?v/max*100:0)+'%/s)';let h='<div class="sec">REGENERAÇÃO</div><div class="sysline">Taxas por segundo enquanto joga, até o máximo de cada recurso. '+(safe?'Você está em uma zona segura.':'Você está fora de uma zona segura.')+'</div>';h+=row('Vida',unit(base.hp,P.maxhp)+' fora da cidade.<br>'+unit(city.hp,P.maxhp)+' na zona segura.','');h+=row('Mana',unit(base.mp,P.maxmp)+' fora da cidade.<br>'+unit(city.mp,P.maxmp)+' na zona segura.','');h+=row('Escudo de equipamento',unit(base.shield,P.maxsh)+' após 4s sem receber dano.'+(base.shieldWait>0?'<br>Espera restante: '+preciseNumber(base.shieldWait)+'s.':''),'');h+='<div class="sysline">Curas de habilidades, ataques, poções e companheiros dependem de uso ou acerto; não entram nessas taxas.</div>';return h}
-function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details><summary>Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h)}
+function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details><summary>Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h,'build')}
 
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Ecos ativas: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
@@ -5025,9 +5055,9 @@ function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='wor
   }else{let any=false;for(const k of profile.lore||[]){const page=LORE[k];if(!page)continue;any=true;h+=row('<b>'+page[0]+'</b>',page[1],'')}if(!any)h+='<div class="sysline">Explore as Fendas para descobrir novas páginas.</div>'}
   openModal('DIÁRIO DE JORNADA',h)}
 function diaryView(){journeyView('lore')}
-function lookView(){view=lookView;const lk=profile.look||{h:0,b:0};let h='<div class="sysline">Mude a aparência do seu caçador. Fica salvo no seu despertar.</div>';
+function lookView(){view=lookView;const lk=profile.look||{h:0,b:0};let h='<div class="sysline">Mude a aparência do seu Viajante. Fica salvo no seu despertar.</div>';
   h+=row('Cabelo','Estilo '+(lk.h||'da classe'),btn('Trocar','lookh',0))+row('Roupa','Cor '+(lk.b||'da classe'),btn('Trocar','lookb',0));openModal('APARÊNCIA',h)}
-function saveCodeView(imp){view=null;let h;
+function saveCodeView(imp){view=()=>saveCodeView(imp);let h;
   if(!imp){const code=btoa(unescape(encodeURIComponent(JSON.stringify({p:profile,r:store.get('pds3_run')}))));h='<div class="sysline">Copie este código e guarde num lugar seguro (notas, WhatsApp). Com ele você recupera o jogo em outro aparelho.</div><textarea id="savecode" readonly style="width:100%;height:120px;font-size:11px;background:#040a16;color:#e8f6ff;border:1px solid #ffb347">'+code+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('COPIAR','copysave',0,true,'hot')+'</div>'}
   else h='<div class="sysline">Cole o código do seu save e toque em CARREGAR. Isto substitui o progresso atual deste aparelho.</div><textarea id="loadcode" style="width:100%;height:120px;font-size:11px;background:#040a16;color:#e8f6ff;border:1px solid #ffb347"></textarea><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('CARREGAR','loadsave',0,true,'hot')+'</div>';
   openModal(imp?'IMPORTAR SAVE':'EXPORTAR SAVE',h)}
@@ -5091,7 +5121,7 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
 }
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=9;t++){const gc=Math.round(PRICE[t]*equipFactor(sl)*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
-function extraActions(a,v){if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
+function extraActions(a,v){if(a==='modalback118'){if(MODAL_NAV118.back.length||modalParent118())modalBack118();else closeModal();return 'close0'}if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
 
   if(a==='expact'){const [kind,index,op]=v.split('|');expAction(kind,Number(index),op);return 'close0'}
   if(a==='lootmode'){const [sl,mode]=v.split('|');L.lootMode=mode;lootForgeView(sl);return 'close0'}
@@ -5123,7 +5153,7 @@ function extraActions(a,v){if(a==='professions114'){view=()=>openModal('PROFISS�
   if(a==='loadsave'){try{const d=JSON.parse(decodeURIComponent(escape(atob($('loadcode').value.trim()))));if(!d.p)throw 0;profile=d.p;store.set('pds2_profile',profile);if(d.r)store.set('pds3_run',d.r);else store.del('pds3_run');closeModal();showProfile();$('goBtn').textContent='CONTINUAR';toast('Save carregado.')}catch(e){toast('Código inválido. Confira se copiou tudo.')}return 'close0'}
   if(a==='reaval'){const cur=rankOf(),off=run.official??profile.rank;if(cur<=off)return;run.official=cur;run.gold+=2000*(cur+1);run.pts=(run.pts||0)+1;closeModal();
     const R=RANKS[cur];bigText('REAVALIAÇÃO · RANK '+R.id,2400);shake(.6);fxRing(player.x,player.z,0xffd54f,5,1);setTimeout(()=>fxRing(player.x,player.z,0xffb347,8,1),300);sfx('level');
-    toast('<b>[NARRADOR]</b> A Ordem registrou você como caçador <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
+    toast('<b>[NARRADOR]</b> A Ordem registrou você como Viajante <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
   if(a==='album')return albumView(),'close0';
   if(a==='bestv')return bestView(),'close0';
   if(a==='travel'){const c=(profile.visited||{})[v];if(!c)return;const cost=travelCost(c);if(run.gold<cost)return;if(enemies.some(e=>!e.dead&&e.aggro&&Math.hypot(e.x-player.x,e.z-player.z)<25)){toast('Monstros estão te perseguindo. Não dá para viajar agora.');return}
@@ -5183,7 +5213,8 @@ function titleGain(n){return .1*n/(n+10)}
 function titlePercent(n){return (titleGain(n)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'}
 function titleName(t){return t.n+(t.track?' · NV '+titleLevel(t):'')}
 function titleEffect(t){return t.track?'+'+titlePercent(titleLevel(t))+' de '+t.effect+'.':t.m}
-function titleTrackRows(){let h='';for(const t of TITLES.filter(t=>t.track)){const n=titleLevel(t),v=titleProgress(t),next=titleGoal(t,n+1),prev=titleGoal(t,n),pct=Math.min(100,Math.max(0,100*v/next)),ok=(profile.ach||[]).includes(t.id);if(!v&&!ok)continue;h+=row(titleName(t),titleEffect(t)+'<div class="title-progress114"><span>'+v.toLocaleString('pt-BR')+' / '+next.toLocaleString('pt-BR')+' '+t.unit+'</span><progress aria-label="Progresso de '+t.n+'" value="'+pct+'" max="100"></progress></div>',ok?btn(eqTitles().includes(t.id)?'Tirar':'Equipar','title',t.id,true,eqTitles().includes(t.id)?'on':''):'')}return h}
+function titleCard118(name,description,actions,progress=''){return '<section class="title-card118"><div class="title-heading118"><strong>'+name+'</strong>'+(actions?'<div class="acts">'+actions+'</div>':'')+'</div><div class="title-effect118">'+description+'</div>'+progress+'</section>'}
+function titleTrackRows(){let h='';for(const t of TITLES.filter(t=>t.track)){const n=titleLevel(t),v=titleProgress(t),next=titleGoal(t,n+1),prev=titleGoal(t,n),pct=Math.min(100,Math.max(0,100*v/next)),ok=(profile.ach||[]).includes(t.id);if(!v&&!ok)continue;h+=titleCard118(titleName(t),titleEffect(t),ok?btn(eqTitles().includes(t.id)?'Tirar':'Equipar','title',t.id,true,eqTitles().includes(t.id)?'on':''):'','<div class="title-progress114"><span>'+v.toLocaleString('pt-BR')+' / '+next.toLocaleString('pt-BR')+' '+t.unit+'</span><progress aria-label="Progresso de '+t.n+'" value="'+pct+'" max="100"></progress></div>')}return h}
 
 function syncTitleProgress(){profile.titleProgress=profile.titleProgress||{};let changed=false;for(const t of TITLE_TRACKS){const old=profile.titleProgress[t.id]||0,v=titleProgress(t);if(v>old){profile.titleProgress[t.id]=v;changed=true}const n=titleLevel(t),was=profile.titleLevels?.[t.id]||0;profile.titleLevels=profile.titleLevels||{};if(n>was){profile.titleLevels[t.id]=n;if(!profile.ach.includes(t.id))profile.ach.push(t.id);toast('<b>[CONQUISTA]</b> '+t.n+' chegou ao nível '+n+'. Veja o próximo marco em PERSONAGEM → Títulos.',5000);changed=true;if(eqTitles().includes(t.id)&&player&&!player.dead)refreshStats()}}return changed}
 function titleHitBonus(e){const b=titleB();return (e.isBoss?b.boss||0:b.hunt||0)+(L.special?.kind==='tower'?b.tower||0:0)}
@@ -5452,8 +5483,8 @@ function extraActions2(a,v){
 }
 function titlesView(){checkTitles();view=titlesView;L.characterTab='titles';const got=profile.ach||[];let h=bagTabs('titles')+'<div class="sysline">Equipe <b>quantos títulos conquistados quiser</b> ('+eqTitles().length+(eqTitles().length===1?' ativo':' ativos')+'). Cada um concede seu próprio efeito. O primeiro também dá a auréola.</div>';
   h+=titleTrackRows();for(const t of TITLES.filter(t=>!t.track)){const ok=got.includes(t.id);if(!ok)continue;const bs=t.m;
-    h+=row((ok?'<b>':'<span style="opacity:.5">')+t.n+(ok?'</b>':'</span>'),(ok?bs:'Bloqueado · '+t.d),ok?(eqTitles().includes(t.id)?btn('Tirar','title',t.id,true,'on'):btn('Equipar','title',t.id,true)):'')}
-  openModal('PERSONAGEM',h)}
+    h+=titleCard118(t.n,bs,eqTitles().includes(t.id)?btn('Tirar','title',t.id,true,'on'):btn('Equipar','title',t.id,true))}
+  openModal('PERSONAGEM',h,'titles')}
 /* instâncias novas */
 function specialSetup2(kind,S,arg){
   if(kind==='tower'){S.floor=Math.min(towerCap(),arg);S.gr=Math.min(9,Math.floor((S.floor-1)/11));S.boss=S.floor%10===0;S.spawned=false}
@@ -5531,9 +5562,9 @@ function setB(){const out={};for(const s of activeSets())for(const [k,v] of Obje
 const CONS=[['fur','Fúria','+1% de chance de crítico por ponto','Ápice: mais +10% de chance de crítico'],['mur','Muralha','+3% de escudo máximo por ponto','Ápice: revive uma vez por masmorra'],['arc','Arcano','−1,5% de recarga das habilidades por ponto','Ápice: mais −20% de recarga']];
 const cons=k=>(run.cons||{})[k]||0;
 function consFull(){const c=run.cons||{};return CONS.every(([k,,,cap])=>(c[k]||0)>=10)}
-function consView(){view=consView;run.cons=run.cons||{fur:0,mur:0,arc:0};let h='<div class="sysline">Pontos de constelação: <b>'+(run.cpts||0)+'</b>. Ganhe 1 por nível a partir do 35.'+(consFull()?' <b style="color:#ffd54f">Constelações completas:</b> as constelações param de dar pontos (cada nível segue dando 1 ponto de status).':'')+'</div>'+(consFull()&&run.cpts>0?'<div style="display:flex;justify-content:flex-end">'+btn('CONVERTER '+run.cpts+' PONTOS EM '+run.cpts+' DE STATUS','consconv',0,true,'hot')+'</div>':'');
+function consView(){view=consView;run.cons=run.cons||{fur:0,mur:0,arc:0};L.characterTab='passives';let h=characterTabs('passives')+characterBack118('Constelações','passives')+'<div class="sysline">Pontos de constelação: <b>'+(run.cpts||0)+'</b>. Ganhe 1 por nível a partir do 35.'+(consFull()?' <b style="color:#ffd54f">Constelações completas:</b> as constelações param de dar pontos (cada nível segue dando 1 ponto de status).':'')+'</div>'+(consFull()&&run.cpts>0?'<div style="display:flex;justify-content:flex-end">'+btn('CONVERTER '+run.cpts+' PONTOS EM '+run.cpts+' DE STATUS','consconv',0,true,'hot')+'</div>':'');
   for(const [k,n,d,cap] of CONS){const v=cons(k);h+=row(n+' <b>'+v+'/10</b>','<span style="color:#ffd070">'+'★'.repeat(v)+'☆'.repeat(10-v)+'</span> · '+d+' · '+cap,btn('+1','cons',k,(run.cpts||0)>0&&v<10))}
-  openModal('CONSTELAÇÕES',h)}
+  openModal('PERSONAGEM',h,'constel')}
 const rebirthB=()=>1+.1*(profile.rebirths||0);
 /* ================= BLOCO B: ECONOMIA, CARAVANAS, CHEFES ERRANTES, RUÍNAS ================= */
 const ECON=[1,1,1,1,1,1,1,1,1,1];let econT=45;
@@ -5611,7 +5642,7 @@ function updInvasion(dt){const I=L.inv;if(!I)return;I.t-=dt;const alive=(I.targe
 const choiceMul=()=>{const c=nearestCity(player.x,player.z).c,r=regionState116(c);return (1-karma()*.015)*(1-regionDiscount116(r)/100)*(1+r.damage/100)};
 /* reconstruir cidade caída */
 const rebuildCost=()=>({gold:Math.round(20000*(rankOf()+1)),cry:30});
-function rebuildView(c){view=null;const left=enemies.filter(e=>!e.dead&&e.breaker&&Math.hypot(e.x-c.x,e.z-c.z)<45).length,k=rebuildCost(),tot=run.res.cry.reduce((a,b)=>a+b,0);
+function rebuildView(c){view=()=>rebuildView(c);const left=enemies.filter(e=>!e.dead&&e.breaker&&Math.hypot(e.x-c.x,e.z-c.z)<45).length,k=rebuildCost(),tot=run.res.cry.reduce((a,b)=>a+b,0);
   let h='<div class="sysline">'+c.name+' caiu. Para reconstruir: expulse os monstros e doe material para os sobreviventes.</div>';
   h+=row('1. Expulsar os monstros',left?'<span style="color:#ff8fa3">Restam '+left+' monstros na cidade</span>':'<span style="color:#6fe39a">Cidade limpa</span>','');
   h+=row('2. Doar material',fmt(k.gold)+' ouro + '+k.cry+' cristais de qualquer rank · você tem '+fmt(run.gold)+' / '+tot,btn('RECONSTRUIR','rebuild',c.id,!left&&run.gold>=k.gold&&tot>=k.cry,'hot'));
@@ -5625,8 +5656,8 @@ function doRebuild(id){const c=nearestCity(player.x,player.z).c;if(c.id!==id||L.
 /* Dano crítico: x1,7 base (x2,4 com Fúria 10). Chance acima de 100% vira dano crítico extra (+1% por 1% que sobra). */
 function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur')+(cons('fur')>=10?.1:0)}
 function critMul(){return 2}
-function passivesView(){view=passivesView;L.characterTab='passives';let h=characterTabs('passives')+transmigratorRow();for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');const books=PBOOK.filter(b=>pb(b.k)>0);if(books.length){h+='<div class="sec">TOMOS APRENDIDOS</div>';for(const b of books)h+=row(b.n+' · NV '+pb(b.k),b.d(pb(b.k)),'<b>Ativa</b>')}
- if(unl('constel')||(run.cpts||0)>0||CONS.some(([k])=>cons(k)>0)){h+='<div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);if(lv>0)h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),'<b>Ativa</b>')}h+=btn('Distribuir · '+(run.cpts||0)+((run.cpts||0)===1?' ponto':' pontos'),'consv',0)}openModal('PERSONAGEM',h)}
+function passivesView(){view=passivesView;L.characterTab='passives';let h=characterTabs('passives')+skillPoints118()+transmigratorRow();for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');const books=PBOOK.filter(b=>pb(b.k)>0);if(books.length){h+='<div class="sec">TOMOS APRENDIDOS</div>';for(const b of books)h+=row(b.n+' · NV '+pb(b.k),b.d(pb(b.k)),'<b>Ativa</b>')}
+ if(unl('constel')||(run.cpts||0)>0||CONS.some(([k])=>cons(k)>0)){h+='<div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);if(lv>0)h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),'<b>Ativa</b>')}h+=btn('Distribuir · '+(run.cpts||0)+((run.cpts||0)===1?' ponto':' pontos'),'consv',0)}openModal('PERSONAGEM',h,'passives')}
 
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
@@ -5649,7 +5680,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Soma → efetivo',P(bp.dmg)+' → <span style="color:#ffd54f">'+P(bp.edmg)+'</span> dano · '+P(bp.hp)+' → <span style="color:#ffd54f">'+P(bp.ehp)+'</span> vida','quanto maior a soma, menos cada % rende: efetivo = 3×soma ÷ (3 + soma), nunca passa de +300%');
   return h+'</div>'}
 function bagTabs(cur){return cur==='itens'||cur==='world'?'':characterTabs(cur==='char'?'status':cur==='pow'?'skills':cur)}
-function bagView(tab){tab=tab||'itens';if(tab==='char')return characterView('status');if(tab==='pow')return characterView('skills');if(['status','skills','passives','build'].includes(tab))return characterView(tab);L.bagTab=tab;if(tab==='itens')return bagItems();if(tab==='titles')return titlesView();view=()=>bagView(tab);let h=bagTabs(tab);
+function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118();if(tab==='pow')return characterView('skills');if(['status','skills','passives','build'].includes(tab))return characterView(tab);L.bagTab=tab;if(tab==='itens')return bagItems();if(tab==='titles')return titlesView();view=()=>bagView(tab);let h=bagTabs(tab);
   if(tab==='char'){h+=(profile.name?row(safeText(profile.name),'Seu personagem',''):'')+profRows()+'<div class="sysline">Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n)+(run.fused?' '+run.fused.tag:'')+(profile.rebirths?' · Reencarnações: '+profile.rebirths:'')+'<br>Vida '+fmt(player.maxhp)+' · Dano '+fmt(player.dmg)+' · Defesa '+Math.round(player.def*100)+'% · Título: '+((TITLES.find(t=>t.id===profile.title)||{}).n||'nenhum')+'</div>';
     h+=row('Ataque básico',CLASSES[basicAttackId()].n+' · '+basicAttackDesc(basicAttackId()),btn('Escolher estilo','basicview',0));
     h+=row('Combinação de habilidades','Monte até '+classSlotCount()+' habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=equipmentPanel();h+=charSheet();
@@ -5714,8 +5745,8 @@ function extraActions3(a,v){if(a==='region116'){regionView116();return 'close0'}
 }
 
 /* ================= JANELAS ================= */
-function openModal(title,html){if(profile?.creationPending91&&started&&title!=='CRIAÇÃO DO PERSONAGEM')return;$('mx').hidden=!!(profile?.creationPending91&&started);toggleGameMenu95(false);if(!modalOpen||$('mt').textContent!==title)$('modalNotice95').hidden=true;$('mt').textContent=title;$('mb').innerHTML=html;$('modal').hidden=false;modalOpen=true;paused=true;$('dlg').hidden=true}
-function closeModal(){if(profile?.creationPending91&&started)return;$('modal').hidden=true;modalOpen=false;view=null;if(player&&!player.dead&&$('dead').hidden)paused=false}
+function openModal(title,html,route=''){if(profile?.creationPending91&&started&&title!=='CRIAÇÃO DO PERSONAGEM')return;rememberCharacter118();const restoredScroll=enterModal118(title,route);$('mx').hidden=!!(profile?.creationPending91&&started);toggleGameMenu95(false);if(!modalOpen||$('mt').textContent!==title)$('modalNotice95').hidden=true;$('mt').textContent=title;$('mb').innerHTML=html;$('modal').hidden=false;modalOpen=true;paused=true;$('dlg').hidden=true;modalRoute118=route;if(route)CHAR_UI118.route=route;const scroll=restoredScroll,serial=MODAL_NAV118.serial;$('mback118').hidden=!!profile?.creationPending91||!(MODAL_NAV118.back.length||modalParent118());$('mb').scrollTop=scroll;requestAnimationFrame(()=>{if(modalOpen&&MODAL_NAV118.serial===serial)$('mb').scrollTop=scroll})}
+function closeModal(){if(profile?.creationPending91&&started)return;rememberCharacter118();modalRoute118='';MODAL_NAV118.current=null;MODAL_NAV118.back=[];MODAL_NAV118.serial++;$('modal').hidden=true;modalOpen=false;view=null;if(player&&!player.dead&&$('dead').hidden)paused=false}
 function rerender(){if(view)view()}
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+name+'<small>'+desc+'</small></div><div class="acts">'+btns+'</div></div>';
 const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" data-v="'+v+'" '+(en?'':'disabled')+'>'+txt+'</button>';
@@ -5825,7 +5856,7 @@ function bagItems(){
   openModal('BOLSA',bagTabs('itens')+h);
 }
 function mapView(){
-  view=null;const P=player;
+  view=mapView;const P=player;
   let h='<canvas id="bigmap" width="600" height="600" style="width:100%;max-width:min(420px,56vh);aspect-ratio:1;display:block;margin:0 auto;border-radius:4px"></canvas>';
   if(L.mode==='world'){h+='<div class="sec">CIDADES PRÓXIMAS</div>';citiesAround(P.x,P.z,700).map(c=>({c,d:Math.hypot(c.x-P.x,c.z-P.z)})).sort((a,b)=>a.d-b.d).slice(0,5).forEach(({c,d})=>{h+=row(c.name,Math.round(d)+'m · zona segura com lojas','')});h+='<div class="sec">PORTAIS ABERTOS</div>';gates.filter(g=>!g.dead).map(g=>({g,d:Math.hypot(g.x-P.x,g.z-P.z)})).sort((a,b)=>a.d-b.d).forEach(({g,d})=>{if(g.secret){h+=row('<span class="rl" style="color:#ffd070">???</span> · portal desconhecido',Math.round(d)+'m · fecha em '+fmtT(g.life)+' · o Oráculo não consegue medir','');return}h+=row('<span class="rl" style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+GR[g.rank].id+'</span>'+(g.red?' · vermelho':'')+' · '+GR[g.rank].th.n,Math.round(d)+'m · fecha em '+fmtT(g.life)+' · nível recomendado '+GR[g.rank].lvl+'+','')})}
   else h+='<div class="sysline" style="font-size:12px">'+(L.floors?'Andar '+(L.floors.current+1)+'/3 · escadas em verde · saída somente no 1º andar. ':'')+'Salas exploradas '+L.seen.size+'/'+L.rooms.length+'. Azul: saída. Dourado: baú e guardião.</div>';
@@ -5834,7 +5865,7 @@ function mapView(){
 }
 function gateModal(g){
   if(expeditionType(g)==='extract')g.red=false;
-  view=null;if(g.secret){openModal('PORTAL ???','<div class="sysline"><b>[NARRADOR]</b> Erro. Não foi possível medir este portal.</div>'+row('Rank','Desconhecido','<b style="color:#ffd070">???</b>')+row('Fecha em',fmtT(g.life),'')+'<div class="sysline" style="color:var(--dim)">A energia lá dentro não se parece com nada que a Ordem registrou. Quem entra não pode sair até o fim.</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','close',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>');return}const G=GR[g.rank],pr=rankOf();const warn=run.level<G.lvl;
+  view=()=>gateModal(g);if(g.secret){openModal('PORTAL ???','<div class="sysline"><b>[NARRADOR]</b> Erro. Não foi possível medir este portal.</div>'+row('Rank','Desconhecido','<b style="color:#ffd070">???</b>')+row('Fecha em',fmtT(g.life),'')+'<div class="sysline" style="color:var(--dim)">A energia lá dentro não se parece com nada que a Ordem registrou. Quem entra não pode sair até o fim.</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','modalback118',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>');return}const G=GR[g.rank],pr=rankOf();const warn=run.level<G.lvl;
   let h='<div class="sysline"><b>[NARRADOR]</b> Portal <b style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+G.id+'</b> · '+G.th.n+(g.red?' · <b style="color:#ff4d6a">PORTAL VERMELHO</b>':'')+'</div>';
   if((g.aff||[]).length)h+=row('Afixos','<span style="color:#ffb84d">'+(g.aff.map(i=>{const a=AFFIX.find(x=>x.id===i);return a.n+' ('+a.d+')'}).join(', '))+'</span> · ouro +'+g.aff.length*50+'%','');
   h+=row('Nível recomendado',(warn?'<span style="color:#ff8fa3">Você está abaixo do recomendado</span>':'Você está pronto'),'<b>'+G.lvl+'+</b>');
@@ -5843,7 +5874,7 @@ function gateModal(g){
   h+=row('Fecha em',fmtT(g.life)+(g.rank>=2?' · se fechar sem ser limpo, os monstros escapam':''),'');
   h+=row('Seu grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Sozinho'+(run.shadows.length?' + '+run.shadows.length+' eco(s)':''),'');
   if(g.red)h+='<div class="sysline" style="color:#ffb3c0">Portal vermelho: a única saída fica trancada até concluir o objetivo. Monstros 30% mais fortes, recompensas em dobro. Pergaminho de retorno não funciona. Morrer rompe o portal e solta monstros no mundo; essa entrada é perdida.</div>';
-  h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','close',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>';
+  h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','modalback118',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>';
   openModal('PORTAL RANK '+G.id,h);
 }
 let gearDrag=null;
@@ -5851,7 +5882,7 @@ $('mb').addEventListener('dragstart',e=>{if(e.target.closest('[data-gear-uid]'))
 $('mb').addEventListener('pointerdown',e=>{const el=e.target.closest('[data-gear-uid]');if(!el||e.button!==0||e.pointerType==='touch')return;e.preventDefault();gearDrag={uid:el.dataset.gearUid,x:e.clientX,y:e.clientY};$('mb').setPointerCapture(e.pointerId);el.style.opacity='.5'});
 $('mb').addEventListener('pointerup',e=>{if(!gearDrag)return;const drag=gearDrag;gearDrag=null;const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-gear-slot]');if(el&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>5){if(dropEquipment(drag.uid,el.dataset.gearSlot))saveRun();else toast('Arraste uma peça compatível com esta posição e com seu rank.')}rerender()});
 $('mb').addEventListener('pointercancel',()=>{if(gearDrag){gearDrag=null;rerender()}});
-$('mb').addEventListener('toggle',e=>{if(e.target.matches('details[data-skill114]')){L.skillOpen114=L.skillOpen114||{};L.skillOpen114[e.target.dataset.skill114]=e.target.open}},true);
+$('mb').addEventListener('toggle',e=>{if(e.target.matches('details[data-skill114]')){if(e.target.isConnected)CHAR_UI118.details[e.target.dataset.skill114]=e.target.open}},true);
 $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const a=b.dataset.a,v=b.dataset.v;
   const xr=extraActions(a,v)||extraActions2(a,v)||extraActions3(a,v);if(xr==='close'||xr==='close0')return;if(xr){saveRun();rerender();return}
   if(a==='close')return closeModal();
@@ -5906,7 +5937,7 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
   if(!started||!$('dead').hidden)return;
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
   if(e.code==='KeyI'||e.code==='KeyB'){modalOpen?closeModal():bagView();return}
-  if(e.code==='KeyC'||e.code==='Tab'){e.preventDefault();modalOpen?closeModal():statusView();return}
+  if(e.code==='KeyC'||e.code==='Tab'){e.preventDefault();modalOpen?closeModal():openCharacter118();return}
   if(paused)return;
   if(e.code==='Space'){e.preventDefault();attack()}
   if(e.code==='ShiftLeft'||e.code==='ShiftRight')dodge();
@@ -5952,7 +5983,7 @@ function finishCreation(){if(!profile.creationPending91)return false;const d=cre
 function transmigratorBonus(){return .10*Math.max(0,Math.min(10,profile.transmigratorLv||0))}
 function improveTransmigrator(){const lv=profile.transmigratorLv||0;if(lv>=10||(run.spts||0)<1)return false;run.spts--;profile.transmigratorLv=lv+1;saveRun();passivesView();return true}
 function transmigratorRow(){const lv=profile.transmigratorLv||0;return '<div class="sec">ORIGEM</div>'+row('Transmigrador · NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões. XP de missões não muda.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>')}
-function cfgView(){view=null;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();closeModal();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
+function cfgView(){view=cfgView;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
   narratorSettings105()+movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input aria-label="Tamanho dos botões" type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   '<div class="sysline" style="font-size:12px;color:var(--dim)">LEVE: menos grama e resolução menor, para celular fraco.</div>'+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
@@ -6039,7 +6070,7 @@ function startGame(){
   if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
   started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;
   const rk=RANKS[rankOf()];
-  logNews('<b>[NARRADOR]</b> Caçador rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
+  logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
   logNews('<b>[NARRADOR]</b> Portais abertos nas planícies. Veja no MAPA.');
 
   unlockLore('start');if(!profile.creationPending91)tutorial();setTimeout(styleTutorial,1200);setInterval(()=>{if(started&&run&&!player.dead)checkTitles()},3000);
@@ -6215,8 +6246,8 @@ function kitMigrate111(){if(!profile||!run||profile.kitMigrated111)return;const 
 
 function kitDeviceLook111(a){a.m.body.visible=false;const col=a.col||0x6fe8dd,base=mesh(geo('kitBase111',()=>new THREE.CylinderGeometry(.75,.9,.2,8)),toonS(0x354c5c));base.position.y=.1;a.m.root.add(base);const shape=a.kitDevice111==='trap'?geo('kitTrap111',()=>new THREE.TorusGeometry(.6,.15,6,12)):a.kitDevice111==='emitter'?geo('kitEmitter111',()=>new THREE.OctahedronGeometry(.55)):geo('kitTurret111',()=>new THREE.ConeGeometry(.4,1.2,6));const core=mesh(shape,glowS(col,.8));core.position.y=a.kitDevice111==='trap'?.4:1;if(a.kitDevice111==='trap')core.rotation.x=Math.PI/2;a.m.root.add(core);const label=makeSign(a.short,'#b6fff1',.32);label.position.y=1.9;a.m.root.add(label)}
 
-function kitFilter111(slot){const choosing=Number.isInteger(slot),field=choosing?'loadoutClass111':'skillClass111',selected=L[field]??String(profile.cls);let h='<label style="display:block;margin:10px 0">Filtrar habilidades por classe <select aria-label="Filtrar habilidades por classe" style="max-width:100%;padding:8px;background:#192236;color:#eaf5ff" onchange="L.'+field+'=this.value;'+(choosing?'loadoutView('+slot+')':'skillsView()')+'">';for(const [v,n] of [['all','Todas as aprendidas'],['equipped','Equipadas'],...jobsOf().map(ci=>[String(ci),CLASSES[ci].n])])h+='<option value="'+v+'" '+(v===selected?'selected':'')+'>'+n+'</option>';return h+'</select></label>'}
-function kitVisible111(s,choosing=false){const v=L[choosing?'loadoutClass111':'skillClass111']??String(profile.cls);return v==='all'||v==='equipped'&&player.skills.some(x=>!x.empty&&x.skillId===s.skillId)||String(s.sourceClass)===v}
+function kitFilter111(slot){const choosing=Number.isInteger(slot),field=choosing?'loadoutClass111':'skillClass111',selected=CHAR_UI118.filters[field]??String(profile.cls);let h='<label style="display:block;margin:10px 0">Filtrar habilidades por classe <select aria-label="Filtrar habilidades por classe" style="max-width:100%;padding:8px;background:#192236;color:#eaf5ff" onchange="CHAR_UI118.filters.'+field+'=this.value;'+(choosing?'loadoutView('+slot+')':'skillsView()')+'">';for(const [v,n] of [['all','Todas as aprendidas'],['equipped','Equipadas'],...jobsOf().map(ci=>[String(ci),CLASSES[ci].n])])h+='<option value="'+v+'" '+(v===selected?'selected':'')+'>'+n+'</option>';return h+'</select></label>'}
+function kitVisible111(s,choosing=false){const v=CHAR_UI118.filters[choosing?'loadoutClass111':'skillClass111']??String(profile.cls);return v==='all'||v==='equipped'&&player.skills.some(x=>!x.empty&&x.skillId===s.skillId)||String(s.sourceClass)===v}
 
 function kitCanonical111(sk){if(!sk)return null;const found=Object.values(KIT_DEFS111).flat().find(s=>s.n===sk.n);if(!found)return null;if(sk.kit111||sk.skillId===found.skillId||sk.sourceClass===found.sourceClass||!sk.t)return found;const old=ADV[found.sourceClass]?.sk;return old&&old.n===sk.n&&old.t===sk.t&&old.pow===sk.pow?found:null}
 function kitArchive111(){run.lib=run.lib||[];run.stolen=(run.stolen||[]).filter(s=>{const mapped=kitCanonical111(s);if(!mapped)return true;if(!run.lib.some(x=>x.n===s.n))run.lib.push({...s});profile.kitLearning111=profile.kitLearning111||{};profile.kitLearning111[mapped.skillId]=true;return false})}
@@ -6277,12 +6308,12 @@ function isTwiceAwakened103(){return awakening103().total>=3}
 function rareEligible103(ci){const a=awakening103();return RARE_IDS111.includes(ci)&&a.total>=3&&(a.points[ci]||0)>0&&!a.unlocked.includes(ci)}
 function rareLearn103(ci){if(!rareEligible103(ci)||!canRedistribute())return false;const a=awakening103();a.unlocked.push(ci);narratorEvent105('learnrare');profile.jobs=[...new Set([...jobsOf(),ci])];store.set('pds2_profile',profile);saveRun();return true}
 function rareAttune103(ci){const a=awakening103(),max=Math.max(0,...Object.values(a.points));if(!canRedistribute()||!a.unlocked.includes(ci)||a.points[ci]!==max||a.affinity===ci||a.total-(a.attunedAt||0)<3)return false;a.affinity=ci;a.attunedAt=a.total;narratorEvent105('affinity');store.set('pds2_profile',profile);saveRun();return true}
-function awakeningView103(){if(!awakeningDiscovered109())return;view=awakeningView103;L.characterTab='awakening';const a=awakening103();if(!isTwiceAwakened103()){let h=characterTabs('awakening')+'<div class="guide93"><strong>A FISSURA</strong><p>O portal fechou, mas você ainda sente algo ali. Uma passagem que parece responder à sua presença.</p><p>O Narrador percebe que alguma coisa mudou. Ainda não sabe o que está acontecendo.</p></div>';if(a.pending)h+=row('Um vestígio permanece','Posição '+Math.round(a.pending.x)+', '+Math.round(a.pending.z)+'. Distância: '+Math.round(Math.hypot(player.x-a.pending.x,player.z-a.pending.z))+' m. Aproxime-se para investigar.',btn('Investigar','awinspect',0,L.mode==='world'&&Math.hypot(player.x-a.pending.x,player.z-a.pending.z)<5));else h+=row('A sensação permanece','Não há um vestígio para investigar agora. Continue sua jornada.','');if(a.total>0)h+=row('O que você viveu',a.total+' '+(a.total===1?'vestígio investigado':'vestígios investigados')+'. Você ainda está descobrindo o que isso significa.','');h+=trialJournal113();openModal('PERSONAGEM',h);return}let h=characterTabs('awakening')+'<div class="guide93"><strong>O QUE PERMANECEU</strong><p>Algo sobrevive ao fechamento das Fendas. Você consegue sustentar essa passagem; o Narrador ainda não sabe explicar como.</p><p>Você poderá aprender todas as dez classes raras e combinar até seis habilidades. A afinidade principal dobra apenas a característica exclusiva da classe, quando uma habilidade rara dela estiver equipada.</p></div>';
+function awakeningView103(){if(!awakeningDiscovered109())return;view=awakeningView103;L.characterTab='awakening';const a=awakening103();if(!isTwiceAwakened103()){let h=characterTabs('awakening')+'<div class="guide93"><strong>A FISSURA</strong><p>O portal fechou, mas você ainda sente algo ali. Uma passagem que parece responder à sua presença.</p><p>O Narrador percebe que alguma coisa mudou. Ainda não sabe o que está acontecendo.</p></div>';if(a.pending)h+=row('Um vestígio permanece','Posição '+Math.round(a.pending.x)+', '+Math.round(a.pending.z)+'. Distância: '+Math.round(Math.hypot(player.x-a.pending.x,player.z-a.pending.z))+' m. Aproxime-se para investigar.',btn('Investigar','awinspect',0,L.mode==='world'&&Math.hypot(player.x-a.pending.x,player.z-a.pending.z)<5));else h+=row('A sensação permanece','Não há um vestígio para investigar agora. Continue sua jornada.','');if(a.total>0)h+=row('O que você viveu',a.total+' '+(a.total===1?'vestígio investigado':'vestígios investigados')+'. Você ainda está descobrindo o que isso significa.','');h+=trialJournal113();openModal('PERSONAGEM',h,'awakening');return}let h=characterTabs('awakening')+'<div class="guide93"><strong>O QUE PERMANECEU</strong><p>Algo sobrevive ao fechamento das Fendas. Você consegue sustentar essa passagem; o Narrador ainda não sabe explicar como.</p><p>Você poderá aprender todas as dez classes raras e combinar até seis habilidades. A afinidade principal dobra apenas a característica exclusiva da classe, quando uma habilidade rara dela estiver equipada.</p></div>';
  h+=row('Rank e Despertar','Rank '+RANKS[profile.rank].id+' · '+(isTwiceAwakened103()?'Segundo Despertar concluído':'Segundo Despertar em desenvolvimento')+'. Despertar não promove seu rank. Para superar SS+, alcance SS+, conclua o Segundo Despertar e cumpra os requisitos da prova ★.','');
  h+=row('Capítulo 1 · A fissura que permaneceu',a.discovered?'Investigações concluídas: '+a.total+' / 3 para despertar. Energia de Fendas: '+a.energy+'.':'A partir do nível 30, conclua e saia de uma Fenda de pelo menos seu rank atual (inclusive F). Investigue o vestígio deixado no mundo.','');
  if(a.pending)h+=row('Fissura para investigar','Posição '+Math.round(a.pending.x)+', '+Math.round(a.pending.z)+'. Distância: '+Math.round(Math.hypot(player.x-a.pending.x,player.z-a.pending.z))+' m. Ela permanece disponível se você sair para se preparar.',btn('Investigar','awinspect',0,L.mode==='world'&&Math.hypot(player.x-a.pending.x,player.z-a.pending.z)<5));
  h+='<div class="sec">CAMINHOS DO SEGUNDO DESPERTAR</div>';for(const c of RARE103){if(!c.ready){h+=row(c.n,'Chega nas próximas etapas do Segundo Despertar.','Em desenvolvimento');continue}const learned=a.unlocked.includes(c.id);h+=row(c.n,'Afinidade construída: '+(a.points[c.id]||0)+'. '+c.exclusive+'<br>'+(a.affinity===c.id?'Afinidade principal · ×2':'Característica ativa ao equipar habilidade rara da classe.'),(learned?'<b>Aprendida</b>':btn('Aprender','awlearn',c.id,rareEligible103(c.id)&&canRedistribute()))+(learned?btn('Afinidade principal','awattune',c.id,canRedistribute()&&a.affinity!==c.id&&a.points[c.id]===Math.max(0,...Object.values(a.points))&&a.total-(a.attunedAt||0)>=3):''))}
- h+='<div class="sysline">Cada investigação concluída desenvolve o caminho escolhido. A afinidade principal pode ser escolhida entre os caminhos mais desenvolvidos. Para mudar depois, conclua mais três investigações e desenvolva o novo caminho até ele estar entre suas maiores afinidades. Não perde nenhuma classe. Aprendizado e escolha de afinidade são feitos na cidade. Ecos e habilidades antigos permanecem disponíveis.</div>';h+=trialJournal113();openModal('PERSONAGEM',h)}
+ h+='<div class="sysline">Cada investigação concluída desenvolve o caminho escolhido. A afinidade principal pode ser escolhida entre os caminhos mais desenvolvidos. Para mudar depois, conclua mais três investigações e desenvolva o novo caminho até ele estar entre suas maiores afinidades. Não perde nenhuma classe. Aprendizado e escolha de afinidade são feitos na cidade. Ecos e habilidades antigos permanecem disponíveis.</div>';h+=trialJournal113();openModal('PERSONAGEM',h,'awakening')}
 // BEGIN JOURNEY113
 // Investigations require only movement, basic combat and interaction, never a rare skill.
 const TRIALS113={
@@ -6300,7 +6331,7 @@ const TRIALS113={
 function trialJournal113(){const a=awakening103(),records=(a.journal113||[]).slice(-6).reverse();if(!records.length)return '';let h='<div class="sec">O QUE VOCÊ TESTEMUNHOU</div>';for(const r of records){const spec=TRIALS113[r.ci];if(spec)h+=row(spec.title,spec.lines[r.variant%3]+(a.total>=3?' · '+CLASSES[r.ci].n:''),'Investigação '+r.number)}return h}
 function trialChapter113(total){return total===1?'Você sentiu a passagem responder à sua ação. Ainda não há uma explicação.':total===2?'Isso aconteceu de novo. Você reconhece a sensação, mesmo que a fissura se manifeste de outra forma.':total===3?'A mudança permanece depois que a fissura fecha. Você pode desenvolver os caminhos que experimentou. O Narrador reconhece a mudança, mas não sabe de onde ela vem.':''}
 function trialLayout113(p,mode){for(let turn=0;turn<16;turn++){const rot=turn*Math.PI/8,spots=Array.from({length:3},(_,i)=>{const a=rot+i*Math.PI*2/3,r=mode==='adapt'?(i===1?6:2.5):4.5;return {x:p.x+Math.sin(a)*r,z:p.z+Math.cos(a)*r}}),foes=Array.from({length:3},(_,i)=>{const a=rot+(i+.5)*Math.PI*2/3;return {x:p.x+Math.sin(a)*6.5,z:p.z+Math.cos(a)*6.5}});if([...spots,...foes,{x:p.x,z:p.z}].every(q=>freeAt(q.x,q.z,.65)&&los(p.x,p.z,q.x,q.z)))return {spots,foes}}return null}
-function inspectFissure103(){const a=awakening103(),p=a.pending;if(!p||L.mode!=='world'||player.dead||Math.hypot(player.x-p.x,player.z-p.z)>5||AR103.trial)return;let h='<div class="guide93"><strong>A PASSAGEM AINDA RESPONDE</strong><p>'+(['Algo permaneceu depois do fechamento. Você percebe várias formas de se aproximar.','A sensação voltou. Você pode repetir a experiência ou tentar outra resposta.','Você reconhece a fissura. Ela ainda pode responder de formas diferentes.'][Math.min(2,a.total)] )+'</p><p>Alguma dessas sensações chama sua atenção. De qual você se aproxima?</p></div>';for(const c of RARE103.filter(c=>c.ready)){const s=TRIALS113[c.id];h+=row(s.choice,s.hint,btn('Aproximar-se','awtrial',c.id))}openModal('FISSURA PERSISTENTE',h)}
+function inspectFissure103(){const a=awakening103(),p=a.pending;if(!p||L.mode!=='world'||player.dead||Math.hypot(player.x-p.x,player.z-p.z)>5||AR103.trial)return;view=inspectFissure103;let h='<div class="guide93"><strong>A PASSAGEM AINDA RESPONDE</strong><p>'+(['Algo permaneceu depois do fechamento. Você percebe várias formas de se aproximar.','A sensação voltou. Você pode repetir a experiência ou tentar outra resposta.','Você reconhece a fissura. Ela ainda pode responder de formas diferentes.'][Math.min(2,a.total)] )+'</p><p>Alguma dessas sensações chama sua atenção. De qual você se aproxima?</p></div>';for(const c of RARE103.filter(c=>c.ready)){const s=TRIALS113[c.id];h+=row(s.choice,s.hint,btn('Aproximar-se','awtrial',c.id))}openModal('FISSURA PERSISTENTE',h)}
 function startTrial103(ci){const a=awakening103(),p=a.pending,s=TRIALS113[ci];if(!p||!s||L.mode!=='world'||player.dead||Math.hypot(player.x-p.x,player.z-p.z)>5||AR103.trial)return false;const layout=trialLayout113(p,s.mode);if(!layout){toast('As bordas estão obstruídas. A fissura permanece para outra aproximação.');return false}closeModal();const t={v113:true,region:L,pendingId:p.id,ci,x:p.x,z:p.z,t:0,step:0,done:[],nodes:[],walk:0,lastBeat:-1,safe:(a.total+ci)%3,variant:(a.points[ci]||0)%3,targets:[],ringAt:0};AR103.trial=t;for(const q of layout.foes.slice(0,s.count))t.targets.push(spawnKind(kindsFor(p.rank)[0].k,q.x,q.z,p.rank,{aggro:true,noExpLoot:true,aw103:true}));if(ci===17){const e=t.targets[0];e.hp*=1.8;e.maxhp=e.hp}if(ci===7||ci===14){t.helper=spawnShadow({n:ci===7?'Vestígio Guardião':'Peregrino da Fissura'},p.x,p.z);t.helper.awTrial=true;if(ci===14){Object.assign(t.helper,{guardianTrial108:true,shadow:false,short:'Peregrino'});t.helper.hp=t.helper.maxhp=Math.max(player.maxhp,t.targets.reduce((n,e)=>n+e.dmg,0)*8)}}const center=['pulse','duel'].includes(s.mode);for(let i=0;i<s.verbs.length;i++){const q=center?p:layout.spots[i],node={type:'trial113',x:q.x,z:q.z,r:2,label:'F · '+s.verbs[i],hidden:false,trial113:t,index113:i,use:()=>trialInteract113(t,i)};t.nodes.push(node);L.inter.push(node)}fxRing(p.x,p.z,0xc2a2ff,8,1);toast('<b>[FISSURA]</b> '+s.title+'. '+s.task+' Permaneça no círculo de 8m. Sair ou morrer interrompe a tentativa, mas permite tentar de novo.',6000);return true}
 function trialInteract113(t,i){if(AR103.trial!==t||t.region!==L||player.dead||paused)return false;const n=t.nodes[i],s=TRIALS113[t.ci];if(!n||t.done.includes(i)||Math.hypot(player.x-n.x,player.z-n.z)>=2||!los(player.x,player.z,n.x,n.z))return false;
  if(s.mode==='pulse'){if(t.step>=3)return false;const beat=Math.floor(t.t/4);if(t.t%4>=2||beat===t.lastBeat){toast('Espere o próximo pulso claro.');return false}t.lastBeat=beat;t.step++;}
@@ -6335,7 +6366,7 @@ function rareSkillRun103(sk){if(sk.sourceClass===14){guardianCast108(sk);sfx('sk
  case 'rare_passage':{const pt=skillGroundPoint(8);AR103.passages={a:{x:P.x,z:P.z},b:pt,until:time+8};for(const pt0 of [AR103.passages.a,pt])fxRing(pt0.x,pt0.z,sk.col,1.2,8);break}
  case 'rare_cut':{const dx=Math.sin(P.face),dz=Math.cos(P.face),cx=P.x+dx*5,cz=P.z+dz*5;waveFwd(P.x,P.z,P.face,sk.col,10,2);for(const e of enemies){const ex=e.x-P.x,ez=e.z-P.z,along=ex*dx+ez*dz;if(!e.dead&&along>=0&&along<=10+e.r&&Math.abs(ex*dz-ez*dx)<1.5+e.r){const hit=hurtEnemy(e,dmg,P.x,P.z,{fromPlayer:true,skillHit:true,kb:0,stun:0});if(hit>0&&!e.dead&&!e.isBoss&&los(e.x,e.z,cx,cz))moveEnt(e,(cx-e.x)*.35,(cz-e.z)*.35)}}break}
  }sfx('skill')}
-function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,GR[r].th.n+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
+function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}view=rareGateView103;let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,GR[r].th.n+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
 function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk||sk.cdT>0||rareCastCheck103(sk)||!Number.isInteger(n)||n<1||n>affinity103(13)||profile.rank+n>8||awakening103().energy<n*3)return false;let pt=null;for(let i=0;i<12;i++){const ang=i*Math.PI/6,x=player.x+Math.sin(ang)*7,z=player.z+Math.cos(ang)*7;if(worldFree(x,z,3)&&!inCity(x,z)&&gates.every(g=>g.dead||Math.hypot(g.x-x,g.z-z)>7)){pt={x,z};break}}if(!pt){toast('Não há espaço livre para o portal. Procure uma área aberta.');return false}const g=newGate();Object.assign(g,{...pt,rank:profile.rank+n,aff:[],red:false,double:false,secret:false,inverse:false,time:false,life:900,custom:true,rareCreated103:true});awakening103().energy-=n*3;gates.push(g);gateMesh(g);narratorEvent105('fenda',{rank:g.rank});sk.cdT=sk.cdMax=skillCooldown(sk);saveRun();closeModal();toast('Fenda rank '+GR[g.rank].id+' aberta.');return true}
 function rareAreaTime103(x,z,boss=false){const z0=AR103.zone;return z0&&z0.until>time&&Math.hypot(x-z0.x,z-z0.z)<=z0.r?(boss?.8:.5):1}
 function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103)hud103.textContent=rareHud103();if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
