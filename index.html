@@ -724,10 +724,20 @@ function rankTalentRows(){const points=rankPoints();let h='<div class="sec">ESCO
 function bounceBasic(p){if(!p.bounces)return false;let target=null,dist=7;for(const e of enemies){if(e.dead||e.sleep||e.invuln||p.hit.has(e))continue;const d=Math.hypot(e.x-p.x,e.z-p.z);if(d<dist){dist=d;target=e}}if(!target)return false;const a=Math.atan2(target.x-p.x,target.z-p.z),speed=Math.hypot(p.vx,p.vz);p.vx=Math.sin(a)*speed;p.vz=Math.cos(a)*speed;p.mesh.rotation.y=a;p.bounces--;p.dmg*=.7;p.life=Math.max(p.life,.5);return true}
 function classTraining(){const n=jobsOf().filter(i=>!CLASSES[i].rare).length;return {level:5+10*n,bosses:2*n,gold:500*n*n}}
 function classTrainingReady(){const q=classTraining();return run.level>=q.level&&(profile.bossKills||0)>=q.bosses&&run.gold>=q.gold&&L.mode==='world'&&!!inCity(player.x,player.z)}
+const ORDER_REP_NEED=[0,100,300,700,1400,2600,4500,7500,12000];
+const ORDER_REP_PORTAL=[10,25,50,90,150,240,360,520,750,1000];
+function orderRepNeed(rank){return ORDER_REP_NEED[Math.min(TOPR,Math.max(0,rank))]}
+function ensureOrderRep(){if(Number.isFinite(profile.orderRep97))return;let total=Math.max(0,Number(profile.guildClaims)||0)*6;for(let r=0;r<=9;r++)total+=rankPortalCount(r)*ORDER_REP_PORTAL[r];const rank=Math.min(TOPR,Math.max(0,profile.rank||0)),nx=rank+1;total=Math.max(total,orderRepNeed(rank));if(nx<=TOPR&&(profile.guildClaims||0)>=nx*2&&qualifyingRankPortals(nx)>=3)total=Math.max(total,orderRepNeed(nx));profile.orderRep97=Math.floor(total)}
+function orderRep(){ensureOrderRep();return profile.orderRep97}
+function orderRepReward(rank,mul=1){const r=Math.min(9,Math.max(0,Math.floor(Number(rank)||0))),gap=Math.max(0,(profile.rank||0)-r-1);return Math.max(1,Math.round(ORDER_REP_PORTAL[r]*mul/Math.pow(2,gap)))}
+function questOrderRep(q){const r=Number.isInteger(q.repRank97)?q.repRank97:q.t==='clear'?q.rank:q.t==='kill'?Math.max(0,Math.floor((q.n-20)/10)):0;return orderRepReward(r,.6)}
+function addOrderRep(amount,reason){ensureOrderRep();if(!Number.isFinite(amount)||amount<=0)return 0;amount=Math.floor(amount);profile.orderRep97+=amount;toast('<b>[ORDEM]</b> '+reason+': +'+fmt(amount)+' de reputação · total '+fmt(profile.orderRep97)+'.');return amount}
+function claimOrderQuest(index){const q=run.quests?.[index];if(!q||q.got<q.n)return false;ensureOrderRep();const rw=Math.round(q.rw*(1+.05*affL('Lyra'))),rep=questOrderRep(q);run.quests[index]=genQuest(q.t);profile.guildClaims=(profile.guildClaims||0)+1;run.gold+=rw;addOrderRep(rep,'Missão concluída');toast('<b>[NARRADOR]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);saveRun();return true}
 function rankPortalCount(rank){return Math.max(0,Number(profile.closedPortalsByRank?.[rank])||0)}
-function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;g.rankCounted=true;profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
+function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;ensureOrderRep();g.rankCounted=true;addOrderRep(orderRepReward(rank),'Calabouço rank '+RANKS[rank].id+' fechado');profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
+function recordSpecialOrderRep(){const g=L.gate,sp=L.special,ref=g?.ref;if(!ref||!ref.id||ref.rankCounted||!sp||!(sp.done||sp.cleared)||!Number.isInteger(g.rank)||g.rank<0||g.rank>9)return false;ensureOrderRep();ref.rankCounted=true;addOrderRep(orderRepReward(g.rank),'Calabouço especial rank '+RANKS[g.rank].id+' fechado');return true}
 function qualifyingRankPortals(rank){let total=0;for(let r=rank;r<=9;r++)total+=rankPortalCount(r);return total}
-function rankTrialReady(nx){return nx===profile.rank+1&&nx<=TOPR&&run.level>=GR[nx].lvl&&(profile.guildClaims||0)>=nx*2&&qualifyingRankPortals(nx)>=3}
+function rankTrialReady(nx){return nx===profile.rank+1&&nx<=TOPR&&run.level>=GR[nx].lvl&&orderRep()>=orderRepNeed(nx)}
 function updateRankExaminer(S){if(!L.rankTrial)return false;if(S.stage===0&&S.t>2.5){S.stage=3;const b=spawnBoss(0,-8,S.gr,{n:'Examinador do Rank '+RANKS[L.rankTrial].id,types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)});b.aggro=true;bossAggro(b);toast('<b>[ORDEM]</b> Derrote o Examinador para conquistar o rank '+RANKS[L.rankTrial].id+'.')}S.msg=S.stage===0?'Prepare-se para o Examinador':'Derrote o Examinador do Rank '+RANKS[L.rankTrial].id;return true}
 
 
@@ -1402,7 +1412,7 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(kindsFor(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
 function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
-  if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&g.ref&&g.ref.id)g.ref.dead=true;player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
+  if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead;
   if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
   curGate=null;
@@ -1513,9 +1523,9 @@ function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)re
 
 /* ================= MISSÕES ================= */
 function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1+(run?run.level:1)/10;
-  if(t==='kill'){const n=20+pr*10;return {t,n,got:0,rw:Math.round(70*GR[pr].gold*lvM),d:'Mate '+n+' monstros'}}
-  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
-  return {t:'pvp',n:1,got:0,rw:Math.round(160*GR[pr].gold*lvM),d:'Derrote um caçador hostil'}}
+  if(t==='kill'){const n=20+pr*10;return {t,repRank97:pr,n,got:0,rw:Math.round(70*GR[pr].gold*lvM),d:'Mate '+n+' monstros'}}
+  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));return {t,repRank97:r,rank:r,n:1,got:0,rw:Math.round(220*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'}}
+  return {t:'pvp',repRank97:pr,n:1,got:0,rw:Math.round(160*GR[pr].gold*lvM),d:'Derrote um caçador hostil'}}
 function genQuests(){return[genQuest('kill'),genQuest('clear'),genQuest('pvp')]}
 function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;q.got++;if(q.got>=q.n)toast('<b>[NARRADOR]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}}
 
@@ -1830,7 +1840,7 @@ function gainXp(x,source){
   if(source==='monster')x*=1+transmigratorBonus();
   run.xp+=Math.round(x*(1+guildBonus()+(npcHas('Lyra')?.1:0)+((festival()||{}).xp||0)+.03*pb('xp')));let need=xpNeed();const r0=rankOf();
   while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);if(run.level>=35&&!consFull())run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);if(run.level%5===0)run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[NARRADOR]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Ordem (Lyra).',5000),1500)}toast('<b>[NARRADOR]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
-  {const nx=profile.rank+1;if(profile.rk2&&nx<=TOPR&&run.level>=GR[nx].lvl&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ORDEM]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
+  {const nx=profile.rank+1;if(profile.rk2&&rankTrialReady(nx)&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ORDEM]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[NARRADOR]</b> Missão de troca de classe disponível. Fale com a Ordem em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[NARRADOR]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
 }
@@ -2570,7 +2580,7 @@ function ensureRun(){run.lamps=run.lamps||0;
 }
 function dprog(k,v){const d=run.daily;if(!d||d.done)return;const g=DAILY.find(q=>q[0]===k);const b=d.p[k];d.p[k]=Math.min(g[2],b+v);
   if(b<g[2]&&d.p[k]>=g[2])toast('<b>[DIÁRIA]</b> '+g[1]+' concluído.');
-  if(DAILY.every(q=>d.p[q[0]]>=q[2])){d.done=true;run.pts+=1;player.hp=player.maxhp;player.mp=player.maxmp;bigText('DIÁRIA COMPLETA',1400);sfx('level');toast('<b>[NARRADOR]</b> Missão diária concluída: +1 ponto de status e recuperação total.',5000)}}
+  if(DAILY.every(q=>d.p[q[0]]>=q[2])){d.done=true;addOrderRep(10,'Missão diária');run.pts+=1;player.hp=player.maxhp;player.mp=player.maxmp;bigText('DIÁRIA COMPLETA',1400);sfx('level');toast('<b>[NARRADOR]</b> Missão diária concluída: +1 ponto de status e recuperação total.',5000);saveRun()}}
 function shadowCap(){return Math.max(3,2+Math.floor(((player&&player.maxmp)||60)/50))+(profile.rank===9?3:0)}
 function summonCap(){return 2+Math.floor(((player&&player.maxmp)||60)/(hasClassPassive(6)?30:60))}
 function minionAllies(includeEcos=false){return allies.filter(a=>a.life>0&&!a.dead&&(includeEcos||!a.shadow)&&!a.guest&&!a.party&&!a.caravan)}
@@ -2715,18 +2725,18 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
 function startFirstEquipment(){if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: conquiste ouro, procure Kael e escolha uma peça. Acompanhe a missão no Diário.',6500)}
 function firstEquipmentObjective(){const q=profile.firstEquipment92;if(!q||q.done)return null;const bought=run.items.some(it=>it.firstPurchase92),price=Math.round(PRICE[0]*equipFactor('b')*priceMul('arm')),weapon=Math.round(PRICE[0]*priceMul('wep'));
  return {id:'firstEquipment',n:'Seu primeiro equipamento',d:bought?'<div class="guide93"><strong>3. Equipe sua compra</strong><p>Abra a Bolsa e escolha Equipar na peça comprada.</p><p>No PC, você também pode arrastá-la para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Conquiste seu ouro</strong><p>Derrote monstros perto da cidade. Venda os espólios a Dorian, no Mercado.</p><strong>2. Escolha seu equipamento</strong><p>Procure Kael e compre uma peça rank F em Armas ou Armaduras.</p><p>Peças menores: a partir de '+price+' ouro.<br>Arma: '+weapon+' ouro nos preços atuais.</p></div>',progress:bought?'Etapa 3 de 3 · equipe uma peça que você comprou':run.gold>=price?'Etapa 2 de 3 · procure Kael e compre uma peça':'Etapa 1 de 3 · ouro '+Math.floor(run.gold)+' / '+price+' para a peça mais barata',ready:false}}
-function finishFirstEquipment(){const q=profile.firstEquipment92;if(!q||q.done||!Object.values(run.equip).some(it=>it?.firstPurchase92))return false;q.done=true;if(run.trackObj==='firstEquipment')run.trackObj=null;store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Seu primeiro equipamento: concluído. Você conquistou o ouro, escolheu a peça e a equipou. O próximo passo é seu.',6500);saveRun();return true}
+function finishFirstEquipment(){const q=profile.firstEquipment92;if(!q||q.done||!Object.values(run.equip).some(it=>it?.firstPurchase92))return false;q.done=true;addOrderRep(10,'Primeiro equipamento');if(run.trackObj==='firstEquipment')run.trackObj=null;store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Seu primeiro equipamento: concluído. Você conquistou o ouro, escolheu a peça e a equipou. O próximo passo é seu.',6500);saveRun();return true}
 function journeyObjectives(){const list=[],nx=profile.rank+1;const first=firstEquipmentObjective();if(first)list.push(first);
-  if(nx<=TOPR){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos da prova. Procure Lyra na Ordem da Fenda; enfrente diretamente o Examinador.':'Requisitos: nível '+need+', '+(nx*2)+' missões concluídas com recompensa recebida e 3 portais rank '+RANKS[nx].id+' ou superior fechados. Procure Lyra.',progress:'nível '+run.level+'/'+need+' · missões '+(profile.guildClaims||0)+'/'+(nx*2)+' · portais '+RANKS[nx].id+' '+Math.min(3,qualifyingRankPortals(nx))+'/3'+(ready?' · prova disponível':''),ready})}
+  if(nx<=TOPR){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos. Procure Lyra na Ordem e enfrente o Examinador. Sua reputação permanece após a prova.':'Alcance o nível '+need+' e '+fmt(orderRepNeed(nx))+' de reputação da Ordem. Ganhe reputação fechando calabouços e concluindo missões, na ordem que preferir.',progress:'nível '+run.level+'/'+need+' · reputação '+fmt(orderRep())+'/'+fmt(orderRepNeed(nx))+(ready?' · prova disponível':''),ready})}
   else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre do Oráculo para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
-  (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
+  (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
 function journeyView(tab='goals'){view=()=>journeyView(tab);let h='<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){if(profile.firstEquipment92?.done)h+=row('Seu primeiro equipamento · concluído','Você conquistou ouro, comprou uma peça e aprendeu a equipá-la.','✓');h+='<div class="sysline">Acompanhe um objetivo no painel do personagem. Histórias iniciadas na Ordem e missões continuam registradas aqui; as recompensas são recebidas com Lyra.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
-    h+='<div class="sec">MISSÃO DIÁRIA'+(run.daily&&run.daily.done?' · CONCLUÍDA':'')+'</div><div class="sysline">Complete os quatro objetivos até a meia-noite do seu aparelho. Recompensa automática: +1 ponto de atributo e recuperação total de vida e mana. Se começar e não concluir antes da virada do dia, a Zona de Penalidade fica pendente para a próxima entrada.</div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
+    h+='<div class="sec">MISSÃO DIÁRIA'+(run.daily&&run.daily.done?' · CONCLUÍDA':'')+'</div><div class="sysline">Complete os quatro objetivos até a meia-noite do seu aparelho. Recompensa automática: +10 de reputação da Ordem, +1 ponto de atributo e recuperação total de vida e mana. Se começar e não concluir antes da virada do dia, a Zona de Penalidade fica pendente para a próxima entrada.</div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
   }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
     for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
     if(!any)h+='<div class="sysline">Passe na primeira Prova de Rank para receber o chamado de Lyra.</div>';
@@ -2991,11 +3001,11 @@ const MAIN_ACTS=[null,
  ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
 function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
 function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
-function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="sysline">O rank não sobe sozinho: você precisa passar na <b>Prova de Rank</b> da Ordem. Cada rank de E a SS+ concede <b>1 escolha de combate</b>. De E a A, libera também mais <b>1 espaço de habilidade</b>, até seis. O bônus de dano e vida continua. Complete as tarefas da Ordem e feche 3 portais do rank que deseja alcançar ou superior. Depois, enfrente diretamente o Examinador do próximo rank.</div>';
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=TOPR,need=can?GR[nx].lvl:0;let h='<div class="guide93"><strong>SEU CAMINHO NA ORDEM</strong><p>Feche calabouços e conclua missões para ganhar <b>reputação da Ordem</b>. Escolha como avançar.</p><p>Alcance o nível e a reputação exigidos, depois vença o Examinador. As provas seguem em ordem, mas sua reputação <b>nunca é gasta</b>: ela já conta para as próximas.</p><p>Cada rank de E a SS+ concede <b>1 escolha de combate</b> e bônus de dano e vida. De E a A, também libera mais <b>1 espaço de habilidade</b>, até seis.</p><p>A confiança das vilas é separada deste progresso.</p></div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
-  if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Tarefas da Ordem concluídas e recebidas: '+(profile.guildClaims||0)+'/'+(nx*2)+'.<br>Portais rank '+RANKS[nx].id+' fechados: '+Math.min(3,qualifyingRankPortals(nx))+'/3. Contam também os ranks superiores.<br>Prova final: duelo contra o Examinador do Rank '+RANKS[nx].id+'. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));
+  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e calabouços.':'<br>Reputação suficiente!')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR CALABOUÇO</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
 
-  else h+=row(r>TOPR?'Rank raro ★':'Rank máximo da Ordem','As provas terminam no SS+. O rank raro ★ é um despertar especial.','');
+  if(!can)h+=row(r>TOPR?'Rank raro ★':'Rank máximo da Ordem','As provas terminam no SS+. O rank raro ★ é um despertar especial.','');
   h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=rankTalentRows();h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
   for(let i=1;i<MAIN_ACTS.length;i++)if(acts.includes(i)||profile.rank>=i){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
   if(!any)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">A história começa quando você passar na primeira Prova de Rank.</div>';
@@ -3084,13 +3094,13 @@ function storyEv(t,v=1){const P=profile.story;if(!P)return;let ch=false;
   for(const S of STORIES){const st=P[S.id];if(!st||st.done)continue;let sp=S.steps[st.s];if(sp[0]!==t&&!STORY_ABS[sp[0]])continue;
     if(STORY_ABS[sp[0]])st.got=STORY_ABS[sp[0]]();else st.got+=v;
     while(sp&&st.got>=sp[1]){st.s++;st.got=0;ch=true;sp=S.steps[st.s];
-      if(!sp){st.done=true;const g=Math.round(S.rw.g*(1+rankOf()));run.gold+=g;run.pts=(run.pts||0)+S.rw.p;profile.ach=profile.ach||[];if(!profile.ach.includes(S.rw.t))profile.ach.push(S.rw.t);bigText('HISTÓRIA CONCLUÍDA',1600);sfx('arise');toast('<b>[HISTÓRIA]</b> '+S.n+' concluída: +'+fmt(g)+' ouro, +'+S.rw.p+' pontos de status e o título <b>'+TITLES.find(x=>x.id===S.rw.t).n+'</b>.',7000);break}
+      if(!sp){st.done=true;addOrderRep(50,'História concluída');const g=Math.round(S.rw.g*(1+rankOf()));run.gold+=g;run.pts=(run.pts||0)+S.rw.p;profile.ach=profile.ach||[];if(!profile.ach.includes(S.rw.t))profile.ach.push(S.rw.t);bigText('HISTÓRIA CONCLUÍDA',1600);sfx('arise');toast('<b>[HISTÓRIA]</b> '+S.n+' concluída: +'+fmt(g)+' ouro, +'+S.rw.p+' pontos de status e o título <b>'+TITLES.find(x=>x.id===S.rw.t).n+'</b>.',7000);break}
       toast('<b>[HISTÓRIA]</b> '+S.n+' · capítulo '+(st.s+1)+': '+sp[2],7000);if(STORY_ABS[sp[0]])st.got=STORY_ABS[sp[0]]()}}
-  if(ch)store.set('pds2_profile',profile)}
+  if(ch){store.set('pds2_profile',profile);saveRun()}}
 function storyTab(){const P=profile.story||{};let h='<div class="sysline">Histórias da Ordem: cada uma tem capítulos e termina com um <b>título único</b>. Dá para seguir várias ao mesmo tempo.</div>';
   for(const S of STORIES){const st=P[S.id],T=TITLES.find(t=>t.id===S.rw.t);
     if(st&&st.done){h+=row('<b style="color:#6fe39a">'+S.n+'</b>','Concluída · título '+T.n+': '+T.m,'');continue}
-    if(!st){h+=row('<b>'+S.n+'</b> · '+S.npc,S.steps.length+' capítulos · recompensa: ouro, '+S.rw.p+' pontos de status e o título '+T.n+' ('+T.m+')',btn('Começar','stbeg',S.id,true,'hot'));continue}
+    if(!st){h+=row('<b>'+S.n+'</b> · '+S.npc,S.steps.length+' capítulos · recompensa: 50 de reputação da Ordem, ouro, '+S.rw.p+' pontos de status e o título '+T.n+' ('+T.m+')',btn('Começar','stbeg',S.id,true,'hot'));continue}
     const sp=S.steps[st.s];h+=row('<b>'+S.n+'</b> · capítulo '+(st.s+1)+'/'+S.steps.length,sp[2]+'<br>Progresso: <b>'+Math.min(st.got,sp[1])+'/'+sp[1]+'</b>','')}return h}
 
 /* ===== ESTAÇÕES ===== */
@@ -3127,7 +3137,7 @@ const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessan
 function showSys(t){logNews('<b>[NARRADOR]</b> '+t,'important')}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Arconte, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){profile.story=profile.story||[];if(!profile.story.includes(l)){profile.story.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0};setTimeout(()=>showSys('Tenho uma exigência. '+t[1]+'. Não me decepcione.'),5000)}}
-function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=2;run.spts+=2;run.demand=null;showSys('Exigência cumprida. +2 pontos de status, +2 de habilidade. Você me diverte.')}}
+function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=2;run.spts+=2;run.demand=null;addOrderRep(20,'Exigência cumprida');saveRun();showSys('Exigência cumprida. +2 pontos de status, +2 de habilidade. Você me diverte.')}}
 function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){const lost=d.got;d.got=0;toast('<b>[NARRADOR]</b> Exigência: <b>'+d.d+'</b>. Você '+({nododge:'esquivou',nopot:'usou poção'}[t]||'quebrou a regra')+' e perdeu o progresso ('+lost+' → 0/'+d.n+'). Termine para ganhar +5 pontos de status e +2 de habilidade.',6000)}}
 /* fusão (classe híbrida) */
 function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div class="sec">FUSÃO SECRETA</div>';
@@ -3139,7 +3149,7 @@ function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div 
 function fuseTag(n){return /Almas|Sombr|Praga|Ninhada/.test(n)?'Sombrio':/Gelo|Inverno/.test(n)?'Glacial':/Chama|Fúria|Destruição/.test(n)?'Carmesim':/Caos/.test(n)?'do Caos':/Legião|Feras/.test(n)?'Comandante':'Rúnico'}
 /* ações das ideias */
 function extraActions2(a,v){
-  if(a==='npcdone'){const q=NPCQ[v];profile.npcSk=profile.npcSk||{};profile.npcSk[v]=true;store.set('pds2_profile',profile);refreshStats();bigText('HABILIDADE APRENDIDA',1400);sfx('level');toast('<b>['+v.toUpperCase()+']</b> '+q.sk,5000);return true}
+  if(a==='npcdone'){const q=NPCQ[v];if(!q||npcHas(v)||(profile.npcq?.[v]?.got||0)<q.n||affL(v)<3)return false;addOrderRep(25,'Missão pessoal');profile.npcSk=profile.npcSk||{};profile.npcSk[v]=true;store.set('pds2_profile',profile);refreshStats();bigText('HABILIDADE APRENDIDA',1400);sfx('level');toast('<b>['+v.toUpperCase()+']</b> '+q.sk,5000);return true}
   if(a==='fishpull'){fishPull();return 'close0'}
   if(a==='rodup'){const r=run.rod||0,N=ROD[r+1];if(!N||run.gold<N.p)return;run.gold-=N.p;run.rod=r+1;sfx('level');toast('<b>[PESCA]</b> Nova vara: '+N.n+'.');return true}
   if(a==='fishsell'){const v=fishValue();if(!v)return;run.gold+=v;run.fish={};sfx('coin');toast('<b>[PESCA]</b> Peixes vendidos: +'+fmt(v)+' ouro.');return true}
@@ -3216,7 +3226,7 @@ const npcHas=n=>!!(profile.npcSk||{})[n];
 function npcEv(t,v=1){profile.npcq=profile.npcq||{};for(const n in NPCQ){const q=NPCQ[n];if(q.t!==t||affL(n)<6||npcHas(n))continue;const s=profile.npcq[n]=profile.npcq[n]||{got:0};if(s.got>=q.n)continue;s.got=Math.min(q.n,s.got+v);if(s.got>=q.n)toast('<b>['+n.toUpperCase()+']</b> Missão pessoal concluída. Fale comigo.',4000)}store.set('pds2_profile',profile)}
 function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};let h=row('Conversar','"'+NPCTALK[n][Math.min(NPCTALK[n].length-1,Math.floor(l/2))]+'"','');
   if(npcHas(n))h+=row('Habilidade aprendida',q.sk,'<b style="color:#6fe39a">Ativa</b>');
-  else if(l>=3)h+=row('Missão pessoal: '+q.d,'Progresso '+fmt(Math.min(s.got,q.n))+'/'+fmt(q.n)+' · recompensa: '+q.sk,btn('Concluir','npcdone',n,s.got>=q.n,'hot'));
+  else if(l>=3)h+=row('Missão pessoal: '+q.d,'Progresso '+fmt(Math.min(s.got,q.n))+'/'+fmt(q.n)+' · recompensa: 25 de reputação da Ordem e '+q.sk,btn('Concluir','npcdone',n,s.got>=q.n,'hot'));
   else h+=row('Missão pessoal','Liberada com 3 corações','');return h}
 /* cidade */
 const cityOf=()=>nearestCity(player.x,player.z).c;
@@ -3465,7 +3475,7 @@ function openShop(id){
 function guildView(tab){
   view=()=>guildView(tab);
   let h='<div class="tabs">'+[['quests','Missões'],['prova','Prova de Rank'],['jobs','Trabalhos'],['story','Histórias'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k!=='reaval'&&(k==='quests'||k==='story'||k==='prova'||k==='jobs'||k==='rank'||k==='reaval'||k==='travel'||unl(k))).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
-  if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
+  if(tab==='quests'){h+='<div class="sysline">Lyra: As missões renovam quando você recebe a recompensa.</div>';h+=affRow('Lyra');run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d,'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · recompensa '+fmt(q.rw)+' ouro + '+questOrderRep(q)+' de reputação da Ordem',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
     if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
     else{h+='<div class="sysline">Lyra: Todo '+c.n+' que passa no Julgamento vira <b>'+A.n+'</b>. Sua classe não muda, ela evolui.</div>';
@@ -3559,7 +3569,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
   if(a==='equip')equipBagItem(v);
   if(a==='sell'){if(!sellEquipment(v))return}
-  if(a==='claim'){const q=run.quests[+v];if(q.got<q.n)return;const rw=Math.round(q.rw*(1+.05*affL('Lyra')));run.gold+=rw;toast('<b>[NARRADOR]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);profile.guildClaims=(profile.guildClaims||0)+1;run.quests[+v]=genQuest(q.t)}
+  if(a==='claim'){if(!claimOrderQuest(+v))return}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[NARRADOR]</b> '+p.name+' entrou no seu grupo.')}
   if(a==='fire'){const p=run.party[+v];run.party.splice(+v,1);const al=allies.find(x=>x.data===p);if(al){al.dead=true;scene.remove(al.m.root)}}
   if(a==='sellres'){const k=v.slice(0,-1),r=+v.slice(-1);const P=k==='core'?CORE_P:CRY_P;const g=run.res[k][r]*sellP(k,r);run.gold+=g;run.res[k][r]=0;toast('<b>[NARRADOR]</b> +'+fmt(g)+' ouro');beep(990,.08,.05)}
@@ -3704,7 +3714,7 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
   if(!DEV)return;if(++n>=7&&profile){n=0;profile.rank=profile.rank===9?8:9;store.set('pds2_profile',profile);showProfile();beep(110,.5,.06,'sawtooth')}})})();
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML='';
-function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
+function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();ensureOrderRep();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.map(s=>s.n).join(' · ')+'<br>3 opções de habilidade · escolha 1 para começar'+(c.arise?'<br>Único que ergue ecos':'')+'<br>Mortes: '+(profile.deaths||0)}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
@@ -3753,9 +3763,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v96</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v97</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=96;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=97;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

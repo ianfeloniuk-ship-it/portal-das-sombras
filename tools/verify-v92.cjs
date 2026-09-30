@@ -7,7 +7,7 @@ function extract(n){const m=new RegExp('function\\s+'+n+'\\s*\\([^)]*\\)').exec(
 
 
 
-let uid=0,saves=0;const c={profile:{},run:{},PRICE:[150],EQUIP_SLOTS:['w','a','h','g','b'],store:{set(){}},toast(){},saveRun(){saves++},refreshStats(){},rankOf:()=>0,equipFactor:s=>['h','g','b'].includes(s)?.2:1,priceMul:()=>1,makeItem:(slot,tier,rar)=>({uid:++uid,slot,tier,rar,name:'Teste'}),addItem:it=>c.run.items.push(it)};vm.createContext(c);
+let uid=0,saves=0;const c={profile:{},run:{},PRICE:[150],EQUIP_SLOTS:['w','a','h','g','b'],store:{set(){}},toast(){},saveRun(){saves++},refreshStats(){},rankOf:()=>0,equipFactor:s=>['h','g','b'].includes(s)?.2:1,priceMul:()=>1,makeItem:(slot,tier,rar)=>({uid:++uid,slot,tier,rar,name:'Teste'}),addItem:it=>c.run.items.push(it)};vm.createContext(c);Object.assign(c,{fmt:String,TOPR:8,RANKS:Array.from({length:10},(_,i)=>({id:String(i)}))});vm.runInContext(src.slice(src.indexOf('const ORDER_REP_NEED='),src.indexOf('function rankPortalCount')),c);for(const n of ['rankPortalCount','qualifyingRankPortals'])vm.runInContext(extract(n),c);
 for(const n of ['pickAwaken','newRun','startFirstEquipment','firstEquipmentObjective','finishFirstEquipment','equipmentBagRoom','buyEquipment','equipBagItem'])vm.runInContext(extract(n),c);
 c.newRun();assert.equal(c.run.gold,60);Object.assign(c.run,{gold:734});assert.equal(c.run.gold,734);c.startFirstEquipment();assert(!c.profile.firstEquipment92);
 c.profile=c.pickAwaken(0);c.newRun();assert.equal(c.run.gold,0);c.startFirstEquipment();assert.equal(c.run.trackObj,'firstEquipment');assert.equal(c.run.gold,0);assert(c.firstEquipmentObjective().progress.includes('Etapa 1'));assert(!c.buyEquipment('b',0));assert.equal(c.run.items.length,0);
