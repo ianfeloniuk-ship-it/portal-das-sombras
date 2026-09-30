@@ -610,3 +610,7 @@ Validação: verify-ui118 (stack, retorno regenerado, rerender, scroll, fechamen
 Próxima frente maior permanece variedade/progressão longa da torre; esta conversa priorizou os ajustes de feedback antes de iniciar essa frente. Fonte game.html; index.html gerado; cache v121. Checkout isolado: C:/Users/irror/Documents/Codex/2026-09-30/leia-o-registro-de-continuidade-do/work/ecos-interface.
 
 Publicação autorizada diretamente por Ian nesta conversa: “pode aprovar”. Integra 4442b73 (movimentos dos goblins v120); esta entrega usa v121 para não repetir a versão de cache.
+
+
+## 2026-09-30 — v125: cristais por rank
+Publicação autorizada por Ian. Veios existentes usam GLB próprio gerado por TripoSR, reduzido a 8.000 triângulos, com pedra e mineral separados. Mineral, partículas e identificação seguem as dez cores RANKS. Carregamento compartilhado, fallback procedural e proteção contra recompensa repetida após esgotamento. Layout, chances e economia preservados. Fonte tools/crystals125.js sincronizada pelo build. Testes verify-crystals125, ecology124 e v118 aprovados; fixture privada no navegador validou mineração nos dez ranks e aparência na dungeon. Fixture não publicada.
