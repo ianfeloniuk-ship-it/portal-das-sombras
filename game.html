@@ -221,6 +221,7 @@ body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-
 <script src="tools/warrior-player127.js"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/biome-materials132.js"></script>
+<script src="tools/citizens133.js"></script>
 <script src="tools/rift131.js"></script>
 <script src="tools/rift-audio131.js"></script>
 <script>window.RIFT131_ENABLE=window.RIFT131_ENABLE!==false;</script>
@@ -3364,6 +3365,7 @@ function animGlb(m,st){
 }
 
 function animChibi(m,st,t){
+  if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
   if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
@@ -4146,8 +4148,10 @@ function buildCity(c,g,addCol,R){
   addVendor(c,'bank','Selene','BANCO','#ffd54f',X-5,Z+9.6,{body:0x2a3a5a,hair:0xffe08a,wep:'none',gk:'Mage',tint:0xffe08a});
   for(let i=0;i<5;i++)spawnHunter(c,true);}
 }
-function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const m=makeChibi(look);m.root.position.set(x,0,z);scene.add(m.root);
-  npcs.push({kind:'vendor',noLabel:true,home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+name.toUpperCase()+' — '+sign,use:()=>openShop(shop)})}
+function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const detailed=window.Citizens133&&Citizens133.has(name),m=detailed&&Citizens133.create(name)||makeChibi(look);m.root.position.set(x,0,z);scene.add(m.root);
+  const n={kind:'vendor',noLabel:true,home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+name.toUpperCase()+' — '+sign,use:()=>openShop(shop)};npcs.push(n);
+  if(detailed&&!m.citizen133)Citizens133.load(name).then(ok=>{if(!ok||n.gone||!npcs.includes(n)||L.mode!=='world')return;const next=Citizens133.create(name);if(!next)return;next.root.position.copy(n.m.root.position);next.root.rotation.copy(n.m.root.rotation);scene.remove(n.m.root);n.m=next;scene.add(next.root)});
+}
 function buildWorld(seed){
   seed=seed??profile.seed;if(WSEED!==(seed|0))gates=[];
   worldInit(seed);clearLevel();
