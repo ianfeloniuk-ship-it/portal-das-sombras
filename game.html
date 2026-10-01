@@ -4246,7 +4246,7 @@ function riftContact131(){
 }
 function riftExitVisual131(it){
  if(!it.grp?.userData.rift131||it.riftLocked131===it.locked)return;
- it.riftLocked131=it.locked;Rift131.setPalette(it.grp,{red:it.locked,secret:!it.locked});
+ it.riftLocked131=it.locked;Rift131.setPalette(it.grp,{red:it.locked,exit:!it.locked,secret:!it.locked});
  if(it.sg){it.grp.remove(it.sg);it.sg.material.map.dispose();it.sg.material.dispose();}
  it.sg=Rift131.label({exit:true,locked:it.locked},L.G?.id||GR[L.gate?.rank||0].id);it.grp.add(it.sg);
 }
@@ -4505,7 +4505,7 @@ function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruíd
 function exitPortal(x,z,locked){
   const existing=L.exits.find(it=>it.type==='exit');if(existing)return existing;
   if(window.RIFT131_ENABLE&&window.Rift131){
-    const grp=Rift131.create({seed:131,red:locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
+    const grp=Rift131.create({seed:131,red:locked,exit:!locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
     const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
     const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
   }
@@ -4591,7 +4591,7 @@ function mine(it,rank){
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,RANKS[rank].c);fxBurst(it.x,1,it.z,crystalColor125(rank).getHex(),6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}
 }
-function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead&&!L.brk){toast('<b>[NARRADOR]</b> Portal vermelho: conclua o objetivo para destrancar a única saída.');return}leaveDungeon(false)}
+function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead){toast('<b>[NARRADOR]</b> Portal vermelho: derrote o guardião para abrir a única saída.');return}leaveDungeon(false)}
 function enterGate(g){if(g.dead||g.coreFailed103)return;
 
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
@@ -4621,7 +4621,7 @@ function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t)
   if(riftClosure){delete riftClosure.cleared;gateMesh(riftClosure);riftClosure.closing131=true;gates.push(riftClosure);Rift131.close(riftClosure.mesh,riftClosure.storyScar131)}
   for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}
   placeAllies();cam.x=player.x;cam.z=player.z;
-  toast(g.deathBreak103?'<b>[NARRADOR]</b> O portal vermelho rompeu. Monstros escaparam para o mundo; a entrada foi perdida.':g.coreFailed103?'<b>[NARRADOR]</b> Você escapou. O núcleo foi perdido e o portal se fechou.':cleared?'<b>[NARRADOR]</b> O portal rank '+GR[g.rank].id+' se fechou e sumiu. Venda seus recursos no Mercado de qualquer cidade.':'<b>[NARRADOR]</b> Você saiu da masmorra. O portal continua aberto.',4000);
+  toast(g.deathBreak103?'<b>[NARRADOR]</b> O portal vermelho rompeu. Monstros escaparam para o mundo; a entrada foi perdida.':g.coreFailed103?'<b>[NARRADOR]</b> Você escapou. O núcleo foi perdido e o portal se fechou.':cleared?'<b>[NARRADOR]</b> O portal rank '+GR[g.rank].id+' se fechou e sumiu. Venda seus recursos no Mercado de qualquer cidade.':'<b>[NARRADOR]</b> Você saiu da masmorra. O portal continua aberto enquanto ainda tiver tempo.',4000);
   saveRun();
 }
 function placeAllies(){for(const a of allies){if(a.guest)continue;a.x=player.x+rnd(-1.5,1.5);a.z=player.z+rnd(.5,2);if(L.grid&&!freeAt(a.x,a.z,.4)){a.x=player.x;a.z=player.z}a.act=null;a.m.root.position.set(a.x,0,a.z)}}
