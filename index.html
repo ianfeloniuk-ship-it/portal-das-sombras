@@ -3201,8 +3201,8 @@ function makeChibi(o){
   return {root,body,armL,armR,legL,legR,mats,sc,eyeMat:em};
 }
 /* ================= MODELOS 3D ANIMADOS (KayKit, CC0) ================= */
-const MODELS={ok:false,list:{},w:{},anims:[],h:{},ready:null};
-const MKEYS=['Knight','Rogue','Rogue_Hooded','Mage','Barbarian','Skeleton_Minion','Skeleton_Mage','Skeleton_Rogue','Skeleton_Warrior'];
+const MODELS={ok:false,list:{},w:{},anims:[],clips:{},h:{},ready:null};
+const MKEYS=['Knight','Rogue','Rogue_Hooded','Mage','Barbarian','Skeleton_Minion','Skeleton_Mage','Skeleton_Rogue','Skeleton_Warrior','necromante-tripo-animado'];
 const WKEYS=['sword_1handed','dagger','axe_1handed','staff','crossbow_1handed','shield_round','Skeleton_Blade','Skeleton_Axe','Skeleton_Staff','Skeleton_Shield_Small_A'];
 MODELS.ready=new Promise(res=>{
   if(!THREE.GLTFLoader||!THREE.SkeletonUtils){res(false);return}
@@ -3214,14 +3214,14 @@ MODELS.ready=new Promise(res=>{
     if(t==='e'){try{envParse(g.scene);envBlades();ENV.ok=true}catch(err){console.warn(err);ENV.ok=false}}
     else if(t==='a')MODELS.anims=g.animations;
     else if(t==='w')MODELS.w[k]=g.scene;
-    else{MODELS.list[k]=g.scene;const b=new THREE.Box3().setFromObject(g.scene);MODELS.h[k]=b.max.y-b.min.y||2}
+    else{MODELS.list[k]=g.scene;if(k==='necromante-tripo-animado')MODELS.clips[k]=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MODELS.h[k]=b.max.y-b.min.y||2}
     fin()};
   const fk=(t,k)=>(t==='w'?'w_':'')+k;
   const perFile=()=>{for(const [t,k] of jobs)ld.load('models/'+fk(t,k)+'.glb',g=>one(t,k,g),undefined,()=>{if(t!=='e'&&t!=='f')fail=true;fin()})};
   (window.PDS_SITE?Promise.reject(0):fetch('models-pack.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(p=>{for(const [t,k] of jobs){const b=p[fk(t,k)];if(!b){if(t!=='e'&&t!=='f')fail=true;fin();continue}const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);ld.parse(u.buffer,'',g=>one(t,k,g),()=>{if(t!=='e'&&t!=='f')fail=true;fin()})}}).catch(perFile);
   setTimeout(()=>{if(n<jobs.length){fail=true;n=jobs.length-1;fin()}},25000);
 });
-const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','Rogue_Hooded','Mage','Mage','Mage','Mage','Mage','Mage','Knight','Barbarian','Mage','Knight','Mage','Mage','Mage'];
+const CLASS_GK=['Knight','Rogue_Hooded','Barbarian','Mage','Rogue','Mage','Mage','necromante-tripo-animado','Mage','Mage','Mage','Mage','Mage','Mage','Knight','Barbarian','Mage','Knight','Mage','Mage','Mage'];
 const TINT_K={0x3a2266:.9};/* necromante: tom sombrio forte sobre a textura verde */
 const CLASS_TINT=[null,null,null,null,null,0xfff0c0,0x9ff0ff,0x3a2266,0xff5a3a,0x7fd0ff,0xb89060,0xc0a8ff,0x8fe8ff,0xc2a2ff,0xffdb86,0xbfea9c,0x6fe8dd,0xc4b0ff,0xb2dfff,0xffdd9b,0xb98cff];
 const ATK_CLIP={sword:'1H_Melee_Attack_Slice_Diagonal',dagger:'Dualwield_Melee_Attack_Slice',axe:'2H_Melee_Attack_Slice',staff:'Spellcast_Shoot',bonestaff:'Spellcast_Shoot',wand:'Spellcast_Shoot',tome:'Spellcast_Shoot',bow:'1H_Ranged_Shoot',none:'1H_Melee_Attack_Chop'};
@@ -3236,7 +3236,7 @@ function makeActor(o){
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(2.05/MODELS.h[gk]);body.scale.setScalar(sc);
   const mats=[];
-  model.traverse(c=>{if(c.isMesh){envCull(c);const mm=toToon(c.material,c.isSkinnedMesh,.06);if(o.tint!=null){mm.color.lerp(new THREE.Color(o.tint),TINT_K[o.tint]||.6)}if(o.emis)mm.emissive=new THREE.Color(o.emis);mm.roughness=.8;mm.metalness=0;c.material=mm;if(!mats.includes(mm))mats.push(mm)}});
+  model.traverse(c=>{if(c.isMesh){envCull(c);const mm=toToon(c.material,c.isSkinnedMesh,.06);if(o.tint!=null&&gk!=='necromante-tripo-animado'){mm.color.lerp(new THREE.Color(o.tint),TINT_K[o.tint]||.6)}if(o.emis)mm.emissive=new THREE.Color(o.emis);mm.roughness=.8;mm.metalness=0;c.material=mm;if(!mats.includes(mm))mats.push(mm)}});
   /* Os modelos KayKit trazem armas embutidas nas mãos (besta, facas, cajado...). Escondemos todas; a arma certa da classe é presa abaixo. */
   /* Algumas classes usam peças embutidas do modelo: Paladino = varinha + livro aberto; Invocador = livro aberto (+ cajado). */
   const keepW={wand:['1H_Wand','Spellbook_open'],tome:['Spellbook_open']}[o.wep]||[];
@@ -3247,7 +3247,7 @@ function makeActor(o){
   att('handslot.r',wr);att('handslot.l',wl);
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
-  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:o.atkClip||ATK_CLIP[o.wep]||ATK_CLIP.none,la:0,lw:0,wmats,wnodes};
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,customClips:MODELS.clips[gk]||null,atkClip:o.atkClip||(gk==='necromante-tripo-animado'?'chop.001':ATK_CLIP[o.wep]||ATK_CLIP.none),la:0,lw:0,wmats,wnodes};
 }
 // Articulated CC0 variants replace the static, two-view display meshes.
 // Decorations belong to bones, so armor and weapons follow every animation.
@@ -3368,6 +3368,7 @@ function makeMonster(o){
 }
 function gAct(m,n){if(m.act[n])return m.act[n];let c;
   if(m.alias){const nm=m.alias[n]||(n==='Hit_A'?m.alias.Hit:null)||m.alias.Idle;c=m.clips.find(a=>a.name===nm||a.name.endsWith('|'+nm))}
+  else if(m.customClips)c=m.customClips.find(a=>a.name===n);
   else c=MODELS.anims.find(a=>a.name===n);
   if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
 function gPlay(m,n,once,spd){const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
@@ -3379,7 +3380,7 @@ function animGlb(m,st){
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
   else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
-  else{const a=m.cur&&m.act[m.cur];const busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
+  else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.stop();a.reset();m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);
 }
 
@@ -4288,9 +4289,10 @@ function gateMesh(g){retireExtraction117(g);
 function removeGateMesh(g){if(g.mesh){if(g.mesh.userData.rift131){Rift131.dispose(g.mesh);envDispose(g.mesh)}L.group.remove(g.mesh);g.mesh=null}L.inter=L.inter.filter(i=>i.g!==g)}
 function tickGates(dt){
   const P=player;
-  for(const g of gates){if(g.dead||g===curGate)continue;g.life-=dt;
+  const closingDone=[];for(const g of gates){if(g.dead||g===curGate)continue;if(g.closing131){if(g.mesh?.userData.rift131?.closing>1.65)closingDone.push(g);continue;}g.life-=dt;
     const far=L.mode==='world'&&P&&Math.hypot(g.x-P.x,g.z-P.z)>420;
-    if(g.life<=0||far){g.dead=true;if(L.mode==='world'){removeGateMesh(g);if(!far&&!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
+    if(g.life<=0||far){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!far&&!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
+  for(const g of closingDone){removeGateMesh(g);gates=gates.filter(x=>x!==g)}
   gates=gates.filter(g=>!g.dead||g===curGate);
   let alive=gates.filter(g=>!g.dead).length;
   while(alive<10){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
@@ -4627,11 +4629,13 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
       const e=spawnKind(wpick(activeDungeonPool124(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
 function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
-  const g=L.gate,cleared=L.bossDead&&!L.failed103;narratorPortal105(g,cleared);
-  if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);rareOnPortal103(g);run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
+  const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&g.mesh?.userData.rift131?{...g,dead:false,life:120}:null;narratorPortal105(g,cleared);
+  if(cleared){g.cleared=true;g.dead=true;qev('clear',g.rank);rareOnPortal103(g);if(riftClosure){const pending=awakening103().pending;riftClosure.storyScar131=!!pending&&Math.hypot(pending.x-g.x,pending.z-g.z)<.1}run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
+
   curGate=null;
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
   buildWorld();
+  if(riftClosure){delete riftClosure.cleared;gateMesh(riftClosure);riftClosure.closing131=true;gates.push(riftClosure);Rift131.close(riftClosure.mesh,riftClosure.storyScar131)}
   for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}
   placeAllies();cam.x=player.x;cam.z=player.z;
   toast(g.deathBreak103?'<b>[NARRADOR]</b> O portal vermelho rompeu. Monstros escaparam para o mundo; a entrada foi perdida.':g.coreFailed103?'<b>[NARRADOR]</b> Você escapou. O núcleo foi perdido e o portal se fechou.':cleared?'<b>[NARRADOR]</b> O portal rank '+GR[g.rank].id+' se fechou e sumiu. Venda seus recursos no Mercado de qualquer cidade.':'<b>[NARRADOR]</b> Você saiu da masmorra. O portal continua aberto.',4000);
@@ -7293,7 +7297,7 @@ function awakeningDiscovered109(){const a=profile?.awakening103;return !!(a&&(a.
 function awakening103(){const a=profile.awakening103||(profile.awakening103={});a.points=a.points&&typeof a.points==='object'?a.points:{};a.unlocked=Array.isArray(a.unlocked)?a.unlocked.filter(i=>RARE_IDS111.includes(i)):[];a.energy=Math.max(0,Number(a.energy)||0);a.total=Math.max(0,Number(a.total)||0);a.essences=Array.isArray(a.essences)?a.essences.slice(-20):[];return a}
 function rareActive103(ci){return !!player&&player.skills.some(s=>!s.empty&&s.sourceClass===ci&&s.rare103)}
 function affinity103(ci){return awakening103().affinity===ci&&rareActive103(ci)?2:1}
-function rareOnPortal103(g){if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id)};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Você sente a fissura. Uma nova aba apareceu em Personagem.',7000);store.set('pds2_profile',profile)}
+function rareOnPortal103(g){if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id),color:g.red?'red':'violet'};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Você sente a fissura. Uma nova aba apareceu em Personagem.',7000);store.set('pds2_profile',profile)}
 function isTwiceAwakened103(){return awakening103().total>=3}
 function rareEligible103(ci){const a=awakening103();return RARE_IDS111.includes(ci)&&a.total>=3&&(a.points[ci]||0)>0&&!a.unlocked.includes(ci)}
 function rareLearn103(ci){if(!rareEligible103(ci)||!canRedistribute())return false;const a=awakening103();a.unlocked.push(ci);narratorEvent105('learnrare');profile.jobs=[...new Set([...jobsOf(),ci])];store.set('pds2_profile',profile);saveRun();return true}
@@ -7361,7 +7365,8 @@ function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate');if
 function rareAreaTime103(x,z,boss=false){const z0=AR103.zone;return z0&&z0.until>time&&Math.hypot(x-z0.x,z-z0.z)<=z0.r?(boss?.8:.5):1}
 function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103)hud103.textContent=rareHud103();if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
  if(!rareActive103(13))AR103.passages=null;const cap=rareActive103(7)?affinity103(7):0;for(const al of specialEcos103().slice(cap)){al.dead=true;scene.remove(al.m.root)}
- if(a.pending&&L.mode==='world'&&!L.inter.some(i=>i.type==='fissure103')){const p=a.pending;L.inter.push({type:'fissure103',x:p.x,z:p.z,r:3.5,label:'F · INVESTIGAR FISSURA',use:inspectFissure103})}for(const it of L.inter)if(it.type==='fissure103'){it.hidden=!a.pending||!!AR103.trial;if(a.pending){it.x=a.pending.x;it.z=a.pending.z}}
+  if(a.pending&&L.mode==='world'&&!L.inter.some(i=>i.type==='fissure103')){const p=a.pending;L.inter.push({type:'fissure103',x:p.x,z:p.z,r:3.5,label:'F · INVESTIGAR FISSURA',use:inspectFissure103})}for(const it of L.inter)if(it.type==='fissure103'){it.hidden=!a.pending||!!AR103.trial;if(a.pending){it.x=a.pending.x;it.z=a.pending.z}}
+ if(L.mode==='world'&&a.pending){if(!window.riftScarPersistent131||window.riftScarPersistent131.userData.owner!==L){const scar=new THREE.Group();for(let i=0;i<7;i++){const angle=-.9+i*.3,length=1.15+(i%3)*.22,x0=Math.cos(angle)*length*.22,z0=Math.sin(angle)*length*.22,x1=Math.cos(angle+.3)*length,z1=Math.sin(angle+.3)*length,m=new THREE.Mesh(new THREE.CylinderGeometry(.019,.006,Math.hypot(x1-x0,z1-z0),4),glowS(a.pending.color==='red'?0xe14a64:0x9370d2,.30)),dir=new THREE.Vector3(x1-x0,0,z1-z0);m.position.set((x0+x1)/2,.055,(z0+z1)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());scar.add(m)}scar.userData.owner=L;scene.add(scar);window.riftScarPersistent131=scar}window.riftScarPersistent131.position.set(a.pending.x,0,a.pending.z)}else if(window.riftScarPersistent131){scene.remove(window.riftScarPersistent131);window.riftScarPersistent131=null}
  if(a.pending&&L.mode==='world'&&Math.hypot(P.x-a.pending.x,P.z-a.pending.z)<35&&time>(AR103.ringAt||0)){AR103.ringAt=time+1;fxRing(a.pending.x,a.pending.z,0xc2a2ff,2.5,1.2)}
  const t=AR103.trial;if(t)trialUpdate113(t,dt);
  const ps=AR103.passages;if(ps&&ps.until>time)for(const ent of [P,...allies]){if(ent.dead||time<(ent.passageAt103||0))continue;if(ent.passageLock103&&Math.hypot(ent.x-ent.passageLock103.x,ent.z-ent.passageLock103.z)<1.5)continue;ent.passageLock103=null;let dest=null;if(Math.hypot(ent.x-ps.a.x,ent.z-ps.a.z)<1.2)dest=ps.b;else if(Math.hypot(ent.x-ps.b.x,ent.z-ps.b.z)<1.2)dest=ps.a;if(dest&&freeAt(dest.x,dest.z,ent.r||.5)&&los(ent.x,ent.z,dest.x,dest.z)){ent.x=dest.x;ent.z=dest.z;ent.passageAt103=time+1.5;ent.passageLock103=dest;ent.act=null}}
@@ -7373,6 +7378,7 @@ function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'clos
 if(window.RIFT131_ENABLE&&new URLSearchParams(location.search).get('fendas')==='teste'){
  const review=document.createElement('button');review.id='riftReview131';review.textContent='VER FENDA';review.style.cssText='position:fixed;right:12px;top:55px;z-index:90;background:#292035;color:#dfcfef;border:1px solid #9470bd;padding:8px;font-size:11px';
  review.onclick=()=>{if(!started||!player||L.mode!=='world'){toast('Entre na partida, em Aster, para ver a fenda.');return}const g=gates.filter(x=>!x.dead&&x.mesh).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];if(!g)return;player.x=g.x;player.z=g.z+3.2;player.face=Math.PI;player.act=null;player.m.root.position.set(player.x,0,player.z);updChunks(true);riftPrevious131=null;toast('Atravesse a superfície colorida para entrar.',3000);};document.body.appendChild(review);
+ if(new URLSearchParams(location.search).has('riftReview')){const closeReview=document.createElement('button');closeReview.id='riftCloseReview131';closeReview.textContent='TESTAR FECHAMENTO';closeReview.style.cssText='position:fixed;right:12px;top:92px;z-index:90;background:#292035;color:#dfcfef;border:1px solid #9470bd;padding:8px;font-size:11px';closeReview.onclick=()=>{const g=gates.filter(x=>!x.dead&&x.mesh?.userData.rift131).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0];if(!g)return;player.x=g.x;player.z=g.z+7;player.face=Math.PI;player.m.root.position.set(player.x,0,player.z);g.closing131=true;Rift131.close(g.mesh);toast('Ciclo visual de fechamento iniciado.',1800)};document.body.appendChild(closeReview)}
 }
 
 // cenário da tela inicial
@@ -7382,9 +7388,9 @@ titleWorld();MODELS.ready.then(()=>{if(!started&&ENV.ok)titleWorld()});
 requestAnimationFrame(frame);
 </script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v145</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v151</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=145;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=151;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
