@@ -3465,7 +3465,7 @@ function itemArm(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Mat
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
 function atkOf(kind){const s=run.stats||{};return 10+2*run.level+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+itemAtk(run.equip.w)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===9?1:rk*.1;
-  const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Legado da Torre ('+towerMilestones()+' marcos)',towerMilestones()*.01,towerMilestones()*.01],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
+  const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Legado da Torre ('+towerMilestones()+' marcos)',towerMilestones()*.01,towerMilestones()*.01],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Set de classe rara',rareSetBonus155().dmg,rareSetBonus155().hp],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
@@ -4270,7 +4270,7 @@ function newGate(){
   for(let t=0;t<80;t++){const a=rnd(0,TAU),d=rnd(55,170);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<52*CITYK)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<30))continue;if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
   // v153 (pedido do Ian): o ranque do portal é sorteado, sem depender do seu ranque nem da região.
   const pr=run?rankOf():0;let rank=0;{let r=Math.random()*GATE_RANDOM153.reduce((a,b)=>a+b,0);for(;rank<9;rank++){if(r<GATE_RANDOM153[rank])break;r-=GATE_RANDOM153[rank]}}
-  const set153=Math.random()<.04&&rank>=1?'metamorfo':null;
+  const set153=null;
   if(rank===9&&Math.random()<(pr>=9?.3:danger(x,z)>=9?.5:.8))rank=8;
   const life=rnd(420,900);
   return {id:++gateSeq,x,z,rank,aff:rollAff(rank),double:Math.random()<(rank<=1?.03:.012),red:rank>0&&Math.random()<.12,life,max:life,seed:(Math.random()*2**31)|0,layout103:pick(['core','floors',null,null,null]),cleared:false,dead:false,...(set153?{set153,family124:SETS153[set153].family,biome124:SETS153[set153].biome,red:false}:{})};
@@ -4670,7 +4670,7 @@ function mine(it,rank){
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}
 }
 function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead){toast('<b>[NARRADOR]</b> Portal vermelho: derrote o guardião para abrir a única saída.');return}leaveDungeon(false)}
-function enterGate(g){if(g.dead||g.coreFailed103)return;if(g.set153&&SETS153[g.set153])logNews('<b>[NARRADOR]</b> '+SETS153[g.set153].lore);
+function enterGate(g){if(g.dead||g.coreFailed103)return;rollRareGate155(g);if(g.set153&&SETS153[g.set153]){bigText('PORTAL DE CLASSE RARA',1600);toast('<b>[NARRADOR]</b> Este portal guarda o rastro do <b>'+(CLASSES[SETS153[g.set153].cls]?.n||'')+'</b>. Ele ficou vermelho: não há saída até o guardião cair.',7000)}if(g.set153&&SETS153[g.set153])logNews('<b>[NARRADOR]</b> '+SETS153[g.set153].lore);
 
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
@@ -4795,10 +4795,37 @@ function makeItem(slot,tier,rar){
 }
 /* v153 (pedido do Ian): sets das classes raras. Peças separadas (cabeça, peito, braços, pernas, arma) que qualquer personagem equipa;
    o bônus só desperta na classe dona do set. Ficam em Fendas de Vestígio, portais raros que surgem ao acaso. */
-const SETS153={metamorfo:{cls:15,n:'Pele do Metamorfo',family:'spiders',biome:'floresta',col:'#9fe07a',
-  lore:'Este portal não leva a um mundo qualquer: é o vestígio de onde um Metamorfo caiu. A pele dele se partiu e os pedaços ainda respiram entre as teias.',
+const SETS153={metamorfo:{cls:15,n:'Pele do Metamorfo',family:'rare_metamorfo',biome:'floresta',col:'#9fe07a',
+  lore:'Este portal não leva a um mundo qualquer: é o vestígio de onde um Metamorfo caiu. A pele dele se partiu e os pedaços ainda respiram entre lobos e dragões.',
   pieces:{h:{n:'Elmo do Instinto',d:'Formas atacam 10% mais rápido.'},a:{n:'Couraça Mutável',d:'Na Forma Blindada você recebe 15% menos dano.'},g:{n:'Braçais das Garras Vivas',d:'Golpes em forma envenenam: 40% do dano em 3 s.'},b:{n:'Grevas do Predador',d:'+12% de velocidade em qualquer forma.'},w:{n:'Garras do Metamorfo',d:'+15% de dano das formas.'}},
   full:{n:'Fúria Primordial',d:'Trocar de forma dá 4 s de +30% de dano e cura 5% da vida.'}}};
+/* v155 (Ian): cada uma das 10 classes raras tem portal próprio, criaturas do tema e um set de 5 peças.
+   Peças das 9 classes novas: +6% de dano e +6% de vida cada (só na classe dona); set completo: +15% de ambos. */
+const RARE_SETS155=[
+ ['necromante',7,'Mortalha do Necromante','#b98cff','Cripta do Lich','Lich da Cripta',['minion','warrior','rogue','mage','fantasma','caveira','wraith'],'mage','Um necromante foi enterrado aqui e não aceitou. Esqueletos e fantasmas guardam o que restou da mortalha dele.',['Capuz da Cripta','Manto Fúnebre','Luvas do Ossuário','Botas do Sepulcro','Cajado de Ossos']],
+ ['tempo',12,'Relógio do Mago do Tempo','#8fe8ff','Salão dos Instantes','Guardião do Instante',['redemoinho','invasor','guardiao','lula'],'guardiao','O tempo aqui anda em círculos. Algo parou no meio de um passo e ficou.',['Coroa da Hora','Túnica Suspensa','Luvas do Ponteiro','Sandálias do Atraso','Astrolábio Partido']],
+ ['tecelao',13,'Fios do Tecelão de Fendas','#c2a2ff','Tear da Fenda','Fiandeira do Vazio',['visitante','invasor','lula','wraith'],'lula','Fios brilhantes atravessam as paredes. Quem costurou esta passagem ainda puxa a linha.',['Véu do Tecelão','Manto Costurado','Luvas do Fio','Botas da Passagem','Lâmina de Linha']],
+ ['guardiao',14,'Juramento do Guardião','#ffdb86','Bastião dos Vínculos','Colosso Juramentado',['golenzinho','golempedra','guardiao','gigante'],'gigante','Muralhas que se movem protegem um juramento que ninguém mais lembra.',['Elmo do Juramento','Couraça do Bastião','Manoplas do Vínculo','Grevas da Âncora','Escudo Juramentado']],
+ ['metamorfo',15],
+ ['artifice',16,'Engrenagens do Artífice Rúnico','#ffb36b','Oficina Rúnica','Autômato Mestre',['golenzinho','tribal','golempedra'],'golempedra','Runas acesas por todo lado. As máquinas daqui ainda obedecem ao dono que sumiu.',['Óculos Rúnicos','Avental Blindado','Luvas de Forja','Botas de Engrenagem','Martelo Rúnico']],
+ ['duelista',17,'Lâmina do Duelista Espectral','#9fc8ff','Arena dos Reflexos','Duelista sem Rosto',['ninjinha','ninja','rogue','wraith'],'ninja','Cada sombra aqui é um oponente. O melhor deles ainda espera o próximo duelo.',['Máscara Espectral','Gibão do Duelo','Luvas da Guarda','Botas do Passo','Florete Espectral']],
+ ['condutor',18,'Para-raios do Condutor','#7ad7ff','Pico das Tempestades','Senhor do Trovão',['passaro','vespa','redemoinho','glubancio'],'redemoinho','O ar estala. Uma tempestade presa entre paredes procura saída.',['Elmo Condutor','Peitoral de Cobre','Manoplas do Raio','Grevas do Vento','Lança da Tempestade']],
+ ['oraculo',19,'Vestes do Oráculo','#e7d48a','Santuário dos Vestígios','Profeta Mascarado',['tribal','mono','fantasma','caveira'],'tribal','Máscaras sussurram o que vai acontecer. Uma delas fala mais alto que as outras.',['Máscara do Presságio','Vestes do Vestígio','Luvas da Leitura','Sandálias do Caminho','Relicário do Oráculo']],
+ ['devorador',20,'Carapaça do Devorador','#a070ff','Abismo Faminto','Boca do Vazio',['lula','invasor','demon','chifrudo'],'lula','O escuro aqui tem fome. Tudo o que entra encolhe um pouco.',['Elmo Oco','Carapaça do Vazio','Manoplas Famintas','Grevas do Abismo','Manopla Devoradora']]
+];
+FAMILIES124.rare_metamorfo={label:'Feras do Metamorfo',name:'Covil do Metamorfo',ks:['lobo','raptor','dragonete','dino','dragaoancio'],chief:'dragaoancio',boss:'Metamorfo Primordial'};
+for(const [id,cls,n,col,place,boss,ks,chief,lore,pc] of RARE_SETS155){if(id==='metamorfo')continue;
+ FAMILIES124['rare_'+id]={label:n,name:place,ks,chief,boss};
+ const owner=()=>CLASSES[cls]?.n||'dona do set';
+ SETS153[id]={cls,n,family:'rare_'+id,biome:'campos',col,lore,generic155:true,
+  pieces:Object.fromEntries(['h','a','g','b','w'].map((sl,i)=>[sl,{n:pc[i],d:'+6% de dano e +6% de vida.'}])),
+  full:{n:'Despertar de '+n.split(' do ').pop().split(' das ').pop(),d:'+15% de dano e +15% de vida. Libera o teste de despertar.'}}}
+function rareSetBonus155(){const out={dmg:0,hp:0};if(!run||!player)return out;for(const id in SETS153){const S=SETS153[id];if(!S.generic155||!setActive153(id))continue;const n=Math.min(5,setCount153(id));out.dmg+=.06*n+(n>=5?.15:0);out.hp+=.06*n+(n>=5?.15:0)}return out}
+function rareGateChance155(rank){return .02+.48*Math.max(0,Math.min(9,rank))/9}
+function rollRareGate155(g){if(g.rareRolled155||g.secret||g.inverse||g.custom||g.missionExtract117)return;g.rareRolled155=true;if(Math.random()>=rareGateChance155(g.rank))return;
+ const id=RARE_SETS155[Math.floor(Math.random()*RARE_SETS155.length)][0],S=SETS153[id];
+ Object.assign(g,{set153:id,family124:S.family,biome124:HABITATS124[g.biome124]?g.biome124:'campos',red:true,expType:'standard',layout103:null,double:false})}
+
 function setActive153(id){const S=SETS153[id];return !!S&&!!player&&(rareActive103(S.cls)||profile.cls===S.cls)}
 function setHas153(id,slot){return setActive153(id)&&equippedItems().some(it=>it.set153===id&&it.slot===slot)}
 function setCount153(id){return equippedItems().filter(it=>it.set153===id).length}
@@ -4808,7 +4835,7 @@ function setText153(it){const S=SETS153[it.set153];if(!S)return '';const n=setCo
   return ' · SET '+S.n.toUpperCase()+' ('+n+'/5): '+S.pieces[it.slot].d+' Completo: '+S.full.d+(on?'':' (só desperta na classe '+(CLASSES[S.cls]?.n||'dona do set')+')')}
 function setDrop153(boss){const g=L.gate,id=g&&g.set153,S=SETS153[id];if(!S)return false;if(!boss&&Math.random()>=.3)return false;
   const owned=new Set([...run.items,...equippedItems(),...(profile.house?.chest||[])].filter(it=>it&&it.set153===id).map(it=>it.slot));
-  const left=EQUIP_SLOTS.filter(sl=>!owned.has(sl));const slot=left.length?pick(left):pick(EQUIP_SLOTS);
+  const slot=pick(EQUIP_SLOTS); // v155 (Ian): o chefe solta uma das 5 peças ao acaso
   const it=setPiece153(id,slot,Math.max(0,Math.min(9,g.rank)));addItem(it);floater(player.x,player.z,'PEÇA DE SET: '+it.name,S.col,true);
   const a=awakening103();if(RARE_IDS111.includes(S.cls)&&!a.unlocked.includes(S.cls)&&!(a.points[S.cls]>0)){a.points[S.cls]=1;logNews('<b>[NARRADOR]</b> A peça vibra no seu corpo. Algo do '+(CLASSES[S.cls]?.n||'dono')+' tenta acordar em você.')}
   saveRun();return true}
