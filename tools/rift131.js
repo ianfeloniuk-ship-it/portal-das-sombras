@@ -1,7 +1,8 @@
 /* Original sculpted rift. Geometry, effects and motion shared by preview and game. */
 (function(global){
  'use strict';const T=global.THREE,TAU=Math.PI*2,textures=new Map();
- const contour=[[-.48,.18],[-1.04,.66],[-1.40,1.48],[-1.29,2.26],[-1.52,3.02],[-1.29,3.82],[-.68,4.51],[-.13,5.19],[.47,4.72],[1.20,4.10],[1.47,3.26],[1.32,2.55],[1.44,1.70],[1.02,.80],[.47,.25]];
+ // v153: rounded liquid oval; the old pointed crown vertex read as a "tip" on the portal.
+ const contour=Array.from({length:15},(_,i)=>{const a=(i+.5)/15*Math.PI*2;return[-1.38*(1+.045*Math.sin(3*a+1.))*Math.sin(a),2.62-2.44*(1+.03*Math.sin(2*a+.4))*Math.cos(a)];});
  const noise=`float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);} float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.)),f.x),f.y);} float fbm(vec2 p){float a=.5,v=0.;for(int i=0;i<4;i++){v+=a*noise(p);p=mat2(.8,-.6,.6,.8)*p*2.03+7.17;a*=.5;}return v;}`;
  const vertex=`varying vec2 vUv;varying vec2 vLocal;void main(){vUv=uv;vLocal=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
  function rng(seed){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};}
@@ -14,7 +15,7 @@
   const R=rng(731+(options.seed||0)%997),root=new T.Group();root.name='Fenda esculpida';
   const accent=new T.Color(palette(options)).convertSRGBToLinear(),linear=!!options.legacyLinearOutput;
   const secondary=new T.Color(options.red?0xff9f49:options.exit?0xffe5a3:0x668fff).convertSRGBToLinear();
-  const uniforms={uTime:{value:0},uColor:{value:accent},uSecondary:{value:secondary},uPower:{value:1+(options.rank||0)*.035},uContour:{value:contour.map(p=>new T.Vector2(...p))}};
+  const uniforms={uTear:{value:0},uTime:{value:0},uColor:{value:accent},uSecondary:{value:secondary},uPower:{value:1+(options.rank||0)*.035},uContour:{value:contour.map(p=>new T.Vector2(...p))}};
   const texURL=options.textureUrl||'models/aster-materiais130.png';if(!textures.has(texURL)){const tex=new T.TextureLoader().load(texURL);tex.anisotropy=4;textures.set(texURL,tex);}const atlas=textures.get(texURL);
   const stone=new T.MeshStandardMaterial({color:new T.Color(0x62636a).convertSRGBToLinear(),roughness:.93,metalness:.06,vertexColors:true});
   stone.onBeforeCompile=s=>{s.uniforms.riftAtlas={value:atlas};s.vertexShader='varying vec3 riftP;varying vec3 riftN;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nriftP=position;riftN=normal;');s.fragmentShader='uniform sampler2D riftAtlas;varying vec3 riftP;varying vec3 riftN;\n'+s.fragmentShader;s.fragmentShader=s.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
@@ -46,9 +47,26 @@
   for(const side of [-1,1])for(let i=0;i<3;i++){parts.push({geo:shard(.34+i*.1),matrix:matrix([side*(1.4+i*.13),.13,-.05+i*.12],[-Math.PI/2,.3,side*.3]),color:[.7,.72,.76]});}
   for(const b of blocks){b.geo.applyMatrix4(b.matrix);b.geo.translate(-b.center[0],-b.center[1],-b.center[2]);const blockShade=b.color[0],blockColors=new Float32Array(b.geo.attributes.position.count*3);for(let i=0;i<blockColors.length;i+=3){blockColors[i]=blockShade;blockColors[i+1]=blockShade;blockColors[i+2]=blockShade*1.06}b.geo.setAttribute("color",new T.BufferAttribute(blockColors,3));const m=mesh(b.geo,stone);m.position.set(...b.center);m.userData.riftBlock131=true;floats.push({mesh:m,position:new T.Vector3(...b.center),rotation:m.rotation.clone(),phase:R()*TAU,speed:.55+R()*.4,block:true,index:b.index});}
   mesh(merge(parts),stone);mesh(merge(cracks),luminous);
-  const shape=new T.Shape();contour.forEach((p,i)=>i?shape.lineTo(...p):shape.moveTo(...p));shape.closePath();const aperture=new T.ShapeGeometry(shape);const ap=aperture.attributes.position;const uv=[];for(let i=0;i<ap.count;i++)uv.push(ap.getX(i)/3.2+.5,ap.getY(i)/5.3);aperture.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
-  const surface=new T.ShaderMaterial({uniforms,vertexShader:vertex,fragmentShader:`
-   uniform float uTime,uPower;uniform vec3 uColor,uSecondary;uniform vec2 uContour[15];varying vec2 vUv,vLocal;
+  const shape=new T.Shape();shape.moveTo(...contour[0]);shape.splineThru([...contour.slice(1),contour[0]].map(p=>new T.Vector2(...p)));
+  const rim=shape.getSpacedPoints(96).slice(0,96),RINGS=14,cx=0,cy=2.62,apPos=[],apUv=[],apK=[],apA=[],apIdx=[];
+  apPos.push(cx,cy,0);apUv.push(cx/3.2+.5,cy/5.3);apK.push(0);apA.push(0);
+  for(let k=1;k<=RINGS;k++)for(let j=0;j<rim.length;j++){const f=k/RINGS,x=cx+(rim[j].x-cx)*f,y=cy+(rim[j].y-cy)*f;apPos.push(x,y,0);apUv.push(x/3.2+.5,y/5.3);apK.push(f);apA.push(j/rim.length);}
+  const ring=(k,j)=>1+(k-1)*rim.length+((j+rim.length)%rim.length);
+  for(let j=0;j<rim.length;j++){apIdx.push(0,ring(1,j),ring(1,j+1));for(let k=1;k<RINGS;k++){apIdx.push(ring(k,j),ring(k+1,j),ring(k+1,j+1),ring(k,j),ring(k+1,j+1),ring(k,j+1));}}
+  const aperture=new T.BufferGeometry();aperture.setAttribute('position',new T.Float32BufferAttribute(apPos,3));aperture.setAttribute('uv',new T.Float32BufferAttribute(apUv,2));aperture.setAttribute('ringK',new T.Float32BufferAttribute(apK,1));aperture.setAttribute('ringA',new T.Float32BufferAttribute(apA,1));aperture.setIndex(apIdx);aperture.computeBoundingSphere();
+  const liquidVertex=`attribute float ringK;attribute float ringA;uniform float uTime,uPower,uTear;varying vec2 vUv;varying vec2 vLocal;varying float vEdge;varying float vBulge;
+   void main(){vUv=uv;vec3 p=position;float t=uTime,a=ringA*6.28318;vec2 c=vec2(0.,2.62),d=p.xy-c;
+    // Liquid rim: the outline wobbles like a surface held by tension.
+    float wob=sin(a*5.+t*1.35)*.045+sin(a*9.-t*2.1)*.025+sin(a*3.-t*.7)*.035;
+    // Opening: the edge is ragged like torn cloth while reality is being ripped.
+    wob+=uTear*(sin(a*23.+t*9.)*.06+sin(a*41.-t*13.)*.035+abs(sin(a*7.+t*3.))*.05);p.xy+=d*wob*ringK*ringK;
+    // Body: a soft bulge that breathes plus travelling ripples, so the portal has volume instead of a flat card.
+    float bulge=(1.-ringK*ringK)*(.30+.07*sin(t*1.1))*clamp(uPower,0.,1.6);
+    float rip=sin(length(d)*5.5-t*2.4)*.05*(1.-ringK)+sin(d.x*3.+d.y*2.-t*1.6)*.035*(1.-ringK*ringK);
+    p.z+=bulge+rip;vBulge=bulge+rip;vLocal=p.xy;vEdge=(1.-ringK)*1.25;
+    gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`;
+  const surface=new T.ShaderMaterial({uniforms,vertexShader:liquidVertex,fragmentShader:`
+   uniform float uTime,uPower;uniform vec3 uColor,uSecondary;uniform vec2 uContour[15];varying vec2 vUv,vLocal;varying float vEdge,vBulge;
    ${noise}
    float segment(vec2 p,vec2 a,vec2 b){vec2 d=b-a;return length(p-a-d*clamp(dot(p-a,d)/dot(d,d),0.,1.));}
    float liquid(vec2 p,float t){
@@ -60,7 +78,7 @@
     return broad+sin(r*29.-t*2.1+sin(p.x*5.)*.4)*.016*smoothstep(.04,.30,r);
    }
    void main(){
-    float edge=10.;for(int i=0;i<15;i++){vec2 b=uContour[0];if(i<14)b=uContour[i+1];edge=min(edge,segment(vLocal,uContour[i],b));}
+    float edge=vEdge;
     vec2 p=(vUv-vec2(.50,.47))*vec2(1.2,1.);float rad=length(p),t=uTime*.74;
     float h=liquid(p,t),epsilon=.004;
     vec2 grad=vec2(liquid(p+vec2(epsilon,0.),t)-liquid(p-vec2(epsilon,0.),t),liquid(p+vec2(0.,epsilon),t)-liquid(p-vec2(0.,epsilon),t))/(epsilon*2.);
@@ -74,6 +92,11 @@
     vec3 col=deep*(.55+sky*.7)+mix(uColor,uSecondary,sky*.50)*caustic*.26;
     col+=mix(uColor,uSecondary,.65)*sheen*.22;
     col+=uSecondary*fresnel*.14;
+    // Flowing ink currents drawn into the core give depth and keep it from reading as a looping image.
+    vec2 fp=p*3.2;float sw=atan(p.y,p.x)+rad*4.-t*.55;vec2 flow=vec2(cos(sw),sin(sw))*rad;
+    float ink=fbm(fp+flow*2.2+vec2(t*.21,-t*.17));float ink2=fbm(fp*1.7-flow*1.6+vec2(-t*.13,t*.19)+ink*1.3);
+    col+=mix(uColor,uSecondary,ink2)*pow(ink2,2.2)*.55*smoothstep(.02,.35,rad);
+    col+=mix(uSecondary,vec3(1.),.35)*pow(max(0.,vBulge*2.4),3.)*.10;
     col*=1.-.88*exp(-rad*rad*40.);
     float lip=exp(-edge*57.)*(.35+.65*(.5+.5*sin(vLocal.y*5.-t*1.2+h*9.)));
     float borderGlow=exp(-edge*8.)*(.72+.28*sin(t+vLocal.y*3.));
@@ -97,12 +120,34 @@
   root.userData.triangles=0;root.traverse(o=>{if(o.isMesh)root.userData.triangles+=(o.geometry.index?o.geometry.index.count:o.geometry.attributes.position.count)/3;});
   return root;
  }
+ function open(root){const d=root&&root.userData.rift131;if(!d||d.disposed||d.closing)return false;d.opening=.001;for(const f of d.floats){f.mesh.visible=false;f.from=f.position.clone().add(new T.Vector3(f.position.x*1.6,-2.2-Math.random()*1.5,(Math.random()-.5)*3));}return true;}
  function close(root,leaveStoryScar=false){const d=root&&root.userData.rift131;if(!d||d.disposed||d.closing||d.closed)return false;d.closing=.001;d.closed=true;d.leaveStoryScar=!!leaveStoryScar;d.scar.visible=d.leaveStoryScar;return true;}
- function update(root,dt){const data=root&&root.userData.rift131;if(!data||data.disposed)return;const step=Math.min(dt,.1);data.time+=step;data.uniforms.uTime.value=data.time;if(data.closing){data.closing+=step;const t=Math.min(1,data.closing/1.65),ease=t*t*(3-2*t);data.membrane.scale.set(1+Math.sin(data.time*.95)*.018,Math.max(.001,1-ease),1);data.uniforms.uPower.value=(data.basePower||1)*Math.max(.001,1-ease);data.scar.visible=data.leaveStoryScar&&t>=.72;for(const o of data.scar.children){o.material.opacity=(1-ease)*(.24+.16*Math.sin(data.time*2.2));}for(const f of data.floats){if(!f.block)continue;const m=f.mesh;if(data.closing<.18+(f.index%4)*.045)continue;const fall=(data.closing-(.18+(f.index%4)*.045));m.position.set(f.position.x+Math.sin(f.phase)*fall*.38,Math.max(-.15,f.position.y-fall*fall*3.2),f.position.z);m.rotation.set(f.rotation.x+fall*1.8,f.rotation.y+fall*1.3,f.rotation.z+fall*2);if(fall>1.05)m.visible=false;}if(t>=1)data.uniforms.uPower.value=.001;}else{data.membrane.scale.x=1+Math.sin(data.time*.95)*.018;for(const f of data.floats){const t=data.time*f.speed*1.45+f.phase;f.mesh.position.copy(f.position);f.mesh.position.y+=Math.sin(t)*.18;f.mesh.position.x+=Math.sin(t*.68)*.075;f.mesh.rotation.set(f.rotation.x+Math.sin(t*.61)*.16,f.rotation.y+Math.sin(t*.45)*.18,f.rotation.z+Math.sin(t*.79)*.15);}}}
+ function update(root,dt){const data=root&&root.userData.rift131;if(!data||data.disposed)return;const step=Math.min(dt,.1);data.time+=step;data.uniforms.uTime.value=data.time;if(data.opening){data.opening+=step;const D=2.6,o=Math.min(1,data.opening/D),ms=data.membrane;
+   // v153 Tecelão: reality tears as a bright slit, then the cloth of the world is pulled open and the stones are drawn in.
+   const slit=Math.min(1,o/.32),se=slit*slit*(3-2*slit),wide=Math.max(0,(o-.32)/.68),we=1-Math.pow(1-wide,3),over=Math.sin(wide*Math.PI)*.12;
+   ms.scale.set(Math.max(.025,we+over*(1-wide)),Math.max(.001,se),1);ms.position.y=2.62*(1-se);ms.rotation.z=0;
+   data.uniforms.uTear.value=1-we*.85-(o>=1?.15:0);data.uniforms.uPower.value=(data.basePower||1)*(1+2.6*(1-we)*se);
+   for(const f of data.floats){const m=f.mesh,k=Math.min(1,Math.max(0,(o-.30-(f.index%5||0)*.04)/.5)),ke=1-Math.pow(1-k,3);if(k<=0){m.visible=false;continue}m.visible=true;
+    const from=f.from||f.position;m.position.lerpVectors(from,f.position,ke);m.rotation.set(f.rotation.x+(1-ke)*3,f.rotation.y+(1-ke)*2,f.rotation.z+(1-ke)*2.5);}
+   if(o>=1){data.opening=0;data.uniforms.uTear.value=0;data.uniforms.uPower.value=data.basePower||1;ms.scale.set(1,1,1);ms.position.y=0;}
+   }else if(data.closing){data.closing+=step;const D=1.9,t=Math.min(1,data.closing/D),ease=t*t*(3-2*t);
+   // v153 closure: a flare, then the liquid spins and is swallowed into the centre; stones are pulled in, then drop.
+   const flare=Math.exp(-Math.pow((data.closing-.18)/.12,2))*1.8,shrink=Math.max(.001,1-Math.pow(ease,1.4));
+   data.uniforms.uTime.value=data.time+data.closing*data.closing*3.5;
+   const ms=data.membrane;ms.scale.set(shrink*(1+Math.sin(data.time*9.)*.03*(1-t)),shrink,1);ms.position.y=2.62*(1-shrink);ms.rotation.z=ease*.9;
+   data.uniforms.uPower.value=(data.basePower||1)*(Math.max(.001,1-ease)+flare);
+   data.scar.visible=data.leaveStoryScar&&t>=.72;for(const o of data.scar.children){o.material.opacity=(1-ease)*(.24+.16*Math.sin(data.time*2.2));}
+   for(const f of data.floats){const m=f.mesh,pull=Math.min(1,data.closing/.75),pe=pull*pull*(3-2*pull);
+    const cx=0,cy=2.62,tx=f.position.x+(cx-f.position.x)*.32*pe,ty=f.position.y+(cy-f.position.y)*.32*pe;
+    if(data.closing<.75){m.position.set(tx+Math.sin(data.time*23.+f.phase)*.03*pe,ty,f.position.z);m.rotation.z=f.rotation.z+pe*.6;continue;}
+    const fall=data.closing-.75-(f.index%4)*.05;if(fall<0)continue;
+    m.position.set(tx+Math.sin(f.phase)*fall*.5,Math.max(-.15,ty-fall*fall*4.2),f.position.z+Math.cos(f.phase)*fall*.3);
+    m.rotation.set(f.rotation.x+fall*2.2,f.rotation.y+fall*1.5,f.rotation.z+.6+fall*2.4);if(fall>1.15)m.visible=false;}
+   if(t>=1)data.uniforms.uPower.value=.001;}else{data.membrane.scale.x=1+Math.sin(data.time*.95)*.018;for(const f of data.floats){const t=data.time*f.speed*1.45+f.phase;f.mesh.position.copy(f.position);f.mesh.position.y+=Math.sin(t)*.18;f.mesh.position.x+=Math.sin(t*.68)*.075;f.mesh.rotation.set(f.rotation.x+Math.sin(t*.61)*.16,f.rotation.y+Math.sin(t*.45)*.18,f.rotation.z+Math.sin(t*.79)*.15);}}}
  function dispose(root){const d=root&&root.userData.rift131;if(!d||d.disposed)return;d.disposed=true;root.traverse(o=>{if(o.geometry&&!o.isSprite)o.geometry.dispose();});d.materials.forEach(m=>m.dispose());}
  function inside(x,y){let hit=false;for(let i=0,j=contour.length-1;i<contour.length;j=i++){const a=contour[i],b=contour[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit;}
  function crosses(a,b,radius=.20){if(Math.abs(b[2]-.025)<=radius&&inside(b[0],b[1]))return true;const za=a[2]-.025,zb=b[2]-.025;if(za*zb>=0)return false;const f=za/(za-zb);return inside(a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f);}
- function label(g,rank){const text=g.exit?(g.locked?'SAÍDA BLOQUEADA':'SAÍDA'):g.secret?'FENDA OCULTA':g.red?'FENDA VERMELHA':g.inverse?'FENDA INVERTIDA':g.time?'FENDA TEMPORAL':g.custom?'FENDA CRIADA':'FENDA VIOLETA';const canvas=document.createElement('canvas');canvas.width=640;canvas.height=168;const c=canvas.getContext('2d');c.textAlign='center';c.textBaseline='middle';c.shadowColor='#090c15';c.shadowBlur=9;c.lineWidth=5;c.strokeStyle='#090c15';c.fillStyle='#e9e2d5';c.font='500 30px Georgia';c.strokeText(text,320,49);c.fillText(text,320,49);c.font='600 43px Georgia';const bottom=g.secret&&!g.exit?'RANK ???':'RANK '+rank;c.strokeText(bottom,320,111);c.fillText(bottom,320,111);const map=new T.CanvasTexture(canvas),sprite=new T.Sprite(new T.SpriteMaterial({map,transparent:true,depthWrite:false,toneMapped:false}));sprite.scale.set(3.1,.82,1);sprite.position.y=6.35;return sprite;}
+ function label(g,rank){const text=g.exit?(g.locked?'SAÍDA BLOQUEADA':'SAÍDA'):g.set153?'FENDA DE VESTÍGIO':g.secret?'FENDA OCULTA':g.red?'FENDA VERMELHA':g.inverse?'FENDA INVERTIDA':g.time?'FENDA TEMPORAL':g.custom?'FENDA CRIADA':'FENDA VIOLETA';const canvas=document.createElement('canvas');canvas.width=640;canvas.height=168;const c=canvas.getContext('2d');c.textAlign='center';c.textBaseline='middle';c.shadowColor='#090c15';c.shadowBlur=9;c.lineWidth=5;c.strokeStyle='#090c15';c.fillStyle='#e9e2d5';c.font='500 30px Georgia';c.strokeText(text,320,49);c.fillText(text,320,49);c.font='600 43px Georgia';const bottom=g.secret&&!g.exit?'RANK ???':'RANK '+rank;c.strokeText(bottom,320,111);c.fillText(bottom,320,111);const map=new T.CanvasTexture(canvas),sprite=new T.Sprite(new T.SpriteMaterial({map,transparent:true,depthWrite:false,toneMapped:false}));sprite.scale.set(3.1,.82,1);sprite.position.y=6.35;return sprite;}
  function setPalette(root,options){const d=root.userData.rift131;if(!d)return;d.color.setHex(palette(options)).convertSRGBToLinear();d.uniforms.uSecondary.value.setHex(options.red?0xff9f49:options.exit?0xffe5a3:0x668fff).convertSRGBToLinear();d.materials[1].color.copy(d.color).multiplyScalar(2.5);}
- global.Rift131={create,update,dispose,close,palette,inside,crosses,label,setPalette};
+ global.Rift131={create,update,dispose,open,close,palette,inside,crosses,label,setPalette};
 })(window);

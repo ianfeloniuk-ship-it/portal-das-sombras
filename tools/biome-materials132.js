@@ -18,7 +18,7 @@ window.BiomeMaterials132=(()=>{
  `);
  }else{
  s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
- float road132=smoothstep(.15,.85,road128);float snow132=1.-smoothstep(.1,.7,abs(biome131-4.));float sand132=1.-smoothstep(.1,.7,abs(biome131-6.));float ash132=1.-smoothstep(.1,.7,abs(biome131-7.));
+ float road132=smoothstep(.15,.85,road128);float snow132=snowMask154;float sand132=sandMask154;float ash132=ashMask154;
  vec3 soil132=tile132(terrainWorld128.xz*.24,vec2(0.,0.));vec3 sandtex132=tile132(terrainWorld128.xz*.22,vec2(.5,0.));
  vec3 detail132=mix(soil132/vec3(.29,.25,.15),sandtex132/vec3(.66,.49,.29),sand132);
  float mono132=dot(detail132,vec3(.299,.587,.114));detail132=mix(detail132,vec3(mono132),max(snow132,ash132));
@@ -26,5 +26,5 @@ window.BiomeMaterials132=(()=>{
  `);
  }
  };m.customProgramCacheKey=()=>oldKey+'-painted132-'+kind;m.needsUpdate=true;return m;}
- return{tree:m=>apply(m,'tree'),ground:m=>apply(m,'ground')};
+ return{tree:m=>apply(m,'tree'),ground:m=>window.Terrain153?Terrain153.apply(apply(m,'ground')):apply(m,'ground')};
 })();

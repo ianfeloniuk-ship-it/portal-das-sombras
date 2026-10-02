@@ -27,15 +27,23 @@
     mesh.material=material;mesh.castShadow=true;mesh.receiveShadow=true;mesh.frustumCulled=false;
     return material;
   }
+  // v153: Mixamo-rigged Viajante (Tripo). Bones are renamed to the names the procedural animation uses,
+  // and their bind orientation is kept so model-space deltas can be retargeted (see retarget153).
+  const MIX153={Hips:'hips',Spine:'spine',Spine2:'chest',Neck:'neck',Head:'head',RightArm:'upperarm_r',RightForeArm:'forearm_r',RightHand:'hand_r',LeftArm:'upperarm_l',LeftForeArm:'forearm_l',LeftHand:'hand_l',RightUpLeg:'thigh_r',RightLeg:'shin_r',RightFoot:'foot_r',LeftUpLeg:'thigh_l',LeftLeg:'shin_l',LeftFoot:'foot_l'};
   API.create=function(options){
     const model=T.SkeletonUtils.clone(options.modelScene||asset.scene),root=new T.Group(),body=new T.Group();root.add(body);body.add(model);
-    model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;
+    let mix153=false;model.traverse(o=>{if(o.isMesh&&/^tripo_part/.test(o.name))mix153=true;if(o.isBone&&/^mixamorig:?/.test(o.name)){mix153=true;const k=o.name.replace(/^mixamorig:?/,'');o.userData.mixName=k;if(MIX153[k])o.name=MIX153[k]}});
+    if(mix153){model.updateMatrixWorld(true);const box=new T.Box3().setFromObject(model),s=2.05/(box.max.y-box.min.y);model.scale.setScalar(s);model.position.y=-box.min.y*s;}
+    else{model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;}
     const uniforms={gearArmor:{value:new T.Color(1,1,1)},gearGloves:{value:new T.Color(1,1,1)},gearBoots:{value:new T.Color(1,1,1)},gearAmounts:{value:new T.Vector3()}};
-    const mats=[],bones={};model.traverse(o=>{if(o.isBone)bones[o.name]=o;if(o.isMesh)mats.push(setupMaterial(o,uniforms,options.legacyLinearOutput));});
-    const socket=new T.Group();socket.name='weapon_socket_r';socket.position.set(.002,0,.004);socket.rotation.set(2.05,0,0);bones.hand_r.add(socket);
+    const mats=[],bones={};model.traverse(o=>{if(o.isBone&&(!mix153||Object.values(MIX153).includes(o.name)||/^cape/.test(o.name))&&!bones[o.name])bones[o.name]=o;if(o.isMesh)mats.push(setupMaterial(o,uniforms,options.legacyLinearOutput));});
+    if(mix153){for(const k of ['cape','cape_tail'])if(!bones[k])bones[k]=new T.Object3D();model.updateMatrixWorld(true);const inv=new T.Quaternion().copy(model.getWorldQuaternion(new T.Quaternion())).invert();
+      for(const [k,b] of Object.entries(bones)){if(!b.isBone)continue;b.userData.bindLocal153=b.quaternion.clone();b.userData.bindModel153=inv.clone().multiply(b.getWorldQuaternion(new T.Quaternion()));}
+      const minv=new T.Matrix4().copy(model.matrixWorld).invert();model.traverse(o=>{if(!o.isBone)return;o.userData.rest155M=inv.clone().multiply(o.getWorldQuaternion(new T.Quaternion()));o.userData.rest155P=o.getWorldPosition(new T.Vector3()).applyMatrix4(minv);});}
+    const socket=new T.Group();socket.name='weapon_socket_r';socket.position.set(.002,0,.004);socket.rotation.set(2.05,0,0);if(mix153){socket.rotation.set(0,0,Math.PI/2);socket.scale.setScalar(1/model.scale.x*1.0)}bones.hand_r.add(socket);
     const armorGroup=new T.Group();armorGroup.name='equipment_layers';model.add(armorGroup);
     const shadow=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.23,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;root.add(shadow);
-    const m={root,body,model,bones,uniforms,mats,wmats:[],wnodes:[],socket,armorParts:[],baseMaterials:mats.slice(),warrior127:true,glb:true,sc:1,armL:bones.upperarm_l,armR:bones.upperarm_r,legL:bones.thigh_l,legR:bones.thigh_r,eyeMat:new T.MeshBasicMaterial(),gearSignature:null,attackPhase:0};
+    const m={mix153,root,body,model,bones,uniforms,mats,wmats:[],wnodes:[],socket,armorParts:[],baseMaterials:mats.slice(),warrior127:true,glb:true,sc:1,armL:bones.upperarm_l,armR:bones.upperarm_r,legL:bones.thigh_l,legR:bones.thigh_r,eyeMat:new T.MeshBasicMaterial(),gearSignature:null,attackPhase:0};
     API.gear(m,options.equip||{},options);API.animate(m,{move:0,atk:0,dead:0},0,0);return m;
   };
   function disposePart(part){part.traverse(o=>{if(o.isMesh){o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});part.removeFromParent?part.removeFromParent():part.parent&&part.parent.remove(part);}
@@ -61,6 +69,7 @@
     upperarm_l:[[0,-.08,0,.035],[.20,-.25,.1,.2],[.42,-.45,-.1,.22],[.65,-.15,0,.1],[1,-.08,0,.035]]
   };
   API.animate=function(m,st,t,dt){
+    if(anim155&&m.mix153&&dt>0){m.body.position.set(0,0,0);m.body.rotation.set(0,0,0);frame155(m,st,dt);m.attackPhase=st.atk>0?st.atk:0;m.root.updateMatrixWorld(true);return}
     const b=m.bones;Object.values(b).forEach(o=>o.rotation.set(0,0,0));m.body.position.set(0,0,0);m.body.rotation.set(0,0,0);
     const move=clamp(st.move||0,0,1),wave=Math.sin(t*9),step=Math.abs(Math.sin(t*9));
     b.upperarm_r.rotation.set(-.18+wave*.20*move,0,-.05);b.upperarm_l.rotation.set(-.08-wave*.24*move,0,.035);b.forearm_r.rotation.x=-.18;b.forearm_l.rotation.x=-.1;
@@ -71,6 +80,64 @@
     if(st.dead>0){m.body.rotation.x=-1.48*st.dead;m.body.position.y=.2*st.dead;}
     modelMatrices(m);
   };
-  function modelMatrices(m){m.root.updateMatrixWorld(true);}
+  // T-pose → relaxed arms, applied in model space before the animation deltas.
+  const REST153={upperarm_r:new T.Euler(0,0,1.25),upperarm_l:new T.Euler(0,0,-1.25),forearm_r:new T.Euler(0,0,.15),forearm_l:new T.Euler(0,0,-.15)};
+  const q1=new T.Quaternion(),q2=new T.Quaternion(),q3=new T.Quaternion();
+  function retarget153(m){if(!m.mix153)return;for(const [k,b] of Object.entries(m.bones)){const bl=b.userData.bindLocal153,bm=b.userData.bindModel153;if(!bl)continue;
+    q1.setFromEuler(b.rotation);if(REST153[k])q1.multiply(q2.setFromEuler(REST153[k]));
+    // Convert the model-space delta into this bone's local frame, then apply on top of its bind rotation.
+    q3.copy(bm).invert().multiply(q1).multiply(bm);b.quaternion.copy(bl).multiply(q3);}}
+  API.REST153=REST153;
+  function modelMatrices(m){retarget153(m);m.root.updateMatrixWorld(true);}
+  // v155 (etapa 3): animações prontas do pacote KayKit (CC0, models/anims.glb) no Viajante.
+  // O esqueleto KayKit fica invisível; a cada quadro a rotação de cada osso em relação à pose T
+  // é copiada para o osso equivalente do Viajante (as duas poses de repouso são pose T).
+  // ?semAnim155 volta para a animação por código.
+  // Nomes KayKit (o GLTFLoader tira os pontos: upperarm.l → upperarml) → ossos do Viajante.
+  const KAY155={hips:'hips',spine:'spine',chest:'chest',head:'head',upperarml:'upperarm_l',lowerarml:'forearm_l',wristl:'hand_l',upperarmr:'upperarm_r',lowerarmr:'forearm_r',wristr:'hand_r',upperlegl:'thigh_l',lowerlegl:'shin_l',footl:'foot_l',upperlegr:'thigh_r',lowerlegr:'shin_r',footr:'foot_r'};
+  const CLIP155={idle:'Idle',correr:'Running_A',golpe1:'1H_Melee_Attack_Slice_Diagonal',golpe2:'1H_Melee_Attack_Chop',golpe3:'1H_Melee_Attack_Stab',esquiva:'Dodge_Forward',dano:'Hit_A',morte:'Death_A'};
+  // Trecho útil de cada golpe (início/fim em fração do clipe), para o golpe caber nos ~0,28 s do jogo.
+  const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]};
+  let anim155=null;
+  API.loadAnims=function(url){
+    if(/semAnim155/.test(location.search))return Promise.resolve(false);
+    const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);
+    return new Promise(res=>L.load(url,g=>{const clips={};for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
+      anim155={scene:g.scene,clips};API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações KayKit não carregaram; usando animação por código.',e);res(false)}));
+  };
+  const v1=new T.Vector3(),v2=new T.Vector3(),q4=new T.Quaternion(),m4=new T.Matrix4();
+  function modelQ(o,inv,out){return out.copy(inv).multiply(o.getWorldQuaternion(q4))}
+  function setup155(m){
+    const rig=T.SkeletonUtils.clone(anim155.scene);rig.traverse(o=>{if(o.isMesh)o.visible=false});rig.updateMatrixWorld(true);
+    const kb={};rig.traverse(o=>{if(KAY155[o.name])kb[KAY155[o.name]]=o});
+    m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert(),minv=new T.Matrix4().copy(m.model.matrixWorld).invert();
+    // Pose de repouso do Viajante (antes de qualquer animação): usa a guardada na criação.
+    const pairs=[];m.model.traverse(o=>{if(!o.isBone||!o.userData.rest155M||!kb[o.name])return;const k=kb[o.name];
+      pairs.push({b:o,k,restB:o.userData.rest155M.clone(),restK:k.getWorldQuaternion(new T.Quaternion())})});
+    const hips=pairs.find(p=>p.b.name==='hips');
+    const hipH=hips.b.userData.rest155P.y,kayH=hips.k.getWorldPosition(new T.Vector3()).y;
+    const mixer=new T.AnimationMixer(rig),act={};for(const [k,c] of Object.entries(anim155.clips))act[k]=mixer.clipAction(c);
+    m.a155={rig,pairs,hips,ratio:hipH/kayH,kayRestP:hips.k.getWorldPosition(new T.Vector3()),parentInv:new T.Matrix4().copy(minv.clone().multiply(hips.b.parent.matrixWorld)).invert(),mixer,act,cur:null,state:null,t0:0};
+  }
+  function play155(A,name,fade,once,restart){const a=A.act[name]||A.act.idle;if(A.cur===a&&!restart)return a;if(A.cur===a){a.reset();return a}if(!A.cur)A.mixer.stopAllAction();else for(const o of Object.values(A.act))if(o!==A.cur&&o!==a)o.stop();a.reset();a.setLoop(once?T.LoopOnce:T.LoopRepeat);a.clampWhenFinished=!!once;a.paused=false;a.timeScale=1;a.play();if(A.cur)A.cur.crossFadeTo(a,fade,false);A.cur=a;return a}
+  function frame155(m,st,dt){
+    if(!m.a155)setup155(m);const A=m.a155;let a;
+    if(st.dead>0)play155(A,'morte',.12,true);
+    else if(st.atk>0){const n=['golpe1','golpe2','golpe3'][((st.combo||1)-1)%3],key=A.act[n]?n:'golpe1';
+      // Golpe novo (mesmo tipo repetido) reinicia o clipe.
+      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=WIN155[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
+    else if(st.dodge){a=play155(A,'esquiva',.05,true);a.timeScale=a.getClip().duration/.38;A.state='esquiva'}
+    else{A.state=null;if((st.move||0)>.08){a=play155(A,'correr',.15);a.timeScale=.65+.5*Math.min(1,st.move)}else play155(A,'idle',.2)}
+    A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
+    m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
+    for(const p of A.pairs){
+      // delta do KayKit desde a pose T, aplicado sobre a pose T do Viajante, em espaço do modelo.
+      const d=p.k.getWorldQuaternion(q1).multiply(q2.copy(p.restK).invert()),target=d.multiply(p.restB);
+      p.b.parent.updateWorldMatrix(true,false);const pq=modelQ(p.b.parent,inv,q3);p.b.quaternion.copy(pq.invert().multiply(target));
+    }
+    // Altura do quadril (agachar, cair ao morrer); sem andar sozinho para os lados.
+    const hp=A.hips.k.getWorldPosition(v1).sub(A.kayRestP).multiplyScalar(A.ratio);hp.x=0;hp.z=st.dead>0?hp.z:0;
+    A.hips.b.position.copy(v2.copy(A.hips.b.userData.rest155P).add(hp).applyMatrix4(A.parentInv));
+  }
   global.Warrior127=API;
 })(window);
