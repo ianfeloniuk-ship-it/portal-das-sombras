@@ -231,6 +231,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
+<script src="tools/boss160.js"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js"></script>
 <script src="tools/water154.js"></script>
@@ -4738,7 +4739,10 @@ function spawnBoss(x,z,gr,B){
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
   const K={goblin118:B.goblin118,mon:B.mon,gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:900,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
   const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;dunScale(e,gr);
-  if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(bossMechanics113(B));e.mechT=8}if(B.goblin118)e.mech='costas';return e;
+  if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(bossMechanics113(B));e.mechT=8}if(B.goblin118)e.mech='costas';
+  // v161: portal de classe rara usa o chefe da classe feito no Tripo.
+  const rid161=L&&L.mode==='dungeon'&&L.gate&&L.gate.set153;if(rid161&&window.Boss160&&Boss160.has(rid161)){Boss160.env={L:()=>L,P:()=>player};Boss160.attach(e,rid161)}
+  return e;
 }
 /* MECÂNICAS DE CHEFE: cada chefe pode vir com um "quebra-cabeça" próprio. */
 function bossMechanics113(B){return ['costas','divide','barreira',...((B.types||[B.type])[0]==='soulrain'?['inverte']:[])]}
@@ -5416,7 +5420,7 @@ function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const activ
     else if(A.type==='cast'){wind=Math.min(1,A.t/.6);if(A.t>1.1){e.act=null;e.cd=.6}}
   }else{
     turnTo(e,ang,dt,e.isBoss?7+(e.gr||0)*.6:undefined);
-    if(e.isBoss&&!e.world){e.volT=(e.volT??3)-dt;if(e.volT<=0&&d<22){const g=e.gr||0;e.volT=Math.max(1.4,4-g*.3)*(e.phase>=2?.75:1);const n=6+g*2+(e.phase>=2?4:0),off=Math.random()*TAU;for(let i=0;i<n;i++)shoot(e.x,e.z,off+i/n*TAU,9+g*.6,e.dmg*.45,'enemy',0xff5d7a,'orb');sfx('swing')}}
+    if(e.isBoss&&!e.world){e.volT=(e.volT??3)-dt;if(e.volT<=0&&d<22){const g=e.gr||0;e.volT=Math.max(1.4,4-g*.3)*(e.phase>=2?.75:1);const n=6+g*2+(e.phase>=2?4:0),off=Math.random()*TAU;if(!(e.boss160id&&window.Boss160&&Boss160.volley(e,T,n)))for(let i=0;i<n;i++)shoot(e.x,e.z,off+i/n*TAU,9+g*.6,e.dmg*.45,'enemy',0xff5d7a,'orb');sfx('swing')}}
     if(e.ai==='melee'||e.ai==='boss'||e.ai==='rival'){
       if(e.ai==='boss'){e.spT-=dt;if(e.spT<=0&&d<20){e.spT=(e.phase>=2?4.2:6.5)*(e.phase>=3?.7:1)*((e.boss.types||[]).length>2?.8:1);bossSpecial(e,T);return}}
       if(e.ai==='rival'){e.dashCd-=dt;if(e.dashCd<=0&&d>4&&d<10){e.dashCd=rnd(2.5,4);e.act={type:'lunge',t:0,wind:.3};return}if(player.atkT>0&&d<3&&Math.random()<.02){e.kb.x=-dx/d*9;e.kb.z=-dz/d*9}}
@@ -5444,6 +5448,8 @@ function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const activ
 }
 function bossAggro(b){if(b.raid155)bossE=b;$('boss').hidden=false;toast('<b>[NARRADOR]</b> Guardião: <b>'+b.name+'</b>');bossLight.color.setHex(0xffd070);bossLight.intensity=1.4}
 function bossSpecial(b,T){
+  // v161: chefe de classe rara usa o poder da própria classe.
+  if(b.boss160id&&window.Boss160&&Boss160.special(b,T)){b.spI=(b.spI||0)+1;return}
   const types=b.boss.types||[b.boss.type];b.spI=(b.spI||0)+1;const tp=types[b.spI%types.length],p2=b.phase>=2;b.act={type:'cast',t:0,wind:.6};
   if(tp==='seismic'){hazard(b.x,b.z,p2?9:7,1.1,b.dmg*1.6,'enemy',0xff3030);if(p2)setTimeout(()=>{if(!b.dead&&L.mode==='dungeon')hazard(b.x,b.z,12,1,b.dmg*1.2,'enemy',0xff3030)},700);toast('<b>[NARRADOR]</b> '+b.name+': Golpe Sísmico',1400)}
   else if(tp==='soulrain'){const n=p2?9:5;for(let i=0;i<n;i++){const hx=T.x+(i?rnd(-4,4):0),hz=T.z+(i?rnd(-4,4):0);hazard(hx,hz,2.2,1+i*.12,b.dmg*1.1,'enemy',0xb06bff);fallFx(hx,hz,1+i*.12,'soul',0xb06bff)}toast('<b>[NARRADOR]</b> '+b.name+': Chuva de Almas',1400)}
