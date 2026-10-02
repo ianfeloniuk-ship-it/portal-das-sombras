@@ -4332,8 +4332,10 @@ const GATE_COUNT155=12,GATE_NEAR155=200,GATE_FAR155=280;
 function tickGates(dt){
   const P=player;
   const closingDone=[];for(const g of gates){if(g.dead||g===curGate)continue;if(g.closing131){if(g.mesh?.userData.rift131?.closing>2.15)closingDone.push(g);continue;}g.life-=dt;
+    // v155 (Ian): portal longe não some; só deixa de ser desenhado. Voltando antes do tempo acabar, ele continua lá.
     const far=L.mode==='world'&&P&&Math.hypot(g.x-P.x,g.z-P.z)>GATE_FAR155;
-    if(g.life<=0||far){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!far&&!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
+    if(L.mode==='world'&&g.life>0){if(far&&g.mesh)removeGateMesh(g);else if(!far&&!g.mesh)gateMesh(g)}
+    if(g.life<=0){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!far&&!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
   for(const g of closingDone){removeGateMesh(g);gates=gates.filter(x=>x!==g)}
   gates=gates.filter(g=>!g.dead||g===curGate);
   // v155 (Ian): portais espalhados pelo mundo todo. Conta só os que estão por perto; os que ficaram para trás somem e novos nascem à volta (inclusive à frente), então andar reto sempre encontra portal.
