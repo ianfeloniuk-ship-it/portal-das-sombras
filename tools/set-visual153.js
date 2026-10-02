@@ -23,7 +23,7 @@ window.SetVisual153=(()=>{
   const axis=longestAxis(box),len=Math.max(size.x,size.y,size.z);
   holder.userData={axis,len,size};return holder}
  function attach(root,item){
-  const id=item.set153,slot=item.slot,fit=FIT[slot];if(!fit||!root||id!=='metamorfo')return; // v155: só o Metamorfo tem peças 3D por enquanto
+  const id=item.set153,slot=item.slot,fit=FIT[slot];if(!fit||!root||!(window.SET_MODELS165||['metamorfo']).includes(id))return; // v165: sets com peças 3D prontas (adicione o id em SET_MODELS165 quando os .glb existirem)
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
    const bones=SIDES[slot]||[[fit.bone,null]];root.updateMatrixWorld(true);
