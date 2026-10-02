@@ -617,3 +617,14 @@ Publicação autorizada por Ian. Veios existentes usam GLB próprio gerado por T
 
 ## v126 — colisão dos cristais
 Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do ator; movimento respeita veios ativos e atores sobrepostos são deslocados ao espaço livre mais próximo, respeitando paredes e outros veios. Esgotamento libera passagem. Teste verify-crystal-collision126 cobre surgimento central, três portes, travessia, esgotamento e veios vizinhos; regressões crystals125/v118 aprovadas.
+
+## v155 (02/10/2026, Claude na nuvem) — pedidos de Ian
+- Chão azul corrigido: o shader do terreno usava `snow154`/`mix154` sem declarar (o `sync-environment128.py` do build tinha apagado os atributos). Agora estão em `tools/environment128.js` e `tools/environment-bridge128.js`. **Atenção:** o build regrava blocos do `game.html` a partir de `tools/` (ecology124, habitat-render124, environment128, goblins, kit111); edite sempre o arquivo de `tools/`.
+- Portais: sempre 12 a até 200 m do jogador. Longe (>280 m) só deixam de ser desenhados e continuam contando o tempo; voltando, estão lá.
+- Portal que fecha sem ser concluído (mesmo longe) solta monstros + chefe. Vila a até 100 m da muralha → marcham e atacam (`RAID155`, defesa 0–100%); em 0 a cidade cai (`profile.raided155`) e usa a reconstrução existente. Sem vila: vagueiam. Morte em portal vermelho solta o chefe. Aster é protegida (decisão provisória, perguntar a Ian). Monstros soltos ficam no mundo (máx. 80).
+- Portais de classe rara (`rollRareGate155`): ao entrar, 2% no F até 50% no ★; 10% para cada uma das 10 classes; viram vermelhos. Temas em `RARE_SETS155` (Metamorfo: lobos/raptores/dragões; Necromante: esqueletos/fantasmas/espectros; etc.).
+- Chefe solta 1 das 5 peças ao acaso. Sets das 9 classes novas: +6% dano/vida por peça, +15% completo (só na classe dona). Peças 3D só do Metamorfo.
+- Set completo (5 vestidas) → botão "Teste de despertar" em Personagem → Build; duelo com o guardião do tema (×2,5 de vida); vencer ensina a classe rara.
+- Masmorras escuras como caverna (luz só em volta do herói, véu `#cave155`).
+- UI: selo ESCUDO removido; "Poderes" só mostra linhas com conteúdo; equipamento foi para Personagem → Build; Retirar sempre clicável (avisa bolsa cheia); todo botão tem animação ao apertar.
+- Pendente: modelos próprios dos chefes (Tripo), ataques temáticos, bônus específicos dos sets, paredes de caverna/câmera baixa, mecânicas do teste de despertar.
