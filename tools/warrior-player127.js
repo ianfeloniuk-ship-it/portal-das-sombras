@@ -53,7 +53,12 @@
     if(signature===m.gearSignature)return;m.gearSignature=signature;
     for(const p of m.wnodes)disposePart(p);for(const p of m.armorParts)disposePart(p);m.wnodes=[];m.armorParts=[];m.wmats=[];m.mats=m.baseMaterials.slice();
     const itemFor=it=>{if(!it)return null;return {...it,visual:{...it.visualWeapon,...it.visual,color:it.visual?.color??colors[clamp(it.tier||0,0,9)]}}};
-    const heldWeapon=equip.w;if(heldWeapon){const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=global.WarriorEquipment127.weapon(T,item);m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
+    m.bow155=false;const heldWeapon=equip.w,isBow=heldWeapon&&(heldWeapon.kind155==='bow'||heldWeapon.visual?.shape==='bow'||heldWeapon.visualWeapon?.shape==='bow');
+    if(isBow&&bow155&&m.bones.hand_l){const bow=T.SkeletonUtils.clone(bow155);const holder=new T.Group();holder.add(bow);
+      // Empunhadura: o meio do arco (y≈0,49 do modelo) na palma; em pose T o arco fica de pé no mundo e acompanha a mão.
+      bow.position.set(0,-.49,0);const hl=m.bones.hand_l;m.model.updateMatrixWorld(true);const hq=hl.getWorldQuaternion(new T.Quaternion()),hs=hl.getWorldScale(new T.Vector3()).x;
+      holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);m.wnodes.push(holder);m.bow155=true}
+    else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=global.WarriorEquipment127.weapon(T,item);m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
     // Equipment is added as independent pieces; the approved face remains intact.
     // Armor assets await art review. Keep the approved clothes intact.
@@ -95,21 +100,27 @@
   // ?semAnim155 volta para a animação por código.
   // Nomes KayKit (o GLTFLoader tira os pontos: upperarm.l → upperarml) → ossos do Viajante.
   const KAY155={hips:'hips',spine:'spine',chest:'chest',head:'head',upperarml:'upperarm_l',lowerarml:'forearm_l',wristl:'hand_l',upperarmr:'upperarm_r',lowerarmr:'forearm_r',wristr:'hand_r',upperlegl:'thigh_l',lowerlegl:'shin_l',footl:'foot_l',upperlegr:'thigh_r',lowerlegr:'shin_r',footr:'foot_r'};
+  // Esqueleto Mixamo (animações feitas no Tripo por texto, models/anim-viajante155.glb) → ossos do Viajante.
+  const MIXG155={Hips:'hips',Spine:'spine',Spine2:'chest',Neck:'neck',Head:'head',RightArm:'upperarm_r',RightForeArm:'forearm_r',RightHand:'hand_r',LeftArm:'upperarm_l',LeftForeArm:'forearm_l',LeftHand:'hand_l',RightUpLeg:'thigh_r',RightLeg:'shin_r',RightFoot:'foot_r',LeftUpLeg:'thigh_l',LeftLeg:'shin_l',LeftFoot:'foot_l'};
   const CLIP155={idle:'Idle',correr:'Running_A',golpe1:'1H_Melee_Attack_Slice_Diagonal',golpe2:'1H_Melee_Attack_Chop',golpe3:'1H_Melee_Attack_Stab',esquiva:'Dodge_Forward',dano:'Hit_A',morte:'Death_A'};
   // Trecho útil de cada golpe (início/fim em fração do clipe), para o golpe caber nos ~0,28 s do jogo.
-  const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]};
-  let anim155=null;
+  const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]},WINTRIPO155={golpe1:[0,.7],golpe2:[0,.7],golpe3:[.05,.6],pesado1:[0,.7],pesado2:[0,.75],lanca1:[0,.65],adaga1:[0,.8],adaga2:[0,.8],arco1:[0,.85],arco2:[0,.85],cajado1:[0,.8],cajado2:[0,.8],magia_mao:[0,.8],soco:[0,.75]};
+  // Golpe básico por tipo de arma da classe (combo 1-2-3). Clipes que faltarem caem no próximo da lista.
+  const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
+  let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;API.BOWPOS155=BOWPOS155;
+  // v155: arco do Arqueiro (Tripo, referência aprovada) na mão esquerda.
+  let bow155=null;API.loadBow=function(url){const L=new T.GLTFLoader();return new Promise(res=>L.load(url,g=>{bow155=g.scene;res(true)},undefined,()=>res(false)))};
   API.loadAnims=function(url){
     if(/semAnim155/.test(location.search))return Promise.resolve(false);
     const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);
-    return new Promise(res=>L.load(url,g=>{const clips={};for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
-      anim155={scene:g.scene,clips};API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações KayKit não carregaram; usando animação por código.',e);res(false)}));
+    return new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
+      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações KayKit não carregaram; usando animação por código.',e);res(false)}));
   };
   const v1=new T.Vector3(),v2=new T.Vector3(),q4=new T.Quaternion(),m4=new T.Matrix4();
   function modelQ(o,inv,out){return out.copy(inv).multiply(o.getWorldQuaternion(q4))}
   function setup155(m){
     const rig=T.SkeletonUtils.clone(anim155.scene);rig.traverse(o=>{if(o.isMesh)o.visible=false});rig.updateMatrixWorld(true);
-    const kb={};rig.traverse(o=>{if(KAY155[o.name])kb[KAY155[o.name]]=o});
+    const kb={};rig.traverse(o=>{const mx=o.name.replace(/^mixamorig:?/,'');const g=KAY155[o.name]||(mx!==o.name&&MIXG155[mx]);if(g)kb[g]=o});
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert(),minv=new T.Matrix4().copy(m.model.matrixWorld).invert();
     // Pose de repouso do Viajante (antes de qualquer animação): usa a guardada na criação.
     const pairs=[];m.model.traverse(o=>{if(!o.isBone||!o.userData.rest155M||!kb[o.name])return;const k=kb[o.name];
@@ -123,10 +134,13 @@
   function frame155(m,st,dt){
     if(!m.a155)setup155(m);const A=m.a155;let a;
     if(st.dead>0)play155(A,'morte',.12,true);
-    else if(st.atk>0){const n=['golpe1','golpe2','golpe3'][((st.combo||1)-1)%3],key=A.act[n]?n:'golpe1';
+    // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
+    else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
+    else if(st.atk>0){const seq=ATK155[st.wep]||ATK155.sword,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
-      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=WIN155[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
+      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
     else if(st.dodge){a=play155(A,'esquiva',.05,true);a.timeScale=a.getClip().duration/.38;A.state='esquiva'}
+    else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
     else{A.state=null;if((st.move||0)>.08){a=play155(A,'correr',.15);a.timeScale=.65+.5*Math.min(1,st.move)}else play155(A,'idle',.2)}
     A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();

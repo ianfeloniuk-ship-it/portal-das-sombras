@@ -3477,7 +3477,7 @@ function statsFor(){
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
   const equip=run&&run.equip||{};
-  const m=window.WARRIOR127_ENABLE&&profile.cls===0&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
+  const m=window.WARRIOR127_ENABLE&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.05;m.root.add(aura);
   if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
@@ -3574,7 +3574,9 @@ function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
 function freeAt(x,z,r){if(!crystalFree126(x,z,r))return false;if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
 function moveEnt(e,dx,dz){crystalUnstuck126(e);if(!Number.isFinite(dx)||!Number.isFinite(dz))return;const dist=Math.hypot(dx,dz);if(!dist)return;const limit=32,scale=dist>limit?limit/dist:1;dx*=scale;dz*=scale;const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dz))/.25));dx/=steps;dz/=steps;for(let i=0;i<steps;i++){if(kitBlocked111(e,e.x+dx,e.z+dz))break;if(L.grid){const r=(e.r||.5)*.85;if(crystalFree126(e.x+dx,e.z,e.r||.5)&&freeAt(e.x+dx,e.z,r))e.x+=dx;if(crystalFree126(e.x,e.z+dz,e.r||.5)&&freeAt(e.x,e.z+dz,r))e.z+=dz}else{e.x+=dx;e.z+=dz;pushOut(e);crystalUnstuck126(e)}}}
 function movementSpeed(raw){if(!Number.isFinite(raw))return 0;return Math.max(0,CFG.moveLimit?Math.min(raw,6.4*CFG.moveCap/100):raw)}
-function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
+// v155 (Ian): Arqueiro sem arco arremessa a flecha com a mão, mais devagar, até equipar um arco.
+function bareArcher155(){return CLASSES[profile.cls]?.wep==='bow'&&!run.equip.w}
+function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1)*(bareArcher155()?1.6:1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
 function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> Limitar minha velocidade de movimento</label><div class="sysline">100% é a velocidade inicial. O limite não aumenta sua velocidade nem reduz agilidade, ataques ou esquiva. Vale também para a montaria.</div><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%">'}
 
 function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2-x1,z2-z1));for(let i=1;i<n;i++){const t=i/n;if(!gfree(x1+(x2-x1)*t,z1+(z2-z1)*t))return false}return true}
@@ -3632,7 +3634,12 @@ function envShader(wind,see){return sh=>{let v=sh.vertexShader,f=sh.fragmentShad
   if(see){sh.uniforms.uPl=ENV.pl;sh.uniforms.uCa=ENV.ca;sh.uniforms.uOcc=ENV.occ;v='varying vec3 vWp;\n'+v;add+='vWp=(modelMatrix*vec4(transformed,1.)).xyz;';
     f='uniform vec3 uPl;uniform vec3 uCa;uniform float uOcc;varying vec3 vWp;\n'+f.replace('void main() {','void main() {\nif(uOcc>.5){vec3 dd=uPl-uCa;float tt=dot(vWp-uCa,dd)/dot(dd,dd);if(tt>.04&&tt<.97){float rr=length(vWp-(uCa+dd*tt)),RR=mix(.9,2.9,tt);if(rr<RR&&(rr<RR*.55||mod(floor(gl_FragCoord.x)+floor(gl_FragCoord.y),2.)<1.))discard;}}')}
   sh.vertexShader=v.replace('#include <begin_vertex>','#include <begin_vertex>\n'+add);sh.fragmentShader=f}}
-function envMat(wind,see){const m=new THREE.MeshLambertMaterial({vertexColors:true});m.onBeforeCompile=envShader(wind,see);m.customProgramCacheKey=()=>'env'+(wind?1:0)+(see?1:0);return m}
+// Etapa 2 (Ian): low plants stop being neon lime; their green follows the season and sits closer to the ground tone.
+function floraSeason154(sh){sh.uniforms.uSeason154=window.SEASON154U||(window.SEASON154U={value:0});sh.fragmentShader='uniform float uSeason154;'+String.fromCharCode(10)+sh.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+  {vec3 c0=diffuseColor.rgb;float g154=smoothstep(.02,.12,c0.g-max(c0.r,c0.b));float l154=dot(c0,vec3(.3,.59,.11));
+   vec3 tone154=uSeason154<.5?vec3(.62,.86,.42):uSeason154<1.5?vec3(.56,.74,.38):uSeason154<2.5?vec3(1.,.62,.26):vec3(.86,.9,.88);
+   diffuseColor.rgb=mix(c0,(l154*1.35+.03)*tone154,g154*.85);}`)}
+function envMat(wind,see){const m=new THREE.MeshLambertMaterial({vertexColors:true});m.onBeforeCompile=wind&&!see?sh=>{envShader(wind,see)(sh);floraSeason154(sh)}:envShader(wind,see);m.customProgramCacheKey=()=>'env'+(wind?1:0)+(see?1:0);return m}
 const ENVMAT=envMat(false,false),FLORAMAT=envMat(true,false),TREEMAT=envMat(true,true),BLDMAT=envMat(false,true);
 /* tufos de grama feitos à mão: poucas faces, muitas cópias */
 function envBlades(){const P=[],N=[],C=[],I=[];const R=mulberry32(77);
@@ -3667,7 +3674,7 @@ const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed'
 const ROCKS=['rock_largeA','rock_largeB','rock_largeC','rock_largeD','rock_tallA','rock_tallB','rock_tallC','stone_tallA','stone_largeA'];
 // Etapa 2 (Ian, 02/10): borders are not straight lines; warp the lookup so biomes reach into each other in fingers and islands.
 function biomeWarp(x,z){return[x+(WN(x*.021+5.3,z*.021+9.1)-.5)*46+(WN(x*.09+3.7,z*.09+7.2)-.5)*14,z+(WN(x*.021+41.2,z*.021+77.5)-.5)*46+(WN(x*.09+61.4,z*.09+13.8)-.5)*14]}
-function biomeMix154(x,z){const w=biomeWarp(x,z),b=WN(w[0]*.0028+311,w[1]*.0028+733),b2=WN(w[0]*.004+91,w[1]*.004+57),snow=clamp((.38-b)/.1,0,1),cold=clamp((b2-.55)/.12,0,1),heat=clamp((b-.62)/.1,0,1),lava=clamp((b2-.48)/.12,0,1),wet=clamp((b2-.6)/.1,0,1)*(1-snow)*(1-heat);return{snow:snow*(1-cold),crystal:snow*cold,sand:heat*(1-lava),ash:heat*lava,wet}}
+function biomeMix154(x,z){const w=biomeWarp(x,z),b=WN(w[0]*.0028+311,w[1]*.0028+733),b2=WN(w[0]*.004+91,w[1]*.004+57),snow=clamp((.35-b)/.08,0,1),cold=clamp((b2-.58)/.08,0,1),heat=clamp((b-.65)/.08,0,1),lava=clamp((b2-.51)/.08,0,1),wet=clamp((b2-.64)/.08,0,1)*(1-snow)*(1-heat);return{snow:snow*(1-cold),crystal:snow*cold,sand:heat*(1-lava),ash:heat*lava,wet}}
 function bare154(x,z){const m=biomeMix154(x,z);return m.sand>.6||m.ash>.6}
 function snowB(x,z){const w=biomeWarp(x,z);return WN(w[0]*.0028+311,w[1]*.0028+733)}
 function biomeAt(x,z){const w=biomeWarp(x,z);x=w[0];z=w[1];const b=WN(x*.0028+311,z*.0028+733),b2=WN(x*.004+91,z*.004+57);if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.005+17,z*.005+29)>.74?'flores':'campos'}
@@ -3734,9 +3741,9 @@ const Environment128=(()=>{
   const normals=g.attributes.normal;for(let n=0;n<normals.count;n++)if(Math.hypot(normals.getX(n),normals.getY(n),normals.getZ(n))<.01)normals.setXYZ(n,0,1,0);for(const n of leafIds)normals.setXYZ(n,0,1,0);
   const out={p:g.attributes.position.array,n:g.attributes.normal.array,c:g.attributes.color.array,i:g.index.array,nv:p.length/3,min:box.min.toArray(),max:box.max.toArray(),h:box.max.y-box.min.y,w:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)};g.dispose();cache.set(key,out);return out;
  }
- function groundMaterial(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainSnow154:[bio==='neve'?1:0],terrainMix154:[bio==='deserto'?1:0,bio==='vulcao'?1:0,bio==='pantano'?1:0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
-  s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;attribute float terrainSnow154;varying float snow154;attribute vec3 terrainMix154;varying vec3 mix154;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;snow154=terrainSnow154;mix154=terrainMix154;');
-  s.fragmentShader=`varying float snow154;varying vec3 mix154;varying float road128;varying float biome131;varying vec3 terrainWorld128;
+ function groundMaterial(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
+  s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;');
+  s.fragmentShader=`varying float road128;varying float biome131;varying vec3 terrainWorld128;
   float hash128(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
   float noise128(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash128(i),hash128(i+vec2(1,0)),f.x),mix(hash128(i+vec2(0,1)),hash128(i+vec2(1,1)),f.x),f.y);}
   `+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -3745,11 +3752,11 @@ const Environment128=(()=>{
    float stone=smoothstep(.65,.80,noise128(q*.48));float detail=mix(.85+grain*.22+noise128(q*2.7)*.09, .98-crack*.28+grain*.07,road128);
    detail+=stone*.055;float snow128=smoothstep(.58,.78,max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b)));detail=mix(detail,.95+grain*.06,snow128*.8);
    float natural131=1.-smoothstep(.15,.8,road128);
-   float sand131=sandMask154;
-   float bog131=wetMask154;
+   float sand131=1.-smoothstep(.1,.5,abs(biome131-6.));
+   float bog131=1.-smoothstep(.1,.5,abs(biome131-3.));
    float forest131=1.-smoothstep(.1,.5,abs(biome131-1.));
-   float ice131=snowMask154;
-   float ash131=ashMask154;
+   float ice131=1.-smoothstep(.1,.5,abs(biome131-4.));
+   float ash131=1.-smoothstep(.1,.5,abs(biome131-7.));
    float crystal131=1.-smoothstep(.1,.5,abs(biome131-5.));
    float ripples131=.5+.5*sin(q.x*8.+q.y*2.3+noise128(q*.32)*9.);
    detail*=1.+natural131*(sand131*(ripples131-.5)*.16+ice131*(ripples131-.5)*.045);
@@ -3763,7 +3770,7 @@ const Environment128=(()=>{
   s.fragmentShader=s.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
    float damp131=(1.-smoothstep(.1,.5,abs(biome131-3.)))*(1.-smoothstep(.15,.8,road128))*smoothstep(.38,.68,noise128(terrainWorld128.xz*.31));
    roughnessFactor=mix(roughnessFactor,.38,damp131);
-  `);};m.customProgramCacheKey=()=> 'biome-terrain131';const g132=typeof window!=='undefined'&&window.BiomeMaterials132?window.BiomeMaterials132.ground(m):m;return typeof window!=='undefined'&&window.Terrain153?window.Terrain153.apply(g132):g132}
+  `);};m.customProgramCacheKey=()=> 'biome-terrain131';return typeof window!=='undefined'&&window.BiomeMaterials132?window.BiomeMaterials132.ground(m):m}
  return{tree,groundMaterial,cache};
 })();
 
@@ -3780,20 +3787,14 @@ const environmentGroundColors128=envGroundColors;
 envGroundColors=function(pg,near){
  environmentGroundColors128(pg,near);const pos=pg.attributes.position,col=pg.attributes.color,season=seasonI();
  const palette={campos:0x56664a,floresta:0x35493e,flores:0x627350,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
- const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),mixes=new Float32Array(pos.count*3),snows=new Float32Array(pos.count),biomes=new Float32Array(pos.count),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
+ const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),biomes=new Float32Array(pos.count),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=onRoad(segs,x,z)||near.some(city=>(Math.abs(x-city.x)<4.5||Math.abs(z-city.z)<4.5)&&Math.hypot(x-city.x,z-city.z)<40);
-  // Etapa 2 (Ian): every biome border blends by continuous weights, so the ground never changes in mesh-sized steps.
-  const mx=biomeMix154(x,z),green=['floresta','flores'].includes(bio)?bio:'campos';color.setHex(palette[green]);
-  if(mx.wet>0)color.lerp(other.setHex(palette.pantano),mx.wet);if(mx.sand>0)color.lerp(other.setHex(palette.deserto),mx.sand);if(mx.ash>0)color.lerp(other.setHex(palette.vulcao),mx.ash);if(mx.crystal>0)color.lerp(other.setHex(palette.cristal),mx.crystal);
-  mixes[i*3]=mx.sand;mixes[i*3+1]=mx.ash;mixes[i*3+2]=mx.wet;
-  if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x587452),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
+  color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x587452),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
   color.multiplyScalar(.85+WN(x*.065,z*.065)*.25);
-  // Etapa 2: snow thins out in patches past the tundra edge instead of stopping at a line.
-  let snw=season===3&&!['deserto','vulcao'].includes(bio)?1:mx.snow;if(snw>0)color.lerp(other.setHex(palette.neve),snw*(bio==='neve'?1:clamp((WN(x*.08+21,z*.08+5)-.3)/.3,0,1)*.6));snows[i]=snw;
   if(road)color.setHex(season===3&&!['deserto','vulcao'].includes(bio)?0xa2aaa8:0x827866);
   if(d<31)color.lerp(other.setHex(0x8c897d),clamp((31-d)/3,0,1));
-  biomes[i]=bio==='floresta'?1:bio==='flores'?2:0;col.setXYZ(i,color.r,color.g,color.b);surfaces[i]=d<31?1:road?.62:0;
- }col.needsUpdate=true;pg.setAttribute('terrainRoad128',new THREE.BufferAttribute(surfaces,1));pg.setAttribute('terrainBio131',new THREE.BufferAttribute(biomes,1));pg.setAttribute('terrainSnow154',new THREE.BufferAttribute(snows,1));pg.setAttribute('terrainMix154',new THREE.BufferAttribute(mixes,3));
+  biomes[i]=season===3&&!['deserto','vulcao'].includes(bio)?4:biomeIds.indexOf(bio);col.setXYZ(i,color.r,color.g,color.b);surfaces[i]=d<31?1:road?.62:0;
+ }col.needsUpdate=true;pg.setAttribute('terrainRoad128',new THREE.BufferAttribute(surfaces,1));pg.setAttribute('terrainBio131',new THREE.BufferAttribute(biomes,1));
 };
 envGroundMat=function(){return GMAT2||(GMAT2=Environment128.groundMaterial())};
 // Natural dungeon floors use the same stone/soil finish with their existing biome colors.
@@ -3868,7 +3869,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44*CITYK||q.clear)continue;
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'&&(n>.56||R()<.035)){if(R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
-    else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);
+    else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();EW(so,pk(R,ROCKS),px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
   if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<40*CITYK)continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
@@ -3922,7 +3923,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(!fallen){const cs=Math.cos(ry),sn=Math.sin(ry);for(const sd of[-1,1]){if(R()<.35)continue;const dx=sd*(W*.5+1.1),dz=W*.25;const gx=x+dx*cs+dz*sn,gz=z-dx*sn+dz*cs;
       EH(fl,R()<.5?'plant_bushDetailed':'plant_bushLarge',gx,0,gz,R()*TAU,1+R()*.4);for(let f=0;f<3;f++)EH(fl,pk(R,FLOWERS),gx+(R()-.5)*1.6,0,gz+(R()-.5)*1.6,R()*TAU,.5+R()*.3)}}}
   for(const a of[45,135,225,315])for(const s of[-1,1]){const r=(a+s*9)*Math.PI/180,x=X+Math.cos(r)*41.5,z=Z+Math.sin(r)*41.5;
-    EH(tr,fallen?pk(R,TREES.dead):pk(R,TREES.leaf),x,0,z,R()*TAU,5.4+R()*1.8,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:2.6,k:.4})}
+    {const k=fallen?pk(R,TREES.dead):pk(R,TREES.leaf);if(!window.TripoEnvironment153||TripoEnvironment153.treeOk(k,x,z)){EH(tr,k,x,0,z,R()*TAU,5.4+R()*1.8,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:2.6,k:.4})}}}
   for(let k=0,n=ENV.lite?50:150;k<n;k++){const a=R()*TAU,d=CITYR-3.4+R()*2.6;if(gate(a)<.15)continue;EH(fl,k%9?'blades':pk(R,['plant_bush','grass_leafs','plant_flatShort']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,fallen?.6:tintB(0xffffff,.85+R()*.15))}
   const shopH={};
   for(const sp of SHOPS){const sx=X+sp.x,sz=Z+sp.z,ry=Math.atan2(-sp.x,-sp.z),[k,W]=SHOPM[sp.id]||['building_home_A_blue',7];
@@ -4074,7 +4075,7 @@ function envRuin(g,x0,z0,addCol){const b=new EnvBatch(),R=mulberry32((x0*7+z0*13
   for(let i=0;i<8;i++){const a=i/8*TAU;if(i===3)continue;const x=x0+Math.cos(a)*7,z=z0+Math.sin(a)*7;EH(b,R()<.5?'statue_columnDamaged':'statue_column',x,0,z,R()*TAU,1.8+R()*3.2);addCol({x,z,r:.8});ENV.cast.push({x:x+.3,z:z-.2,r:1.4,k:.3})}
   EH(b,'arch',x0+Math.cos(3/8*TAU)*7.4,0,z0+Math.sin(3/8*TAU)*7.4,-3/8*TAU+Math.PI/2,4.2);
   for(let i=0;i<6;i++){const a=R()*TAU,d=3+R()*7;EW(b,pk(R,['rubble_half','statue_head','rock_smallA','statue_block','gravestone']),x0+Math.cos(a)*d,0,z0+Math.sin(a)*d,R()*TAU,1+R()*1.2,.9)}
-  EH(b,'tree_dead_large',x0+9,0,z0-6,1,6.5);addCol({x:x0+9,z:z0-6,r:.7});
+  if(!window.TripoEnvironment153||TripoEnvironment153.treeOk('tree_dead_large',x0+9,z0-6)){EH(b,'tree_dead_large',x0+9,0,z0-6,1,6.5);addCol({x:x0+9,z:z0-6,r:.7})}
   envOwn(g,b.mesh(ENVMAT))}
 /* baú de verdade, com tampa que abre */
 function envChest(boss){const g=new THREE.Group(),k=boss?'chest_gold':'chest',s=.85;const body=envMesh(k);body.scale.setScalar(s);g.add(body);
@@ -4758,9 +4759,9 @@ function makeHunterAlly(p,x,z,guest){
 
 /* ================= ITENS ================= */
 function makeItem(slot,tier,rar){
-  const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Besta',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
+  const R=RAR[rar];const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso'}[CLASSES[profile.cls].wep]||'Arma';
   const visual=slot==='w'&&window.Warrior127&&Warrior127.visualWeapon?Warrior127.visualWeapon(tier,CLASSES[profile.cls].wep):undefined;
-  return {slot,tier,rar,name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*equipFactor(slot)*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar),...(visual?{visual}: {})};
+  return {slot,tier,rar,...(slot==='w'?{kind155:CLASSES[profile.cls].wep}:{}),name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:Math.round(PRICE[tier]*equipFactor(slot)*(1+.06*rar)*.4),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar),...(visual?{visual}: {})};
 }
 /* v153 (pedido do Ian): sets das classes raras. Peças separadas (cabeça, peito, braços, pernas, arma) que qualquer personagem equipa;
    o bônus só desperta na classe dona do set. Ficam em Fendas de Vestígio, portais raros que surgem ao acaso. */
@@ -5149,7 +5150,7 @@ function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   if(curAtk&&curAtk.kind){if(['mage','wraith','vespa','yeti'].includes(curAtk.kind)&&!player.slowT){player.slowT=2;floater(player.x,player.z,'LENTO','#ffd08a')}else if(['rogue','aranha','lobo','raptor'].includes(curAtk.kind)&&Math.random()<.35){player.bleedT=3;player.bleedD=amt*.08;floater(player.x,player.z,'SANGRANDO','#ff4d6a')}}
-  player.hp-=amt;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
+  player.hp-=amt;player.hitAnimT=time+.4;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0)die();
 }
@@ -5211,7 +5212,7 @@ function potionHealFraction(){return (npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25
 function potionDescription(){const p=potionHealFraction();return 'Cura '+String(Math.round(p*10000)/100).replace('.',',')+'% da vida máxima ('+fmt(Math.round(player.maxhp*p))+' de vida). Sem mana nem recarga.'+(hasT('lakeg')?' Recupera também 30% do escudo máximo.':'')}
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;narratorEvent105('potion');player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
 function useSkill(sk){
-  if(sk&&!sk.empty){const canonical=kitCanonical111(sk);if(canonical){const equipped=player.skills.find(s=>!s.empty&&s.skillId===canonical.skillId);if(!equipped){toast('Equipe esta habilidade em um dos seis espaços.');return}if(!player.dead&&!paused)kitCast111(equipped);return}}
+  if(sk&&!sk.empty){const canonical=kitCanonical111(sk);if(canonical){const equipped=player.skills.find(s=>!s.empty&&s.skillId===canonical.skillId);if(!equipped){toast('Equipe esta habilidade em um dos seis espaços.');return}if(!player.dead&&!paused){const c0=equipped.cdT;kitCast111(equipped);if(equipped.cdT>c0)skillAnim155(equipped)}return}}
   if(player.dead||paused||!sk||sk.empty)return;
   if(sk.n==='Sol Nascente'){sk=player.skills.find(s=>!s.empty&&s.n==='Sol Nascente');if(!sk){toast('Equipe Sol Nascente em um dos seis espaços de Personagem → Habilidades.');return}}
   if(sk.rare103){const returning=sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time;if(sk.cdT>0&&!returning)return;const error=rareCastCheck103(sk);if(error){toast(error);return}if(sk.t==='rare_gate'){rareAutoGate153(sk);return}const cost=rareMana103(sk);if(player.mp<cost){floater(player.x,player.z,'SEM MANA','#4f8dff');return}player.mp-=cost;if(!returning){sk.cdT=sk.cdMax=skillCooldown(sk);player.lastSpellAt=time}rareSkillRun103(sk);if(typeof castFluid139==='function')castFluid139(sk);narratorSkill105(sk);player.atkT=.001;return}
@@ -5239,7 +5240,9 @@ function magicEvolution(sk,dmg){const P=player,col=sk.col;
   if(sk.n==='Matilha Espiritual'||sk.n==='Colosso de Pedra'){const wolf=sk.n==='Matilha Espiritual',n=Math.min(wolf?3:1,Math.max(0,summonCap()-minionAllies().length));for(let i=0;i<n;i++){let x=P.x+Math.sin(i*2.1)*1.8,z=P.z+Math.cos(i*2.1)*1.8;if(!freeAt(x,z,.5)){x=P.x;z=P.z}spawnSummon(wolf?'wolf':'golem',x,z,1e9)}if(wolf)for(const a of allies)if(!a.dead&&a.summonKind==='wolf'){a.buffT=Math.max(a.buffT||0,8);fxRing(a.x,a.z,col,1.4,.6)}circle(P.x,P.z,col);saveRun();return true}
   return false;
 }
-function runSkill(sk){if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
+// v155: habilidades com animação própria no Viajante (Chuva de Flechas: com arco mira para o alto; sem arco joga um punhado de flechas para cima).
+function skillAnim155(sk){if(/Chuva de Flechas/.test(sk?.n||''))player.skillAnim155={k:bareArcher155()?'chuva_sem_arco':'chuva_com_arco',until:time+.8}}
+function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);
   if(sk.rare103){rareSkillRun103(sk);return}
   switch(sk.t){
@@ -5261,7 +5264,7 @@ function runSkill(sk){if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
     case 'minionbuff':{const mine=minionAllies(true),blocked=hasAff('nocure');for(const a of mine){if(!blocked)a.hp=Math.min(a.maxhp,a.hp+a.maxhp*.45);a.buffT=8+(sk.pow-1.5)*4;fxRing(a.x,a.z,0xb98cff,1.4,.4)}fxRing(P.x,P.z,0xb98cff,4,.6);floater(P.x,P.z,'PACTO SOMBRIO: '+mine.length+(blocked?' fortalecidas (sem cura)':' curadas e fortalecidas'),'#b18cff');break}
     case 'summon':{const n=Math.min(Math.round(sk.pow),Math.max(0,summonCap()-minionAllies().length));
       for(let i=0;i<n;i++){const a=rnd(0,TAU);let x=P.x+Math.cos(a)*1.8,z=P.z+Math.sin(a)*1.8;if(!freeAt(x,z,.4)){x=P.x;z=P.z}const a2=spawnSummon(sk.n.includes('Lobo')||sk.n.includes('Feras')||sk.n.includes('Matilha')?'wolf':'skel',x,z,1e9);if(sk.giant){a2.giant=true;a2.m.body.scale.setScalar(2);a2.hp=a2.maxhp*=8;a2.dmg*=5;a2.r=1}}saveRun();break}
-    case 'rain':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.28:.35);const h=hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);if(sk.n==='Chuva de Flechas')h.slow=2;fallFx(hx,hz,du,fk,col)}break}
+    case 'rain':{const pt=skillGroundPoint(),cx=pt.x,cz=pt.z;const fk=/Flecha/.test(sk.n)?'arrow':/Meteoro/.test(sk.n)?'meteor':/Alma/.test(sk.n)?'soul':'orb';const nn=fk==='meteor'?5:fk==='arrow'?10:7;if(fk==='arrow')player.skillAnim155={k:bareArcher155()?'chuva_sem_arco':'chuva_com_arco',until:time+.8};for(let i=0;i<nn;i++){const hx=cx+rnd(-3,3),hz=cz+rnd(-3,3),du=(fk==='meteor'?.6:.35)+i*(fk==='arrow'?.28:.35);const h=hazard(hx,hz,fk==='meteor'?2.4:1.9,du,dmg*(fk==='arrow'?.7:1),'player',col);if(sk.n==='Chuva de Flechas')h.slow=2;fallFx(hx,hz,du,fk,col)}break}
     case 'dot':{if(sk.n==='Lâmina Envenenada'){P.venomCharges=3;P.venomUntil=time+8;fxRing(P.x,P.z,col,1.5);break}const pt=skillGroundPoint(11,5);for(let i=0;i<5;i++){const h=hazard(pt.x,pt.z,5.5,.5+i,dmg/5,'player',col);h.kb=0;h.passive=true}break}
   }
   sfx('skill');
@@ -5462,7 +5465,7 @@ function update(dt){
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
     else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
-    animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,dodge:P.dodgeT>0&&!run.mounted},time);
+    animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:bareArcher155()?'bow_bare':(CLASSES[profile.cls]||{}).wep,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
   P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;P.aura.rotation.z+=dt;
@@ -6461,7 +6464,7 @@ const SEASONS=['Primavera','Verão','Outono','Inverno'];
 function seasonI(){return Math.floor(Math.floor(dayT/DAYLEN)/5)%4}
 /* clima */
 const WX={type:'clear',t:120,pts:null};
-function updWeather(dt){if(L.mode==='world'&&player){const si=seasonI();if(WX.se!==undefined&&WX.se!==si){toast('<b>[ESTAÇÃO]</b> Chegou '+(si===1?'o ':'a ')+'<b>'+SEASONS[si]+'</b>. '+['Mais chuva e o chão verdeja.','Tempo aberto quase sempre.','Árvores douradas e folhas no chão.','Neve cobre o mundo e o frio traz nevascas.'][si],7000);for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}WX.se=si}WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random(),se=seasonI();const nt=se===3?(r<.3?'clear':r<.4?'rain':'snow'):se===1?(r<.75?'clear':'rain'):se===0?(r<.45?'clear':'rain'):(r<.5?'clear':r<.85?'rain':'snow');if(nt!==WX.type){WX.type=nt;if(L.mode==='world'&&['rain','snow'].includes(nt))narratorEvent105(nt);toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
+function updWeather(dt){if(L.mode==='world'&&player){const si=seasonI();(window.SEASON154U||(window.SEASON154U={value:0})).value=si;if(WX.se!==undefined&&WX.se!==si){toast('<b>[ESTAÇÃO]</b> Chegou '+(si===1?'o ':'a ')+'<b>'+SEASONS[si]+'</b>. '+['Mais chuva e o chão verdeja.','Tempo aberto quase sempre.','Árvores douradas e folhas no chão.','Neve cobre o mundo e o frio traz nevascas.'][si],7000);for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}WX.se=si}WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random(),se=seasonI();const nt=se===3?(r<.3?'clear':r<.4?'rain':'snow'):se===1?(r<.75?'clear':'rain'):se===0?(r<.45?'clear':'rain'):(r<.5?'clear':r<.85?'rain':'snow');if(nt!==WX.type){WX.type=nt;if(L.mode==='world'&&['rain','snow'].includes(nt))narratorEvent105(nt);toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
   const on=L.mode==='world'&&WX.type!=='clear';
   if(on&&!WX.pts){const g=new THREE.BufferGeometry(),a=[];for(let i=0;i<700;i++)a.push(rnd(-30,30),rnd(0,22),rnd(-30,30));g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));WX.pts=new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:.12,transparent:true,opacity:.7}));scene.add(WX.pts)}
   if(WX.pts){WX.pts.visible=on;if(on){WX.pts.material.color.setHex(WX.type==='rain'?0xc8a2ff:0xffffff);WX.pts.material.size=WX.type==='rain'?.09:.16;WX.pts.position.set(player.x,0,player.z);const p=WX.pts.geometry.attributes.position;const sp=WX.type==='rain'?26:4;for(let i=0;i<p.count;i++){let y=p.getY(i)-sp*dt;if(y<0)y+=22;p.setY(i,y);if(WX.type==='snow')p.setX(i,p.getX(i)+Math.sin(time+i)*dt*.5)}p.needsUpdate=true}}}
@@ -7112,7 +7115,7 @@ $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
-  if(window.WARRIOR127_ENABLE&&profile&&profile.cls===0&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims('models/anims.glb'):0).then(()=>startGame());return}
+  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>startGame());return}
   $('title').hidden=true;
   if(!loadRun())newRun();ensureRun();if(!run.quests)run.quests=genQuests();
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
@@ -7508,6 +7511,10 @@ const TripoEnvironment153 = (() => {
       if (!o.isMesh) return;
       const geometry=o.geometry.clone();
       geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(origin,o.matrixWorld));
+      // Etapa 2 (Ian): Tripo trees came with a flat grass platform that clashes with the ground; keep only trunk/roots near the floor.
+      if(['oak','willow','fir'].includes(id)){const P=geometry.attributes.position,I=geometry.index?geometry.index.array:null,n=I?I.length:P.count,keep=[],lim=size.y*(id==='willow'?.075:.125),rad=size.y*(id==='fir'?.06:.1);
+        for(let t=0;t<n;t+=3){const v=[I?I[t]:t,I?I[t+1]:t+1,I?I[t+2]:t+2];if(Math.max(...v.map(k=>P.getY(k)))<lim&&Math.max(...v.map(k=>Math.hypot(P.getX(k),P.getZ(k))))>rad)continue;keep.push(...v)}
+        geometry.setIndex(keep)}
       geometry.computeBoundingSphere();
       const source=Array.isArray(o.material)?o.material:[o.material];
       const materials=source.map(m=>{
@@ -7520,6 +7527,10 @@ const TripoEnvironment153 = (() => {
         // Same character visibility cutout as existing scenery. Instancing needs world positions.
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
+          if(['oak','willow','fir'].includes(id))shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
+            {vec3 c0=diffuseColor.rgb;float leaf154=smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95);float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
+            diffuseColor.rgb=mix(c0,(dot(c0,vec3(.3,.59,.11))*2.1+.11)*vColor,leaf154*on154);}
+            #endif`);
           if(!['oak','willow','fir','boulder','stones','mossrock'].includes(id)){
             // Night: amber window panes glow and the facade keeps a faint read, like the procedural houses.
             shader.uniforms.night153=window.NIGHT153U||(window.NIGHT153U={value:0});
@@ -7551,6 +7562,17 @@ const TripoEnvironment153 = (() => {
     if(bio==='vulcao'||bio==='deserto')return null;
     return bio==='pantano'?'willow':bio==='neve'||bio==='cristal'?'fir':'oak';
   }
+  // Etapa 2 (Ian): leaf colour follows biome and season (white = keep the Tripo texture).
+  function leaf154(id,x,z){
+    const bio=L.mode==='dungeon'&&L.G?.th?.habitat124||biomeAt(x,z),se=seasonI(),v=WN?WN(x*.05+7,z*.05+3):.5;
+    if(id==='fir')return bio==='neve'||bio==='cristal'||se===3?(v>.5?[.72,.88,.8]:[.6,.8,.68]):bio==='pantano'?[.42,.55,.36]:bio==='floresta'?[.3,.48,.3]:null;
+    if(se===2)return[[1,.55,.16],[.92,.32,.12],[1,.78,.22]][Math.min(2,Math.floor(v*3))];
+    if(se===3)return[.88,.92,.96];
+    if(bio==='flores')return se===0?(v>.55?[1,.93,.95]:[1,.52,.76]):[.62,.88,.38];
+    if(bio==='pantano')return[.45,.55,.3];
+    if(bio==='floresta')return[.3,.5,.28];
+    return se===0?[.55,.88,.35]:null;
+  }
   function add(batch,id,x,y,z,ry,scale,sy,sz){
     (batch.tripo153||(batch.tripo153=[])).push({id,x,y,z,ry:ry||0,scale,sy:sy||scale,sz:sz||scale});
   }
@@ -7569,6 +7591,8 @@ const TripoEnvironment153 = (() => {
   const oldEH=EH,oldEW=EW,oldMesh=EnvBatch.prototype.mesh;
   EH=function(batch,key,x,y,z,ry,height,tint){
     const id=key.startsWith('tree_')?tree(key,x,z):null,m=models[id];
+    // Etapa 2 (Ian): the old non-Tripo trees are gone; where there is no Tripo tree, nothing grows.
+    if(!m&&key.startsWith('tree_')&&models.oak)return 0;
     if(!m)return oldEH(batch,key,x,y,z,ry,height,tint);
     // Metre scale: real trees tower over the 1.9 m hero (oak ~10 m, willow ~9 m, fir ~12 m).
     const scale=height*({oak:1.55,willow:1.35,fir:1.7}[id]||1)/m.h;add(batch,id,x,y,z,ry,scale);return scale;
@@ -7598,6 +7622,7 @@ const TripoEnvironment153 = (() => {
       for(const part of models[id].parts){
         const mesh=new THREE.InstancedMesh(part.geometry,part.material,placements.length);
         placements.forEach((e,i)=>{position.set(e.x,e.y,e.z);rotation.setFromAxisAngle(axis,e.ry);scale.set(e.scale,e.sy||e.scale,e.sz||e.scale);matrix.compose(position,rotation,scale);mesh.setMatrixAt(i,matrix)});
+        if(['oak','willow','fir'].includes(id)){const col=new THREE.Color();placements.forEach((e,i)=>{const c=leaf154(id,e.x,e.z);col.setRGB(...(c||[1,1,1]));mesh.setColorAt(i,col)});mesh.instanceColor.needsUpdate=true}
         mesh.instanceMatrix.needsUpdate=true;
         // Three r128 culls instances using source bounds; chunk streaming already bounds visibility.
         mesh.frustumCulled=false;mesh.userData.tripo153=id;group.add(mesh);
@@ -7609,7 +7634,8 @@ const TripoEnvironment153 = (() => {
   const oldDispose=envDispose;
   envDispose=function(root){root.traverse(o=>{if(o.isInstancedMesh&&o.userData.tripo153&&o.dispose)o.dispose()});oldDispose(root)};
   MODELS.ready=Promise.all([MODELS.ready,ready]).then(([ok])=>ok);
-  return {models,errors,ready,files};
+  const treeOk=(k,x,z)=>!k.startsWith('tree_')||!models.oak||!!models[tree(k,x,z)];
+  return {models,errors,ready,files,treeOk,leaf154};
 })();
 window.TripoEnvironment153=TripoEnvironment153;
 
