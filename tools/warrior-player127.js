@@ -58,7 +58,7 @@
     const core=new T.Mesh(new T.CylinderGeometry(.018+.02*k,.035+.03*k,len,10,1,true),mat);core.position.y=cy??(bow?.49:.07+len/2);g.add(core);
     const halo=new T.Mesh(new T.CylinderGeometry(.04+.05*k,.07+.06*k,len*1.05,10,1,true),mat.clone());halo.material.opacity*=.45;halo.position.copy(core.position);g.add(halo);
     g.onBeforeRender=()=>{};core.onBeforeRender=()=>{const t=performance.now()/1000;mat.opacity=(.18+.3*k)*(.75+.25*Math.sin(t*(2+4*k)));halo.scale.setScalar(1+.08*Math.sin(t*(1.5+3*k)))};
-    w.add(g);(w.userData.materials||(w.userData.materials=[])).push(mat,halo.material)}
+    w.add(g)}
   function staff162(item){const r=new T.Group(),col=item.visual.color,mats=[];
     const wood=new T.MeshStandardMaterial({color:0x4a2e1c,roughness:.8}),gem=new T.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.8,roughness:.25,metalness:.2}),gold=new T.MeshStandardMaterial({color:0x927044,metalness:.75,roughness:.35});mats.push(wood,gem,gold);
     const shaft=new T.Mesh(new T.CylinderGeometry(.013,.016,1.05,8),wood);shaft.position.y=.3;r.add(shaft);
