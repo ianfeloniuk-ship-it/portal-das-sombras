@@ -4325,10 +4325,34 @@ function tickGates(dt){
   const PP=P||{x:0,z:0};let alive=gates.filter(g=>!g.dead&&Math.hypot(g.x-PP.x,g.z-PP.z)<GATE_NEAR155).length,tries=0;
   while(alive<GATE_COUNT155&&tries++<GATE_COUNT155){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
 }
-function dungeonBreak(g){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
-  const n=4+g.rank;for(let i=0;i<n;i++){const e=spawnKind(wpick(dungeonPool124(g)).k,g.x+rnd(-4,4),g.z+rnd(-4,4),g.rank,{wild:true,breaker:true});e.gold*=2}
-  toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: portal rank '+GR[g.rank].id+' a '+Math.round(Math.hypot(g.x-player.x,g.z-player.z))+'m. Monstros soltos.',5000);bigText('QUEBRA',1100);
+function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
+  // v155 (Ian): monstros e o chefe saem do portal. Se houver vila a até 100 m, marcham para atacá-la; senão vagueiam pelo mapa.
+  const near=nearestCity(g.x,g.z),wall=36*CITYK,city=near.c&&near.d-wall<=100&&!cityFallen(near.c)&&near.c.name!=='Aster'?near.c:null;
+  const raid={city:city?city.id:null,cx:city?city.x:g.x,cz:city?city.z:g.z};const out=[];
+  const n=opts.bossOnly?0:4+g.rank;for(let i=0;i<n;i++){const e=spawnKind(wpick(dungeonPool124(g)).k,g.x+rnd(-4,4),g.z+rnd(-4,4),g.rank,{wild:true,breaker:true});e.gold*=2;out.push(e)}
+  {const prev=bossE,b=spawnBoss(g.x+rnd(-2,2),g.z+rnd(-2,2),g.rank,dungeonBoss124(g));bossE=prev;b.wild=true;b.breaker=true;b.gold*=2;out.push(b)}
+  for(const e of out){e.raid155={...raid,tx:raid.cx,tz:raid.cz}}
+  const dist=player?Math.round(Math.hypot(g.x-player.x,g.z-player.z)):0;
+  if(city){const R=RAID155[city.id]||(RAID155[city.id]={hp:100,warned:false});R.hp=Math.min(R.hp,100);
+    toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' e marcham para <b>'+city.name+'</b> ('+dist+' m de você). Defenda a cidade!',7000);bigText('ATAQUE A '+city.name.toUpperCase(),1600)}
+  else{toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' a '+dist+' m e vagueiam pelo mapa.',5000);bigText('QUEBRA',1100)}
+  return out;
 }
+/* v155: ataque da Fenda a uma vila. Monstros dentro da muralha derrubam a defesa da cidade; em 0 ela cai (mesma reconstrução da queda sazonal). */
+const RAID155={};
+function raidMove155(e,dt,near){const R=e.raid155;let dx=R.tx-e.x,dz=R.tz-e.z,d=Math.hypot(dx,dz);
+  if(d<(R.city?4:2)){if(R.city){const a=rnd(0,TAU),r=rnd(4,20*CITYK);R.tx=R.cx+Math.cos(a)*r;R.tz=R.cz+Math.sin(a)*r}else{R.tx=e.x+rnd(-40,40);R.tz=e.z+rnd(-40,40)}return 0}
+  const sp=e.speed*(R.city?.75:.4)*dt;if(near)moveEnt(e,dx/d*sp,dz/d*sp);else{e.x+=dx/d*sp;e.z+=dz/d*sp}e.face=Math.atan2(dx,dz);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return 1}
+function updRaids155(dt){if(L.mode!=='world')return;const per={};
+  for(const e of enemies){if(e.dead||e.gone||!e.raid155?.city)continue;const R=e.raid155,c={x:R.cx,z:R.cz};if(Math.hypot(e.x-c.x,e.z-c.z)<36*CITYK)per[R.city]=(per[R.city]||0)+(e.isBoss?.6:.15)}
+  for(const id in RAID155){const R=RAID155[id],c=citiesAround(player.x,player.z,4000).find(c=>c.id===id)||null;const alive=enemies.some(e=>!e.dead&&!e.gone&&e.raid155?.city===id);
+    if(!alive){delete RAID155[id];if(c&&!cityFallen(c)){toast('<b>[CIDADE]</b> O ataque a '+c.name+' acabou. A cidade resistiu'+(R.hp<100?' com '+Math.round(R.hp)+'% da defesa':'')+'.',5000)}continue}
+    if(per[id]){R.hp-=per[id]*dt;if(!R.warned&&R.hp<100){R.warned=true;toast('<b>[CIDADE]</b> Monstros dentro das muralhas'+(c?' de '+c.name:'')+'! Defesa caindo.',4000)}}
+    if(R.hp<=0&&c){profile.raided155=profile.raided155||{};profile.raided155[id]=1;if(profile.rebuilt)delete profile.rebuilt[id];store.set('pds2_profile',profile);delete RAID155[id];
+      for(const e of enemies)if(e.raid155?.city===id){e.raid155.city=null;e.raid155.tx=e.x;e.raid155.tz=e.z}
+      const ch=chunks.get(c.cx+','+c.cz);if(ch){unloadChunk(ch);loadChunk(c.cx,c.cz)}bigText(c.name.toUpperCase()+' CAIU',1800);sfx('gong');toast('<b>[NARRADOR]</b> '+c.name+' caiu para os monstros da Fenda. Expulse-os e reconstrua a cidade.',7000)}}
+}
+function raidHud155(){const P=player;if(!P||L.mode!=='world')return '';let best=null;for(const id in RAID155){const c=citiesAround(P.x,P.z,400).find(c=>c.id===id);if(c){const d=Math.hypot(c.x-P.x,c.z-P.z);if(!best||d<best.d)best={c,d,R:RAID155[id]}}}return best?' · '+best.c.name.toUpperCase()+' SOB ATAQUE: DEFESA '+Math.max(0,Math.round(best.R.hp))+'%':''}
 function failRedPortalOnDeath(){
  if(L.mode!=='dungeon')return false;const g=L.special?L.gate?.ref:L.gate;
  if(!g||!g.red||g.id<0)return false;
@@ -4342,7 +4366,7 @@ function releaseRedPortalBreaks(){
  if(L.mode!=='world')return;const pending=profile.pendingRedBreaks103;
  if(!Array.isArray(pending)||!pending.length)return;
  profile.pendingRedBreaks103=[];store.set('pds2_profile',profile);
- for(const g of pending)if(Number.isFinite(g.x)&&Number.isFinite(g.z)&&Number.isInteger(g.rank)&&g.rank>=0&&g.rank<GR.length)dungeonBreak(g);
+ for(const g of pending)if(Number.isFinite(g.x)&&Number.isFinite(g.z)&&Number.isInteger(g.rank)&&g.rank>=0&&g.rank<GR.length)dungeonBreak(g,{bossOnly:true});
 }
 
 function genCands(){const pr=Math.min(9,run?rankOf():0);const out=[];for(let i=0;i<3;i++){const rank=clamp(pr+Math.floor(rnd(-1,2)),0,TOPR);const lvl=Math.max(1,(run?run.level:1)+Math.floor(rnd(-3,5)));out.push({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank,lvl,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),cost:Math.round(HIRE[rank]*(1+lvl*.03))})}return out}
@@ -5317,6 +5341,7 @@ function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const activ
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
+  if(e.raid155&&!e.aggro&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>12){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:0,dead:0,wind:0},e.t);return}}
   e.sleep=pd>55&&!e.aggro&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
@@ -5324,7 +5349,7 @@ function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const activ
   updateBasicDots(e,dt);if(e.dead)return;
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
-  if(L.mode==='world'){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);if(nc.d<R2&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*R2;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*R2;e.aggro=false}}}
+  if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);if(nc.d<R2&&!cityFallen(nc.c)){e.x=nc.c.x+(e.x-nc.c.x)/nc.d*R2;e.z=nc.c.z+(e.z-nc.c.z)/nc.d*R2;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
@@ -5374,7 +5399,7 @@ function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const activ
   animChibi(e.m,{move:mv,speed:Math.hypot(e.x-e.m.root.position.x,e.z-e.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind},e.t);
   e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;
 }
-function bossAggro(b){$('boss').hidden=false;toast('<b>[NARRADOR]</b> Guardião: <b>'+b.name+'</b>');bossLight.color.setHex(0xffd070);bossLight.intensity=1.4}
+function bossAggro(b){if(b.raid155)bossE=b;$('boss').hidden=false;toast('<b>[NARRADOR]</b> Guardião: <b>'+b.name+'</b>');bossLight.color.setHex(0xffd070);bossLight.intensity=1.4}
 function bossSpecial(b,T){
   const types=b.boss.types||[b.boss.type];b.spI=(b.spI||0)+1;const tp=types[b.spI%types.length],p2=b.phase>=2;b.act={type:'cast',t:0,wind:.6};
   if(tp==='seismic'){hazard(b.x,b.z,p2?9:7,1.1,b.dmg*1.6,'enemy',0xff3030);if(p2)setTimeout(()=>{if(!b.dead&&L.mode==='dungeon')hazard(b.x,b.z,12,1,b.dmg*1.2,'enemy',0xff3030)},700);toast('<b>[NARRADOR]</b> '+b.name+': Golpe Sísmico',1400)}
@@ -5500,7 +5525,7 @@ function update(dt){
 }
 function updWorld(dt){updEcon(dt);
   const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<36*CITYK&&!fal;
-  if(fal&&nc.d<45*CITYK){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,9);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(worldKinds124(gr,nc.c.x,nc.c.z)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[NARRADOR]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);
+  if(fal&&nc.d<45*CITYK&&!(profile.raided155||{})[nc.c.id]){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,9);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(worldKinds124(gr,nc.c.x,nc.c.z)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[NARRADOR]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);
   if(L.car){L.carT-=dt;if(L.carT<=0){L.carT=18;const c=L.car;for(let i=0;i<3;i++){const a=rnd(0,TAU),x=c.x+Math.cos(a)*14,z=c.z+Math.sin(a)*14;if(nearestCity(x,z).d<40*CITYK)continue;const e=spawnKind(wpick(worldKinds124(danger(x,z),x,z)).k,x,z,Math.max(danger(x,z),rankOf()-2),{wild:true});e.aggro=true}toast('<b>[CARAVANA]</b> Emboscada!',1500)}if(L.car.dead)L.car=null}
   if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}
   if(run.daily&&run.daily.day!==todayKey())ensureRun();
@@ -6038,7 +6063,7 @@ function updDayNight(dt){dayT+=dt;if(profile)profile.dayT=dayT;if(L.mode!=='worl
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */
 let evT=240;
-function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
+function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updRaids155(dt);updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
   if(profile.nemesis&&Math.random()<.4){spawnNemesis();return}
   if(unl('time')&&Math.random()<.12){const g=newGate();g.rank=clamp(rankOf(),0,9);g.time=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um portal com cor de sépia apareceu. Parece levar a outra época.',6000);bigText('PORTAL DO TEMPO',1200);return}
   if(Math.random()<.22){const g=newGate();g.rank=clamp(rankOf(),0,9);g.inverse=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um PORTAL INVERTIDO apareceu. Do outro lado fica o ninho deles.',6000);bigText('PORTAL INVERTIDO',1200);return}
@@ -6596,7 +6621,7 @@ function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};l
 const cityOf=()=>nearestCity(player.x,player.z).c;
 const cityL=c=>(profile.cityLv||{})[c.id]||0;
 /* cidades caídas */
-function cityFallen(c){if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=Math.floor((Date.now()/864e5+3)%7);const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
+function cityFallen(c){if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=Math.floor((Date.now()/864e5+3)%7);const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}
 
 /* ================= LIBERAÇÃO GRADUAL ================= */
@@ -6704,7 +6729,7 @@ function rebuildView(c){view=()=>rebuildView(c);const left=enemies.filter(e=>!e.
   h+=row('2. Doar material',fmt(k.gold)+' ouro + '+k.cry+' cristais de qualquer rank · você tem '+fmt(run.gold)+' / '+tot,btn('RECONSTRUIR','rebuild',c.id,!left&&run.gold>=k.gold&&tot>=k.cry,'hot'));
   openModal('RECONSTRUIR '+c.name.toUpperCase(),h)}
 function doRebuild(id){const c=nearestCity(player.x,player.z).c;if(c.id!==id||L.mode!=='world'||player.dead||Math.hypot(player.x-c.x,player.z-c.z)>45||!cityFallen(c)||enemies.some(e=>!e.dead&&e.breaker&&Math.hypot(e.x-c.x,e.z-c.z)<45))return;const k=rebuildCost();if(run.gold<k.gold||run.res.cry.reduce((a,b)=>a+b,0)<k.cry)return;let need=k.cry;run.gold-=k.gold;for(let t=0;t<10&&need>0;t++){const u=Math.min(run.res.cry[t],need);run.res.cry[t]-=u;need-=u}
-  profile.rebuilt=profile.rebuilt||{};profile.rebuilt[c.id]=weekId();regionEvent116(c,20,-20,'Você ajudou a reconstruir a cidade. Confiança +20; abastecimento recuperado.');store.set('pds2_profile',profile);
+  profile.rebuilt=profile.rebuilt||{};profile.rebuilt[c.id]=weekId();if(profile.raided155)delete profile.raided155[c.id];regionEvent116(c,20,-20,'Você ajudou a reconstruir a cidade. Confiança +20; abastecimento recuperado.');store.set('pds2_profile',profile);
   const ch=chunks.get(c.cx+','+c.cz);if(ch){unloadChunk(ch);loadChunk(c.cx,c.cz)}closeModal();bigText(c.name.toUpperCase()+' RECONSTRUÍDA',1800);sfx('gong');sfx('level');
   toast('<b>[CIDADE]</b> '+c.name+' voltou a viver. Lojas abertas, muralhas de pé. Confiança local +20.',6000)}
 /* bolsa organizada */
@@ -7475,7 +7500,7 @@ function rareAutoGate153(sk){const a=awakening103();let best=0;for(let n=1;n<=af
 function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}view=rareGateView103;let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p><p><b>Fendas tecidas: o Tecelão não rasga o mundo, ele puxa um fio do Eco e costura a passagem até um trecho que nenhum transmigrador saqueou. Lá dentro, os itens sobem um grau de raridade e guardam o calor do mundo de origem (+15% de ataque/escudo, +3% por nível da habilidade). Ao usar, a habilidade abre na hora o melhor portal que suas energias pagam, com chance de vir vermelho (12% + 3% por nível).</b></p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,BIO_N[biomeAt(player.x,player.z)]+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
 function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate'||s.effect==='gate');if(!sk||sk.cdT>0||rareCastCheck103(sk)||!Number.isInteger(n)||n<1||n>affinity103(13)||profile.rank+n>8||awakening103().energy<n*3)return false;let pt=null;for(let i=0;i<12;i++){const ang=i*Math.PI/6,x=player.x+Math.sin(ang)*7,z=player.z+Math.cos(ang)*7;if(worldFree(x,z,3)&&!inCity(x,z)&&gates.every(g=>g.dead||Math.hypot(g.x-x,g.z-z)>7)){pt={x,z};break}}if(!pt){toast('Não há espaço livre para o portal. Procure uma área aberta.');return false}const lv153=rareGateLevel153(sk),red153=Math.random()<Math.min(.45,.12+.03*lv153);const g=newGate();Object.assign(g,{...pt,rank:profile.rank+n,aff:[],red:red153,woven153:rareWovenBonus153(lv153),double:false,secret:false,inverse:false,time:false,life:900,custom:true,rareCreated103:true});awakening103().energy-=n*3;gates.push(g);gateMesh(g);if(g.mesh?.userData.rift131)Rift131.open(g.mesh);shake(.55);if(typeof fxBurst==='function')fxBurst(g.x,2.6,g.z,red153?0xec3552:0xb98cff,34,6);narratorEvent105('fenda',{rank:g.rank});sk.cdT=sk.cdMax=skillCooldown(sk);saveRun();closeModal();toast((red153?'Fenda VERMELHA':'Fenda')+' rank '+GR[g.rank].id+' aberta. Itens tecidos: +'+Math.round(g.woven153*100)+'%.');logNews('<b>[NARRADOR]</b> Você rasga o tecido da realidade e costura a passagem.'+(red153?' O fio veio tingido de sangue: a Fenda é vermelha.':'')+' Do outro lado há um trecho que ninguém pisou: o que se encontra lá vem intacto, com o calor do mundo de origem.');return true}
 function rareAreaTime103(x,z,boss=false){const z0=AR103.zone;return z0&&z0.until>time&&Math.hypot(x-z0.x,z-z0.z)<=z0.r?(boss?.8:.5):1}
-function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103)hud103.textContent=rareHud103();if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
+function rareUpdate103(dt){if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103)hud103.textContent=rareHud103()+raidHud155();if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
  if(!rareActive103(13))AR103.passages=null;const cap=rareActive103(7)?affinity103(7):0;for(const al of specialEcos103().slice(cap)){al.dead=true;scene.remove(al.m.root)}
   if(a.pending&&L.mode==='world'&&!L.inter.some(i=>i.type==='fissure103')){const p=a.pending;L.inter.push({type:'fissure103',x:p.x,z:p.z,r:3.5,label:'F · INVESTIGAR FISSURA',use:inspectFissure103})}for(const it of L.inter)if(it.type==='fissure103'){it.hidden=!a.pending||!!AR103.trial;if(a.pending){it.x=a.pending.x;it.z=a.pending.z}}
  if(L.mode==='world'&&a.pending){if(!window.riftScarPersistent131||window.riftScarPersistent131.userData.owner!==L){const scar=new THREE.Group();for(let i=0;i<7;i++){const angle=-.9+i*.3,length=1.15+(i%3)*.22,x0=Math.cos(angle)*length*.22,z0=Math.sin(angle)*length*.22,x1=Math.cos(angle+.3)*length,z1=Math.sin(angle+.3)*length,m=new THREE.Mesh(new THREE.CylinderGeometry(.019,.006,Math.hypot(x1-x0,z1-z0),4),glowS(a.pending.color==='red'?0xe14a64:0x9370d2,.30)),dir=new THREE.Vector3(x1-x0,0,z1-z0);m.position.set((x0+x1)/2,.055,(z0+z1)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());scar.add(m)}scar.userData.owner=L;scene.add(scar);window.riftScarPersistent131=scar}window.riftScarPersistent131.position.set(a.pending.x,0,a.pending.z)}else if(window.riftScarPersistent131){scene.remove(window.riftScarPersistent131);window.riftScarPersistent131=null}
