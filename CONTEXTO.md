@@ -641,3 +641,5 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 ## v160 (02/10/2026, Claude)
 - Projéteis do **Mago do Raio** (classe 11) e do **Mago da Terra** (classe 10) refeitos no Tripo e ligados em `tools/proj155.js`: raio = cristal azul com descargas elétricas; terra = pedra incandescente com poeira. Substituem os modelos com defeito em `models/proj155/`.
 - Os 9 chefes das classes raras foram baixados do Tripo com esqueleto (Mixamo) e ficam em `Entregas/chefes-raros-tripo/` para a próxima etapa.
+
+- v161 (02/10/2026): chefes das classes raras do Tripo com poderes da classe (tools/boss160.js, models/chefes160/).

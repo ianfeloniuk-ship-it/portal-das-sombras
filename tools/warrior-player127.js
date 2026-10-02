@@ -45,25 +45,50 @@
     if(mix153){for(const k of ['cape','cape_tail'])if(!bones[k])bones[k]=new T.Object3D();model.updateMatrixWorld(true);const inv=new T.Quaternion().copy(model.getWorldQuaternion(new T.Quaternion())).invert();
       for(const [k,b] of Object.entries(bones)){if(!b.isBone)continue;b.userData.bindLocal153=b.quaternion.clone();b.userData.bindModel153=inv.clone().multiply(b.getWorldQuaternion(new T.Quaternion()));}
       const minv=new T.Matrix4().copy(model.matrixWorld).invert();model.traverse(o=>{if(!o.isBone)return;o.userData.rest155M=inv.clone().multiply(o.getWorldQuaternion(new T.Quaternion()));o.userData.rest155P=o.getWorldPosition(new T.Vector3()).applyMatrix4(minv);});}
-    const socket=new T.Group();socket.name='weapon_socket_r';socket.position.set(.002,0,.004);socket.rotation.set(2.05,0,0);if(mix153){socket.rotation.set(0,0,Math.PI/2);socket.scale.setScalar(1/model.scale.x*1.0)}bones.hand_r.add(socket);
+    const socket=new T.Group();socket.name='weapon_socket_r';socket.position.set(.002,0,.004);socket.rotation.set(2.05,0,0);if(mix153){/* v162 (Ian: "corrigir essa espada"): nos ossos do Tripo a mão em pose T tem os eixos do modelo (dedos em -X, polegar em +Z). A lâmina sai do punho para o lado do polegar e o cabo fica na palma. */socket.rotation.set(Math.PI/2,0,0);socket.position.set(-.045,-.015,0);socket.scale.setScalar(1/model.scale.x*1.6)}bones.hand_r.add(socket);
     const armorGroup=new T.Group();armorGroup.name='equipment_layers';model.add(armorGroup);
     const shadow=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.23,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;root.add(shadow);
     const m={mix153,root,body,model,bones,uniforms,mats,wmats:[],wnodes:[],socket,armorParts:[],baseMaterials:mats.slice(),warrior127:true,glb:true,sc:1,armL:bones.upperarm_l,armR:bones.upperarm_r,legL:bones.thigh_l,legR:bones.thigh_r,eyeMat:new T.MeshBasicMaterial(),gearSignature:null,attackPhase:0};
     API.gear(m,options.equip||{},options);API.animate(m,{move:0,atk:0,dead:0},0,0);return m;
   };
   function disposePart(part){part.traverse(o=>{if(o.isMesh){o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});part.removeFromParent?part.removeFromParent():part.parent&&part.parent.remove(part);}
+  /* v162 (Ian): aura da arma pela cor do rank — espada, cajado e arco. Rank F/E sem aura; cresce e pulsa mais nos ranks altos. */
+  function aura162(w,color,tier,len,bow,cy){if(tier<1)return;const k=Math.min(1,tier/9),g=new T.Group();g.name='aura162';
+    const mat=new T.MeshBasicMaterial({color,transparent:true,opacity:.18+.3*k,blending:T.AdditiveBlending,depthWrite:false});
+    const core=new T.Mesh(new T.CylinderGeometry(.018+.02*k,.035+.03*k,len,10,1,true),mat);core.position.y=cy??(bow?.49:.07+len/2);g.add(core);
+    const halo=new T.Mesh(new T.CylinderGeometry(.04+.05*k,.07+.06*k,len*1.05,10,1,true),mat.clone());halo.material.opacity*=.45;halo.position.copy(core.position);g.add(halo);
+    g.onBeforeRender=()=>{};core.onBeforeRender=()=>{const t=performance.now()/1000;mat.opacity=(.18+.3*k)*(.75+.25*Math.sin(t*(2+4*k)));halo.scale.setScalar(1+.08*Math.sin(t*(1.5+3*k)))};
+    w.add(g);(w.userData.materials||(w.userData.materials=[])).push(mat,halo.material)}
+  function staff162(item){const r=new T.Group(),col=item.visual.color,mats=[];
+    const wood=new T.MeshStandardMaterial({color:0x4a2e1c,roughness:.8}),gem=new T.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.8,roughness:.25,metalness:.2}),gold=new T.MeshStandardMaterial({color:0x927044,metalness:.75,roughness:.35});mats.push(wood,gem,gold);
+    const shaft=new T.Mesh(new T.CylinderGeometry(.013,.016,1.05,8),wood);shaft.position.y=.3;r.add(shaft);
+    const ring=new T.Mesh(new T.TorusGeometry(.04,.009,6,14),gold);ring.position.y=.84;r.add(ring);
+    const orb=new T.Mesh(new T.IcosahedronGeometry(.045,1),gem);orb.position.y=.86;r.add(orb);
+    r.userData.materials=mats;r.userData.shape='staff';r.userData.color=col;r.userData.rank=item.tier||0;return r}
+  /* v162 (Ian: "a mão tem que fechar em volta da onde segura a espada"): o Viajante não tem ossos de dedo,
+     então os dedos da malha (vértices do hand_r além dos nós dos dedos) são enrolados em volta do cabo. */
+  const FIST162={knuckle:.049,lift:.007,r:.016,max:Math.PI*1.55,thumbZ:.044};
+  function fist162(m,on){if(!m.mix153)return;m.model.traverse(o=>{if(!o.isSkinnedMesh)return;const sk=o.skeleton,hi=sk.bones.findIndex(b=>b.name==='hand_r');if(hi<0)return;
+    let g=o.geometry;const SI=g.attributes.skinIndex,SW=g.attributes.skinWeight,wt=v=>{let w=0;for(let k=0;k<4;k++)if([SI.getX,SI.getY,SI.getZ,SI.getW][k].call(SI,v)===hi)w+=[SW.getX,SW.getY,SW.getZ,SW.getW][k].call(SW,v);return w};
+    if(o.userData.fist162===undefined){let has=false;for(let v=0;v<SI.count&&!has;v++)if(wt(v)>.5)has=true;if(!has){o.userData.fist162=null;return}
+      g=o.geometry=g.clone();const P0=g.attributes.position,n=new T.BufferAttribute(new Float32Array(P0.count*3),3);for(let v=0;v<P0.count;v++)n.setXYZ(v,P0.getX(v),P0.getY(v),P0.getZ(v));g.setAttribute('position',n);
+      const hp=new T.Vector3().setFromMatrixPosition(new T.Matrix4().copy(sk.boneInverses[hi]).invert());o.userData.fist162={orig:n.array.slice(),w:Float32Array.from({length:P0.count},(_,v)=>wt(v)),hp,on:false}}
+    const F=o.userData.fist162;if(!F||F.on===on)return;F.on=on;const P=o.geometry.attributes.position,O=F.orig,KX=F.hp.x-FIST162.knuckle,KY=F.hp.y-FIST162.lift,R=FIST162.r,ZT=F.hp.z+FIST162.thumbZ;
+    for(let v=0;v<P.count;v++){let x=O[v*3],y=O[v*3+1],z=O[v*3+2];if(on&&F.w[v]>.5&&x<KX&&z<ZT){const f=Math.min((KX-x)/R,FIST162.max),d=y-KY;x=KX-(R+d)*Math.sin(f);y=KY-R+(R+d)*Math.cos(f)}P.setXYZ(v,x,y,z)}
+    P.needsUpdate=true;o.geometry.computeVertexNormals();m.fistHand162=F.hp});
+    if(on&&m.fistHand162)m.socket.position.set(-FIST162.knuckle,-FIST162.lift-FIST162.r,.02)}
   API.gear=function(m,equip,options){
     options=options||{};const colors=options.tierColors||[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
     const signature=JSON.stringify(['w','a','h','g','b'].map(k=>{const i=equip[k];return i?[k,i.uid,i.tier,i.rar,i.visual,i.visualWeapon]:[k,null]}));
     if(signature===m.gearSignature)return;m.gearSignature=signature;
     for(const p of m.wnodes)disposePart(p);for(const p of m.armorParts)disposePart(p);m.wnodes=[];m.armorParts=[];m.wmats=[];m.mats=m.baseMaterials.slice();
     const itemFor=it=>{if(!it)return null;return {...it,visual:{...it.visualWeapon,...it.visual,color:it.visual?.color??colors[clamp(it.tier||0,0,9)]}}};
-    m.bow155=false;const heldWeapon=equip.w,isBow=heldWeapon&&(heldWeapon.kind155==='bow'||heldWeapon.visual?.shape==='bow'||heldWeapon.visualWeapon?.shape==='bow');
+    m.bow155=false;fist162(m,false);const heldWeapon=equip.w,isBow=heldWeapon&&(heldWeapon.kind155==='bow'||heldWeapon.visual?.shape==='bow'||heldWeapon.visualWeapon?.shape==='bow');
     if(isBow&&bow155&&m.bones.hand_l){const bow=T.SkeletonUtils.clone(bow155);const holder=new T.Group();holder.add(bow);m.bowHolder155=holder;
       // Empunhadura: o meio do arco (y≈0,49 do modelo) na palma; em pose T o arco fica de pé no mundo e acompanha a mão.
       bow.position.set(0,-.49,0);const hl=m.bones.hand_l;m.model.updateMatrixWorld(true);const hq=hl.getWorldQuaternion(new T.Quaternion()),hs=hl.getWorldScale(new T.Vector3()).x;
-      holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true}
-    else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=global.WarriorEquipment127.weapon(T,item);m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
+      holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true;const it=itemFor(heldWeapon);aura162(bow,it.visual.color,it.tier||0,.98,true)}
+    else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=heldWeapon.kind155==='staff'?staff162(item):global.WarriorEquipment127.weapon(T,item);fist162(m,true);aura162(weapon,item.visual.color,item.tier||0,...(heldWeapon.kind155==='staff'?[.32,false,.84]:[item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
     // Equipment is added as independent pieces; the approved face remains intact.
     // Armor assets await art review. Keep the approved clothes intact.
