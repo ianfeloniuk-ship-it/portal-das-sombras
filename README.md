@@ -9,7 +9,7 @@ RPG de ação 3D para PC, com suporte a celular. Explore as Fendas, enfrente gua
 ## Jogar no PC
 - Abra o site no navegador. A tela ocupa a janela disponível; maximize para jogar em tela larga.
 - WASD/setas movem. O botão esquerdo do mouse mira e ataca; segure para atacar continuamente.
-- Arraste com o botão direito para girar a câmera, use a roda para aproximar e o botão do meio para restaurar.
+- Arraste com o botão direito para girar a câmera (puxe para baixo para vê-la na altura do herói, até de frente), use a roda para aproximar e o botão do meio para restaurar.
 - **DIÁRIO** (L) reúne objetivos, histórias e descobertas. Escolha **Acompanhar** para mostrar um objetivo no painel.
 - Em **⚙ → Ver atalhos do teclado**, consulte todos os controles. **Configurar teclas** permite trocar os atalhos e atualiza a barra de habilidades.
 - Para usar a cópia local deste repositório no Windows, execute `JOGAR-PC.bat` com Python disponível.

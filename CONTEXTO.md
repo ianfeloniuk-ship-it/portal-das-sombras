@@ -643,3 +643,10 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Os 9 chefes das classes raras foram baixados do Tripo com esqueleto (Mixamo) e ficam em `Entregas/chefes-raros-tripo/` para a próxima etapa.
 
 - v161 (02/10/2026): chefes das classes raras do Tripo com poderes da classe (tools/boss160.js, models/chefes160/).
+
+## v165 (02/10/2026, Claude na nuvem) — feedback do Irror
+- Arqueiro: Flecha Enredante agora deixa chefes 25% mais lentos (comuns 50%) e dá crítico garantido também neles; Armadilha pega chefe (sem imobilizar: 25% mais lento por 3s + crítico). Disparo Rápido virou rajada de 3 flechas que atravessam (45% cada, 135% total). Lentidão de chefe = `e.slow` com fator .75 no movimento.
+- Anel embaixo do herói não pisca mais (estava no mesmo nível do chão; agora y .12 + polygonOffset).
+- Câmera: no PC, arrastar com o botão direito para baixo desce a câmera até a altura do herói (`pcCam.pitch` 0–1), dá para vê-lo de frente girando; botão do meio restaura. No celular, botão 🎥 alterna vista de cima / de frente.
+- Mira: `aimPoint` usa o retângulo real do canvas e, com câmera baixa (mouse acima do horizonte), segue a direção do mouse.
+- Pendente: barra de vida sobre a cabeça fica alta na câmera baixa.
