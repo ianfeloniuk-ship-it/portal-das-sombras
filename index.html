@@ -156,7 +156,7 @@ small.tip{font-size:12px;line-height:1.55}
 #history95.collapsed{height:34px!important}#history95.collapsed #historyBody95,#history95.collapsed #historyResize95{display:none}
 body:not(.pc) #history95{top:180px;bottom:auto;max-height:25dvh;width:280px;max-width:calc(100vw - 120px)}
 @media(orientation:portrait){#tb{left:auto;right:8px;display:block}#tb .mini{padding:9px 12px;font-size:11px}}
-.skill114{border-bottom:1px solid #d5a34b40;padding:12px 2px}.skill114 summary{cursor:pointer;font-weight:700}.skill114 summary span{float:right;color:#b8b3aa;font-size:12px}.title-progress114{margin-top:8px;font-size:12px}.title-progress114 progress{display:block;width:100%;margin-top:4px;accent-color:#e9b35e}
+.skill114{border-bottom:1px solid #d5a34b40;padding:12px 2px}.skill114 summary{cursor:default;font-weight:700;list-style:none}.skill114 summary::-webkit-details-marker{display:none}.skill114 summary span{float:right;color:#b8b3aa;font-size:12px}.title-progress114{margin-top:8px;font-size:12px}.title-progress114 progress{display:block;width:100%;margin-top:4px;accent-color:#e9b35e}
 /* v118: títulos e caminhos de navegação do Personagem. */
 .title-card118{padding:12px 0;border-bottom:1px solid #d5a34b40}
 .title-heading118{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -222,7 +222,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">ECOS DA FENDA</h1>
-    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Escolha sua classe para começar a jornada. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. Ao morrer, perde parte do ouro e da XP, mas o personagem continua.</div>
+    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. Ao morrer, perde parte do ouro e da XP, mas o personagem continua.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -424,7 +424,7 @@ const NR_LINES105={
   "Você venceu um rank de Fenda que já custou uma queda.",
   "Eu não esqueci aquela derrota. Agora também tenho esta vitória.",
   "O mesmo rank, outro resultado.",
-  "Essa classificação já marcou uma queda sua. Hoje marcou uma vitória.",
+  "Você já tinha caído num portal deste rank. Hoje venceu.",
   "Seu histórico neste rank ficou menos pesado.",
   "Essa vitória responde a uma parte do caminho que doeu.",
   "Antes houve uma queda em desafio deste rank. Hoje houve conclusão.",
@@ -442,14 +442,14 @@ const NR_LINES105={
   "Você entrou em uma Fenda acima do seu rank.",
   "Seu rank é menor que o deste portal. Cuidado.",
   "Há uma diferença de rank aqui. Vale manter a saída em mente.",
-  "Esse portal pede mais do que sua classificação atual.",
+  "Este portal é de rank maior que o seu.",
   "A Ordem classificaria esta entrada como arriscada.",
   "Estamos além do perigo indicado pelo seu rank.",
   "Você entrou num portal de rank maior que o seu.",
   "Neste desafio, sua classificação recomenda atenção.",
   "A dificuldade subiu antes da sua próxima prova.",
   "Esse rank ainda está à frente do seu. A entrada já ficou atrás.",
-  "Você escolheu um desafio maior que sua classificação.",
+  "Você entrou num portal acima do seu rank.",
   "O portal abriu. Isso não torna o confronto simples.",
   "Podemos observar o terreno antes de avançar mais.",
   "O rank desta Fenda merece respeito.",
@@ -900,7 +900,7 @@ const NR_LINES105={
   "A missão defensiva encontrou uma conclusão.",
   "O alvo permaneceu enquanto os invasores caíram.",
   "Você sustentou o espaço que precisava proteger.",
-  "A defesa devolveu um resultado completo.",
+  "Defesa concluída.",
   "O núcleo continua aqui depois das ondas.",
   "Agora recolha o que essa defesa rendeu.",
   "Você foi uma companhia difícil para os invasores.",
@@ -1178,7 +1178,7 @@ const NR_LINES105={
   "Aquele inimigo exigente ficou para trás.",
   "Você sobreviveu até vencer esse confronto.",
   "A resistência do guardião acabou.",
-  "Você levou a luta até a derrota do chefe.",
+  "Você derrotou o chefe.",
   "Esse combate encontrou uma conclusão a seu favor.",
   "O adversário caiu antes de encerrar sua jornada.",
   "Você superou a ameaça que estava diante de si.",
@@ -1190,7 +1190,7 @@ const NR_LINES105={
   "Mais um chefe entrou nas suas lembranças de vitória.",
   "Você conseguiu terminar o combate contra ele.",
   "A ameaça que enfrentamos acabou caindo.",
-  "Seu percurso atravessou outro guardião.",
+  "Mais um guardião derrotado.",
   "O confronto deixou uma conquista concreta.",
   "Você venceu o adversário que comandava essa luta.",
   "O guardião recebeu uma resposta definitiva neste combate.",
@@ -1294,7 +1294,7 @@ const NR_LINES105={
  ],
  "buy": [
   "Você comprou uma nova peça de equipamento.",
-  "A bolsa recebeu o resultado dessa escolha.",
+  "A compra foi para a bolsa.",
   "Seu ouro virou equipamento para experimentar.",
   "A compra acrescentou uma opção ao repertório.",
   "Você levou uma peça nova da loja.",
@@ -1306,7 +1306,7 @@ const NR_LINES105={
   "O preparo também acontece diante do balcão.",
   "Você trouxe mais uma opção de equipamento.",
   "A peça comprada ainda merece ser comparada.",
-  "Seu ouro passou a ter outra forma.",
+  "Você gastou ouro numa compra.",
   "A loja contribuiu com sua preparação.",
   "Você escolheu acrescentar essa peça ao inventário.",
   "O equipamento novo já pode ser avaliado.",
@@ -1314,14 +1314,14 @@ const NR_LINES105={
   "Você saiu da negociação com uma peça.",
   "A bolsa ganhou algo além de recursos.",
   "Seu preparo incluiu uma escolha na loja.",
-  "A peça comprada faz parte do que você carrega.",
-  "Você trocou ouro por uma possibilidade de combate.",
+  "A peça comprada está na bolsa.",
+  "Você comprou equipamento de combate.",
   "A loja recebeu pagamento e entregou equipamento.",
   "Esse investimento agora está na sua bolsa.",
   "Você ampliou o conjunto disponível para escolher.",
   "A preparação ganhou uma peça comprada.",
   "Compra feita. Confira na bolsa.",
-  "O balcão ofereceu algo que você resolveu levar.",
+  "Compra feita no balcão.",
   "Você encontrou uma compra para fazer antes de seguir.",
   "O lojista certamente aprovou esse plano.",
   "Seu ouro conseguiu uma nova ocupação.",
@@ -1341,9 +1341,9 @@ const NR_LINES105={
   "A bolsa recebeu uma criação da forja.",
   "Seu preparo ganhou algo feito com materiais reunidos.",
   "Os espólios encontraram uma nova utilidade.",
-  "Você deu forma ao que havia guardado.",
+  "A forja transformou seus materiais em uma peça.",
   "A peça forjada já faz parte do inventário.",
-  "O trabalho da forja produziu um resultado.",
+  "A forja terminou a peça.",
   "Seus recursos deixaram de ser apenas reserva.",
   "Você construiu mais uma opção para o conjunto.",
   "A fabricação terminou com equipamento novo.",
@@ -1399,7 +1399,7 @@ const NR_LINES105={
   "A peça saiu da tentativa com melhoria maior.",
   "Você manteve o item e avançou seu reforço.",
   "O aprimoramento acrescentou força ao equipamento.",
-  "O trabalho sobre essa peça chegou ao objetivo.",
+  "A melhoria deu certo.",
   "Mais um reforço foi conquistado.",
   "Essa melhoria já faz parte do item.",
   "Você conseguiu levar a peça um pouco além.",
@@ -1455,7 +1455,7 @@ const NR_LINES105={
   "Os materiais foram gastos e o reforço falhou.",
   "Pelo menos a peça não fugiu da responsabilidade.",
   "A melhoria marcou presença apenas no plano.",
-  "Desta vez, o risco cobrou a parte dele.",
+  "O reforço falhou desta vez.",
   "O ferreiro acabou de ganhar um silêncio constrangedor.",
   "Seu item continua inteiro e bastante teimoso.",
   "A tentativa foi ambiciosa. O resultado, conservador."
@@ -1565,16 +1565,16 @@ const NR_LINES105={
   "Sua formação recebeu uma mudança importante.",
   "A habilidade nova acompanha essa conquista.",
   "Você avançou além da etapa inicial da classe.",
-  "A missão de evolução teve seu resultado.",
+  "Missão de evolução concluída.",
   "Seu aprendizado chegou a uma nova forma.",
-  "Você abriu outra parte dessa formação.",
+  "Você avançou na evolução da classe.",
   "O desafio de classe encontrou sua conclusão.",
   "A mudança trouxe mais uma opção ao combate.",
   "Sua jornada acrescentou uma evolução à classe.",
-  "Você recebeu o resultado da missão de formação.",
+  "Você recebeu a recompensa da missão de evolução.",
   "A classe agora tem outro estágio no seu caminho.",
   "Essa conquista amplia o que você pode usar.",
-  "Você completou a primeira evolução dessa formação.",
+  "Você completou a primeira evolução da classe.",
   "Sua apresentação acaba de ficar um pouco maior.",
   "A classe ganhou um nome para combinar com a ambição.",
   "Você passou da parte introdutória com bastante insistência.",
@@ -1810,9 +1810,9 @@ const NR_LINES105={
   "A batalha deixou uma conquista ligada à cidade.",
   "Seu caminho passou pela defesa de outras ruas.",
   "Você encerrou o combate contra o sitiante.",
-  "A ameaça à cidade perdeu seu maior adversário.",
+  "A cidade está a salvo: o dragão caiu.",
   "O cerco encontrou resistência suficiente em você.",
-  "Você levou a batalha até a derrota do dragão.",
+  "Você derrotou o dragão.",
   "A cidade ficou livre daquele inimigo sitiante.",
   "O combate decidiu o fim dessa ameaça.",
   "Sua jornada acrescentou uma defesa de cidade.",
@@ -1845,7 +1845,7 @@ const NR_LINES105={
   "Seu grupo ganhou um caçador contratado.",
   "A contratação acrescentou companhia à jornada.",
   "Você escolheu dividir o combate com alguém.",
-  "Seu ouro trouxe reforço para perto.",
+  "Você contratou um aliado.",
   "O grupo recebeu mais um integrante.",
   "Você ampliou a companhia que leva consigo.",
   "Uma contratação mudou a composição do grupo.",
@@ -1889,14 +1889,14 @@ const NR_LINES105={
   "A viagem encontrou um caminho mais curto.",
   "O portal trouxe você ao destino registrado.",
   "Sua rota passou pela rede de viagens.",
-  "Você chegou à cidade escolhida pela passagem.",
+  "Você chegou à cidade escolhida.",
   "A distância ficou do outro lado do portal.",
   "Essa travessia ligou dois pontos do seu mapa.",
   "Você voltou a uma cidade registrada na jornada.",
   "O caminho entre cidades coube numa passagem.",
   "A viagem terminou no destino escolhido.",
   "Você aproveitou uma ligação que já conhecia.",
-  "Seu percurso mudou de lugar pela rede de portais.",
+  "Você viajou pela rede de portais.",
   "A cidade de destino agora está ao redor.",
   "Você trocou estrada por uma travessia direta.",
   "O registro das cidades tornou essa viagem possível.",
@@ -1908,7 +1908,7 @@ const NR_LINES105={
   "A passagem encurtou esse trecho do caminho.",
   "Seu destino registrado recebeu novos passos.",
   "Você concluiu a viagem pela rede disponível.",
-  "Essa travessia aproveitou lugares já visitados.",
+  "Você viajou para uma cidade que já conhecia.",
   "O percurso agora continua na cidade escolhida.",
   "Você usou o mapa que construiu com as visitas.",
   "Gosto de portais cujo destino aceita clientes.",
@@ -1988,7 +1988,7 @@ const NR_LINES105={
   "Você fez algo que ganhou uma identificação própria.",
   "Sua lista de conquistas cresceu.",
   "O novo título registra uma parte do percurso.",
-  "Você abriu mais uma opção de título.",
+  "Título novo liberado.",
   "Essa conquista já pertence à sua jornada.",
   "O caminho deixou uma nova marca no registro.",
   "Seu progresso cumpriu outra condição de reconhecimento.",
@@ -2066,9 +2066,9 @@ const NR_LINES105={
   "O caminho agora segue pelo dia.",
   "O amanhecer mudou a paisagem ao redor.",
   "Você deixou mais uma noite para trás.",
-  "A exploração recebeu a luz de volta.",
+  "O dia amanheceu.",
   "O próximo trecho começa sob o dia.",
-  "Sua viagem atravessou o fim da escuridão.",
+  "A noite acabou.",
   "O céu clareou enquanto você seguia.",
   "A noite entregou o percurso ao dia.",
   "Você acompanhou outra volta da luz.",
@@ -2106,7 +2106,7 @@ const NR_LINES105={
   "A chuva alcançou seus passos no mundo.",
   "Você viu o tempo mudar durante a travessia.",
   "O percurso agora tem chuva por companhia.",
-  "O céu trouxe água a esta etapa.",
+  "Começou a chover.",
   "A paisagem mudou com o início da chuva.",
   "Sua rota entrou num momento chuvoso.",
   "O mundo recebeu chuva enquanto você seguia.",
@@ -2116,7 +2116,7 @@ const NR_LINES105={
   "A chuva começou ao redor da jornada.",
   "Seu caminho foi alcançado pela mudança do clima.",
   "O céu alterou as condições da exploração.",
-  "A travessia agora divide espaço com a chuva.",
+  "Está chovendo neste trecho.",
   "Você chegou a mais um trecho de tempo fechado.",
   "A água do céu acompanha a paisagem.",
   "O percurso ganhou chuva entre um destino e outro.",
@@ -2134,7 +2134,7 @@ const NR_LINES105={
  ],
  "snow": [
   "A neve começou a cair neste trecho.",
-  "O clima trouxe outra forma à paisagem.",
+  "O clima mudou.",
   "Seu caminho encontrou um período de neve.",
   "O céu espalhou branco sobre a travessia.",
   "Você está passando por uma mudança de clima.",
@@ -2224,7 +2224,7 @@ const NR_LINES105={
   "Você chegou ao conteúdo daquela reserva.",
   "A abertura do baú trouxe um prêmio.",
   "O caminho rendeu algo além do próximo combate.",
-  "Você recolheu o resultado daquela descoberta.",
+  "Você pegou o que havia no baú.",
   "O baú deixou de guardar o que agora é seu.",
   "A exploração teve uma pequena conclusão material.",
   "Sua bolsa recebeu o que estava guardado.",
@@ -2239,7 +2239,7 @@ const NR_LINES105={
   "A exploração acrescentou essa recompensa ao percurso.",
   "Você encontrou algo útil ao abrir o baú.",
   "O caminho deixou um prêmio disponível.",
-  "Sua procura chegou ao que estava guardado.",
+  "Você achou o que estava guardado.",
   "A tampa revelou uma recompensa verdadeira.",
   "Você aproveitou o conteúdo daquele achado.",
   "O baú ofereceu algo para levar adiante.",
@@ -2274,7 +2274,7 @@ const NR_LINES105={
   "A purificação encontrou uma conclusão real.",
   "Seu caminho incluiu cuidar daquela fonte de instabilidade.",
   "O foco já não participa da ameaça como antes.",
-  "Você retirou um poder por meio da purificação.",
+  "A purificação tirou um poder do guardião.",
   "O processo terminou com a fonte controlada.",
   "A ruptura ficou sem aquela influência ativa.",
   "Você sustentou a ação diante dos defensores.",
@@ -2306,7 +2306,7 @@ const NR_LINES105={
   "O guardião perdeu a influência desse foco.",
   "Você encerrou a manifestação destruindo sua origem.",
   "A ruptura ficou sem aquela fonte ativa.",
-  "Seu combate derrubou o foco escolhido.",
+  "Você destruiu o foco.",
   "A destruição concluiu essa preparação.",
   "Você retirou um poder da ameaça principal.",
   "O foco deixou de alimentar o confronto.",
@@ -2327,7 +2327,7 @@ const NR_LINES105={
   "Você concluiu a intervenção naquela fonte.",
   "A manifestação ativa foi eliminada.",
   "O foco não continua sustentando esse poder.",
-  "Você resolveu essa parte da ruptura pela destruição.",
+  "Você destruiu o foco da ruptura.",
   "A fonte de poder cedeu ao confronto.",
   "Seu caminho deixou um foco destruído para trás.",
   "A decisão mudou o que alimentava o guardião.",
@@ -3438,7 +3438,7 @@ function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:
 function rememberCharacter118(){if(modalOpen&&modalRoute118)CHAR_UI118.scroll[modalRoute118]=$('mb').scrollTop}
 function openCharacter118(){const [page,slot]=CHAR_UI118.route.split(':');if(page==='loadout')return loadoutView(slot===undefined?undefined:Number(slot));if(page==='basic')return basicAttackView();if(page==='constel')return consView();return characterView(page)}
 function characterBack118(label){return '<div class="character-path118"><strong>'+label+'</strong></div>'}
-function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 ao subir de nível e também ao derrotar guardiões de calabouços.</p><p>Habilidades e Transmigrador usam este mesmo saldo. Cada melhoria do Transmigrador custa 1 ponto.</p></div>'}
+function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 ao subir de nível e também ao derrotar guardiões de masmorras.</p><p>Habilidades e Transmigrador usam este mesmo saldo. Cada melhoria do Transmigrador custa 1 ponto.</p></div>'}
 
 const keys={},input={x:0,z:0},cam={x:0,z:0};
 
@@ -3468,13 +3468,14 @@ function equipmentShopPrice(sl,t){return Math.round(PRICE[t]*equipFactor(sl)*10*
 function equipFactor(sl){return sl==='h'||sl==='g'||sl==='b'?.2:1}
 function equippedItems(){return Object.values(run?.equip||{}).filter(Boolean)}
 function equipmentShield(){return equippedItems().reduce((n,it)=>n+itemSh(it),0)}
-function unequipItem(sl){const it=run.equip[sl];if(!it||run.items.length>=24){toast('Libere um espaço na bolsa para retirar a peça.');return false}run.items.push(it);run.equip[sl]=null;refreshStats();saveRun();return true}
+function unequipItem(sl){const it=run.equip[sl];if(!it)return false;if(run.items.length>=24){gearPicker(sl);return false}run.items.push(it);run.equip[sl]=null;refreshStats();saveRun();return true}
 function dropEquipment(uid,sl){const it=run.items.find(it=>it.uid===uid);if(!it||it.slot!==sl)return false;return equipBagItem(uid)}
 function gearText(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function equipmentPanel(){let h='<div class="sec">SEU EQUIPAMENTO</div><div class="gear-layout">';for(const sl of EQUIP_SLOTS){const it=run.equip[sl];h+='<div class="gear-slot gear-'+sl+'" data-gear-slot="'+sl+'"><button class="mini" data-a="gearpick" data-v="'+sl+'"><b>'+EQUIP_LABEL[sl]+'</b><br><span style="color:'+(it?RAR[it.rar].c:'#89929d')+'">'+(it?gearText(it.name):'Vazio')+'</span></button>'+(it?'<small>'+gearText(statTxt(it).replace(/<[^>]*>/g,''))+'</small>'+btn('Retirar','unequip',sl,true):'<small>Escolha ou arraste uma peça</small>')+'</div>'}h+='<div class="gear-figure"><svg viewBox="0 0 100 190" role="img" aria-label="Silhueta do personagem com espaços de equipamento"><circle cx="50" cy="25" r="17" fill="'+(run.equip.h?'#e7bd6a':'#657080')+'"/><path d="M30 49 L70 49 L78 100 L62 115 L38 115 L22 100 Z" fill="'+(run.equip.a?'#aa8957':'#394354')+'"/><path d="M28 53 L14 62 L8 109 L21 111 L35 71 M72 53 L86 62 L92 109 L79 111 L65 71" fill="'+(run.equip.g?'#d8ad62':'#657080')+'"/><path d="M37 113 L48 113 L46 159 L31 159 Z M52 113 L63 113 L69 159 L54 159 Z" fill="#657080"/><path d="M31 154 H46 V175 H24 V163 Z M54 154 H69 L76 163 V175 H54 Z" fill="'+(run.equip.b?'#d8ad62':'#394354')+'"/>'+(run.equip.w?'<path d="M10 103 L5 49 L10 32 L15 49 Z" fill="#d9e4ef"/>':'')+'</svg><small>'+gearText(CLASSES[profile.cls].n)+'</small></div></div>';return h}
+function equipmentPanel(){let h='<div class="sec">SEU EQUIPAMENTO</div><div class="gear-layout">';for(const sl of EQUIP_SLOTS){const it=run.equip[sl];h+='<div class="gear-slot gear-'+sl+'" data-gear-slot="'+sl+'"><button class="mini" data-a="gearpick" data-v="'+sl+'"><b>'+EQUIP_LABEL[sl]+'</b><br><span style="color:'+(it?RAR[it.rar].c:'#89929d')+'">'+(it?gearText(it.name):'Vazio')+'</span></button>'+(it?'<small>'+gearText(statTxt(it).replace(/<[^>]*>/g,''))+'</small>'+(run.items.length<24?btn('Retirar','unequip',sl,true):btn('Trocar','gearpick',sl,true)):'<small>Toque para escolher uma peça</small>')+'</div>'}h+='<div class="gear-figure"><svg viewBox="0 0 100 190" role="img" aria-label="Silhueta do personagem com espaços de equipamento"><circle cx="50" cy="25" r="17" fill="'+(run.equip.h?'#e7bd6a':'#657080')+'"/><path d="M30 49 L70 49 L78 100 L62 115 L38 115 L22 100 Z" fill="'+(run.equip.a?'#aa8957':'#394354')+'"/><path d="M28 53 L14 62 L8 109 L21 111 L35 71 M72 53 L86 62 L92 109 L79 111 L65 71" fill="'+(run.equip.g?'#d8ad62':'#657080')+'"/><path d="M37 113 L48 113 L46 159 L31 159 Z M52 113 L63 113 L69 159 L54 159 Z" fill="#657080"/><path d="M31 154 H46 V175 H24 V163 Z M54 154 H69 L76 163 V175 H54 Z" fill="'+(run.equip.b?'#d8ad62':'#394354')+'"/>'+(run.equip.w?'<path d="M10 103 L5 49 L10 32 L15 49 Z" fill="#d9e4ef"/>':'')+'</svg><small>'+gearText(CLASSES[profile.cls].n)+'</small></div></div>';return h}
+function bagGearRows156(){const items=run.items.filter(it=>EQUIP_SLOTS.includes(it.slot));let h='<div class="sec">PEÇAS NA BOLSA ('+run.items.length+'/24)</div>';if(!items.length)return h+'<div class="sysline">Nenhuma peça para equipar na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';for(const sl of EQUIP_SLOTS)for(const it of items.filter(x=>x.slot===sl))h+='<div style="padding:7px 0;border-bottom:1px solid rgba(255,179,71,.12)"><b style="color:'+RAR[it.rar].c+'">'+gearText(it.name)+'</b> · '+EQUIP_LABEL[sl]+'<div style="font-size:12px;margin:3px 0 5px">'+statTxt(it)+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+btn('Equipar','equip',it.uid,true)+equipmentSellButton(it)+'</div></div>';return h}
 function equipmentSellButton(it){const city=L.mode==='world'&&!!inCity(player.x,player.z);return btn('Vender · '+fmt(it.value)+' ouro','sell',it.uid,city)+(city?'':'<small>Venda disponível na cidade.</small>')}
 function sellEquipment(uid){if(L.mode!=='world'||!inCity(player.x,player.z))return false;const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const value=run.items[i].value;run.gold+=value;run.items.splice(i,1);toast('<b>[NARRADOR]</b> Vendido por '+fmt(value)+' ouro');return true}
-function gearPicker(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>gearPicker(sl);let h=equipmentPanel()+'<div class="sec">ESCOLHER '+EQUIP_LABEL[sl].toUpperCase()+'</div>';const items=run.items.filter(it=>it.slot===sl);for(const it of items)h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab">'+gearText(it.name)+'</b>',statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it));if(!items.length)h+='<div class="sysline">Nenhuma peça desta posição na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';h+=btn('Voltar à Build','character','build');openModal('EQUIPAMENTOS',h)}
+function gearPicker(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>gearPicker(sl);let h=equipmentPanel()+'<div class="sec">ESCOLHER '+EQUIP_LABEL[sl].toUpperCase()+'</div>'+(run.items.length>=24&&run.equip[sl]?'<div class="sysline">Bolsa cheia: escolha a peça nova. A '+gearText(EQUIP_LABEL[sl].toLowerCase())+' atual volta para a bolsa no lugar dela.</div>':'');const items=run.items.filter(it=>it.slot===sl);for(const it of items)h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab">'+gearText(it.name)+'</b>',statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it));if(!items.length)h+='<div class="sysline">Nenhuma peça desta posição na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';h+=btn('Voltar à Build','character','build');openModal('EQUIPAMENTOS',h)}
 
 function itemAtk(it){return it&&it.slot==='w'?Math.round(WATK[Math.min(9,it.tier)]*gearQ(it)):0}
 function itemHp(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(AHPV[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
@@ -3530,8 +3531,8 @@ function questOrderRep(q){const r=Number.isInteger(q.repRank97)?q.repRank97:q.t=
 function addOrderRep(amount,reason){ensureOrderRep();if(!Number.isFinite(amount)||amount<=0)return 0;amount=Math.floor(amount);profile.orderRep97+=amount;toast('<b>[ORDEM]</b> '+reason+': +'+fmt(amount)+' de reputação · total '+fmt(profile.orderRep97)+'.');return amount}
 function claimOrderQuest(index){const q=run.quests?.[index];if(!q||q.got<q.n)return false;ensureOrderRep();const rw=Math.round(q.rw*(1+.05*affL('Lyra'))),rep=questOrderRep(q);run.quests[index]=genQuest(q.t);profile.guildClaims=(profile.guildClaims||0)+1;run.gold+=rw;addOrderRep(rep,'Missão concluída');narratorEvent105(q.t==='kill'?'order_kill':q.t==='clear'?'order_clear':'order_pvp');toast('<b>[NARRADOR]</b> Recompensa: +'+fmt(rw)+' ouro');beep(990,.15,.05);saveRun();return true}
 function rankPortalCount(rank){return Math.max(0,Number(profile.closedPortalsByRank?.[rank])||0)}
-function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;ensureOrderRep();g.rankCounted=true;regionPortal116(g);addOrderRep(orderRepReward(rank),'Calabouço rank '+RANKS[rank].id+' fechado');profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
-function recordSpecialOrderRep(){const g=L.gate,sp=L.special,ref=g?.ref;if(!ref||!ref.id||ref.rankCounted||!sp||!(sp.done||sp.cleared)||!Number.isInteger(g.rank)||g.rank<0||g.rank>9)return false;ensureOrderRep();ref.rankCounted=true;regionPortal116(ref);addOrderRep(orderRepReward(g.rank),'Calabouço especial rank '+RANKS[g.rank].id+' fechado');return true}
+function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;ensureOrderRep();g.rankCounted=true;regionPortal116(g);addOrderRep(orderRepReward(rank),'Masmorra rank '+RANKS[rank].id+' fechado');profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
+function recordSpecialOrderRep(){const g=L.gate,sp=L.special,ref=g?.ref;if(!ref||!ref.id||ref.rankCounted||!sp||!(sp.done||sp.cleared)||!Number.isInteger(g.rank)||g.rank<0||g.rank>9)return false;ensureOrderRep();ref.rankCounted=true;regionPortal116(ref);addOrderRep(orderRepReward(g.rank),'Masmorra especial rank '+RANKS[g.rank].id+' fechado');return true}
 function qualifyingRankPortals(rank){let total=0;for(let r=rank;r<=9;r++)total+=rankPortalCount(r);return total}
 function rankTrialReady(nx){return nx===profile.rank+1&&nx<=9&&(nx!==9||isTwiceAwakened103())&&run.level>=GR[nx].lvl&&orderRep()>=orderRepNeed(nx)}
 function updateRankExaminer(S){if(!L.rankTrial)return false;if(S.stage===0&&S.t>2.5){S.stage=3;const b=spawnBoss(0,-8,S.gr,{n:'Examinador do Rank '+RANKS[L.rankTrial].id,types:['seismic','fury'],body:0xc8a040,scale:2.4,skill:S2('Julgamento Dourado','cone',8,25,3,0xffd070)});b.aggro=true;bossAggro(b);toast('<b>[ORDEM]</b> Derrote o Examinador para conquistar o rank '+RANKS[L.rankTrial].id+'.')}S.msg=S.stage===0?'Prepare-se para o Examinador':'Derrote o Examinador do Rank '+RANKS[L.rankTrial].id;return true}
@@ -4464,7 +4465,7 @@ function buildDungeon(g){
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;if(g.extractionCleared117){L.bossDead=true;beginDungeonEscape()}else if(variant==='combat')updateCombat117();
 }
 /* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
-const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. Uma única saída, na entrada.'},floors:{n:'Calabouço de Andares',d:'Três andares ligados por escadas. Baús garantidos: Raro no primeiro, Épico no segundo e Lendário no guardião do terceiro (ou melhores). Itens do segundo e terceiro têm +25% e +50% de ataque/escudo. Vença os defensores para avançar. O guardião está no terceiro; a única saída fica no primeiro. Volte antes do transbordo, 60s após vencer.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
+const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. Uma única saída, na entrada.'},floors:{n:'Masmorra de Andares',d:'Três andares ligados por escadas. Baús garantidos: Raro no primeiro, Épico no segundo e Lendário no guardião do terceiro (ou melhores). Itens do segundo e terceiro têm +25% e +50% de ataque/escudo. Vença os defensores para avançar. O guardião está no terceiro; a única saída fica no primeiro. Volte antes do transbordo, 60s após vencer.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
 const EXP_MATS={ward:{n:'Essência de Proteção',rune:'ward',v:80},echo:{n:'Essência de Duplicação',rune:'reprise',v:100},storm:{n:'Essência de Assalto',rune:'arcane',v:80},fang:{n:'Presa do Predador',rune:'fang',v:70},stalker:{n:'Glândula do Caçador',rune:'stalker',v:100},ore:{n:'Minério de Ressonância',rune:'shell',v:35,w:1},core:{n:'Núcleo Estável',rune:'vigor',v:70,w:2},heart:{n:'Coração de Cristal',rune:'arcane',v:140,w:3}};
 const EXP_FOCI=[{id:'ward',n:'Proteção',d:'Aliados do foco próximos recebem 40% menos dano. No chefe: escudo de 6% da vida máxima por foco, renovado a cada 16s.',c:0x70ddff},{id:'echo',n:'Duplicação',d:'Cria cópias frágeis na sala. No chefe: duas cópias por ativação, com limite de quatro vivas.',c:0xb98cff},{id:'storm',n:'Assalto',d:'Projeta impactos em linha na sala. No chefe: linhas anunciadas por 1,2s, sem bloquear a arena inteira.',c:0xff8750}];
 function expeditionType(g){if(g?.missionExtract117===true)return 'extract';if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='extract'||g.expState?.type==='extract')return 'combat';if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;if(['core','floors'].includes(g.layout103))return g.layout103;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'combat'}
@@ -5171,7 +5172,7 @@ function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)r
  if(sk.t==='bolt')return 'Projétil na direção da mira.'+(skn.includes('Flecha')?' Atravessa inimigos.':'');
  return SKD[sk.t]||'Habilidade especial.';
 }
-function skillDesc(sk){if(!sk)return '';if(sk.kit111)return kitDescription111(sk);const lines=[skillEffect102(sk)];if(skillHasDamage(sk)){const unit=sk.n==='Sol Negro'?' por pulso · 5 pulsos':sk.n==='Era do Gelo'?' por pulso · 4 pulsos':sk.n==='Fúria dos Céus'?' por raio · 3 raios':sk.n==='Mil Cortes'?' por golpe · 6 golpes':sk.n==='Lâmina Rúnica'?' por explosão · 3 explosões':sk.n==='Flecha Estelar'?' por flecha · 3 flechas':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso · 5 pulsos':sk.t==='chain'?' no primeiro alvo':' por inimigo';lines.push('<b>Dano:</b> '+skillDamagePart(sk)+unit);const magic=sk.sourceClass==null?isMagic():MAGIC_CLS.includes(sk.sourceClass);lines.push('<b>Atributo:</b> '+(magic?'Inteligência':'Força'))}if(hasAff('nocure')&&(sk.t==='heal'||sk.t==='minionbuff'))lines.push('<b>Neste calabouço:</b> recuperação de vida bloqueada pelo afixo Sem cura.');lines.push('<b>Custo:</b> '+sk.mp+' mana · <b>Recarga:</b> '+skillCooldownText(sk)+'s');return '<div class="skill-copy">'+lines.join('<br>')+'</div>'}
+function skillDesc(sk){if(!sk)return '';if(sk.kit111)return kitDescription111(sk);const lines=[skillEffect102(sk)];if(skillHasDamage(sk)){const unit=sk.n==='Sol Negro'?' por pulso · 5 pulsos':sk.n==='Era do Gelo'?' por pulso · 4 pulsos':sk.n==='Fúria dos Céus'?' por raio · 3 raios':sk.n==='Mil Cortes'?' por golpe · 6 golpes':sk.n==='Lâmina Rúnica'?' por explosão · 3 explosões':sk.n==='Flecha Estelar'?' por flecha · 3 flechas':sk.t==='rain'?' por impacto':sk.t==='dot'?' por pulso · 5 pulsos':sk.t==='chain'?' no primeiro alvo':' por inimigo';lines.push('<b>Dano:</b> '+skillDamagePart(sk)+unit);const magic=sk.sourceClass==null?isMagic():MAGIC_CLS.includes(sk.sourceClass);lines.push('<b>Atributo:</b> '+(magic?'Inteligência':'Força'))}if(hasAff('nocure')&&(sk.t==='heal'||sk.t==='minionbuff'))lines.push('<b>Nesta masmorra:</b> recuperação de vida bloqueada pelo afixo Sem cura.');lines.push('<b>Custo:</b> '+sk.mp+' mana · <b>Recarga:</b> '+skillCooldownText(sk)+'s');return '<div class="skill-copy">'+lines.join('<br>')+'</div>'}
 
 /* espólio de monstros */
 const LOOTP=['Presa','Couro','Essência','Osso','Garra','Escama','Gel','Pena','Chifre','Olho','Coração','Fragmento'];
@@ -6019,7 +6020,7 @@ function ensureRun(){run.lamps=run.lamps||0;
   for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])if(it&&/Soberan/.test(it.name))it.name=it.name.replace(/d[oa] Soberan[oa]/,'Primeva');
   if(!run.v2){run.v2=1;run.v2fix=1;const lv=run.level||1;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=2*(lv-1)+Math.floor(lv/5)*(profile.rebirths||0)+5*(profile.rebirths||0);
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
-    if(lv>1)setTimeout(()=>showSys('ORÁCULO 2.0. Seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível, com números fixos). Equipamentos convertidos: o rank manda. Abra Status.'),4500)}
+    if(lv>1)setTimeout(()=>showSys('Atualização do jogo: seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível). Seus equipamentos foram ajustados ao novo sistema. Abra Status para distribuir.'),4500)}
   run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;const compensation113=migrateSkillPoints113();if(compensation113)setTimeout(()=>toast('Progressão de habilidades: agora você ganha 1 ponto por nível. +'+compensation113+' pontos retroativos adicionados.',7000),2000);
   if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p||{}).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
   run.daily.p=run.daily.p||{};for(const [k,,n] of DAILY)run.daily.p[k]=clamp(Number(run.daily.p[k])||0,0,n);if(typeof run.trackObj!=='string')run.trackObj=null;
@@ -6163,27 +6164,27 @@ function canRedistribute(){return !player.dead&&L.mode==='world'&&!!inCity(playe
 function redistributeAttributes(){if(!canRedistribute())return false;let points=0;for(const k in STATN)points+=Math.max(0,Math.floor(run.stats[k]||0));if(!points)return false;for(const k in STATN)run.stats[k]=0;run.pts+=points;refreshStats();saveRun();return true}
 function resetRankTalents(){if(!canRedistribute())return false;profile.rankTalents=[];saveRun();return true}
 function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+CLASSES[profile.cls].n+'</p><p><b>'+run.pts+' pontos de atributo disponíveis</b></p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+run.stats[k]+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));h+=row('Redistribuir atributos','Devolve os pontos investidos. Gratuito por enquanto, dentro de uma cidade.',btn('Redistribuir','resetattributes',0,canRedistribute()&&Object.values(run.stats).some(v=>v>0)));h+='<div class="tabs">'+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
-function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),key=encodeURIComponent(sk.n);return '<details class="skill114" data-skill114="'+key+'" '+(CHAR_UI118.details[key]?'open':'')+'><summary>'+safeText(sk.n)+' <span>NV '+lv+(lv>=10?' · MÁXIMO':'/10')+'</span></summary>'+row('',skillDesc(sk)+(up?'<div class="skill-next">'+up+'</div>':''),lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost))+'</details>'}
+function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),key=encodeURIComponent(sk.n);return '<details class="skill114" data-skill114="'+key+'" open><summary onclick="event.preventDefault()" style="cursor:default;list-style:none">'+safeText(sk.n)+' <span>'+(lv>=10?'Melhorias 10/10 · MÁXIMO':'Melhorias '+lv+'/10')+'</span></summary>'+row('',skillDesc(sk)+(up?'<div class="skill-next">'+up+'</div>':''),lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost))+'</details>'}
 function skillsView(){view=skillsView;L.characterTab='skills';let h=characterTabs('skills')+'<div class="sysline"><b>'+run.spts+' pontos disponíveis</b> · +1 por nível</div><div class="tabs">'+btn('Ataque básico','basicview',0)+btn('Equipar habilidades · '+classSlotCount()+(classSlotCount()===1?' espaço':' espaços'),'loadout',0)+'</div>';if(jobsOf().length>1)h+=kitFilter111();const seen=new Set();for(const sk of [...learnedSkills(),...player.skills.filter(s=>!s.empty)]){if(seen.has(sk.n))continue;seen.add(sk.n);if(jobsOf().length===1||kitVisible111(sk))h+=skillUpgradeRow(sk)}
- if(profile.cls===3&&run.level>=20){h+='<details><summary>Elemento</summary>';for(const k in ELEM){const E=ELEM[k];h+=row(E.n,E.d,run.elem===k?'Atual':btn(run.elem?'Trocar · 20.000 ouro':'Escolher','elem',k,!run.elem||run.gold>=20000))}h+='</details>'}
- h+=kitProgress111();const lib=powLib();if(lib.length){h+='<details><summary>Poderes absorvidos · '+lib.length+'</summary>'+libRows();for(const sk of lib)if(!seen.has(sk.n))h+=skillUpgradeRow(sk,2);h+='</details>'}if(run.fused)h+=row(run.fused.n,run.fused.tag,'');if(run.shadows.length)h+=btn('Exército de ecos','army',0);
+ if(profile.cls===3&&run.level>=20){h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Elemento</summary>';for(const k in ELEM){const E=ELEM[k];h+=row(E.n,E.d,run.elem===k?'Atual':btn(run.elem?'Trocar · 20.000 ouro':'Escolher','elem',k,!run.elem||run.gold>=20000))}h+='</details>'}
+ h+=kitProgress111();const lib=powLib();if(lib.length){h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Poderes absorvidos · '+lib.length+'</summary>'+libRows();for(const sk of lib)if(!seen.has(sk.n))h+=skillUpgradeRow(sk,2);h+='</details>'}if(run.fused)h+=row(run.fused.n,run.fused.tag,'');if(run.shadows.length)h+=btn('Exército de ecos','army',0);
  const ready=masteryReady114(),mastery=run.mastery||0;if(ready||mastery>0)h+=row('Maestria · '+mastery,'+'+preciseNumber(mastery*.5)+'% de dano e vida.'+(ready?'':' Maximize as habilidades aprendidas para voltar a investir.'),btn('Melhorar · 1 ponto','mast',0,ready&&run.spts>0));openModal('PERSONAGEM',h,'skills')}
 
 function naturalRegen(P=player,safe=false){return {hp:P.maxhp*((hasT('brk600')?.01:0)+(safe?.08:0)),mp:3+P.maxmp*(.03+(safe?.1:0)),shield:P.maxsh*.2*(hasT('brk30')?1.3:1),shieldWait:Math.max(0,P.shT||0)}}
 function regenRows(){const P=player,nc=L.mode==='world'?nearestCity(P.x,P.z):null,safe=!!nc&&nc.d<36*CITYK&&!cityFallen(nc.c),base=naturalRegen(P,false),city=naturalRegen(P,true),unit=(v,max)=>preciseNumber(v)+'/s ('+preciseNumber(max?v/max*100:0)+'%/s)';let h='<div class="sec">REGENERAÇÃO</div><div class="sysline">Taxas por segundo enquanto joga, até o máximo de cada recurso. '+(safe?'Você está em uma zona segura.':'Você está fora de uma zona segura.')+'</div>';h+=row('Vida',unit(base.hp,P.maxhp)+' fora da cidade.<br>'+unit(city.hp,P.maxhp)+' na zona segura.','');h+=row('Mana',unit(base.mp,P.maxmp)+' fora da cidade.<br>'+unit(city.mp,P.maxmp)+' na zona segura.','');h+=row('Escudo de equipamento',unit(base.shield,P.maxsh)+' após 4s sem receber dano.'+(base.shieldWait>0?'<br>Espera restante: '+preciseNumber(base.shieldWait)+'s.':''),'');h+='<div class="sysline">Curas de habilidades, ataques, poções e companheiros dependem de uso ou acerto; não entram nessas taxas.</div>';return h}
-function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+equipmentPanel()+awakenRows155()+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details><summary>Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h,'build')}
+function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+equipmentPanel()+bagGearRows156()+awakenRows155()+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h,'build')}
 
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Ecos ativos: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
   if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER ECO (F) em guardiões e elites.':'Só o Necromante levanta ecos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
-function startFirstEquipment(){if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em um calabouço, fabrique na forja ou compre com Kael. Depois, equipe pela Bolsa. Acompanhe a missão no Diário.',6500)}
+function startFirstEquipment(){if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja ou compre com Kael. Depois, equipe pela Bolsa. Acompanhe a missão no Diário.',6500)}
 function firstEquipmentObjective(){const q=profile.firstEquipment92;if(!q||q.done)return null;const found=run.items.some(it=>EQUIP_SLOTS.includes(it.slot));
- return {id:'firstEquipment',n:'Seu primeiro equipamento',d:found?'<div class="guide93"><strong>2. Equipe sua peça</strong><p>Abra a Bolsa e escolha Equipar. No PC, também pode arrastar para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Consiga um equipamento</strong><p>Monstros e baús dos calabouços dão equipamentos. A forja também fabrica peças quando for liberada.</p><p>Comprar com Kael é uma alternativa cara: botas F a partir de '+equipmentShopPrice('b',0)+' ouro. Nenhuma peça exige rank para usar.</p></div>',progress:found?'Etapa 2 de 2 · equipe uma peça da bolsa':'Etapa 1 de 2 · encontre, fabrique ou compre uma peça',ready:false}}
+ return {id:'firstEquipment',n:'Seu primeiro equipamento',d:found?'<div class="guide93"><strong>2. Equipe sua peça</strong><p>Abra a Bolsa e escolha Equipar. No PC, também pode arrastar para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Consiga um equipamento</strong><p>Monstros e baús das masmorras dão equipamentos. A forja também fabrica peças quando for liberada.</p><p>Comprar com Kael é uma alternativa cara: botas F a partir de '+equipmentShopPrice('b',0)+' ouro. Nenhuma peça exige rank para usar.</p></div>',progress:found?'Etapa 2 de 2 · equipe uma peça da bolsa':'Etapa 1 de 2 · encontre, fabrique ou compre uma peça',ready:false}}
 function finishFirstEquipment(){const q=profile.firstEquipment92;if(!q||q.done||!Object.values(run.equip).some(it=>it&&EQUIP_SLOTS.includes(it.slot)))return false;q.done=true;addOrderRep(10,'Primeiro equipamento');if(run.trackObj==='firstEquipment')run.trackObj=null;store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Seu primeiro equipamento: concluído. Você conseguiu sua primeira peça e a equipou. O próximo passo é seu.',6500);saveRun();return true}
 function journeyObjectives(){const list=[],nx=profile.rank+1;const eq=run.extractMission117;if(eq)list.push({id:'extract117',n:'Missão de extração',d:eq.completed?'Receba a recompensa com Lyra, na Ordem.':'Envie materiais pela torre verde. Retome a missão com Lyra se sair.',progress:Math.min(6,eq.sent)+'/6',ready:eq.completed});const first=firstEquipmentObjective();if(first)list.push(first);
-  if(nx<=9){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos. Procure Lyra na Ordem e enfrente o Examinador. Sua reputação permanece após a prova.':'Alcance o nível '+need+' e '+fmt(orderRepNeed(nx))+' de reputação da Ordem.'+(nx===9?(isTwiceAwakened103()?' Exige também o Segundo Despertar concluído.':' Continue a história para descobrir o requisito restante.'):'')+' Ganhe reputação fechando calabouços e concluindo missões, na ordem que preferir.',progress:'Nível '+run.level+'/'+need+' · reputação '+fmt(orderRep())+'/'+fmt(orderRepNeed(nx))+(ready?' · prova disponível':''),ready})}
+  if(nx<=9){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos. Procure Lyra na Ordem e enfrente o Examinador. Sua reputação permanece após a prova.':'Alcance o nível '+need+' e '+fmt(orderRepNeed(nx))+' de reputação da Ordem.'+(nx===9?(isTwiceAwakened103()?' Exige também o Segundo Despertar concluído.':' Continue a história para descobrir o requisito restante.'):'')+' Ganhe reputação fechando masmorras e concluindo missões, na ordem que preferir.',progress:'Nível '+run.level+'/'+need+' · reputação '+fmt(orderRep())+'/'+fmt(orderRepNeed(nx))+(ready?' · prova disponível':''),ready})}
   else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre da Ascensão para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d,d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
@@ -6455,9 +6456,9 @@ const MAIN_ACTS=[null,
  ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
 function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
 function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
-function rankTab(){const r=profile.rank,nx=r+1,can=nx<=9,need=can?GR[nx].lvl:0;let h='<div class="guide93"><strong>SEU CAMINHO NA ORDEM</strong><p>Feche calabouços e conclua missões para ganhar <b>reputação da Ordem</b>. Escolha como avançar.</p><p>Alcance o nível e a reputação exigidos, depois vença o Examinador. As provas seguem em ordem, mas sua reputação <b>nunca é gasta</b>: ela já conta para as próximas.</p><p>Cada rank de E a SS+ concede <b>1 escolha de combate</b> e bônus de dano e vida. De E a A, também libera mais <b>1 espaço de habilidade</b>, até seis.</p><p>A confiança das vilas é separada deste progresso.</p></div>';
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=9,need=can?GR[nx].lvl:0;let h='<div class="guide93"><strong>SEU CAMINHO NA ORDEM</strong><p>Feche masmorras e conclua missões para ganhar <b>reputação da Ordem</b>. Escolha como avançar.</p><p>Alcance o nível e a reputação exigidos, depois vença o Examinador. As provas seguem em ordem, mas sua reputação <b>nunca é gasta</b>: ela já conta para as próximas.</p><p>Cada rank de E a SS+ concede <b>1 escolha de combate</b> e bônus de dano e vida. De E a A, também libera mais <b>1 espaço de habilidade</b>, até seis.</p><p>A confiança das vilas é separada deste progresso.</p></div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
-  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e calabouços.':'<br>Reputação suficiente!')+(nx===9&&isTwiceAwakened103()?'<br>Segundo Despertar: <b>'+(isTwiceAwakened103()?'concluído':'necessário')+'</b>. Rank SS+ obrigatório.':'')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR CALABOUÇO</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
+  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e masmorras.':'<br>Reputação suficiente!')+(nx===9&&isTwiceAwakened103()?'<br>Segundo Despertar: <b>'+(isTwiceAwakened103()?'concluído':'necessário')+'</b>. Rank SS+ obrigatório.':'')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR MASMORRA</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
 
   if(!can)h+=row('Rank ★ · Arconte','Você ultrapassou SS+.','');
   h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=row('Escolhas de rank',rankPoints()+' pontos disponíveis em Personagem → Passivas.',btn('Abrir Passivas','character','passives'));h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
@@ -6845,11 +6846,11 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10'+((w.wlv||0)>=10?' · MÁXIMO':' · '+Math.floor(w.wxp||0)+' XP')+' · bônus da arma +'+2*(w.wlv||0)+'%'+(w.rar<2?' · só Épicas ou melhores despertam uma alma':'')+'<br><span style="color:var(--dim)">A arma que você usa ganha XP quando você mata: cada nível acrescenta +2% ao bônus de arma viva (até o 10). No nível 5, armas Épicas+ despertam uma alma que fala com você. A XP fica na arma: trocar de arma recomeça.</span>':'Sem arma','');
     h+=row('Conjunto',!unl('sets')?lockMsg('sets'):(Object.keys(setB()).length?activeSets().map(s=>'<b>'+s.n+'</b>: '+s.d).join('<br>'):'Duas peças do mesmo conjunto ativam o bônus uma vez'),'');
     h+=row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Ordem','')}
-  else if(tab==='world'){if(Object.values(profile.prof||{}).some(x=>x>0))h+=btn('Profissões','professions114',0);if(run.party.length)h+=row('Grupo',run.party.map(p=>p.name).join(', '),'');h+=row('Diário','Páginas da história',btn('Ler','diary',0));
+  else if(tab==='world'){if(Object.values(profile.prof||{}).some(x=>x>0))h+=btn('Profissões','professions114',0);if(run.party.length)h+=row('Grupo',run.party.map(p=>p.name).join(', '),'');h+=row('História','Páginas que você já viveu',btn('Ler','diary',0));
     h+=run.mount?row('Montaria','Lobo de Mana',btn(run.mounted?'Desmontar':'Montar','mount',0)):row('Montaria','Compre no Mercado','');
     h+=regionSummary116(nearestCity(player.x,player.z).c);
-    h+=row('Mapa do tesouro',run.tmap?'Um X marcado no seu mapa':'Compre com Dorian no Mercado','');
-    h+=row('Caravana',L.car?'Escoltando para '+L.car.dest.name:'Nenhuma','')}
+    if(run.tmap)h+=row('Mapa do tesouro','Um X marcado no seu mapa','');
+    if(L.car)h+=row('Caravana','Escoltando para '+L.car.dest.name,'')}
   openModal(tab==='world'?'MUNDO':'PERSONAGEM',h)}
 function extraActions3(a,v){if(a==='region116'){regionView116();return 'close0'}if(a==='aid116'||a==='supply116'){if(a==='aid116')regionAid116();else regionSupply116();regionView116();return 'close0'}if(a==='narrator105'){narratorView105();return true}const rareAction=rareActions103(a,v);if(rareAction)return rareAction;
  if(a==='character'){characterView(v);return 'close0'}
@@ -6936,7 +6937,7 @@ function mktView(){
 function openShop(id){
   if(id==='defense')return defenseView();if(id==='guild')return guildView('quests');if(id==='mkt')return mktView();if(id==='bank')return bankView();
   view=()=>openShop(id);const S=SHOPS.find(s=>s.id===(id==='arm'?'wep':id));const pr=rankOf();
-  let h='<div class="sysline">'+S.vendor+': '+(id==='pot'?'Poção boa salva vida lá dentro.':id==='wep'?'Equipamento custa caro. Nos calabouços, você conquista o seu. Nenhuma peça exige rank.':'Armadura pesada, dano leve.')+' · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';
+  let h='<div class="sysline">'+S.vendor+': '+(id==='pot'?'Poção boa salva vida lá dentro.':id==='wep'?'Equipamento custa caro. Nas masmorras, você conquista o seu. Nenhuma peça exige rank.':'Armadura pesada, dano leve.')+' · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';
   if(id==='wep'||id==='arm')h='<div class="tabs">'+btn('Armas','equipshop','wep',true,id==='wep'?'on':'')+btn('Armaduras','equipshop','arm',true,id==='arm'?'on':'')+'</div>'+h;
   if(id==='pot'&&cityL(cityOf())>=2)ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">(cidade nv 2)</span>',p.d,btn(fmt(p.price)+' ouro','buyelix',i,run.gold>=p.price))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.give.pots?(p.give.pots>1?'Cada poção: ':'')+potionDescription():p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
@@ -6994,9 +6995,9 @@ function bagItems(){
   {const up=EQUIP_SLOTS.map(sl=>bestInBag(sl)).filter(it=>it&&itemScore(it)>itemScore(run.equip[it.slot]));}
 
   h+='<div class="sysline" style="font-size:12px">Arma dá <b>ataque</b>; armadura, elmo, luvas e botas dão <b>escudo</b>. A seta compara com o que você usa.</div>';
-  h+=row('Equipamento','Veja e troque o que você usa em Personagem → Build.',btn('Abrir Build','character','build'));const living=run.equip.w;if(living&&unl('living'))h+='<details><summary>Arma viva · '+gearText(living.name)+' · NV '+(living.wlv||0)+'/10</summary><div class="sysline">A arma ganha experiência ao derrotar inimigos. Cada nível soma 2% ao seu bônus de ataque. '+((living.wlv||0)>=10?'Nível máximo.':Math.floor(living.wxp||0)+' / '+Math.round(120*Math.pow((living.wlv||0)+1,1.5))+' XP para o próximo nível.')+' A experiência pertence a esta arma.</div></details>';
+  h+=row('Equipamento','Veja e troque o que você usa em Personagem → Build.',btn('Abrir Build','character','build'));const living=run.equip.w;if(living&&unl('living'))h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Arma viva · '+gearText(living.name)+' · NV '+(living.wlv||0)+'/10</summary><div class="sysline">A arma ganha experiência ao derrotar inimigos. Cada nível soma 2% ao seu bônus de ataque. '+((living.wlv||0)>=10?'Nível máximo.':Math.floor(living.wxp||0)+' / '+Math.round(120*Math.pow((living.wlv||0)+1,1.5))+' XP para o próximo nível.')+' A experiência pertence a esta arma.</div></details>';
   h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
-  if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Monstros e baús dos calabouços dão equipamentos.</small></div></div>';
+  if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Monstros e baús das masmorras dão equipamentos.</small></div></div>';
   run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab;color:'+RAR[it.rar].c+'">'+gearText(it.name)+'</b><br>'+recoTag(it),EQUIP_LABEL[it.slot]+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · '+statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it))});
   h+=row('Banco',fmt(profile.bank||0)+' ouro guardado · não se perde na morte','');
   h+='<div class="sec">RECURSOS</div>';const rs=[];for(let r=0;r<10;r++){if(run.res.core[r])rs.push(run.res.core[r]+' núcleo '+GR[r].id);if(run.res.cry[r])rs.push(run.res.cry[r]+' cristal '+GR[r].id)}
@@ -7317,7 +7318,7 @@ function kitAmount111(s){return Math.min(1,(s.amount||0)+(s.growth||0)*healerLev
 function kitRadius111(s){return s.radius+(s.radiusGrowth||0)*healerLevel(s)}
 function kitRequirement111(ci,si){const s=KIT_DEFS111[ci]?.[si];if(!s)return '';if(s.evolution)return 'Prova de evolução da classe (nível 30)';if(ci>=12)return si<3?'Aprender o caminho':(si-1)+' investigações neste caminho';if(ci===7&&si>=3&&si<=5)return 'Aprender o caminho do Necromante';if(ci===7&&si===7)return 'Caminho do Necromante e nível 80';if(si<3)return 'Aprender a classe';const extra=KIT_DEFS111[ci].filter((s,i)=>i>=3&&!s.evolution&&!(ci===7&&i<=5));return 'Nível '+([30,45,80,100,120][extra.indexOf(s)]||100)}
 function kitUnlocked111(ci,si){const s=KIT_DEFS111[ci]?.[si];if(!s)return ci===3&&si<3;const p=profile.kitLearning111||(profile.kitLearning111={});if(p[s.skillId])return true;let ok=false;if(s.evolution)ok=!!(profile.cls===ci&&run.adv||run.jobData?.[ci]?.adv||(run.lib||[]).some(x=>x.n===s.n)||(run.stolen||[]).some(x=>x.n===s.n)||ci===5&&profile.paladinSolar109);else if(ci>=12)ok=awakening103().unlocked.includes(ci)&&(si<3||(awakening103().points[ci]||0)>=si-1);else if(ci===7&&si>=3&&si<=5)ok=awakening103().unlocked.includes(7);else if(ci===7&&si===7)ok=awakening103().unlocked.includes(7)&&Math.max(run.level,profile.maxLevel111||0)>=80;else if(si<3)ok=true;else ok=Math.max(run.level,profile.maxLevel111||0)>=Number(kitRequirement111(ci,si).split(' ').pop())||ci===5&&profile.paladinSkills109?.includes(si);if(ok){p[s.skillId]=true;store.set('pds2_profile',profile)}return ok}
-function kitProgress111(){let h='';if(jobsOf().includes(15)){const forms=kitForms111();h+='<details><summary>Formas preparadas · '+forms.length+'/'+2*affinity103(15)+'</summary>';for(const s of KIT_DEFS111[15].filter(s=>s.form&&kitUnlocked111(15,Number(s.skillId.split(':')[1]))))h+=row(s.n,forms.includes(s.form)?'Preparada':'Não preparada',btn(forms.includes(s.form)?'Retirar':'Preparar','kitform111',s.form,canRedistribute()));h+='</details>'}return h}
+function kitProgress111(){let h='';if(jobsOf().includes(15)){const forms=kitForms111();h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Formas preparadas · '+forms.length+'/'+2*affinity103(15)+'</summary>';for(const s of KIT_DEFS111[15].filter(s=>s.form&&kitUnlocked111(15,Number(s.skillId.split(':')[1]))))h+=row(s.n,forms.includes(s.form)?'Preparada':'Não preparada',btn(forms.includes(s.form)?'Retirar':'Preparar','kitform111',s.form,canRedistribute()));h+='</details>'}return h}
 function kitForms111(){const valid=['feral','alada','blindada','agil'];profile.forms111=(profile.forms111||valid.slice(0,2)).filter(x=>valid.includes(x));return profile.forms111.slice(0,2*affinity103(15))}
 function kitToggleForm111(f){if(!canRedistribute()||!['feral','alada','blindada','agil'].includes(f))return;const a=kitForms111(),s=KIT_DEFS111[15].find(s=>s.form===f);if(!kitUnlocked111(15,Number(s.skillId.split(':')[1])))return;if(a.includes(f))profile.forms111=a.filter(x=>x!==f);else if(a.length<2*affinity103(15))profile.forms111=[...a,f];else{toast('Retire uma forma preparada para abrir espaço.');return}saveRun();skillsView()}
 function kitAllies111(s){const P=player,r=s.radius||8,live=allies.filter(a=>!a.dead&&Math.hypot(a.x-P.x,a.z-P.z)<=r&&los(P.x,P.z,a.x,a.z));switch(s.scope){case 'self':return [P];case 'dead':return live.filter(a=>a.shadow||a.summonKind==='skel');case 'summons':return live.filter(a=>a.permanentSummon&&!a.kitDevice111);case 'oneSummon':return live.filter(a=>a.permanentSummon||a.shadow).slice(0,1);case 'ally':{const a=guardianAim108();return a?[a]:[]}case 'allies':return live;default:return [P,...live]}}
@@ -7394,7 +7395,7 @@ function kitUpdate111(dt){const k=kitState111();if(player.dead){AR103.kit111=nul
  for(const z of k.zones){if(z.until<=time)continue;if(z.follow154){z.x=player.x;z.z=player.z}if(z.kind==='damage'&&time>=z.at&&z.left>0){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-z.x,e.z-z.z)<=z.r+(e.r||0)&&los(z.x,z.z,e.x,e.z))kitHit111(e,z.damage,z.s);z.left--;z.at+=z.interval;if(!z.left)z.until=0;fxRing(z.x,z.z,z.col,z.r,.4);if(typeof pulseFx156==='function')pulseFx156(z)}else if(z.kind==='heal'&&time>=z.at&&z.left>0){for(const a of [player,...allies])if(!a.dead&&Math.hypot(a.x-z.x,a.z-z.z)<=z.r&&los(z.x,z.z,a.x,a.z))kitHeal111(a,z.fraction);z.left--;z.at+=z.interval}else if(z.kind==='slowzone'||z.kind==='trap'){for(const e of enemies)if(!e.dead&&!e.isBoss&&Math.hypot(e.x-z.x,e.z-z.z)<=z.r&&los(z.x,z.z,e.x,e.z)){if(z.kind==='trap'){e.kitRoot111=time+2;if(z.arch154)e.snare154=time+3;z.until=0;break}else e.slow=Math.max(e.slow||0,.2)}}}k.zones=k.zones.filter(z=>z.until>time);
  if(time>=(k.visualAt||0)){k.visualAt=time+.3;for(const z of k.zones)if(['barrier','seal','slowzone','trap'].includes(z.kind))fxRing(z.x,z.z,z.col,z.r,.4);for(const e of enemies)if(!e.dead){if(e.kitRevealed111>time)fxRing(e.x,e.z,0x8fe8ff,1,.4);if(k.foresight>time&&rareActive103(19)&&e.act&&!e.act.done&&e.act.wind-e.act.t>0&&e.act.wind-e.act.t<=affinity103(19)&&Math.hypot(e.x-player.x,e.z-player.z)<=20)fxRing(e.x,e.z,0xffdb86,e.range||2,.4)}}}
 function kitHud111(){const k=kitState111();return (rareActive103(18)?' · ENERGIA '+k.energy+'/'+3*affinity103(18):'')+(rareActive103(17)?' · RESPOSTAS '+k.counters+'/'+affinity103(17):'')+(rareActive103(20)?' · VAZIO '+k.captured+'/'+affinity103(20):'')+(rareActive103(16)?' · CONSTRUÇÕES '+kitDevices111().length+'/'+2*affinity103(16):'')+(k.form?' · FORMA '+k.form.toUpperCase():'')+(k.anchor?.until>time?' · RETORNAR '+Math.ceil(k.anchor.until-time)+'s':'')}
-function kitEffect111(s){const pct=Math.round(kitAmount111(s)*100),r=preciseNumber(kitRadius111(s)),scope={self:'você',group:'você e aliados próximos',dead:'mortos aliados próximos',summons:'suas invocações próximas',ally:'um aliado na mira',allies:'aliados próximos',oneSummon:'uma invocação próxima'}[s.scope]||'você e aliados próximos';const d={area:'Dano em área de '+r+' m.',target:'Dano em um alvo a até '+s.range+' m.',execute:'Dano em um alvo. +50% se ele tiver até 35% de vida.',line:'Dano em linha até '+s.range+' m.',cone:'Dano em leque até '+s.range+' m.',bolt:'Projétil de dano na direção da mira.',fan:'Três projéteis de dano em leque.',chain:'Dano em até cinco alvos; alcance inicial '+s.range+' m, saltos de 7 m; perde 12% por salto.',pulses:s.pulses+' pulsos de dano em área de '+r+' m.'+(s.delay?' Começa após '+s.delay+'s.':''),burn:'Dano ao longo de '+s.duration+'s em um alvo.',move:'Desloca até '+s.range+' m '+(s.back?'para trás':'na direção da mira')+', respeitando paredes.',heal:(s.scope==='self'?'Cura '+pct+'% da sua vida máxima':s.scope==='group'?'Cura você e aliados próximos em '+pct+'% da vida máxima':'Cura '+pct+'% da vida máxima de '+scope)+(s.scope==='self'||s.scope==='group'?' ('+fmt(Math.round(player.maxhp*kitAmount111(s)))+' de vida em você)':'')+'.',healzone:'Cura 70% da vida máxima: metade ao lançar, metade em três pulsos. Raio '+r+' m.',guard:'Reduz dano de '+scope+' em '+pct+'% por '+s.duration+'s.'+(s.selfAmount?' Em você: '+Math.round(s.selfAmount*100)+'%.':''),ward:'Escudo de '+pct+'% da vida máxima para '+scope+' por '+s.duration+'s. Mantém o maior, sem somar.',cleanse:'Remove sangramento, lentidão e atordoamento do grupo a até '+r+' m.',buff:'Aumenta seu dano em '+pct+'% por '+s.duration+'s.',allybuff:'Aumenta dano de '+scope+' em '+pct+'% por '+s.duration+'s.',stealth:'Furtividade por '+s.duration+'s; atacar encerra.',venom:'Prepara três acertos básicos envenenados por 8s. Veneno: 60% do acerto em 4s.',evade:'Evita dano por '+s.duration+'s.',block:'Bloqueia um golpe direto ou projétil comum em '+s.duration+'s. Não bloqueia áreas ou chefes.',parry:'Apara um golpe direto ou projétil comum em 1s; guarda uma resposta. Não apara áreas ou chefes.',counter:'Gasta uma resposta conquistada para causar dano.',taunt:'Atrai inimigos comuns num raio de '+r+' m por '+s.duration+'s.',slow:'Lentidão de 50% por '+s.duration+'s. Chefes resistem.',root:'Imobiliza inimigos comuns por até 3s.',interrupt:'Interrompe a ação de inimigos comuns. Resistência de 3s entre interrupções.',push:'Empurra inimigos comuns, sem dano.',pull:'Atrai inimigos comuns à mira, sem dano.',blind:'Fumaça reduz em 25% o dano dos inimigos atingidos por '+s.duration+'s.',weaken:'Reduz o dano do alvo em '+pct+'% por '+s.duration+'s.',trap:'Armadilha de '+s.duration+'s; imobiliza o primeiro inimigo comum por 2s.',slowzone:'Zona de lentidão de 50% por '+s.duration+'s. Chefes resistem.',barrier:'Barreira de '+s.duration+'s bloqueia a passagem de inimigos comuns. Você e aliados atravessam.',seal:'Selo no chão: reduz em 50% o próximo dano recebido por alguém do grupo na área.',summon:'Invoca até '+s.count+' '+({wolf:'lobos',skel:'esqueletos',golem:'golem',sentinel:'sentinela imóvel'}[s.kind]||'aliados')+' nas vagas livres, até morrerem.',order:'Comanda '+scope+' para a posição ou inimigo da mira por 8s.',recall:'Recolhe '+scope+' até você, com caminho livre.',echo:'Convoca eco especial de um vestígio de elite ou essência já recolhida. Limite 1; afinidade 2.',dilate:'Desacelera inimigos e projéteis na área. Reserva temporal amplia duração; chefes sofrem efeito menor.',passage:'Passagens entre você e a mira por 8s. Respeitam paredes; intervalo de 1,5s por viajante.',gate:'Fora de combate: escolha portal +1 rank, +2 com afinidade. Custo de 3 energias de Fenda por rank. Não promove o personagem.',anchor:'Marca posição por 3s mais reserva temporal. Use novamente para retornar, sem custo adicional.',reprise:'Repete 60% do dano da última ativa compatível; não repete outras funções.',rewindheal:'Recupera metade da vida perdida em até 4s. Não retorna posição nem revive.',speed:'Aumenta movimento em '+pct+'% por '+s.duration+'s.',link:'Vincula aliado por 20s: transfere 30% do dano restante; você paga metade da parcela. Pode matar você. Alcance e visão: 12 m.',anchorward:'Âncora por 20s: absorve 30% do seu dano restante no raio 8 m, até 30% da sua vida máxima. Compartilha limite de vínculos.',interpose:'Desloca ao vínculo ou âncora alcançável, sem escudo adicional.',form:'Alterna para a forma '+s.form+': '+({feral:'garras de alcance curto',alada:'projétil de alcance médio',blindada:'golpe lento e amplo',agil:'golpes rápidos de menor dano'}[s.form]||'')+'. Muda apenas o ataque básico. Use novamente para sair. Prepare formas na cidade.',device:'Constrói '+s.n.toLowerCase()+' por 30s. '+({turret:'Dispara em inimigos a até 12 m.',trap:'Imobiliza o primeiro inimigo comum a até 2 m por 2s e se desfaz.',emitter:'Concede escudo de 12% da vida máxima ao grupo no raio 5 m a cada 2s.'}[s.kind]||'')+' Limite 2; afinidade 4. Pode ser destruído.',repair:'Repara 50% da vida de uma construção.',dismantle:'Remove uma construção sua.',detonate:'Consome uma construção para causar dano ao redor dela.',relocate:'Reposiciona uma construção em chão livre e visível.',foresight:'Realça ataques já em preparação por 8s: janela de 1s, ou 2s com afinidade.',reveal:'Destaca inimigos próximos por 8s, inclusive no mapa.',survey:'Revela o mapa do calabouço a até 20 m; no mundo, localiza o portal mais próximo.',capture:'Por 3s captura um projétil comum próximo; chefes e áreas não são compatíveis. Reserva 1; afinidade 2.',release:'Gasta um projétil capturado e devolve dano calculado pelos seus atributos.',consume:'Gasta um projétil capturado para recuperar 20% da mana máxima.'};return d[s.effect]||'Efeito desconhecido'}
+function kitEffect111(s){const pct=Math.round(kitAmount111(s)*100),r=preciseNumber(kitRadius111(s)),scope={self:'você',group:'você e aliados próximos',dead:'mortos aliados próximos',summons:'suas invocações próximas',ally:'um aliado na mira',allies:'aliados próximos',oneSummon:'uma invocação próxima'}[s.scope]||'você e aliados próximos';const d={area:'Dano em área de '+r+' m.',target:'Dano em um alvo a até '+s.range+' m.',execute:'Dano em um alvo. +50% se ele tiver até 35% de vida.',line:'Dano em linha até '+s.range+' m.',cone:'Dano em leque até '+s.range+' m.',bolt:'Projétil de dano na direção da mira.',fan:'Três projéteis de dano em leque.',chain:'Dano em até cinco alvos; alcance inicial '+s.range+' m, saltos de 7 m; perde 12% por salto.',pulses:s.pulses+' pulsos de dano em área de '+r+' m.'+(s.delay?' Começa após '+s.delay+'s.':''),burn:'Dano ao longo de '+s.duration+'s em um alvo.',move:'Desloca até '+s.range+' m '+(s.back?'para trás':'na direção da mira')+', respeitando paredes.',heal:(s.scope==='self'?'Cura '+pct+'% da sua vida máxima':s.scope==='group'?'Cura você e aliados próximos em '+pct+'% da vida máxima':'Cura '+pct+'% da vida máxima de '+scope)+(s.scope==='self'||s.scope==='group'?' ('+fmt(Math.round(player.maxhp*kitAmount111(s)))+' de vida em você)':'')+'.',healzone:'Cura 70% da vida máxima: metade ao lançar, metade em três pulsos. Raio '+r+' m.',guard:'Reduz dano de '+scope+' em '+pct+'% por '+s.duration+'s.'+(s.selfAmount?' Em você: '+Math.round(s.selfAmount*100)+'%.':''),ward:'Escudo de '+pct+'% da vida máxima para '+scope+' por '+s.duration+'s. Mantém o maior, sem somar.',cleanse:'Remove sangramento, lentidão e atordoamento do grupo a até '+r+' m.',buff:'Aumenta seu dano em '+pct+'% por '+s.duration+'s.',allybuff:'Aumenta dano de '+scope+' em '+pct+'% por '+s.duration+'s.',stealth:'Furtividade por '+s.duration+'s; atacar encerra.',venom:'Prepara três acertos básicos envenenados por 8s. Veneno: 60% do acerto em 4s.',evade:'Evita dano por '+s.duration+'s.',block:'Bloqueia um golpe direto ou projétil comum em '+s.duration+'s. Não bloqueia áreas ou chefes.',parry:'Apara um golpe direto ou projétil comum em 1s; guarda uma resposta. Não apara áreas ou chefes.',counter:'Gasta uma resposta conquistada para causar dano.',taunt:'Atrai inimigos comuns num raio de '+r+' m por '+s.duration+'s.',slow:'Lentidão de 50% por '+s.duration+'s. Chefes resistem.',root:'Imobiliza inimigos comuns por até 3s.',interrupt:'Interrompe a ação de inimigos comuns. Resistência de 3s entre interrupções.',push:'Empurra inimigos comuns, sem dano.',pull:'Atrai inimigos comuns à mira, sem dano.',blind:'Fumaça reduz em 25% o dano dos inimigos atingidos por '+s.duration+'s.',weaken:'Reduz o dano do alvo em '+pct+'% por '+s.duration+'s.',trap:'Armadilha de '+s.duration+'s; imobiliza o primeiro inimigo comum por 2s.',slowzone:'Zona de lentidão de 50% por '+s.duration+'s. Chefes resistem.',barrier:'Barreira de '+s.duration+'s bloqueia a passagem de inimigos comuns. Você e aliados atravessam.',seal:'Selo no chão: reduz em 50% o próximo dano recebido por alguém do grupo na área.',summon:'Invoca até '+s.count+' '+({wolf:'lobos',skel:'esqueletos',golem:'golem',sentinel:'sentinela imóvel'}[s.kind]||'aliados')+' nas vagas livres, até morrerem.',order:'Comanda '+scope+' para a posição ou inimigo da mira por 8s.',recall:'Recolhe '+scope+' até você, com caminho livre.',echo:'Convoca eco especial de um vestígio de elite ou essência já recolhida. Limite 1; afinidade 2.',dilate:'Desacelera inimigos e projéteis na área. Reserva temporal amplia duração; chefes sofrem efeito menor.',passage:'Passagens entre você e a mira por 8s. Respeitam paredes; intervalo de 1,5s por viajante.',gate:'Fora de combate: escolha portal +1 rank, +2 com afinidade. Custo de 3 energias de Fenda por rank. Não promove o personagem.',anchor:'Marca posição por 3s mais reserva temporal. Use novamente para retornar, sem custo adicional.',reprise:'Repete 60% do dano da última ativa compatível; não repete outras funções.',rewindheal:'Recupera metade da vida perdida em até 4s. Não retorna posição nem revive.',speed:'Aumenta movimento em '+pct+'% por '+s.duration+'s.',link:'Vincula aliado por 20s: transfere 30% do dano restante; você paga metade da parcela. Pode matar você. Alcance e visão: 12 m.',anchorward:'Âncora por 20s: absorve 30% do seu dano restante no raio 8 m, até 30% da sua vida máxima. Compartilha limite de vínculos.',interpose:'Desloca ao vínculo ou âncora alcançável, sem escudo adicional.',form:'Alterna para a forma '+s.form+': '+({feral:'garras de alcance curto',alada:'projétil de alcance médio',blindada:'golpe lento e amplo',agil:'golpes rápidos de menor dano'}[s.form]||'')+'. Muda apenas o ataque básico. Use novamente para sair. Prepare formas na cidade.',device:'Constrói '+s.n.toLowerCase()+' por 30s. '+({turret:'Dispara em inimigos a até 12 m.',trap:'Imobiliza o primeiro inimigo comum a até 2 m por 2s e se desfaz.',emitter:'Concede escudo de 12% da vida máxima ao grupo no raio 5 m a cada 2s.'}[s.kind]||'')+' Limite 2; afinidade 4. Pode ser destruído.',repair:'Repara 50% da vida de uma construção.',dismantle:'Remove uma construção sua.',detonate:'Consome uma construção para causar dano ao redor dela.',relocate:'Reposiciona uma construção em chão livre e visível.',foresight:'Realça ataques já em preparação por 8s: janela de 1s, ou 2s com afinidade.',reveal:'Destaca inimigos próximos por 8s, inclusive no mapa.',survey:'Revela o mapa da masmorra a até 20 m; no mundo, localiza o portal mais próximo.',capture:'Por 3s captura um projétil comum próximo; chefes e áreas não são compatíveis. Reserva 1; afinidade 2.',release:'Gasta um projétil capturado e devolve dano calculado pelos seus atributos.',consume:'Gasta um projétil capturado para recuperar 20% da mana máxima.'};return d[s.effect]||'Efeito desconhecido'}
 function kitDescription111(s){let h=kitEffect111(s)+(typeof cm154Desc==='function'?cm154Desc(s):'');if(s.pow>0)h+='<br><b>Dano:</b> '+fmt(Math.round(skillDamage(s)))+' total por alvo · '+(MAGIC_CLS.includes(s.sourceClass)?'Inteligência':'Força');return '<div class="skill-copy">'+h+'<br><b>Custo:</b> '+(s.energy?s.energy+' energia':s.mp+' mana')+' · <b>Recarga:</b> '+skillCooldownText(s)+'s</div>'}
 
 function kitMigrate111(){if(!profile||!run||profile.kitMigrated111)return;const old=profile.cls===3||(profile.jobs||[]).includes(3);if(old){const ci=({fogo:8,gelo:9,terra:10,raio:11})[run.elem]||8;profile.jobs=[...new Set([...(profile.jobs||[]).filter(i=>i!==3),ci,...(!run.elem?[9,11]:[])])];if(profile.cls===3){profile.cls=ci;const evo=KIT_DEFS111[ci].find(s=>s.evolution);if(run.adv){profile.kitLearning111=profile.kitLearning111||{};profile.kitLearning111[evo.skillId]=true;run.skl[evo.n]=Math.max(run.skl[evo.n]||0,run.skl.Meteoro||0)}}const mapping=run.elem?[ci+':0',ci+':1',ci+':2']:['8:0','9:1','11:0'];if(run.classLoadout)run.classLoadout=run.classLoadout.map(id=>typeof id==='string'&&id.startsWith('3:')?mapping[Number(id.split(':')[1])]||null:id);if(run.jobData?.[3]){run.jobData[ci]=run.jobData[ci]||run.jobData[3]}if(run.basicChoices?.mag===3)run.basicChoices.mag=ci;}profile.kitMigrated111=true;store.set('pds2_profile',profile)}
@@ -7747,9 +7748,9 @@ requestAnimationFrame(frame);
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 17vmax,rgba(1,1,3,.82) 30vmax,rgba(1,1,3,.97) 42vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v156</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v157</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=156;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=157;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
