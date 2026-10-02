@@ -49,7 +49,7 @@ function renderHabitat124(cells,W,H,CS,ox,oz,th,R){
 }
 function habitatProps124(rooms,g,R){
  if(!ENV.ok)return;const flora=new EnvBatch(),bio=g.biome124,family=dungeonFamily124(g);
- const choices={goblins:['log_stack','barrel_small','box_small'],wolves:['bone_A','ribcage'],mushrooms:['mushroom_redGroup','mushroom_tanGroup'],spiders:['bone_A','stump_old'],slimes:['lily_large','plant_flatTall'],bogkin:['lily_large','grass_leafsLarge'],yetis:['rock_smallC','bone_A'],crystals:['rock_tallA','stone_tallA'],cacti:['cactus_short','plant_bushSmall'],scarabs:['rock_smallC','bone_A'],demons:['tree_dead_small','bone_A'],dragons:['ribcage','rock_smallC'],swarm:['flower_yellowA','flower_purpleA'],meadow:['flower_redA','grass_leafsLarge']}[family];
+ const choices={goblins:['log_stack','barrel_small','box_small'],wolves:['bone_A','ribcage'],mushrooms:['mushroom_redGroup','mushroom_tanGroup'],spiders:['bone_A','stump_old'],slimes:['lily_large','plant_flatTall'],bogkin:['lily_large','grass_leafsLarge'],yetis:['rock_smallC','bone_A'],crystals:['rock_tallA','stone_tallA'],cacti:['cactus_short','plant_bushSmall'],scarabs:['rock_smallC','bone_A'],demons:['tree_dead_small','bone_A'],dragons:['ribcage','rock_smallC'],swarm:['flower_yellowA','flower_purpleA'],meadow:['flower_redA','grass_leafsLarge']}[family]||['bone_A','rock_smallC','ribcage'];
  const grid=L.grid;
  // Low edge details never consume walkable cells or cover stairs/objectives.
  for(const r of rooms){if(r.i===0)continue;let count=0;

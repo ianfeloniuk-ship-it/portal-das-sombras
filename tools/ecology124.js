@@ -34,6 +34,7 @@ function dungeonFamily124(g){
  let bio=HABITATS124[g.biome124]?g.biome124:biomeAt(g.x||0,g.z||0);if(!HABITATS124[bio])bio='campos';
  if(g.goblin118&&!HABITATS124[bio].includes('goblins'))bio='floresta';g.biome124=bio;
  const native=HABITATS124[bio];if(g.goblin118)return g.family124='goblins';
+ if(String(g.family124).startsWith('rare_')&&FAMILIES124[g.family124])return g.family124;
  if(native.includes(g.family124))return g.family124;
  let ids=native;if(expeditionType(g)==='hunt'){const predators=native.filter(id=>['wolves','spiders','swarm','bogkin','yetis','scarabs','dragons'].includes(id));if(predators.length)ids=predators}
  return g.family124=ids[Math.floor(mulberry32(((g.seed||0)^0x124a91)>>>0)()*ids.length)];
@@ -44,7 +45,7 @@ function dungeonBoss124(g){
  const id=dungeonFamily124(g),f=FAMILIES124[id],d=KINDS[f.chief],rank=g.rank||0;
  const high={goblins:1,wolves:2,mushrooms:0,spiders:3,swarm:3,meadow:2,slimes:0,bogkin:0,yetis:4,crystals:4,cacti:0,scarabs:3,demons:1,dragons:2};
  const sovereign={campos:3,floresta:3,flores:3,pantano:2,neve:1,cristal:1,deserto:0,vulcao:0};
- const base=rank>=9?SOVEREIGNS[sovereign[g.biome124]]:rank>=6?BOSSES_HIGH[high[id]]:BOSSES[id==='wolves'||id==='dragons'?2:0];
+ const base=rank>=9?SOVEREIGNS[sovereign[g.biome124]??3]:rank>=6?BOSSES_HIGH[high[id]??2]:BOSSES[id==='wolves'||id==='dragons'||id.startsWith('rare_')?2:0];
  const boss={...base,n:f.boss,ecologyFamily124:id,body:d.body||d.skin||0x69754b,scale:id==='goblins'?1.7:1.6};
  delete boss.mon;delete boss.goblin118;
  if(d.mon)boss.mon=d.mon;if(d.goblin118)boss.goblin118=d.goblin118;

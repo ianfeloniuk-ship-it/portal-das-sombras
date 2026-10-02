@@ -3094,6 +3094,7 @@ function dungeonFamily124(g){
  let bio=HABITATS124[g.biome124]?g.biome124:biomeAt(g.x||0,g.z||0);if(!HABITATS124[bio])bio='campos';
  if(g.goblin118&&!HABITATS124[bio].includes('goblins'))bio='floresta';g.biome124=bio;
  const native=HABITATS124[bio];if(g.goblin118)return g.family124='goblins';
+ if(String(g.family124).startsWith('rare_')&&FAMILIES124[g.family124])return g.family124;
  if(native.includes(g.family124))return g.family124;
  let ids=native;if(expeditionType(g)==='hunt'){const predators=native.filter(id=>['wolves','spiders','swarm','bogkin','yetis','scarabs','dragons'].includes(id));if(predators.length)ids=predators}
  return g.family124=ids[Math.floor(mulberry32(((g.seed||0)^0x124a91)>>>0)()*ids.length)];
@@ -3104,7 +3105,7 @@ function dungeonBoss124(g){
  const id=dungeonFamily124(g),f=FAMILIES124[id],d=KINDS[f.chief],rank=g.rank||0;
  const high={goblins:1,wolves:2,mushrooms:0,spiders:3,swarm:3,meadow:2,slimes:0,bogkin:0,yetis:4,crystals:4,cacti:0,scarabs:3,demons:1,dragons:2};
  const sovereign={campos:3,floresta:3,flores:3,pantano:2,neve:1,cristal:1,deserto:0,vulcao:0};
- const base=rank>=9?SOVEREIGNS[sovereign[g.biome124]]:rank>=6?BOSSES_HIGH[high[id]]:BOSSES[id==='wolves'||id==='dragons'?2:0];
+ const base=rank>=9?SOVEREIGNS[sovereign[g.biome124]??3]:rank>=6?BOSSES_HIGH[high[id]??2]:BOSSES[id==='wolves'||id==='dragons'||id.startsWith('rare_')?2:0];
  const boss={...base,n:f.boss,ecologyFamily124:id,body:d.body||d.skin||0x69754b,scale:id==='goblins'?1.7:1.6};
  delete boss.mon;delete boss.goblin118;
  if(d.mon)boss.mon=d.mon;if(d.goblin118)boss.goblin118=d.goblin118;
@@ -3165,7 +3166,7 @@ function renderHabitat124(cells,W,H,CS,ox,oz,th,R){
 }
 function habitatProps124(rooms,g,R){
  if(!ENV.ok)return;const flora=new EnvBatch(),bio=g.biome124,family=dungeonFamily124(g);
- const choices={goblins:['log_stack','barrel_small','box_small'],wolves:['bone_A','ribcage'],mushrooms:['mushroom_redGroup','mushroom_tanGroup'],spiders:['bone_A','stump_old'],slimes:['lily_large','plant_flatTall'],bogkin:['lily_large','grass_leafsLarge'],yetis:['rock_smallC','bone_A'],crystals:['rock_tallA','stone_tallA'],cacti:['cactus_short','plant_bushSmall'],scarabs:['rock_smallC','bone_A'],demons:['tree_dead_small','bone_A'],dragons:['ribcage','rock_smallC'],swarm:['flower_yellowA','flower_purpleA'],meadow:['flower_redA','grass_leafsLarge']}[family];
+ const choices={goblins:['log_stack','barrel_small','box_small'],wolves:['bone_A','ribcage'],mushrooms:['mushroom_redGroup','mushroom_tanGroup'],spiders:['bone_A','stump_old'],slimes:['lily_large','plant_flatTall'],bogkin:['lily_large','grass_leafsLarge'],yetis:['rock_smallC','bone_A'],crystals:['rock_tallA','stone_tallA'],cacti:['cactus_short','plant_bushSmall'],scarabs:['rock_smallC','bone_A'],demons:['tree_dead_small','bone_A'],dragons:['ribcage','rock_smallC'],swarm:['flower_yellowA','flower_purpleA'],meadow:['flower_redA','grass_leafsLarge']}[family]||['bone_A','rock_smallC','ribcage'];
  const grid=L.grid;
  // Low edge details never consume walkable cells or cover stairs/objectives.
  for(const r of rooms){if(r.i===0)continue;let count=0;
@@ -4258,7 +4259,7 @@ function buildWorld(seed){
   worldInit(seed);clearLevel();
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);
-  hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;
+  hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
   const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));L.group.add(moon);L.moon=moon;
   updChunks(true);
   if(!gates.length)for(let i=0;i<GATE_COUNT155;i++)gates.push(newGate());
@@ -4412,6 +4413,8 @@ function buildDungeon(g){
   L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[]};scene.add(L.group);
   scene.background=new THREE.Color(th.fog);scene.fog=new THREE.FogExp2(th.fog,.03);
   hemi.color.setHex(th.light);hemi.intensity=.5;sun.color.setHex(th.light);sun.intensity=.35;pLight.color.setHex(th.light);pLight.intensity=1.3;
+  // v155 (Ian): masmorra é caverna: escuro, só a luz que você carrega mostra o caminho. Não dá para ver o mapa inteiro de cima.
+  scene.background=new THREE.Color(0x020204);scene.fog=new THREE.FogExp2(0x020204,.04);hemi.intensity=.07;sun.intensity=.05;pLight.color.setHex(0xffd9a8);pLight.intensity=2.8;pLight.distance=16;L.cave155=true;
   renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,true,.06);if(ENV.ok&&!th.natural124)envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,g.rank);
   const cellPos=(cx,cy)=>({x:ox+(cx+.5)*CS,z:oz+(cy+.5)*CS});
   const randIn=r=>{for(let t=0;t<40;t++){const cx=r.x+1+Math.floor(R()*(r.w-2)),cy=r.y+1+Math.floor(R()*(r.h-2));if(cells[cy*Wd+cx]===1)return cellPos(cx,cy)}const c=cen(r);return cellPos(c.x,c.y)};
@@ -5881,7 +5884,7 @@ function updSpecial(dt){
   if(L.bossDead&&S.kind==='tower'){S.msg='Andar '+S.floor+' limpo · suba ou saia';return}
   if(L.bossDead){S.msg='Concluído · saia pelo portal · fecha em '+fmtT(L.closeT);return}
   if(S.kind==='job'){
-    if(updateRankExaminer(S))return;
+    if(updateRankExaminer(S))return;if(updateAwakenTest155(S))return;
     const alive=enemies.filter(e=>!e.dead&&!e.isBoss).length;
     if(S.stage===0&&S.t>2.5){S.stage=1;spawnWave(8,0);toast('<b>[NARRADOR]</b> Missão de troca de classe: onda 1 de 3.')}
     else if(S.stage===1&&alive===0){S.stage=2;spawnWave(12,3);toast('<b>[NARRADOR]</b> Onda 2 de 3. Elites chegando.')}
@@ -5928,7 +5931,18 @@ function className(){const A=ADV[profile.cls],t=tierOf();return run.adv?(t?TIER_
 function canArise(){return !!CLASSES[profile.cls].arise||ownsRare(7)||profile.rank===9}
 function completeTier(){narratorEvent105('tier');run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
   bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[NARRADOR]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% no bônus somado (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}
+/* v155 (Ian): set completo de uma classe rara libera o teste de despertar: duelo contra o guardião do tema, mais forte. Vencer ensina a classe. */
+function awakenTestReady155(id){const S=SETS153[id];return !!S&&setCount153(id)>=5&&!awakening103().unlocked.includes(S.cls)&&profile.cls!==S.cls}
+function awakenRows155(){let h='';for(const id in SETS153){const n=setCount153(id);if(!n)continue;const S=SETS153[id],cls=CLASSES[S.cls]?.n,learned=awakening103().unlocked.includes(S.cls)||profile.cls===S.cls;
+  h+=row(S.n+' ('+n+'/5)',learned?'Você já tem a classe '+cls+'.':n<5?'Reúna as 5 peças (vestidas) para liberar o teste de despertar do '+cls+'.':'Set completo. Enfrente o guardião para aprender a classe '+cls+'.',learned||n<5?'':btn('Teste de despertar','awtest155',id,L.mode==='world','hot'))}return h}
+function startAwakenTest155(id){if(!awakenTestReady155(id)||L.mode!=='world'||player.dead)return false;closeModal();L.awaken155=id;buildSpecial('job');L.awaken155=id;toast('<b>[NARRADOR]</b> Teste de despertar do <b>'+CLASSES[SETS153[id].cls].n+'</b>. O dono deste set deixou um guardião para medir você.',7000);return true}
+function updateAwakenTest155(S){const id=L.awaken155;if(!id)return false;const Set=SETS153[id];
+  if(S.stage===0&&S.t>2.5){S.stage=3;const gr=clamp(rankOf()+1,0,9),B={...dungeonBoss124({family124:Set.family,biome124:'campos',rank:gr,seed:1})};B.n='Prova: '+B.n;B.scale=(B.scale||1.6)*1.3;const b=spawnBoss(0,-8,gr,B);b.hp*=2.5;b.maxhp*=2.5;b.aggro=true;bossAggro(b)}
+  S.msg=S.stage===0?'Prepare-se para o teste de despertar':'Teste de despertar · derrote o guardião do '+CLASSES[Set.cls].n;return true}
+function completeAwakenTest155(){const id=L.awaken155,S=SETS153[id];L.awaken155=null;if(!S)return;const a=awakening103();a.discovered=true;if(!a.unlocked.includes(S.cls))a.unlocked.push(S.cls);a.points[S.cls]=Math.max(1,a.points[S.cls]||0);profile.jobs=[...new Set([...jobsOf(),S.cls])];store.set('pds2_profile',profile);
+  bigText(CLASSES[S.cls].n.toUpperCase()+' DESPERTO',2400);sfx('arise');toast('<b>[NARRADOR]</b> Teste concluído. Você aprendeu a classe rara <b>'+CLASSES[S.cls].n+'</b>. Monte as habilidades dela em Personagem → Habilidades.',8000);saveRun()}
 function completeJob(){
+  if(L.awaken155){completeAwakenTest155();return}
   if(L.rankTrial){const r=L.rankTrial;L.rankTrial=0;profile.rank=Math.max(profile.rank,r);narratorEvent105('rank',{rank:r});rememberClassCooldowns();player.skills=pSkills();showG();store.set('pds2_profile',profile);refreshStats();player.hp=player.maxhp;player.aura.material.color.set(RANKS[r].c);bigText('RANK '+RANKS[r].id,2200);sfx('arise');
     toast('<b>[ORDEM]</b> Prova concluída: você agora é <b style="color:'+RANKS[r].c+'">rank '+RANKS[r].id+'</b>. '+(r===9?'Você superou SS+ e alcançou Arconte.':'<b>Uma nova escolha de combate</b> disponível em Prova de Rank. Veja também seus espaços de habilidades.'),8000);setTimeout(()=>storyAct(r),2500);saveRun();return}
   if(L.tierTrial){L.tierTrial=false;completeTier();return}
@@ -6133,7 +6147,7 @@ function skillsView(){view=skillsView;L.characterTab='skills';let h=characterTab
 
 function naturalRegen(P=player,safe=false){return {hp:P.maxhp*((hasT('brk600')?.01:0)+(safe?.08:0)),mp:3+P.maxmp*(.03+(safe?.1:0)),shield:P.maxsh*.2*(hasT('brk30')?1.3:1),shieldWait:Math.max(0,P.shT||0)}}
 function regenRows(){const P=player,nc=L.mode==='world'?nearestCity(P.x,P.z):null,safe=!!nc&&nc.d<36*CITYK&&!cityFallen(nc.c),base=naturalRegen(P,false),city=naturalRegen(P,true),unit=(v,max)=>preciseNumber(v)+'/s ('+preciseNumber(max?v/max*100:0)+'%/s)';let h='<div class="sec">REGENERAÇÃO</div><div class="sysline">Taxas por segundo enquanto joga, até o máximo de cada recurso. '+(safe?'Você está em uma zona segura.':'Você está fora de uma zona segura.')+'</div>';h+=row('Vida',unit(base.hp,P.maxhp)+' fora da cidade.<br>'+unit(city.hp,P.maxhp)+' na zona segura.','');h+=row('Mana',unit(base.mp,P.maxmp)+' fora da cidade.<br>'+unit(city.mp,P.maxmp)+' na zona segura.','');h+=row('Escudo de equipamento',unit(base.shield,P.maxsh)+' após 4s sem receber dano.'+(base.shieldWait>0?'<br>Espera restante: '+preciseNumber(base.shieldWait)+'s.':''),'');h+='<div class="sysline">Curas de habilidades, ataques, poções e companheiros dependem de uso ou acerto; não entram nessas taxas.</div>';return h}
-function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+equipmentPanel()+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details><summary>Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h,'build')}
+function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('build')+equipmentPanel()+awakenRows155()+charSheet()+regenRows();const effects=[];for(const sl of EQUIP_SLOTS){const it=run.equip[sl],r=GEAR_RUNES[it?.rune];if(r)effects.push(row(EQUIP_LABEL[sl]+' · '+r.n,r.d,''))}for(const set of activeSets())effects.push(row(set.n,set.d,''));if(effects.length)h+='<details><summary>Efeitos do equipamento</summary>'+effects.join('')+'</details>';openModal('PERSONAGEM',h,'build')}
 
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Ecos ativos: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Ecos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
@@ -6818,6 +6832,7 @@ function extraActions3(a,v){if(a==='region116'){regionView116();return 'close0'}
  if(a==='resetattributes'){redistributeAttributes();statusView();return 'close0'}
  if(a==='armorpart'){if(EQUIP_SLOTS.includes(v)&&v!=='w'){L.armorSlot=v;openShop('arm')}return 'close0'}
  if(a==='gearpick'){gearPicker(v);return 'close0'}
+ if(a==='awtest155'){startAwakenTest155(v);return 'close'}
  if(a==='gearbag'){bagItems();return 'close0'}
  if(a==='unequip'){unequipItem(v);return true}
 
@@ -7706,3 +7721,4 @@ requestAnimationFrame(frame);
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
+<script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 17vmax,rgba(1,1,3,.82) 30vmax,rgba(1,1,3,.97) 42vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
