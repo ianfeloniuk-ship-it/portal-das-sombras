@@ -35,6 +35,11 @@
     let mix153=false;model.traverse(o=>{if(o.isMesh&&/^tripo_part/.test(o.name))mix153=true;if(o.isBone&&/^mixamorig:?/.test(o.name)){mix153=true;const k=o.name.replace(/^mixamorig:?/,'');o.userData.mixName=k;if(MIX153[k])o.name=MIX153[k]}});
     if(mix153){model.updateMatrixWorld(true);const box=new T.Box3().setFromObject(model),s=2.05/(box.max.y-box.min.y);model.scale.setScalar(s);model.position.y=-box.min.y*s;}
     else{model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;}
+    // v156: a malha do Viajante tem triângulos-fio (luvas e botas) que vão do centro do corpo até além da mão ou do chão à canela,
+    // aparecendo como uma linha. Remove triângulos com aresta acima de 12 cm (na escala do arquivo); os normais têm até ~3,5 cm.
+    if(mix153)model.traverse(o=>{if(!o.isSkinnedMesh||!o.geometry.index||o.geometry.userData.sliver156!=null)return;const g=o.geometry,P=g.attributes.position,I=g.index.array,keep=[],a=new T.Vector3(),b=new T.Vector3(),c=new T.Vector3();let cut=0;
+      for(let t=0;t<I.length;t+=3){a.fromBufferAttribute(P,I[t]);b.fromBufferAttribute(P,I[t+1]);c.fromBufferAttribute(P,I[t+2]);if(Math.max(a.distanceTo(b),b.distanceTo(c),c.distanceTo(a))>.12){cut++;continue}keep.push(I[t],I[t+1],I[t+2])}
+      if(cut)g.setIndex(keep);g.userData.sliver156=cut});
     const uniforms={gearArmor:{value:new T.Color(1,1,1)},gearGloves:{value:new T.Color(1,1,1)},gearBoots:{value:new T.Color(1,1,1)},gearAmounts:{value:new T.Vector3()}};
     const mats=[],bones={};model.traverse(o=>{if(o.isBone&&(!mix153||Object.values(MIX153).includes(o.name)||/^cape/.test(o.name))&&!bones[o.name])bones[o.name]=o;if(o.isMesh)mats.push(setupMaterial(o,uniforms,options.legacyLinearOutput));});
     if(mix153){for(const k of ['cape','cape_tail'])if(!bones[k])bones[k]=new T.Object3D();model.updateMatrixWorld(true);const inv=new T.Quaternion().copy(model.getWorldQuaternion(new T.Quaternion())).invert();
@@ -54,10 +59,10 @@
     for(const p of m.wnodes)disposePart(p);for(const p of m.armorParts)disposePart(p);m.wnodes=[];m.armorParts=[];m.wmats=[];m.mats=m.baseMaterials.slice();
     const itemFor=it=>{if(!it)return null;return {...it,visual:{...it.visualWeapon,...it.visual,color:it.visual?.color??colors[clamp(it.tier||0,0,9)]}}};
     m.bow155=false;const heldWeapon=equip.w,isBow=heldWeapon&&(heldWeapon.kind155==='bow'||heldWeapon.visual?.shape==='bow'||heldWeapon.visualWeapon?.shape==='bow');
-    if(isBow&&bow155&&m.bones.hand_l){const bow=T.SkeletonUtils.clone(bow155);const holder=new T.Group();holder.add(bow);
+    if(isBow&&bow155&&m.bones.hand_l){const bow=T.SkeletonUtils.clone(bow155);const holder=new T.Group();holder.add(bow);m.bowHolder155=holder;
       // Empunhadura: o meio do arco (y≈0,49 do modelo) na palma; em pose T o arco fica de pé no mundo e acompanha a mão.
       bow.position.set(0,-.49,0);const hl=m.bones.hand_l;m.model.updateMatrixWorld(true);const hq=hl.getWorldQuaternion(new T.Quaternion()),hs=hl.getWorldScale(new T.Vector3()).x;
-      holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);m.wnodes.push(holder);m.bow155=true}
+      holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true}
     else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=global.WarriorEquipment127.weapon(T,item);m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
     // Equipment is added as independent pieces; the approved face remains intact.
@@ -107,7 +112,7 @@
   const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]},WINTRIPO155={golpe1:[0,.7],golpe2:[0,.7],golpe3:[.05,.6],pesado1:[0,.7],pesado2:[0,.75],lanca1:[0,.65],adaga1:[0,.8],adaga2:[0,.8],arco1:[0,.85],arco2:[0,.85],cajado1:[0,.8],cajado2:[0,.8],magia_mao:[0,.8],soco:[0,.75]};
   // Golpe básico por tipo de arma da classe (combo 1-2-3). Clipes que faltarem caem no próximo da lista.
   const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
-  let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;API.BOWPOS155=BOWPOS155;
+  let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;const BOWIDLE155=[0,0,0],BOWIDLEPOS155=[0,0,0];let BOWPALM155=.08;API.setPalm155=v=>BOWPALM155=v;API.BOWIDLE155=BOWIDLE155;API.BOWIDLEPOS155=BOWIDLEPOS155;API.BOWPOS155=BOWPOS155;
   // v155: arco do Arqueiro (Tripo, referência aprovada) na mão esquerda.
   let bow155=null;API.loadBow=function(url){const L=new T.GLTFLoader();return new Promise(res=>L.load(url,g=>{bow155=g.scene;res(true)},undefined,()=>res(false)))};
   API.loadAnims=function(url){
@@ -152,6 +157,12 @@
     // Altura do quadril (agachar, cair ao morrer); sem andar sozinho para os lados.
     const hp=A.hips.k.getWorldPosition(v1).sub(A.kayRestP).multiplyScalar(A.ratio);hp.x=0;hp.z=st.dead>0?hp.z:0;
     A.hips.b.position.copy(v2.copy(A.hips.b.userData.rest155P).add(hp).applyMatrix4(A.parentInv));
+    // Arco fora do tiro: em pé ao lado do corpo, um pouco para fora da mão, sem atravessar braço e perna.
+    const bh=m.bowHolder155;if(bh&&bh.parent){const aiming=/^(arco|chuva_com_arco)/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||'');
+      if(!aiming){m.root.updateMatrixWorld(true);const hand=bh.parent,mq=m.model.getWorldQuaternion(q4).clone(),want=mq.multiply(q1.setFromEuler(new T.Euler(...BOWIDLE155)));
+        bh.quaternion.copy(hand.getWorldQuaternion(q2).invert().multiply(want));// Palma = pulso + um pouco na direção antebraço→mão (onde os dedos fecham).
+        const hw=hand.getWorldPosition(v1),fa=(m.bones.forearm_l||hand.parent).getWorldPosition(new T.Vector3()),dir=hw.clone().sub(fa).normalize();const wp=hw.clone().addScaledVector(dir,BOWPALM155).add(new T.Vector3(...BOWIDLEPOS155).applyQuaternion(m.model.getWorldQuaternion(q3)));bh.position.copy(hand.worldToLocal(wp));bh.userData.idle155=true}
+      else if(bh.userData.idle155){bh.quaternion.copy(bh.userData.aimQ155);bh.position.copy(bh.userData.aimP155);bh.userData.idle155=false}}
   }
   global.Warrior127=API;
 })(window);
