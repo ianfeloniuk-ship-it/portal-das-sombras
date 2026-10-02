@@ -1,15 +1,15 @@
 /* v156 (pedido do Ian): projéteis feitos no Tripo a partir das referências aprovadas
    (Entregas/Tripo-Referencias-Classes-2026-10-01/Projeteis) no lugar das bolhas de luz.
-   Raio e terra ficaram de fora: as gerações do Tripo saíram com defeito e precisam ser refeitas.
+   Raio e terra foram refeitos no Tripo (02/10) e entraram na v159.
    Cada modelo é virado para que o comprimento fique no eixo +Z (direção do voo) e medido em metros. */
 (function(global){
   'use strict';
   const T=global.THREE,API={ready:false,models:{}};
   // nome do arquivo → comprimento no jogo (m)
-  const FILES={flecha:.95,fogo:.7,gelo:.9,artifice:1,condutor:1,devorador:.9,metamorfo:.9};
+  const FILES={flecha:.95,fogo:.7,gelo:.9,artifice:1,condutor:1,devorador:.9,metamorfo:.9,raio:.95,terra:.8};
   // Tipo de projétil do jogo e classe dona → modelo.
   const BY_TYPE={arrow:'flecha',sarrow:'flecha',fire:'fogo',ice:'gelo'};
-  const BY_CLASS={4:'flecha',8:'fogo',9:'gelo',15:'metamorfo',16:'artifice',18:'condutor',20:'devorador'};
+  const BY_CLASS={4:'flecha',8:'fogo',9:'gelo',10:'terra',11:'raio',15:'metamorfo',16:'artifice',18:'condutor',20:'devorador'};
   // Ajuste fino de quem tem a ponta para trás (giro em Y, radianos).
   const FLIP={};
   API.load=function(base){
@@ -46,7 +46,7 @@
     return t=>{rim.material.opacity=.45+.25*Math.sin(t*9);for(const s of ps){const u=(s.userData.ph+t*.9)%1,r=len*(.55-.5*u),a=s.userData.ph*20+t*6+u*5;s.position.set(Math.cos(a)*r,Math.sin(a)*r,-u*len*.4);s.scale.setScalar(len*.26*(1-u*.4));s.material.opacity=.35+u*.65}}}
   function frost(g,len,col){const ps=[];for(let i=0;i<10;i++){const s=sprite(i%2?0xd8f6ff:col,true,.7);s.userData.ph=Math.random();g.add(s);ps.push(s)}
     return t=>{for(const s of ps){const u=(s.userData.ph+t*1.5)%1;s.position.set(rnd(-.05,.05),rnd(-.05,.05),-u*len*1.2);s.scale.setScalar(len*.3*(1-u));s.material.opacity=(1-u)*.6}}}
-  const FX={fogo:(g,c)=>flame(g,.9),metamorfo:(g,c)=>flame(g,.5),condutor:(g,c)=>lightning(g,1.2,0x9fe0ff),artifice:(g,c)=>lightning(g,.9,0x5fd0ff),devorador:(g,c)=>voidFx(g,1.3),gelo:(g,c)=>frost(g,.8,0x9fe8ff)};
+  const FX={fogo:(g,c)=>flame(g,.9),metamorfo:(g,c)=>flame(g,.5),condutor:(g,c)=>lightning(g,1.2,0x9fe0ff),artifice:(g,c)=>lightning(g,.9,0x5fd0ff),devorador:(g,c)=>voidFx(g,1.3),gelo:(g,c)=>frost(g,.8,0x9fe8ff),raio:(g,c)=>lightning(g,1.1,0xc8ecff),terra:(g,c)=>frost(g,.7,0x9a7b55)};
   API.addFx=function(g,name,col){const f=FX[name];if(!f)return;const holder=new T.Group();g.add(holder);const up=f(holder,col);const t0=performance.now();
     // Atualiza junto com o desenho do projétil (sem depender do laço do jogo).
     const hook=new T.Mesh(new T.BufferGeometry(),new T.MeshBasicMaterial({visible:false}));hook.frustumCulled=false;hook.onBeforeRender=()=>up((performance.now()-t0)/1000);holder.add(hook);up(0)};

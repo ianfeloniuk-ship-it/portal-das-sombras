@@ -637,3 +637,7 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - **v158** (outra sessão): habilidades em caixas de abrir/fechar e textos longos em balão com ⓘ — **Ian reprovou**, corrigido na v159.
 - **v159** (Claude na nuvem): habilidades em linha fixa (nome, melhorias, botão) com descrição e próximo nível no balão ao passar o mouse (`skillUpgradeRow`, `tipText155`); caixas sempre abertas, sem clique; balão sem ⓘ; no celular o balão abre ao tocar e some em 5 s. **Regra do Ian: explicação só no balão (tooltip), nunca abrir/fechar no clique.**
 - Criado `VERSAO.md` (versão atual + como começar/publicar); o `tools/build.py` atualiza o número sozinho.
+
+## v160 (02/10/2026, Claude)
+- Projéteis do **Mago do Raio** (classe 11) e do **Mago da Terra** (classe 10) refeitos no Tripo e ligados em `tools/proj155.js`: raio = cristal azul com descargas elétricas; terra = pedra incandescente com poeira. Substituem os modelos com defeito em `models/proj155/`.
+- Os 9 chefes das classes raras foram baixados do Tripo com esqueleto (Mixamo) e ficam em `Entregas/chefes-raros-tripo/` para a próxima etapa.
