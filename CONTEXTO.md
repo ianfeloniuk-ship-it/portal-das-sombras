@@ -1,5 +1,7 @@
 # Contexto do projeto Ecos da Fenda (antigo Portal das Sombras) (para outra conversa/IA continuar)
 
+> **Versão atual e regras para começar: veja [`VERSAO.md`](VERSAO.md).** Sempre parta da `main` do GitHub; cópias locais podem estar atrasadas.
+
 Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, com foco em PC e suporte a celular, ambientado nas Fendas e ecos de mundos mortos. Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes. A identidade atual é **Ecos da Fenda**, com a ação **ERGUER ECO**; os registros históricos abaixo descrevem versões anteriores.
 Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-das-sombras/ (GitHub Pages, branch `main`, pasta raiz).
 
@@ -628,3 +630,10 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Masmorras escuras como caverna (luz só em volta do herói, véu `#cave155`).
 - UI: selo ESCUDO removido; "Poderes" só mostra linhas com conteúdo; equipamento foi para Personagem → Build; Retirar sempre clicável (avisa bolsa cheia); todo botão tem animação ao apertar.
 - Pendente: modelos próprios dos chefes (Tripo), ataques temáticos, bônus específicos dos sets, paredes de caverna/câmera baixa, mecânicas do teste de despertar.
+
+## v156–v159 (02/10/2026)
+- **v156** (outra sessão): projéteis do Tripo (`models/proj155/`, `tools/proj155.js`) com efeitos de energia; Chuva de Flechas/Meteoros com flechas e meteoros de verdade; arco em pé na palma; linha da mão ao chão do Viajante removida.
+- **v157** (outra sessão): troca de equipamento com bolsa cheia, lista de peças na Build, revisão de textos ("masmorra" em vez de "calabouço", Narrador, caixas sempre abertas).
+- **v158** (outra sessão): habilidades em caixas de abrir/fechar e textos longos em balão com ⓘ — **Ian reprovou**, corrigido na v159.
+- **v159** (Claude na nuvem): habilidades em linha fixa (nome, melhorias, botão) com descrição e próximo nível no balão ao passar o mouse (`skillUpgradeRow`, `tipText155`); caixas sempre abertas, sem clique; balão sem ⓘ; no celular o balão abre ao tocar e some em 5 s. **Regra do Ian: explicação só no balão (tooltip), nunca abrir/fechar no clique.**
+- Criado `VERSAO.md` (versão atual + como começar/publicar); o `tools/build.py` atualiza o número sozinho.

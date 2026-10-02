@@ -39,4 +39,9 @@ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;
 </html>
 '''
 (root/'index.html').write_text(head+game+tail.replace('__V__',ver),encoding='utf-8')
+# Mantém VERSAO.md com a versão publicada, para outras conversas/IAs saberem de onde partir.
+vf=root/'VERSAO.md'
+if vf.is_file():
+    vt=vf.read_text(encoding='utf-8')
+    vf.write_text(re.sub(r'<!--v-->v\d+<!--/v-->','<!--v-->v'+ver+'<!--/v-->',vt),encoding='utf-8')
 print('index.html gerado')

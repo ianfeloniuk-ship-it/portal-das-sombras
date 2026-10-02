@@ -4,6 +4,8 @@ RPG de ação 3D para PC, com suporte a celular. Explore as Fendas, enfrente gua
 
 **Jogar:** https://ianfeloniuk-ship-it.github.io/portal-das-sombras/
 
+**Para desenvolver:** veja [`VERSAO.md`](VERSAO.md) (versão atual e de onde partir) e [`CONTEXTO.md`](CONTEXTO.md).
+
 ## Jogar no PC
 - Abra o site no navegador. A tela ocupa a janela disponível; maximize para jogar em tela larga.
 - WASD/setas movem. O botão esquerdo do mouse mira e ataca; segure para atacar continuamente.
