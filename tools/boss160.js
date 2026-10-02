@@ -7,8 +7,8 @@
   'use strict';
   const T=global.THREE,API={};
   // id do conjunto raro → id da classe (projétil da classe vem do Proj155).
-  const CLS={tempo:12,tecelao:13,guardiao:14,metamorfo:15,artifice:16,duelista:17,condutor:18,oraculo:19,devorador:20};
-  const ATK={tempo:['cajado1','magia_mao'],tecelao:['magia_mao','cajado2'],oraculo:['cajado1','magia_mao'],condutor:['magia_mao','lanca1'],devorador:['soco','pesado2'],metamorfo:['soco','pesado1'],guardiao:['pesado1','pesado2'],artifice:['pesado1','pesado2'],duelista:['adaga1','golpe2']};
+  const CLS={necromante:7,tempo:12,tecelao:13,guardiao:14,metamorfo:15,artifice:16,duelista:17,condutor:18,oraculo:19,devorador:20};
+  const ATK={necromante:['cajado1','magia_mao'],tempo:['cajado1','magia_mao'],tecelao:['magia_mao','cajado2'],oraculo:['cajado1','magia_mao'],condutor:['magia_mao','lanca1'],devorador:['soco','pesado2'],metamorfo:['soco','pesado1'],guardiao:['pesado1','pesado2'],artifice:['pesado1','pesado2'],duelista:['adaga1','golpe2']};
   const HEIGHT=3.3;
   const cache=new Map();let anim=null;
   function loader(){const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);return L}
@@ -53,6 +53,7 @@
   const aim=(b,t)=>Math.atan2(t.x-b.x,t.z-b.z);
   // Rajada leve (substitui o anel genérico de orbes vermelhos).
   const VOLLEY={
+    necromante:(b,t,n)=>{const o=Math.random()*TAU;for(let i=0;i<n;i++)shot(b,o+i/n*TAU,7,.42,0x7dff9a,{})},
     tempo:(b,t,n)=>{const o=Math.random()*TAU;for(let i=0;i<n;i++)shot(b,o+i/n*TAU,6,.4,0xffd27a,{slow:.5})},
     tecelao:(b,t,n)=>{for(let i=0;i<n;i++)later(b,i*70,()=>shot(b,aim(b,t)+(i-n/2)*.18,10,.4,0xc58cff))},
     guardiao:(b,t,n)=>{const a=aim(b,t);for(let i=-2;i<=2;i++)shot(b,a+i*.22,8,.5,0x9fd8ff,{sc:1.6,kb:2.2})},
@@ -66,6 +67,9 @@
   API.volley=function(b,t,n){const f=VOLLEY[b.boss160id];if(!f||!G.shoot)return false;f(b,t,n);G.sfx&&G.sfx('swing');return true};
   // Golpe especial (substitui o especial genérico do chefe).
   const SPECIAL={
+    necromante:(b,t,p2)=>{const n=p2?6:4;for(let i=0;i<n;i++){const x=t.x+(i?R(-4,4):0),z=t.z+(i?R(-4,4):0);G.hazard(x,z,2,1+i*.15,b.dmg*1.1,'enemy',0x7dff9a)}
+      if(G.spawnKind&&G.bossMinion124){const k=p2?3:2;for(let i=0;i<k;i++){const a=i/k*TAU,x=b.x+Math.cos(a)*3,z=b.z+Math.sin(a)*3;try{const m=G.spawnKind(G.bossMinion124(b,'minion'),x,z,b.gr,{room:b.room});m.aggro=true;G.fxRing&&G.fxRing(m.x,m.z,0x7dff9a,1.5)}catch(e){}}}
+      say(b,'Levantar os Mortos')},
     tempo:(b,t,p2)=>{const n=p2?5:3;for(let i=0;i<n;i++){const x=t.x+(i?R(-3,3):0),z=t.z+(i?R(-3,3):0);G.hazard(x,z,2.6,1+i*.35,b.dmg*1.2,'enemy',0xffd27a)}say(b,'Instante Parado')},
     tecelao:(b,t,p2)=>{const a=aim(b,t);for(let i=1;i<=(p2?8:6);i++)G.hazard(b.x+Math.sin(a)*i*2.2,b.z+Math.cos(a)*i*2.2,1.5,.7+i*.08,b.dmg*1.3,'enemy',0xc58cff);say(b,'Rasgo de Fenda')},
     guardiao:(b,t,p2)=>{G.hazard(b.x,b.z,p2?8:6,1,b.dmg*1.5,'enemy',0x9fd8ff);G.fxRing&&G.fxRing(b.x,b.z,0x9fd8ff,4,.8);say(b,'Bastião Inabalável')},

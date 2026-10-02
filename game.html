@@ -227,11 +227,11 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=162"></script>
+<script src="tools/warrior-player127.js?v=163"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
-<script src="tools/boss160.js"></script>
+<script src="tools/boss160.js?v=163"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js"></script>
 <script src="tools/water154.js"></script>
@@ -5011,8 +5011,10 @@ function castFluid139(sk){if(!window.Combat139||!player)return;const cls=sk.sour
 /* ================= PERIGOS ================= */
 function hazard(x,z,r,dur,dmg,team,col){if(team==='enemy'&&r>8){r=8;dur=Math.max(dur,1.2)}
   const g=new THREE.Group();g.position.set(x,.06,z);
-  const ring=new THREE.Mesh(new THREE.RingGeometry(r-.12,r,40),glow(col,.9));ring.rotation.x=-Math.PI/2;g.add(ring);
-  const fill=new THREE.Mesh(new THREE.CircleGeometry(r,40),glow(col,.28));fill.rotation.x=-Math.PI/2;fill.scale.setScalar(.01);g.add(fill);
+  // v163: área de perigo com cor sólida — o brilho aditivo virava branco no chão claro das masmorras.
+  const solid163=(o)=>new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:o,depthWrite:false});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(r-.18,r,40),solid163(.95));ring.rotation.x=-Math.PI/2;g.add(ring);
+  const fill=new THREE.Mesh(new THREE.CircleGeometry(r,40),solid163(.35));fill.rotation.x=-Math.PI/2;fill.scale.setScalar(.01);g.add(fill);
   scene.add(g);const h={g,fill,x,z,r,dur,t:0,dmg,team,col,owner:team==='enemy'?curAtk:null};hazards.push(h);return h;
 }
 function updHazards(dt){

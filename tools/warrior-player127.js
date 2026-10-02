@@ -77,7 +77,18 @@
     for(let v=0;v<P.count;v++){let x=O[v*3],y=O[v*3+1],z=O[v*3+2];if(on&&F.w[v]>.5&&x<KX&&z<ZT){const f=Math.min((KX-x)/R,FIST162.max),d=y-KY;x=KX-(R+d)*Math.sin(f);y=KY-R+(R+d)*Math.cos(f)}P.setXYZ(v,x,y,z)}
     P.needsUpdate=true;o.geometry.computeVertexNormals();m.fistHand162=F.hp});
     if(on&&m.fistHand162)m.socket.position.set(-FIST162.knuckle,-FIST162.lift-FIST162.r,.02)}
-  API.gear=function(m,equip,options){
+  /* v163 (Ian: "fazer espada tbm no tripo"): espada do Tripo (models/armas155/espada162.glb). Normalizada com o cabo
+     na origem e a lâmina em +Y, do mesmo tamanho da espada longa antiga. Enquanto carrega, fica a espada desenhada. */
+  let sword163=null;const waiting163=new Set();
+  (function(){if(!T.GLTFLoader)return;new T.GLTFLoader().load('models/armas155/espada162.glb',g=>{const o=g.scene;o.updateMatrixWorld(true);
+    const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),ax=sz.x>sz.y&&sz.x>sz.z?'x':sz.z>sz.y?'z':'y';
+    const holder=new T.Group(),inner=new T.Group();inner.add(o);holder.add(inner);if(ax==='x')inner.rotation.z=-Math.PI/2;if(ax==='z')inner.rotation.x=Math.PI/2;
+    holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder),L=b2.max.y-b2.min.y,sc=.68/L;inner.scale.multiplyScalar(sc);holder.updateMatrixWorld(true);
+    const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*.075),-c.z);
+    holder.traverse(x=>{if(x.isMesh){x.castShadow=true;if(x.material)x.material.metalness=Math.min(x.material.metalness??0,.6)}});sword163=holder;
+    for(const m of waiting163){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}waiting163.clear()},undefined,()=>{})})();
+  function tripoSword163(item){const w=sword163.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;return w}
+  API.gear=function(m,equip,options){m.lastGear163=[equip,options];
     options=options||{};const colors=options.tierColors||[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
     const signature=JSON.stringify(['w','a','h','g','b'].map(k=>{const i=equip[k];return i?[k,i.uid,i.tier,i.rar,i.visual,i.visualWeapon]:[k,null]}));
     if(signature===m.gearSignature)return;m.gearSignature=signature;
@@ -88,7 +99,7 @@
       // Empunhadura: o meio do arco (y≈0,49 do modelo) na palma; em pose T o arco fica de pé no mundo e acompanha a mão.
       bow.position.set(0,-.49,0);const hl=m.bones.hand_l;m.model.updateMatrixWorld(true);const hq=hl.getWorldQuaternion(new T.Quaternion()),hs=hl.getWorldScale(new T.Vector3()).x;
       holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true;const it=itemFor(heldWeapon);aura162(bow,it.visual.color,it.tier||0,.98,true)}
-    else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const weapon=heldWeapon.kind155==='staff'?staff162(item):global.WarriorEquipment127.weapon(T,item);fist162(m,true);aura162(weapon,item.visual.color,item.tier||0,...(heldWeapon.kind155==='staff'?[.32,false,.84]:[item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
+    else if(heldWeapon){m.bow155=false;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const isSword163=heldWeapon.kind155!=='staff'&&/^(sword|broad|long)$/.test(item.visual.shape||'');if(isSword163&&!sword163)waiting163.add(m);const weapon=heldWeapon.kind155==='staff'?staff162(item):isSword163&&sword163?tripoSword163(item):global.WarriorEquipment127.weapon(T,item);fist162(m,true);aura162(weapon,item.visual.color,item.tier||0,...(heldWeapon.kind155==='staff'?[.32,false,.84]:[isSword163&&sword163?.6:item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
     // Equipment is added as independent pieces; the approved face remains intact.
     // Armor assets await art review. Keep the approved clothes intact.
