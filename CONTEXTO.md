@@ -689,3 +689,9 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - **Talentos de rank**: Disparo dividido = projéteis paralelos com dano inteiro (era leque com 40%); Ricochete mantém dano inteiro; novos **Espelho** (2 níveis: para trás, depois para os lados) e **Eco gratuito** (25% de habilidade sem custo nem recarga).
 - **Mana**: custo de habilidade = maior entre o custo base e base/60 da mana máxima (`manaCost177`); regeneração 2 + 1,8%/s (era 3 + 3%/s).
 - Pendentes do áudio: passivas corpo a corpo; combinar habilidades/classes em sinergia (ex.: fúria + giro); chefes com mais habilidades (o Irror gostou do chefe SS+ com giro e chuva roxa). Sugestão dele: lançar single player e só depois pensar em multiplayer (arena primeiro); anti-cheat é caro — decisão do Ian.
+
+## v178 (03/10/2026, Claude na nuvem) — pendentes do áudio do Irror
+- Projéteis de monstro com nível ≥50 ricocheteiam na parede (1 vez; 2 a partir do nível 125) (`wallBounce177`).
+- Talentos de rank corpo a corpo: **Golpe espelhado** (acerta atrás também, dano inteiro) e **Onda de choque** (3º golpe solta onda que atravessa; até 3 ondas).
+- **Sinergia**: usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela (texto "SINERGIA +30%").
+- Todo chefe tem pelo menos 3 tipos de ataque (sorteia os que faltam entre sísmico, fúria, chuva de almas, legião).
