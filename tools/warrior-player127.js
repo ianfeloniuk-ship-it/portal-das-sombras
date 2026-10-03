@@ -148,7 +148,7 @@
   const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]},WINTRIPO155={golpe1:[0,.7],golpe2:[0,.7],golpe3:[.05,.6],pesado1:[0,.7],pesado2:[0,.75],lanca1:[0,.65],adaga1:[0,.8],adaga2:[0,.8],arco1:[0,.85],arco2:[0,.85],cajado1:[0,.8],cajado2:[0,.8],magia_mao:[0,.8],soco:[0,.75]};
   // Golpe básico por tipo de arma da classe (combo 1-2-3). Clipes que faltarem caem no próximo da lista.
   const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
-  let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;const BOWIDLE155=[0,0,0],BOWIDLEPOS155=[0,0,0];let BOWPALM155=.08;API.setPalm155=v=>BOWPALM155=v;API.BOWIDLE155=BOWIDLE155;API.BOWIDLEPOS155=BOWIDLEPOS155;API.BOWPOS155=BOWPOS155;
+  let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;const BOWIDLE155=[0,0,0],BOWIDLEPOS155=[.11,0,.04];let BOWPALM155=.08;API.setPalm155=v=>BOWPALM155=v;API.BOWIDLE155=BOWIDLE155;API.BOWIDLEPOS155=BOWIDLEPOS155;API.BOWPOS155=BOWPOS155;
   // v155: arco do Arqueiro (Tripo, referência aprovada) na mão esquerda.
   let bow155=null;API.loadBow=function(url){const L=new T.GLTFLoader();return new Promise(res=>L.load(url,g=>{bow155=g.scene;res(true)},undefined,()=>res(false)))};
   API.loadAnims=function(url){
@@ -193,6 +193,8 @@
     // Altura do quadril (agachar, cair ao morrer); sem andar sozinho para os lados.
     const hp=A.hips.k.getWorldPosition(v1).sub(A.kayRestP).multiplyScalar(A.ratio);hp.x=0;hp.z=st.dead>0?hp.z:0;
     A.hips.b.position.copy(v2.copy(A.hips.b.userData.rest155P).add(hp).applyMatrix4(A.parentInv));
+    // v168 (Irror): tiro com arco = braço esquerdo esticado para o alvo segurando o arco em pé; mão direita puxa a corda até o rosto.
+    if(m.bowHolder155&&(/^arco/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||''))){aimPose168(m);const bh2=m.bowHolder155,rq=m.root.getWorldQuaternion(new T.Quaternion()),want=rq.multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWAIM168)));bh2.parent.updateWorldMatrix(true,false);bh2.quaternion.copy(bh2.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want));bh2.position.set(0,0,0);bh2.userData.idle155=false;bh2.userData.aim168=true}
     // Arco fora do tiro: em pé ao lado do corpo, um pouco para fora da mão, sem atravessar braço e perna.
     const bh=m.bowHolder155;if(bh&&bh.parent){const aiming=/^(arco|chuva_com_arco)/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||'');
       if(!aiming){m.root.updateMatrixWorld(true);const hand=bh.parent,mq=m.model.getWorldQuaternion(q4).clone(),want=mq.multiply(q1.setFromEuler(new T.Euler(...BOWIDLE155)));
@@ -200,5 +202,10 @@
         const hw=hand.getWorldPosition(v1),fa=(m.bones.forearm_l||hand.parent).getWorldPosition(new T.Vector3()),dir=hw.clone().sub(fa).normalize();const wp=hw.clone().addScaledVector(dir,BOWPALM155).add(new T.Vector3(...BOWIDLEPOS155).applyQuaternion(m.model.getWorldQuaternion(q3)));bh.position.copy(hand.worldToLocal(wp));bh.userData.idle155=true}
       else if(bh.userData.idle155){bh.quaternion.copy(bh.userData.aimQ155);bh.position.copy(bh.userData.aimP155);bh.userData.idle155=false}}
   }
+  const BOWAIM168=[0,0,0];API.BOWAIM168=BOWAIM168;
+  function aimBone168(b,c,dir){if(!b||!c||!b.parent)return;b.updateWorldMatrix(true,true);const bp=b.getWorldPosition(new T.Vector3()),cur=c.getWorldPosition(new T.Vector3()).sub(bp).normalize(),q=new T.Quaternion().setFromUnitVectors(cur,dir.clone().normalize()),wq=b.getWorldQuaternion(new T.Quaternion()),pq=b.parent.getWorldQuaternion(new T.Quaternion());b.quaternion.copy(pq.invert().multiply(q.multiply(wq)))}
+  function aimPose168(m){const B=m.bones,rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),U=new T.Vector3(0,1,0),R=new T.Vector3(-1,0,0).applyQuaternion(rq);
+    const f=F.clone().addScaledVector(U,.1);aimBone168(B.upperarm_l,B.forearm_l,f);aimBone168(B.forearm_l,B.hand_l,f);
+    aimBone168(B.upperarm_r,B.forearm_r,R.clone().multiplyScalar(.8).addScaledVector(F,-.3).addScaledVector(U,.15));aimBone168(B.forearm_r,B.hand_r,R.clone().multiplyScalar(-.6).addScaledVector(F,.8).addScaledVector(U,.12));m.root.updateMatrixWorld(true)}
   global.Warrior127=API;
 })(window);

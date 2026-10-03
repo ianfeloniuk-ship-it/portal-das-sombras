@@ -661,3 +661,8 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Build → Peças na bolsa: abas por tipo (Todas, Arma, Armadura, Elmo, Luvas, Botas, com contagem), ordenar por Maior bônus / Raridade / Valor (`GEAR166`), e cada peça mostra "▲ +X / ▼ −X ataque|escudo vs. atual".
 - Chefes (Ian: "é pra ser assim"): cada barra é vida de verdade — vida do chefe × barras/3 (F 1 barra = 1/3 da vida antiga; ★ 8 barras); portal vermelho +1 barra.
 - Caveira sobre monstros (`threat`) já é recalculada a cada quadro pelo nível atual do jogador; some quando você passa do nível do monstro.
+
+## v168 (03/10/2026, Claude na nuvem) — feedback do Irror
+- Arco: tiro com pose por código (`aimPose168` em `tools/warrior-player127.js`): braço esquerdo esticado para o alvo com o arco em pé, mão direita puxada até o rosto. Parado, o arco fica ao lado do corpo (`BOWIDLEPOS155=[.11,0,.04]`), sem atravessar perna/mão. A animação do Tripo do arco continua por baixo (só os braços são sobrepostos).
+- Monstro acima do seu nível (`levelGap168`, aplicado no 1º quadro): vida × (nível dele ÷ seu nível), dano × (1 + metade disso). Ex.: nível 223 vs 77 → vida ×2,9, dano ×1,95. XP por morte não mudou (subir fica mais lento por tempo).
+- Botão 🎥 (vista de frente) agora aparece também no PC.

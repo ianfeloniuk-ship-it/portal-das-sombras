@@ -4745,6 +4745,8 @@ function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t)
 function placeAllies(){for(const a of allies){if(a.guest)continue;a.x=player.x+rnd(-1.5,1.5);a.z=player.z+rnd(.5,2);if(L.grid&&!freeAt(a.x,a.z,.4)){a.x=player.x;a.z=player.z}a.act=null;a.m.root.position.set(a.x,0,a.z)}}
 
 /* ================= ENTIDADES ================= */
+/* v168 (Irror): monstro de nível bem acima do seu precisa ter força de verdade. Vida × (nível dele ÷ seu nível) e dano × metade disso, só quando ele está acima. */
+function levelGap168(e){if(!run||!e)return;const had='lvl' in e,l=eLvl(e);if(!had)delete e.lvl;const g=l/Math.max(1,run.level);if(g<=1)return;e.hp*=g;e.maxhp*=g;e.dmg*=1+(g-1)*.5;e.gap168=g}
 function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
   const m=makeChibi({goblin118:K.goblin118,body:K.body,skin:K.skin??0xe8e0cc,eye:K.eye??0xff3030,wep:K.wep,shield:K.shield,scale:K.scale,wcol:0xb06bff,hair:K.hair,helm:K.helm,gk:K.gk,tint:K.gtint,atkClip:K.clip,mon:K.mon});
   m.root.position.set(x,0,z);scene.add(m.root);
@@ -5415,7 +5417,7 @@ function pickTarget(e){if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypo
   return best?{t:best,d:bd}:null;
 }
 function dmgTo(t,amt){amt=kitWeakDamage111(curAtk,amt);if(t.defenseCore){hurtDefenseCore(amt);return}if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
-function updEnemy(e,dt){if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
+function updEnemy(e,dt){if(!e.gap168done){e.gap168done=1;if(!e.rival)levelGap168(e)}if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
@@ -7784,11 +7786,11 @@ requestAnimationFrame(frame);
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
-<script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const isTouch=matchMedia('(hover:none)').matches||('ontouchstart' in window);if(!isTouch)return;const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>
+<script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v167</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v168</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=167;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=168;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
