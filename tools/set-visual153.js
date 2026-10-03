@@ -12,9 +12,9 @@ window.SetVisual153=(()=>{
  function prepare(src,fit){
   const piece=src.clone(true);piece.traverse(o=>{if(o.isMesh){o.castShadow=true;const m=o.material=o.material.clone();m.metalness=Math.min(m.metalness,.25);m.roughness=Math.max(m.roughness,.55);
     // Tripo albedo is very dark under the game light; lift it and let the crimson veins glow so the piece reads from the top-down camera.
-    m.color.setScalar(1.7);
+    m.color.setScalar(1.2);m.side=T.DoubleSide; /* v169: textura já refinada no Blender (mais viva e com brilho próprio) */
     m.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
-      float l153=dot(diffuseColor.rgb,vec3(.299,.587,.114));diffuseColor.rgb=max(vec3(0.),mix(vec3(l153),diffuseColor.rgb,1.75));`).replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+      float l153=dot(diffuseColor.rgb,vec3(.299,.587,.114));diffuseColor.rgb=max(vec3(0.),mix(vec3(l153),diffuseColor.rgb,1.25));`).replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
       #ifdef USE_MAP
       vec3 t153=texture2D(map,vUv).rgb;float red153=smoothstep(.06,.30,t153.r-max(t153.g,t153.b));totalEmissiveRadiance+=vec3(.9,.05,.04)*red153*1.1;
       #endif`)};m.customProgramCacheKey=()=> 'set153-color'}});
@@ -22,7 +22,7 @@ window.SetVisual153=(()=>{
   const holder=new T.Group();piece.position.sub(center);holder.add(piece);
   const axis=longestAxis(box),len=Math.max(size.x,size.y,size.z);
   holder.userData={axis,len,size};return holder}
- function attach(root,item){
+ function attach(root,item){if(item.slot!=='w'&&RIG169[item.set153]){attachRig169(root,item);return}
   const id=item.set153,slot=item.slot,fit=FIT[slot];if(!fit||!root||!(window.SET_MODELS165||['metamorfo']).includes(id))return; // v165: sets com peças 3D prontas (adicione o id em SET_MODELS165 quando os .glb existirem)
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
@@ -49,13 +49,23 @@ window.SetVisual153=(()=>{
    if(slot==='w')root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=false});
   });
  }
+ // v169: peças encaixadas no Blender no corpo do Viajante, com pesos copiados do corpo (dobram junto). Ligadas aos ossos do herói pelo nome.
+ const RIG169={metamorfo:'models/set153/metamorfo-rig.glb'};window.SET_RIG169=RIG169;
+ function attachRig169(root,item){const slot=item.slot;load(RIG169[item.set153]).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
+   let body=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o});if(!body)return;
+   const parts=[];src.traverse(o=>{if(o.isSkinnedMesh&&o.name.startsWith('set169_'+slot))parts.push(o)});
+   for(const sm of parts){const bones=sm.skeleton.bones.map(b=>boneOf(root,b.name));if(bones.some(b=>!b))continue;
+     const mats=(Array.isArray(sm.material)?sm.material:[sm.material]).map(m=>{const c=m.clone();c.side=T.DoubleSide;if(c.color)c.color.multiplyScalar(1.45);return c});
+     const m=new T.SkinnedMesh(sm.geometry,Array.isArray(sm.material)?mats:mats[0]);m.name='set153_'+slot;m.castShadow=true;m.frustumCulled=false;
+     m.position.copy(sm.position);m.quaternion.copy(sm.quaternion);m.scale.copy(sm.scale);body.parent.add(m);m.updateMatrixWorld(true);
+     m.bind(new T.Skeleton(bones,sm.skeleton.boneInverses.map(x=>x.clone())),sm.bindMatrix.clone())}})}
  // Viajante clothing parts (Tripo segmentation) replaced by armor in the same slot.
  const HIDE={a:['tripo_part_0','tripo_part_3'],h:['tripo_part_6'],g:['tripo_part_1','tripo_part_2'],b:['tripo_part_4']};
- function clothing(root,slots){root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(HIDE).some(([sl,list])=>slots.includes(sl)&&list.includes(o.name))}})}
+ function clothing(root,slots,rig){root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?{h:['tripo_part_6']}:HIDE).some(([sl,list])=>slots.includes(sl)&&list.includes(o.name))}})}
  function clear(root){const old=[];root.traverse(o=>{if(/^set153_/.test(o.name))old.push(o)});old.forEach(o=>o.parent.remove(o));root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=true})}
  function apply(){if(!player||!player.m||!player.m.root||typeof equippedItems!=='function')return;const root=player.m.root,items=equippedItems().filter(it=>it.set153);
   const key=items.map(it=>it.uid+it.slot).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);
-  root.userData.set153Tokens=new Set(items.map(it=>it.uid+it.slot));clothing(root,items.map(it=>it.slot));items.forEach(it=>attach(root,it))}
+  root.userData.set153Tokens=new Set(items.map(it=>it.uid+it.slot));clothing(root,items.map(it=>it.slot),items.some(it=>RIG169[it.set153]));items.forEach(it=>attach(root,it))}
  setInterval(()=>{try{apply();const r=player&&player.m&&player.m.root;if(r){const w=equippedItems().some(it=>it.set153&&it.slot==='w');r.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=!w})}}catch(e){console.warn('SetVisual153',e)}},400);
  return {apply,clear,FIT};
 })();
