@@ -4826,11 +4826,14 @@ const THREAT184=[{n:'',h:1,d:1,r:1},
  {n:'Aniquilação',a:0x8a0018,h:2.8,d:1.36,r:7,col:'#ff2050',dark:1},
  {n:'Extinção',a:0x101018,h:3.3,d:1.43,r:9,col:'#9aa0b8',dark:1},
  {n:'Divindade',a:0xfff0a0,h:3.9,d:1.5,r:12,col:'#fff27a'}];
-function threatRoll184(gr,boss){const red=L&&L.gate&&L.gate.red?1:0;let t=boss?1:0;
- const p=boss?.42+.03*gr+.05*red:.16+.02*gr,cap=boss?Math.min(gr>=8||red&&gr>=6?9:8,3+gr):Math.min(6,1+gr);
- while(t<cap&&Math.random()<p)t++;return t}
+function threatRoll184(gr,boss,G){const gg=G||(L&&L.gate),red=gg&&gg.red?1:0;let t=boss?1:0;
+ const p=boss?.42+.03*gr+.05*red:.16+.02*gr,cap=boss?Math.min(8,3+gr):Math.min(6,1+gr);
+ while(t<cap&&Math.random()<p)t++;
+ /* v194 (Ian): Divindade só nasce em portal ★ vermelho: o vermelho pode fazer o guardião ascender. */
+ if(boss&&gr>=9&&red&&t>=6&&Math.random()<.25){t=9;if(G||L.gate)setTimeout(()=>{try{bigText('O GUARDIÃO ASCENDEU',2000);toast('<b>[NARRADOR]</b> O portal ★ ficou vermelho e o guardião ascendeu a <b>DIVINDADE</b>.',7000)}catch(_){}},2600)}
+ return t}
 let BREAKG184=null;
-function bossThreat184(gr){const g=BREAKG184||(L&&L.mode==='dungeon'&&L.gate);if(!g)return threatRoll184(gr,true);if(g.bt184==null)g.bt184=threatRoll184(gr,true);return g.bt184}
+function bossThreat184(gr){const g=BREAKG184||(L&&L.mode==='dungeon'&&L.gate);if(!g)return threatRoll184(gr,true);if(g.bt184==null)g.bt184=threatRoll184(gr,true,g);return g.bt184}
 const AURA184={};
 function auraMesh184(t){const T=THREAT184[t];if(!AURA184.g){AURA184.g=new THREE.CylinderGeometry(1,1.25,1,20,1,true);AURA184.g.translate(0,.5,0);AURA184.r=new THREE.RingGeometry(.7,1,32);AURA184.r.rotateX(-Math.PI/2)}
  const blend=T.dark?THREE.NormalBlending:THREE.AdditiveBlending;
@@ -5014,7 +5017,11 @@ function applyHistory95(){const box=$('history95'),size=sizeHistory95(CFG.histor
 function toggleHistory95(){CFG.historyCollapsed95=!CFG.historyCollapsed95;applyHistory95();store.set('pds_cfg',CFG)}
 function latestHistory95(){CFG.historyCollapsed95=false;applyHistory95();$('historyBody95').scrollTop=$('historyBody95').scrollHeight;historyUnread95=0;historyBadge95();store.set('pds_cfg',CFG)}
 function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory95();store.set('pds_cfg',CFG);$('historyBody95').focus()}
-function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
+/* v194 (Ian): aviso aparece em destaque no topo e depois fica nas Notícias. Tempo cresce com o tamanho do texto; no máximo 3 na tela. */
+function popNews194(html,ms){let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(560px,92vw)';document.body.appendChild(box)}
+ const d=document.createElement('div');d.innerHTML=html;d.style.cssText='background:rgba(14,12,22,.92);border:1px solid rgba(255,179,71,.55);border-radius:8px;padding:9px 14px;color:#f4ead8;font-size:15px;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.5);transition:opacity .4s;opacity:0';box.appendChild(d);requestAnimationFrame(()=>d.style.opacity='1');
+ while(box.children.length>3)box.firstChild.remove();const t=Math.max(ms||0,3500+d.textContent.length*45);setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),450)},Math.min(t,12000))}
+function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
 function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
 
@@ -6109,7 +6116,7 @@ setInterval(()=>{try{replicaTick169()}catch(e){}},250);
 function awakeningView103(){view=awakeningView103;L.characterTab='awakening';const a=awakening103();let h=characterTabs('awakening')+'<div class="guide93"><strong>DESPERTAR</strong><p>Portais de classe rara guardam o chefe de uma classe. Cada chefe solta uma das 5 peças da armadura dele. Com as 5 vestidas, o chamado do Despertar aparece: vença o chefe fortalecido e replique as habilidades dele para despertar a classe.</p></div>';
   for(const c of RARE103){const learned=a.unlocked.includes(c.id)||profile.cls===c.id;h+=row(c.n,learned?'Desperta. '+(c.exclusive||''):'Ainda não despertou.',learned?'<b>Desperta</b>':'')}openModal('PERSONAGEM',h,'awakening')}
 function awakenKey169(id){return equippedItems().filter(it=>it.set153===id).map(it=>it.uid).sort().join('|')}
-function awakenPopup169(){if(!started||!run||!player||player.dead||L.mode!=='world'||modalOpen||paused||profile.creationPending91)return;profile.awDeclined169=profile.awDeclined169||{};
+function awakenPopup169(force){if(!started||!run||!player||player.dead||L.mode!=='world'||(!force&&(modalOpen||paused))||profile.creationPending91)return;profile.awDeclined169=profile.awDeclined169||{};
   for(const id in SETS153){if(!awakenTestReady155(id))continue;const key=awakenKey169(id);if(profile.awDeclined169[id]===key||L.awAsked169===key)continue;L.awAsked169=key;const Set=SETS153[id],cn=CLASSES[Set.cls].n;
     openModal('DESPERTAR','<div class="guide93"><strong>'+safeText(Set.n)+' completa</strong><p>As cinco peças do '+cn+' respondem juntas. Uma passagem se abre: lá dentro o guardião do '+cn+' espera, muito mais forte. Se vencer, terá de replicar as habilidades dele para despertar a classe.</p><p>Se recusar, você fica só com os itens. O chamado só volta quando reunir um set novo.</p></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('RECUSAR','aw169no',id)+btn('ACEITAR','aw169yes',id,true,'hot')+'</div>');return}}
 setInterval(()=>{try{awakenPopup169()}catch(e){}},1500);
@@ -6743,7 +6750,7 @@ function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citie
   (on?row('Portal Primordial','Arconte inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
 const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
-function showSys(t){logNews('<b>[NARRADOR]</b> '+t,'important')}
+function showSys(t){logNews('<b>[NARRADOR]</b> '+t,'important');if(!modalOpen)try{popNews194('<b>[NARRADOR]</b> '+t,6000)}catch(_){}}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Arconte, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){profile.story=profile.story||[];if(!profile.story.includes(l)){profile.story.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0};setTimeout(()=>showSys('Tenho uma exigência. '+t[1]+'. Não me decepcione.'),5000)}}
 function demandKill(){const d=run.demand;if(!d)return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){run.pts+=2;giveBoon184(10);run.demand=null;addOrderRep(20,'Exigência cumprida');saveRun();showSys('Exigência cumprida. +2 pontos de status e Bênção da Fenda. Você me diverte.')}}
@@ -7205,7 +7212,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[NARRADOR]</b> Comprado: '+p.n)}
   if(a==='buyi')buyEquipment(v[0],+v.slice(1));
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
-  if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip')equipBagItem(v);
+  if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
   if(a==='sell'){if(!sellEquipment(v))return}
   if(a==='claim'){if(!claimOrderQuest(+v))return}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);narratorEvent105('hire');makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[NARRADOR]</b> '+p.name+' entrou no seu grupo.')}
@@ -7965,9 +7972,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v193</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v194</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=193;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=194;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

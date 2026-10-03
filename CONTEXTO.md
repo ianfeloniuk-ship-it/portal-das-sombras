@@ -729,3 +729,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v191: materiais Tripo em DoubleSide (paredes de torres/casas/taverna tinham buracos).
 - v192: aviso ao entrar em portal perigoso sem pergaminho; túmulo (profile.grave192) devolve 20% do ouro uma vez.
 - v193: 3º espaço de relíquia no rank ★ (relicSlots192); título Matador de Deuses (profile.godKills192, +6% dano).
+- v194: avisos em pop-up no topo (popNews194) e depois nas Notícias; despertar abre ao equipar a 5ª peça; Divindade só em portal ★ vermelho (~6% dos chefes, por ascensão).
