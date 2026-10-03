@@ -2628,7 +2628,9 @@ const toonS=c=>{if(!TC[c]){TC[c]=new THREE.MeshToonMaterial({color:c,gradientMap
 const toon=(c,e=0)=>new THREE.MeshToonMaterial({color:c,gradientMap:gmap,emissive:e});
 const glowS=(c,o=.8)=>{const k=c+'_'+o;if(!GLC[k]){GLC[k]=new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false});GLC[k].userData.shared=true}return GLC[k]};
 const glow=(c,o=.8)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false});
-const geo=(k,f)=>GC[k]||(GC[k]=f());
+/* v172: algumas peças pediam a forma pelo nome sem saber criá-la (()=>0). Se ninguém criou antes, usa a forma padrão daquele nome — senão a tela quebra (torre travava ao limpar o andar). */
+const GEO_DEF172={gring:()=>new THREE.TorusGeometry(2.3,.22,8,40),stall:()=>new THREE.BoxGeometry(3,1.1,1.4),awn:()=>new THREE.BoxGeometry(3.4,.15,2),leaf:()=>new THREE.ConeGeometry(2.2,4.2,7),pil:()=>new THREE.CylinderGeometry(1,1,24,12,1,true)};
+const geo=(k,f)=>GC[k]||(GC[k]=f()||(GEO_DEF172[k]||(()=>new THREE.BoxGeometry(.01,.01,.01)))());
 const OUT=new THREE.MeshBasicMaterial({color:0x000000,side:THREE.BackSide});
 function mesh(g,mat,outline=true,os=1.08){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
 const hemi=new THREE.HemisphereLight(0xbfdcff,0x101830,.75);scene.add(hemi);
@@ -7812,9 +7814,9 @@ requestAnimationFrame(frame);
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
 <script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v172</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v173</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=172;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=173;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

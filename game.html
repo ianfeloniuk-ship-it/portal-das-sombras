@@ -2611,7 +2611,9 @@ const toonS=c=>{if(!TC[c]){TC[c]=new THREE.MeshToonMaterial({color:c,gradientMap
 const toon=(c,e=0)=>new THREE.MeshToonMaterial({color:c,gradientMap:gmap,emissive:e});
 const glowS=(c,o=.8)=>{const k=c+'_'+o;if(!GLC[k]){GLC[k]=new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false});GLC[k].userData.shared=true}return GLC[k]};
 const glow=(c,o=.8)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false});
-const geo=(k,f)=>GC[k]||(GC[k]=f());
+/* v172: algumas peças pediam a forma pelo nome sem saber criá-la (()=>0). Se ninguém criou antes, usa a forma padrão daquele nome — senão a tela quebra (torre travava ao limpar o andar). */
+const GEO_DEF172={gring:()=>new THREE.TorusGeometry(2.3,.22,8,40),stall:()=>new THREE.BoxGeometry(3,1.1,1.4),awn:()=>new THREE.BoxGeometry(3.4,.15,2),leaf:()=>new THREE.ConeGeometry(2.2,4.2,7),pil:()=>new THREE.CylinderGeometry(1,1,24,12,1,true)};
+const geo=(k,f)=>GC[k]||(GC[k]=f()||(GEO_DEF172[k]||(()=>new THREE.BoxGeometry(.01,.01,.01)))());
 const OUT=new THREE.MeshBasicMaterial({color:0x000000,side:THREE.BackSide});
 function mesh(g,mat,outline=true,os=1.08){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
 const hemi=new THREE.HemisphereLight(0xbfdcff,0x101830,.75);scene.add(hemi);
