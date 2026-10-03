@@ -715,3 +715,7 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Efeitos de combate atrasados (golpe duplo, projéteis extras, pisão, ondas, rajada) seguem o relógio do jogo: param na pausa e somem ao trocar de área (`later181`).
 - Famílias: aranha prende com teia (lento 1,5 s), esqueletos às vezes arremessam osso, lobo uiva e chama a matilha (`familySwing182`).
 - LOD também para muralha, paliçada e casas.
+
+## v183
+- Fendas instáveis: afixos vamp/elite/rage, até 3 afixos no rank 6+, +25% XP por afixo.
+- Relíquias únicas de chefe (UNIQ183): vamp, thorns, echo, cdr (-12% recarga), swift (-25% esquiva), soul.

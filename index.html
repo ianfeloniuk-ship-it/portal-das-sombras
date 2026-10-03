@@ -3505,6 +3505,22 @@ function itemSh(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math
 function itemArm(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(AARM[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
 function armRed(arm){return arm/(arm+20+1.5*run.level)}
 /* v174 (Ian): cajado, varinha, orbe e tomo só somam no ataque mágico; espada, arco e outras armas físicas só no físico. */
+/* v183: Relíquias únicas — cada família de chefe pode soltar 1 peça Primordial com um efeito próprio (12%; 25% em portal vermelho). */
+const UNIQ183={
+ vamp:{n:'Presa do Alfa',slot:'w',d:'Seus golpes recuperam 2% do dano causado.',fam:['wolves','rare_metamorfo','dragons']},
+ thorns:{n:'Carapaça da Matriarca',slot:'a',d:'Devolve 30% do dano recebido a quem atacou.',fam:['spiders','scarabs','crystals','rare_guardiao']},
+ echo:{n:'Clava do Chefe Ferrugem',slot:'w',d:'O 3º golpe do combo explode em área (60% do dano a até 3 m).',fam:['goblins','demons','yetis','rare_artifice']},
+ cdr:{n:'Coroa Esporada',slot:'h',d:'Recargas das habilidades 12% menores.',fam:['mushrooms','swarm','meadow','rare_tempo','rare_oraculo']},
+ swift:{n:'Botas do Vento Brejeiro',slot:'b',d:'+12% de velocidade e esquiva recarrega 25% mais rápido.',fam:['bogkin','slimes','cacti','rare_condutor','rare_duelista']},
+ soul:{n:'Luvas do Último Suspiro',slot:'g',d:'Matar um inimigo recupera 4% da mana.',fam:['rare_necromante','rare_devorador','rare_tecelao']}};
+function uniqueHas183(k){return !!run&&equippedItems().some(it=>it&&it.unique183===k)}
+function uniqueDrop183(){const g=L.gate;if(!g||L.special)return;const fam=g.family124||'';if(Math.random()>=(g.red?.25:.12))return;
+  let key=Object.keys(UNIQ183).find(k=>UNIQ183[k].fam.includes(fam))||pick(Object.keys(UNIQ183));const U=UNIQ183[key];
+  const it=makeItem(U.slot,Math.max(0,Math.min(9,g.rank)),6);it.name=U.n;it.unique183=key;it.value=Math.round(it.value*3);addItem(it);bigText('RELÍQUIA ÚNICA',1600);floater(player.x,player.z,U.n,'#ff3d1e',true);sfx('arise')}
+function hitHooks183(e,amt,o){if(!o.fromPlayer||!player)return;if(uniqueHas183('vamp'))player.hp=Math.min(player.maxhp,player.hp+amt*.02);
+  if(o.third&&uniqueHas183('echo')&&time>(player.echo183||0)){player.echo183=time+.3;fxRing(e.x,e.z,0xffb36b,3,.3);for(const x of enemies)if(x!==e&&!x.dead&&Math.hypot(x.x-e.x,x.z-e.z)<3+(x.r||.5))hurtEnemy(x,amt*.6,e.x,e.z,{fromPlayer:false,kb:1.5})}
+  if(e.dead&&uniqueHas183('soul'))player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.04)}
+function hurtHooks183(amt){const at=curAtk;if(at&&at.vamp183&&!at.dead)at.hp=Math.min(at.maxhp,at.hp+amt*.2);if(uniqueHas183('thorns')&&at&&!at.dead&&Math.hypot(at.x-player.x,at.z-player.z)<7)hurtEnemy(at,amt*.3,player.x,player.z,{fromPlayer:false,kb:.5})}
 function weaponIsMagic173(it){if(!it)return false;const k=it.kind155||'';return /^(staff|bonestaff|wand|orb|tome)$/.test(k)||(!k&&/^(Cajado|Varinha|Orbe|Tomo)/.test(it.name||''))}
 function animWep173(){const w=run.equip.w,cw=(CLASSES[profile.cls]||{}).wep;if(bareArcher155())return 'bow_bare';if(/^(staff|bonestaff|wand|tome|orb)$/.test(cw||'')&&!weaponIsMagic173(w))return 'orb';return cw}
 function atkOf(kind){const s=run.stats||{},w=run.equip.w;return 10+2*run.level+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+(w&&(kind==='mag')===weaponIsMagic173(w)?itemAtk(w):0)}
@@ -4483,7 +4499,7 @@ function buildDungeon(g){
   // veios de cristal
   for(const i of (g.extractionCleared117?[]:mids)){if(R()<.55){const r=rooms[i];const p=randIn(r);addVein(p.x,p.z,g.rank,3+Math.floor(R()*3),th.trim)}}
   // afixos
-  const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;e.gold*=1+.5*af.length}if(af.includes('dark')){scene.fog.density=.035;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[NARRADOR]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
+  const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;if(af.includes('vamp'))e.vamp183=true;if(af.includes('elite')&&!e.isBoss&&!e.elite&&Math.random()<.25)makeElite(e);if(af.includes('rage')&&e.isBoss){const nb=(e.bars||3)+1;e.hp*=nb/(nb-1);e.maxhp*=nb/(nb-1);e.bars=nb;e.dmg*=1.3}e.gold*=1+.5*af.length;e.xp*=1+.25*af.length}if(af.includes('dark')){scene.fog.density=.035;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[NARRADOR]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
   const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
   if(variant==='core')setupCoreDefense();else if(variant==='floors')setupDungeonFloors();else if(variant!=='combat')setupExpedition(g,mids);
@@ -4654,7 +4670,7 @@ function openChest(x,z,tier,boss,reward=null){
   const depth=reward?.depth??dungeonFloorAt(z),floorTreasure=!!reward||(boss&&!!L.floors);
   if(!boss&&!floorTreasure&&!goblinDungeon118(L.gate)&&!L.G?.th?.natural124&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');narratorEvent105('mimic');return}
   narratorEvent105('treasure');const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
-  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss);
+  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss);if(boss)uniqueDrop183();if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
   saveRun();
 }
@@ -4913,7 +4929,7 @@ function setDrop153(boss){const g=L.gate,id=g&&g.set153,S=SETS153[id];if(!S)retu
 function rollItem(tier,boss,depth=0,minRarity=0){tier=Math.max(0,Math.min(9,tier));depth=Math.max(0,Math.min(2,depth));const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const woven=!!(L.gate&&L.gate.rareCreated103),wovenB=woven?(L.gate.woven153||.15):0;const rar=Math.min(6,Math.max(minRarity,woven?1:0,wpick(w.map((w,i)=>({i,w}))).i+depth+(woven?1:0)));const it=makeItem(pick(EQUIP_SLOTS),tier,rar);if(depth)it.depth105=depth;if(woven){it.woven153=wovenB;it.name+=' (Tecido)'}if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function dungeonEquipmentChance(e){if(L.mode!=='dungeon'||L.special||e.noExpLoot||e.rival||e.isBoss)return 0;const depth=dungeonFloorAt(e.z);return e.elite?.35+.1*depth:.08+.04*depth}
 function dropDungeonEquipment(e){const chance=dungeonEquipmentChance(e);if(chance<=0||Math.random()>=chance)return false;return addItem(rollItem(e.gr??L.gate.rank,false,dungeonFloorAt(e.z)))}
-function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque'+(weaponIsMagic173(it)?' mágico':' físico'):'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+(it.set153?setText153(it):'')+(it.woven153?' · TECIDO: veio de um trecho intocado da Fenda, +'+Math.round((it.woven153===1?.15:it.woven153)*100)+'% de ataque/escudo (já incluído)':'')+(it.depth105?' · Andar '+(it.depth105+1)+': +'+(it.depth105*25)+'% de ataque/escudo (já incluído)':'')+gearRuneText(it)}
+function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque'+(weaponIsMagic173(it)?' mágico':' físico'):'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+(it.set153?setText153(it):'')+(it.unique183&&UNIQ183[it.unique183]?' · <b style="color:#ff3d1e">ÚNICO:</b> '+UNIQ183[it.unique183].d:'')+(it.woven153?' · TECIDO: veio de um trecho intocado da Fenda, +'+Math.round((it.woven153===1?.15:it.woven153)*100)+'% de ataque/escudo (já incluído)':'')+(it.depth105?' · Andar '+(it.depth105+1)+': +'+(it.depth105*25)+'% de ataque/escudo (já incluído)':'')+gearRuneText(it)}
 function addItem(it){
   if(run.items.length>=24){run.gold+=it.value;toast('<b>[NARRADOR]</b> Bolsa cheia. '+it.name+' vendido por '+fmt(it.value)+' ouro.');return false}
   run.items.push(it);toast('<b>[NARRADOR]</b> Item na bolsa: <b style="color:'+RAR[it.rar].c+'">'+RAR[it.rar].n+' · '+it.name+'</b>. Abra a Bolsa para equipar.',3500);return true
@@ -5119,7 +5135,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){
   floater(e.x,e.z,blocked?'BLOQUEIO '+fmt(Math.trunc(amt)):crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(blocked&&time>=(e.blockFeedbackAt||0)){fxRing(e.x,e.z,0xb8c7d8,1.15,.22);e.blockFeedbackAt=time+.12}if(crit&&o.fromPlayer){if(time>=(player.critFeedbackAt||0)){fxBurst(e.x,.72,e.z,crit3?0xffefaa:0xffcf56,crit3?9:5,crit3?3.2:2.3);fxRing(e.x,e.z,crit3?0xffefaa:0xffcf56,crit3?1.9:1.35,.26);player.critFeedbackAt=time+.12}shake(crit3?.18:.12);hitstop(crit3?.055:.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
   if(o.slow)e.slow=Math.max(e.slow,o.slow);
-  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){if(typeof cm154Basic==='function')cm154Basic(o,e);applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyWeaponVenom(e,amt);applyGearRuneHit(e,amt)}
+  if(o.fromPlayer&&!blocked&&Number.isInteger(o.basicClass)){if(typeof cm154Basic==='function')cm154Basic(o,e);hitHooks183(e,amt,o);applyBasicAttackEffect(e,o.basicClass,amt,o.third);applyWeaponVenom(e,amt);applyGearRuneHit(e,amt)}
   if(o.fromPlayer&&!o.pet&&!o.passive&&!blocked&&profile)applyPassive(e,amt,crit,o);
   resolveEnemyStun(e,oldStun);
   sfx(blocked?'block':'hit',crit);
@@ -5157,7 +5173,7 @@ function applyPassive(e,amt,crit,o){const P=player;for(const c of passiveClasses
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}}
 /* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
 const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Raios na área da mira (até 14 m), mesmo sem inimigos; com alvos, marca até 5 posições antes dos impactos',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva na área da mira (até 14 m), com impactos durante cerca de 3 s; pode lançar no chão vazio',dot:'Área de praga na mira (até 11 m), com 5 pulsos durante 5 s; atinge inimigos que entrarem nela',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (limite pela mana máxima; permanecem até morrer)'};
-function skillCooldown(sk,level){const lv=level==null?(run&&run.skl?run.skl[sk.n]||0:0):level,arc=run?cons('arc'):0;return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)}
+function skillCooldown(sk,level){const lv=level==null?(run&&run.skl?run.skl[sk.n]||0:0):level,arc=run?cons('arc'):0;return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)*(run&&typeof uniqueHas183=='function'&&uniqueHas183('cdr')?.88:1)}
 function skillCooldownText(sk){return String(Math.round(skillCooldown(sk)*100)/100).replace('.',',')}
 function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldown(sk)||1),0,1)}
 function skillButtonState(sk,mp){if(sk.kit111&&sk.effect==='anchor'&&kitState111().anchor?.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.kit111&&sk.energy&&sk.cdT<=0&&kitState111().energy<sk.energy)return {kind:'mana',text:'SEM ENERGIA'};if(sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.empty)return {kind:'empty',text:sk.lockedRank?'BLOQUEADO':'VAZIO'};if(sk.cdT>0)return {kind:'cooldown',text:(sk.cdT<10?sk.cdT.toFixed(1):Math.ceil(sk.cdT))+'s'};if(mp<manaCost177(sk.mp))return {kind:'mana',text:'SEM MANA'};return {kind:'ready',text:'PRONTA'}}
@@ -5283,7 +5299,7 @@ const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   if(player.dead)return;if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
-  if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
+  if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(1,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}
   amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}
@@ -5340,7 +5356,7 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   projs.push({originY:o.originY??1.1,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:Math.sin(a)*spd,vz:Math.cos(a)*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
-function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))}
+function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))*(typeof uniqueHas183=='function'&&uniqueHas183('swift')?.75:1)}
 function dodge(){
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
@@ -6409,9 +6425,9 @@ function tutorialTick93(dt){if(!profile.tips93||profile.creationPending91||modal
  if(!id)return;seen[id]=true;tutorialDelay93=25;store.set('pds2_profile',profile);toast('<div class="guide93"><strong>[TUTORIAL] '+title+':</strong> <p>'+body+'</p></div>',6500)}
 
 /* ================= IDEIAS: AFIXOS, PESCA, CULINÁRIA, MIMIC, TÍTULOS, MALDIÇÕES, TORRE, NÊMESIS, AFINIDADE, CIDADE, CLIMA, INVERTIDO, DOMÍNIOS, FUSÃO, SAZONAL, ORÁCULO ================= */
-const AFFIX=[{id:'expl',n:'Explosivos',d:'monstros explodem ao morrer'},{id:'nocure',n:'Sem cura',d:'poções e curas não funcionam'},{id:'dark',n:'Escuridão',d:'visão muito curta'},{id:'frenzy',n:'Frenesi',d:'monstros 30% mais rápidos'},{id:'armor',n:'Blindados',d:'monstros com +50% de vida'}];
+const AFFIX=[{id:'expl',n:'Explosivos',d:'monstros explodem ao morrer'},{id:'nocure',n:'Sem cura',d:'poções e curas não funcionam'},{id:'dark',n:'Escuridão',d:'visão muito curta'},{id:'frenzy',n:'Frenesi',d:'monstros 30% mais rápidos'},{id:'armor',n:'Blindados',d:'monstros com +50% de vida'},{id:'vamp',n:'Vampíricos',d:'monstros recuperam 20% do dano que causam'},{id:'elite',n:'Elite',d:'1 em cada 4 monstros é elite'},{id:'rage',n:'Chefe Furioso',d:'chefe com 1 barra a mais e +30% de dano; baú dele dá 1 item extra'}];
 const affN=g=>(g.aff||[]).map(i=>AFFIX.find(a=>a.id===i).n);
-function rollAff(rank){if(Math.random()>.35+rank*.04)return[];const a=[...AFFIX].sort(()=>Math.random()-.5);return a.slice(0,Math.random()<.3?2:1).map(x=>x.id)}
+function rollAff(rank){if(Math.random()>.35+rank*.04)return[];const a=[...AFFIX].sort(()=>Math.random()-.5);return a.slice(0,rank>=6&&Math.random()<.3?3:Math.random()<.3?2:1).map(x=>x.id)} /* v183: até 3 regras em portais altos; cada regra dá +50% de ouro e +25% de XP */
 const hasAff=id=>L.mode==='dungeon'&&L.gate&&(L.gate.aff||[]).includes(id);
 /* títulos */
 /* TÍTULOS (feedback do Irror): sem limite de equipados; cada um dá uma MECÂNICA própria, não só número. */
@@ -7893,9 +7909,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v182</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v183</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=182;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=183;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
