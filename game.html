@@ -7726,7 +7726,10 @@ const TripoEnvironment153 = (() => {
   const ready=Promise.all(Object.entries(files).map(([id,file])=>new Promise(resolve=>{
     const loader=new THREE.GLTFLoader();
     if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);
-    loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
+    loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}
+      /* v180: versão leve (Blender, ~3 mil triângulos) para árvores longe da câmera */
+      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb'})[id];
+      if(lod&&models[id])loader.load('models/'+lod,g2=>{const full=models[id];try{prepare(g2,id);full.liteParts=models[id].parts}catch(e){}models[id]=full;resolve()},undefined,()=>resolve());else resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
   })));
   function tree(key,x,z){
     if(key.includes('dead'))return null;
@@ -7796,12 +7799,18 @@ const TripoEnvironment153 = (() => {
         placements.forEach((e,i)=>{position.set(e.x,e.y,e.z);rotation.setFromAxisAngle(axis,e.ry);scale.set(e.scale,e.sy||e.scale,e.sz||e.scale);matrix.compose(position,rotation,scale);mesh.setMatrixAt(i,matrix)});
         if(['oak','willow','fir'].includes(id)){const col=new THREE.Color();placements.forEach((e,i)=>{const c=leaf154(id,e.x,e.z);col.setRGB(...(c||[1,1,1]));mesh.setColorAt(i,col)});mesh.instanceColor.needsUpdate=true}
         mesh.instanceMatrix.needsUpdate=true;
+        const li=models[id].liteParts&&models[id].liteParts[models[id].parts.indexOf(part)];
+        if(li){const lm=new THREE.InstancedMesh(li.geometry,li.material,placements.length);for(let i=0;i<placements.length;i++){mesh.getMatrixAt(i,matrix);lm.setMatrixAt(i,matrix)}if(mesh.instanceColor){const col=new THREE.Color();for(let i=0;i<placements.length;i++){mesh.getColorAt(i,col);lm.setColorAt(i,col)}lm.instanceColor.needsUpdate=true}lm.instanceMatrix.needsUpdate=true;lm.frustumCulled=false;lm.userData.tripo153=id;lm.visible=false;lm.castShadow=mesh.castShadow;lm.receiveShadow=mesh.receiveShadow;group.add(lm);mesh.userData.lite180=lm}
         // Three r128 culls instances using source bounds; chunk streaming already bounds visibility.
         mesh.frustumCulled=false;mesh.userData.tripo153=id;group.add(mesh);
+        /* v180: recorte de visão por grupo — esfera que cobre as instâncias; fora da câmera não é desenhado (cidade ia a 10 mi de triângulos). */
+        {let r=0,cx=0,cz=0;placements.forEach(e=>{cx+=e.x;cz+=e.z});cx/=placements.length;cz/=placements.length;placements.forEach(e=>{r=Math.max(r,Math.hypot(e.x-cx,e.z-cz)+14*(e.scale||1))});mesh.userData.bs180=new THREE.Sphere(new THREE.Vector3(cx,4,cz),r+8);CULL180.add(mesh)}
       }
     }
     return group;
   };
+  const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
+  setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}const P=typeof player!=='undefined'&&player?player:camera.position,d=Math.max(0,Math.hypot(m.userData.bs180.center.x-P.x,m.userData.bs180.center.z-P.z)-m.userData.bs180.radius*.5);m.visible=inV&&d<40;lt.visible=inV&&d>=40&&d<100}},100);
   // Streamed instances share resources; release only the instance GPU buffer when a chunk unloads.
   const oldDispose=envDispose;
   envDispose=function(root){root.traverse(o=>{if(o.isInstancedMesh&&o.userData.tripo153&&o.dispose)o.dispose()});oldDispose(root)};

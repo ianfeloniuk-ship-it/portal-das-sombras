@@ -698,3 +698,7 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 
 ## v179 (03/10/2026)
 - Efeitos de habilidade menos "luminosos" (Ian): rastro luminoso genérico (`Combat139`) só nas classes corpo a corpo; área de habilidade marcada por contorno discreto no chão (`zoneMark178`) no lugar do disco branco aditivo; Chuva de Flechas e de Meteoros sem anel a cada pulso; flechas levantam poeira ao cair (`dustPuff178`); anéis `fxRing` com metade do brilho.
+
+## v180 (03/10/2026)
+- Desempenho: recorte de visão por grupo de instâncias do Tripo (`CULL180`) e LOD das árvores (`tripo-carvalho153-lod.glb` etc., ~3 mil triângulos; completa até 40 m, leve de 40 a 100 m). Cidade: 10,5 mi → ~4 mi de triângulos.
+- Revisão geral em `docs/revisao180.md`.
