@@ -723,3 +723,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v185: botas só +15% velocidade; missões (exigência, clone, núcleo) dão Bênção da Fenda (+15% dano, +8% velocidade, 10-15 min) em vez de ponto de habilidade; ameaça: Presságio/Calamidade/Eclipse/Abismo, mults suavizados após teste; chefe guarda o nível no portal e monstros da quebra mantêm ameaça.
 - v186: 9 níveis de ameaça (Ameaça, Flagelo, Devastação, Catástrofe, Cataclismo, Apocalipse, Aniquilação, Extinção, Divindade) com aura animada; sorteio em cadeia pelo rank.
 - v187: morte verdadeira (newRun; mantém profile: rank, despertar, banco, casa; relíquias somem); Pergaminho de Ressurgimento (run.rez187, 5000 ouro, máx 3, loja de poções); rank ★ na prova da Ordem exige classe rara despertada (starReady187).
+- v188: prédios KayKit (doorRot188, +90°) e casa Tripo (+90°) giram para a porta olhar para a praça.

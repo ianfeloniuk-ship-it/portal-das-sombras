@@ -3713,7 +3713,9 @@ function envGroundTex(){const s=256,c=document.createElement('canvas');c.width=c
 /* ---------- cenário 3D: mundo, cidade, ruínas, masmorra ---------- */
 const pk=(R,a)=>a[Math.floor(R()*a.length)];
 function EH(b,k,x,y,z,ry,H,t){const m=ENV.m[k];if(!m)return 0;const s=H/m.h;b.add(k,x,y,z,ry,s,s,s,t);return s}
-function EW(b,k,x,y,z,ry,W,t){const m=ENV.m[k];if(!m)return 0;const s=W/m.w;b.add(k,x,y,z,ry,s,s,s,t);return s}
+/* v188 (Ian): nos modelos de prédio a porta fica na lateral; giramos para a porta olhar para onde o prédio aponta. */
+const DOOR188={};function doorRot188(k){return k&&k.startsWith('building_')&&!/destroyed|well|scaffold/.test(k)?(DOOR188[k]??Math.PI/2):0}
+function EW(b,k,x,y,z,ry,W,t){const m=ENV.m[k];if(!m)return 0;ry+=doorRot188(k);const s=W/m.w;b.add(k,x,y,z,ry,s,s,s,t);return s}
 const ENVG={};
 function envMesh(k,mat){const m=ENV.m[k];if(!m)return new THREE.Group();if(!ENVG[k]){const b=new EnvBatch();b.add(k,0,0,0,0,1);ENVG[k]=b.geo()}return new THREE.Mesh(ENVG[k],mat||ENVMAT)}
 function envOwn(parent,m){if(m){m.userData.own=1;parent.add(m)}return m}
@@ -7888,7 +7890,7 @@ const TripoEnvironment153 = (() => {
     const kind=Village129.classify(key),m=models.house;
     if(!m||!['home-a','home-b'].includes(kind))return oldEW(batch,key,x,y,z,ry,width,tint);
     // Two-storey homes ~6.6-7.4 m; the requested width only adds a little variety.
-    const scale=(6.6+Math.max(0,width-5.4)*.6)/m.h;add(batch,'house',x,y,z,ry,scale);return scale;
+    const scale=(6.6+Math.max(0,width-5.4)*.6)/m.h;add(batch,'house',x,y,z,ry+Math.PI/2,scale);return scale;/* v188: porta da casa Tripo fica na lateral do modelo */
   };
   EnvBatch.prototype.mesh=function(material){
     const base=oldMesh.call(this,material),entries=this.tripo153;
