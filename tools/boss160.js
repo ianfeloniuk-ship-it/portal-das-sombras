@@ -20,8 +20,15 @@
   function clips(a,names){let m=clipsFor.get(a);if(!m){m={};for(const c of a.animations){const tr=c.tracks.filter(t=>t.name.endsWith('.quaternion')&&names.has(t.name.split('.')[0]));m[c.name]=new T.AnimationClip(c.name,c.duration,tr)}clipsFor.set(a,m)}return m}
   API.attach=function(e,id){
     if(!CLS[id]||!e||!e.m||!e.m.root)return;
-    e.boss160id=id;
-    Promise.all([load(id),loadAnim()]).then(([g,a])=>{
+    e.boss160id=id;skin(e,load(id),HEIGHT,ATK[id]||['pesado1']);
+  };
+  /* v165: mobs dos clãs (models/mobs165/<arquivo>.glb) usam o mesmo esqueleto e animações. */
+  const mobCache=new Map();
+  API.mob=function(e,file,height,moves){if(!e||!e.m||!e.m.root)return;const url='models/mobs165/'+file+'.glb';
+    if(!mobCache.has(url))mobCache.set(url,new Promise(r=>loader().load(url,g=>r(g),undefined,()=>r(null))));
+    e.mob165=file;skin(e,mobCache.get(url),height||1.6,moves||['golpe1','golpe2'])};
+  function skin(e,gp,HEIGHT,moves){
+    Promise.all([gp,loadAnim()]).then(([g,a])=>{
       if(!g||!a||e.gone||!e.m.root.parent)return;
       const model=T.SkeletonUtils.clone(g.scene);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;if(m)m.metalness=Math.min(m.metalness||0,.3)}});
       const holder=new T.Group();holder.add(model);model.updateMatrixWorld(true);
@@ -32,7 +39,6 @@
       const C=clips(a,names),mixer=new T.AnimationMixer(model),act={};for(const n in C)act[n]=mixer.clipAction(C[n]);
       const B={model,mixer,act,cur:null,last:performance.now(),px:e.x,pz:e.z,atk:0};e.boss160=B;
       const play=(n,once,dur)=>{const x=act[n]||act.idle;if(!x)return null;if(B.cur===x)return x;if(B.cur)B.cur.fadeOut(.15);x.reset();x.setLoop(once?T.LoopOnce:T.LoopRepeat);x.clampWhenFinished=!!once;x.timeScale=dur?x.getClip().duration/dur:1;x.fadeIn(.15).play();B.cur=x;return x};
-      const moves=ATK[id]||['pesado1'];
       const tick=()=>{if(e.gone||!e.m.root.parent)return;
         const now=performance.now(),dt=Math.min(.1,(now-B.last)/1000);B.last=now;
         const sp=Math.hypot(e.x-B.px,e.z-B.pz)/Math.max(dt,1e-3);B.px=e.x;B.pz=e.z;
@@ -42,7 +48,7 @@
         mixer.update(dt);requestAnimationFrame(tick)};
       requestAnimationFrame(tick);
     });
-  };
+  }
 
   /* ---------- Poderes de cada classe ---------- */
   const G=global,TAU=Math.PI*2,R=(a,b)=>a+Math.random()*(b-a);
