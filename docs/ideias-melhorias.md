@@ -6,13 +6,13 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - ~~Buracos nas paredes dos modelos Tripo (v191, DoubleSide)~~
 - Taverna da praça com vaso e degrau soltos na frente (modelo Tripo + enfeites fora do lugar).
 - Torres da muralha meio desencaixadas do muro, algumas entram na praça.
-- Masmorra: ~20 projéteis continuam na lista depois do combate; conferir se algum não some.
+- ~~Projéteis presos na masmorra: não é bug (estavam em voo)~~
 - Desempenho: no 1º quadro do mundo chega a ~5,9 mi de triângulos antes do recorte ajustar (depois cai para ~1,5 mi). Casas Tripo (12 mil triângulos cada, 60 cópias) pesam mais; usar o LOD também na cidade.
 - Lojas (KayKit) foram giradas junto com as casas na v188; conferir uma a uma se a fachada ficou certa.
 
 ## Sistemas
-- Morte verdadeira: aviso ao entrar em portal perigoso sem Pergaminho de Ressurgimento.
-- Túmulo no lugar da morte: recuperar 20% do ouro uma vez, se voltar lá.
+- ~~Aviso ao entrar em portal perigoso sem Pergaminho (v192)~~
+- ~~Túmulo no lugar da morte: 20% do ouro (v192)~~
 - Relíquias: 3º espaço no rank ★; relíquia sobe de nível com o uso (ex.: 100 abates).
 - Ameaça: diário de caça na guilda com os monstros de nível alto vencidos; título por vencer chefe Divindade.
 - Ranking sazonal da torre (ideia 4).
