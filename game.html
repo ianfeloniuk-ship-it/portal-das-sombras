@@ -3157,7 +3157,7 @@ function renderHabitat124(cells,W,H,CS,ox,oz,th,R){
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(points,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.computeVertexNormals();
  const ground=new THREE.Mesh(g,habitatFloor124(th.habitat124));ground.receiveShadow=true;ground.name='habitat-ground-'+th.habitat124;envOwn(L.group,ground);
  inst(geo('habitat-base124-'+CS,()=>new THREE.BoxGeometry(CS,.96,CS)),habitatMat124(th.wall),bases);
- inst(geo('habitat-rock124',()=>new THREE.DodecahedronGeometry(1,1)),habitatMat124(th.wall),walls.concat(pillars));
+ inst(geo('habitat-rock188',()=>{/* v188 (Ian): parede lisa parecia bola de neve; rocha facetada e irregular */const q=new THREE.DodecahedronGeometry(1,1).toNonIndexed(),P=q.attributes.position,v=new THREE.Vector3();for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);const h=Math.sin(v.x*12.9+v.y*78.2+v.z*37.7)*43758.5,n=h-Math.floor(h);v.multiplyScalar(.78+n*.36);v.y=v.y>0?v.y*1.15:v.y*.7;P.setXYZ(i,v.x,v.y,v.z)}q.computeVertexNormals();return q}),habitatMat124(th.wall),walls.concat(pillars));
  const voidGround=new THREE.Mesh(new THREE.PlaneGeometry(W*CS+80,H*CS+80),habitatMat124(th.fog));voidGround.rotation.x=-Math.PI/2;voidGround.position.set(0,-.3,0);envOwn(L.group,voidGround);
  const bio=th.habitat124,ice=bio==='neve'||bio==='cristal',plants=new EnvBatch(),flora=new EnvBatch();
  for(const p of details){
@@ -3686,7 +3686,7 @@ const ENV_WIND='float hh=max(transformed.y-.3,0.),amp=hh*.03+min(hh,.8)*.08;tran
 function envShader(wind,see){return sh=>{let v=sh.vertexShader,f=sh.fragmentShader,add='';
   if(wind){sh.uniforms.uWind=ENV.wind;v='uniform float uWind;\n'+v;add+=ENV_WIND}
   if(see){sh.uniforms.uPl=ENV.pl;sh.uniforms.uCa=ENV.ca;sh.uniforms.uOcc=ENV.occ;v='varying vec3 vWp;\n'+v;add+='vWp=(modelMatrix*vec4(transformed,1.)).xyz;';
-    f='uniform vec3 uPl;uniform vec3 uCa;uniform float uOcc;varying vec3 vWp;\n'+f.replace('void main() {','void main() {\nif(uOcc>.5){vec3 dd=uPl-uCa;float tt=dot(vWp-uCa,dd)/dot(dd,dd);if(tt>.04&&tt<.97){float rr=length(vWp-(uCa+dd*tt)),RR=mix(.9,2.9,tt);if(rr<RR&&(rr<RR*.55||mod(floor(gl_FragCoord.x)+floor(gl_FragCoord.y),2.)<1.))discard;}}')}
+    f='uniform vec3 uPl;uniform vec3 uCa;uniform float uOcc;varying vec3 vWp;\n'+f.replace('void main() {','void main() {\nif(uOcc>.5){vec3 dd=uPl-uCa;float tt=dot(vWp-uCa,dd)/dot(dd,dd);if(tt>.04&&tt<.97){float rr=length(vWp-(uCa+dd*tt)),RR=mix(1.4,4.6,tt);if(rr<RR&&(rr<RR*.6||mod(floor(gl_FragCoord.x)+floor(gl_FragCoord.y),2.)<1.))discard;}}')}
   sh.vertexShader=v.replace('#include <begin_vertex>','#include <begin_vertex>\n'+add);sh.fragmentShader=f}}
 // Etapa 2 (Ian): low plants stop being neon lime; their green follows the season and sits closer to the ground tone.
 function floraSeason154(sh){sh.uniforms.uSeason154=window.SEASON154U||(window.SEASON154U={value:0});sh.fragmentShader='uniform float uSeason154;'+String.fromCharCode(10)+sh.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -4313,7 +4313,7 @@ function buildWorld(seed){
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);
   hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
-  const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));L.group.add(moon);L.moon=moon;
+  const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));moon.position.set(-80,70,-150);L.group.add(moon);L.moon=moon;
   updChunks(true);
   if(!gates.length)for(let i=0;i<GATE_COUNT155;i++)gates.push(newGate());
   for(const g of gates)if(!g.dead){gateMesh(g);if(g.closing131&&g.mesh?.userData.rift131)Rift131.close(g.mesh,g.storyScar131)}

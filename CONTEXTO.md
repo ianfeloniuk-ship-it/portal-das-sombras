@@ -724,3 +724,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v186: 9 níveis de ameaça (Ameaça, Flagelo, Devastação, Catástrofe, Cataclismo, Apocalipse, Aniquilação, Extinção, Divindade) com aura animada; sorteio em cadeia pelo rank.
 - v187: morte verdadeira (newRun; mantém profile: rank, despertar, banco, casa; relíquias somem); Pergaminho de Ressurgimento (run.rez187, 5000 ouro, máx 3, loja de poções); rank ★ na prova da Ordem exige classe rara despertada (starReady187).
 - v188: prédios KayKit (doorRot188, +90°) e casa Tripo (+90°) giram para a porta olhar para a praça.
+- v189: lua nasce longe (antes ficava no chão da praça até o 1º update); recorte de visão mais largo (árvores não tapam o herói); paredes de masmorra viram rocha facetada (habitat-rock188).
