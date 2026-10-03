@@ -719,3 +719,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 ## v183
 - Fendas instáveis: afixos vamp/elite/rage, até 3 afixos no rank 6+, +25% XP por afixo.
 - Relíquias únicas de chefe (UNIQ183): vamp, thorns, echo, cdr (-12% recarga), swift (-25% esquiva), soul.
+- v184: relíquias em espaço próprio (2, no perfil, repetida vira ouro); níveis de ameaça Lobo/Tigre/Demônio/Dragão/Deus em monstros e chefes de masmorra (por rank do portal).
