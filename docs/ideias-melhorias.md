@@ -3,6 +3,7 @@
 Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 
 ## Bugs e acabamento
+- ~~Buracos nas paredes dos modelos Tripo (v191, DoubleSide)~~
 - Taverna da praça com vaso e degrau soltos na frente (modelo Tripo + enfeites fora do lugar).
 - Torres da muralha meio desencaixadas do muro, algumas entram na praça.
 - Masmorra: ~20 projéteis continuam na lista depois do combate; conferir se algum não some.

@@ -7798,7 +7798,7 @@ const TripoEnvironment153 = (() => {
       geometry.computeBoundingSphere();
       const source=Array.isArray(o.material)?o.material:[o.material];
       const materials=source.map(m=>{
-        const mat=m.clone();
+        const mat=m.clone();mat.side=THREE.DoubleSide;/* v191: malhas Tripo têm faces invertidas; com um lado só apareciam buracos nas paredes */
         if(mat.map){mat.map.encoding=THREE.sRGBEncoding;mat.map.anisotropy=4;}
         mat.roughness=Math.max(.72,mat.roughness||0);mat.metalness=0;
         // Tripo foliage albedo is very dark under the game's lighting; lift it to read like the reference.

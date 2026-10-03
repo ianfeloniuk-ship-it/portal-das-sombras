@@ -726,3 +726,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v188: prédios KayKit (doorRot188, +90°) e casa Tripo (+90°) giram para a porta olhar para a praça.
 - v189: lua nasce longe (antes ficava no chão da praça até o 1º update); recorte de visão mais largo (árvores não tapam o herói); paredes de masmorra viram rocha facetada (habitat-rock188).
 - v190: cofre de relíquias (relicVault190, só na cidade): guardada não se perde na morte e fica sem efeito. docs/ideias-melhorias.md com a lista viva.
+- v191: materiais Tripo em DoubleSide (paredes de torres/casas/taverna tinham buracos).
