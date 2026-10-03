@@ -695,3 +695,6 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Talentos de rank corpo a corpo: **Golpe espelhado** (acerta atrás também, dano inteiro) e **Onda de choque** (3º golpe solta onda que atravessa; até 3 ondas).
 - **Sinergia**: usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela (texto "SINERGIA +30%").
 - Todo chefe tem pelo menos 3 tipos de ataque (sorteia os que faltam entre sísmico, fúria, chuva de almas, legião).
+
+## v179 (03/10/2026)
+- Efeitos de habilidade menos "luminosos" (Ian): rastro luminoso genérico (`Combat139`) só nas classes corpo a corpo; área de habilidade marcada por contorno discreto no chão (`zoneMark178`) no lugar do disco branco aditivo; Chuva de Flechas e de Meteoros sem anel a cada pulso; flechas levantam poeira ao cair (`dustPuff178`); anéis `fxRing` com metade do brilho.
