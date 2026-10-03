@@ -3520,7 +3520,7 @@ function relicToggle183(k){const r=relics183();if(!r.own[k])return;const i=r.eq.
 function relicPanel183(){const r=relics183(),ks=Object.keys(UNIQ183).filter(k=>r.own[k]);let h='<div class="sec">RELÍQUIAS '+r.eq.length+'/2 <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Caem de chefes. Não ocupam espaço de armadura. Clique para equipar ou retirar."></span></div><div style="display:flex;flex-wrap:wrap;gap:6px">';
  for(const k of Object.keys(UNIQ183)){const U=UNIQ183[k],on=r.eq.includes(k);h+=r.own[k]?'<button class="mini" data-a="relic" data-v="'+k+'" data-tip154="'+gearText(U.d)+'" style="border-color:'+(on?'#ff3d1e':'#555')+'"><b style="color:#ff6a4a">'+(on?'◆ ':'◇ ')+gearText(U.n)+'</b></button>':'<button class="mini" disabled data-tip154="Cai de um chefe ainda não vencido.">◇ ???</button>'}
  return h+'</div>'}
-function uniqueDrop183(th){const g=L.gate;if(!g||L.special)return;const fam=g.family124||'';if(th<4&&Math.random()>=(g.red?.25:.12)*(1+.5*(th||0)))return;
+function uniqueDrop183(th){const g=L.gate;if(!g||L.special)return;const fam=g.family124||'';if(th<9&&Math.random()>=(g.red?.25:.12)*(1+.25*(th||0)))return;
   let key=Object.keys(UNIQ183).find(k=>UNIQ183[k].fam.includes(fam))||pick(Object.keys(UNIQ183));const U=UNIQ183[key];
   const r=relics183();if(r.own[key]){run.gold=(run.gold||0)+200*(1+g.rank);floater(player.x,player.z,'Relíquia repetida: ouro','#ffd36b',true);return}r.own[key]=1;if(r.eq.length<2)r.eq.push(key);store.set('pds2_profile',profile);bigText('RELÍQUIA ÚNICA',1600);floater(player.x,player.z,U.n,'#ff3d1e',true);sfx('arise')}
 function hitHooks183(e,amt,o){if(!o.fromPlayer||!player)return;if(uniqueHas183('vamp'))player.hp=Math.min(player.maxhp,player.hp+amt*.02);
@@ -4809,15 +4809,32 @@ function kindsFor0(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:1
 /* Masmorras comuns acompanham o jogador (pedido do Ian): se você está acima do nível do rank, os monstros sobem até o seu nível (e dão mais XP/ouro). */
 function dunLvl(gr){const G=GR[Math.min(9,gr)];return (L&&L.mode==='dungeon'&&!L.special&&run)?Math.max(G.lvl,run.level):G.lvl}
 function dunScale(e,gr){const G=GR[Math.min(9,gr)],lv=dunLvl(gr);if(lv<=G.lvl)return;const mh=eHP(lv)/G.hp,md=eDMG(lv)/G.dmg,rw=Math.sqrt(mh);e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.xp*=rw;e.gold*=rw;e.lvl=lv+(e.elite?3:0)+(e.isBoss?5:0)}
-/* v185 (Ian): nível de ameaça próprio: Presságio, Calamidade, Eclipse, Abismo. Sorteado pelo rank do portal, nunca pelo nível do jogador. */
-const THREAT184=[{n:'',c:0x000000,h:1,d:1,r:1},{n:'Presságio',c:0x332200,h:1.3,d:1.1,r:1.6,col:'#ffb347'},{n:'Calamidade',c:0x440011,h:1.7,d:1.2,r:2.6,col:'#ff4a5a'},{n:'Eclipse',c:0x220044,h:2.3,d:1.3,r:4,col:'#c77dff'},{n:'Abismo',c:0x444400,h:3.2,d:1.4,r:7,col:'#fff27a'}];
-function threatRoll184(gr,boss){const q=Math.random(),red=L&&L.gate&&L.gate.red?1:0;
- if(boss){if((gr>=8||red&&gr>=6)&&q<.04+.01*gr)return 4;if(gr>=5&&q<.2+.03*gr)return 3;if(q<.45+.03*gr)return 2;return 1}
- if(gr>=6&&q<.01)return 3;if(gr>=3&&q<.03+.015*gr)return 2;if(q<.12+.03*gr)return 1;return 0}
+/* v186 (Ian): 9 níveis de ameaça, sorteados pelo rank do portal (nunca pelo nível do jogador). Cada nível tem aura própria em volta do monstro. */
+const THREAT184=[{n:'',h:1,d:1,r:1},
+ {n:'Ameaça',a:0xd8d8d8,h:1.15,d:1.05,r:1.4,col:'#e0e0e0'},
+ {n:'Flagelo',a:0x7cff6a,h:1.3,d:1.1,r:1.8,col:'#8cff7a'},
+ {n:'Devastação',a:0x3fb6ff,h:1.5,d:1.15,r:2.4,col:'#5cc4ff'},
+ {n:'Catástrofe',a:0xffa21f,h:1.75,d:1.2,r:3.2,col:'#ffae3a'},
+ {n:'Cataclismo',a:0xff3a2a,h:2.05,d:1.25,r:4.2,col:'#ff4d3d'},
+ {n:'Apocalipse',a:0xc03aff,h:2.4,d:1.3,r:5.5,col:'#cf5cff'},
+ {n:'Aniquilação',a:0x8a0018,h:2.8,d:1.36,r:7,col:'#ff2050',dark:1},
+ {n:'Extinção',a:0x101018,h:3.3,d:1.43,r:9,col:'#9aa0b8',dark:1},
+ {n:'Divindade',a:0xfff0a0,h:3.9,d:1.5,r:12,col:'#fff27a'}];
+function threatRoll184(gr,boss){const red=L&&L.gate&&L.gate.red?1:0;let t=boss?1:0;
+ const p=boss?.42+.03*gr+.05*red:.16+.02*gr,cap=boss?Math.min(gr>=8||red&&gr>=6?9:8,3+gr):Math.min(6,1+gr);
+ while(t<cap&&Math.random()<p)t++;return t}
 let BREAKG184=null;
 function bossThreat184(gr){const g=BREAKG184||(L&&L.mode==='dungeon'&&L.gate);if(!g)return threatRoll184(gr,true);if(g.bt184==null)g.bt184=threatRoll184(gr,true);return g.bt184}
+const AURA184={};
+function auraMesh184(t){const T=THREAT184[t];if(!AURA184.g){AURA184.g=new THREE.CylinderGeometry(1,1.25,1,20,1,true);AURA184.g.translate(0,.5,0);AURA184.r=new THREE.RingGeometry(.7,1,32);AURA184.r.rotateX(-Math.PI/2)}
+ const blend=T.dark?THREE.NormalBlending:THREE.AdditiveBlending;
+ const m=AURA184['m'+t]||(AURA184['m'+t]=new THREE.MeshBasicMaterial({color:T.a,transparent:true,opacity:T.dark?.42:.22,blending:blend,depthWrite:false,side:THREE.DoubleSide}));
+ const rm=AURA184['r'+t]||(AURA184['r'+t]=new THREE.MeshBasicMaterial({color:T.a,transparent:true,opacity:T.dark?.7:.55,blending:blend,depthWrite:false}));
+ const g=new THREE.Group(),c=new THREE.Mesh(AURA184.g,m),r=new THREE.Mesh(AURA184.r,rm);r.position.y=.05;g.add(c,r);
+ if(t>=7){const r2=new THREE.Mesh(AURA184.r,AURA184.m9||(AURA184.m9=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false})));r2.position.y=.06;g.add(r2);g.userData.r2=r2}
+ const sp=1+t*.12;c.onBeforeRender=()=>{const k=performance.now()/1000;c.scale.set(1+.06*Math.sin(k*3*sp),1+.15*Math.sin(k*2*sp+1),1+.06*Math.sin(k*3*sp));r.rotation.y=k*sp;if(g.userData.r2){const f=(k*.8)%1;g.userData.r2.scale.setScalar(1+f*1.6);g.userData.r2.material.opacity=.5*(1-f)}};return g}
 function threatApply184(e,t){if(!t)return;const T=THREAT184[t];e.threat184=t;e.hp*=T.h;e.maxhp*=T.h;e.dmg*=T.d;e.xp*=T.r;e.gold*=T.r;e.name='['+T.n+'] '+e.name;
- try{e.mats.forEach(m=>{m.emissive.setHex(T.c);m.userData.e0=T.c})}catch(_){}if(t>=3&&e.m&&e.m.body)e.m.body.scale.multiplyScalar(1.08)}
+ try{const a=auraMesh184(t),R=(e.r||.6)*1.5,H=(e.scale||1)*2.2*(1+.04*t);a.scale.set(R,H,R);e.m.root.add(a);e.aura184=a}catch(_){}if(t>=5&&e.m&&e.m.body)e.m.body.scale.multiplyScalar(1+.025*(t-4))}
 function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;if(!extra.wild)dunScale(e,gr);if(L&&L.mode==='dungeon')threatApply184(e,threatRoll184(gr,false));return e}
 function spawnRival(x,z,gr,extra={}){
   const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
@@ -4829,7 +4846,7 @@ function spawnBoss(x,z,gr,B){
   /* v178 (Irror): todo chefe tem pelo menos 3 tipos de ataque (o SS+ com giro e chuva roxa foi o que mais divertiu). */{const all=['seismic','fury','soulrain','legion'],ts=[...(B.types||[B.type]).filter(Boolean)];while(ts.length<3){const c=all.filter(t=>!ts.includes(t));ts.push(c[Math.floor(Math.random()*c.length)])}B={...B,types:ts}}
   const tp0=(B.types||[B.type])[0],skull=tp0==='soulrain'||tp0==='legion',bsc=B.scale||2.2;
   const K={goblin118:B.goblin118,mon:B.mon,gk:{seismic:'Knight',fury:'Barbarian',soulrain:'Skeleton_Mage',legion:'Skeleton_Warrior'}[tp0],gtint:B.body,n:B.n,hp:900,dmg:20,spd:2.6,ai:'boss',range:3.6*bsc/2.2,wind:.75,atkCd:1.5,xp:0,scale:bsc,r:Math.min(1.6,1.3*bsc/2.2),helm:!skull,skin:skull?0xe8e0cc:0xd8d8e0,eye:B.p3?0xffffff:0xff2020,body:B.body,wep:tp0==='soulrain'?'staff':tp0==='fury'?'axe':'sword'};
-  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.bars=bossBarsFor166(gr)+(L.mode==='dungeon'&&L.gate?.red?1:0);/* v167 (Ian): cada barra é vida de verdade (1 barra = 1/3 da vida antiga); portal vermelho +1 barra */e.hp*=e.bars/3;e.maxhp*=e.bars/3;e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;dunScale(e,gr);{const t=bossThreat184(gr);threatApply184(e,t);e.threat183=t;if(t>=3){bigText('AMEAÇA NÍVEL '+THREAT184[t].n.toUpperCase(),2200)}}
+  const G=GR[gr];const e=mkEnemy(K,x,z,G.hp,G.dmg,{isBoss:true,boss:B,spT:5,phase:1,absorbed:false,gr});e.bars=bossBarsFor166(gr)+(L.mode==='dungeon'&&L.gate?.red?1:0);/* v167 (Ian): cada barra é vida de verdade (1 barra = 1/3 da vida antiga); portal vermelho +1 barra */e.hp*=e.bars/3;e.maxhp*=e.bars/3;e.xp=200*G.xp;e.gold=rnd(120,180)*G.gold;bossE=e;dunScale(e,gr);{const t=bossThreat184(gr);threatApply184(e,t);e.threat183=t;if(t>=5){bigText('AMEAÇA NÍVEL '+THREAT184[t].n.toUpperCase(),2200)}}
   if(Math.random()<Math.min(.95,.6+gr*.06)){e.mech=pick(bossMechanics113(B));e.mechT=8}if(B.goblin118)e.mech='costas';
   // v161: portal de classe rara usa o chefe da classe feito no Tripo.
   const rid161=L&&L.mode==='dungeon'&&L.gate&&L.gate.set153;if(rid161&&window.Boss160&&Boss160.has(rid161)){Boss160.env={L:()=>L,P:()=>player};Boss160.attach(e,rid161)}
@@ -7927,9 +7944,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v185</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v186</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=185;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=186;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
