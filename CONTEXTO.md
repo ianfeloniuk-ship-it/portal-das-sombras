@@ -656,3 +656,8 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Pousada: o ponto "F · POUSADA" e a placa ficavam ao lado da fonte; agora ficam na porta do prédio no anel (157,5°, 30,5 m).
 - Marquinha escura acima da barra de habilidades era o painel `#rare-status103` vazio; agora some quando não tem texto.
 - Dúvida aberta do Irror ("caverninhas dinâmicas… entrei no nível 1… agora nível 15") — perguntar o que ele quis dizer.
+
+## v167 (03/10/2026, Claude na nuvem)
+- Build → Peças na bolsa: abas por tipo (Todas, Arma, Armadura, Elmo, Luvas, Botas, com contagem), ordenar por Maior bônus / Raridade / Valor (`GEAR166`), e cada peça mostra "▲ +X / ▼ −X ataque|escudo vs. atual".
+- Chefes (Ian: "é pra ser assim"): cada barra é vida de verdade — vida do chefe × barras/3 (F 1 barra = 1/3 da vida antiga; ★ 8 barras); portal vermelho +1 barra.
+- Caveira sobre monstros (`threat`) já é recalculada a cada quadro pelo nível atual do jogador; some quando você passa do nível do monstro.
