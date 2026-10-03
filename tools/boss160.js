@@ -18,9 +18,9 @@
   // Só rotações: as posições do rig do Viajante esticariam um corpo de outro tamanho.
   const clipsFor=new WeakMap();
   function clips(a,names){let m=clipsFor.get(a);if(!m){m={};for(const c of a.animations){const tr=c.tracks.filter(t=>t.name.endsWith('.quaternion')&&names.has(t.name.split('.')[0]));m[c.name]=new T.AnimationClip(c.name,c.duration,tr)}clipsFor.set(a,m)}return m}
-  API.attach=function(e,id){
+  API.attach=function(e,id,h){
     if(!CLS[id]||!e||!e.m||!e.m.root)return;
-    e.boss160id=id;skin(e,load(id),HEIGHT,ATK[id]||['pesado1']);
+    e.boss160id=id;skin(e,load(id),h||HEIGHT,ATK[id]||['pesado1']);
   };
   /* v165: mobs dos clãs (models/mobs165/<arquivo>.glb) usam o mesmo esqueleto e animações. */
   const mobCache=new Map();
@@ -30,7 +30,7 @@
   function skin(e,gp,HEIGHT,moves){
     Promise.all([gp,loadAnim()]).then(([g,a])=>{
       if(!g||!a||e.gone||!e.m.root.parent)return;
-      const model=T.SkeletonUtils.clone(g.scene);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;if(m)m.metalness=Math.min(m.metalness||0,.3)}});
+      const model=T.SkeletonUtils.clone(g.scene);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material=o.material.clone();if(m){m.metalness=Math.min(m.metalness||0,.3);m.roughness=Math.max(m.roughness??1,.6);/* v170 (Ian: chefe sem visual, muito escuro na masmorra): a textura brilha um pouco por conta própria. */if(m.map){m.emissive=new T.Color(1,1,1);m.emissiveMap=m.map;m.emissiveIntensity=.45}m.needsUpdate=true}}});
       const holder=new T.Group();holder.add(model);model.updateMatrixWorld(true);
       const box=new T.Box3().setFromObject(model),h=box.max.y-box.min.y,ws=e.m.root.getWorldScale(new T.Vector3()).y||1,s=HEIGHT/h/ws;
       model.scale.setScalar(s);model.position.y=-box.min.y*s;

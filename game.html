@@ -232,7 +232,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
-<script src="tools/boss160.js?v=165"></script>
+<script src="tools/boss160.js?v=170"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js"></script>
 <script src="tools/water154.js"></script>
@@ -4772,7 +4772,7 @@ function updBossMech(e,dt){if(!e.mech||e.dead)return;
   if(!e.intro)return;e.mechT-=dt;
   if(e.mech==='inverte'&&e.mechT<=0&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<=14&&los(e.x,e.z,player.x,player.z)){e.mechT=12;const h=hazard(player.x,player.z,2.5,1.2,0,'enemy',0xd06bff);h.owner=e;h.invert113=true;floater(e.x,e.z,'OLHAR DISTORCIDO','#d06bff',true)}
   if(e.mech==='barreira'){if(e.mechT<=0&&!e.barrier){e.barrier=5;e.mechT=15;floater(e.x,e.z,'BARREIRA','#7fd8ff',true,4);fxRing(e.x,e.z,0x7fd8ff,4,.8)}if(e.barrier>0){e.barrier-=dt;if(Math.random()<dt*6)fxRing(e.x,e.z,0x7fd8ff,3.2,.3);if(e.barrier<=0){e.barrier=0;floater(e.x,e.z,'BARREIRA CAIU','#ffd54f',true,4)}}}
-  if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(bossMinion124(e,i?'gigante':'orc'),e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
+  if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(bossMinion124(e,i?'gigante':'orc'),e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;/* v170 (Ian): o fragmento do chefe de classe rara usa o modelo do próprio chefe, menor. */if(e.boss160id&&window.Boss160){Boss160.attach(f,e.boss160id,2.2);f.boss160frag=true}f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
 /* TRAÇOS: monstros de portais altos ganham poderes que respondem ao jogador. */
 const TRAITS={regen:{n:'Regenerador',d:'recupera 2% da vida por segundo'},veloz:{n:'Veloz',d:'40% mais rápido'},blind:{n:'Blindado',d:'toma 40% menos dano (críticos ignoram)'},vamp:{n:'Vampírico',d:'cura 30% do dano que causa'}};
 function giveTrait(e){const t=pick(Object.keys(TRAITS));e.trait=t;e.name=e.name+' '+TRAITS[t].n;if(t==='veloz')e.speed*=1.4}

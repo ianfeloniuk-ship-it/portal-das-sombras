@@ -249,7 +249,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
-<script src="tools/boss160.js?v=165"></script>
+<script src="tools/boss160.js?v=170"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js"></script>
 <script src="tools/water154.js"></script>
@@ -4789,7 +4789,7 @@ function updBossMech(e,dt){if(!e.mech||e.dead)return;
   if(!e.intro)return;e.mechT-=dt;
   if(e.mech==='inverte'&&e.mechT<=0&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<=14&&los(e.x,e.z,player.x,player.z)){e.mechT=12;const h=hazard(player.x,player.z,2.5,1.2,0,'enemy',0xd06bff);h.owner=e;h.invert113=true;floater(e.x,e.z,'OLHAR DISTORCIDO','#d06bff',true)}
   if(e.mech==='barreira'){if(e.mechT<=0&&!e.barrier){e.barrier=5;e.mechT=15;floater(e.x,e.z,'BARREIRA','#7fd8ff',true,4);fxRing(e.x,e.z,0x7fd8ff,4,.8)}if(e.barrier>0){e.barrier-=dt;if(Math.random()<dt*6)fxRing(e.x,e.z,0x7fd8ff,3.2,.3);if(e.barrier<=0){e.barrier=0;floater(e.x,e.z,'BARREIRA CAIU','#ffd54f',true,4)}}}
-  if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(bossMinion124(e,i?'gigante':'orc'),e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
+  if(e.mech==='divide'&&!e.split&&e.hp<e.maxhp*.5){e.split=true;bigText('O CHEFE SE DIVIDIU',1200);for(let i=0;i<2;i++){const a=i*Math.PI+rnd(-.3,.3);const f=spawnKind(bossMinion124(e,i?'gigante':'orc'),e.x+Math.cos(a)*4,e.z+Math.sin(a)*4,e.gr??0,{});f.name='Fragmento de '+e.name;/* v170 (Ian): o fragmento do chefe de classe rara usa o modelo do próprio chefe, menor. */if(e.boss160id&&window.Boss160){Boss160.attach(f,e.boss160id,2.2);f.boss160frag=true}f.hp=f.maxhp=e.maxhp*.25;f.dmg=e.dmg*.6;f.aggro=true;makeElite&&makeElite(f);fxRing(f.x,f.z,0xff5a6e,2.5,.6)}}}
 /* TRAÇOS: monstros de portais altos ganham poderes que respondem ao jogador. */
 const TRAITS={regen:{n:'Regenerador',d:'recupera 2% da vida por segundo'},veloz:{n:'Veloz',d:'40% mais rápido'},blind:{n:'Blindado',d:'toma 40% menos dano (críticos ignoram)'},vamp:{n:'Vampírico',d:'cura 30% do dano que causa'}};
 function giveTrait(e){const t=pick(Object.keys(TRAITS));e.trait=t;e.name=e.name+' '+TRAITS[t].n;if(t==='veloz')e.speed*=1.4}
@@ -7789,9 +7789,9 @@ requestAnimationFrame(frame);
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
 <script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v169</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v170</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=169;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=170;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
