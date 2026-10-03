@@ -675,3 +675,7 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 
 ## v173 (03/10/2026)
 - Torre travava ao matar o último inimigo: o portal dourado de subir usava a forma "gring" que só os portais antigos criavam; agora `geo()` tem forma padrão para esses nomes (`GEO_DEF172`).
+
+## v174 (03/10/2026)
+- Cajado/varinha/orbe/tomo somam ataque só no dano mágico; armas físicas só no físico (`weaponIsMagic173`, `atkOf`). Texto da arma diz "de ataque mágico/físico".
+- Mago sem cajado ataca com a mão (animação `orb`, `animWep173`); com cajado, animação de cajado. Cajado parado fica em pé na mão (`staff174` em `tools/warrior-player127.js`).
