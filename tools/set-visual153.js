@@ -52,7 +52,7 @@ window.SetVisual153=(()=>{
   });
  }
  // v169: peças encaixadas no Blender no corpo do Viajante, com pesos copiados do corpo (dobram junto). Ligadas aos ossos do herói pelo nome.
- const RIG169={metamorfo:'models/set153/metamorfo-rig.glb'};window.SET_RIG169=RIG169;
+ const RIG169=Object.fromEntries(['metamorfo','necromante','tempo','tecelao','guardiao','artifice','duelista','condutor','oraculo','devorador'].map(id=>[id,'models/set153/'+id+'-rig.glb']));window.SET_RIG169=RIG169;
  function attachRig169(root,item){const slot=item.slot;load(RIG169[item.set153]).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
    let body=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o});if(!body)return;
    const parts=[];src.traverse(o=>{if(o.isSkinnedMesh&&o.name.startsWith('set169_'+slot))parts.push(o)});
@@ -63,7 +63,7 @@ window.SetVisual153=(()=>{
      m.bind(new T.Skeleton(bones,sm.skeleton.boneInverses.map(x=>x.clone())),sm.bindMatrix.clone())}})}
  // Viajante clothing parts (Tripo segmentation) replaced by armor in the same slot.
  const HIDE={a:['tripo_part_0','tripo_part_3'],h:['tripo_part_6'],g:['tripo_part_1','tripo_part_2'],b:['tripo_part_4']};
- function clothing(root,slots,rig){root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?{h:['tripo_part_6']}:HIDE).some(([sl,list])=>slots.includes(sl)&&list.includes(o.name))}})}
+ function clothing(root,slots,rig){root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?{}:HIDE).some(([sl,list])=>slots.includes(sl)&&list.includes(o.name))}})}
  function clear(root){const old=[];root.traverse(o=>{if(/^set153_/.test(o.name))old.push(o)});old.forEach(o=>o.parent.remove(o));root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=true})}
  function apply(){if(!player||!player.m||!player.m.root||typeof equippedItems!=='function')return;const root=player.m.root,items=equippedItems().filter(it=>it.set153);
   const key=items.map(it=>it.uid+it.slot).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);

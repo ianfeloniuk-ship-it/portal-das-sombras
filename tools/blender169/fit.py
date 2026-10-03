@@ -33,6 +33,8 @@ for m in list(BODY.modifiers):
     bpy.context.view_layer.objects.active=BODY;bpy.ops.object.modifier_apply(modifier=m.name)
 BODY.parent=None
 def load_piece(name):
+  import os
+  if not os.path.exists(f'{setdir}/{setid}-{name}.glb'):return None
   before=set(bpy.context.scene.objects)
   bpy.ops.import_scene.gltf(filepath=f'{setdir}/{setid}-{name}.glb')
   new=[o for o in bpy.context.scene.objects if o not in before]
@@ -79,11 +81,19 @@ def skin(o,name):
   bpy.context.view_layer.objects.active=o;bpy.ops.object.modifier_apply(modifier=m.name)
   o.parent=A;am=o.modifiers.new('arm','ARMATURE');am.object=A
 pieces=[]
-H=load_piece('elmo');box_fit(H,P['tripo_part_6'],(1.2,1.25,1.12),(0,-.04,-.02));skin(H,'set169_h');pieces.append(H)
-C=load_piece('peitoral');C_T=np.vstack([P['tripo_part_0'],P['tripo_part_3']]);box_fit(C,C_T,(1.12,1.35,1.1),(0,-.03,0));skin(C,'set169_a');pieces.append(C)
+H=load_piece('elmo')
+if H:box_fit(H,P['tripo_part_6'],(1.42,1.45,1.28),(0,-.02,.03))
+if H:skin(H,'set169_h');pieces.append(H)
+C=load_piece('peitoral')
+C_T=np.vstack([P['tripo_part_0'],P['tripo_part_3']]);C and box_fit(C,C_T,(1.12,1.35,1.1),(0,-.03,0))
+if C:skin(C,'set169_a');pieces.append(C)
 for side in 'rl':
-  g=load_piece('bracal');seg_fit(g,'tripo_part_'+('7' if side=='r' else '8')+'&forearm_'+side,1.0,1.85,mirror=(side=='l'),lo=0,hi=100);skin(g,'set169_g_'+side);pieces.append(g)
-  b=load_piece('greva');seg_fit(b,'shin_'+side,.95,1.3,mirror=(side=='l'),lo=0,hi=92);skin(b,'set169_b_'+side);pieces.append(b)
+  g=load_piece('bracal')
+  if g:seg_fit(g,'tripo_part_'+('7' if side=='r' else '8')+'&forearm_'+side,1.0,1.85,mirror=(side=='l'),lo=0,hi=100)
+  if g:skin(g,'set169_g_'+side);pieces.append(g)
+  b=load_piece('greva')
+  if b:seg_fit(b,'shin_'+side,.95,1.3,mirror=(side=='l'),lo=0,hi=92)
+  if b:skin(b,'set169_b_'+side);pieces.append(b)
 for o in body:bpy.data.objects.remove(o)
 bpy.data.objects.remove(BODY)
 bpy.ops.object.select_all(action='DESELECT');A.select_set(True)
