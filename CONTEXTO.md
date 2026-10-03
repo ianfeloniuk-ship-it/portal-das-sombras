@@ -682,3 +682,10 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 
 ## v176 (03/10/2026, Claude na nuvem)
 - Armaduras das 10 classes raras refinadas e encaixadas no corpo do Viajante com esqueleto (`models/set153/<id>-rig.glb`, 4–6 MB cada). Elmo maior para a cabeça caber dentro: a cabeça não é mais escondida (rosto aparece em capuzes). Nenhuma roupa é escondida com armadura encaixada. Arma continua no método antigo.
+
+## v177 (03/10/2026, Claude na nuvem) — áudio do Irror
+- **Sem "rubber band"**: vida/dano do monstro dependem só do nível dele (removido o fator pelo nível do jogador da v168). Ouro dos monstros continua pela metade.
+- **Poderes por nível do monstro** (`tierSetup177/tierShoot177/tierSwing177`, a cada 25 níveis, máx. 8): à distância +1 projétil no 25, +30% velocidade no 50, +1 no 75 e mais a cada 50 níveis (máx. +4); corpo a corpo: golpe duplo no 25, pisão em área avisado no 50, alcance +40% no 75, golpe 25% mais rápido no 100. (Ricochete na parede ainda não feito.)
+- **Talentos de rank**: Disparo dividido = projéteis paralelos com dano inteiro (era leque com 40%); Ricochete mantém dano inteiro; novos **Espelho** (2 níveis: para trás, depois para os lados) e **Eco gratuito** (25% de habilidade sem custo nem recarga).
+- **Mana**: custo de habilidade = maior entre o custo base e base/60 da mana máxima (`manaCost177`); regeneração 2 + 1,8%/s (era 3 + 3%/s).
+- Pendentes do áudio: passivas corpo a corpo; combinar habilidades/classes em sinergia (ex.: fúria + giro); chefes com mais habilidades (o Irror gostou do chefe SS+ com giro e chuva roxa). Sugestão dele: lançar single player e só depois pensar em multiplayer (arena primeiro); anti-cheat é caro — decisão do Ian.
