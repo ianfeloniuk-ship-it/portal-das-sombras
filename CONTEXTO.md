@@ -709,3 +709,9 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - **Guerreiro**: **Fôlego** gasta a Fúria (+1% de cura por ponto); **Varredura** com 40 de Fúria causa dano e atordoa 1 s.
 - Código em `tools/kit111-runtime.js` (`cm181*`), ganchos no `hurtEnemy` (`cm154Basic(o,e)`) e no `hurtPlayer` (`cm181Hurt`). Barras de Firmeza e Marcas no mesmo painel da Fúria.
 - Armadura substituindo a roupa (corpo base): rascunho em `tools/blender169/fit2.py` e `wip-set-visual181.patch`, **não publicado**, aguardando o Ian.
+
+## v182 (03/10/2026, Claude na nuvem)
+- **Armadura substitui a roupa** (aprovado pelo pedido do Ian de corrigir encaixes): mangas, casaco, cachecol e calça somem onde há peça; corpo base justo escuro (`base169_*`) por baixo. Braçais no braço e antebraço presos só ao osso (não cruzam mais), greva na canela dobrando no joelho, elmo com escala uniforme envolvendo a cabeça (`tools/blender169/fit2.py`). Condutor (sem peitoral) mantém a roupa no tronco.
+- Efeitos de combate atrasados (golpe duplo, projéteis extras, pisão, ondas, rajada) seguem o relógio do jogo: param na pausa e somem ao trocar de área (`later181`).
+- Famílias: aranha prende com teia (lento 1,5 s), esqueletos às vezes arremessam osso, lobo uiva e chama a matilha (`familySwing182`).
+- LOD também para muralha, paliçada e casas.
