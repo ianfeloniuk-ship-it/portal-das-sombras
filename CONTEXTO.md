@@ -650,3 +650,9 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Câmera: no PC, arrastar com o botão direito para baixo desce a câmera até a altura do herói (`pcCam.pitch` 0–1), dá para vê-lo de frente girando; botão do meio restaura. No celular, botão 🎥 alterna vista de cima / de frente.
 - Mira: `aimPoint` usa o retângulo real do canvas e, com câmera baixa (mouse acima do horizonte), segue a direção do mouse.
 - Pendente: barra de vida sobre a cabeça fica alta na câmera baixa.
+
+## v166 (02–03/10/2026, Claude na nuvem) — feedback do Irror
+- Barras de vida do chefe pelo rank (`bossBarsFor166`): F 1, E 2, D 3, C 3, B 4, A 4, S 5, SS 6, SS+ 7, ★ 8 (cerco continua 5). Visual (`bossBars166`): barras sobrepostas coloridas; a da frente esvazia e mostra a de trás; bolinhas em cima e "×N" marcam quantas faltam.
+- Pousada: o ponto "F · POUSADA" e a placa ficavam ao lado da fonte; agora ficam na porta do prédio no anel (157,5°, 30,5 m).
+- Marquinha escura acima da barra de habilidades era o painel `#rare-status103` vazio; agora some quando não tem texto.
+- Dúvida aberta do Irror ("caverninhas dinâmicas… entrei no nível 1… agora nível 15") — perguntar o que ele quis dizer.
