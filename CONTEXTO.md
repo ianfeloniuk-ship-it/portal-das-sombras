@@ -702,3 +702,10 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 ## v180 (03/10/2026)
 - Desempenho: recorte de visão por grupo de instâncias do Tripo (`CULL180`) e LOD das árvores (`tripo-carvalho153-lod.glb` etc., ~3 mil triângulos; completa até 40 m, leve de 40 a 100 m). Cidade: 10,5 mi → ~4 mi de triângulos.
 - Revisão geral em `docs/revisao180.md`.
+
+## v181 (03/10/2026, Claude na nuvem) — classes corpo a corpo comuns
+- **Assassino — Marcas** (até 5 por inimigo, somem após 5 s): golpe básico marca (+1; +2 no 3º golpe). **Execução** gasta as Marcas (+40% de dano cada, até +200%) e, se matar, recarrega o **Passo Sombrio**. **Passo Sombrio** vai para as costas do inimigo mais perto da mira e deixa os golpes nele críticos por 2 s. **Adaga** em alvo com 3+ Marcas lança 3 adagas.
+- **Tanque — Firmeza** (0–100, cai após 5 s parado): +15 ao levar golpe, +25 ao aparar, +5 por golpe básico. **Golpe de Escudo** com 50: atordoa à frente por 1,5 s e cura 8%. **Aparo**: golpe aparado volta com 150% do dano. **Passo Pesado** com 30: tremor que atordoa por 1 s a até 4 m.
+- **Guerreiro**: **Fôlego** gasta a Fúria (+1% de cura por ponto); **Varredura** com 40 de Fúria causa dano e atordoa 1 s.
+- Código em `tools/kit111-runtime.js` (`cm181*`), ganchos no `hurtEnemy` (`cm154Basic(o,e)`) e no `hurtPlayer` (`cm181Hurt`). Barras de Firmeza e Marcas no mesmo painel da Fúria.
+- Armadura substituindo a roupa (corpo base): rascunho em `tools/blender169/fit2.py` e `wip-set-visual181.patch`, **não publicado**, aguardando o Ian.

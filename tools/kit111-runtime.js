@@ -70,7 +70,7 @@ function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoin
  case 'consume':k.captured--;P.mp=Math.min(P.maxmp,P.mp+P.maxmp*.2);break;
  default:throw new Error('Efeito não implementado: '+s.effect);
  }}
-function kitIncoming111(a,amt,compatible=false){const k=kitState111();if(a===player&&compatible&&k.block?.until>time){if(k.block.parry&&rareActive103(17))k.counters=Math.min(affinity103(17),k.counters+1);k.block=null;floater(a.x,a.z,'APARO','#bfe8ff');return 0}if(a.kitGuard111?.until>time)amt*=1-a.kitGuard111.amount;for(const z of k.zones)if(z.kind==='seal'&&z.until>time&&Math.hypot(a.x-z.x,a.z-z.z)<=z.r){amt*=.5;z.until=0;break}return amt}
+function kitIncoming111(a,amt,compatible=false){const k=kitState111();if(a===player&&compatible&&k.block?.until>time){if(k.block.parry&&rareActive103(17))k.counters=Math.min(affinity103(17),k.counters+1);k.block=null;floater(a.x,a.z,'APARO','#bfe8ff');if(typeof cm181Has==='function'&&cm181Has(2)){cm181Firm(25);const at=curAtk;if(at&&!at.dead&&Math.hypot(at.x-a.x,at.z-a.z)<7){hurtEnemy(at,amt*1.5,a.x,a.z,{fromPlayer:true,skillHit:true,kb:1.5,stun:.3});floater(at.x,at.z,'DEVOLVIDO','#9fd0ff')}}return 0}if(a.kitGuard111?.until>time)amt*=1-a.kitGuard111.amount;for(const z of k.zones)if(z.kind==='seal'&&z.until>time&&Math.hypot(a.x-z.x,a.z-z.z)<=z.r){amt*=.5;z.until=0;break}return amt}
 function kitWeakDamage111(e,d){return e?.kitWeak111?.until>time?d*(1-e.kitWeak111.amount):d}
 function kitWalk111(d){trialWalk113(d);if(!rareActive103(18)||!nearestEnemy(player.x,player.z,18))return;const k=kitState111();k.walk+=Math.max(0,d);while(k.walk>=4){k.walk-=4;k.energy=Math.min(3*affinity103(18),k.energy+1)}}
 function kitBlocked111(e,x,z){if(!enemies.includes(e)||e.isBoss)return false;if(e.kitRoot111>time)return true;return kitState111().zones.some(s=>s.kind==='barrier'&&s.until>time&&Math.hypot(x-s.x,z-s.z)<s.r+(e.r||.5)&&Math.hypot(e.x-s.x,e.z-s.z)>=s.r+(e.r||.5))}
@@ -99,7 +99,7 @@ addEventListener('pointerdown',e=>{if(e.target?.closest?.('#bQ,#bR,#bT,#bG,#bY,#
 const CM154_MOVE=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space'];
 function cm154HasWarrior(){return basicAttackId()===0||(player.skills||[]).some(s=>s&&!s.empty&&String(s.skillId||'').startsWith('0:'))}
 function cm154Gain(n){CM154.fury=Math.min(100,CM154.fury+n);CM154.furyAt=time;if(CM154.fury>=100&&!CM154.fullShown){CM154.fullShown=true;floater(player.x,player.z,'FÚRIA CHEIA','#ff7a3a',true)}}
-function cm154Basic(o){if(o.basicClass!==0||time-(CM154.lastBasic||-9)<.05)return;CM154.lastBasic=time;cm154Gain(o.third?12:6)}
+function cm154Basic(o,e){if(o.basicClass===1&&e&&time-(e.markHit181||-9)>=.05){e.markHit181=time;cm181Mark(e,o.third?2:1)}if(o.basicClass===2&&time-(CM154.lastTank181||-9)>=.05){CM154.lastTank181=time;cm181Firm(5)}if(o.basicClass!==0||time-(CM154.lastBasic||-9)<.05)return;CM154.lastBasic=time;cm154Gain(o.third?12:6)}
 function cm154ChargeLevel(){const c=CM154.charge;return c?1+Math.min(2,Math.floor(time-c.t0)):0}
 function cm154Charge(s){if(s.skillId!=='4:2'||CM154.firing)return false;if(CM154.charge)return true;if(s.cdT>0||kitCheck111(s)||player.mp<manaCost177(s.mp))return false;CM154.charge={s,t0:time,codes:null,ptr:false};faceTarget(s.range||14);return true}
 function cm154Fire(){const c=CM154.charge;if(!c)return;const lvl=cm154ChargeLevel();CM154.charge=null;if(player.dead||paused)return;c.s.charge154=lvl;CM154.firing=true;try{kitCast111(c.s)}finally{CM154.firing=false;delete c.s.charge154}}
@@ -109,26 +109,62 @@ function cm154Mod(s){const o={...s},P=player;delete s.charge154;
  if(s.skillId==='0:0'&&CM154.fury>=100){CM154.fury=0;CM154.fullShown=false;o.whirl154=true;floater(P.x,P.z,'REDEMOINHO','#ff7a3a',true)}
  if(s.skillId==='0:1'&&CM154.fury>=30){CM154.fury-=30;CM154.fullShown=false;o.rush154={x:P.x,z:P.z}}
  if(s.skillId==='0:2')cm154Gain(40);
+ cm181Mod(s,o);
  return o}
-function cm154After(o){const P=player;
+function cm154After(o){const P=player;cm181After(o);
  if(o.whirl154){const r=kitRadius111(o);kitState111().zones.push({x:P.x,z:P.z,r,until:time+3.6,at:time+.6,col:0xff7a3a,kind:'damage',s:{...o,whirl154:false},damage:skillDamage(o)*.5,left:5,interval:.6,follow154:true});shake(.2)}
  if(o.rush154){const a=o.rush154,dx=P.x-a.x,dz=P.z-a.z,len=Math.hypot(dx,dz)||1,d=skillDamage({...o,pow:1.6});for(const e of enemies){if(e.dead)continue;const t=Math.max(0,Math.min(1,((e.x-a.x)*dx+(e.z-a.z)*dz)/(len*len))),dist=Math.hypot(a.x+dx*t-e.x,a.z+dz*t-e.z);if(dist<=1.6+(e.r||.5)){hurtEnemy(e,d,a.x,a.z,{fromPlayer:true,skillHit:true,kb:3,stun:.6})}}fxSlash(P.x,P.z,P.face,0xff7a3a,3,true,0);hitstop(.06)}
  if(o.skillId==='4:6'){const z=kitState111().zones;if(z.length&&z[z.length-1].kind==='trap')z[z.length-1].arch154=true}}
-function cm154Update(dt){let el=document.getElementById('cm154');if(!el){el=document.createElement('div');el.id='cm154';el.style.cssText='position:fixed;left:50%;bottom:136px;transform:translateX(-50%);pointer-events:none;z-index:5;font:600 11px system-ui;color:#fff;text-align:center;text-shadow:0 1px 2px #000';document.body.appendChild(el)}
+function cm154Update(dt){cm181Tick(dt);let el=document.getElementById('cm154');if(!el){el=document.createElement('div');el.id='cm154';el.style.cssText='position:fixed;left:50%;bottom:136px;transform:translateX(-50%);pointer-events:none;z-index:5;font:600 11px system-ui;color:#fff;text-align:center;text-shadow:0 1px 2px #000';document.body.appendChild(el)}
  if(CM154.fury>0&&time-CM154.furyAt>5){CM154.fury=Math.max(0,CM154.fury-10*dt);if(CM154.fury<100)CM154.fullShown=false}
  const c=CM154.charge;if(c&&!c.codes){c.codes=[...CM154.held].filter(k=>!CM154_MOVE.includes(k));c.ptr=CM154.ptr}if(c){const held=c.codes.length?c.codes.some(k=>CM154.held.has(k)):c.ptr&&CM154.ptr;if(!held||time-c.t0>4||player.dead)cm154Fire();else if(time>=CM154.fxAt){CM154.fxAt=time+.25;const lvl=cm154ChargeLevel();fxRing(player.x,player.z,lvl===3?0xffe066:0xbfff8f,.8+lvl*.5,.3)}}
  let h='';if(!player.dead&&cm154HasWarrior()){const f=Math.round(CM154.fury),full=f>=100;h+='<div style="width:180px;margin:2px auto;background:#1a0d08cc;border:1px solid '+(full?'#ffb36b':'#6b3a22')+';border-radius:4px;height:9px;overflow:hidden"><div style="height:100%;width:'+f+'%;background:'+(full?'#ffb36b':'#ff6a2a')+'"></div></div><div>FÚRIA '+f+'/100'+(full?' · CORTE GIRATÓRIO VIRA REDEMOINHO':'')+'</div>'}
  if(CM154.charge){const lvl=cm154ChargeLevel();h+='<div style="color:#d8ffb0">CARREGANDO '+'▮'.repeat(lvl)+'▯'.repeat(3-lvl)+(lvl===3?' · MÁXIMO':'')+'</div>'}
+ h+=cm181Hud();
  if(el.innerHTML!==h)el.innerHTML=h}
+/* v181 (Ian): classes corpo a corpo comuns mais legais sem complicar — Assassino: Marcas; Tanque: Firmeza; Guerreiro: Fôlego e Varredura também usam a Fúria. */
+function cm181Has(ci){return !!player&&(basicAttackId()===ci||(player.skills||[]).some(s=>s&&!s.empty&&String(s.skillId||'').startsWith(ci+':')))}
+function cm181Firm(n){CM154.firm=Math.max(0,Math.min(100,(CM154.firm||0)+n));CM154.firmAt=time;if(CM154.firm>=100&&!CM154.firmFull){CM154.firmFull=true;floater(player.x,player.z,'FIRMEZA CHEIA','#9fd0ff',true)}}
+function cm181Hurt(){if(cm181Has(2))cm181Firm(15)}
+function cm181Mark(e,n){if(!e||e.dead)return;e.marks181=Math.min(5,(e.marks181||0)+n);e.markAt181=time;if(e.marks181>=5&&!e.markFull181){e.markFull181=true;floater(e.x,e.z,'5 MARCAS','#c7a1ff',true)}}
+function cm181Near(r=10){let b=null,d=r;for(const e of enemies){if(e.dead||!(e.marks181>0))continue;const k=Math.hypot(e.x-player.x,e.z-player.z);if(k<d){d=k;b=e}}return b}
+function cm181Mod(s,o){const P=player;
+ if(s.skillId==='1:4'){const t=kitTarget111(s);o.exec181=t;if(t&&t.marks181>0){const m=t.marks181;o.pow*=1+.4*m;t.marks181=0;t.markFull181=false;floater(P.x,P.z,'EXECUÇÃO · '+m+' MARCAS → +'+(40*m)+'%','#c7a1ff',m>=5)}}
+ if(s.skillId==='1:0'){const pt=skillGroundPoint(s.range,s.range),t=enemies.filter(e=>!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=s.range+2&&los(P.x,P.z,e.x,e.z)).sort((a,b)=>Math.hypot(a.x-pt.x,a.z-pt.z)-Math.hypot(b.x-pt.x,b.z-pt.z))[0];if(t)o.back181={t,x:P.x,z:P.z}}
+ if(s.skillId==='1:6'){const t=kitTarget111({...s,range:14});if(t&&t.marks181>=3)o.fan181=true}
+ if(s.skillId==='2:0'&&(CM154.firm||0)>=50){CM154.firm-=50;CM154.firmFull=false;o.bash181=true;floater(P.x,P.z,'ESCUDO FIRME','#9fd0ff',true)}
+ if(s.skillId==='2:6'&&(CM154.firm||0)>=30){CM154.firm-=30;CM154.firmFull=false;o.quake181=true}
+ if(s.skillId==='0:7'&&CM154.fury>0){const f=CM154.fury;o.amount=(o.amount||.3)*(1+f/100);CM154.fury=0;CM154.fullShown=false;floater(P.x,P.z,'FÔLEGO · FÚRIA '+Math.round(f),'#ff7a3a')}
+ if(s.skillId==='0:6'&&CM154.fury>=40){CM154.fury-=40;CM154.fullShown=false;o.sweep181=true}}
+function cm181After(o){const P=player;
+ if(o.exec181&&o.exec181.dead){const ps=(P.skills||[]).find(x=>x&&!x.empty&&x.skillId==='1:0');if(ps){ps.cdT=0;floater(P.x,P.z,'PASSO SOMBRIO PRONTO','#c7a1ff')}}
+ if(o.back181){const {t,x,z}=o.back181;if(!t.dead){const dx=t.x-x,dz=t.z-z,l=Math.hypot(dx,dz)||1,off=(t.r||.5)+.9,bx=t.x+dx/l*off,bz=t.z+dz/l*off;if(freeAt(bx,bz,P.r||.5)){P.x=bx;P.z=bz;if(P.m)P.m.root.position.set(bx,0,bz)}P.face=Math.atan2(t.x-P.x,t.z-P.z);t.snare154=Math.max(t.snare154||0,time+2);floater(P.x,P.z,'PELAS COSTAS · CRÍTICO 2s','#c7a1ff');fxRing(P.x,P.z,0x7a4aff,1.2,.35)}}
+ if(o.fan181){const d=skillDamage(o),f=P.face;for(const side of[-.55,.55])shoot(P.x+Math.cos(f)*side,P.z-Math.sin(f)*side,f,25,d,'player',o.col,'orb',{vis156:1,skillHit:true,kb:0,stun:0});floater(P.x,P.z,'TRÊS ADAGAS','#c7a1ff')}
+ if(o.bash181){for(const e of enemies){if(e.dead)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);let da=Math.atan2(dx,dz)-P.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<=4.5+(e.r||.5)&&Math.abs(da)<1.1){e.stun=Math.max(e.stun||0,1.5);e.act=null}}const h=Math.round(P.maxhp*.08);P.hp=Math.min(P.maxhp,P.hp+h);floater(P.x,P.z,'+'+fmt(h)+' VIDA','#6fe39a');shake(.15)}
+ if(o.quake181){fxRing(P.x,P.z,0x9fd0ff,4,.5);shake(.25);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=4+(e.r||.5)){e.stun=Math.max(e.stun||0,1);e.act=null}floater(P.x,P.z,'TREMOR','#9fd0ff')}
+ if(o.sweep181){const d=skillDamage({...o,pow:1.5});for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=kitRadius111(o)+(e.r||.5)){hurtEnemy(e,d,P.x,P.z,{fromPlayer:true,skillHit:true,kb:2,stun:1});e.stun=Math.max(e.stun||0,1)}floater(P.x,P.z,'VARREDURA FURIOSA','#ff7a3a',true)}}
+function cm181Tick(dt){if(CM154.firm>0&&time-(CM154.firmAt||0)>5){CM154.firm=Math.max(0,CM154.firm-8*dt);if(CM154.firm<100)CM154.firmFull=false}for(const e of enemies)if(e.marks181>0&&time-(e.markAt181||0)>5){e.marks181=0;e.markFull181=false}}
+function cm181Hud(){if(!player||player.dead)return '';let h='';
+ if(cm181Has(2)){const f=Math.round(CM154.firm||0),full=f>=100;h+='<div style="width:180px;margin:2px auto;background:#081018cc;border:1px solid '+(full?'#cfe8ff':'#2e4a66')+';border-radius:4px;height:9px;overflow:hidden"><div style="height:100%;width:'+f+'%;background:'+(full?'#cfe8ff':'#5fa8ff')+'"></div></div><div>FIRMEZA '+f+'/100</div>'}
+ if(cm181Has(1)){const e=cm181Near();if(e)h+='<div style="color:#d8c4ff">MARCAS '+'◆'.repeat(e.marks181)+'◇'.repeat(5-e.marks181)+'</div>'}
+ return h}
 function cm154Desc(s){const id=s.skillId;return ({
  '0:0':' <b>Fúria cheia:</b> gasta 100 de Fúria e vira um redemoinho que segue você por 3s (5 golpes extras).',
  '0:1':' <b>Com 30 de Fúria:</b> gasta 30 e acerta todos no caminho, empurrando e atordoando.',
  '0:2':' Dá +40 de Fúria.',
  '0:4':' Gasta toda a Fúria: +1% de dano por ponto (até o dobro com 100).',
+ '0:6':' <b>Com 40 de Fúria:</b> gasta 40, causa dano e atordoa por 1s quem estiver em volta.',
+ '0:7':' Gasta toda a Fúria: +1% de cura por ponto (até o dobro com 100).',
+ '1:0':' Leva você para as costas do inimigo mais perto da mira; seus golpes nele são críticos por 2s.',
+ '1:4':' Gasta as Marcas do alvo: +40% de dano por Marca (até +200%). Se matar, o Passo Sombrio recarrega na hora.',
+ '1:6':' Em alvo com 3 ou mais Marcas, lança 3 adagas.',
+ '2:0':' <b>Com 50 de Firmeza:</b> gasta 50, atordoa quem está à frente por 1,5s e cura 8% da sua vida.',
+ '2:5':' O golpe aparado volta para quem atacou com 150% do dano e dá +25 de Firmeza.',
+ '2:6':' <b>Com 30 de Firmeza:</b> gasta 30 e, ao chegar, atordoa por 1s quem estiver a até 4 m.',
  '4:2':' <b>Segure a tecla para carregar</b> e solte para atirar: 1 segundo = dano dobrado; 2 segundos = dano triplo, alcance maior e crítico garantido.',
  '4:5':' Alvo enredado toma crítico garantido enquanto estiver lento.',
  '4:6':' Quem cair na armadilha toma crítico garantido por 3s.'
-})[id]||(String(id).startsWith('0:')&&s.pow>0?' Golpes básicos do Guerreiro enchem a Fúria (+6, +12 no terceiro golpe).':'')}
+})[id]||(String(id).startsWith('0:')&&s.pow>0?' Golpes básicos do Guerreiro enchem a Fúria (+6, +12 no terceiro golpe).':String(id).startsWith('1:')&&s.pow>0?' Golpes básicos do Assassino marcam o alvo (+1; +2 no terceiro golpe; até 5).':String(id).startsWith('2:')?' Levar golpes enche a Firmeza (+15; +25 ao aparar).':'')}
 
 function kitArchive111(){run.lib=run.lib||[];run.stolen=(run.stolen||[]).filter(s=>{const mapped=kitCanonical111(s);if(!mapped)return true;if(!run.lib.some(x=>x.n===s.n))run.lib.push({...s});profile.kitLearning111=profile.kitLearning111||{};profile.kitLearning111[mapped.skillId]=true;return false})}
 
