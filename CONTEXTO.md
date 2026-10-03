@@ -667,7 +667,7 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Monstro acima do seu nível (`levelGap168`, aplicado no 1º quadro): vida × (nível dele ÷ seu nível), dano × (1 + metade disso). Ex.: nível 223 vs 77 → vida ×2,9, dano ×1,95. XP por morte não mudou (subir fica mais lento por tempo).
 - Botão 🎥 (vista de frente) agora aparece também no PC.
 
-## v169 (03/10/2026, Claude na nuvem)
+## v172 (03/10/2026, Claude na nuvem) — juntado com v169–v171 da outra sessão
 - **Modelos refinados no Blender** (headless, `bpy` 4.2): 50 modelos do Tripo (set Metamorfo, armas, projéteis, chefes, vendedores, prédios, árvores, pedras) com normais corrigidas, sombreamento suave, oclusão de ambiente gravada na textura, mais contraste/saturação e brilho próprio nas partes saturadas (set 1,5; projéteis 4; armas 3; chefes 2,5; cenário 0). Viajante e modelos KayKit/Quaternius não foram mexidos. Scripts em `tools/blender169/`.
 - **Armadura encaixada no corpo** (`tools/blender169/fit.py`): elmo/peitoral pela caixa da cabeça/tronco do Viajante; braçais (antebraço) e grevas (canela) pelo eixo principal da região; pesos copiados do corpo → `models/set153/metamorfo-rig.glb` (peças `set169_h|a|g_r|g_l|b_r|b_l`, 4,2 MB). No jogo (`attachRig169`) as peças são ligadas aos ossos do herói e dobram junto. Roupa do Viajante não é mais escondida (só a cabeça sob o elmo). Arma continua no método antigo.
 - **Equilíbrio** (Irror: nível 211 e 15 mi de ouro em 1 h): monstros ~3× vida e ~2,4× dano (`eHP` /7, `eDMG` /45); XP de monstro acima do nível no máx. ×2 (era ×6), bônus de chefe acima do nível no máx. 0,5 nível (era 1,6); `xpNeed` mais íngreme (60+40L+4L^1,8); ouro dos monstros pela metade e menos ainda quando muito acima do seu nível.

@@ -6,29 +6,31 @@ window.SetVisual153=(()=>{
  // by = which axis of the piece is matched to `size` (x = width, len = longest side along the limb).
  const FIT={h:{bone:'head',size:.40,by:'x',lift:.07,fwd:.01,upright:true},a:{bone:'chest',size:.80,by:'x',lift:-.05,fwd:.06,upright:true},
   g:{fill:.95,by:'len',along:.5},b:{fill:.95,by:'len',along:.5},w:{bone:'hand_r',size:.42,by:'len',along:.14,child:null,forward:true}};
+ const SETS165=['metamorfo','necromante','tempo','tecelao','guardiao','artifice','duelista','condutor','oraculo','devorador'],WEAP165=['metamorfo','necromante'];
+ const HAS165=(id,slot)=>(window.SET_MODELS165||SETS165).includes(id)&&(slot!=='w'||WEAP165.includes(id));
  function load(url){if(!cache.has(url))cache.set(url,new Promise(res=>new T.GLTFLoader().load(url,g=>res(g.scene),undefined,()=>res(null))));return cache.get(url)}
  function longestAxis(box){const s=box.getSize(new T.Vector3());return s.x>=s.y&&s.x>=s.z?'x':s.y>=s.z?'y':'z'}
  function boneOf(root,name){let b=null;root.traverse(o=>{if(!b&&o.isBone&&o.name===name)b=o});return b}
  function prepare(src,fit){
-  const piece=src.clone(true);piece.traverse(o=>{if(o.isMesh){o.castShadow=true;const m=o.material=o.material.clone();m.metalness=Math.min(m.metalness,.25);m.roughness=Math.max(m.roughness,.55);
+  const piece=src.clone(true),red165=fit.red165;piece.traverse(o=>{if(o.isMesh){o.castShadow=true;const m=o.material=o.material.clone();m.metalness=Math.min(m.metalness,.25);m.roughness=Math.max(m.roughness,.55);
     // Tripo albedo is very dark under the game light; lift it and let the crimson veins glow so the piece reads from the top-down camera.
-    m.color.setScalar(1.2);m.side=T.DoubleSide; /* v169: textura já refinada no Blender (mais viva e com brilho próprio) */
-    m.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
-      float l153=dot(diffuseColor.rgb,vec3(.299,.587,.114));diffuseColor.rgb=max(vec3(0.),mix(vec3(l153),diffuseColor.rgb,1.25));`).replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+    m.color.setScalar(red165?1.7:1.25);m.side=T.DoubleSide;
+    if(red165)m.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+      float l153=dot(diffuseColor.rgb,vec3(.299,.587,.114));diffuseColor.rgb=max(vec3(0.),mix(vec3(l153),diffuseColor.rgb,1.75));`).replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
       #ifdef USE_MAP
       vec3 t153=texture2D(map,vUv).rgb;float red153=smoothstep(.06,.30,t153.r-max(t153.g,t153.b));totalEmissiveRadiance+=vec3(.9,.05,.04)*red153*1.1;
-      #endif`)};m.customProgramCacheKey=()=> 'set153-color'}});
+      #endif`)};if(red165)m.customProgramCacheKey=()=> 'set153-color'}});
   const box=new T.Box3().setFromObject(piece),size=box.getSize(new T.Vector3()),center=box.getCenter(new T.Vector3());
   const holder=new T.Group();piece.position.sub(center);holder.add(piece);
   const axis=longestAxis(box),len=Math.max(size.x,size.y,size.z);
   holder.userData={axis,len,size};return holder}
  function attach(root,item){if(item.slot!=='w'&&RIG169[item.set153]){attachRig169(root,item);return}
-  const id=item.set153,slot=item.slot,fit=FIT[slot];if(!fit||!root||!(window.SET_MODELS165||['metamorfo']).includes(id))return; // v165: sets com peças 3D prontas (adicione o id em SET_MODELS165 quando os .glb existirem)
+  const id=item.set153,slot=item.slot,fit=FIT[slot];if(!fit||!root||!HAS165(id,slot))return; // v165: peças do Tripo de todas as classes raras (armas só Metamorfo e Necromante)
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
    const bones=SIDES[slot]||[[fit.bone,null]];root.updateMatrixWorld(true);
    bones.forEach(([bn,cn],i)=>{const bone=boneOf(root,bn);if(!bone)return;
-    const holder=prepare(src,fit),piece=holder.children[0],ws=bone.getWorldScale(new T.Vector3()).x||1,rootQ=root.getWorldQuaternion(new T.Quaternion());
+    const holder=prepare(src,{...fit,red165:id==='metamorfo'}),piece=holder.children[0],ws=bone.getWorldScale(new T.Vector3()).x||1,rootQ=root.getWorldQuaternion(new T.Quaternion());
     let q=rootQ.clone();
     if(!fit.upright){
      // Point the piece's longest axis along the limb (bone → child bone) in the current pose.
@@ -66,6 +68,6 @@ window.SetVisual153=(()=>{
  function apply(){if(!player||!player.m||!player.m.root||typeof equippedItems!=='function')return;const root=player.m.root,items=equippedItems().filter(it=>it.set153);
   const key=items.map(it=>it.uid+it.slot).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);
   root.userData.set153Tokens=new Set(items.map(it=>it.uid+it.slot));clothing(root,items.map(it=>it.slot),items.some(it=>RIG169[it.set153]));items.forEach(it=>attach(root,it))}
- setInterval(()=>{try{apply();const r=player&&player.m&&player.m.root;if(r){const w=equippedItems().some(it=>it.set153&&it.slot==='w');r.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=!w})}}catch(e){console.warn('SetVisual153',e)}},400);
+ setInterval(()=>{try{apply();const r=player&&player.m&&player.m.root;if(r){const w=equippedItems().some(it=>it.set153&&it.slot==='w'&&HAS165(it.set153,'w'));r.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=!w})}}catch(e){console.warn('SetVisual153',e)}},400);
  return {apply,clear,FIT};
 })();
