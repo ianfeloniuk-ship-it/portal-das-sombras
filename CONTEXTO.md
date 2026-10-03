@@ -680,5 +680,5 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - Cajado/varinha/orbe/tomo somam ataque só no dano mágico; armas físicas só no físico (`weaponIsMagic173`, `atkOf`). Texto da arma diz "de ataque mágico/físico".
 - Mago sem cajado ataca com a mão (animação `orb`, `animWep173`); com cajado, animação de cajado. Cajado parado fica em pé na mão (`staff174` em `tools/warrior-player127.js`).
 
-## v175 (03/10/2026)
+## v176 (03/10/2026, Claude na nuvem)
 - Armaduras das 10 classes raras refinadas e encaixadas no corpo do Viajante com esqueleto (`models/set153/<id>-rig.glb`, 4–6 MB cada). Elmo maior para a cabeça caber dentro: a cabeça não é mais escondida (rosto aparece em capuzes). Nenhuma roupa é escondida com armadura encaixada. Arma continua no método antigo.
