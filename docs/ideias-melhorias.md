@@ -13,8 +13,9 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 ## Sistemas
 - ~~Aviso ao entrar em portal perigoso sem Pergaminho (v192)~~
 - ~~Túmulo no lugar da morte: 20% do ouro (v192)~~
-- Relíquias: 3º espaço no rank ★; relíquia sobe de nível com o uso (ex.: 100 abates).
-- Ameaça: diário de caça na guilda com os monstros de nível alto vencidos; título por vencer chefe Divindade.
+- ~~3º espaço de relíquia no rank ★ (v193)~~
+- Relíquias: relíquia sobe de nível com o uso (ex.: 100 abates).
+- Ameaça: diário de caça na guilda com os monstros de nível alto vencidos; ~~título Matador de Deuses (v193)~~.
 - Ranking sazonal da torre (ideia 4).
 - Combinar duas classes (ideia 2): segunda classe com metade dos bônus.
 - Cofre da casa com espaço limitado que cresce com o nível da casa (hoje o cofre de relíquias não tem limite).

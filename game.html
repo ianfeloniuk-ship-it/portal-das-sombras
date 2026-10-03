@@ -3500,14 +3500,16 @@ const UNIQ183={
 function relics183(){const r=profile.relics183=profile.relics183||{own:{},eq:[]};r.own=r.own||{};r.vault=r.vault||{};r.eq=(r.eq||[]).filter(k=>r.own[k]);return r}
 function uniqueHas183(k){return !!run&&!!profile&&relics183().eq.includes(k)}
 /* v190 (Ian): relíquia guardada no cofre (banco/casa) não se perde na morte, mas também não pode ser usada. */
+/* v192: rank ★ abre o 3º espaço de relíquia. */
+function relicSlots192(){return (profile&&profile.rank>=9)?3:2}
 function relicVault190(k){const r=relics183();if(!r.own[k])return;if(r.vault[k])delete r.vault[k];else{r.vault[k]=1;r.eq=r.eq.filter(x=>x!==k)}store.set('pds2_profile',profile);refreshStats()}
-function relicToggle183(k){const r=relics183();if(!r.own[k]||r.vault[k])return;const i=r.eq.indexOf(k);if(i>=0)r.eq.splice(i,1);else{if(r.eq.length>=2)r.eq.shift();r.eq.push(k)}store.set('pds2_profile',profile);refreshStats()}
-function relicPanel183(){const r=relics183(),ks=Object.keys(UNIQ183).filter(k=>r.own[k]);let h='<div class="sec">RELÍQUIAS '+r.eq.length+'/2 <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Caem de chefes e somem se você morrer. Na cidade, guarde no cofre para não perder."></span></div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+function relicToggle183(k){const r=relics183();if(!r.own[k]||r.vault[k])return;const i=r.eq.indexOf(k);if(i>=0)r.eq.splice(i,1);else{if(r.eq.length>=relicSlots192())r.eq.shift();r.eq.push(k)}store.set('pds2_profile',profile);refreshStats()}
+function relicPanel183(){const r=relics183(),ks=Object.keys(UNIQ183).filter(k=>r.own[k]);let h='<div class="sec">RELÍQUIAS '+r.eq.length+'/'+relicSlots192()+' <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Caem de chefes e somem se você morrer. Na cidade, guarde no cofre para não perder."></span></div><div style="display:flex;flex-wrap:wrap;gap:6px">';
  for(const k of Object.keys(UNIQ183)){const U=UNIQ183[k],on=r.eq.includes(k);const vt=r.vault[k];h+=r.own[k]?'<span style="display:inline-flex;gap:2px"><button class="mini" data-a="relic" data-v="'+k+'" '+(vt?'disabled ':'')+'data-tip154="'+gearText(U.d)+(vt?' Guardada no cofre.':'')+'" style="border-color:'+(on?'#ff3d1e':'#555')+'"><b style="color:'+(vt?'#9aa0b8':'#ff6a4a')+'">'+(vt?'▣ ':on?'◆ ':'◇ ')+gearText(U.n)+'</b></button>'+(player&&inCity(player.x,player.z)?'<button class="mini" data-a="relicvault" data-v="'+k+'" data-tip154="'+(vt?'Tirar do cofre para usar.':'Guardar no cofre: não se perde ao morrer, mas fica sem efeito.')+'">'+(vt?'Retirar':'Guardar')+'</button>':'')+'</span>':'<button class="mini" disabled data-tip154="Cai de um chefe ainda não vencido.">◇ ???</button>'}
  return h+'</div>'}
 function uniqueDrop183(th){const g=L.gate;if(!g||L.special)return;const fam=g.family124||'';if(th<9&&Math.random()>=(g.red?.25:.12)*(1+.25*(th||0)))return;
   let key=Object.keys(UNIQ183).find(k=>UNIQ183[k].fam.includes(fam))||pick(Object.keys(UNIQ183));const U=UNIQ183[key];
-  const r=relics183();if(r.own[key]){run.gold=(run.gold||0)+200*(1+g.rank);floater(player.x,player.z,'Relíquia repetida: ouro','#ffd36b',true);return}r.own[key]=1;if(r.eq.length<2)r.eq.push(key);store.set('pds2_profile',profile);bigText('RELÍQUIA ÚNICA',1600);floater(player.x,player.z,U.n,'#ff3d1e',true);sfx('arise')}
+  const r=relics183();if(r.own[key]){run.gold=(run.gold||0)+200*(1+g.rank);floater(player.x,player.z,'Relíquia repetida: ouro','#ffd36b',true);return}r.own[key]=1;if(r.eq.length<relicSlots192())r.eq.push(key);store.set('pds2_profile',profile);bigText('RELÍQUIA ÚNICA',1600);floater(player.x,player.z,U.n,'#ff3d1e',true);sfx('arise')}
 function hitHooks183(e,amt,o){if(!o.fromPlayer||!player)return;if(uniqueHas183('vamp'))player.hp=Math.min(player.maxhp,player.hp+amt*.02);
   if(o.third&&uniqueHas183('echo')&&time>(player.echo183||0)){player.echo183=time+.3;fxRing(e.x,e.z,0xffb36b,3,.3);for(const x of enemies)if(x!==e&&!x.dead&&Math.hypot(x.x-e.x,x.z-e.z)<3+(x.r||.5))hurtEnemy(x,amt*.6,e.x,e.z,{fromPlayer:false,kb:1.5})}
   if(e.dead&&uniqueHas183('soul'))player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.04)}
@@ -4666,7 +4668,7 @@ function openChest(x,z,tier,boss,reward=null){
   const depth=reward?.depth??dungeonFloorAt(z),floorTreasure=!!reward||(boss&&!!L.floors);
   if(!boss&&!floorTreasure&&!goblinDungeon118(L.gate)&&!L.G?.th?.natural124&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');narratorEvent105('mimic');return}
   narratorEvent105('treasure');const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
-  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss);if(boss)uniqueDrop183(boss.threat183||0);if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
+  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss);if(boss&&(boss.threat184||0)>=9){profile.godKills192=(profile.godKills192||0)+1;bigText('MATADOR DE DEUSES',2200)}if(boss)uniqueDrop183(boss.threat183||0);if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
   saveRun();
 }
@@ -6478,6 +6480,7 @@ const TITLES=[
  {id:'lakeg',n:'Guardião do Lago',d:'história A Canção do Lago',c:()=>false,m:'Poções também enchem 30% do escudo',b:{}},
  {id:'towerc',n:'Eleito da Torre',d:'história O Chamado da Torre',c:()=>false,m:'+20% de dano dentro da torre',b:{}},
  {id:'protector',n:'Protetor da Cidade',d:'história A Cidade que Cresce',c:()=>false,m:'Renda das cidades +50%',b:{}},
+ {id:'godslayer',n:'Matador de Deuses',d:'vença um chefe de ameaça Divindade',c:()=>(profile.godKills192||0)>0,m:'+6% de dano',b:{dmg:.06}},
  {id:'sov',n:'Arconte',d:'???',secret:true,c:()=>profile.rank===9,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
 const TITLE_TRACKS=[
  {id:'endlessHunt',n:'Flagelo das Fendas',base:100,unit:'monstros derrotados',key:'hunt',effect:'dano contra inimigos comuns e elites',value:()=>Math.max(profile.titleKills||0,run.kills||0)},
