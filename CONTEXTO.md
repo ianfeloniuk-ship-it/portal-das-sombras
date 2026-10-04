@@ -732,3 +732,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v194: avisos em pop-up no topo (popNews194) e depois nas Notícias; despertar abre ao equipar a 5ª peça; Divindade só em portal ★ vermelho (~6% dos chefes, por ascensão).
 - v195: arma nas costas ao correr (sheath195 em tools/warrior-player127.js, carregado à parte: subir ?v= no game.html); ao parar saca (braço ao ombro) e segura 3 s; atacar/habilidade/mirar saca na hora.
 - v196: relógio do mundo (dayT, vida do portal, bênção) usa tempo real até 1 s/quadro (WDT196); combate segue limitado a .05.
+- v197: espada nas costas com o cabo para cima no ombro direito e lâmina para baixo.

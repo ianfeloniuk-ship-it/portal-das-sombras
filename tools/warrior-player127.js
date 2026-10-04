@@ -203,8 +203,8 @@
     for(const W of [m.socket,m.bowHolder155]){if(!W||!W.parent||!W.children.length)continue;const axis=sheathAxis195(W);if(!axis)continue;
       W.userData.base195={p:W.position.clone(),q:W.quaternion.clone(),s:W.scale.clone()};W.updateMatrixWorld(true);
       const hp=new T.Vector3(),hq=new T.Quaternion(),hs=new T.Vector3();W.matrixWorld.decompose(hp,hq,hs);
-      const bow=W===m.bowHolder155,dir=U.clone().multiplyScalar(.85).addScaledVector(R,bow?-.5:.5).normalize(),bq=new T.Quaternion().setFromUnitVectors(axis,dir);
-      const bp=cp.clone().addScaledVector(F,-.2).addScaledVector(R,bow?.12:-.12).addScaledVector(U,-.32);
+      const bow=W===m.bowHolder155,dir=(bow?U.clone().multiplyScalar(.85).addScaledVector(R,-.5):U.clone().multiplyScalar(-.85).addScaledVector(R,-.45)).normalize()/* v197 (Ian): cabo para cima, perto do ombro direito, lâmina para baixo */,bq=new T.Quaternion().setFromUnitVectors(axis,dir);
+      const bp=bow?cp.clone().addScaledVector(F,-.2).addScaledVector(R,.12).addScaledVector(U,-.32):cp.clone().addScaledVector(F,-.2).addScaledVector(R,.16).addScaledVector(U,.22);
       const k=S.s*S.s*(3-2*S.s),wp=hp.lerp(bp,k),wq=hq.slerp(bq,k),M=new T.Matrix4().compose(wp,wq,hs);
       W.parent.updateMatrixWorld(true);M.premultiply(new T.Matrix4().copy(W.parent.matrixWorld).invert());M.decompose(W.position,W.quaternion,W.scale)}}
   function frame155(m,st,dt){
