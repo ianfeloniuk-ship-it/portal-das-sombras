@@ -742,3 +742,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v204: relíquias sobem de nível (100 abates, máx 5, +20%/nível, relicM204); cofre 1 sem casa, 2+móveis/2 (máx 6).
 - v205: Fim do Mundo manda uma horda por dia de jogo para a cidade a até 150 m do jogador (hordeTick205, usa raid155; Aster fica fora).
 - v206: textos de história curtos (lore206, uma vez cada): peso da ameaça, Divindade = pedaço do Arquiteto, pergaminho da capela, "o mundo esquece quem cai".
+- v207: portal com nível fixo (lvl207: rank alto acompanha o nível do jogador, ★ pode passar); dunLvl usa o nível do portal. Torre sem "continuar" e recorde zera na morte. Muralha removida (pontos devolvidos); constelações novas: Caçador, Vento, Sangue, Sombra.
