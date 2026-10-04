@@ -734,3 +734,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v196: relógio do mundo (dayT, vida do portal, bênção) usa tempo real até 1 s/quadro (WDT196); combate segue limitado a .05.
 - v197: espada nas costas com o cabo para cima no ombro direito e lâmina para baixo.
 - v198: semana de jogo = 7 dias de jogo (weekId por dayT): chefe semanal, Fim do Mundo (1 semana em 3), cidades caindo por dia de jogo; estações de 7 dias de jogo; aviso ao virar a semana (weekTick198).
+- v199: arco atravessado nas costas; adaga na cintura (m.kind195); testado espada, adaga, machado, cajado, arco, lança.
