@@ -4663,13 +4663,13 @@ function orbMat231(){if(CRY230.orb)return CRY230.orb;const m=new THREE.ShaderMat
 function plasmaOrb231(r){const g=new THREE.Group(),m=new THREE.Mesh(new THREE.SphereGeometry(r,32,22),orbMat231());m.onBeforeRender=()=>{m.material.uniforms.uT.value=performance.now()/1000};g.add(m);
  const core=new THREE.Mesh(new THREE.SphereGeometry(r*.22,16,12),new THREE.MeshBasicMaterial({color:0xd9b8ff,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(core);
  const l=new THREE.PointLight(0xb070ff,1.6,18,1.6);g.add(l);g.userData.orb=m;return g}
-/* v233 (Ian): o selo agora é uma pequena fenda de luz presa sobre a fonte (mesmo visual dos portais, encolhido e quieto): é a prisão que a Pedra-Âncora segura. */
-const SEALS233=[];
-function seal231(broken,capital){const g=new THREE.Group(),k=capital?1.25:1;
- if(!broken){if(window.Rift131){const r=Rift131.create({seed:233,secret:true,legacyLinearOutput:true});r.scale.setScalar(.42*k);r.position.y=1.1;g.add(r);g.userData.seal233=r;SEALS233.push(r)}
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.6*k,.06,8,48),new THREE.MeshBasicMaterial({color:0xc9a6ff,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false}));ring.rotation.x=Math.PI/2;ring.position.y=.9;g.add(ring);g.userData.ring233=ring;
-  const l=new THREE.PointLight(0xa070ff,1.3,16,1.6);l.position.y=2.2;g.add(l)}
- else{for(let i=0;i<9;i++){const a=i/9*TAU+.3,len=4+((i*37)%5);const cr=new THREE.Mesh(geo('crack231',()=>new THREE.PlaneGeometry(.22,1)),new THREE.MeshBasicMaterial({color:0x14060c}));cr.rotation.set(-Math.PI/2,0,-a);cr.scale.y=len;cr.position.set(Math.cos(a)*(1.2+len/2),.04,Math.sin(a)*(1.2+len/2));g.add(cr)}g.scale.setScalar(k)}
+const SEALS233=[];/* v234 (Ian): voltou o pilar com a esfera de plasma */
+function seal231(broken,capital){const g=new THREE.Group(),st=toonS(0x5c566a),dk=toonS(0x3e3a48),k=capital?1.25:1;
+ if(!broken){const base=mesh(geo('sealB231',()=>new THREE.BoxGeometry(1.8,.5,1.8)),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>new THREE.BoxGeometry(1,3.4,1)),st);col.position.y=2.2;const cap=mesh(geo('sealT231',()=>new THREE.BoxGeometry(1.7,.45,1.7)),dk);cap.position.y=4.1;g.add(base,col,cap);g.scale.setScalar(k);
+  const orb=plasmaOrb231(1.05);orb.position.y=5.45;g.add(orb);g.userData.orb=orb}
+ else{const base=mesh(geo('sealB231',()=>0),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>0),st);col.scale.y=.38;col.position.set(.15,.85,0);col.rotation.z=.18;g.add(base,col);
+  for(let i=0;i<9;i++){const a=i/9*TAU+.3,len=4+((i*37)%5);const cr=new THREE.Mesh(geo('crack231',()=>new THREE.PlaneGeometry(.22,1)),new THREE.MeshBasicMaterial({color:0x14060c}));cr.rotation.set(-Math.PI/2,0,-a);cr.scale.y=len;cr.position.set(Math.cos(a)*(1.2+len/2),.04,Math.sin(a)*(1.2+len/2));g.add(cr)}
+  for(let i=0;i<6;i++){const sh=mesh(geo('shard231',()=>new THREE.TetrahedronGeometry(.35)),toonS(0x7a3aa8));sh.position.set(Math.cos(i)*2.5,.15,Math.sin(i*1.7)*2.5);sh.rotation.set(i,i*2,i);g.add(sh)}g.scale.setScalar(k)}
  return g}
 /* v232 (Ian): na quebra da âncora sai um pulso de luz até 400 m: dano em tudo (monstros comuns morrem, chefes perdem 20%, você perde 30% da vida) e arranca as árvores. */
 function pulse232(x,z){const R=400,dur=2.2,g=new THREE.Mesh(new THREE.SphereGeometry(1,32,16,0,TAU,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xc58aff,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
