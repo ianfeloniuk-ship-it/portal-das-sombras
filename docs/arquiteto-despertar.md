@@ -1,4 +1,6 @@
-# O Despertar do Arquiteto (proposta para aprovar)
+# O Despertar do Arquiteto
+
+**Implementado na v223** (capitais em (±5,0),(0,±5),(5,5); Aster é o refúgio final; fim do ciclo apaga tudo, inclusive rank, casa e banco).
 
 ## Já no jogo (v222)
 - Capital caída → Fenda da Âncora no centro, com um pedaço do Arquiteto (Braço Esquerdo, Braço Direito, Pernas, Tronco, Cabeça).
