@@ -772,3 +772,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v235: correntes na esfera do selo (3 anéis girando + 4 correntes do pilar; chains234).
 - v236: fonte refeita (basin236): bacia octogonal de pedra escura, borda e runas roxas, água violeta pulsando; pilar escurecido para combinar.
 - v237: água da fonte = shader do lago de pesca (Water154) em tom violeta.
+- v238: barracas da praça afastadas da fonte (Z+10,5); Ato X real (godCalm237: ★ vermelho 2% por 3 dias de jogo após vencer Logos); página "A Âncora Rompida"; lista de caçadores-monstro limpa ao sair da área; revisão: sintaxe ok, testes geral/postos/Arquiteto/Fenda ok.
