@@ -4819,22 +4819,22 @@ function dunLvl(gr){const G=GR[Math.min(9,gr)];return (L&&L.mode==='dungeon'&&!L
 function dunScale(e,gr,lvo){const G=GR[Math.min(9,gr)],lv=lvo||dunLvl(gr);if(lv<=G.lvl)return;const mh=eHP(lv)/G.hp,md=eDMG(lv)/G.dmg,rw=Math.sqrt(mh);e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.xp*=rw;e.gold*=rw;e.lvl=lv+(e.elite?3:0)+(e.isBoss?5:0)}
 /* v186 (Ian): 9 níveis de ameaça, sorteados pelo rank do portal (nunca pelo nível do jogador). Cada nível tem aura própria em volta do monstro. */
 const THREAT184=[{n:'',h:1,d:1,r:1},
- {n:'Anjo',a:0xd8d8d8,h:1.15,d:1.05,r:1.4,col:'#e0e0e0'},
- {n:'Arcanjo',a:0x7cff6a,h:1.3,d:1.1,r:1.8,col:'#8cff7a'},
- {n:'Principado',a:0x3fb6ff,h:1.5,d:1.15,r:2.4,col:'#5cc4ff'},
- {n:'Potestade',a:0xffa21f,h:1.75,d:1.2,r:3.2,col:'#ffae3a'},
- {n:'Virtude',a:0xff3a2a,h:2.05,d:1.25,r:4.2,col:'#ff4d3d'},
- {n:'Dominação',a:0xc03aff,h:2.4,d:1.3,r:5.5,col:'#cf5cff'},
- {n:'Trono',a:0x8a0018,h:2.8,d:1.36,r:7,col:'#ff2050',dark:1},
- {n:'Querubim',a:0x101018,h:3.3,d:1.43,r:9,col:'#9aa0b8',dark:1},
- {n:'Serafim',a:0xfff0a0,h:3.9,d:1.5,r:12,col:'#fff27a'},
+ {n:'Sombra',a:0xd8d8d8,h:1.15,d:1.05,r:1.4,col:'#e0e0e0'},
+ {n:'Legião',a:0x7cff6a,h:1.3,d:1.1,r:1.8,col:'#8cff7a'},
+ {n:'Praga',a:0x3fb6ff,h:1.5,d:1.15,r:2.4,col:'#5cc4ff'},
+ {n:'Dilúvio',a:0xffa21f,h:1.75,d:1.2,r:3.2,col:'#ffae3a'},
+ {n:'Babel',a:0xff3a2a,h:2.05,d:1.25,r:4.2,col:'#ff4d3d'},
+ {n:'Leviatã',a:0xc03aff,h:2.4,d:1.3,r:5.5,col:'#cf5cff'},
+ {n:'Behemoth',a:0x8a0018,h:2.8,d:1.36,r:7,col:'#ff2050',dark:1},
+ {n:'Apocalipse',a:0x101018,h:3.3,d:1.43,r:9,col:'#9aa0b8',dark:1},
+ {n:'Logos',a:0xfff0a0,h:3.9,d:1.5,r:12,col:'#fff27a'},
  {n:'Inefável',a:0x0a0410,h:6,d:1.9,r:30,col:'#ffffff',dark:1,beyond:1},
  {n:'Supremo',a:0xffffff,h:4.6,d:1.6,r:16,col:'#f4f0ff',beyond:1}];/* v225 (Ian): acima da Divindade: Supremo (pedaços do Arquiteto) e Inefável (o Arquiteto inteiro, nível ???). Absoluto e Uno ficam para a história. */
 function threatRoll184(gr,boss,G){const gg=G||(L&&L.gate),red=gg&&gg.red?1:0;let t=boss?1:0;
  const p=boss?.42+.03*gr+.05*red:.16+.02*gr,cap=boss?Math.min(8,3+gr):Math.min(6,1+gr);
  while(t<cap&&Math.random()<p)t++;
  /* v194 (Ian): Divindade só nasce em portal ★ vermelho: o vermelho pode fazer o guardião ascender. */
- if(boss&&gr>=9&&red&&t>=6&&Math.random()<.25){t=9;if(G||L.gate)setTimeout(()=>{try{bigText('O GUARDIÃO ASCENDEU',2000);toast('<b>[NARRADOR]</b> O portal ★ ficou vermelho e o guardião ascendeu a <b>SERAFIM</b>.',7000);lore206('god','Os velhos da Ordem dizem que um Serafim é um pedaço do Arquiteto tentando atravessar. Cada uma que cai o deixa mais fraco.')}catch(_){}},2600)}
+ if(boss&&gr>=9&&red&&t>=6&&Math.random()<.25){t=9;if(G||L.gate)setTimeout(()=>{try{bigText('O GUARDIÃO ASCENDEU',2000);toast('<b>[NARRADOR]</b> O portal ★ ficou vermelho e o guardião ascendeu a <b>LOGOS</b>.',7000);lore206('god','Os velhos da Ordem dizem que um Logos é um pedaço do Arquiteto tentando atravessar. Cada uma que cai o deixa mais fraco.')}catch(_){}},2600)}
  return t}
 let BREAKG184=null;
 function bossThreat184(gr){const g=BREAKG184||(L&&L.mode==='dungeon'&&L.gate);if(!g)return threatRoll184(gr,true);if(g.bt184==null)g.bt184=threatRoll184(gr,true,g);return g.bt184}
@@ -4847,7 +4847,7 @@ function auraMesh184(t){const T=THREAT184[t];if(!AURA184.g){AURA184.g=new THREE.
  if(t>=7){const r2=new THREE.Mesh(AURA184.r,AURA184.m9||(AURA184.m9=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false})));r2.position.y=.06;g.add(r2);g.userData.r2=r2}
  const sp=1+t*.12;c.onBeforeRender=()=>{const k=performance.now()/1000;c.scale.set(1+.06*Math.sin(k*3*sp),1+.15*Math.sin(k*2*sp+1),1+.06*Math.sin(k*3*sp));r.rotation.y=k*sp;if(g.userData.r2){const f=(k*.8)%1;g.userData.r2.scale.setScalar(1+f*1.6);g.userData.r2.material.opacity=.5*(1-f)}};return g}
 function lore206(id,txt){profile.seen206=profile.seen206||{};if(profile.seen206[id])return;profile.seen206[id]=1;store.set('pds2_profile',profile);setTimeout(()=>{try{showSys(txt)}catch(_){}},1200)}
-function threatApply184(e,t){if(!t)return;if(started&&run)lore206('threat','A Ordem mede o peso de cada monstro que atravessa a fenda. A Ordem usa a escala antiga dos nove coros do céu: Anjo, Arcanjo, Principado... até Serafim, o máximo que um monstro alcança. Acima disso só existem os pedaços do Arquiteto, chamados Supremos, e ele próprio, o Inefável. A balança da Ordem só mostra ???.');const T=THREAT184[t];e.threat184=t;e.hp*=T.h;e.maxhp*=T.h;e.dmg*=T.d;e.xp*=T.r;e.gold*=T.r;e.name='['+T.n+'] '+e.name;
+function threatApply184(e,t){if(!t)return;if(started&&run)lore206('threat','A Ordem mede o peso de cada monstro que atravessa a fenda. A Ordem usa a escala dos textos antigos: Sombra, Legião, Praga, Dilúvio... até Logos, o máximo que um monstro alcança. Acima disso só existem os pedaços do Arquiteto, chamados Supremos, e ele próprio, o Inefável. A balança da Ordem só mostra ???.');const T=THREAT184[t];e.threat184=t;e.hp*=T.h;e.maxhp*=T.h;e.dmg*=T.d;e.xp*=T.r;e.gold*=T.r;e.name='['+T.n+'] '+e.name;
  try{const a=auraMesh184(t),R=(e.r||.6)*1.5,H=(e.scale||1)*2.2*(1+.04*t);a.scale.set(R,H,R);e.m.root.add(a);e.aura184=a}catch(_){}if(t>=5&&e.m&&e.m.body)e.m.body.scale.multiplyScalar(1+.025*(t-4))}
 function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;if(!extra.wild)dunScale(e,gr);if(L&&L.mode==='dungeon')threatApply184(e,threatRoll184(gr,false));return e}
 function spawnRival(x,z,gr,extra={}){
@@ -6176,7 +6176,7 @@ const LORE={
   act13:['Ato XIII · Quem Fechou a Porta','O Arquiteto se desfez em pó dourado no meio da estrada para Aster. Os cinco pedaços voltaram a dormir sob as âncoras. O Narrador ficou em silêncio por muito tempo, e depois disse só: "Obrigado." A porta está fechada. Por enquanto.'],
   act8:['Ato VIII · O Clã Ferrugem','Torvo, do Clã Ferrugem, conta que os goblins atravessaram a Fenda há cem anos, fugindo de um mundo que o Arquiteto já tinha esvaziado. "Ele não cria monstros. Ele recolhe. Nós fomos recolhidos uma vez. Não vamos ser de novo." O clã caça portais para que nenhum outro povo passe pelo que passaram.'],
   act9:['Ato IX · As Capitais','Lyra explica que cada capital foi erguida sobre uma Pedra-Âncora, um cristal tão antigo quanto a primeira Fenda. Enquanto as âncoras resistem, o mundo não rasga por inteiro. Os ataques às cidades nunca foram aleatórios: o Arquiteto está procurando as âncoras.'],
-  act10:['Ato X · Pedaços de Deus','Aldric segura o fragmento dourado que caiu do Serafim: "Isto é um dedo dele. Cada portal ★ vermelho é o Arquiteto tentando enfiar a mão neste mundo." Desde que você venceu, os portais ★ vermelhos ficaram mais raros por alguns dias. Ele sentiu.'],
+  act10:['Ato X · Pedaços de Deus','Aldric segura o fragmento dourado que caiu do Logos: "Isto é um dedo dele. Cada portal ★ vermelho é o Arquiteto tentando enfiar a mão neste mundo." Desde que você venceu, os portais ★ vermelhos ficaram mais raros por alguns dias. Ele sentiu.'],
   act11:['Ato XI · A Mão do Arquiteto','Ao fechar o Portal Primordial, você viu do outro lado uma mão de pedra e luz recuar. O Fim do Mundo não é um desastre: é um teste. O Arquiteto mede as muralhas, as âncoras e os caçadores. E anota.'],
   act12:['Ato XII · O Narrador','A voz que acompanha você desde o primeiro dia fala, pela primeira vez, sem tom de deboche: "Fui eu quem derrubou o primeiro guardião, há muito tempo. Achei que estava salvando este mundo. Só abri a porta para ele. Você é forte o bastante para fechá-la. Eu não fui." O próximo ciclo começa com uma pergunta: como se fecha uma porta que você mesmo abriu?'],
   start:['O Despertar','As Fendas trouxeram ameaças e viajantes de outros mundos. Os habitantes têm dons e ranks definidos; os Transmigradores conseguem evoluir além desses limites. Uma voz acompanha sua chegada: o Narrador. Sua origem permanece desconhecida.'],
@@ -6549,7 +6549,7 @@ const TITLES=[
  {id:'lakeg',n:'Guardião do Lago',d:'história A Canção do Lago',c:()=>false,m:'Poções também enchem 30% do escudo',b:{}},
  {id:'towerc',n:'Eleito da Torre',d:'história O Chamado da Torre',c:()=>false,m:'+20% de dano dentro da torre',b:{}},
  {id:'protector',n:'Protetor da Cidade',d:'história A Cidade que Cresce',c:()=>false,m:'Renda das cidades +50%',b:{}},
- {id:'godslayer',n:'Matador de Deuses',d:'vença um chefe de ameaça Serafim',c:()=>(profile.godKills192||0)>0,m:'+6% de dano',b:{dmg:.06}},
+ {id:'godslayer',n:'Matador de Deuses',d:'vença um chefe de ameaça Logos',c:()=>(profile.godKills192||0)>0,m:'+6% de dano',b:{dmg:.06}},
  {id:'doorcloser',n:'Quem Fechou a Porta',d:'derrote o Arquiteto',c:()=>(profile.archKills223||0)>0,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}},
  {id:'sov',n:'Arconte',d:'???',secret:true,c:()=>profile.rank===9,m:'+10% de dano e de vida',b:{dmg:.1,hp:.1}}];
 const TITLE_TRACKS=[

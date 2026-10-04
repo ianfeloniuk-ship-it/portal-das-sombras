@@ -762,3 +762,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v224: Divindade é o nível máximo; pedaços do Arquiteto sempre Divindade; o Arquiteto tem nível próprio "???" (THREAT184[10], acima de tudo), modelo Devorador de 9 m escurecido.
 - v225: níveis acima da Divindade: Supremo (pedaços do Arquiteto, THREAT184[11]) e Inefável (o Arquiteto, [10]); Absoluto e Uno reservados para a história.
 - v226: níveis de ameaça com nomes dos nove coros celestes: Anjo, Arcanjo, Principado, Potestade, Virtude, Dominação, Trono, Querubim, Serafim; acima: Supremo e Inefável.
+- v227: níveis de ameaça renomeados (sem anjos): Sombra, Legião, Praga, Dilúvio, Babel, Leviatã, Behemoth, Apocalipse, Logos; acima: Supremo e Inefável.
