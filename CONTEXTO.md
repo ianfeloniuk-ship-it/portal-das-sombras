@@ -774,3 +774,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v237: água da fonte = shader do lago de pesca (Water154) em tom violeta.
 - v238: barracas da praça afastadas da fonte (Z+10,5); Ato X real (godCalm237: ★ vermelho 2% por 3 dias de jogo após vencer Logos); página "A Âncora Rompida"; lista de caçadores-monstro limpa ao sair da área; revisão: sintaxe ok, testes geral/postos/Arquiteto/Fenda ok.
 - v239: água no mundo: lagos (lakeAt239, 4% dos pedaços, longe de cidade/estrada, pesca, colisão) e rios serpenteando a cada 2 regiões entre cidades (riverCenter239), pontes onde estradas cruzam; árvores/pedras/flores/capim fora da água. Final: Narrador e Clã NÃO entram na batalha. Arte do Arquiteto em docs/arquiteto-conceito.png.
+- v240: rios por bioma (neve/cristal = gelo andável, deserto/vulcão = seco), estrada passa por cima do rio com mureta de pedra (água cortada sob a estrada); lagos congelados na neve.
