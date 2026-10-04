@@ -761,3 +761,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v223: Despertar do Arquiteto: 5 capitais (caps223) guardam os pedaços; aviso global ao romper + HUD k/5; com 5 rompidas ele nasce e marcha a 1,6 m/s para Aster (profile.arch223); se chegar a 55 m de Aster = FIM DO CICLO (apaga perfil e run, conta pds_cycles); se morrer = relíquias, 1 mi de ouro, título Quem Fechou a Porta, Ato XIII.
 - v224: Divindade é o nível máximo; pedaços do Arquiteto sempre Divindade; o Arquiteto tem nível próprio "???" (THREAT184[10], acima de tudo), modelo Devorador de 9 m escurecido.
 - v225: níveis acima da Divindade: Supremo (pedaços do Arquiteto, THREAT184[11]) e Inefável (o Arquiteto, [10]); Absoluto e Uno reservados para a história.
+- v226: níveis de ameaça com nomes dos nove coros celestes: Anjo, Arcanjo, Principado, Potestade, Virtude, Dominação, Trono, Querubim, Serafim; acima: Supremo e Inefável.
