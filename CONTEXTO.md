@@ -748,3 +748,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v210: teste de contorno (casca invertida) em jogador, monstros e aliados; Configurações → Tela (pds_outline210, desligado por padrão).
 - v211: contorno ligado por padrão; sombra em faixas (MeshToon com 3 tons, celAdd211) em monstros/aliados sem textura; modelos com textura (Tripo, jogador) ficam para a próxima etapa.
 - v212: sombra em faixas em todos os materiais iluminados (aomap_fragment, reload para desligar); troca toon pula materiais com shader próprio; contorno de esqueleto aplicado depois da pele (corrige casca roxa no jogador); texto da tela inicial com a morte nova.
+- v213: bônus do rank cresce com o nível até o nível do rank; Bênção da Fenda vira velocidade + 1% vida/s (sem dano); diária sem penalidade.
