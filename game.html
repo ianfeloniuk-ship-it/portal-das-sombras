@@ -4002,7 +4002,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
     if(!fallen){const p1=side(W*.5+.9,W*.28),p2=side(-W*.5-.9,W*.28);EW(b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);EW(b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
       const p3=side(W*.5+.9,W*.28-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1)}}
-  const fs=fallen?0:EW(b,'fountain-round',X,0,Z,0,8.6);if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
+  const fs=0;/* v236: fonte própria do selo (seal231) */if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}
   EW(b,'stall-red',X+5,0,Z+6.5,0,3.4,dark);if(!fallen&&TripoEnvironment153.models.bankhall){b.add('tripo_bank_building',X-15.5,0,Z+7,Math.atan2(15.5,-7),1);addCol({x:X-15.5,z:Z+7,r:4.6})}else EW(b,'stall-green',X-5,0,Z+6.5,0,3.4,dark);addCol({x:X+5,z:Z+6.3,r:1.3});if(!TripoEnvironment153.models.bankhall)addCol({x:X-5,z:Z+6.3,r:1.3});
   EW(b,'building_well_blue',X+15.5,0,Z+7,-.5,2.6,dark);addCol({x:X+15.5,z:Z+7,r:1.4});
@@ -4673,9 +4673,19 @@ function chains234(g,orb){const R=1.24,rings=new THREE.Group();rings.position.co
  [[.5,0],[-.45,1.1],[.15,2.2]].forEach(([tilt,rot],k)=>{const ring=new THREE.Group();ring.rotation.set(tilt,rot,0);const n=34;for(let i=0;i<n;i++){const a=i/n*TAU,l=new THREE.Mesh(chainLink234(),chainMat234());l.position.set(Math.cos(a)*R,0,Math.sin(a)*R);l.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-Math.sin(a),0,Math.cos(a)));l.rotateY(i%2?Math.PI/2:0);ring.add(l)}ring.userData.sp=(k%2?-1:1)*(.12+k*.05);rings.add(ring)});
  rings.children[0].onBeforeRender=()=>{const t=performance.now()/1000;rings.children.forEach(r=>r.rotation.y=r.userData.base??(r.userData.base=r.rotation.y));rings.children.forEach((r,i)=>r.rotation.y=r.userData.base+t*r.userData.sp)};
  for(const [x,z] of [[.75,.75],[-.75,.75],[.75,-.75],[-.75,-.75]])chainLine234(g,new THREE.Vector3(x,4.35,z),new THREE.Vector3(orb.position.x+x*.55,orb.position.y-.45,orb.position.z+z*.55))}
-function seal231(broken,capital){const g=new THREE.Group(),st=toonS(0x5c566a),dk=toonS(0x3e3a48),k=capital?1.25:1;
+/* v236 (Ian): fonte refeita para combinar com o pilar: bacia octogonal de pedra escura, borda com faixa roxa e runas, água violeta brilhando. */
+function basin236(g){const st=toonS(0x3d3947),dk=toonS(0x2c2934);
+ const wall=mesh(geo('bas236',()=>new THREE.CylinderGeometry(3.6,3.9,.85,8,1,true)),st);wall.material=wall.material.clone();wall.material.side=THREE.DoubleSide;wall.position.y=.42;g.add(wall);
+ const rim=mesh(geo('rim236',()=>{const q=new THREE.TorusGeometry(3.62,.2,4,8);q.rotateX(Math.PI/2);q.rotateY(Math.PI/8);return q}),dk);rim.position.y=.86;g.add(rim);
+ const glow=new THREE.Mesh(geo('glw236',()=>{const q=new THREE.TorusGeometry(3.62,.045,4,8);q.rotateX(Math.PI/2);q.rotateY(Math.PI/8);return q}),new THREE.MeshBasicMaterial({color:0xb070ff,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}));glow.position.y=1.08;g.add(glow);
+ const floor=mesh(geo('flr236',()=>new THREE.CylinderGeometry(3.85,3.95,.12,8)),dk);floor.position.y=.06;g.add(floor);
+ const water=new THREE.Mesh(geo('wat236',()=>{const q=new THREE.CircleGeometry(3.45,8);q.rotateX(-Math.PI/2);q.rotateY(Math.PI/8);return q}),new THREE.MeshStandardMaterial({color:0x3a1a6a,emissive:0x6a2ab0,emissiveIntensity:.55,roughness:.15,metalness:.2,transparent:true,opacity:.88}));water.position.y=.62;g.add(water);
+ water.onBeforeRender=()=>{water.material.emissiveIntensity=.45+.15*Math.sin(performance.now()/700)};
+ for(let i=0;i<8;i++){const a=i/8*TAU+Math.PI/8,r=new THREE.Mesh(geo('run236',()=>new THREE.PlaneGeometry(.55,.55)),new THREE.MeshBasicMaterial({color:0xd6a8ff,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  r.position.set(Math.cos(a)*3.93,.45,Math.sin(a)*3.93);r.lookAt(Math.cos(a)*10,.45,Math.sin(a)*10);g.add(r)}}
+function seal231(broken,capital){const g=new THREE.Group(),st=toonS(0x3d3947),dk=toonS(0x2c2934),k=capital?1.25:1;
  if(!broken){const base=mesh(geo('sealB231',()=>new THREE.BoxGeometry(1.8,.5,1.8)),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>new THREE.BoxGeometry(1,3.4,1)),st);col.position.y=2.2;const cap=mesh(geo('sealT231',()=>new THREE.BoxGeometry(1.7,.45,1.7)),dk);cap.position.y=4.1;g.add(base,col,cap);g.scale.setScalar(k);
-  const orb=plasmaOrb231(1.05);orb.position.y=5.45;g.add(orb);g.userData.orb=orb;chains234(g,orb)}
+  const orb=plasmaOrb231(1.05);orb.position.y=5.45;g.add(orb);g.userData.orb=orb;chains234(g,orb);basin236(g)}
  else{const base=mesh(geo('sealB231',()=>0),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>0),st);col.scale.y=.38;col.position.set(.15,.85,0);col.rotation.z=.18;g.add(base,col);
   for(let i=0;i<9;i++){const a=i/9*TAU+.3,len=4+((i*37)%5);const cr=new THREE.Mesh(geo('crack231',()=>new THREE.PlaneGeometry(.22,1)),new THREE.MeshBasicMaterial({color:0x14060c}));cr.rotation.set(-Math.PI/2,0,-a);cr.scale.y=len;cr.position.set(Math.cos(a)*(1.2+len/2),.04,Math.sin(a)*(1.2+len/2));g.add(cr)}
   for(let i=0;i<6;i++){const sh=mesh(geo('shard231',()=>new THREE.TetrahedronGeometry(.35)),toonS(0x7a3aa8));sh.position.set(Math.cos(i)*2.5,.15,Math.sin(i*1.7)*2.5);sh.rotation.set(i,i*2,i);g.add(sh)}g.scale.setScalar(k)}

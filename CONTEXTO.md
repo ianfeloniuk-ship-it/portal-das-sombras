@@ -770,3 +770,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v233: nomes Sombra…Logos de volta; selo da fonte = fenda pequena (Rift131) com anel; todos os portais abrem como o Tecelão (Rift131.open); árvores do pulso carbonizadas (instanceColor) em vez de sumir; juice233 (balanço/inclinação/avanço/tranco) em chefes e elites; docs/arquiteto-visual.md.
 - v234: voltou o pilar de ponta quadrada com a esfera de plasma no centro das cidades (a pedido do Ian).
 - v235: correntes na esfera do selo (3 anéis girando + 4 correntes do pilar; chains234).
+- v236: fonte refeita (basin236): bacia octogonal de pedra escura, borda e runas roxas, água violeta pulsando; pilar escurecido para combinar.
