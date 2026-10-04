@@ -11,7 +11,7 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - Muralha da cidade sempre completa (754 mil triângulos); dividir em pedaços para usar a versão leve longe.
 - ~~Fachadas das lojas conferidas (v200)~~
 
-- Sombra em faixas: falta personagens com textura (Tripo), cenário e prédios.
+- ~~Sombra em faixas em tudo (v212)~~
 
 ## Sistemas
 - ~~Aviso ao entrar em portal perigoso sem Pergaminho (v192)~~
