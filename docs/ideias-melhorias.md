@@ -4,11 +4,11 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 
 ## Bugs e acabamento
 - ~~Buracos nas paredes dos modelos Tripo (v191, DoubleSide)~~
-- Taverna da praça com vaso e degrau soltos na frente (modelo Tripo + enfeites fora do lugar).
+- ~~Taverna e lojas com a frente para a praça (v200)~~
 - Torres da muralha meio desencaixadas do muro, algumas entram na praça.
 - ~~Projéteis presos na masmorra: não é bug (estavam em voo)~~
 - Desempenho: no 1º quadro do mundo chega a ~5,9 mi de triângulos antes do recorte ajustar (depois cai para ~1,5 mi). Casas Tripo (12 mil triângulos cada, 60 cópias) pesam mais; usar o LOD também na cidade.
-- Lojas (KayKit) foram giradas junto com as casas na v188; conferir uma a uma se a fachada ficou certa.
+- ~~Fachadas das lojas conferidas (v200)~~
 
 ## Sistemas
 - ~~Aviso ao entrar em portal perigoso sem Pergaminho (v192)~~

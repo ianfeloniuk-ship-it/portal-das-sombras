@@ -3718,7 +3718,8 @@ function envGroundTex(){const s=256,c=document.createElement('canvas');c.width=c
 const pk=(R,a)=>a[Math.floor(R()*a.length)];
 function EH(b,k,x,y,z,ry,H,t){const m=ENV.m[k];if(!m)return 0;const s=H/m.h;b.add(k,x,y,z,ry,s,s,s,t);return s}
 /* v188 (Ian): nos modelos de prédio a porta fica na lateral; giramos para a porta olhar para onde o prédio aponta. */
-const DOOR188={};function doorRot188(k){return k&&k.startsWith('building_')&&!/destroyed|well|scaffold/.test(k)?(DOOR188[k]??Math.PI/2):0}
+/* v200: na cidade os prédios viram modelos Tripo, que já têm a porta na frente; só a loja de armaduras tem a porta atrás. As casas giram no próprio código da casa Tripo. */
+const DOOR188={building_market_blue:-Math.PI/2};function doorRot188(k){return k&&k.startsWith('building_')&&!/destroyed|well|scaffold/.test(k)?(DOOR188[k]??0):0}
 function EW(b,k,x,y,z,ry,W,t){const m=ENV.m[k];if(!m)return 0;ry+=doorRot188(k);const s=W/m.w;b.add(k,x,y,z,ry,s,s,s,t);return s}
 const ENVG={};
 function envMesh(k,mat){const m=ENV.m[k];if(!m)return new THREE.Group();if(!ENVG[k]){const b=new EnvBatch();b.add(k,0,0,0,0,1);ENVG[k]=b.geo()}return new THREE.Mesh(ENVG[k],mat||ENVMAT)}
