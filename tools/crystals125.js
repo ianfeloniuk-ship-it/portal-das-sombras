@@ -23,6 +23,7 @@ const crystalReady125=new Promise(resolve=>{
  },undefined,()=>resolve(false));
 });
 function attachCrystal125(group,rank){
+ if(typeof crystalCluster230==='function'){group.clear();group.add(crystalCluster230(crystalRank125(rank),1.5,false));group.userData.rankCrystal125=true;group.userData.rank125=crystalRank125(rank);return true}/* v230: cristal desenhado */
  if(!CRYSTALS125.template)return false;
  group.clear();const model=CRYSTALS125.template.clone(true);
  model.traverse(o=>{if(o.isMesh)o.material=crystalMaterial125(rank,o.userData.mineral125)});

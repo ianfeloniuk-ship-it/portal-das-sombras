@@ -4002,7 +4002,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
     if(!fallen){const p1=side(W*.5+.9,W*.28),p2=side(-W*.5-.9,W*.28);EW(b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);EW(b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
       const p3=side(W*.5+.9,W*.28-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1)}}
-  const fs=EW(b,'fountain-round',X,0,Z,0,8.6);ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});EH(b,'statue_obelisk',X,0,Z,.4,4.8);addCol({x:X,z:Z,r:4.4});
+  const fs=fallen?0:EW(b,'fountain-round',X,0,Z,0,8.6);if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}
   EW(b,'stall-red',X+5,0,Z+6.5,0,3.4,dark);if(!fallen&&TripoEnvironment153.models.bankhall){b.add('tripo_bank_building',X-15.5,0,Z+7,Math.atan2(15.5,-7),1);addCol({x:X-15.5,z:Z+7,r:4.6})}else EW(b,'stall-green',X-5,0,Z+6.5,0,3.4,dark);addCol({x:X+5,z:Z+6.3,r:1.3});if(!TripoEnvironment153.models.bankhall)addCol({x:X-5,z:Z+6.3,r:1.3});
   EW(b,'building_well_blue',X+15.5,0,Z+7,-.5,2.6,dark);addCol({x:X+15.5,z:Z+7,r:1.4});
@@ -4293,10 +4293,10 @@ function buildCity(c,g,addCol,R){
     const w=new THREE.Mesh(geo('hw',()=>new THREE.PlaneGeometry(.8,.8)),glowS(0xffd9a0,.9));w.position.set(1.2,2,2.27);hg.add(w);g.add(hg);addCol({x,z,r:3.4})}
   }
   const plaza=new THREE.Mesh(geo('plaza',()=>new THREE.RingGeometry(12.6,13.2,48)),toonS(0x8e846a));plaza.rotation.x=-Math.PI/2;plaza.position.set(X,.03,Z);g.add(plaza);
-  const cr=new THREE.Mesh(geo('crys',()=>new THREE.OctahedronGeometry(.9,0)),glowS(0xffd08a,.95));cr.position.set(X,6,Z);g.add(cr);g.userData.crystal=cr;
+  const cr=seal231(fallen,c.capital);cr.position.set(X,0,Z);g.add(cr);/* v231 (Ian): coluna de ponta quadrada com a esfera de plasma que sela a prisão; quebrada na cidade caída */
   const cl=new THREE.PointLight(0xffd08a,1.2,26,1.5);cl.position.set(X,6,Z);g.add(cl);
   const nm=makeCitySign(fallen?c.name.toUpperCase()+' · CAÍDA':c.name.toUpperCase(),fallen?'#ff4d6a':'#ffd08a',.9);nm.position.set(X,9,Z);g.add(nm);
-  if(cLv>=3){const rr=new THREE.Mesh(new THREE.TorusGeometry(34,.35,6,80),glowS(0xffd070,.8));rr.rotation.x=Math.PI/2;rr.position.set(X,4.2,Z);g.add(rr)}
+  /* v232: anel dourado flutuante removido (era da muralha antiga de 34 m e cortava a praça) */
   if(fallen){L.inter.push({type:'rebuild',city:c,x:X,z:Z+4,r:3,label:'F · RECONSTRUIR '+c.name.toUpperCase(),use:()=>rebuildView(c)});const fog=new THREE.Mesh(new THREE.CylinderGeometry(33,33,12,32,1,true),glowS(0xff2020,.12));fog.position.set(X,6,Z);g.add(fog)}
   for(const s of SHOPS){const sx=X+s.x,sz=Z+s.z;if(E){const ry=Math.atan2(-s.x,-s.z),sn=makeCitySign(s.sign,s.sc,.8);sn.position.set(sx+Math.sin(ry)*(s.d/2+.6),Math.min((shopH[s.id]||6)*.72,6.2),sz+Math.cos(ry)*(s.d/2+.6));g.add(sn)}else{const sg=new THREE.Group();sg.position.set(sx,0,sz);sg.rotation.y=Math.atan2(-s.x,-s.z);
     const b=mesh(new THREE.BoxGeometry(s.w,s.h,s.d),toonS(s.col));b.position.y=s.h/2;sg.add(b);
@@ -4644,10 +4644,51 @@ function useDungeonStairs(it){
 }
 function coreDefenseLayout111(r,g){return {core:{x:r.wx,z:g.oz+(r.y+3.5)*g.CS},front:{x:r.wx,z:g.oz+(r.y+r.h-2.5)*g.CS}}}
 function coreWaveSize111(rank,wave){return Math.min(20,8+Math.floor(rank/2)+2*(wave-1))}
+/* v230: cristal do Tripo (mesmo dos veios), em grupo; carrega quando o modelo estiver pronto. Cor pelo rank, brilho e luz próprios. */
+/* v230 (Ian): cristal desenhado (prismas de 6 lados com ponta, translúcidos e brilhando), estilo fantasia cartoon. Substitui o modelo que parecia pedra. */
+const CRY230={},CRYCOL230={2:0x2fd0ff,4:0x3a8cff,8:0xffb51e};
+function cryGeo230(){if(CRY230.g)return CRY230.g;const b=new THREE.CylinderGeometry(.42,.5,1,6,1);b.translate(0,.5,0);const t=new THREE.ConeGeometry(.42,.55,6,1);t.translate(0,1.27,0);
+ const a=b.toNonIndexed(),c=t.toNonIndexed(),pa=a.attributes.position.array,pc=c.attributes.position.array,m=new Float32Array(pa.length+pc.length);m.set(pa);m.set(pc,pa.length);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m,3));g.computeVertexNormals();return CRY230.g=g}
+function cryMat230(rank,broken){const k=rank+':'+(broken?1:0);if(CRY230[k])return CRY230[k];const col=new THREE.Color(CRYCOL230[rank]??RANKS[Math.min(RANKS.length-1,rank)].c);if(broken)col.setHex(0xc81e32);
+ const m=new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:broken?.2:.32,roughness:.25,metalness:.05,transparent:true,opacity:.9,flatShading:true});m.userData.shared=true;return CRY230[k]=m}
+function crystalCluster230(rank,size,broken){const g=new THREE.Group(),geo=cryGeo230(),mat=cryMat230(rank,broken),R=mulberry32((rank*97+size*31)|0);
+ const parts=[[0,0,1,0,0],[.45,.1,.62,.42,0],[-.42,.15,.55,-.38,.3],[.1,-.42,.5,.1,-.45],[-.2,.4,.42,-.15,.5],[.32,.38,.36,.3,.4]];
+ for(const [x,z,h,tx,tz] of parts){const p=new THREE.Mesh(geo,mat);p.position.set(x*size*.35,0,z*size*.35);p.scale.set(size*.32*(.7+h*.3),size*h,size*.32*(.7+h*.3));p.rotation.set(tz*.5,R()*TAU,-tx*.5);g.add(p)}
+ const glow=new THREE.Mesh(new THREE.SphereGeometry(size*.32,10,8),new THREE.MeshBasicMaterial({color:mat.color,transparent:true,opacity:broken?.08:.22,blending:THREE.AdditiveBlending,depthWrite:false}));glow.position.y=size*.45;g.add(glow);return g}
+/* v231: esfera de plasma (selo da prisão), coluna de pedra de ponta quadrada, versão quebrada com chão rachado, e a cena da ruptura. */
+function orbMat231(){if(CRY230.orb)return CRY230.orb;const m=new THREE.ShaderMaterial({uniforms:{uT:{value:0}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+ vertexShader:'varying vec3 vN;varying vec3 vP;varying vec3 vV;void main(){vec4 w=modelMatrix*vec4(position,1.);vP=position;vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}',
+ fragmentShader:'uniform float uT;varying vec3 vN;varying vec3 vP;varying vec3 vV;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}float n(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}void main(){float fr=pow(1.-abs(dot(normalize(vN),vV)),2.2);vec3 d=normalize(vP);float a=atan(d.z,d.x),b=asin(d.y);float s=n(vec3(a*3.,b*3.,uT*.6))+.5*n(vec3(a*7.,b*7.,uT*1.3));float fil=smoothstep(.04,.0,abs(fract(s*3.)-.5)-.44);vec3 c=mix(vec3(.35,.12,.95),vec3(.85,.2,.9),s)*(fil*1.1+fr*.9)+vec3(.55,.6,1.)*pow(fr,5.)*1.1+vec3(.25,.06,.45)*.35;gl_FragColor=vec4(c,clamp(fil*.85+fr*.8+.12,0.,1.));}'});
+ return CRY230.orb=m}
+function plasmaOrb231(r){const g=new THREE.Group(),m=new THREE.Mesh(new THREE.SphereGeometry(r,32,22),orbMat231());m.onBeforeRender=()=>{m.material.uniforms.uT.value=performance.now()/1000};g.add(m);
+ const core=new THREE.Mesh(new THREE.SphereGeometry(r*.22,16,12),new THREE.MeshBasicMaterial({color:0xd9b8ff,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(core);
+ const l=new THREE.PointLight(0xb070ff,1.6,18,1.6);g.add(l);g.userData.orb=m;return g}
+function seal231(broken,capital){const g=new THREE.Group(),st=toonS(0x5c566a),dk=toonS(0x3e3a48),k=capital?1.25:1;
+ if(!broken){const base=mesh(geo('sealB231',()=>new THREE.BoxGeometry(1.8,.5,1.8)),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>new THREE.BoxGeometry(1,3.4,1)),st);col.position.y=2.2;const cap=mesh(geo('sealT231',()=>new THREE.BoxGeometry(1.7,.45,1.7)),dk);cap.position.y=4.1;g.add(base,col,cap);g.scale.setScalar(k);
+  const orb=plasmaOrb231(1.05);orb.position.y=5.45;g.add(orb);g.userData.orb=orb}
+ else{const base=mesh(geo('sealB231',()=>0),dk);base.position.y=.25;const col=mesh(geo('sealC231',()=>0),st);col.scale.y=.38;col.position.set(.15,.85,0);col.rotation.z=.18;g.add(base,col);
+  for(let i=0;i<9;i++){const a=i/9*TAU+.3,len=4+((i*37)%5);const cr=new THREE.Mesh(geo('crack231',()=>new THREE.PlaneGeometry(.22,1)),new THREE.MeshBasicMaterial({color:0x14060c}));cr.rotation.set(-Math.PI/2,0,-a);cr.scale.y=len;cr.position.set(Math.cos(a)*(1.2+len/2),.04,Math.sin(a)*(1.2+len/2));g.add(cr)}
+  for(let i=0;i<6;i++){const sh=mesh(geo('shard231',()=>new THREE.TetrahedronGeometry(.35)),toonS(0x7a3aa8));sh.position.set(Math.cos(i)*2.5,.15,Math.sin(i*1.7)*2.5);sh.rotation.set(i,i*2,i);g.add(sh)}g.scale.setScalar(k)}
+ return g}
+/* v232 (Ian): na quebra da âncora sai um pulso de luz até 400 m: dano em tudo (monstros comuns morrem, chefes perdem 20%, você perde 30% da vida) e arranca as árvores. */
+function pulse232(x,z){const R=400,dur=2.2,g=new THREE.Mesh(new THREE.SphereGeometry(1,32,16,0,TAU,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xc58aff,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.92,1,64),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.3;
+ g.position.set(x,0,z);ring.position.x=x;ring.position.z=z;L.group.add(g,ring);const hit=new Set();let t=0,treesDone=false;
+ const iv=setInterval(()=>{t+=.05;const k=Math.min(1,t/dur),r=Math.max(1,R*(1-Math.pow(1-k,2)));g.scale.set(r,r*.35,r);ring.scale.setScalar(r);g.material.opacity=.35*(1-k);ring.material.opacity=.8*(1-k*.8);
+  for(const e of enemies){if(e.dead||hit.has(e)||Math.hypot(e.x-x,e.z-z)>r)continue;hit.add(e);if(e.isBoss)hurtEnemy(e,e.maxhp*.2,x,z,{pierce:true});else{e.hp=1;hurtEnemy(e,1e12,x,z,{pierce:true,kb:6})}}
+  if(player&&!player.dead&&!hit.has(player)&&Math.hypot(player.x-x,player.z-z)<=r){hit.add(player);curAtk=null;hurtPlayer(player.maxhp*.3,false);shake(.8);floater(player.x,player.z,'PULSO DA ÂNCORA','#e0b8ff',true)}
+  if(!treesDone&&k>.3){treesDone=true;try{clearTrees232(x,z,R)}catch(_){}}
+  if(k>=1){clearInterval(iv);L.group.remove(g,ring);g.geometry.dispose();ring.geometry.dispose()}},50)}
+function clearTrees232(x,z,R){const M=new THREE.Matrix4(),P=new THREE.Vector3(),Z=new THREE.Matrix4().makeScale(0,0,0);let n=0;scene.traverse(o=>{if(!o.isInstancedMesh||!['oak','willow','fir'].includes(o.userData.tripo153))return;let ch=false;for(let i=0;i<o.count;i++){o.getMatrixAt(i,M);P.setFromMatrixPosition(M);if(Math.hypot(P.x-x,P.z-z)<=R&&M.elements[0]!==0){o.setMatrixAt(i,Z);ch=true;n++}}if(ch)o.instanceMatrix.needsUpdate=true});return n}
+function ruptureCine231(c,gate){const P=player;if(!P)return;window.CINE231={x:c.x,z:c.z,t:0,dur:5};const orb=plasmaOrb231(1.4);orb.position.set(c.x,6,c.z);L.group.add(orb);if(gate&&gate.mesh)gate.mesh.scale.setScalar(.01);
+ bigText('A ÂNCORA SE ROMPE',2200);sfx('gong');let t=0;const iv=setInterval(()=>{t+=.05;const k=Math.min(1,t/1.6);orb.scale.setScalar(1+k*.6+Math.sin(t*40)*.08*k);
+  if(t>=1.6&&orb.parent){L.group.remove(orb);pulse232(c.x,c.z);shake(1.2);sfx('boom');fxRing(c.x,c.z,0xc070ff,14,.9);for(let i=0;i<4;i++)fxBurst(c.x,5,c.z,i%2?0xc070ff:0xffffff,18,9)}
+  if(t>1.6&&gate&&gate.mesh)gate.mesh.scale.setScalar(Math.min(2.4,(t-1.6)*1.2));if(t>=4.8){clearInterval(iv);if(gate&&gate.mesh)gate.mesh.scale.setScalar(2.4)}},50)}
+function crystal229(rank,size,broken,rockless){const g=crystalCluster230(rank,size,broken);if(!broken){const l=new THREE.PointLight(new THREE.Color(RANKS[Math.min(RANKS.length-1,rank)].c),1.2,12,1.8);l.position.y=size*.6;g.add(l)}return g}
 function setupCoreDefense(){
  const r=L.rooms[L.bossRoom],layout=coreDefenseLayout111(r,L.grid),grp=new THREE.Group();grp.position.set(layout.core.x,0,layout.core.z);
  const base=mesh(geo('coreBase103',()=>new THREE.CylinderGeometry(2.1,2.5,.6,8)),toonS(0x536a86));base.position.y=.3;grp.add(base);
- const crystal=mesh(geo('core103',()=>new THREE.OctahedronGeometry(1.7)),glowS(0x78e6ff,.8));crystal.position.y=2.5;grp.add(crystal);const sg=makeSign('NÚCLEO SELADO','#8de6ff',.55);sg.position.y=5;grp.add(sg);L.group.add(grp);
+ const crystal=crystal229(2,3.4,false);crystal.position.y=.55;grp.add(crystal);/* v230: núcleo é um cristal de verdade */const sg=makeSign('NÚCLEO SELADO','#8de6ff',.55);sg.position.y=5;grp.add(sg);L.group.add(grp);
  const maxhp=600*L.G.dmg;L.defense={core:{...layout.core,r:2,hp:maxhp,maxhp,defenseCore:true},front:layout.front,grp,crystal,sg,started:false,failed:false,done:false,t:0,wave:0,duration:60};
  const it={type:'core',x:layout.core.x,z:layout.core.z,r:4,label:'F · INICIAR DEFESA DO NÚCLEO',use:()=>startCoreDefense()};L.defense.inter=it;L.inter.push(it);
  for(const dx of [-6.4,0,6.4]){const ring=new THREE.Mesh(geo('coreEntry111',()=>new THREE.RingGeometry(1.1,1.45,24)),glowS(0xff7b66,.65));ring.rotation.x=-Math.PI/2;ring.position.set(layout.front.x+dx,.08,layout.front.z);L.group.add(ring)}const frontSign=makeSign('CHEGADA DOS INVASORES','#ff9b87',.4);frontSign.position.set(layout.front.x,2.5,layout.front.z+2);L.group.add(frontSign);
@@ -4717,6 +4758,7 @@ const crystalReady125=new Promise(resolve=>{
  },undefined,()=>resolve(false));
 });
 function attachCrystal125(group,rank){
+ if(typeof crystalCluster230==='function'){group.clear();group.add(crystalCluster230(crystalRank125(rank),1.5,false));group.userData.rankCrystal125=true;group.userData.rank125=crystalRank125(rank);return true}/* v230: cristal desenhado */
  if(!CRYSTALS125.template)return false;
  group.clear();const model=CRYSTALS125.template.clone(true);
  model.traverse(o=>{if(o.isMesh)o.material=crystalMaterial125(rank,o.userData.mineral125)});
@@ -5789,6 +5831,7 @@ function camUpdate(dt){
   const pt=FX2.cine>0?0:pcCam.pitch,pe=pt*pt*(3-2*pt),H=hgt*cz+(2.1-hgt*cz)*pe,B=back*cz+(5.2*cz-back*cz)*pe;
   const[ox,oz]=camRot(0,B),[fx,fz]=camRot(0,-2*(1-pe));
   camera.position.set(lx+ox+rnd(-s,s),H+rnd(-s,s),lz+oz);camera.lookAt(lx+fx,1+.5*pe,lz+fz);
+  {const C=window.CINE231;if(C){C.t+=1/60;const a=C.t*.35;camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4,C.z);if(C.t>C.dur)window.CINE231=null}}
 }
 
 /* ================= OVERLAY E HUD ================= */
@@ -7061,7 +7104,7 @@ function endCycle223(){if(window._wipe)return;window._wipe=1;paused=true;let n=0
 function anchorOpen221(c){return !!(c&&c.capital&&cityFallen(c)&&!(profile.anchorShut221||{})[c.id])}
 function anchorTick221(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z),c=n.c;if(!c||!c.capital||n.d>700)return;const has=gates.find(g=>g.anchor221===c.id&&!g.dead);
  if(anchorOpen221(c)&&!has){const rank=clamp(rankOf()+1,2,9);const g={id:++gateSeq,x:c.x,z:c.z+3,rank,piece222:rh(c.cx,c.cz,5)%5,lvl207:Math.max(portalLvl207(rank),run.level)+20,aff:rollAff(Math.max(6,rank)),double:false,red:true,giant:true,life:1e9,max:1e9,seed:(Math.random()*2**31)|0,layout103:null,cleared:false,dead:false,anchor221:c.id};gates.push(g);gateMesh(g);if(g.mesh)g.mesh.scale.setScalar(2.4);
-  if(n.d<300){bigText('FENDA DA ÂNCORA',1800);showSys('A Pedra-Âncora de <b>'+c.name+'</b> se rompeu. Uma Fenda vermelha gigante abriu no centro da cidade. Lá dentro pulsa um pedaço do Arquiteto. Ninguém consegue medir o nível dele. Leve aliados.')}}
+  if(n.d<300){ruptureCine231(c,g);showSys('A Pedra-Âncora de <b>'+c.name+'</b> se rompeu. Uma Fenda vermelha gigante abriu no centro da cidade. Lá dentro pulsa um pedaço do Arquiteto. Ninguém consegue medir o nível dele. Leve aliados.')}}
  else if(has&&!anchorOpen221(c)){has.dead=true;if(has.mesh&&has.mesh.parent)has.mesh.parent.remove(has.mesh)}}
 function rebuildView(c){view=()=>rebuildView(c);if(anchorOpen221(c)){openModal('RECONSTRUIR '+c.name.toUpperCase(),'<div class="sysline">A Fenda da Âncora ainda está aberta no centro de '+c.name+'. Entre e derrote o guardião para fechá-la; só depois dá para reconstruir.</div>');return}const left=enemies.filter(e=>!e.dead&&e.breaker&&Math.hypot(e.x-c.x,e.z-c.z)<45).length,k=rebuildCost(),tot=run.res.cry.reduce((a,b)=>a+b,0);
   let h='<div class="sysline">'+c.name+' caiu. Para reconstruir: expulse os monstros e doe material para os sobreviventes.</div>';
