@@ -184,7 +184,31 @@
     m.a155={rig,pairs,hips,ratio:hipH/kayH,kayRestP:hips.k.getWorldPosition(new T.Vector3()),parentInv:new T.Matrix4().copy(minv.clone().multiply(hips.b.parent.matrixWorld)).invert(),mixer,act,cur:null,state:null,t0:0};
   }
   function play155(A,name,fade,once,restart){const a=A.act[name]||A.act.idle;if(A.cur===a&&!restart)return a;if(A.cur===a){a.reset();return a}if(!A.cur)A.mixer.stopAllAction();else for(const o of Object.values(A.act))if(o!==A.cur&&o!==a)o.stop();a.reset();a.setLoop(once?T.LoopOnce:T.LoopRepeat);a.clampWhenFinished=!!once;a.paused=false;a.timeScale=1;a.play();if(A.cur)A.cur.crossFadeTo(a,fade,false);A.cur=a;return a}
+  /* v195 (Ian): correndo, a arma vai nas costas (como aljava). Ao parar, ele leva a mão ao ombro, saca e segura;
+     3 s parado sem atacar, guarda de novo. Atacar, usar habilidade ou mirar saca na hora. */
+  const SH195={draw:.32};
+  function sheathRestore195(m){for(const W of [m.socket,m.bowHolder155])if(W&&W.userData.base195){const b=W.userData.base195;W.position.copy(b.p);W.quaternion.copy(b.q);W.scale.copy(b.s);W.userData.base195=null}}
+  function sheathAxis195(W){if(W.userData.axis195)return W.userData.axis195;W.updateMatrixWorld(true);const inv=new T.Matrix4().copy(W.matrixWorld).invert(),b=new T.Box3();W.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).applyMatrix4(inv);b.union(bb)}});
+    if(b.isEmpty())return null;const sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),ax=sz.x>=sz.y&&sz.x>=sz.z?'x':sz.y>=sz.z?'y':'z',v=new T.Vector3();v[ax]=c[ax]>=0?1:-1;return W.userData.axis195=v}
+  function sheath195(m,st,dt){const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
+    const moving=(st.move||0)>.08&&!busy;let target;
+    if(busy||st.dead>0){target=0;S.idle=0}else if(moving){target=1;S.idle=0;S.wasMove=true}
+    else{if(S.wasMove){S.wasMove=false;S.idle=0;S.drawn=true}S.idle+=dt||0;target=S.drawn&&S.idle<3?0:1;if(S.idle>=3)S.drawn=false}
+    if(busy){S.drawn=true;S.idle=0}
+    const sp=(dt||0)/SH195.draw;S.s=target>S.s?Math.min(target,S.s+sp):Math.max(target,S.s-sp*(busy?2:1));
+    const B=m.bones,ch=B.chest||B.spine;if(!ch)return;const rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),U=new T.Vector3(0,1,0),R=new T.Vector3(-1,0,0).applyQuaternion(rq);
+    // braço vai ao ombro no meio do movimento de sacar/guardar
+    if(S.s>.12&&S.s<.88&&B.upperarm_r&&B.forearm_r&&B.hand_r&&!m.bowHolder155){aimBone168(B.upperarm_r,B.forearm_r,U.clone().multiplyScalar(.9).addScaledVector(F,-.35).addScaledVector(R,.25));aimBone168(B.forearm_r,B.hand_r,U.clone().multiplyScalar(.4).addScaledVector(F,-.8).addScaledVector(R,-.4));m.root.updateMatrixWorld(true)}
+    if(S.s<=0)return;const cp=ch.getWorldPosition(new T.Vector3());
+    for(const W of [m.socket,m.bowHolder155]){if(!W||!W.parent||!W.children.length)continue;const axis=sheathAxis195(W);if(!axis)continue;
+      W.userData.base195={p:W.position.clone(),q:W.quaternion.clone(),s:W.scale.clone()};W.updateMatrixWorld(true);
+      const hp=new T.Vector3(),hq=new T.Quaternion(),hs=new T.Vector3();W.matrixWorld.decompose(hp,hq,hs);
+      const bow=W===m.bowHolder155,dir=U.clone().multiplyScalar(.85).addScaledVector(R,bow?-.5:.5).normalize(),bq=new T.Quaternion().setFromUnitVectors(axis,dir);
+      const bp=cp.clone().addScaledVector(F,-.2).addScaledVector(R,bow?.12:-.12).addScaledVector(U,-.32);
+      const k=S.s*S.s*(3-2*S.s),wp=hp.lerp(bp,k),wq=hq.slerp(bq,k),M=new T.Matrix4().compose(wp,wq,hs);
+      W.parent.updateMatrixWorld(true);M.premultiply(new T.Matrix4().copy(W.parent.matrixWorld).invert());M.decompose(W.position,W.quaternion,W.scale)}}
   function frame155(m,st,dt){
+    sheathRestore195(m);
     if(!m.a155)setup155(m);const A=m.a155;let a;
     if(st.dead>0)play155(A,'morte',.12,true);
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
@@ -216,6 +240,7 @@
         bh.quaternion.copy(hand.getWorldQuaternion(q2).invert().multiply(want));// Palma = pulso + um pouco na direção antebraço→mão (onde os dedos fecham).
         const hw=hand.getWorldPosition(v1),fa=(m.bones.forearm_l||hand.parent).getWorldPosition(new T.Vector3()),dir=hw.clone().sub(fa).normalize();const wp=hw.clone().addScaledVector(dir,BOWPALM155).add(new T.Vector3(...BOWIDLEPOS155).applyQuaternion(m.model.getWorldQuaternion(q3)));bh.position.copy(hand.worldToLocal(wp));bh.userData.idle155=true}
       else if(bh.userData.idle155){bh.quaternion.copy(bh.userData.aimQ155);bh.position.copy(bh.userData.aimP155);bh.userData.idle155=false}}
+    try{sheath195(m,st,dt)}catch(e){}
   }
   const BOWAIM168=[0,0,0];API.BOWAIM168=BOWAIM168;
   function aimBone168(b,c,dir){if(!b||!c||!b.parent)return;b.updateWorldMatrix(true,true);const bp=b.getWorldPosition(new T.Vector3()),cur=c.getWorldPosition(new T.Vector3()).sub(bp).normalize(),q=new T.Quaternion().setFromUnitVectors(cur,dir.clone().normalize()),wq=b.getWorldQuaternion(new T.Quaternion()),pq=b.parent.getWorldQuaternion(new T.Quaternion());b.quaternion.copy(pq.invert().multiply(q.multiply(wq)))}

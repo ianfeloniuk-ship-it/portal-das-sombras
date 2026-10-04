@@ -730,3 +730,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v192: aviso ao entrar em portal perigoso sem pergaminho; túmulo (profile.grave192) devolve 20% do ouro uma vez.
 - v193: 3º espaço de relíquia no rank ★ (relicSlots192); título Matador de Deuses (profile.godKills192, +6% dano).
 - v194: avisos em pop-up no topo (popNews194) e depois nas Notícias; despertar abre ao equipar a 5ª peça; Divindade só em portal ★ vermelho (~6% dos chefes, por ascensão).
+- v195: arma nas costas ao correr (sheath195 em tools/warrior-player127.js, carregado à parte: subir ?v= no game.html); ao parar saca (braço ao ombro) e segura 3 s; atacar/habilidade/mirar saca na hora.
