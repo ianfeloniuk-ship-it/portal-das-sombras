@@ -3960,7 +3960,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();EW(so,pk(R,ROCKS),px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
-  if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.road||q.d<40*CITYK)continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
+  if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK)continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
   if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<44*CITYK)continue;at(px,pz);const s2=.7+R()*.9;EW(so,pk(R,['rock_tallA','rock_tallB','stone_tallA']),px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2})}
   for(let k=0,nc=lite?60:150;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<37*CITYK)continue;
     const fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
@@ -3977,7 +3977,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     else if(r<.72)EH(fl,pk(R,['plant_bush','plant_bushLarge','plant_bushSmall','plant_flatShort','plant_flatTall']),px,0,pz,ry,.7+R()*.6);
     else if(r<.85)EW(so,pk(R,['rock_smallA','rock_smallC','stone_smallA','rock_smallFlatA']),px,-.03,pz,ry,.5+R()*.7);
     else EH(fl,'blades',px,0,pz,ry,.7+R()*.5)}
-  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz);if(q.road||q.d<36*CITYK||B==='deserto'||B==='neve'||['neve','cristal'].includes(biomeAt(px,pz))||snowB(px,pz)<.33||bare154(px,pz))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
+  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz);if(q.clear||q.d<36*CITYK||B==='deserto'||B==='neve'||['neve','cristal'].includes(biomeAt(px,pz))||snowB(px,pz)<.33||bare154(px,pz))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
   for(let i=0;i<4;i++){envOwn(g,TR[i].mesh(TREEMAT));envOwn(g,FL[i].mesh(FLORAMAT));envOwn(g,SO[i].mesh(ENVMAT))}
 }
 ENV.cast=[];
@@ -4265,7 +4265,7 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const op217=outpostAt217(cx,cz);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)||(op217&&Math.hypot(x-x0-9,z-z0-9)<17)}};
+  const RSEG=roadSegs(x0,z0,2);const op217=outpostAt217(cx,cz),lk239=lakeAt239(cx,cz);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)||(op217&&Math.hypot(x-x0-9,z-z0-9)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -4284,7 +4284,7 @@ function loadChunk(cx,cz){
   inst(geo('leaf',()=>0),toonS(0x3a86c8),trees.map(t=>({x:t.x,y:5.6,z:t.z,s:t.s*.7,ry:t.ry})),true,g);
   inst(geo('rock',()=>new THREE.DodecahedronGeometry(1.2,0)),toonS(0x3a4d6b),rocks.map(r=>({x:r.x,y:.4*r.s,z:r.z,s:r.s,ry:r.ry,rx:r.ry})),true,g);
   }
-  const city=near.find(c=>c.cx===cx&&c.cz===cz);if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(outpostAt217(cx,cz))buildOutpost217(ch,g,addCol);else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
+  const city=near.find(c=>c.cx===cx&&c.cz===cz);try{if(!city)buildWater239(ch,g,addCol)}catch(e){}if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(outpostAt217(cx,cz))buildOutpost217(ch,g,addCol);else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
   if(ch.pg){envAO(ch.pg);delete ch.pg}
   L.group.add(g);chunks.set(key,ch);
 }
@@ -7042,6 +7042,31 @@ function spawnWorldBoss(){const P=player,a=rnd(0,TAU),x=P.x+Math.cos(a)*70,z=P.z
 function worldBossDeath(b){if(b.siege){siegeWin(b);storyEv('siege')}hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
 /* v217 (Ian): mundo em camadas. Cidades a ~1,9 km; capitais a cada 5×5 regiões (~9,6 km);
    postos de estrada (fogueira para descansar e mascate) a cada poucas centenas de metros nas estradas; Carroça da Ordem entre cidades visitadas. */
+/* v239 (Ian): água no mundo. Lagos espalhados (pesca, não dá para andar por cima) e rios serpenteando entre as regiões,
+   com ponte onde a estrada cruza. Longe das cidades; nada de árvore ou pedra dentro da água. */
+const RIVW239=11;
+function riverX239(z){const k=Math.round((0)/1);return 0}
+function riverAt239(x){const P=REG*CH*2,b=Math.floor((x-REG*CH*.5)/P);return b}
+function riverCenter239(b,z){const P=REG*CH*2;return (b*P)+REG*CH*.5+Math.sin(z*.0043+b*1.7)*95+Math.sin(z*.011+b)*28}
+function riverNear239(x,z){const P=REG*CH*2,b=Math.round((x-REG*CH*.5)/P);const cxr=riverCenter239(b,z);return {b,x:cxr,d:Math.abs(x-cxr)}}
+function lakeAt239(cx,cz){if(rh(cx,cz,21)%100>=4)return null;const x=cx*CH+(rh(cx,cz,22)%20-10),z=cz*CH+(rh(cx,cz,23)%20-10),r=12+rh(cx,cz,24)%12;
+ if(nearestCity(x,z).d<260||onRoad(roadSegs(x,z,1),x,z,r+8)||riverNear239(x,z).d<r+30)return null;const bio=biomeAt(x,z);if(bio==='deserto'||bio==='vulcao')return null;return {x,z,r}}
+function waterMat239(){if(CRY230.wr)return CRY230.wr;const t=Water154.mesh(1);const m=t.material;CRY230.wr=m;return m}
+function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH,z0=ch.cz*CH;
+ const lk=lakeAt239(ch.cx,ch.cz);if(lk){const w=Water154.mesh(lk.r);w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);g.add(w);
+  const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,40),toonS(0x5b4a33));bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);g.add(bank);
+  addCol({x:lk.x,z:lk.z,r:lk.r-1.2});L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
+ const rv=riverNear239(x0,z0);if(rv.d>CH)return;if(nearestCity(x0,z0).d<220)return;
+ const pts=[];for(let i=0;i<=12;i++){const z=z0-CH/2+i*CH/12;pts.push([riverCenter239(rv.b,z),z])}
+ const pos=[],uv=[],idx=[];pts.forEach(([x,z],i)=>{pos.push(x-RIVW239/2,.06,z,x+RIVW239/2,.06,z);uv.push(0,.5,1,.5);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
+ const geom=new THREE.BufferGeometry();geom.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geom.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geom.setIndex(idx);geom.computeVertexNormals();
+ const w=new THREE.Mesh(geom,waterMat239());w.onBeforeRender=()=>{waterMat239().uniforms.uTime.value=performance.now()/1000};g.add(w);
+ const RS=roadSegs(x0,z0,1);const bridges=[];for(const [x1,z1,x2,z2] of RS){if(z1!==z2||Math.abs(z1-z0)>CH/2)continue;const bx=riverCenter239(rv.b,z1);if(bx<Math.min(x1,x2)||bx>Math.max(x1,x2))continue;bridges.push({x:bx,z:z1})}
+ for(const B of bridges){const br=new THREE.Group(),wood=toonS(0x7a5534),dk=toonS(0x553a22);const deck=mesh(geo('brd239',()=>new THREE.BoxGeometry(RIVW239+5,.35,5)),wood);deck.position.y=.5;br.add(deck);
+  for(const sz of [-2.3,2.3]){const rail=mesh(geo('brr239',()=>new THREE.BoxGeometry(RIVW239+5,.18,.18)),dk);rail.position.set(0,1.45,sz);br.add(rail);for(let i=-3;i<=3;i++){const post=mesh(geo('brp239',()=>new THREE.BoxGeometry(.22,1.2,.22)),dk);post.position.set(i*(RIVW239+4)/6,1,sz);br.add(post)}}
+  br.position.set(B.x,0,B.z);g.add(br)}
+ for(let i=0;i<pts.length;i+=1){const [x,z]=pts[i];if(bridges.some(B=>Math.abs(B.z-z)<4.5))continue;addCol({x,z,r:RIVW239/2-.6})}}
+function riverClear239(x,z){return riverNear239(x,z).d<RIVW239/2+3}
 function outpostAt217(cx,cz){if(rh(cx,cz,9)%100>=11)return false;const x=cx*CH,z=cz*CH;if(!onRoad(roadSegs(x,z,1),x,z,12))return false;return nearestCity(x,z).d>350}
 function buildOutpost217(ch,g,addCol){const x0=ch.cx*CH+9,z0=ch.cz*CH+9,R=mulberry32(rh(ch.cx,ch.cz,10));
  if(ENV.ok){const b=new EnvBatch();EH(b,'campfire_stones',x0,0,z0,0,.7);EH(b,'tent_detailedOpen',x0+4,0,z0-3,R()*TAU,2.6);EW(b,'stall',x0-4,0,z0+2,Math.PI/2,3.2);EW(b,'cart',x0+1,0,z0+5,R()*TAU,2.6);EH(b,'lantern_standing',x0-2,0,z0-3,0,2.4);EW(b,'crates_stacked',x0-5.5,0,z0-1,R()*TAU,1.4);EW(b,'barrel',x0+5.5,0,z0+1,0,.8);envOwn(g,b.mesh(ENVMAT))}
@@ -8192,9 +8217,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v238</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v239</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=238;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=239;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
