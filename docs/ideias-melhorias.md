@@ -21,6 +21,8 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - ~~Combinar classes: já existe (passivas somam, habilidades no kit)~~
 - ~~Cofre limitado pela casa (v204)~~
 
+- ~~Fim do Mundo: horda diária contra a cidade perto do jogador (v205)~~
+
 ## História
 - Explicar no mundo o que é o nível de ameaça: a Ordem mede o "peso" de cada monstro que sai da fenda.
 - Divindade: ligar ao Arquiteto (Ato VII). Chefes Divindade seriam pedaços dele tentando atravessar.

@@ -6285,7 +6285,14 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function weekTick198(){const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
+/* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
+function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;
+ if(!player||player.dead||L.mode!=='world'||!unl('season')||!seasonOn()||profile.season===weekId())return;
+ const near=nearestCity(player.x,player.z),c=near.c;if(!c||near.d>150||cityFallen(c)||c.name==='Aster')return;
+ const gr=clamp(rankOf(),0,9),a=rnd(0,TAU),hx=c.x+Math.cos(a)*90,hz=c.z+Math.sin(a)*90,n=6+gr+(d%7);const R=RAID155[c.id]||(RAID155[c.id]={hp:100,warned:false});
+ for(let i=0;i<n;i++){const k=wpick(kindsFor(gr)).k,e=spawnKind(k,hx+rnd(-6,6),hz+rnd(-6,6),gr,{wild:true,breaker:true});threatApply184(e,threatRoll184(gr,false,{red:1}));e.gold*=2;e.raid155={city:c.id,cx:c.x,cz:c.z,tx:c.x,tz:c.z}}
+ toast('<b>[NARRADOR]</b> FIM DO MUNDO: uma horda de '+n+' monstros marcha para <b>'+c.name+'</b>. Defenda a cidade!',7000);bigText('HORDA',1400)}
+function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
@@ -7998,9 +8005,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v204</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v205</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=204;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=205;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

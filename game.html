@@ -6268,7 +6268,14 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function weekTick198(){const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
+/* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
+function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;
+ if(!player||player.dead||L.mode!=='world'||!unl('season')||!seasonOn()||profile.season===weekId())return;
+ const near=nearestCity(player.x,player.z),c=near.c;if(!c||near.d>150||cityFallen(c)||c.name==='Aster')return;
+ const gr=clamp(rankOf(),0,9),a=rnd(0,TAU),hx=c.x+Math.cos(a)*90,hz=c.z+Math.sin(a)*90,n=6+gr+(d%7);const R=RAID155[c.id]||(RAID155[c.id]={hp:100,warned:false});
+ for(let i=0;i<n;i++){const k=wpick(kindsFor(gr)).k,e=spawnKind(k,hx+rnd(-6,6),hz+rnd(-6,6),gr,{wild:true,breaker:true});threatApply184(e,threatRoll184(gr,false,{red:1}));e.gold*=2;e.raid155={city:c.id,cx:c.x,cz:c.z,tx:c.x,tz:c.z}}
+ toast('<b>[NARRADOR]</b> FIM DO MUNDO: uma horda de '+n+' monstros marcha para <b>'+c.name+'</b>. Defenda a cidade!',7000);bigText('HORDA',1400)}
+function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;

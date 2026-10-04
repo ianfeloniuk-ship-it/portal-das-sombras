@@ -740,3 +740,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v202: ranking da torre por semana de jogo (towerWeek202): 5 rivais por semana, prêmio em ouro por posição na virada.
 - v203: diário de caça (profile.hunt203, contado em killEnemy) na aba da guilda; marcos 10/50/200 por nível dão ouro e +0,5% de dano.
 - v204: relíquias sobem de nível (100 abates, máx 5, +20%/nível, relicM204); cofre 1 sem casa, 2+móveis/2 (máx 6).
+- v205: Fim do Mundo manda uma horda por dia de jogo para a cidade a até 150 m do jogador (hordeTick205, usa raid155; Aster fica fora).
