@@ -4236,7 +4236,7 @@ function envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,rank){const b=new EnvBat
   envOwn(L.group,b.mesh(ENVMAT))}
 
 /* ================= MUNDO INFINITO ================= */
-const CH=64,REG=6;
+const CH=64,REG=20;
 let chunks=new Map(),HASH=new Map(),WN=null,WSEED=null,ranking=[],cityCache=new Map();
 const CN_A=['Val','Ny','Se','Dra','Lu','Kal','Vey','Or','Tes','Mi','Gwy','Sol','Ar','Ki','Hol','Ze','Ob','Mar','El','Syl','Bri','Cor','Tha','Um','Ra','Is','Fen','Gal','Mor','Zar','Aur','Bel','Cai','Dun','Eri','Fal','Hae','Ith','Jor','Lor','Nar','Pel','Qui','Rho','Sar','Tor','Ul','Var','Wyn','Xan'];
 const CN_B=['kor','mera','ran','moor','men','dera','ra','ion','sar','rath','dun','lace','dent','rin','low','phyr','sidia','row','dran','var','sa','vo','los','bra','heim','vale','gard','polis','thas','mir','tia','nor','wen','bur','dell','crest','fall','hold','reach','spire'];
@@ -4255,7 +4255,8 @@ function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)
 function roadSegs(x,z,n){const RX=Math.floor(Math.round(x/CH)/REG),RZ=Math.floor(Math.round(z/CH)/REG),out=[];
   for(let i=-n;i<=n;i++)for(let j=-n;j<=n;j++){const c=regionCity(RX+i,RZ+j),e=regionCity(RX+i+1,RZ+j),so=regionCity(RX+i,RZ+j+1);out.push([c.x,c.z,e.x,c.z],[e.x,c.z,e.x,e.z],[c.x,c.z,c.x,so.z],[c.x,so.z,so.x,so.z])}return out}
 function onRoad(segs,x,z,w=4.5){for(const [x1,z1,x2,z2] of segs){if(z1===z2){if(Math.abs(z-z1)<w&&x>=Math.min(x1,x2)-w&&x<=Math.max(x1,x2)+w)return true}else if(Math.abs(x-x1)<w&&z>=Math.min(z1,z2)-w&&z<=Math.max(z1,z2)+w)return true}return false}
-function danger(x,z){const n=nearestCity(x,z);return clamp(Math.floor((n.d-46)/26)+Math.floor(Math.hypot(x,z)/900),0,9)}
+/* v215 (Ian): cidades a ~1,3 km (REG 6→20); perigo esticado na mesma proporção */
+function danger(x,z){const n=nearestCity(x,z);return clamp(Math.floor((n.d-46)/(26*REG/6))+Math.floor(Math.hypot(x,z)/900),0,9)}
 function worldInit(seed){if(WSEED===(seed|0)&&WN)return;WSEED=seed|0;WN=makeNoise(seed);cityCache.clear();
   const RK=mulberry32(seed+5);ranking=[];for(let i=0;i<14;i++){const ri=Math.min(TOPR,Math.floor(Math.pow(RK(),2.2)*(TOPR+1)));ranking.push({name:NAMES[Math.floor(RK()*NAMES.length)],rank:ri,lvl:Math.round(8+RK()*30+ri*18)})}}
 function hrem(c){const a=HASH.get(hkey(Math.floor(c.x/HB),Math.floor(c.z/HB)));if(a){const i=a.indexOf(c);if(i>=0)a.splice(i,1)}}
@@ -4423,20 +4424,23 @@ function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   {BREAKG184=g;const prev=bossE,b=spawnBoss(g.x+rnd(-2,2),g.z+rnd(-2,2),g.rank,dungeonBoss124(g));dunScale(b,g.rank,gateLvl207(g));bossE=prev;b.wild=true;b.breaker=true;b.gold*=2;out.push(b);BREAKG184=null}
   for(const e of out){e.raid155={...raid,tx:raid.cx,tz:raid.cz}}
   const dist=player?Math.round(Math.hypot(g.x-player.x,g.z-player.z)):0;
+  const near215=dist<RAIDNEAR215,say215=near215?toast:(h=>logNews(h));
   if(city){const R=RAID155[city.id]||(RAID155[city.id]={hp:100,warned:false});R.hp=Math.min(R.hp,100);
-    toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' e marcham para <b>'+city.name+'</b> ('+dist+' m de você). Defenda a cidade!',7000);bigText('ATAQUE A '+city.name.toUpperCase(),1600)}
-  else{toast('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' a '+dist+' m e vagueiam pelo mapa.',5000);bigText('QUEBRA',1100)}
+    say215('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' e marcham para <b>'+city.name+'</b> ('+dist+' m de você). Defenda a cidade!',7000);if(near215)bigText('ATAQUE A '+city.name.toUpperCase(),1600)}
+  else{say215('<b>[NARRADOR]</b> TRANSBORDO DA FENDA: '+(opts.bossOnly?'o guardião escapou':'monstros e o guardião saíram')+' de um portal rank '+GR[g.rank].id+' a '+dist+' m e vagueiam pelo mapa.',5000);if(near215)bigText('QUEBRA',1100)}
   return out;
 }
 /* v155: ataque da Fenda a uma vila. Monstros dentro da muralha derrubam a defesa da cidade; em 0 ela cai (mesma reconstrução da queda sazonal). */
 const RAID155={};
-function raidMove155(e,dt,near){const R=e.raid155;let dx=R.tx-e.x,dz=R.tz-e.z,d=Math.hypot(dx,dz);
+function raidMove155(e,dt,near){const R=e.raid155;if(R.city&&player&&Math.hypot(player.x-R.cx,player.z-R.cz)>RAIDNEAR215)return 0;let dx=R.tx-e.x,dz=R.tz-e.z,d=Math.hypot(dx,dz);
   if(d<(R.city?4:2)){if(R.city){const a=rnd(0,TAU),r=rnd(4,20*CITYK);R.tx=R.cx+Math.cos(a)*r;R.tz=R.cz+Math.sin(a)*r}else{R.tx=e.x+rnd(-40,40);R.tz=e.z+rnd(-40,40)}return 0}
   const sp=e.speed*(R.city?.75:.4)*dt;if(near)moveEnt(e,dx/d*sp,dz/d*sp);else{e.x+=dx/d*sp;e.z+=dz/d*sp}e.face=Math.atan2(dx,dz);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return 1}
+/* v215 (Ian): ataque só anda, avisa e derruba cidade se você estiver perto dela (até 500 m). Cidade longe não pune. */
+const RAIDNEAR215=500;
 function updRaids155(dt){if(L.mode!=='world')return;const per={};
-  for(const e of enemies){if(e.dead||e.gone||!e.raid155?.city)continue;const R=e.raid155,c={x:R.cx,z:R.cz};if(Math.hypot(e.x-c.x,e.z-c.z)<36*CITYK)per[R.city]=(per[R.city]||0)+(e.isBoss?.6:.15)}
+  for(const e of enemies){if(e.dead||e.gone||!e.raid155?.city)continue;const R=e.raid155,c={x:R.cx,z:R.cz};if(Math.hypot(player.x-c.x,player.z-c.z)>RAIDNEAR215)continue;if(Math.hypot(e.x-c.x,e.z-c.z)<36*CITYK)per[R.city]=(per[R.city]||0)+(e.isBoss?.6:.15)}
   for(const id in RAID155){const R=RAID155[id],c=citiesAround(player.x,player.z,4000).find(c=>c.id===id)||null;const alive=enemies.some(e=>!e.dead&&!e.gone&&e.raid155?.city===id);
-    if(!alive){delete RAID155[id];if(c&&!cityFallen(c)){toast('<b>[CIDADE]</b> O ataque a '+c.name+' acabou. A cidade resistiu'+(R.hp<100?' com '+Math.round(R.hp)+'% da defesa':'')+'.',5000)}continue}
+    if(!alive){delete RAID155[id];if(c&&!cityFallen(c)&&Math.hypot(c.x-player.x,c.z-player.z)<RAIDNEAR215){toast('<b>[CIDADE]</b> O ataque a '+c.name+' acabou. A cidade resistiu'+(R.hp<100?' com '+Math.round(R.hp)+'% da defesa':'')+'.',5000)}continue}
     if(per[id]){R.hp-=per[id]*dt;if(!R.warned&&R.hp<100){R.warned=true;toast('<b>[CIDADE]</b> Monstros dentro das muralhas'+(c?' de '+c.name:'')+'! Defesa caindo.',4000)}}
     if(R.hp<=0&&c){profile.raided155=profile.raided155||{};profile.raided155[id]=1;if(profile.rebuilt)delete profile.rebuilt[id];store.set('pds2_profile',profile);delete RAID155[id];
       for(const e of enemies)if(e.raid155?.city===id){e.raid155.city=null;e.raid155.tx=e.x;e.raid155.tz=e.z}
@@ -8044,9 +8048,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v214</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v215</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=214;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=215;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

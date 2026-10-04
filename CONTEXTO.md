@@ -750,3 +750,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v212: sombra em faixas em todos os materiais iluminados (aomap_fragment, reload para desligar); troca toon pula materiais com shader próprio; contorno de esqueleto aplicado depois da pele (corrige casca roxa no jogador); texto da tela inicial com a morte nova.
 - v213: bônus do rank cresce com o nível até o nível do rank; Bênção da Fenda vira velocidade + 1% vida/s (sem dano); diária sem penalidade.
 - v214: bônus do rank começa em 50% no nível 1 e chega a 100% no nível do rank; sequência de diárias de 7 dias (profile.streak214): bênção, ouro, pergaminho, ouro x2, bênção longa, pergaminho, relíquia nova.
+- v215: cidades a ~0,8–1,5 km (REG 20); perigo esticado (26*REG/6); ataques a cidades só andam/avisam/derrubam com o jogador a até 500 m (RAIDNEAR215); aviso de rompimento longe vai só para as Notícias.
