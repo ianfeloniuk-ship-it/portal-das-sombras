@@ -746,3 +746,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v208: monstros/chefe do rompimento com o nível do portal (dunScale com lvo); teste de visual cartunesco (toon208, filtro de cor) em Configurações → Tela.
 - v209: visual cartunesco ligado por padrão (brilho 1.01 para o deserto não estourar).
 - v210: teste de contorno (casca invertida) em jogador, monstros e aliados; Configurações → Tela (pds_outline210, desligado por padrão).
+- v211: contorno ligado por padrão; sombra em faixas (MeshToon com 3 tons, celAdd211) em monstros/aliados sem textura; modelos com textura (Tripo, jogador) ficam para a próxima etapa.
