@@ -4236,7 +4236,7 @@ function envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,rank){const b=new EnvBat
   envOwn(L.group,b.mesh(ENVMAT))}
 
 /* ================= MUNDO INFINITO ================= */
-const CH=64,REG=20;
+const CH=64,REG=30;
 let chunks=new Map(),HASH=new Map(),WN=null,WSEED=null,ranking=[],cityCache=new Map();
 const CN_A=['Val','Ny','Se','Dra','Lu','Kal','Vey','Or','Tes','Mi','Gwy','Sol','Ar','Ki','Hol','Ze','Ob','Mar','El','Syl','Bri','Cor','Tha','Um','Ra','Is','Fen','Gal','Mor','Zar','Aur','Bel','Cai','Dun','Eri','Fal','Hae','Ith','Jor','Lor','Nar','Pel','Qui','Rho','Sar','Tor','Ul','Var','Wyn','Xan'];
 const CN_B=['kor','mera','ran','moor','men','dera','ra','ion','sar','rath','dun','lace','dent','rin','low','phyr','sidia','row','dran','var','sa','vo','los','bra','heim','vale','gard','polis','thas','mir','tia','nor','wen','bur','dell','crest','fall','hold','reach','spire'];
@@ -4245,8 +4245,8 @@ function cityNameGen(R){return CN_A[Math.floor(R()*CN_A.length)]+CN_B[Math.floor
 const CITY_NAMES=['Valkor','Nymeria','Seoran','Drakemoor','Lumen','Kaldera','Veyra','Orion','Tessar','Mirath','Gwyn','Solace','Ardent','Kirin','Hollow','Zephyr','Obsidia','Marrow','Eldran','Sylvar','Brisa','Corvo','Thalos','Umbra'];
 function rh(a,b,c=0){return (Math.imul(a|0,73856093)^Math.imul(b|0,19349663)^Math.imul(c|0,83492791)^WSEED)>>>0}
 function regionCity(rx,rz){const k=rx+','+rz;let c=cityCache.get(k);if(c)return c;const R=mulberry32(rh(rx,rz,7));
-  const o=(rx===0&&rz===0)?{x:0,z:0}:{x:1+Math.floor(R()*(REG-2)),z:1+Math.floor(R()*(REG-2))};const cx=rx*REG+o.x,cz=rz*REG+o.z;
-  c={id:k,cx,cz,x:cx*CH,z:cz*CH,name:(rx===0&&rz===0)?'Aster':cityNameGen(R)};cityCache.set(k,c);return c}
+  const H217=REG>>1,o=(rx===0&&rz===0)?{x:H217,z:H217}:{x:Math.round(H217+(R()-.5)*REG*.4),z:Math.round(H217+(R()-.5)*REG*.4)};const cx=rx*REG+o.x-H217,cz=rz*REG+o.z-H217;/* v217: cidade perto do centro da região: no mínimo ~1,1 km entre cidades */
+  const cap217=((rx%5)+5)%5===0&&((rz%5)+5)%5===0;c={id:k,cx,cz,x:cx*CH,z:cz*CH,capital:cap217,name:(rx===0&&rz===0)?'Aster':cityNameGen(R)};if(cap217&&c.name!=='Aster')c.name='Capital '+c.name;cityCache.set(k,c);return c}
 function nearestCity(x,z){const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG);let best=null,bd=1e12;
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(rx+i,rz+j),d=Math.hypot(x-c.x,z-c.z);if(d<bd){bd=d;best=c}}return{c:best,d:bd}}
 function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG),n=Math.ceil(rad/(CH*REG))+1;
@@ -4265,7 +4265,7 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)}};
+  const RSEG=roadSegs(x0,z0,2);const op217=outpostAt217(cx,cz);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)||(op217&&Math.hypot(x-x0-9,z-z0-9)<17)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -4284,7 +4284,7 @@ function loadChunk(cx,cz){
   inst(geo('leaf',()=>0),toonS(0x3a86c8),trees.map(t=>({x:t.x,y:5.6,z:t.z,s:t.s*.7,ry:t.ry})),true,g);
   inst(geo('rock',()=>new THREE.DodecahedronGeometry(1.2,0)),toonS(0x3a4d6b),rocks.map(r=>({x:r.x,y:.4*r.s,z:r.z,s:r.s,ry:r.ry,rx:r.ry})),true,g);
   }
-  const city=near.find(c=>c.cx===cx&&c.cz===cz);if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
+  const city=near.find(c=>c.cx===cx&&c.cz===cz);if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(outpostAt217(cx,cz))buildOutpost217(ch,g,addCol);else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
   if(ch.pg){envAO(ch.pg);delete ch.pg}
   L.group.add(g);chunks.set(key,ch);
 }
@@ -4323,7 +4323,7 @@ function buildCity(c,g,addCol,R){
     const dir=Math.hypot(s.x,s.z),off=Math.max(s.w,s.d)*.55+1.6,vx=sx-s.x/dir*off,vz=sz-s.z/dir*off;
     addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=window.Water154?Water154.mesh(2.25):new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
-    L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView})}
+    L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+8,2.4,Z+18);g.add(sg217);L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · CARROÇA DA ORDEM',use:travelView217})}}
   buildHouse(c,g,E);
   if(!cityFallen(c)){const lx=X-16,lz=Z-1;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5);/* v166: a pousada fica no anel de casas (157,5°); placa e porta acompanham o prédio */const ir=157.5*Math.PI/180,ix=E?X+Math.cos(ir)*30.5:X+7,iz=E?Z+Math.sin(ir)*30.5:Z-4.6;if(E)inn.position.set(X+Math.cos(ir)*31.5,4.2,Z+Math.sin(ir)*31.5);else inn.position.set(X+7,2.6,Z-6);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}L.inter.push({type:'inn',city:c,x:ix,z:iz,r:3.2,label:'F · POUSADA',use:innView})}
@@ -6899,7 +6899,7 @@ function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};l
   else h+=row('Missão pessoal','Liberada com 3 corações','');return h}
 /* cidade */
 const cityOf=()=>nearestCity(player.x,player.z).c;
-const cityL=c=>(profile.cityLv||{})[c.id]||0;
+const cityL=c=>Math.max(c&&c.capital?4:0,(profile.cityLv||{})[c.id]||0)/* v217: capitais já nascem grandes */;
 /* cidades caídas */
 function cityFallen(c){if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=gameDay198()%7;const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}
@@ -6948,6 +6948,21 @@ function spawnWorldBoss(){const P=player,a=rnd(0,TAU),x=P.x+Math.cos(a)*70,z=P.z
   for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
   toast('<b>[MUNDO]</b> Um DRAGÃO ERRANTE sobrevoa a região. Ele aparece no mapa.',6000);bigText('DRAGÃO ERRANTE',1300)}
 function worldBossDeath(b){if(b.siege){siegeWin(b);storyEv('siege')}hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
+/* v217 (Ian): mundo em camadas. Cidades a ~1,9 km; capitais a cada 5×5 regiões (~9,6 km);
+   postos de estrada (fogueira para descansar e mascate) a cada poucas centenas de metros nas estradas; Carroça da Ordem entre cidades visitadas. */
+function outpostAt217(cx,cz){if(rh(cx,cz,9)%100>=11)return false;const x=cx*CH,z=cz*CH;if(!onRoad(roadSegs(x,z,1),x,z,12))return false;return nearestCity(x,z).d>350}
+function buildOutpost217(ch,g,addCol){const x0=ch.cx*CH+9,z0=ch.cz*CH+9,R=mulberry32(rh(ch.cx,ch.cz,10));
+ if(ENV.ok){const b=new EnvBatch();EH(b,'campfire_stones',x0,0,z0,0,.7);EH(b,'tent_detailedOpen',x0+4,0,z0-3,R()*TAU,2.6);EW(b,'stall',x0-4,0,z0+2,Math.PI/2,3.2);EW(b,'cart',x0+1,0,z0+5,R()*TAU,2.6);EH(b,'lantern_standing',x0-2,0,z0-3,0,2.4);EW(b,'crates_stacked',x0-5.5,0,z0-1,R()*TAU,1.4);EW(b,'barrel',x0+5.5,0,z0+1,0,.8);envOwn(g,b.mesh(ENVMAT))}
+ const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4]])addCol({x,z,r});
+ const nm='Posto '+['do Viajante','da Encruzilhada','do Lampião','da Carroça','das Brasas','do Corvo'][rh(ch.cx,ch.cz,11)%6];
+ L.inter.push({type:'outpost',chunk:ch,x:x0+1.5,z:z0+1.5,r:2.6,label:'F · DESCANSAR NA FOGUEIRA',use:()=>{player.hp=player.maxhp;player.mp=player.maxmp;floater(player.x,player.z,'Descansou','#ffd08a',true);toast('<b>['+nm.toUpperCase()+']</b> Você descansou na fogueira. Vida e mana cheias.',4000);saveRun()}});
+ L.inter.push({type:'outpost',chunk:ch,x:x0-4,z:z0+3.5,r:2.4,label:'F · MASCATE',use:()=>openShop('pot')})}
+function visit217(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d>40*CITYK)return;const V=profile.visited217=profile.visited217||{};if(!V[n.c.id]){V[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z,cap:!!n.c.capital};store.set('pds2_profile',profile);if(n.c.capital&&n.c.name!=='Aster'){bigText(n.c.name.toUpperCase(),1800);showSys('Você chegou a <b>'+n.c.name+'</b>. As capitais guardam o comércio da região e uma Carroça da Ordem para viajar.')}}}
+function travelView217(){const V=profile.visited217||{},P=player;let h='<div class="sysline">A Carroça da Ordem leva você a qualquer cidade que já visitou. O preço sobe com a distância.</div>';
+ const L2=Object.entries(V).map(([id,v])=>({id,...v,d:Math.hypot(v.x-P.x,v.z-P.z)})).filter(v=>v.d>200).sort((a,b)=>a.d-b.d);
+ for(const v of L2){const km=v.d/1000,cost=Math.round(80*km*(1+rankOf()*.15));h+=row((v.cap?'★ ':'')+gearText(v.n),km.toFixed(1)+' km',btn(fmt(cost)+' ouro','travel217',v.id,run.gold>=cost))}
+ if(!L2.length)h+='<div class="sysline">Visite outras cidades para liberar destinos.</div>';openModal('CARROÇA DA ORDEM',h)}
+function travelGo217(id){const v=(profile.visited217||{})[id];if(!v)return;const P=player,km=Math.hypot(v.x-P.x,v.z-P.z)/1000,cost=Math.round(80*km*(1+rankOf()*.15));if(run.gold<cost)return;run.gold-=cost;closeModal();P.x=v.x+rnd(-3,3);P.z=v.z+14;cam.x=P.x;cam.z=P.z;P.m.root.position.set(P.x,0,P.z);updChunks(true);dayT+=Math.min(DAYLEN*.5,km*40);saveRun();toast('<b>[CARROÇA]</b> Você chegou a '+gearText(v.n)+'. A viagem levou '+Math.round(km*40/60)+' min de jogo.',5000)}
 function ruinAt(cx,cz){if(((rh(cx,cz,3))%100)>=6)return false;if(onRoad(roadSegs(cx*CH,cz*CH,1),cx*CH,cz*CH,16))return false;for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor((cx+i)/REG),Math.floor((cz+j)/REG));if(Math.abs(c.cx-cx)<=1&&Math.abs(c.cz-cz)<=1)return false}return true}
 function buildRuin(ch,g,addCol){const x0=ch.cx*CH,z0=ch.cz*CH,key=ch.cx+','+ch.cz;
   if(ENV.ok)envRuin(g,x0,z0,addCol);else for(let i=0;i<8;i++){const a=i/8*TAU;if(i===3)continue;const p=mesh(geo('rpil',()=>new THREE.CylinderGeometry(.6,.7,1,8)),toonS(0x5a5a68));const h=rnd(1.5,4.5);p.scale.y=h;p.position.set(x0+Math.cos(a)*7,h/2,z0+Math.sin(a)*7);g.add(p);addCol({x:p.position.x,z:p.position.z,r:.8})}
@@ -7265,7 +7280,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[NARRADOR]</b> Comprado: '+p.n)}
   if(a==='buyi')buyEquipment(v[0],+v.slice(1));
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
-  if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
+  if(a==='travel217'){travelGo217(v);return 'close'}if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
   if(a==='sell'){if(!sellEquipment(v))return}
   if(a==='claim'){if(!claimOrderQuest(+v))return}
   if(a==='hire'){const p=L.cands[+v];if(!p||run.gold<p.cost||run.party.length>=3)return;run.gold-=p.cost;L.cands.splice(+v,1);run.party.push(p);narratorEvent105('hire');makeHunterAlly(p,player.x+1,player.z+1,false);toast('<b>[NARRADOR]</b> '+p.name+' entrou no seu grupo.')}
@@ -7855,7 +7870,7 @@ function graveTick192(){const G=profile&&profile.grave192;if(!G||!player||L.mode
  if(!window.GRAVE192M){const g=new THREE.Group(),st=toonS(0x6d6a74),a=mesh(new THREE.BoxGeometry(.9,1.3,.25),st);a.position.y=.65;const b=mesh(new THREE.BoxGeometry(.25,.9,.27),st);b.position.y=1.1;const c=mesh(new THREE.BoxGeometry(.7,.22,.27),st);c.position.y=1.25;const gl=new THREE.Mesh(new THREE.RingGeometry(.8,1.1,24),glowS(0xffd070,.8));gl.rotation.x=-Math.PI/2;gl.position.y=.04;g.add(a,b,c,gl);window.GRAVE192M=g}
  if(GRAVE192M.parent!==L.group){L.group.add(GRAVE192M)}GRAVE192M.position.set(G.x,0,G.z);
  if(Math.hypot(player.x-G.x,player.z-G.z)<2.2&&!player.dead){run.gold+=G.gold;floater(player.x,player.z,'+'+fmt(G.gold)+' ouro do túmulo','#ffd36b',true);toast('<b>[NARRADOR]</b> Você achou o que restou de si mesmo.',4000);sfx('coin');delete profile.grave192;store.set('pds2_profile',profile);L.group.remove(GRAVE192M)}}
-function rareUpdate103(dt){laterTick181();graveTick192();if(run)run.playT184=(run.playT184||0)+Math.max(dt,dt>0?(window.WDT196||dt):0);if(boon184()&&player&&!player.dead)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.01*dt);if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103){const t103=rareHud103()+raidHud155();hud103.textContent=t103;hud103.style.display=t103?'':'none'}if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
+function rareUpdate103(dt){laterTick181();try{visit217()}catch(_){}graveTick192();if(run)run.playT184=(run.playT184||0)+Math.max(dt,dt>0?(window.WDT196||dt):0);if(boon184()&&player&&!player.dead)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.01*dt);if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103){const t103=rareHud103()+raidHud155();hud103.textContent=t103;hud103.style.display=t103?'':'none'}if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
  if(!rareActive103(13))AR103.passages=null;const cap=rareActive103(7)?affinity103(7):0;for(const al of specialEcos103().slice(cap)){al.dead=true;scene.remove(al.m.root)}
   if(a.pending&&L.mode==='world'&&!L.inter.some(i=>i.type==='fissure103')){const p=a.pending;L.inter.push({type:'fissure103',x:p.x,z:p.z,r:3.5,label:'F · INVESTIGAR FISSURA',use:inspectFissure103})}for(const it of L.inter)if(it.type==='fissure103'){it.hidden=!a.pending||!!AR103.trial;if(a.pending){it.x=a.pending.x;it.z=a.pending.z}}
  if(L.mode==='world'&&a.pending){if(!window.riftScarPersistent131||window.riftScarPersistent131.userData.owner!==L){const scar=new THREE.Group();for(let i=0;i<7;i++){const angle=-.9+i*.3,length=1.15+(i%3)*.22,x0=Math.cos(angle)*length*.22,z0=Math.sin(angle)*length*.22,x1=Math.cos(angle+.3)*length,z1=Math.sin(angle+.3)*length,m=new THREE.Mesh(new THREE.CylinderGeometry(.019,.006,Math.hypot(x1-x0,z1-z0),4),glowS(a.pending.color==='red'?0xe14a64:0x9370d2,.30)),dir=new THREE.Vector3(x1-x0,0,z1-z0);m.position.set((x0+x1)/2,.055,(z0+z1)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());scar.add(m)}scar.userData.owner=L;scene.add(scar);window.riftScarPersistent131=scar}window.riftScarPersistent131.position.set(a.pending.x,0,a.pending.z)}else if(window.riftScarPersistent131){scene.remove(window.riftScarPersistent131);window.riftScarPersistent131=null}
@@ -8048,9 +8063,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v216</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v217</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=216;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=217;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
