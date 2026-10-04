@@ -5784,7 +5784,7 @@ function update(dt){
     if(P.dodgeT>0){P.dodgeT-=dt;const sp=P.dashSpd||17;moveEnt(P,P.dir.x*sp*dt,P.dir.z*sp*dt);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{execute:P.dashDmg.execute,kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}
+    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
@@ -7053,21 +7053,33 @@ function lakeAt239(cx,cz){if(rh(cx,cz,21)%100>=4)return null;const x=cx*CH+(rh(c
  if(nearestCity(x,z).d<260||onRoad(roadSegs(x,z,1),x,z,r+8)||riverNear239(x,z).d<r+30)return null;const bio=biomeAt(x,z);if(bio==='deserto'||bio==='vulcao')return null;return {x,z,r}}
 function waterMat239(){if(CRY230.wr)return CRY230.wr;const t=Water154.mesh(1);const m=t.material;CRY230.wr=m;return m}
 function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH,z0=ch.cz*CH;
- const lk=lakeAt239(ch.cx,ch.cz);if(lk){const fz=['neve','cristal'].includes(biomeAt(lk.x,lk.z));const w=fz?new THREE.Mesh(new THREE.CircleGeometry(lk.r,40),CRY230.ice||(CRY230.ice=new THREE.MeshStandardMaterial({color:0x8fc6e6,emissive:0x2f6a96,emissiveIntensity:.22,roughness:.12,metalness:.15}))):Water154.mesh(lk.r);w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);g.add(w);
+ const lk=lakeAt239(ch.cx,ch.cz);if(lk){const fz=['neve','cristal'].includes(biomeAt(lk.x,lk.z));let w;if(fz){const cg=new THREE.CircleGeometry(lk.r,40);cg.setAttribute('aFD',new THREE.Float32BufferAttribute(new Float32Array(cg.attributes.position.count*2).map((v,i)=>i%2?0:1),2));const mt=riverMat240();w=new THREE.Mesh(cg,mt);w.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000}}else w=Water154.mesh(lk.r);w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);g.add(w);
   const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,40),toonS(0x5b4a33));bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);g.add(bank);
   if(!fz)addCol({x:lk.x,z:lk.z,r:lk.r-1.2});L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
  const rv=riverNear239(x0,z0);if(rv.d>CH)return;if(nearestCity(x0,z0).d<220)return;
  /* v240 (Ian): neve/cristal = gelo (dá para andar); deserto/vulcão = seco; estrada passa por cima do rio (mureta de pedra), água some sob a estrada. */
  const RS=roadSegs(x0,z0,1),cross=[];for(const [x1,z1,x2,z2] of RS){if(z1!==z2||Math.abs(z1-z0)>CH/2+6)continue;const bx=riverCenter239(rv.b,z1);if(bx<Math.min(x1,x2)||bx>Math.max(x1,x2))continue;cross.push({x:bx,z:z1})}
- const kind=(x,z)=>{const b=biomeAt(x,z);return (b==='deserto'||b==='vulcao')?0:(b==='neve'||b==='cristal')?2:1};
- const N=24,pts=[];for(let i=0;i<=N;i++){const z=z0-CH/2+i*CH/N,x=riverCenter239(rv.b,z);pts.push({x,z,k:cross.some(c=>Math.abs(c.z-z)<5)?0:kind(x,z)})}
- const strip=(seg,mat,anim)=>{if(seg.length<2)return;const pos=[],uv=[],idx=[];seg.forEach((p,i)=>{pos.push(p.x-RIVW239/2,.06,p.z,p.x+RIVW239/2,.06,p.z);uv.push(0,.5,1,.5);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
-  const gm=new THREE.BufferGeometry();gm.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));gm.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));gm.setIndex(idx);gm.computeVertexNormals();const m=new THREE.Mesh(gm,mat);if(anim)m.onBeforeRender=()=>{mat.uniforms.uTime.value=performance.now()/1000};g.add(m)};
- const ice=CRY230.ice||(CRY230.ice=new THREE.MeshStandardMaterial({color:0x8fc6e6,emissive:0x2f6a96,emissiveIntensity:.22,roughness:.12,metalness:.15}));
- let seg=[],cur=-1;const flush=()=>{if(cur===1)strip(seg,waterMat239(),true);else if(cur===2)strip(seg,ice,false)};
- for(const p of pts){if(p.k!==cur){if(seg.length){const last=seg[seg.length-1];flush();seg=p.k?[last]:[]}cur=p.k}if(p.k)seg.push(p)}flush();
+ const fd=(x,z)=>{const b=snowB(x,z);return [1-Math.min(1,Math.max(0,(b-.25)/.08)),Math.min(1,Math.max(0,(b-.66)/.06))]},kind=(x,z)=>{const [f,d]=fd(x,z);return d>.95?0:f>.5?2:1};
+ const N=24,pts=[];for(let i=0;i<=N;i++){const z=z0-CH/2+i*CH/N,x=riverCenter239(rv.b,z),[f,d]=fd(x,z);pts.push({x,z,f,d,road:cross.some(c=>Math.abs(c.z-z)<5),k:kind(x,z)})}
+ {let seg=[];const flushS=()=>{if(seg.length<2){seg=[];return}const pos=[],uv=[],fdA=[],idx=[];seg.forEach((p,i)=>{pos.push(p.x-RIVW239/2,.06,p.z,p.x+RIVW239/2,.06,p.z);uv.push(0,.5,1,.5);fdA.push(p.f,p.d,p.f,p.d);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
+  const gm=new THREE.BufferGeometry();gm.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));gm.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));gm.setAttribute('aFD',new THREE.Float32BufferAttribute(fdA,2));gm.setIndex(idx);gm.computeVertexNormals();
+  const mt=riverMat240(),m=new THREE.Mesh(gm,mt);m.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000};g.add(m);seg=[]};
+  for(const p of pts){if(p.road){flushS();continue}seg.push(p)}flushS()}
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(RIVW239+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
- for(const p of pts){if(p.k===1)addCol({x:p.x,z:p.z,r:RIVW239/2-.6})}}
+ for(const p of pts){if(p.k===1&&!p.road)addCol({x:p.x,z:p.z,r:RIVW239/2-.6})}}
+/* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
+function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight};
+ m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
+ m.fragmentShader=base.fragmentShader.replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+  float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
+  float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
+  vec3 Li=normalize(vec3(-.4,.8,.45));ice+=pow(max(0.,dot(reflect(-Li,vec3(0.,1.,0.)),normalize(vec3(.1,.85,.5)))),20.)*.25+pow(n(p*24.+floor(t*1.5)),30.)*1.6;
+  col=mix(col,ice,smoothstep(.2,.8,fz));
+  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y);gl_FragColor=vec4(col,a);');
+ return CRY230.rv=m}
+function onIce240(P){if(L.mode!=='world')return false;const rv=riverNear239(P.x,P.z);if(rv.d<RIVW239/2+.5&&snowB(P.x,P.z)<.29)return true;const lk=lakeAt239(Math.round(P.x/CH),Math.round(P.z/CH));return !!(lk&&['neve','cristal'].includes(biomeAt(lk.x,lk.z))&&Math.hypot(P.x-lk.x,P.z-lk.z)<lk.r)}
+function iceMove240(P,vx,vz,dt){const on=onIce240(P);P.iv240=P.iv240||{x:0,z:0};if(!on){P.iv240.x=P.iv240.z=0;return false}
+ const k=Math.min(1,dt*(vx||vz?1.4:.35));P.iv240.x+=(vx-P.iv240.x)*k;P.iv240.z+=(vz-P.iv240.z)*k;if(Math.hypot(P.iv240.x,P.iv240.z)<.05)return true;moveEnt(P,P.iv240.x*dt,P.iv240.z*dt);if(!P.iceTip240){P.iceTip240=1;toast('<b>[NARRADOR]</b> Gelo. Cuidado: aqui você desliza.',3500)}return true}
 function riverClear239(x,z){return riverNear239(x,z).d<RIVW239/2+3}
 function outpostAt217(cx,cz){if(rh(cx,cz,9)%100>=11)return false;const x=cx*CH,z=cz*CH;if(!onRoad(roadSegs(x,z,1),x,z,12))return false;return nearestCity(x,z).d>350}
 function buildOutpost217(ch,g,addCol){const x0=ch.cx*CH+9,z0=ch.cz*CH+9,R=mulberry32(rh(ch.cx,ch.cz,10));
@@ -8219,9 +8231,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v240</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v241</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=240;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=241;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
