@@ -7,7 +7,8 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - ~~Taverna e lojas com a frente para a praça (v200)~~
 - Torres da muralha meio desencaixadas do muro, algumas entram na praça.
 - ~~Projéteis presos na masmorra: não é bug (estavam em voo)~~
-- Desempenho: no 1º quadro do mundo chega a ~5,9 mi de triângulos antes do recorte ajustar (depois cai para ~1,5 mi). Casas Tripo (12 mil triângulos cada, 60 cópias) pesam mais; usar o LOD também na cidade.
+- ~~Desempenho: árvores completas só bem perto; pedaço novo começa leve (v201): 6,7–10,5 mi → 1,6–4,6 mi~~
+- Muralha da cidade sempre completa (754 mil triângulos); dividir em pedaços para usar a versão leve longe.
 - ~~Fachadas das lojas conferidas (v200)~~
 
 ## Sistemas
