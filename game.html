@@ -6262,7 +6262,7 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function weekTick198(){const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;
+function weekTick198(){const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
@@ -6807,7 +6807,7 @@ function updSpecial2(S,dt){
 }
 function winSpecial(msg,chest){L.bossDead=true;L.closeT=60;for(const it of L.exits)if(it.locked){unlockExitModel131(it)}if(chest)addChest(0,0,L.special.gr,true);bigText('VITÓRIA',1200);sfx('gong');toast('<b>[NARRADOR]</b> '+msg,4000)}
 const tLvl=f=>f<=100?Math.round(f*2.6):260+(f-100)*4,towerCap=()=>1e9;
-function towerClear(S){if(S.cleared)return;const beforeMarks=towerMilestones();S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);store.set('pds2_profile',profile);const earned=towerMilestones()-beforeMarks;if(earned>0){refreshStats();toast('<b>[TORRE]</b> Legado da Torre: +'+earned+'% ao bônus permanente de dano e vida. Vale em qualquer lugar. Consulte Personagem → Build.',6000)}
+function towerClear(S){if(S.cleared)return;const beforeMarks=towerMilestones();S.cleared=true;setTimeout(()=>storyEv('tower'),50);if(hasT('tower'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.25);profile.towerBest=Math.max(profile.towerBest||0,S.floor);towerWeek202().best=Math.max(towerWeek202().best,S.floor);store.set('pds2_profile',profile);const earned=towerMilestones()-beforeMarks;if(earned>0){refreshStats();toast('<b>[TORRE]</b> Legado da Torre: +'+earned+'% ao bônus permanente de dano e vida. Vale em qualquer lugar. Consulte Personagem → Build.',6000)}
   const storyEnd=finishTowerStory();
   /* Saída só abre nos andares de chefe (10, 20...) — sugestão do Irror. */
   if(S.boss||S.floor>=100)for(const it of L.exits)if(it.locked){unlockExitModel131(it)}L.bossDead=true;L.closeT=9999;
@@ -6817,6 +6817,13 @@ function towerClear(S){if(S.cleared)return;const beforeMarks=towerMilestones();S
   const grp=new THREE.Group();grp.position.set(0,0,-4);const ring=new THREE.Mesh(geo('gring',()=>0),glowS(0xffd070,1));ring.position.y=2.6;grp.add(ring);const sg=makeSign('ANDAR '+(S.floor+1),'#ffd070',.55);sg.position.y=5.5;grp.add(sg);L.group.add(grp);L.exits.push({ring,grp,sg,locked:false});
   L.inter.push({type:'next',x:0,z:-4,r:3.2,label:'F · SUBIR PARA O ANDAR '+(S.floor+1),use:()=>buildSpecial('tower',{x:L.gate.x,z:L.gate.z},S.floor+1)});
   bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500);saveRun()}
+/* v202 (Ian): ranking sazonal da torre. A cada semana de jogo, 5 caçadores rivais sobem a torre; quem chegar mais alto ganha prêmio na virada da semana. */
+function towerWeek202(){const w=weekId();let T=profile.towerWeek202;if(!T||T.w!==w){if(T&&!T.paid)towerPay202(T);T=profile.towerWeek202={w,best:0,paid:false}}return T}
+function towerRivals202(w){const R=mulberry32(9001+w*7919),base=Math.max(5,(profile.towerBest||0)*.8);const used=new Set();return [0,1,2,3,4].map(i=>{let n;do n=NAMES[Math.floor(R()*NAMES.length)];while(used.has(n));used.add(n);return {n,f:Math.max(1,Math.round(base*(.5+R()*.9)))}})}
+function towerBoard202(T){const L2=[...towerRivals202(T.w),{n:'Você',f:T.best,me:1}].sort((a,b)=>b.f-a.f||(b.me?1:-1));return L2}
+function towerPay202(T){if(T.paid||!T.best)return;T.paid=true;const pos=towerBoard202(T).findIndex(x=>x.me)+1,mul=[0,5,3,2,1,1,.5][pos]||.5,g=Math.round(400*T.best*mul*(1+rankOf()*.3));if(run){run.gold+=g;toast('<b>[TORRE]</b> Fim da semana de jogo: você ficou em <b>'+pos+'º</b> no ranking da torre (andar '+T.best+'). Prêmio: <b class="gold">'+fmt(g)+' de ouro</b>.',8000);if(pos===1)bigText('1º NA TORRE',1800)}}
+function towerRankRows202(){const T=towerWeek202(),B=towerBoard202(T),left=weekLeft();let h='<div class="sec">RANKING DA SEMANA <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Andar mais alto alcançado nesta semana de jogo. Na virada da semana, o prêmio em ouro depende da sua posição."></span></div>';
+ B.forEach((x,i)=>{h+=row((i+1)+'º '+(x.me?'<b style="color:#ffd36b">Você</b>':gearText(x.n)),'Andar '+x.f,'')});return h+'<div class="sysline">Fecha em '+gameLeftTxt198(left)+'.</div>'}
 function towerTab(){const b=profile.towerBest||0,cap=towerCap(),c=Math.max(1,b);let h='<div class="sysline">A Torre da Ascensão é <b>infinita</b>. Chefe a cada 10 andares; Arconte no andar 100. A saída abre nos andares de chefe. Você pode continuar do seu recorde: <b>andar '+b+'</b>.</div>'+row('Legado da Torre · +'+towerMilestones()+'%','Cada 10 andares inéditos acrescentam 1% ao bônus de dano e vida, válido em qualquer lugar. Soma-se aos demais bônus, com rendimento decrescente. Automático, sem pontos de passiva. Refazer não acumula.','')+row('Próximo marco','Andar '+((towerMilestones()+1)*10)+' · +1% ao Legado da Torre','')+row('Recompensas','Equipamentos somente nos baús dos chefes. Outros andares: ouro, XP e materiais.','')+'<div class="sysline">Nível dos monstros: andar × 2,6 até o 100; depois, +4 níveis por andar.</div>'+row('Começar do andar 1','Aquecimento',btn('Entrar','tower',1))+(b>=2?row('Continuar do andar '+c,'Pula os andares que você já venceu',btn('Entrar','tower',c,true,'hot')):'');
   h+='<div class="sec">RANKING DA TORRE</div>';towerRank().forEach((r,i)=>{h+='<div class="it" style="'+(r.me?'background:rgba(255,179,71,.14)':'')+'"><div class="d"><b>'+(i+1)+'º</b> '+r.n+'</div><span>andar '+r.f+'</span></div>'});return h}
 
@@ -7126,7 +7133,7 @@ function guildView(tab){
       row('Recompensa','Bônus da Ordem por subir de rank: '+fmt(2000*(cur+1))+' ouro e 2 pontos de status','')+
       '<div style="display:flex;justify-content:flex-end">'+(ok?btn('FAZER REAVALIAÇÃO','reaval',0,true,'hot'):'<span class="sysline">Seu rank oficial já está atualizado.</span>')+'</div>'}
   else if(tab==='clone')h+=cloneTab();else if(tab==='god')h+=godTab();
-  else if(tab==='tower')h+=towerTab();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();else if(tab==='prova')h+=rankTab();else if(tab==='jobs')h+=jobsTab();
+  else if(tab==='tower')h+=towerTab()+towerRankRows202();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();else if(tab==='prova')h+=rankTab();else if(tab==='jobs')h+=jobsTab();
   else if(tab==='hire'){h+='<div class="sysline">Caçadores contratados seguem você no mundo e nas masmorras. Se morrerem, não voltam. Máximo de 3.</div><div class="sec">SEU GRUPO ('+run.party.length+'/3)</div>';
     if(!run.party.length)h+='<div class="it"><div class="d"><small>Ninguém contratado.</small></div></div>';
     run.party.forEach((p,i)=>{h+=row(p.name+' <span class="rl" style="color:'+RANKS[p.rank].c+'">['+RANKS[p.rank].id+']</span>',CLASSES[p.cls].n+' · NV '+p.lvl,btn('Dispensar','fire',i,true,'red'))});
