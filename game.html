@@ -5945,8 +5945,10 @@ const ADV=[
   {n:'Arquimago Telúrico',sk:S('Colosso de Pedra','summon',16,40,2.5,0xc8a070)},
   {n:'Arquimago Tempestuoso',sk:S('Fúria dos Céus','chain',8,30,3.4,0xfff36b)}];
 const JOB_LVL=30;
-const weekId=()=>Math.floor((Date.now()/864e5+3)/7);
-const weekLeft=()=>((weekId()+1)*7-3)*864e5-Date.now();
+const weekId=()=>Math.floor(gameDay198()/7);/* v198 (Ian): semana de jogo = 7 dias de jogo (~56 min), não a semana real */
+function gameDay198(){try{return Math.floor(dayT/DAYLEN)}catch(e){return 0}}
+function gameLeftTxt198(sec){sec=Math.max(0,sec);const d=Math.floor(sec/DAYLEN),m=Math.ceil(sec/60);return (d>0?d+' dia'+(d>1?'s':'')+' de jogo · ':'')+'~'+m+' min'}
+const weekLeft=()=>((weekId()+1)*7*DAYLEN-dayT);
 function weeklyBoss(){const pool=[...BOSSES,...BOSSES_HIGH];return pool[weekId()%pool.length]}
 
 /* ================= INSTÂNCIAS ESPECIAIS ================= */
@@ -6259,7 +6261,10 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
+function weekTick198(){const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;
+ if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
+ else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
+function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
@@ -6705,7 +6710,7 @@ function storyTab(){const P=profile.story||{};let h='<div class="sysline">Histó
 
 /* ===== ESTAÇÕES ===== */
 const SEASONS=['Primavera','Verão','Outono','Inverno'];
-function seasonI(){return Math.floor(Math.floor(dayT/DAYLEN)/5)%4}
+function seasonI(){return Math.floor(gameDay198()/7)%4}/* v198: cada estação dura 7 dias de jogo */
 /* clima */
 const WX={type:'clear',t:120,pts:null};
 function updWeather(dt){if(L.mode==='world'&&player){const si=seasonI();(window.SEASON154U||(window.SEASON154U={value:0})).value=si;if(WX.se!==undefined&&WX.se!==si){toast('<b>[ESTAÇÃO]</b> Chegou '+(si===1?'o ':'a ')+'<b>'+SEASONS[si]+'</b>. '+['Mais chuva e o chão verdeja.','Tempo aberto quase sempre.','Árvores douradas e folhas no chão.','Neve cobre o mundo e o frio traz nevascas.'][si],7000);for(const ch of[...chunks.values()])unloadChunk(ch);updChunks(true)}WX.se=si}WX.t-=dt;if(WX.t<=0){WX.t=rnd(150,300);const r=Math.random(),se=seasonI();const nt=se===3?(r<.3?'clear':r<.4?'rain':'snow'):se===1?(r<.75?'clear':'rain'):se===0?(r<.45?'clear':'rain'):(r<.5?'clear':r<.85?'rain':'snow');if(nt!==WX.type){WX.type=nt;if(L.mode==='world'&&['rain','snow'].includes(nt))narratorEvent105(nt);toast('<b>[CLIMA]</b> '+(nt==='rain'?'Começou a chover. Raios ficam 30% mais fortes.':nt==='snow'?'Começou a nevar. Monstros mais lentos, gelo 30% mais forte.':'O tempo abriu.'))}}
@@ -6730,7 +6735,7 @@ function domainTab(){const o=profile.owned||[];let h='<div class="sysline">Masmo
   o.forEach((d,i)=>{const today=todayKey(),can=d.last!==today;h+=row('<span class="rl" style="color:'+RANKS[d.rank].c+'">'+GR[d.rank].id+'</span> · '+d.name,d.att?'<span style="color:#ff8fa3">SOB ATAQUE: defenda ou perca</span>':can?'Recursos prontos':'Já coletado hoje',d.att?btn('DEFENDER','defend',i,true,'red'):btn('Coletar','collect',i,can))});return h}
 /* sazonal */
 const seasonOn=()=>weekId()%3===2;
-function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citiesAround(player.x,player.z,1500).filter(cityFallen).length;return '<div class="sysline">'+(on?'<b style="color:#ff4d6a">O FIM DO MUNDO COMEÇOU.</b> Um Arconte inimigo abriu o Portal Primordial. A cada dia mais cidades caem. <b>'+fc+'</b> cidade(s) perto de você já caíram. Fechar o portal salva todas.':'Tudo calmo. O próximo fim do mundo vem em algumas semanas.')+'</div>'+
+function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citiesAround(player.x,player.z,1500).filter(cityFallen).length;return '<div class="sysline">'+(on?'<b style="color:#ff4d6a">O FIM DO MUNDO COMEÇOU.</b> Um Arconte inimigo abriu o Portal Primordial. A cada dia mais cidades caem. <b>'+fc+'</b> cidade(s) perto de você já caíram. Fechar o portal salva todas.':'Tudo calmo. O próximo fim do mundo vem em '+gameLeftTxt198(((weekId()+(2-weekId()%3||3))*7)*DAYLEN-dayT)+'.')+'</div>'+
   (on?row('Portal Primordial','Arconte inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
 const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
@@ -6833,7 +6838,7 @@ function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};l
 const cityOf=()=>nearestCity(player.x,player.z).c;
 const cityL=c=>(profile.cityLv||{})[c.id]||0;
 /* cidades caídas */
-function cityFallen(c){if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=Math.floor((Date.now()/864e5+3)%7);const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
+function cityFallen(c){if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=gameDay198()%7;const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}
 
 /* ================= LIBERAÇÃO GRADUAL ================= */
@@ -7108,8 +7113,8 @@ function guildView(tab){
     else{h+='<div class="sysline">Lyra: Todo '+c.n+' que passa no Julgamento vira <b>'+A.n+'</b>. Sua classe não muda, ela evolui.</div>';
       h+=row('Requisito','Nível '+JOB_LVL+' · você está no nível '+run.level,'')+row('Missão','Sobreviva a 3 ondas na Arena do Julgamento e derrote o Cavaleiro do Julgamento. Sem saída até o fim.','')+row('Recompensa','Classe '+A.n+', vida +25%, dano +30% e a habilidade '+A.sk.n,'');
       h+='<div style="display:flex;justify-content:flex-end">'+btn('ACEITAR MISSÃO','job',0,run.level>=JOB_LVL,'hot')+'</div>'}}
-  else if(tab==='weekly'){const B=weeklyBoss(),gr=Math.min(9,rankOf()+1),done=profile.weekly===weekId(),left=weekLeft(),dd=Math.floor(left/864e5),hh=Math.floor(left%864e5/36e5);
-    h+='<div class="sysline">Chefe desta semana: <b>'+B.n+'</b>. Ele se ajusta ao seu rank.</div>'+row('Rank do chefe','Um acima do seu','<b class="rl" style="color:'+RANKS[gr].c+'">'+GR[gr].id+'</b>')+row('Recompensa','Dois baús de guardião, ouro triplo e núcleos','')+row('Troca de chefe','Em '+dd+'d '+hh+'h','');
+  else if(tab==='weekly'){const B=weeklyBoss(),gr=Math.min(9,rankOf()+1),done=profile.weekly===weekId(),left=weekLeft();
+    h+='<div class="sysline">Chefe desta semana: <b>'+B.n+'</b>. Ele se ajusta ao seu rank.</div>'+row('Rank do chefe','Um acima do seu','<b class="rl" style="color:'+RANKS[gr].c+'">'+GR[gr].id+'</b>')+row('Recompensa','Dois baús de guardião, ouro triplo e núcleos','')+row('Troca de chefe','Em '+gameLeftTxt198(left),'');
     h+='<div style="display:flex;justify-content:flex-end">'+(done?'<span class="sysline">Concluído nesta semana.</span>':btn('ENFRENTAR','weekly',0,true,'hot'))+'</div>'}
   else if(tab==='guild'){h+=guildTab()}
   else if(tab==='travel'){h+=travelTab()}
