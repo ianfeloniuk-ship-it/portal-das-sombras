@@ -760,3 +760,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v222: Fenda da Âncora guarda pedaço do Arquiteto (PIECES222: braços, pernas, tronco, cabeça), nível ???, ameaça Extinção/Divindade, vida x2,5, falas próprias. Proposta do despertar em docs/arquiteto-despertar.md.
 - v223: Despertar do Arquiteto: 5 capitais (caps223) guardam os pedaços; aviso global ao romper + HUD k/5; com 5 rompidas ele nasce e marcha a 1,6 m/s para Aster (profile.arch223); se chegar a 55 m de Aster = FIM DO CICLO (apaga perfil e run, conta pds_cycles); se morrer = relíquias, 1 mi de ouro, título Quem Fechou a Porta, Ato XIII.
 - v224: Divindade é o nível máximo; pedaços do Arquiteto sempre Divindade; o Arquiteto tem nível próprio "???" (THREAT184[10], acima de tudo), modelo Devorador de 9 m escurecido.
+- v225: níveis acima da Divindade: Supremo (pedaços do Arquiteto, THREAT184[11]) e Inefável (o Arquiteto, [10]); Absoluto e Uno reservados para a história.
