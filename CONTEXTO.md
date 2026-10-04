@@ -771,3 +771,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v234: voltou o pilar de ponta quadrada com a esfera de plasma no centro das cidades (a pedido do Ian).
 - v235: correntes na esfera do selo (3 anéis girando + 4 correntes do pilar; chains234).
 - v236: fonte refeita (basin236): bacia octogonal de pedra escura, borda e runas roxas, água violeta pulsando; pilar escurecido para combinar.
+- v237: água da fonte = shader do lago de pesca (Water154) em tom violeta.
