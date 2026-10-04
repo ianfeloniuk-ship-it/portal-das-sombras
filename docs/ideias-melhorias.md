@@ -24,7 +24,4 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - ~~Fim do Mundo: horda diária contra a cidade perto do jogador (v205)~~
 
 ## História
-- Explicar no mundo o que é o nível de ameaça: a Ordem mede o "peso" de cada monstro que sai da fenda.
-- Divindade: ligar ao Arquiteto (Ato VII). Chefes Divindade seriam pedaços dele tentando atravessar.
-- Pergaminho de Ressurgimento: criado pela capela; uma sacerdotisa vende e conta de onde vem.
-- Morte verdadeira: o Narrador comenta que "o mundo esquece quem cai", mas a Ordem guarda o rank. Dá sentido a manter só o rank.
+- ~~Textos curtos no jogo (v206): ameaça (1ª vez), Divindade, pergaminho, morte~~
