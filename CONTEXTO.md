@@ -765,3 +765,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v227: níveis de ameaça renomeados (sem anjos): Sombra, Legião, Praga, Dilúvio, Babel, Leviatã, Behemoth, Apocalipse, Logos; acima: Supremo e Inefável.
 
 - v228: nomes de ameaça voltaram ao original (Ameaça…Divindade), mantendo Supremo e Inefável acima.
+- v229: nomes de ameaça originais restaurados de fato (Ameaça…Divindade; v228 saiu sem a troca), Supremo e Inefável acima.
