@@ -4372,7 +4372,7 @@ function removeGateMesh(g){if(g.mesh){if(g.mesh.userData.rift131){Rift131.dispos
 const GATE_COUNT155=12,GATE_NEAR155=200,GATE_FAR155=280;
 function tickGates(dt){
   const P=player;
-  const closingDone=[];for(const g of gates){if(g.dead||g===curGate)continue;if(g.closing131){if(g.mesh?.userData.rift131?.closing>2.15)closingDone.push(g);continue;}g.life-=dt;
+  const closingDone=[];for(const g of gates){if(g.dead||g===curGate)continue;if(g.closing131){if(g.mesh?.userData.rift131?.closing>2.15)closingDone.push(g);continue;}g.life-=Math.max(dt,dt>0?(window.WDT196||dt):0);
     // v155 (Ian): portal longe não some; só deixa de ser desenhado. Voltando antes do tempo acabar, ele continua lá.
     const far=L.mode==='world'&&P&&Math.hypot(g.x-P.x,g.z-P.z)>GATE_FAR155;
     if(L.mode==='world'&&g.life>0){if(far&&g.mesh)removeGateMesh(g);else if(!far&&!g.mesh)gateMesh(g)}
@@ -5631,7 +5631,8 @@ function updNpc(n,dt){
 let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
-  const rdt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
+  /* v196 (Ian): relógio do mundo usa o tempo real (até 1 s por quadro); combate segue limitado a .05 para não atravessar paredes. Com PC lento, dias, estações e portais não atrasam. */
+  const realDt=Math.max(0,Math.min(1,(now-last)/1000));window.WDT196=realDt;const rdt=Math.min(.05,realDt);last=now;
   AU.want=wantTrack();
   if(riftSound131&&(!started||paused||document.hidden||!AU.on||player?.dead))riftSound131.silence();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
@@ -6258,7 +6259,7 @@ const GUILDS=[
 /* dia e noite */
 let dayT=120;const DAYLEN=480;
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>.55&&p<.95}
-function updDayNight(dt){dayT+=dt;if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
+function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-.5)/.08,(1-p)/.08),0,1)*(p>.5?1:0);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
@@ -7762,7 +7763,7 @@ function graveTick192(){const G=profile&&profile.grave192;if(!G||!player||L.mode
  if(!window.GRAVE192M){const g=new THREE.Group(),st=toonS(0x6d6a74),a=mesh(new THREE.BoxGeometry(.9,1.3,.25),st);a.position.y=.65;const b=mesh(new THREE.BoxGeometry(.25,.9,.27),st);b.position.y=1.1;const c=mesh(new THREE.BoxGeometry(.7,.22,.27),st);c.position.y=1.25;const gl=new THREE.Mesh(new THREE.RingGeometry(.8,1.1,24),glowS(0xffd070,.8));gl.rotation.x=-Math.PI/2;gl.position.y=.04;g.add(a,b,c,gl);window.GRAVE192M=g}
  if(GRAVE192M.parent!==L.group){L.group.add(GRAVE192M)}GRAVE192M.position.set(G.x,0,G.z);
  if(Math.hypot(player.x-G.x,player.z-G.z)<2.2&&!player.dead){run.gold+=G.gold;floater(player.x,player.z,'+'+fmt(G.gold)+' ouro do túmulo','#ffd36b',true);toast('<b>[NARRADOR]</b> Você achou o que restou de si mesmo.',4000);sfx('coin');delete profile.grave192;store.set('pds2_profile',profile);L.group.remove(GRAVE192M)}}
-function rareUpdate103(dt){laterTick181();graveTick192();if(run)run.playT184=(run.playT184||0)+dt;if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103){const t103=rareHud103()+raidHud155();hud103.textContent=t103;hud103.style.display=t103?'':'none'}if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
+function rareUpdate103(dt){laterTick181();graveTick192();if(run)run.playT184=(run.playT184||0)+Math.max(dt,dt>0?(window.WDT196||dt):0);if(AR103.region!==L){if(AR103.trial)finishTrial103(false);AR103={region:L,reserve:0};}const P=player;kitUpdate111(dt);if(typeof cm154Update==='function')cm154Update(dt);guardianUpdate108();const hud103=document.getElementById('rare-status103');if(hud103){const t103=rareHud103()+raidHud155();hud103.textContent=t103;hud103.style.display=t103?'':'none'}if(P.dead){if(AR103.trial)finishTrial103(false);AR103.anchor=null;AR103.zone=null;AR103.passages=null;AR103.lastAttack=null;return}const a=awakening103();if(!rareActive103(12)){AR103.reserve=0;AR103.anchor=null;if(!AR103.trial)AR103.zone=null}else if(nearestEnemy(P.x,P.z,18))AR103.reserve=Math.min(3*affinity103(12),(AR103.reserve||0)+dt*.5);
  if(!rareActive103(13))AR103.passages=null;const cap=rareActive103(7)?affinity103(7):0;for(const al of specialEcos103().slice(cap)){al.dead=true;scene.remove(al.m.root)}
   if(a.pending&&L.mode==='world'&&!L.inter.some(i=>i.type==='fissure103')){const p=a.pending;L.inter.push({type:'fissure103',x:p.x,z:p.z,r:3.5,label:'F · INVESTIGAR FISSURA',use:inspectFissure103})}for(const it of L.inter)if(it.type==='fissure103'){it.hidden=!a.pending||!!AR103.trial;if(a.pending){it.x=a.pending.x;it.z=a.pending.z}}
  if(L.mode==='world'&&a.pending){if(!window.riftScarPersistent131||window.riftScarPersistent131.userData.owner!==L){const scar=new THREE.Group();for(let i=0;i<7;i++){const angle=-.9+i*.3,length=1.15+(i%3)*.22,x0=Math.cos(angle)*length*.22,z0=Math.sin(angle)*length*.22,x1=Math.cos(angle+.3)*length,z1=Math.sin(angle+.3)*length,m=new THREE.Mesh(new THREE.CylinderGeometry(.019,.006,Math.hypot(x1-x0,z1-z0),4),glowS(a.pending.color==='red'?0xe14a64:0x9370d2,.30)),dir=new THREE.Vector3(x1-x0,0,z1-z0);m.position.set((x0+x1)/2,.055,(z0+z1)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());scar.add(m)}scar.userData.owner=L;scene.add(scar);window.riftScarPersistent131=scar}window.riftScarPersistent131.position.set(a.pending.x,0,a.pending.z)}else if(window.riftScarPersistent131){scene.remove(window.riftScarPersistent131);window.riftScarPersistent131=null}
