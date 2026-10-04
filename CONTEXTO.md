@@ -744,3 +744,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v206: textos de história curtos (lore206, uma vez cada): peso da ameaça, Divindade = pedaço do Arquiteto, pergaminho da capela, "o mundo esquece quem cai".
 - v207: portal com nível fixo (lvl207: rank alto acompanha o nível do jogador, ★ pode passar); dunLvl usa o nível do portal. Torre sem "continuar" e recorde zera na morte. Muralha removida (pontos devolvidos); constelações novas: Caçador, Vento, Sangue, Sombra.
 - v208: monstros/chefe do rompimento com o nível do portal (dunScale com lvo); teste de visual cartunesco (toon208, filtro de cor) em Configurações → Tela.
+- v209: visual cartunesco ligado por padrão (brilho 1.01 para o deserto não estourar).
