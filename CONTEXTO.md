@@ -739,3 +739,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v201: LOD de árvores mais apertado (completa só d<16 com raio*.2); mesh novo começa na versão leve. Medido: 6,7–10,5 mi → 1,6–4,6 mi triângulos.
 - v202: ranking da torre por semana de jogo (towerWeek202): 5 rivais por semana, prêmio em ouro por posição na virada.
 - v203: diário de caça (profile.hunt203, contado em killEnemy) na aba da guilda; marcos 10/50/200 por nível dão ouro e +0,5% de dano.
+- v204: relíquias sobem de nível (100 abates, máx 5, +20%/nível, relicM204); cofre 1 sem casa, 2+móveis/2 (máx 6).
