@@ -3535,7 +3535,7 @@ function weaponIsMagic173(it){if(!it)return false;const k=it.kind155||'';return 
 function animWep173(){const w=run.equip.w,cw=(CLASSES[profile.cls]||{}).wep;if(bareArcher155())return 'bow_bare';if(/^(staff|bonestaff|wand|tome|orb)$/.test(cw||'')&&!weaponIsMagic173(w))return 'orb';return cw}
 function atkOf(kind){const s=run.stats||{},w=run.equip.w;return 10+2*run.level+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+(w&&(kind==='mag')===weaponIsMagic173(w)?itemAtk(w):0)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=rk===9?1:rk*.1;
-  const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Legado da Torre ('+towerMilestones()+' marcos)',towerMilestones()*.01,towerMilestones()*.01],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Set de classe rara',rareSetBonus155().dmg,rareSetBonus155().hp],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
+  const src=[['Rank '+rkN(rk),rkB,rkB],['Evolução da classe',run.adv?.1:0,run.adv?.1:0],['Provação ('+tr+')',.15*tr,.15*tr],['Reencarnação ('+rb+')',.1*rb,.1*rb],['Maestria ('+ms+')',.005*ms,.005*ms],['Legado da Torre ('+towerMilestones()+' marcos)',towerMilestones()*.01,towerMilestones()*.01],['Títulos',tb.dmg||0,tb.hp||0],['Comida',fb.dmg||0,fb.hp||0],['Conjunto',stb.dmg||0,stb.hp||0],['Set de classe rara',rareSetBonus155().dmg,rareSetBonus155().hp],['Afixos',af.dmg/100,af.hp/100],['Fio de Kael',npcHas('Kael')?.08:0,0],['Diário de caça ('+huntMarks203()+' marcos)',.005*huntMarks203(),0],['Maldição',0,cb.hp||0],['Bem descansado',0,.05*innB()]];
   let d=0,h=0;for(const x of src){d+=x[1];h+=x[2]}return{src,dmg:d,hp:h,edmg:effB(d),ehp:effB(h)}}
 function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0};
@@ -5300,7 +5300,7 @@ function dropLoot(e){if(e.rival||e.statue||!run)return;/* v154 economy: boss rel
   const nm=e.isBoss?'Relíquia de '+(e.name||'Chefe'):lootName(e),v=Math.max(3,Math.round((e.gold||4)*3)),L0=run.loot[nm]||(run.loot[nm]={n:0,v,b:!!e.isBoss});L0.n+=n;L0.v=Math.max(L0.v,v);
   floater(e.x,e.z,'+'+n+' '+nm,e.isBoss?'#ffb84d':'#c9d3de',false,3.6)}
 function lootTotal(){let t=0;for(const k in run.loot||{})t+=run.loot[k].n*run.loot[k].v;return t}
-function killEnemy(e){if(e.dead)return;rememberVestige103(e);if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
+function killEnemy(e){if(e.dead)return;rememberVestige103(e);if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;{const pl=Math.max(1,run.level),el=eLvl(e),m=el>pl?Math.min(2,Math.pow(el/pl,.5)):Math.max(.4,Math.pow(el/pl,.8));gainXp(e.xp*m,'monster');if(e.isBoss&&el>pl){const b=Math.round(xpNeed()*Math.min(.5,.2*m));floater(e.x,e.z,'+'+fmt(b)+' XP · chefe acima do seu nível','#ffd08a',true,3.2);gainXp(b,'monster')}}storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(e.xp)}
   bestKill(e.kind);
@@ -6835,6 +6835,12 @@ function towerClear(S){if(S.cleared)return;const beforeMarks=towerMilestones();S
   L.inter.push({type:'next',x:0,z:-4,r:3.2,label:'F · SUBIR PARA O ANDAR '+(S.floor+1),use:()=>buildSpecial('tower',{x:L.gate.x,z:L.gate.z},S.floor+1)});
   bigText('ANDAR '+S.floor+' LIMPO',1200);toast('<b>[TORRE]</b> Andar '+S.floor+' limpo. '+(S.boss?'Suba ou saia pelo portal azul.':'Suba pelo portal dourado. A saída só abre nos andares de chefe (a cada 10).'),4500);saveRun()}
 /* v202 (Ian): ranking sazonal da torre. A cada semana de jogo, 5 caçadores rivais sobem a torre; quem chegar mais alto ganha prêmio na virada da semana. */
+/* v203 (Ian): diário de caça. Conta monstros vencidos por nível de ameaça; marcos (10, 50, 200) dão ouro e +0,5% de dano permanente cada. */
+const HUNTM203=[10,50,200];
+function huntCount203(t){const H=profile.hunt203=profile.hunt203||{};const n=H[t]=(H[t]||0)+1;if(HUNTM203.includes(n)){const g=Math.round(150*n*t*(1+rankOf()*.2));run.gold+=g;toast('<b>[DIÁRIO DE CAÇA]</b> '+n+' monstros <b>'+THREAT184[t].n+'</b> vencidos. +'+fmt(g)+' de ouro e +0,5% de dano.',6000);refreshStats()}store.set('pds2_profile',profile)}
+function huntMarks203(){const H=profile.hunt203||{};let m=0;for(const t in H)for(const x of HUNTM203)if(H[t]>=x)m++;return m}
+function huntRows203(){const H=profile.hunt203||{};let h='<div class="sec">DIÁRIO DE CAÇA <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Monstros com nível de ameaça que você venceu. Cada marco (10, 50, 200) dá ouro e +0,5% de dano para sempre."></span></div>';
+ for(let t=1;t<THREAT184.length;t++){const n=H[t]||0,nx=HUNTM203.find(x=>x>n);h+=row('<b style="color:'+THREAT184[t].col+'">'+THREAT184[t].n+'</b>',n?n+' vencidos'+(nx?' · próximo marco: '+nx:' · completo'):'nenhum ainda','')}return h}
 function towerWeek202(){const w=weekId();let T=profile.towerWeek202;if(!T||T.w!==w){if(T&&!T.paid)towerPay202(T);T=profile.towerWeek202={w,best:0,paid:false}}return T}
 function towerRivals202(w){const R=mulberry32(9001+w*7919),base=Math.max(5,(profile.towerBest||0)*.8);const used=new Set();return [0,1,2,3,4].map(i=>{let n;do n=NAMES[Math.floor(R()*NAMES.length)];while(used.has(n));used.add(n);return {n,f:Math.max(1,Math.round(base*(.5+R()*.9)))}})}
 function towerBoard202(T){const L2=[...towerRivals202(T.w),{n:'Você',f:T.best,me:1}].sort((a,b)=>b.f-a.f||(b.me?1:-1));return L2}
@@ -7141,7 +7147,7 @@ function guildView(tab){
   else if(tab==='weekly'){const B=weeklyBoss(),gr=Math.min(9,rankOf()+1),done=profile.weekly===weekId(),left=weekLeft();
     h+='<div class="sysline">Chefe desta semana: <b>'+B.n+'</b>. Ele se ajusta ao seu rank.</div>'+row('Rank do chefe','Um acima do seu','<b class="rl" style="color:'+RANKS[gr].c+'">'+GR[gr].id+'</b>')+row('Recompensa','Dois baús de guardião, ouro triplo e núcleos','')+row('Troca de chefe','Em '+gameLeftTxt198(left),'');
     h+='<div style="display:flex;justify-content:flex-end">'+(done?'<span class="sysline">Concluído nesta semana.</span>':btn('ENFRENTAR','weekly',0,true,'hot'))+'</div>'}
-  else if(tab==='guild'){h+=guildTab()}
+  else if(tab==='guild'){h+=guildTab()+huntRows203()}
   else if(tab==='travel'){h+=travelTab()}
   else if(tab==='reaval'){const cur=rankOf(),off=run.official??profile.rank,ok=cur>off;
     h+='<div class="sysline">Lyra: A Ordem só reconhece oficialmente o rank depois da <b>Reavaliação</b>. O cristal mede sua mana e o resultado vai para o registro nacional.</div>'+
@@ -7986,9 +7992,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v202</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v203</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=202;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=203;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

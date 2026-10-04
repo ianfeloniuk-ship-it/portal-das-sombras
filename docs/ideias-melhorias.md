@@ -16,7 +16,7 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 - ~~Túmulo no lugar da morte: 20% do ouro (v192)~~
 - ~~3º espaço de relíquia no rank ★ (v193)~~
 - Relíquias: relíquia sobe de nível com o uso (ex.: 100 abates).
-- Ameaça: diário de caça na guilda com os monstros de nível alto vencidos; ~~título Matador de Deuses (v193)~~.
+- ~~Diário de caça (v203) e título Matador de Deuses (v193)~~
 - ~~Ranking semanal da torre (v202)~~
 - ~~Combinar classes: já existe (passivas somam, habilidades no kit)~~
 - Cofre da casa com espaço limitado que cresce com o nível da casa (hoje o cofre de relíquias não tem limite).
