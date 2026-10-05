@@ -1,3 +1,27 @@
+## Mana e habilidades v258 — 05/10/2026
+
+Ian corrigiu a regra: o custo cresce ao melhorar a própria habilidade, nunca por ganhar mana ou apenas subir o nível do personagem. Autorizou implementar e publicar na versão mais recente. A base v257 e sua campanha foram preservadas.
+
+Implementado custo-base × (1 + 10% por melhoria), com arredondamento para cima e limite de 10 melhorias. Lista e tooltip mostram custo atual/próximo. Cobrança compartilhada nas rotas atuais e legadas; Égide só após execução confirmada; Eco gratuito restitui a mana paga sem resetar recarga. Regeneração reduzida em combate e bônus após seis segundos sem combate. Saves, classes, recursos especiais, narrativa, XP, ouro e morte/ciclo preservados. Escopo completo e limites em [docs/mana-habilidades-v258.md](docs/mana-habilidades-v258.md).
+
+## Campanha em prosa v257 — 05/10/2026
+
+Pedido atual de Ian: terminar a história. A campanha central possui treze capítulos completos e desfechos de contenção, confronto e Fim do Ciclo. As cenas e a ligação da coalizão que criou as prisões são desenvolvimento da IA; nenhum novo título do jogo foi aprovado. Aldric vivo; cinco capitais prendem cinco partes, Aster é o nexo separado; superiores desconhecidos; Narrador e Clã fora do combate final.
+
+O Diário → História oferece leitura dos capítulos liberados pela progressão. A confissão e o capítulo XII exigem provas XI e descobertas anteriores. O final corresponde a act13 (chefe derrotado) ou containmentV5 (Portal Primordial fechado, confissão conhecida, cinco capitais preservadas/reconstruídas, nenhuma Âncora aberta, peça livre ou corpo em marcha). O registro preventivo concede apenas uma página: não chama a vitória do chefe, não distribui seus prêmios e não força prisões a romper. Reabrir ameaças mantém o registro histórico e exige nova defesa.
+
+Chronologia: pedras e Torre antigas; resgate e morte do Primeiro Guardião abrem as grandes Fendas; depois, uma resistência precursora divide a manifestação física e usa as cinco pedras como prisões. Memórias da voz são confrontadas com registros, inclusive uma rota de outra realidade. A procura pela origem e pelos superiores continua depois da vitória concreta de Aster. As escolhas e os resgates da prosa não são novos sistemas físicos implementados. Cinemáticas rejeitadas continuam retiradas. Combate, classes, resets e recompensas mantidos.
+
+## Atualização narrativa v256 — publicação em 05/10/2026
+
+Direção atual de Ian: publicar as atualizações do jogo ao concluir, mantendo a main como fonte oficial. Esta publicação parte da main v252 e preserva seus ajustes de balanceamento, conjuração, maldições, economia e relevo.
+
+Campanha textual v4 em `historia-campanha.js` e `narrativa-campanha.js`: nome escolhido nas falas/Diário, pistas nos atos iniciais/Torre, confissão no Ato XII após XI, Narrador orienta vários Transmigradores em realidades/tempos diferentes e libertação completa do Arquiteto numa realidade ameaça todas. Abertura de passagens e projeção de influência são distintas dessa liberdade completa; cinco Âncoras e Aster separado mantidos. Narrador não é onisciente; Aldric vivo, superiores desconhecidos e Narrador/Clã fora da batalha final.
+
+Cenas 2D e replays rejeitados: não carregados nem publicados. O campo cinematics nos dados é somente histórico, sem renderização atual. Título criativo pendente; “Jogo” é rótulo técnico da aba/PWA. Texto é integrado aos eventos existentes; resgates/escoltas e decisões físicas novos continuam em desenvolvimento. Saves, regras de morte/ciclo, IDs, requisitos, contagens e recompensas mantidos.
+
+## Histórico anterior
+
 # Contexto do projeto Ecos da Fenda (antigo Portal das Sombras) (para outra conversa/IA continuar)
 
 > **Versão atual e regras para começar: veja [`VERSAO.md`](VERSAO.md).** Sempre parta da `main` do GitHub; cópias locais podem estar atrasadas.
