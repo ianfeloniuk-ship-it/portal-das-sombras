@@ -1,3 +1,15 @@
+## Correções de combate, loot e espaço v261 — 05/10/2026
+
+Direção de Ian: loot aleatório independente da classe; armas físicas somente no estilo físico, mágicas somente no mágico; mudança deve trocar animação/dano. Gerador comum tem oito tipos com 12,5% cada, incluindo espada e grimório. Sets mantêm tipo da classe dona do set. Trocar estilo guarda arma incompatível; bolsa cheia bloqueia sem perder item. Desarmado usa soco físico ou magia pela mão, com intervalo ×1,6; limpa combo/pose antiga. Criação oferece somente as três habilidades iniciais, equipa a escolhida e permite trocar na cidade. Save inicial inválido tem correção com backup.
+
+Mira usa vetor XYZ para alvos altos/baixos e morro bloqueia antes do alvo; não acompanha relevo. Aster tem lotes/telhados separados, ruas/portas livres e modelo próprio de Defesa. Baús ficam em piso livre fora de parede/rocha/cristais. Modelos mantêm hierarquia rígida sobre o terreno. Transmigrador e talentos de pontos zeram na morte verdadeira e podem ser reaprendidos; ressurreição protetora não zera. Sem histórico individual de XP. Migração antiga tem backup e não repete após novos investimentos.
+
+Integração preserva main v260 (história/Diário, mana, catálogo e recursos físicos), regras de banco/casa/rank e fórmulas de XP/ouro. QA de 33 escolhas iniciais, 1.200 armas com sementes iguais entre três classes e 27 checks de estilo/loot/criação passou sem erros de página. Testes adicionais e limites registrados na entrega do cofre `Publicacao-Correcoes-v252-2026-10-05/Correcoes-v259/Registro.md`. Pasta v259 é nome histórico; versão final v261. Aceite visual/playtest de Ian pendentes.
+
+## Classes e recursos v260 — 05/10/2026
+
+Ian pediu habilidades claras, duas novas por classe e recursos físicos mais convencionais. Foram adicionadas 40 (200 no catálogo); Guerreiro usa Fúria, Assassino/Tanque/Arqueiro usam Vigor, magias usam mana e Condutor mantém energia. O custo sobe por aprimoramento, nunca pela reserva. Antigos bônus ocultos de Fúria foram substituídos pelo custo explícito. Textos compactos visíveis, recursos e novos IDs persistem no save. Base v259 preservada. Detalhes e limites: [docs/classes-habilidades-v260.md](docs/classes-habilidades-v260.md).
+
 ## Mana e habilidades v258 — 05/10/2026
 
 Ian corrigiu a regra: o custo cresce ao melhorar a própria habilidade, nunca por ganhar mana ou apenas subir o nível do personagem. Autorizou implementar e publicar na versão mais recente. A base v257 e sua campanha foram preservadas.
@@ -821,3 +833,10 @@ Ian pediu pesquisa e autorizou a escolha/implementação do balanceamento pela I
 Ian autorizou aplicar as correções no jogo principal de navegador. Esta versão integra o balanceamento descrito acima; Guerreiro ganha mais vida/ataque físico e menos mana/ataque mágico que os magos; nível próprio e ameaça definem XP/ouro separadamente. HUD mostra progresso e XP restante. Cajado lança magia pela ponta visível e sem arma os ataques mágicos usam a mão com intervalo 60% maior. Reduzir capacidade por maldição também penaliza a reserva atual; retirar equipamento não recupera vida/mana. Contorno de corpo/equipamento reduzido para 4 mm; GLBs de cenário e Rogue preservam texturas/rig e removem faces degeneradas.
 
 Relevo deforma somente o chão. Personagens, criaturas e equipamentos compartilham a altura da raiz, e objetos de cenário em lote recebem altura pelo ponto de apoio de cada item; instâncias usam a origem individual. Projéteis/rastros preservam a altura visual do lançamento sem aplicar o relevo novamente durante o voo. Atualização do cache para pds-v252 e versões de scripts compatíveis. Nenhum reset de save, novo EXE ou mudança na Unreal.
+
+
+## v259 - Vida e dano das criaturas - 05/10/2026
+
+Balanceamento integrado sobre main v258, preservando narrativa, relevo e correções anteriores. tools/monster-balance.js usa referência fixa por nível próprio derivada das 20 classes atuais, espécie e ciclo completo do ataque. Ameaças/IDs e regras de geração preservados. Elites contabilizam resistência dentro da vida efetiva, preservam ferimentos e não repetem promoção. Chefes têm orçamento próprio e mantêm barras de vida. Nível mostrado coincide com o nível da curva; removidos +3/+5 artificiais de elite/chefe. Fórmulas de XP/ouro permanecem; recompensas usam o nível coerente. Reaplicar escala ao mesmo nível não acumula bônus; torre usa essa rotina.
+
+Testes e relatório na entrega Vida-Dano-Monstros-2026-10-05 do cofre. Sem reset de save ou alterações da Unreal. Valores de design escolhidos pela IA; equilíbrio de campanha e combinações extremas ainda exigem playtest. A preparação anterior em cópia v251 foi identificada como base incorreta e não publicada.
