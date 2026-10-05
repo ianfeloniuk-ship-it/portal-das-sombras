@@ -3696,9 +3696,9 @@ class EnvBatch{constructor(){this.l=[];this.nv=0;this.ni=0}
   mesh(mat){const g=this.geo();if(!g)return null;const m=new THREE.Mesh(g,mat);m.matrixAutoUpdate=false;m.updateMatrix();return m}}
 /* materiais: vento nas plantas; prédios e árvores ficam vazados quando tampam o personagem */
 ENV.pl={value:new THREE.Vector3()};ENV.ca={value:new THREE.Vector3()};ENV.occ={value:0};
-const ENV_WIND='float hh=max(transformed.y-.3,0.),amp=hh*.03+min(hh,.8)*.08;transformed.x+=sin(uWind*1.6+transformed.x*.31+transformed.z*.17)*amp;transformed.z+=cos(uWind*1.27+transformed.z*.29+transformed.x*.11)*amp*.7;';
+const ENV_WIND='float hh=max(transformed.y-.3,0.),amp=hh*.03+min(hh,.8)*.08;transformed.x+=sin(uWind*1.6+transformed.x*.31+transformed.z*.17)*amp;transformed.z+=cos(uWind*1.27+transformed.z*.29+transformed.x*.11)*amp*.7;';const ENV_PUSH244='{vec2 dp=transformed.xz-uPlW.xz;float dl=length(dp),pw=smoothstep(1.7,.2,dl)*clamp(transformed.y,0.,1.2)*.8;transformed.xz+=dp/max(dl,.05)*pw;transformed.y-=pw*.35;}';/* v244: grama e flores se abrem quando o jogador passa */
 function envShader(wind,see){return sh=>{let v=sh.vertexShader,f=sh.fragmentShader,add='';
-  if(wind){sh.uniforms.uWind=ENV.wind;v='uniform float uWind;\n'+v;add+=ENV_WIND}
+  if(wind){sh.uniforms.uWind=ENV.wind;sh.uniforms.uPlW=ENV.pl;v='uniform float uWind;uniform vec3 uPlW;\n'+v;add+=ENV_WIND+(see?'':ENV_PUSH244)}
   if(see){sh.uniforms.uPl=ENV.pl;sh.uniforms.uCa=ENV.ca;sh.uniforms.uOcc=ENV.occ;v='varying vec3 vWp;\n'+v;add+='vWp=(modelMatrix*vec4(transformed,1.)).xyz;';
     f='uniform vec3 uPl;uniform vec3 uCa;uniform float uOcc;varying vec3 vWp;\n'+f.replace('void main() {','void main() {\nif(uOcc>.5){vec3 dd=uPl-uCa;float tt=dot(vWp-uCa,dd)/dot(dd,dd);if(tt>.04&&tt<.97){float rr=length(vWp-(uCa+dd*tt)),RR=mix(1.4,4.6,tt);if(rr<RR&&(rr<RR*.6||mod(floor(gl_FragCoord.x)+floor(gl_FragCoord.y),2.)<1.))discard;}}')}
   sh.vertexShader=v.replace('#include <begin_vertex>','#include <begin_vertex>\n'+add);sh.fragmentShader=f}}
@@ -3812,7 +3812,10 @@ const Environment128=(()=>{
   const normals=g.attributes.normal;for(let n=0;n<normals.count;n++)if(Math.hypot(normals.getX(n),normals.getY(n),normals.getZ(n))<.01)normals.setXYZ(n,0,1,0);for(const n of leafIds)normals.setXYZ(n,0,1,0);
   const out={p:g.attributes.position.array,n:g.attributes.normal.array,c:g.attributes.color.array,i:g.index.array,nv:p.length/3,min:box.min.toArray(),max:box.max.toArray(),h:box.max.y-box.min.y,w:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)};g.dispose();cache.set(key,out);return out;
  }
- function groundMaterial(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainSnow154:[bio==='neve'||bio==='cristal'?1:0],terrainMix154:[bio==='deserto'?1:0,bio==='vulcao'?1:0,bio==='pantano'?1:0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
+ /* v244: sombras de nuvens andando no chão */
+ function groundMaterial(bio){const m=groundMaterial0(bio),ob=m.onBeforeCompile;m.onBeforeCompile=function(sh,r){ob.call(this,sh,r);sh.uniforms.uCl244=typeof ENV!=='undefined'?ENV.wind:{value:0};sh.fragmentShader='uniform float uCl244;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>',`{vec2 cq=terrainWorld128.xz*.012+vec2(uCl244*.018,uCl244*.007);float cl=noise128(cq)*.65+noise128(cq*2.3+7.)*.35;diffuseColor.rgb*=1.-.26*smoothstep(.52,.7,cl);}
+ #include <emissivemap_fragment>`)};return m}
+ function groundMaterial0(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainSnow154:[bio==='neve'||bio==='cristal'?1:0],terrainMix154:[bio==='deserto'?1:0,bio==='vulcao'?1:0,bio==='pantano'?1:0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
   s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;attribute float terrainSnow154;attribute vec3 terrainMix154;varying float snow154;varying vec3 mix154;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;snow154=terrainSnow154;mix154=terrainMix154;');
   s.fragmentShader=`varying float snow154;varying vec3 mix154;varying float road128;varying float biome131;varying vec3 terrainWorld128;
   float hash128(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -5770,7 +5773,35 @@ function life243(dt){if(typeof L==='undefined'||L.mode!=='world'||!player){if(LI
  {const P=LIFE243.ff.geometry.attributes.position,on=night&&!cold;LIFE243.ff.visible=on;if(on)LIFE243.fv.forEach((v,i)=>{if(v.y<-50||Math.hypot(v.x-px,v.z-pz)>22){v.x=px+R(20);v.z=pz+R(20);v.y=gy(v.x,v.z)+.5+Math.random()*2}v.p+=dt;v.x+=Math.sin(v.p*.9+i)*dt*.6;v.z+=Math.cos(v.p*.7+i*2)*dt*.6;v.y+=Math.sin(v.p*1.3)*dt*.25;P.setXYZ(i,v.x,v.y,v.z)});P.needsUpdate=true;LIFE243.ff.material.opacity=.55+.45*Math.sin(t*3)}
  {const M=LIFE243.bm,on=!night&&!cold&&!hot,m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),s=new THREE.Vector3(),p=new THREE.Vector3();M.visible=on;if(on){LIFE243.bv.forEach((v,i)=>{if(v.y<-50||Math.hypot(v.x-px,v.z-pz)>24){v.x=px+R(18);v.z=pz+R(18);v.y=0}v.p+=dt;v.h+=Math.sin(v.p*.8+i)*dt*1.5;v.x+=Math.cos(v.h)*dt*1.4;v.z+=Math.sin(v.h)*dt*1.4;v.y=gy(v.x,v.z)+.7+Math.sin(v.p*1.9)*.4+(i%3)*.4;e.set(0,-v.h+Math.PI/2,0);q.setFromEuler(e);s.set(.25+.75*Math.abs(Math.sin(v.p*14+i)),1,1);m.compose(p.set(v.x,v.y,v.z),q,s);M.setMatrixAt(i,m)});M.instanceMatrix.needsUpdate=true}}
 }
-function update(dt){try{life243(dt)}catch(_){}
+/* v244: personagem mais vivo — inclina nas curvas e ao correr, olha em volta parado */
+const AL244={up:new THREE.Vector3(0,1,0),q:new THREE.Quaternion(),a:new THREE.Vector3()};
+function alive244(P,mv,dt){const m=P.m;if(!m||!m.body||P.dead||!dt)return;let df=(P.face-(P.f244??P.face));df=Math.atan2(Math.sin(df),Math.cos(df));P.f244=P.face;
+ const tl=clamp(-df/dt*.035*mv,-.2,.2);P.lean244=(P.lean244||0)+(tl-(P.lean244||0))*Math.min(1,dt*8);P.fw244=(P.fw244||0)+(mv*.09-(P.fw244||0))*Math.min(1,dt*6);
+ m.body.rotation.z+=P.lean244;m.body.rotation.x+=P.fw244;
+ P.idle244=mv>.05||P.atkT>0?0:(P.idle244||0)+dt;const h=m.bones&&m.bones.head;
+ if(h&&P.idle244>2.5){const k=Math.min(1,(P.idle244-2.5)*.8),t=P.idle244,yaw=(Math.sin(t*.45)*.5+Math.sin(t*1.1)*.12)*k;h.getWorldQuaternion(AL244.q);AL244.a.copy(AL244.up).applyQuaternion(AL244.q.invert());h.rotateOnAxis(AL244.a,yaw)}}
+/* v244: pássaros (bando no alto e grupo no chão que foge), poeira dos passos e respingos na água */
+const LF244={};
+function inWater244(x,z){const b=snowB(x,z);if(b<.29||b>.7)return false;const rv=riverNear239(x,z);if(rv.d<RIVW239/2)return true;const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));return !!(lk&&!['neve','cristal'].includes(biomeAt(lk.x,lk.z))&&Math.hypot(x-lk.x,z-lk.z)<lk.r)}
+function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
+ if(!LF244.bird){const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.Float32BufferAttribute([0,0,.22,.07,0,-.18,-.07,0,-.18, 0,0,.05,.55,.04,-.08,0,0,-.12, 0,0,.05,0,0,-.12,-.55,.04,-.08, 0,.02,-.12,.1,0,-.3,-.1,0,-.3],3));
+  const NB=16,bm=new THREE.InstancedMesh(bg,new THREE.MeshBasicMaterial({color:0x2b2630,side:THREE.DoubleSide}),NB);bm.frustumCulled=false;g.add(bm);LF244.bird=bm;LF244.bv=[];for(let i=0;i<NB;i++)LF244.bv.push({p:Math.random()*9,air:i<9});LF244.gr={x:0,z:0,st:'off',t:0};
+  const pm=new THREE.InstancedMesh(new THREE.SphereGeometry(.16,6,5),new THREE.MeshBasicMaterial({transparent:true,opacity:.55,depthWrite:false}),90);pm.frustumCulled=false;g.add(pm);LF244.pm=pm;LF244.pv=[];for(let i=0;i<90;i++){LF244.pv.push({l:0});pm.setColorAt(i,new THREE.Color(1,1,1))}LF244.pi=0;LF244.st=0;LF244.lx=player.x;LF244.lz=player.z}
+ const P=player,t=time,bio=biomeAt(P.x,P.z),night=isNight(),m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),ps=new THREE.Vector3(),M=LF244.bird,G=LF244.gr;
+ const birds=!night&&bio!=='vulcao'&&bio!=='cristal';M.visible=birds&&L.mode==='world'&&g.visible;
+ if(M.visible){if(G.st==='off'){G.t-=dt;if(G.t<=0){const a=Math.random()*6.28,d=14+Math.random()*8;G.x=P.x+Math.cos(a)*d;G.z=P.z+Math.sin(a)*d;G.st='chao';LF244.bv.forEach((v,i)=>{if(!v.air){v.x=G.x+(Math.random()-.5)*3;v.z=G.z+(Math.random()-.5)*3;v.y=0;v.h=Math.random()*6.28;v.vy=0}})}}
+  else if(G.st==='chao'){if(Math.hypot(P.x-G.x,P.z-G.z)<7){G.st='voa';G.t=0;LF244.bv.forEach(v=>{if(!v.air){const a=Math.atan2(v.z-P.z,v.x-P.x)+(Math.random()-.5);v.vx=Math.cos(a)*7;v.vz=Math.sin(a)*7;v.vy=4+Math.random()*3}})}else if(Math.hypot(P.x-G.x,P.z-G.z)>60)G.st='off'}
+  else{G.t+=dt;if(G.t>6){G.st='off';G.t=10+Math.random()*15}}
+  LF244.bv.forEach((v,i)=>{v.p+=dt;let flap;if(v.air){const R=18+(i%3)*4,a=t*.25+i*.7;const cx=P.x+Math.sin(t*.05)*20,cz=P.z+Math.cos(t*.04)*20;v.x=cx+Math.cos(a)*R;v.z=cz+Math.sin(a)*R;v.y=20+Math.sin(t*.6+i)*2+(i%2)*3;v.h=-a;flap=Math.sin(v.p*(i%4?3:9))*.5+.5}
+   else if(G.st==='off'){v.y=-999;flap=0}else if(G.st==='chao'){if(Math.random()<dt*.4)v.h+=(Math.random()-.5)*2;v.y=Math.max(0,Math.sin(v.p*7+i)*.04);flap=.15}
+   else{v.x+=v.vx*dt;v.z+=v.vz*dt;v.y+=v.vy*dt;v.vy+=dt*1.5;v.h=Math.atan2(v.vx,v.vz);flap=Math.abs(Math.sin(v.p*16));}
+   e.set(G.st==='chao'&&!v.air?Math.max(0,Math.sin(v.p*2.3+i))*.5:0,v.h,0);q.setFromEuler(e);const k=v.air?1.6:1.4;sc.set((.2+.8*flap)*k,k,k);m.compose(ps.set(v.x,v.y+(v.air?0:.12),v.z),q,sc);M.setMatrixAt(i,m)});M.instanceMatrix.needsUpdate=true}
+ const pm=LF244.pm,mv=Math.hypot(P.x-LF244.lx,P.z-LF244.lz)/Math.max(dt,1e-3);LF244.lx=P.x;LF244.lz=P.z;LF244.st-=dt;
+ if(mv>2&&mv<40&&LF244.st<=0&&!P.dead){const wet=L.mode==='world'&&inWater244(P.x,P.z),snow=bio==='neve'||bio==='cristal',sand=bio==='deserto';LF244.st=wet?.18:.28;const col=wet?[.75,.88,1]:snow?[.95,.97,1]:sand?[.86,.74,.5]:bio==='vulcao'?[.35,.3,.3]:[.62,.54,.42];
+  for(let j=0;j<(wet?6:3);j++){const v=LF244.pv[LF244.pi=(LF244.pi+1)%90];const a=Math.random()*6.28;v.x=P.x+(Math.random()-.5)*.4;v.z=P.z+(Math.random()-.5)*.4;v.y=.1;v.vx=Math.cos(a)*(wet?1.6:.7);v.vz=Math.sin(a)*(wet?1.6:.7);v.vy=wet?2.5+Math.random()*1.5:.5;v.l=v.L=wet?.55:.6;v.w=wet;pm.setColorAt(LF244.pv.indexOf(v),new THREE.Color(...col))}
+  pm.instanceColor.needsUpdate=true;if(wet&&Math.random()<.4)fxRing(P.x,P.z,0xbfe4ff,1.6,.5)}
+ LF244.pv.forEach((v,i)=>{if(v.l>0){v.l-=dt;v.x+=v.vx*dt;v.z+=v.vz*dt;v.y+=v.vy*dt;if(v.w)v.vy-=9*dt;const k=Math.max(0,v.l/v.L),s=v.w?.7*k+.2:(1.6-k)*.9*k+.15;m.compose(ps.set(v.x,Math.max(.05,v.y),v.z),q.identity(),sc.set(s,s,s))}else m.makeScale(0,0,0);pm.setMatrixAt(i,m)});pm.instanceMatrix.needsUpdate=true}
+function update(dt){try{life243(dt);life244(dt)}catch(_){}
   const P=player;
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
@@ -5795,7 +5826,7 @@ function update(dt){try{life243(dt)}catch(_){}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
-  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;P.aura.rotation.z+=dt;
+  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
   tickGates(dt);
   for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);

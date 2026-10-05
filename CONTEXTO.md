@@ -778,3 +778,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v241: rio contínuo com congelamento/degelo gradual (aFD por vértice a partir de snowB; riverMat240: geada, rachaduras, brilho), seca perto do deserto; lago congelado usa o mesmo gelo; no gelo o herói desliza (iceMove240).
 - v242: Arquiteto modelado no Blender (models/arquiteto242.glb, tools/blender242/arquiteto.py) com animações idle/andar/golpe1/golpe2/morte; substitui o Devorador.
 - v243: árvores balançam com vento (rajadas, fase por árvore, folhas tremem); folhas caindo, borboletas de dia e vaga-lumes à noite perto do jogador (life243).
+- v244: grama se abre ao passar (ENV_PUSH244), pássaros (bando no alto + grupo no chão que foge), poeira nos passos e respingos na água (life244), personagem inclina nas curvas/olha em volta parado (alive244), sombras de nuvens no chão (tools/environment128.js).
