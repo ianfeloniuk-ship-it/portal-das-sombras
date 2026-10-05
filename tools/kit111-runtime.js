@@ -116,7 +116,7 @@ function cm154After(o){const P=player;cm181After(o);
  if(o.skillId==='4:6'){const z=kitState111().zones;if(z.length&&z[z.length-1].kind==='trap')z[z.length-1].arch154=true}}
 function cm154Update(dt){cm181Tick(dt);let el=document.getElementById('cm154');if(!el){el=document.createElement('div');el.id='cm154';el.style.cssText='position:fixed;left:50%;bottom:136px;transform:translateX(-50%);pointer-events:none;z-index:5;font:600 11px system-ui;color:#fff;text-align:center;text-shadow:0 1px 2px #000';document.body.appendChild(el)}
  const c=CM154.charge;if(c&&!c.codes){c.codes=[...CM154.held].filter(k=>!CM154_MOVE.includes(k));c.ptr=CM154.ptr}if(c){const held=c.codes.length?c.codes.some(k=>CM154.held.has(k)):c.ptr&&CM154.ptr;if(!held||time-c.t0>4||player.dead)cm154Fire();else if(time>=CM154.fxAt){CM154.fxAt=time+.25;const lvl=cm154ChargeLevel();fxRing(player.x,player.z,lvl===3?0xffe066:0xbfff8f,.8+lvl*.5,.3)}}
- let h='';if(!player.dead&&cm154HasWarrior()&&profile.cls!==0){const f=Math.round(CM154.fury),full=f>=100;h+='<div style="width:180px;margin:2px auto;background:#1a0d08cc;border:1px solid '+(full?'#ffb36b':'#6b3a22')+';border-radius:4px;height:9px;overflow:hidden"><div style="height:100%;width:'+f+'%;background:'+(full?'#ffb36b':'#ff6a2a')+'"></div></div><div>FÚRIA '+f+'/100'+''+'</div>'}
+ let h='';
  if(CM154.charge){const lvl=cm154ChargeLevel();h+='<div style="color:#d8ffb0">CARREGANDO '+'▮'.repeat(lvl)+'▯'.repeat(3-lvl)+(lvl===3?' · MÁXIMO':'')+'</div>'}
  h+=cm181Hud();
  if(el.innerHTML!==h)el.innerHTML=h}

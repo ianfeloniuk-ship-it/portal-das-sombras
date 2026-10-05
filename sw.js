@@ -1,5 +1,5 @@
-const V='pds-v261';
-const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','historia-campanha.js','narrativa-campanha.js','tools/balance-rpg.js?v=252','tools/monster-balance.js?v=259','tools/mana258.js?v=258','tools/resources260.js?v=260'];
+const V='pds-v262';
+const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','historia-campanha.js','narrativa-campanha.js','tools/balance-rpg.js?v=252','tools/monster-balance.js?v=259','tools/mana258.js?v=258','tools/resources260.js?v=261','tools/combo261.js?v=261'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))));self.clients.claim()});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;

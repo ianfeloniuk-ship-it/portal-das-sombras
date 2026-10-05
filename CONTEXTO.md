@@ -1,10 +1,14 @@
-## Correções de combate, loot e espaço v261 — 05/10/2026
+## Correções de combate, loot e espaço v262 — 05/10/2026
 
 Direção de Ian: loot aleatório independente da classe; armas físicas somente no estilo físico, mágicas somente no mágico; mudança deve trocar animação/dano. Gerador comum tem oito tipos com 12,5% cada, incluindo espada e grimório. Sets mantêm tipo da classe dona do set. Trocar estilo guarda arma incompatível; bolsa cheia bloqueia sem perder item. Desarmado usa soco físico ou magia pela mão, com intervalo ×1,6; limpa combo/pose antiga. Criação oferece somente as três habilidades iniciais, equipa a escolhida e permite trocar na cidade. Save inicial inválido tem correção com backup.
 
 Mira usa vetor XYZ para alvos altos/baixos e morro bloqueia antes do alvo; não acompanha relevo. Aster tem lotes/telhados separados, ruas/portas livres e modelo próprio de Defesa. Baús ficam em piso livre fora de parede/rocha/cristais. Modelos mantêm hierarquia rígida sobre o terreno. Transmigrador e talentos de pontos zeram na morte verdadeira e podem ser reaprendidos; ressurreição protetora não zera. Sem histórico individual de XP. Migração antiga tem backup e não repete após novos investimentos.
 
-Integração preserva main v260 (história/Diário, mana, catálogo e recursos físicos), regras de banco/casa/rank e fórmulas de XP/ouro. QA de 33 escolhas iniciais, 1.200 armas com sementes iguais entre três classes e 27 checks de estilo/loot/criação passou sem erros de página. Testes adicionais e limites registrados na entrega do cofre `Publicacao-Correcoes-v252-2026-10-05/Correcoes-v259/Registro.md`. Pasta v259 é nome histórico; versão final v261. Aceite visual/playtest de Ian pendentes.
+Integração preserva main v261 e seus recursos simultâneos/combinações (história/Diário, mana, catálogo e recursos físicos), regras de banco/casa/rank e fórmulas de XP/ouro. QA de 33 escolhas iniciais, 1.200 armas com sementes iguais entre três classes e 27 checks de estilo/loot/criação passou sem erros de página. Testes adicionais e limites registrados na entrega do cofre `Publicacao-Correcoes-v252-2026-10-05/Correcoes-v259/Registro.md`. Pasta v259 é nome histórico; versão final v262. Aceite visual/playtest de Ian pendentes.
+
+## Recursos simultâneos e combinação v261 — 05/10/2026
+
+Correção explícita de Ian: Guerreiro também ganha mana por Inteligência e pode equipar magia; a combinação equipada deve mostrar os recursos simultaneamente. Mana é permanente no HUD; Fúria, Vigor e energia têm barras separadas conforme técnicas/classe. Botão de 2–3 técnicas soma os custos de cada recurso, valida tudo antes do débito e compartilha as recargas individuais. Detalhes, limites e testes: [docs/multiclasse-combinacoes-v261.md](docs/multiclasse-combinacoes-v261.md). As 40 habilidades da v260 são mantidas.
 
 ## Classes e recursos v260 — 05/10/2026
 
