@@ -1,3 +1,7 @@
+## Recursos e passivas opcionais v264 — 05/10/2026
+
+Custos físicos revistos por técnica (configuração em tools/resource-balance263.json); +10% por melhoria, sem depender de mana máxima ou nível do personagem. Vigor recupera 8/s após 1,5s; Fúria mantém geração por combate e Grito. Doze passivas opcionais de efeito único em Personagem → Passivas, até três espaços nos níveis máximos 10/30/60, troca gratuita na cidade sem recuperar saldos. Seleção opcional persiste no perfil; isso não muda o reset por morte dos talentos comprados e Transmigrador. Descontos de 10% por recurso, arredondados para cima, com piso 1 para técnicas pagas. Combinações somam os custos individuais já descontados e cobram atomicamente. Preserva correções v262 e XP por desafio/missões v263.
+
 ## Correções de combate, loot e espaço v262 — 05/10/2026
 
 Direção de Ian: loot aleatório independente da classe; armas físicas somente no estilo físico, mágicas somente no mágico; mudança deve trocar animação/dano. Gerador comum tem oito tipos com 12,5% cada, incluindo espada e grimório. Sets mantêm tipo da classe dona do set. Trocar estilo guarda arma incompatível; bolsa cheia bloqueia sem perder item. Desarmado usa soco físico ou magia pela mão, com intervalo ×1,6; limpa combo/pose antiga. Criação oferece somente as três habilidades iniciais, equipa a escolhida e permite trocar na cidade. Save inicial inválido tem correção com backup.
