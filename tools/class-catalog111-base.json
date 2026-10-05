@@ -14,14 +14,13 @@
       "skillId": "0:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Investida",
       "effect": "move",
       "cd": 5,
-      "mp": 0,
+      "mp": 12,
       "pow": 0,
       "col": 16767878,
       "radius": 5,
@@ -31,14 +30,13 @@
       "skillId": "0:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Grito de Guerra",
-      "effect": "rally260",
-      "cd": 14,
-      "mp": 0,
+      "effect": "buff",
+      "cd": 16,
+      "mp": 16,
       "pow": 0,
       "col": 16767878,
       "radius": 5,
@@ -49,9 +47,7 @@
       "skillId": "0:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "brief260": "Ganha 35 de Fúria. Não causa dano.",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Lâmina Rúnica",
@@ -68,8 +64,7 @@
       "skillId": "0:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Golpe Pesado",
@@ -85,14 +80,13 @@
       "skillId": "0:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Provocação",
       "effect": "taunt",
       "cd": 8,
-      "mp": 0,
+      "mp": 16,
       "pow": 0,
       "col": 16767878,
       "radius": 7,
@@ -102,8 +96,7 @@
       "skillId": "0:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Varredura",
@@ -119,8 +112,7 @@
       "skillId": "0:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
+      "t": "kit111"
     },
     {
       "n": "Fôlego",
@@ -138,51 +130,7 @@
       "skillId": "0:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "fury"
-    },
-    {
-      "n": "Corte Crescente",
-      "effect": "cone",
-      "brief260": "Corta os inimigos à frente em um leque de 5 m.",
-      "cd": 9,
-      "mp": 20,
-      "pow": 2.2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 5,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 0,
-      "skillId": "0:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "fury"
-    },
-    {
-      "n": "Quebra-Passo",
-      "effect": "slow",
-      "brief260": "Reduz a velocidade de um alvo por 3s.",
-      "cd": 10,
-      "mp": 12,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 4,
-      "duration": 3,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 0,
-      "skillId": "0:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "single": true,
-      "resource260": "fury"
+      "t": "kit111"
     }
   ],
   "1": [
@@ -200,8 +148,7 @@
       "skillId": "1:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Furtividade",
@@ -217,8 +164,7 @@
       "skillId": "1:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Lâmina Envenenada",
@@ -234,8 +180,7 @@
       "skillId": "1:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Mil Cortes",
@@ -254,8 +199,7 @@
       "skillId": "1:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Execução",
@@ -271,8 +215,7 @@
       "skillId": "1:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Cortina de Fumaça",
@@ -288,8 +231,7 @@
       "skillId": "1:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Adaga",
@@ -305,8 +247,7 @@
       "skillId": "1:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Evasão",
@@ -322,51 +263,7 @@
       "skillId": "1:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
-    },
-    {
-      "n": "Ferida Profunda",
-      "effect": "burn",
-      "brief260": "Fere um alvo, causando dano ao longo de 4s.",
-      "cd": 10,
-      "mp": 18,
-      "pow": 2.4,
-      "col": 16767878,
-      "radius": 4,
-      "range": 3,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 1,
-      "skillId": "1:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "vigor"
-    },
-    {
-      "n": "Faca de Interrupção",
-      "effect": "interrupt",
-      "brief260": "Interrompe o ataque de um inimigo comum a até 10 m.",
-      "cd": 12,
-      "mp": 16,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 10,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 1,
-      "skillId": "1:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "single": true,
-      "resource260": "vigor"
+      "t": "kit111"
     }
   ],
   "2": [
@@ -384,8 +281,7 @@
       "skillId": "2:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Impacto",
@@ -401,8 +297,7 @@
       "skillId": "2:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Muralha",
@@ -420,8 +315,7 @@
       "skillId": "2:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Fortaleza Viva",
@@ -440,8 +334,7 @@
       "skillId": "2:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Provocar",
@@ -457,8 +350,7 @@
       "skillId": "2:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Aparo",
@@ -474,8 +366,7 @@
       "skillId": "2:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Passo Pesado",
@@ -491,8 +382,7 @@
       "skillId": "2:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Abalo",
@@ -508,52 +398,7 @@
       "skillId": "2:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
-    },
-    {
-      "n": "Reserva de Guarda",
-      "effect": "ward",
-      "brief260": "Ganha um escudo de 15% da vida máxima por 4s.",
-      "cd": 18,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 2,
-      "skillId": "2:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "scope": "self",
-      "amount": 0.15,
-      "resource260": "vigor"
-    },
-    {
-      "n": "Rompante",
-      "effect": "line",
-      "brief260": "Golpeia em linha os inimigos a até 6 m.",
-      "cd": 10,
-      "mp": 18,
-      "pow": 2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 6,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 2,
-      "skillId": "2:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "vigor"
+      "t": "kit111"
     }
   ],
   "4": [
@@ -573,8 +418,7 @@
       "skillId": "4:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Salto Evasivo",
@@ -591,8 +435,7 @@
       "skillId": "4:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Flecha Perfurante",
@@ -608,8 +451,7 @@
       "skillId": "4:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Flecha Estelar",
@@ -626,8 +468,7 @@
       "skillId": "4:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Tiro Preciso",
@@ -643,8 +484,7 @@
       "skillId": "4:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Flecha Enredante",
@@ -661,8 +501,7 @@
       "skillId": "4:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Armadilha",
@@ -678,8 +517,7 @@
       "skillId": "4:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
+      "t": "kit111"
     },
     {
       "n": "Disparo Rápido",
@@ -695,50 +533,7 @@
       "skillId": "4:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "vigor"
-    },
-    {
-      "n": "Leque de Flechas",
-      "effect": "fan",
-      "brief260": "Dispara três flechas que atravessam inimigos em leque.",
-      "cd": 10,
-      "mp": 20,
-      "pow": 3,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 4,
-      "skillId": "4:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "vigor"
-    },
-    {
-      "n": "Olho de Caçador",
-      "effect": "reveal",
-      "brief260": "Marca no mapa os inimigos a até 24 m por 8s.",
-      "cd": 18,
-      "mp": 12,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 24,
-      "duration": 8,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 4,
-      "skillId": "4:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "vigor"
+      "t": "kit111"
     }
   ],
   "5": [
@@ -759,8 +554,7 @@
       "skillId": "5:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Julgamento",
@@ -777,8 +571,7 @@
       "skillId": "5:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Bênção",
@@ -797,8 +590,7 @@
       "skillId": "5:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Purificação",
@@ -814,8 +606,7 @@
       "skillId": "5:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Égide Sagrada",
@@ -834,8 +625,7 @@
       "skillId": "5:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sol Nascente",
@@ -853,8 +643,7 @@
       "skillId": "5:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Passo da Luz",
@@ -870,8 +659,7 @@
       "skillId": "5:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Correntes Sagradas",
@@ -887,52 +675,7 @@
       "skillId": "5:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Censura",
-      "effect": "weaken",
-      "brief260": "Reduz em 20% o dano de um alvo por 4s.",
-      "cd": 12,
-      "mp": 18,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 5,
-      "skillId": "5:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "amount": 0.2,
-      "resource260": "mana"
-    },
-    {
-      "n": "Lança Solar",
-      "effect": "line",
-      "brief260": "Uma lança de luz atinge os inimigos em uma linha de 10 m.",
-      "cd": 10,
-      "mp": 20,
-      "pow": 2.4,
-      "col": 16767878,
-      "radius": 4,
-      "range": 10,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 5,
-      "skillId": "5:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "6": [
@@ -952,8 +695,7 @@
       "skillId": "6:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Elo Arcano",
@@ -970,8 +712,7 @@
       "skillId": "6:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pacto",
@@ -989,8 +730,7 @@
       "skillId": "6:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Matilha Espiritual",
@@ -1009,8 +749,7 @@
       "skillId": "6:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Recolher",
@@ -1027,8 +766,7 @@
       "skillId": "6:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Frenesi",
@@ -1046,8 +784,7 @@
       "skillId": "6:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Abrigo",
@@ -1065,8 +802,7 @@
       "skillId": "6:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sentinela",
@@ -1084,52 +820,7 @@
       "skillId": "6:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Uivo Espiritual",
-      "effect": "cone",
-      "brief260": "Uma onda espiritual atinge os inimigos à frente em 6 m.",
-      "cd": 10,
-      "mp": 16,
-      "pow": 2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 6,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 6,
-      "skillId": "6:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Instinto de Matilha",
-      "effect": "guard",
-      "brief260": "Suas invocações próximas recebem 25% menos dano por 5s.",
-      "cd": 18,
-      "mp": 24,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 8,
-      "range": 12,
-      "duration": 5,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 6,
-      "skillId": "6:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "summons",
-      "amount": 0.25,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "7": [
@@ -1149,8 +840,7 @@
       "skillId": "7:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Praga",
@@ -1168,8 +858,7 @@
       "skillId": "7:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pacto Sombrio",
@@ -1187,8 +876,7 @@
       "skillId": "7:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Erguer Eco",
@@ -1204,8 +892,7 @@
       "skillId": "7:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Ordem Fúnebre",
@@ -1222,8 +909,7 @@
       "skillId": "7:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pacto dos Mortos",
@@ -1241,8 +927,7 @@
       "skillId": "7:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Domínio dos Ecos",
@@ -1259,8 +944,7 @@
       "skillId": "7:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Mortalha",
@@ -1278,53 +962,7 @@
       "skillId": "7:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Jaula de Ossos",
-      "effect": "root",
-      "brief260": "Prende um inimigo comum por 2s.",
-      "cd": 14,
-      "mp": 20,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 2,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 7,
-      "skillId": "7:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "resource260": "mana"
-    },
-    {
-      "n": "Maldição da Fraqueza",
-      "effect": "weaken",
-      "brief260": "Reduz em 20% o dano dos inimigos em 4 m por 4s.",
-      "cd": 16,
-      "mp": 24,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 7,
-      "skillId": "7:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "amount": 0.2,
-      "ground": true,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "8": [
@@ -1342,8 +980,7 @@
       "skillId": "8:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Chuva de Meteoros",
@@ -1361,8 +998,7 @@
       "skillId": "8:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Explosão Ígnea",
@@ -1378,8 +1014,7 @@
       "skillId": "8:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sol Negro",
@@ -1398,8 +1033,7 @@
       "skillId": "8:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Combustão",
@@ -1415,8 +1049,7 @@
       "skillId": "8:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Jato de Chamas",
@@ -1432,8 +1065,7 @@
       "skillId": "8:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Passo de Cinzas",
@@ -1449,8 +1081,7 @@
       "skillId": "8:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Muralha de Fogo",
@@ -1466,55 +1097,7 @@
       "skillId": "8:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Brasa Latente",
-      "effect": "pulses",
-      "brief260": "Após 1s, explode na área marcada de 3 m.",
-      "cd": 10,
-      "mp": 20,
-      "pow": 2.8,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 8,
-      "skillId": "8:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "pulses": 1,
-      "delay": 1,
-      "ground": true,
-      "resource260": "mana"
-    },
-    {
-      "n": "Manto de Cinzas",
-      "effect": "ward",
-      "brief260": "Ganha um escudo de 15% da vida máxima por 4s.",
-      "cd": 18,
-      "mp": 24,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 8,
-      "skillId": "8:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "self",
-      "amount": 0.15,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "9": [
@@ -1532,8 +1115,7 @@
       "skillId": "9:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Nova de Gelo",
@@ -1550,8 +1132,7 @@
       "skillId": "9:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Maremoto",
@@ -1567,8 +1148,7 @@
       "skillId": "9:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Era do Gelo",
@@ -1587,8 +1167,7 @@
       "skillId": "9:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Prisão Glacial",
@@ -1605,8 +1184,7 @@
       "skillId": "9:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Armadura de Gelo",
@@ -1624,8 +1202,7 @@
       "skillId": "9:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Estilhaço",
@@ -1641,8 +1218,7 @@
       "skillId": "9:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Deslizar",
@@ -1658,52 +1234,7 @@
       "skillId": "9:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Fratura Glacial",
-      "effect": "conditional260",
-      "brief260": "Atinge um alvo; causa 50% mais dano se ele estiver lento ou preso.",
-      "cd": 10,
-      "mp": 20,
-      "pow": 2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 9,
-      "skillId": "9:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "condition260": "slow",
-      "resource260": "mana"
-    },
-    {
-      "n": "Névoa Fria",
-      "effect": "blind",
-      "brief260": "Reduz em 25% o dano dos inimigos ao seu redor por 3s.",
-      "cd": 16,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 3,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 9,
-      "skillId": "9:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "10": [
@@ -1721,8 +1252,7 @@
       "skillId": "10:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Tremor Sísmico",
@@ -1738,8 +1268,7 @@
       "skillId": "10:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pele de Pedra",
@@ -1757,8 +1286,7 @@
       "skillId": "10:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Colosso de Pedra",
@@ -1777,8 +1305,7 @@
       "skillId": "10:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Muralha de Rocha",
@@ -1794,8 +1321,7 @@
       "skillId": "10:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Areia Movediça",
@@ -1811,8 +1337,7 @@
       "skillId": "10:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Arremesso de Rocha",
@@ -1828,8 +1353,7 @@
       "skillId": "10:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Erupção",
@@ -1846,55 +1370,7 @@
       "skillId": "10:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Pedra Suspensa",
-      "effect": "pulses",
-      "brief260": "Após 1,2s, uma rocha cai na área marcada de 3 m.",
-      "cd": 12,
-      "mp": 22,
-      "pow": 3,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 10,
-      "skillId": "10:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "pulses": 1,
-      "delay": 1.2,
-      "ground": true,
-      "resource260": "mana"
-    },
-    {
-      "n": "Casca de Cristal",
-      "effect": "ward",
-      "brief260": "Ganha um escudo de 20% da vida máxima por 4s.",
-      "cd": 20,
-      "mp": 24,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 10,
-      "skillId": "10:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "self",
-      "amount": 0.2,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "11": [
@@ -1912,8 +1388,7 @@
       "skillId": "11:0",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Rajada de Vento",
@@ -1929,8 +1404,7 @@
       "skillId": "11:1",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Tempestade de Raios",
@@ -1948,8 +1422,7 @@
       "skillId": "11:2",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Fúria dos Céus",
@@ -1968,8 +1441,7 @@
       "skillId": "11:3",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Paralisia",
@@ -1986,8 +1458,7 @@
       "skillId": "11:4",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Passo Relâmpago",
@@ -2003,8 +1474,7 @@
       "skillId": "11:5",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Aceleração",
@@ -2021,8 +1491,7 @@
       "skillId": "11:6",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Campo Estático",
@@ -2038,50 +1507,7 @@
       "skillId": "11:7",
       "kit111": true,
       "rare103": false,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Agulha Elétrica",
-      "effect": "bolt",
-      "brief260": "Lança um projétil elétrico na direção da mira.",
-      "cd": 5,
-      "mp": 12,
-      "pow": 1.8,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 11,
-      "skillId": "11:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Clarão",
-      "effect": "blind",
-      "brief260": "Reduz em 25% o dano dos inimigos ao seu redor por 3s.",
-      "cd": 16,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 3,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": false,
-      "sourceClass": 11,
-      "skillId": "11:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "12": [
@@ -2099,8 +1525,7 @@
       "skillId": "12:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Dilatação",
@@ -2116,8 +1541,7 @@
       "skillId": "12:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Reprise",
@@ -2133,8 +1557,7 @@
       "skillId": "12:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Recompor",
@@ -2150,8 +1573,7 @@
       "skillId": "12:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Acelerar",
@@ -2168,8 +1590,7 @@
       "skillId": "12:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Suspender",
@@ -2186,8 +1607,7 @@
       "skillId": "12:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Salto Temporal",
@@ -2203,8 +1623,7 @@
       "skillId": "12:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pulso Temporal",
@@ -2220,53 +1639,7 @@
       "skillId": "12:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Segundo Perdido",
-      "effect": "slowzone",
-      "brief260": "Cria uma área de 3 m que desacelera inimigos comuns por 4s.",
-      "cd": 14,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 12,
-      "skillId": "12:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Impacto Adiado",
-      "effect": "pulses",
-      "brief260": "Após 1s, um pulso atinge a área marcada de 3 m.",
-      "cd": 12,
-      "mp": 22,
-      "pow": 2.6,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 12,
-      "skillId": "12:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "pulses": 1,
-      "delay": 1,
-      "ground": true,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "13": [
@@ -2284,8 +1657,7 @@
       "skillId": "13:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Corte Espacial",
@@ -2301,8 +1673,7 @@
       "skillId": "13:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Ascensão de Fenda",
@@ -2318,8 +1689,7 @@
       "skillId": "13:2",
       "kit111": true,
       "rare103": true,
-      "t": "rare_gate",
-      "resource260": "mana"
+      "t": "rare_gate"
     },
     {
       "n": "Convergência",
@@ -2336,8 +1706,7 @@
       "skillId": "13:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Ruptura",
@@ -2354,8 +1723,7 @@
       "skillId": "13:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Dobra",
@@ -2371,8 +1739,7 @@
       "skillId": "13:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Fronteira",
@@ -2388,8 +1755,7 @@
       "skillId": "13:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Exílio Breve",
@@ -2406,54 +1772,7 @@
       "skillId": "13:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Agulha de Fenda",
-      "effect": "target",
-      "brief260": "Uma pequena fenda atinge um alvo a até 10 m.",
-      "cd": 8,
-      "mp": 18,
-      "pow": 2.2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 10,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 13,
-      "skillId": "13:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "resource260": "mana"
-    },
-    {
-      "n": "Colapso Local",
-      "effect": "pulses",
-      "brief260": "Após 1,2s, uma fenda implode na área marcada de 3 m.",
-      "cd": 14,
-      "mp": 24,
-      "pow": 2.8,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 13,
-      "skillId": "13:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "pulses": 1,
-      "delay": 1.2,
-      "ground": true,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "14": [
@@ -2471,8 +1790,7 @@
       "skillId": "14:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Interposição",
@@ -2488,8 +1806,7 @@
       "skillId": "14:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Juramento",
@@ -2507,8 +1824,7 @@
       "skillId": "14:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Âncora Protetora",
@@ -2524,8 +1840,7 @@
       "skillId": "14:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Escudo do Vínculo",
@@ -2543,8 +1858,7 @@
       "skillId": "14:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Desafio",
@@ -2560,8 +1874,7 @@
       "skillId": "14:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Repulsão",
@@ -2577,8 +1890,7 @@
       "skillId": "14:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Reunir",
@@ -2595,53 +1907,7 @@
       "skillId": "14:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Alívio Compartilhado",
-      "effect": "heal",
-      "brief260": "Cura 20% da vida máxima de um aliado na mira.",
-      "cd": 18,
-      "mp": 24,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 14,
-      "skillId": "14:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "scope": "ally",
-      "amount": 0.2,
-      "resource260": "mana"
-    },
-    {
-      "n": "Círculo de Amparo",
-      "effect": "cleanse",
-      "brief260": "Remove lentidão, atordoamento e sangramento do grupo próximo.",
-      "cd": 18,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 6,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 14,
-      "skillId": "14:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "group",
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "15": [
@@ -2660,8 +1926,7 @@
       "skillId": "15:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Forma Alada",
@@ -2678,8 +1943,7 @@
       "skillId": "15:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Forma Blindada",
@@ -2696,8 +1960,7 @@
       "skillId": "15:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Forma Ágil",
@@ -2714,8 +1977,7 @@
       "skillId": "15:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Salto Bestial",
@@ -2731,8 +1993,7 @@
       "skillId": "15:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Rugido",
@@ -2748,8 +2009,7 @@
       "skillId": "15:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Adaptação",
@@ -2767,8 +2027,7 @@
       "skillId": "15:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Regenerar",
@@ -2786,51 +2045,7 @@
       "skillId": "15:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Garras em Arco",
-      "effect": "cone",
-      "brief260": "Golpeia os inimigos à frente em um leque de 4 m.",
-      "cd": 9,
-      "mp": 18,
-      "pow": 2.2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 4,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 15,
-      "skillId": "15:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Muda de Pele",
-      "effect": "cleanse",
-      "brief260": "Remove sua lentidão, atordoamento e sangramento.",
-      "cd": 18,
-      "mp": 20,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 15,
-      "skillId": "15:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "self",
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "16": [
@@ -2849,8 +2064,7 @@
       "skillId": "16:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Armadilha Rúnica",
@@ -2867,8 +2081,7 @@
       "skillId": "16:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Emissor",
@@ -2885,8 +2098,7 @@
       "skillId": "16:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Reparar",
@@ -2903,8 +2115,7 @@
       "skillId": "16:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Desmontar",
@@ -2920,8 +2131,7 @@
       "skillId": "16:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sobrecarga",
@@ -2937,8 +2147,7 @@
       "skillId": "16:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Projetar",
@@ -2954,8 +2163,7 @@
       "skillId": "16:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pulso Rúnico",
@@ -2971,52 +2179,7 @@
       "skillId": "16:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Lança Rúnica",
-      "effect": "line",
-      "brief260": "Dispara uma linha de energia que atinge inimigos em 10 m.",
-      "cd": 10,
-      "mp": 18,
-      "pow": 2.2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 10,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 16,
-      "skillId": "16:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Placas de Emergência",
-      "effect": "guard",
-      "brief260": "Recebe 25% menos dano por 4s.",
-      "cd": 18,
-      "mp": 22,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 16,
-      "skillId": "16:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "self",
-      "amount": 0.25,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "17": [
@@ -3034,8 +2197,7 @@
       "skillId": "17:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Passo de Flanco",
@@ -3051,8 +2213,7 @@
       "skillId": "17:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Resposta Fantasma",
@@ -3068,8 +2229,7 @@
       "skillId": "17:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Estocada",
@@ -3085,8 +2245,7 @@
       "skillId": "17:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Corte Espectral",
@@ -3102,8 +2261,7 @@
       "skillId": "17:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Desarmar",
@@ -3121,8 +2279,7 @@
       "skillId": "17:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Recuar",
@@ -3139,8 +2296,7 @@
       "skillId": "17:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Desafio Espectral",
@@ -3156,50 +2312,7 @@
       "skillId": "17:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Meia-Lua Espectral",
-      "effect": "cone",
-      "brief260": "Corta os inimigos à frente em um leque de 4 m.",
-      "cd": 10,
-      "mp": 18,
-      "pow": 2.2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 4,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 17,
-      "skillId": "17:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "resource260": "mana"
-    },
-    {
-      "n": "Corpo Etéreo",
-      "effect": "evade",
-      "brief260": "Fica invulnerável por 0,5s.",
-      "cd": 16,
-      "mp": 20,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 0.5,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 17,
-      "skillId": "17:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "18": [
@@ -3218,8 +2331,7 @@
       "skillId": "18:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Descarga",
@@ -3236,8 +2348,7 @@
       "skillId": "18:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Corpo de Tempestade",
@@ -3255,8 +2366,7 @@
       "skillId": "18:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Arco Voltaico",
@@ -3273,8 +2383,7 @@
       "skillId": "18:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Campo de Repulsão",
@@ -3291,8 +2400,7 @@
       "skillId": "18:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Pulso Estático",
@@ -3309,8 +2417,7 @@
       "skillId": "18:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Barreira Elétrica",
@@ -3329,8 +2436,7 @@
       "skillId": "18:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Trovoada",
@@ -3348,57 +2454,7 @@
       "skillId": "18:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Raio Retardado",
-      "effect": "pulses",
-      "brief260": "Após 1s, um raio atinge a área marcada de 3 m.",
-      "cd": 12,
-      "mp": 0,
-      "pow": 2.8,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 18,
-      "skillId": "18:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "pulses": 1,
-      "delay": 1,
-      "ground": true,
-      "energy": 2,
-      "resource260": "mana"
-    },
-    {
-      "n": "Olho da Tempestade",
-      "effect": "guard",
-      "brief260": "Recebe 25% menos dano por 4s.",
-      "cd": 18,
-      "mp": 0,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 18,
-      "skillId": "18:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "self",
-      "amount": 0.25,
-      "energy": 2,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "19": [
@@ -3416,8 +2472,7 @@
       "skillId": "19:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Selo Preventivo",
@@ -3433,8 +2488,7 @@
       "skillId": "19:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Desvio do Destino",
@@ -3450,8 +2504,7 @@
       "skillId": "19:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Enfraquecer",
@@ -3469,8 +2522,7 @@
       "skillId": "19:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Revelação",
@@ -3486,8 +2538,7 @@
       "skillId": "19:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Vislumbre",
@@ -3503,8 +2554,7 @@
       "skillId": "19:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sinal",
@@ -3521,8 +2571,7 @@
       "skillId": "19:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Ruína Anunciada",
@@ -3541,54 +2590,7 @@
       "skillId": "19:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Instante Fatal",
-      "effect": "conditional260",
-      "brief260": "Atinge um alvo; causa 50% mais dano durante a preparação do ataque dele.",
-      "cd": 10,
-      "mp": 20,
-      "pow": 2,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 19,
-      "skillId": "19:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "condition260": "windup",
-      "resource260": "mana"
-    },
-    {
-      "n": "Futuro Resguardado",
-      "effect": "ward",
-      "brief260": "Concede ao grupo em 6 m um escudo de 10% da vida máxima por 4s.",
-      "cd": 20,
-      "mp": 28,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 6,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 19,
-      "skillId": "19:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "scope": "group",
-      "amount": 0.1,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ],
   "20": [
@@ -3606,8 +2608,7 @@
       "skillId": "20:0",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Devolver",
@@ -3623,8 +2624,7 @@
       "skillId": "20:1",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Consumir",
@@ -3640,8 +2640,7 @@
       "skillId": "20:2",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Carapaça Vazia",
@@ -3659,8 +2658,7 @@
       "skillId": "20:3",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Passo Vazio",
@@ -3676,8 +2674,7 @@
       "skillId": "20:4",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Sucção",
@@ -3694,8 +2691,7 @@
       "skillId": "20:5",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Rasgo",
@@ -3711,8 +2707,7 @@
       "skillId": "20:6",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
+      "t": "kit111"
     },
     {
       "n": "Silêncio",
@@ -3729,55 +2724,7 @@
       "skillId": "20:7",
       "kit111": true,
       "rare103": true,
-      "t": "kit111",
-      "resource260": "mana"
-    },
-    {
-      "n": "Fome Silenciosa",
-      "effect": "weaken",
-      "brief260": "Reduz em 20% o dano de um alvo por 4s.",
-      "cd": 12,
-      "mp": 18,
-      "pow": 0,
-      "col": 16767878,
-      "radius": 4,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 20,
-      "skillId": "20:8",
-      "expansion260": true,
-      "unlock260": 15,
-      "research260": 3,
-      "single": true,
-      "amount": 0.2,
-      "resource260": "mana"
-    },
-    {
-      "n": "Estrela Oca",
-      "effect": "pulses",
-      "brief260": "Após 1s, o vazio explode na área marcada de 3 m.",
-      "cd": 12,
-      "mp": 22,
-      "pow": 2.6,
-      "col": 16767878,
-      "radius": 3,
-      "range": 12,
-      "duration": 4,
-      "kit111": true,
-      "t": "kit111",
-      "rare103": true,
-      "sourceClass": 20,
-      "skillId": "20:9",
-      "expansion260": true,
-      "unlock260": 60,
-      "research260": 5,
-      "pulses": 1,
-      "delay": 1,
-      "ground": true,
-      "resource260": "mana"
+      "t": "kit111"
     }
   ]
 }
