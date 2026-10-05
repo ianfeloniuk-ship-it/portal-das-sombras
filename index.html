@@ -5607,9 +5607,24 @@ function pickTarget(e){if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypo
 }
 function dmgTo(t,amt){amt=kitWeakDamage111(curAtk,amt);if(t.defenseCore){hurtDefenseCore(amt);return}if(t===player)hurtPlayer(amt);else hurtAlly(t,amt)}
 /* v233 (Ian): chefes e elites ficavam duros. Camada de movimento por cima da animação: balanço ao andar, inclina para trás ao preparar, avança no golpe, tranco ao levar dano. */
+/* v248 (Ian): Arquiteto no estilo da arte conceitual — cartoon, cores chapadas da paleta (pedra azulada, dourado, roxo brilhante, máscara branca) */
+let GRAD247=null;
+function archMat247(src,skin){if(!GRAD247){const d=new Uint8Array([90,90,90,255,165,165,165,255,230,230,230,255]);GRAD247=new THREE.DataTexture(d,3,1,THREE.RGBAFormat);GRAD247.minFilter=GRAD247.magFilter=THREE.NearestFilter;GRAD247.needsUpdate=true}
+ const m=new THREE.MeshToonMaterial({map:src.map,gradientMap:GRAD247,skinning:!!skin});
+ m.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+  vec3 t7=pow(max(texelColor.rgb,vec3(0.)),vec3(1./2.2));float mx7=max(t7.r,max(t7.g,t7.b)),mn7=min(t7.r,min(t7.g,t7.b)),sat7=(mx7-mn7)/max(mx7,.001),lum7=dot(t7,vec3(.3,.59,.11));
+  float pur7=smoothstep(.12,.3,(t7.b+t7.r*.5)-t7.g*1.6)*step(t7.g,t7.b);
+  float gold7=smoothstep(.06,.18,t7.r-t7.b)*smoothstep(.02,.1,t7.g-t7.b);
+  float wht7=smoothstep(.62,.8,lum7)*(1.-smoothstep(.12,.25,sat7));
+  float tone7=smoothstep(.08,.55,lum7);
+  vec3 stone7=mix(vec3(.06,.07,.12),vec3(.26,.30,.42),tone7);
+  vec3 goldc7=mix(vec3(.45,.27,.06),vec3(.95,.66,.20),tone7);
+  vec3 c7=mix(stone7,goldc7,gold7);c7=mix(c7,vec3(.86,.83,.78),wht7);c7=mix(c7,vec3(.55,.12,1.),pur7);
+  diffuseColor.rgb=c7;vPur7=pur7;`).replace('void main() {','float vPur7;\nvoid main() {').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vec3(.75,.3,1.)*vPur7*1.6;')};
+ m.customProgramCacheKey=()=>'arch247'+(skin?1:0);return m}
 /* v242: Arquiteto modelado no Blender (models/arquiteto242.glb) */
 const ARCH242={g:null};(function(){if(!THREE.GLTFLoader)return;new THREE.GLTFLoader().load('models/arquiteto246.glb',g=>{ARCH242.g=g},undefined,()=>{})})();
-function arch242(e){const G=ARCH242.g;if(!G||!THREE.SkeletonUtils)return false;const m=THREE.SkeletonUtils.clone(G.scene);const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(9/(h*(e.m.root.scale.y||1)));e.m.root.children.forEach(c=>{c.visible=false});e.m.root.add(m);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});const mx=new THREE.AnimationMixer(m),A={};G.animations.forEach(c=>{A[c.name]=mx.clipAction(c)});e.a242={mx,A,cur:null,k:0};arch242play(e,'idle');return true}
+function arch242(e){const G=ARCH242.g;if(!G||!THREE.SkeletonUtils)return false;const m=THREE.SkeletonUtils.clone(G.scene);const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(9/(h*(e.m.root.scale.y||1)));e.m.root.children.forEach(c=>{c.visible=false});e.m.root.add(m);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;o.material=archMat247(o.material,o.isSkinnedMesh)}});try{if(outlineOn210()){outlineAdd210(m);m.traverse(c=>{if(c.userData.ol210c){const u=c.material.userData.u,src=c.onBeforeRender;c.onBeforeRender=function(){src.apply(this,arguments);u.value*=3.2}}})}}catch(_){}const mx=new THREE.AnimationMixer(m),A={};G.animations.forEach(c=>{A[c.name]=mx.clipAction(c)});e.a242={mx,A,cur:null,k:0};arch242play(e,'idle');return true}
 function arch242play(e,n,once){const S=e.a242,a=S&&S.A[n];if(!a||S.cur===n)return;const p=S.cur&&S.A[S.cur];a.reset();if(once){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true}a.play();if(p)a.crossFadeFrom(p,.25,false);S.cur=n}
 function arch242tick(e,mv,atk,dt){const S=e.a242;if(!S)return;if(e.dead||e.hp<=0)arch242play(e,'morte',1);else if(atk>.3){if(!S.at){S.k^=1;S.at=1}arch242play(e,S.k?'golpe1':'golpe2',1)}else{S.at=0;const a=S.A[S.cur];if(!(S.cur&&S.cur.startsWith('golpe')&&a.isRunning()))arch242play(e,mv?'andar':'idle')}S.mx.update(dt)}
 function juice233(e,mv,atk,wind,dt){if(e.a242)arch242tick(e,mv,atk,dt);const J=e.j233||(e.j233={t:0,hit:0}),r=e.m.root,k=e.isBoss?1:.6;J.t+=dt;if(e.flash>0)J.hit=.22;J.hit=Math.max(0,J.hit-dt);
@@ -8304,9 +8319,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v247</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v248</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=247;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=248;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
