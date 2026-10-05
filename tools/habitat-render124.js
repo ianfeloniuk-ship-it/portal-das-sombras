@@ -30,6 +30,7 @@ function renderHabitat124(cells,W,H,CS,ox,oz,th,R){
  const ground=new THREE.Mesh(g,habitatFloor124(th.habitat124));ground.receiveShadow=true;ground.name='habitat-ground-'+th.habitat124;envOwn(L.group,ground);
  inst(geo('habitat-base124-'+CS,()=>new THREE.BoxGeometry(CS,.96,CS)),habitatMat124(th.wall),bases);
  inst(geo('habitat-rock188',()=>{/* v188 (Ian): parede lisa parecia bola de neve; rocha facetada e irregular */const q=new THREE.DodecahedronGeometry(1,1).toNonIndexed(),P=q.attributes.position,v=new THREE.Vector3();for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);const h=Math.sin(v.x*12.9+v.y*78.2+v.z*37.7)*43758.5,n=h-Math.floor(h);v.multiplyScalar(.78+n*.36);v.y=v.y>0?v.y*1.15:v.y*.7;P.setXYZ(i,v.x,v.y,v.z)}q.computeVertexNormals();return q}),habitatMat124(th.wall),walls.concat(pillars));
+ registerChestObstacles253(L.group.children.slice(-2));
  const voidGround=new THREE.Mesh(new THREE.PlaneGeometry(W*CS+80,H*CS+80),habitatMat124(th.fog));voidGround.rotation.x=-Math.PI/2;voidGround.position.set(0,-.3,0);envOwn(L.group,voidGround);
  const bio=th.habitat124,ice=bio==='neve'||bio==='cristal',plants=new EnvBatch(),flora=new EnvBatch();
  for(const p of details){
