@@ -5769,7 +5769,25 @@ function frame(now){
   camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
 }
 let tcA=0;function titleCam(dt){tcA+=dt*.06;camera.position.set(Math.sin(tcA)*46,24,Math.cos(tcA)*46);camera.lookAt(0,2,0);if(L.crystal)L.crystal.rotation.y+=dt}
-function update(dt){
+/* v243: vida no mundo — folhas caindo, borboletas de dia e vaga-lumes à noite, só perto do jogador */
+const LIFE243={};
+function life243(dt){if(typeof L==='undefined'||L.mode!=='world'||!player){if(LIFE243.g)LIFE243.g.visible=false;return}
+ if(!LIFE243.g){const g=LIFE243.g=new THREE.Group();scene.add(g);
+  const NL=70,lp=new Float32Array(NL*3),lc=new Float32Array(NL*3);const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));lg.setAttribute('color',new THREE.BufferAttribute(lc,3));
+  const leaf=new THREE.Points(lg,new THREE.PointsMaterial({size:.32,vertexColors:true,transparent:true,opacity:.9,depthWrite:false}));leaf.frustumCulled=false;g.add(leaf);LIFE243.leaf=leaf;LIFE243.lv=[];
+  for(let i=0;i<NL;i++){LIFE243.lv.push({x:0,y:-99,z:0,s:Math.random()*6});const c=[[.85,.55,.18],[.55,.7,.22],[.9,.75,.3],[.7,.35,.15]][i%4];lc.set(c,i*3)}
+  const NF=40,fp=new Float32Array(NF*3);const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
+  const ff=new THREE.Points(fg,new THREE.PointsMaterial({size:.28,color:0xfff08a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));ff.frustumCulled=false;g.add(ff);LIFE243.ff=ff;LIFE243.fv=[];for(let i=0;i<NF;i++)LIFE243.fv.push({x:0,y:-99,z:0,p:Math.random()*9});
+  const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute([0,0,-.12,.3,0,-.2,.25,0,.15, 0,0,-.12,.25,0,.15,0,0,.12, 0,0,-.12,-.25,0,.15,-.3,0,-.2, 0,0,-.12,0,0,.12,-.25,0,.15],3));wg.computeVertexNormals();
+  const NB=14,bm=new THREE.InstancedMesh(wg,new THREE.MeshBasicMaterial({side:THREE.DoubleSide}),NB);bm.frustumCulled=false;g.add(bm);LIFE243.bm=bm;LIFE243.bv=[];const cols=[0xffd24a,0xff8ad8,0x8ad0ff,0xffffff,0xff9a3a];
+  for(let i=0;i<NB;i++){LIFE243.bv.push({x:0,y:-99,z:0,h:Math.random()*6,p:Math.random()*9});bm.setColorAt(i,new THREE.Color(cols[i%5]))}bm.instanceColor.needsUpdate=true}
+ const g=LIFE243.g;g.visible=true;const t=time,px=player.x,pz=player.z,bio=biomeAt(px,pz),night=isNight(),cold=bio==='neve'||bio==='cristal',hot=bio==='vulcao'||bio==='deserto';
+ const R=(a)=>(Math.random()*2-1)*a,gy=()=>0;
+ {const P=LIFE243.leaf.geometry.attributes.position,on=!cold&&!hot;LIFE243.leaf.visible=on;if(on)LIFE243.lv.forEach((v,i)=>{if(v.y<gy(v.x,v.z)||Math.hypot(v.x-px,v.z-pz)>30){v.x=px+R(26);v.z=pz+R(26);v.y=gy(v.x,v.z)+4+Math.random()*7}v.s+=dt;v.y-=dt*(.6+.3*Math.sin(v.s*2.3));v.x+=dt*(.9+Math.sin(v.s*1.7)*1.2);v.z+=dt*Math.cos(v.s*1.3)*.8;P.setXYZ(i,v.x,v.y,v.z)});P.needsUpdate=true}
+ {const P=LIFE243.ff.geometry.attributes.position,on=night&&!cold;LIFE243.ff.visible=on;if(on)LIFE243.fv.forEach((v,i)=>{if(v.y<-50||Math.hypot(v.x-px,v.z-pz)>22){v.x=px+R(20);v.z=pz+R(20);v.y=gy(v.x,v.z)+.5+Math.random()*2}v.p+=dt;v.x+=Math.sin(v.p*.9+i)*dt*.6;v.z+=Math.cos(v.p*.7+i*2)*dt*.6;v.y+=Math.sin(v.p*1.3)*dt*.25;P.setXYZ(i,v.x,v.y,v.z)});P.needsUpdate=true;LIFE243.ff.material.opacity=.55+.45*Math.sin(t*3)}
+ {const M=LIFE243.bm,on=!night&&!cold&&!hot,m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),s=new THREE.Vector3(),p=new THREE.Vector3();M.visible=on;if(on){LIFE243.bv.forEach((v,i)=>{if(v.y<-50||Math.hypot(v.x-px,v.z-pz)>24){v.x=px+R(18);v.z=pz+R(18);v.y=0}v.p+=dt;v.h+=Math.sin(v.p*.8+i)*dt*1.5;v.x+=Math.cos(v.h)*dt*1.4;v.z+=Math.sin(v.h)*dt*1.4;v.y=gy(v.x,v.z)+.7+Math.sin(v.p*1.9)*.4+(i%3)*.4;e.set(0,-v.h+Math.PI/2,0);q.setFromEuler(e);s.set(.25+.75*Math.abs(Math.sin(v.p*14+i)),1,1);m.compose(p.set(v.x,v.y,v.z),q,s);M.setMatrixAt(i,m)});M.instanceMatrix.needsUpdate=true}}
+}
+function update(dt){try{life243(dt)}catch(_){}
   const P=player;
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
@@ -8103,6 +8121,17 @@ const TripoEnvironment153 = (() => {
         // Same character visibility cutout as existing scenery. Instancing needs world positions.
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
+          /* v243: vento nas árvores — o tronco curva com rajadas e as folhas tremem; fase por árvore */
+          if(['oak','willow','fir'].includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+            {float H=${size.y.toFixed(3)},h=clamp(transformed.y/H,0.,1.);vec2 ph=vec2(0.);
+            #ifdef USE_INSTANCING
+            ph=instanceMatrix[3].xz;
+            #endif
+            float t=uWind,f=dot(ph,vec2(.13,.09)),g=.55+.45*sin(t*.33+f*.7)*sin(t*.21+f*.3);
+            float b=h*h*H*(${id==='fir'?'.022':id==='willow'?'.05':'.035'})*g;
+            transformed.x+=sin(t*1.3+f)*b+b*.6;transformed.z+=cos(t*1.05+f*1.3)*b*.6;
+            float lf=smoothstep(.35,.7,h)*H*.0025*(.6+g);vec3 q=transformed*(5./H);
+            transformed+=vec3(sin(t*4.+q.y+q.z+f),sin(t*3.6+q.x)*.4,cos(t*4.4+q.z+q.x+f))*lf;}`)}
           if(['oak','willow','fir'].includes(id))shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
             {vec3 c0=diffuseColor.rgb;float leaf154=smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95);float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
             diffuseColor.rgb=mix(c0,(dot(c0,vec3(.3,.59,.11))*2.1+.11)*vColor,leaf154*on154);}
@@ -8236,9 +8265,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v242</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v243</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=242;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=243;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
