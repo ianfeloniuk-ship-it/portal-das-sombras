@@ -91,6 +91,17 @@
      [arquivo, comprimento, ponto de pegada (fração a partir da base)]. Tanque e Paladino levam escudo na outra mão. */
   const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],axe:['comum-maca',.6,.14],wand:['comum-lanca',1.35,.4]};
   const SHIELD171={axe:1,wand:1},w171={},wait171=new Set();
+  const isStaff251=kind=>/^(staff|bonestaff|tome)$/.test(kind||'');
+  function staffTip251(w,axis='y'){
+    w.updateMatrixWorld(true);const inv=new T.Matrix4().copy(w.matrixWorld).invert(),box=new T.Box3();
+    w.traverse(o=>{if(o.isMesh&&!o.parent?.userData.staffAura251){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).applyMatrix4(inv))}});
+    if(box.isEmpty())return;const p=box.getCenter(new T.Vector3());p[axis]=box.max[axis];const tip=new T.Object3D();tip.name='staff_muzzle';tip.position.copy(p);w.add(tip);w.userData.staffTip251=tip;w.userData.staffAxis251=axis;
+  }
+  function visibleStaff251(m){if(!m?.staff174)return null;const rare=m.staffVisual251;if(rare?.parent&&rare.visible)return rare;return m.staff174.parent&&m.staff174.visible&&m.socket.visible?m.staff174:null}
+  API.registerStaffVisual=function(m,w){if(!m?.staff174)return;staffTip251(w,w.userData.axis||'y');m.staffVisual251=w};
+  API.staffMuzzle=function(m){const w=visibleStaff251(m);if(!w)return null;const tip=w.userData.staffTip251;if(!tip)return null;m.root.updateMatrixWorld(true);return tip.getWorldPosition(new T.Vector3())};
+  API.prepareStaffCast=function(m,options={}){if(!API.staffMuzzle(m))return false;m.root.rotation.y=options.face??m.root.rotation.y;m.staffCast251=performance.now()+450;API.animate(m,{move:0,atk:.12,combo:options.combo||1,wep:'staff',dead:0},0,1/60);return true};
+  API.handMuzzle=function(m,options={}){if(!m?.bones?.hand_r)return null;m.root.rotation.y=options.face??m.root.rotation.y;if(!m.staff174)API.animate(m,{move:0,atk:.12,combo:options.combo||1,wep:'orb',dead:0},0,1/60);m.root.updateMatrixWorld(true);return m.bones.hand_r.getWorldPosition(new T.Vector3())};
   function norm171(o,len,grip){o.updateMatrixWorld(true);const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),ax=sz.x>sz.y&&sz.x>sz.z?'x':sz.z>sz.y?'z':'y';
     const holder=new T.Group(),inner=new T.Group();inner.add(o);holder.add(inner);if(ax==='x')inner.rotation.z=-Math.PI/2;if(ax==='z')inner.rotation.x=Math.PI/2;
     holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder);inner.scale.multiplyScalar(len/(b2.max.y-b2.min.y));holder.updateMatrixWorld(true);
@@ -102,6 +113,8 @@
     options=options||{};const colors=options.tierColors||[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
     const signature=JSON.stringify(['w','a','h','g','b'].map(k=>{const i=equip[k];return i?[k,i.uid,i.tier,i.rar,i.visual,i.visualWeapon]:[k,null]}));
     if(signature===m.gearSignature)return;m.gearSignature=signature;
+    sheathRestore195(m);delete m.socket.userData.axis195;m.staff174=null;m.staffCast251=0;m.kind195=null;m.bowHolder155=null;
+    m.socket.scale.setScalar(m.mix153?1/m.model.scale.x*(isStaff251(equip.w?.kind155)?1:1.6):1);
     for(const p of m.wnodes)disposePart(p);for(const p of m.armorParts)disposePart(p);m.wnodes=[];m.armorParts=[];m.wmats=[];m.mats=m.baseMaterials.slice();
     const itemFor=it=>{if(!it)return null;return {...it,visual:{...it.visualWeapon,...it.visual,color:it.visual?.color??colors[clamp(it.tier||0,0,9)]}}};
     m.bow155=false;fist162(m,false);const heldWeapon=equip.w,isBow=heldWeapon&&(heldWeapon.kind155==='bow'||heldWeapon.visual?.shape==='bow'||heldWeapon.visualWeapon?.shape==='bow');
@@ -111,7 +124,7 @@
       holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true;const it=itemFor(heldWeapon);aura162(bow,it.visual.color,it.tier||0,.98,true)}
     else if(heldWeapon){m.bow155=false;m.kind195=heldWeapon.kind155;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const isSword163=heldWeapon.kind155!=='staff'&&/^(sword|broad|long)$/.test(item.visual.shape||'');if(isSword163&&!sword163)waiting163.add(m);const k171=W171[heldWeapon.kind155];if(k171){load171(k171[0],k171[1],k171[2],heldWeapon.kind155);if(!w171[heldWeapon.kind155])wait171.add(m)}const c171=k171&&make171(heldWeapon.kind155,item.visual.color);const weapon=c171||(heldWeapon.kind155==='staff'?staff162(item):isSword163&&sword163?tripoSword163(item):global.WarriorEquipment127.weapon(T,item));
       if(SHIELD171[heldWeapon.kind155]&&m.bones.hand_l){load171('comum-escudo',.55,.5,'shield');const sh=make171('shield',item.visual.color);if(sh){const hold=new T.Group();hold.add(sh);hold.rotation.set(0,Math.PI/2,0);hold.position.set(.03,0,.02);hold.scale.setScalar(1/m.model.scale.x);m.bones.hand_l.add(hold);m.wnodes.push(hold)}else wait171.add(m)}
-      fist162(m,true);aura162(weapon,item.visual.color,item.tier||0,...(heldWeapon.kind155==='staff'?[.32,false,.84]:[isSword163&&sword163?.6:item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.staff174=heldWeapon.kind155==='staff'?weapon:null;m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
+      fist162(m,true);const staff=isStaff251(heldWeapon.kind155);if(staff)staffTip251(weapon);aura162(weapon,item.visual.color,item.tier||0,...(staff?[.32,false,.7]:[isSword163&&sword163?.6:item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.staff174=staff?weapon:null;m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
     // Equipment is added as independent pieces; the approved face remains intact.
     // Armor assets await art review. Keep the approved clothes intact.
@@ -190,7 +203,7 @@
   function sheathRestore195(m){for(const W of [m.socket,m.bowHolder155])if(W&&W.userData.base195){const b=W.userData.base195;W.position.copy(b.p);W.quaternion.copy(b.q);W.scale.copy(b.s);W.userData.base195=null}}
   function sheathAxis195(W){if(W.userData.axis195)return W.userData.axis195;W.updateMatrixWorld(true);const inv=new T.Matrix4().copy(W.matrixWorld).invert(),b=new T.Box3();W.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).applyMatrix4(inv);b.union(bb)}});
     if(b.isEmpty())return null;const sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),ax=sz.x>=sz.y&&sz.x>=sz.z?'x':sz.y>=sz.z?'y':'z',v=new T.Vector3();v[ax]=c[ax]>=0?1:-1;return W.userData.axis195=v}
-  function sheath195(m,st,dt){const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
+  function sheath195(m,st,dt){if(m.staff174){if(m.sh195)m.sh195.s=0;return}const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
     const moving=(st.move||0)>.08&&!busy;let target;
     if(busy||st.dead>0){target=0;S.idle=0}else if(moving){target=1;S.idle=0;S.wasMove=true}
     else{if(S.wasMove){S.wasMove=false;S.idle=0;S.drawn=true}S.idle+=dt||0;target=S.drawn&&S.idle<3?0:1;if(S.idle>=3)S.drawn=false}
@@ -213,7 +226,7 @@
     if(st.dead>0)play155(A,'morte',.12,true);
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
     else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
-    else if(st.atk>0){const seq=ATK155[st.wep]||ATK155.sword,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
+    else if(st.atk>0){const seq=ATK155[m.staff174?'staff':st.wep]||ATK155.sword,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
       const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
     else if(st.dodge){a=play155(A,'esquiva',.05,true);a.timeScale=a.getClip().duration/.38;A.state='esquiva'}
@@ -232,8 +245,8 @@
     // v168 (Irror): tiro com arco = braço esquerdo esticado para o alvo segurando o arco em pé; mão direita puxa a corda até o rosto.
     if(m.bowHolder155&&(/^arco/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||''))){aimPose168(m);const bh2=m.bowHolder155,rq=m.root.getWorldQuaternion(new T.Quaternion()),want=rq.multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWAIM168)));bh2.parent.updateWorldMatrix(true,false);bh2.quaternion.copy(bh2.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want));bh2.position.set(0,0,0);bh2.userData.idle155=false;bh2.userData.aim168=true}
     // v174 (Ian): cajado parado fica em pé na mão (como bastão), não atravessado; no golpe segue a animação de cajado.
-    if(m.staff174&&m.staff174.parent){const sw=m.staff174;if(!sw.userData.q174)sw.userData.q174=sw.quaternion.clone();const swinging=/^cajado/.test(A.state||'')&&st.atk>0;
-      if(!swinging){m.root.updateMatrixWorld(true);const want=m.model.getWorldQuaternion(new T.Quaternion());sw.quaternion.copy(sw.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want))}else sw.quaternion.copy(sw.userData.q174)}
+    {const sw=visibleStaff251(m);if(sw){const casting=performance.now()<(m.staffCast251||0)||(st.atk>0&&/^cajado/.test(A.state||''));
+      if(casting)aimStaffPose251(m);else if(!st.dead)carryStaffPose251(m);m.root.updateMatrixWorld(true);const rq=m.root.getWorldQuaternion(new T.Quaternion()),dir=casting?new T.Vector3(0,.18,1).normalize().applyQuaternion(rq):new T.Vector3(0,1,0),axis=new T.Vector3();axis[sw.userData.staffAxis251||'y']=1;const want=new T.Quaternion().setFromUnitVectors(axis,dir);sw.quaternion.copy(sw.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want))}}
     // Arco fora do tiro: em pé ao lado do corpo, um pouco para fora da mão, sem atravessar braço e perna.
     const bh=m.bowHolder155;if(bh&&bh.parent){const aiming=/^(arco|chuva_com_arco)/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||'');
       if(!aiming){m.root.updateMatrixWorld(true);const hand=bh.parent,mq=m.model.getWorldQuaternion(q4).clone(),want=mq.multiply(q1.setFromEuler(new T.Euler(...BOWIDLE155)));
@@ -244,6 +257,8 @@
   }
   const BOWAIM168=[0,0,0];API.BOWAIM168=BOWAIM168;
   function aimBone168(b,c,dir){if(!b||!c||!b.parent)return;b.updateWorldMatrix(true,true);const bp=b.getWorldPosition(new T.Vector3()),cur=c.getWorldPosition(new T.Vector3()).sub(bp).normalize(),q=new T.Quaternion().setFromUnitVectors(cur,dir.clone().normalize()),wq=b.getWorldQuaternion(new T.Quaternion()),pq=b.parent.getWorldQuaternion(new T.Quaternion());b.quaternion.copy(pq.invert().multiply(q.multiply(wq)))}
+  function aimStaffPose251(m){const B=m.bones,rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),R=new T.Vector3(-1,0,0).applyQuaternion(rq),U=new T.Vector3(0,1,0);aimBone168(B.upperarm_r,B.forearm_r,F.clone().multiplyScalar(.7).addScaledVector(R,.3).addScaledVector(U,-.25));aimBone168(B.forearm_r,B.hand_r,F.clone().multiplyScalar(.9).addScaledVector(U,.45));m.root.updateMatrixWorld(true)}
+  function carryStaffPose251(m){const B=m.bones,rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),R=new T.Vector3(-1,0,0).applyQuaternion(rq),U=new T.Vector3(0,1,0);aimBone168(B.upperarm_r,B.forearm_r,U.clone().multiplyScalar(-.95).addScaledVector(R,.25).addScaledVector(F,.05));aimBone168(B.forearm_r,B.hand_r,U.clone().multiplyScalar(-.93).addScaledVector(R,.3).addScaledVector(F,.12));m.root.updateMatrixWorld(true)}
   function aimPose168(m){const B=m.bones,rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),U=new T.Vector3(0,1,0),R=new T.Vector3(-1,0,0).applyQuaternion(rq);
     const f=F.clone().addScaledVector(U,.1);aimBone168(B.upperarm_l,B.forearm_l,f);aimBone168(B.forearm_l,B.hand_l,f);
     aimBone168(B.upperarm_r,B.forearm_r,R.clone().multiplyScalar(.8).addScaledVector(F,-.3).addScaledVector(U,.15));aimBone168(B.forearm_r,B.hand_r,R.clone().multiplyScalar(-.6).addScaledVector(F,.8).addScaledVector(U,.12));m.root.updateMatrixWorld(true)}

@@ -47,6 +47,7 @@ window.SetVisual153=(()=>{
     const off=(holder.userData.offset||new T.Vector3(0,fit.lift||0,0).add(new T.Vector3(0,0,fit.fwd||0).applyQuaternion(rootQ))).clone().divideScalar(ws);
     holder.position.copy(off.applyQuaternion(bone.getWorldQuaternion(new T.Quaternion()).invert()));
     holder.name='set153_'+slot;bone.add(holder);
+    if(slot==='w'&&/^(staff|bonestaff|tome)$/.test(item.kind155||'')&&window.Warrior127&&player?.m?.root===root)Warrior127.registerStaffVisual(player.m,holder);
    });
    if(slot==='w')root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=false});
   });
