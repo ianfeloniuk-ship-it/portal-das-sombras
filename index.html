@@ -244,6 +244,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 </div>
 
 <script src="tools/balance-rpg.js?v=252"></script>
+<script src="tools/monster-balance.js?v=259"></script>
 <script src="tools/mana258.js?v=258"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -2578,7 +2579,8 @@ const pStep=L=>Math.floor(L/25),atkPer=L=>2+pStep(L),hpPer=L=>15+8*pStep(L),mpPe
 const statK=L=>atkPer(L)/2;
 const expAtk=L=>(10+2*L+L*atkPer(L)+1.3*WATK[tierAt(L)])*1.35,expHp=L=>(100+10*L+1.3*AHPV[tierAt(L)])*1.35;
 /* v169 (Irror: "muito fácil"): monstros ~3x mais vida e ~2,4x mais dano que o jogador esperado aguentava antes. */
-const eHP=L=>expAtk(L)/7,eDMG=L=>expHp(L)/45;
+// Vida/dano v2: curva fixa por nível próprio, calibrada pelas classes; não lê run.level.
+const eHP=L=>MonsterBalance.reference(L).dps*4/38,eDMG=L=>MonsterBalance.reference(L).hp/(18*.55*.85)/9;
 GR.forEach(g=>{g.hp=eHP(g.lvl);g.dmg=eDMG(g.lvl)});
 const gid=i=>GR[i].id;
 const GATE_W=[26,24,20,14,10,6,3,1.5,.7,.4],GATE_RANDOM153=[16,15,14,13,11,9,8,6,5,3];
@@ -4639,7 +4641,7 @@ function expeditionObjective(){const ex=L.expedition;if(!ex)return '';const s=ex
 
 function expHazard(...args){const h=hazard(...args);h.owner=null;return h}
 function useLamp(){scene.fog.density=.02;if(!L.lampL){L.lampL=new THREE.PointLight(0xffd9a0,1.6,22);scene.add(L.lampL)}L.lampT=180;toast('<b>[NARRADOR]</b> Lampião Mágico aceso: 3 minutos de luz. Restam '+(run.lamps||0)+'.',5000)}
-function makeElite(e){e.elite=true;e.res=.2;e.maxhp=e.hp=e.hp*1.8;e.dmg*=1.3;e.name='Elite '+e.name;/* Recompensas calculadas uma vez em enemyRewardBalance. */e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
+function makeElite(e){if(e.elite)return;const healthFraction=e.maxhp>0?e.hp/e.maxhp:1,oldRes=e.res||0;e.elite=true;e.res=Math.max(oldRes,.2);e.maxhp*=1.8*(1-e.res)/(1-oldRes);e.hp=e.maxhp*healthFraction;e.dmg*=1.3;e.name='Elite '+e.name;/* Recompensas calculadas uma vez em enemyRewardBalance. */e.m.body.scale.multiplyScalar(1.15);e.mats.forEach(m=>{m.emissive.setHex(0x331100);m.userData.e0=0x331100})}
 /* Variações de calabouço: uma saída real, escadas internas e defesa de núcleo. */
 function variantLayout103(type,R){
  const count=type==='floors'?3:1,W=36,H=count*40-4,cells=new Uint8Array(W*H),rooms=[];
@@ -4900,7 +4902,8 @@ function tierSwing177(e,T){const t=e.tier177||0;if(!t||!T||T.dead)return;
 function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
   const m=makeChibi({goblin118:K.goblin118,body:K.body,skin:K.skin??0xe8e0cc,eye:K.eye??0xff3030,wep:K.wep,shield:K.shield,scale:K.scale,wcol:0xb06bff,hair:K.hair,helm:K.helm,gk:K.gk,tint:K.gtint,atkClip:K.clip,mon:K.mon});
   m.root.position.set(x,0,z);scene.add(m.root);
-  const e={m,mats:m.mats,x,z,face:rnd(0,TAU),name:K.n,hp:K.hp*mulHp,maxhp:K.hp*mulHp,dmg:K.dmg*mulDmg,speed:K.spd,ai:K.ai,range:K.range,wind:K.wind,atkCd:K.atkCd,xp:K.xp,speciesXpBalance:K.xp,r:K.r,shield:!!K.shield,
+  const mb=MonsterBalance.species(K,extra);
+  const e={m,mats:m.mats,x,z,face:rnd(0,TAU),name:K.n,hp:mb.hp*mulHp,maxhp:mb.hp*mulHp,dmg:mb.damage*mulDmg,monsterBalanceVersion:2,speed:K.spd,ai:K.ai,range:K.range,wind:K.wind,atkCd:K.atkCd,xp:K.xp,speciesXpBalance:K.xp,r:K.r,shield:!!K.shield,
     cd:rnd(.5,1.5),act:null,stun:0,slow:0,dotT:0,dotD:0,flash:0,dead:false,deadT:0,aggro:false,kb:{x:0,z:0},t:Math.random()*9,team:'enemy',gold:0,...extra};
   enemies.push(e);return e;
 }
@@ -4908,7 +4911,7 @@ function kindsFor(gr,bio){if(bio&&HABITATS124[bio])return HABITATS124[bio].flatM
 function kindsFor0(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
 /* O nível numérico vem do portal; ameaça e recompensas são calculadas separadamente. */
 function dunLvl(gr){const G=GR[Math.min(9,gr)];return (L&&L.mode==='dungeon'&&!L.special&&L.gate&&L.gate.id>0)?Math.max(G.lvl,gateLvl207(L.gate)):G.lvl}
-function dunScale(e,gr,lvo){const G=GR[Math.min(9,gr)],lv=lvo||dunLvl(gr);if(lv<=G.lvl)return;const mh=eHP(lv)/G.hp,md=eDMG(lv)/G.dmg;e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.lvl=lv+(e.elite?3:0)+(e.isBoss?5:0)}
+function dunScale(e,gr,lvo){const G=GR[Math.min(9,gr)],lv=lvo||dunLvl(gr),old=e.balanceLevel||G.lvl;const mh=eHP(lv)/eHP(old),md=eDMG(lv)/eDMG(old);e.hp*=mh;e.maxhp*=mh;e.dmg*=md;e.lvl=e.balanceLevel=lv}
 /* IDs legados de ameaça preservados; ordem semântica: Logos/Divindade, Supremo, Inefável. A ameaça não fixa o nível numérico. */
 const THREAT184=[{n:'',h:1,d:1,r:1},
  {n:'Sombra',a:0xd8d8d8,h:1.15,d:1.05,r:1.4,col:'#e0e0e0'},
@@ -4941,7 +4944,7 @@ function auraMesh184(t){const T=THREAT184[t];if(!AURA184.g){AURA184.g=new THREE.
 function lore206(id,txt){profile.seen206=profile.seen206||{};if(profile.seen206[id])return;profile.seen206[id]=1;store.set('pds2_profile',profile);setTimeout(()=>{try{showSys(txt)}catch(_){}},1200)}
 function threatApply184(e,t){if(!t)return;if(started&&run)lore206('threat','A Ordem mede o peso de cada monstro que atravessa a fenda. A Ordem usa a escala dos textos antigos: Sombra, Legião, Praga, Dilúvio... até Logos, o máximo que um monstro alcança. Acima disso só existem os pedaços do Arquiteto, chamados Supremos, e ele próprio, o Inefável. A balança da Ordem só mostra ???.');const T=THREAT184[t];e.threat184=t;e.hp*=T.h;e.maxhp*=T.h;e.dmg*=T.d;/* Ameaça não altera o nível; XP/ouro vêm de enemyRewardBalance. */e.name='['+T.n+'] '+e.name;
  try{const a=auraMesh184(t),R=(e.r||.6)*1.5,H=(e.scale||1)*2.2*(1+.04*t);a.scale.set(R,H,R);e.m.root.add(a);e.aura184=a}catch(_){}if(t>=5&&e.m&&e.m.body)e.m.body.scale.multiplyScalar(1+.025*(t-4))}
-function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;if(!extra.wild)dunScale(e,gr);if(L&&L.mode==='dungeon')threatApply184(e,threatRoll184(gr,false));return e}
+function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;dunScale(e,gr,extra.wild?Math.max(1,Math.round(G.lvl*(1+.15*Math.max(0,gr-1)))):undefined);if(L&&L.mode==='dungeon')threatApply184(e,threatRoll184(gr,false));return e}
 function spawnRival(x,z,gr,extra={}){
   const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
   const K={gk:CLASS_GK[CLASSES.indexOf(cl)],gtint:CLASS_TINT[CLASSES.indexOf(cl)],n:'',hp:150,dmg:13,spd:3.4,ai:'rival',range:1.9,wind:.38,atkCd:.9,xp:0,scale:1,r:.55,body:cl.body,wep:['bow','staff','wand','tome','bonestaff'].includes(cl.wep)?'sword':cl.wep,skin:0xffd8b8,eye:0x111111,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a])};
@@ -5257,7 +5260,7 @@ function updHazards(dt){
 /* ================= COMBATE ================= */
 function nearestEnemy(x,z,max){let best=null,bd=max;for(const e of enemies){if(e.dead||e.sleep||e.invuln)continue;const d=Math.hypot(e.x-x,e.z-z);if(d<bd&&los(x,z,e.x,e.z)){bd=d;best=e}}return best}
 /* Nível do monstro: rank da masmorra (ou andar da torre) e perigo do mundo. Caveira: amarela 2×, laranja 5×, vermelha 10× o seu nível. */
-function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(9,e.gr||0)];let l=g.lvl;if(e.wild)l=Math.round(l*(1+.15*Math.max(0,(e.gr||0)-1)));if(e.elite)l+=3;if(e.isBoss)l+=5;return e.lvl=Math.max(1,l)}
+function eLvl(e){if(e.lvl)return e.lvl;const g=GR[Math.min(9,e.gr||0)];return e.lvl=Math.max(1,g.lvl)}
 function threat(lv){const r=lv/Math.max(1,run.level);return r>=10?'#ff3d3d':r>=5?'#ff8a3d':r>1?'#ffd54f':null}
 function identityHitDamage(e,amt,o){if(!o.fromPlayer||o.pet||o.passive)return amt;if(o.execute&&e.hp<=e.maxhp*.35)amt*=1.5;if(o.longshot&&Math.hypot(e.x-o.originX,e.z-o.originZ)>=8)amt*=1.25;return amt}
 function applyWeaponVenom(e,amt){const P=player;if(!(P.venomUntil>time)||!(P.venomCharges>0))return;P.venomCharges--;e.basicDots=e.basicDots||{};const old=e.basicDots.venom;e.basicDots.venom={t:4,d:Math.max(old?.d||0,amt*.6/4),acc:old?.acc||0};floater(e.x,e.z,'ENVENENADO','#8de06a')}
@@ -7066,8 +7069,8 @@ function specialSetup2(kind,S,arg){
 function updSpecial2(S,dt){
   const alive=enemies.filter(e=>!e.dead&&!e.totem).length;
   if(S.kind==='tower'){
-    if(!S.spawned&&S.t>1.5){S.spawned=true;if(S.boss){const pool=S.floor>=100||S.gr>=8?SOVEREIGNS:S.gr>=6?BOSSES_HIGH:BOSSES;const b=spawnBoss(0,-8,S.gr,pick(pool));const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;b.hp*=mh;b.maxhp*=mh;b.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;b.lvl=tLvl(S.floor)+5;if(S.floor>=100)b.bars=5;b.aggro=true;bossAggro(b)}
-      else{const n=6+Math.floor(S.floor/3);for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(8,16);x=Math.cos(a)*d;z=Math.sin(a)*d-3;if(freeAt(x,z,.6))break}const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});const mh=eHP(tLvl(S.floor))/GR[S.gr].hp;e.hp*=mh;e.maxhp*=mh;e.dmg*=eDMG(tLvl(S.floor))/GR[S.gr].dmg;e.aggro=true;if(i<Math.floor(S.floor/5))makeElite(e);e.lvl=tLvl(S.floor)+(e.elite?3:0)}}}
+    if(!S.spawned&&S.t>1.5){S.spawned=true;if(S.boss){const pool=S.floor>=100||S.gr>=8?SOVEREIGNS:S.gr>=6?BOSSES_HIGH:BOSSES;const b=spawnBoss(0,-8,S.gr,pick(pool));dunScale(b,S.gr,tLvl(S.floor));if(S.floor>=100)b.bars=5;b.aggro=true;bossAggro(b)}
+      else{const n=6+Math.floor(S.floor/3);for(let i=0;i<n;i++){let x=0,z=0;for(let t=0;t<20;t++){const a=rnd(0,TAU),d=rnd(8,16);x=Math.cos(a)*d;z=Math.sin(a)*d-3;if(freeAt(x,z,.6))break}const e=spawnKind(wpick(kindsFor(S.gr)).k,x,z,S.gr,{});dunScale(e,S.gr,tLvl(S.floor));e.aggro=true;if(i<Math.floor(S.floor/5))makeElite(e)}}}
     S.msg='TORRE · andar '+S.floor+(S.boss?' · CHEFE':'')+' · inimigos '+alive;
     /* Conta de novo: 'alive' foi medido antes dos inimigos do andar nascerem (bug: andar limpava sozinho). */
     if(S.spawned&&!S.cleared&&S.t>2&&enemies.filter(e=>!e.dead&&!e.totem).length===0&&!(bossE&&!bossE.dead))towerClear(S)}
@@ -8409,9 +8412,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v258</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v259</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=258;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=259;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
