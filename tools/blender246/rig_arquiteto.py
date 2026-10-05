@@ -28,15 +28,67 @@ for sx,s in ((-1,'R'),(1,'L')):
     bone('thigh_'+s,(sx*.1,0,.46),(sx*.1,0,.27),'hips');bone('shin_'+s,(sx*.1,0,.27),(sx*.1,0,.0),'thigh_'+s)
 bpy.ops.object.mode_set(mode='OBJECT')
 segs=[(b.name,arm.matrix_world@b.head_local,arm.matrix_world@b.tail_local) for b in arm.data.bones if b.name!='root']
+def near(p,side=None):
+    cand=segs
+    if side=='legs':cand=[x for x in segs if x[0].startswith(('thigh','shin','hips'))]
+    elif side=='armR':cand=[x for x in segs if x[0] in('arm_R','fore_R','hand_R')]
+    elif side=='armL':cand=[x for x in segs if x[0] in('arm_L','fore_L','hand_L')]
+    elif p.z<.2*K and abs(p.x)<.27*K:cand=[x for x in segs if x[0].startswith(('thigh','shin'))]
+    elif p.x<-.19*K and p.z>.05*K:cand=[x for x in segs if x[0].endswith('_R') and not x[0].startswith(('thigh','shin'))]
+    elif p.x>.19*K and p.z>.05*K:cand=[x for x in segs if x[0].endswith('_L') and not x[0].startswith(('thigh','shin'))]
+    return min((dseg(p,a,b),n) for n,a,b in cand)[1]
 def dseg(p,a,b):
     q,t=intersect_point_line(p,a,b);t=max(0,min(1,t));return (p-(a+(b-a)*t)).length
 G={n:me.vertex_groups.new(name=n) for n,_,_ in segs}
+# peças soltas (ilhas) vão inteiras para um osso: evita esticar a malha entre peito e braço
+# ilhas por posição (o glTF duplica vértices nas costuras de UV)
+par=list(range(len(me.data.vertices)))
+def f(x):
+    while par[x]!=x:par[x]=par[par[x]];x=par[x]
+    return x
+def u(a,b):
+    a,b=f(a),f(b)
+    if a!=b:par[a]=b
+key={}
 for v in me.data.vertices:
-    p=v.co;ds=sorted((dseg(p,a,b),n) for n,a,b in segs)
-    (d0,n0),(d1,n1)=ds[0],ds[1]
-    w1=max(0.,.5-(d1-d0)/(2*.35)) if d1-d0<.35 else 0.
-    G[n0].add([v.index],1-w1,'REPLACE')
-    if w1>0:G[n1].add([v.index],w1,'REPLACE')
+    k=tuple(round(c,3) for c in v.co)
+    if k in key:u(v.index,key[k])
+    else:key[k]=v.index
+for e in me.data.edges:u(e.vertices[0],e.vertices[1])
+from collections import defaultdict
+gr=defaultdict(list)
+for v in me.data.vertices:gr[f(v.index)].append(v.index)
+isl=list(gr.values())
+V=me.data.vertices;big=0
+for ids in isl:
+    c=sum((V[i].co for i in ids),Vector())/len(ids)
+    zs=[V[i].co.z for i in ids];span=max(zs)-min(zs)
+    if span<.32*K:
+        G[near(c)].add(ids,1.,'REPLACE')
+    else:
+        big+=1
+        side='armR' if c.x<-.2*K else 'armL' if c.x>.2*K else 'legs' if c.z<.45*K else None
+        for i in ids:
+            p=V[i].co;n0=near(p,side)
+            if abs(p.x)>.15*K and abs(p.x)<.26*K and p.z>.62*K:
+                side='_R' if p.x<0 else '_L';k=(abs(p.x)-.15*K)/(.11*K)
+                G['arm'+side].add([i],k,'REPLACE');G['chest'].add([i],1-k,'REPLACE')
+            else:G[n0].add([i],1.,'REPLACE')
+# corta triângulos que ligam cadeias que se movem separadas (ex.: punho grudado no pé, perna com perna)
+def chain(n):
+    if n in('arm_R','fore_R','hand_R'):return 'aR'
+    if n in('arm_L','fore_L','hand_L'):return 'aL'
+    if n.endswith('_R') and n[:1] in 'ts':return 'lR'
+    if n.endswith('_L') and n[:1] in 'ts':return 'lL'
+    return 'c'
+OK={frozenset(x) for x in (('aR','c'),('aL','c'),('lR','c'),('lL','c'))}
+def top(v):return me.vertex_groups[max(v.groups,key=lambda g:g.weight).group].name
+ch=[chain(top(v)) for v in V]
+import bmesh
+bm=bmesh.new();bm.from_mesh(me.data)
+kill=[f for f in bm.faces if len({ch[v.index] for v in f.verts})>1 and frozenset({ch[v.index] for v in f.verts}) not in OK]
+bmesh.ops.delete(bm,geom=kill,context='FACES_ONLY');bm.to_mesh(me.data);bm.free()
+print('ilhas',len(isl),'grandes',big,'cortados',len(kill))
 md=me.modifiers.new('arm','ARMATURE');md.object=arm;me.parent=arm
 # ---------- animações
 def act(name,length,keys):
@@ -52,7 +104,7 @@ act('idle',48,[(1,{}),(24,{'chest':(R(-3),0,0),'hips@':(0,.08,0),'arm_L':(0,0,R(
 act('andar',32,[(1,{'thigh_L':(R(22),0,0),'thigh_R':(R(-22),0,0),'shin_L':(R(-10),0,0),'arm_L':(R(-14),0,0),'arm_R':(R(14),0,0)}),
  (9,{'hips@':(0,.15,0)}),(17,{'thigh_L':(R(-22),0,0),'thigh_R':(R(22),0,0),'shin_R':(R(-10),0,0),'arm_L':(R(14),0,0),'arm_R':(R(-14),0,0)}),(25,{'hips@':(0,.15,0)}),
  (32,{'thigh_L':(R(22),0,0),'thigh_R':(R(-22),0,0),'shin_L':(R(-10),0,0),'arm_L':(R(-14),0,0),'arm_R':(R(14),0,0)})])
-act('golpe1',36,[(1,{}),(14,{'chest':(R(-12),0,R(-8)),'arm_R':(R(-150),0,R(-10)),'fore_R':(R(-20),0,0)}),(22,{'chest':(R(18),0,R(6)),'arm_R':(R(20),0,0),'fore_R':(R(-5),0,0),'hips@':(0,-.25,0)}),(36,{})])
+act('golpe1',36,[(1,{}),(14,{'chest':(R(-10),0,R(-6)),'arm_R':(R(-110),0,0),'fore_R':(R(-35),0,0)}),(22,{'chest':(R(18),0,R(6)),'arm_R':(R(20),0,0),'fore_R':(R(-5),0,0),'hips@':(0,-.25,0)}),(36,{})])
 act('golpe2',30,[(1,{}),(10,{'arm_L':(R(-30),0,R(25)),'fore_L':(R(-40),0,0),'chest':(0,0,R(10))}),(16,{'arm_L':(R(-95),0,R(-5)),'fore_L':(R(0),0,0),'chest':(R(8),0,R(-10))}),(30,{})])
 act('morte',48,[(1,{}),(20,{'hips@':(0,-1.2,0),'thigh_L':(R(-60),0,0),'thigh_R':(R(-55),0,0),'shin_L':(R(90),0,0),'shin_R':(R(85),0,0),'chest':(R(25),0,0)}),(48,{'hips@':(0,-2.6,0),'thigh_L':(R(-85),0,0),'thigh_R':(R(-85),0,0),'shin_L':(R(100),0,0),'shin_R':(R(100),0,0),'chest':(R(70),0,0),'head':(R(30),0,0),'arm_L':(R(-40),0,R(40)),'arm_R':(R(-40),0,R(-40))})])
 for im in bpy.data.images:
