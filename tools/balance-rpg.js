@@ -63,15 +63,45 @@
     for (var i = 0; i <= index; i++) value = Math.max(value + 1, Math.round(base * factors[i]));
     return value;
   }
+  // Expected encounter work, never elapsed time, damage taken, or player level.
+  function combatEffort(input) {
+    var o = input || {}, floor = ROLES[o.role] || 1;
+    var hp = Number(o.hp), baseline = Number(o.baselineHp);
+    if (!(Number.isFinite(hp) && hp > 0 && Number.isFinite(baseline) && baseline > 0)) return 1;
+    var resistance = Number.isFinite(Number(o.resistance)) ? Math.max(0, Math.min(.95, Number(o.resistance))) : 0;
+    var work = hp / baseline / (1 - resistance);
+    var premium = o.role === 'boss' ? 1.25 : o.role === 'elite' ? 1.1 : 1;
+    return Math.max(1, work * premium / floor);
+  }
+  function questReward(input) {
+    var o = input || {}, level = levelOf(o.level), count = levelOf(o.count);
+    var minutes, difficulty;
+    switch (o.type) {
+      case 'kill': minutes = count * .18; difficulty = 1; break;
+      case 'clear': minutes = count * 8; difficulty = 1.25; break;
+      case 'pvp': minutes = count * 2.5; difficulty = 1.25; break;
+      case 'extract': minutes = 8; difficulty = 1.15; break;
+      case 'daily': minutes = 8; difficulty = .5; break;
+      case 'story_miner': minutes = 20; difficulty = 1.2; break;
+      case 'story_lake': minutes = 30; difficulty = 1.25; break;
+      case 'story_tower': minutes = 60; difficulty = 1.4; break;
+      case 'story_city': minutes = 35; difficulty = 1.35; break;
+      case 'night': minutes = count * .22; difficulty = 1.15; break;
+      case 'nopot': case 'nododge': minutes = count * .18; difficulty = 1.25; break;
+      default: return { xp: 0, level: level, minutes: 0, difficulty: 0 };
+    }
+    return { xp: Math.max(1, Math.round(xpNeed(level) * .04 * minutes * difficulty)), level: level, minutes: minutes, difficulty: difficulty };
+  }
   function reward(input) {
     var o = input || {}; if (o.noExpLoot || o.allied) return { xp: 0, gold: 0, threat: 0, role: 'none' };
     var l = levelOf(o.level), threat = threatOf(o.threat), ti = THREAT_INDEX[threat];
     var role = ROLES[o.role] == null ? 'normal' : o.role, gr = GOLD_ROLES[role] == null ? 1 : GOLD_ROLES[role];
     var species = Number.isFinite(Number(o.speciesXp)) ? Math.max(.75, Math.min(1.4, Math.sqrt(Math.max(0, Number(o.speciesXp)) / 16))) : 1;
     var risk = Number.isFinite(Number(o.risk)) ? Math.max(1, Math.min(1.5, Number(o.risk))) : 1;
-    var xp = quantizedReward(xpNeed(l) * .08 * ROLES[role] * species * risk, XP_THREAT, ti);
+    var effort = Number.isFinite(Number(o.effort)) ? Math.max(1, Number(o.effort)) : 1;
+    var xp = quantizedReward(xpNeed(l) * .08 * ROLES[role] * species * risk * effort, XP_THREAT, ti);
     var gold = quantizedReward(4 * interp(l, G_LEVELS, G_GOLD) * gr * species * risk, GOLD_THREAT, ti);
-    return { xp: xp, gold: gold, threat: threat, role: role, level: l, speciesFactor: species, riskFactor: risk };
+    return { xp: xp, gold: gold, threat: threat, role: role, level: l, speciesFactor: species, riskFactor: risk, effortFactor: effort };
   }
   function runSelfTests() {
     var w = baseStats(200, 'warrior');
@@ -80,5 +110,5 @@
     for (var l = 1; l <= 2000; l += 17) if (xpNeed(l) < xpNeed(Math.max(1, l - 1))) return false;
     return true;
   }
-  return { xpNeed: xpNeed, growthFor: growthFor, baseStats: baseStats, reward: reward, threatOrder: THREATS.slice(), runSelfTests: runSelfTests };
+  return { xpNeed: xpNeed, growthFor: growthFor, baseStats: baseStats, reward: reward, combatEffort: combatEffort, questReward: questReward, threatOrder: THREATS.slice(), runSelfTests: runSelfTests };
 }));
