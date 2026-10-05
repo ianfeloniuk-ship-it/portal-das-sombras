@@ -1,6 +1,6 @@
 # Versão atual do jogo — título definitivo pendente
 
-**Versão da publicação: <!--v-->v260<!--/v-->** · site: https://ianfeloniuk-ship-it.github.io/portal-das-sombras/
+**Versão da publicação: <!--v-->v261<!--/v-->** · site: https://ianfeloniuk-ship-it.github.io/portal-das-sombras/
 (este número é atualizado sozinho pelo `python3 tools/build.py`, a partir do `sw.js`)
 
 ## Antes de mexer no jogo (qualquer IA, PC ou nuvem)

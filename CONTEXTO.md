@@ -1,3 +1,7 @@
+## Recursos simultâneos e combinação v261 — 05/10/2026
+
+Correção explícita de Ian: Guerreiro também ganha mana por Inteligência e pode equipar magia; a combinação equipada deve mostrar os recursos simultaneamente. Mana é permanente no HUD; Fúria, Vigor e energia têm barras separadas conforme técnicas/classe. Botão de 2–3 técnicas soma os custos de cada recurso, valida tudo antes do débito e compartilha as recargas individuais. Detalhes, limites e testes: [docs/multiclasse-combinacoes-v261.md](docs/multiclasse-combinacoes-v261.md). As 40 habilidades da v260 são mantidas.
+
 ## Classes e recursos v260 — 05/10/2026
 
 Ian pediu habilidades claras, duas novas por classe e recursos físicos mais convencionais. Foram adicionadas 40 (200 no catálogo); Guerreiro usa Fúria, Assassino/Tanque/Arqueiro usam Vigor, magias usam mana e Condutor mantém energia. O custo sobe por aprimoramento, nunca pela reserva. Antigos bônus ocultos de Fúria foram substituídos pelo custo explícito. Textos compactos visíveis, recursos e novos IDs persistem no save. Base v259 preservada. Detalhes e limites: [docs/classes-habilidades-v260.md](docs/classes-habilidades-v260.md).
