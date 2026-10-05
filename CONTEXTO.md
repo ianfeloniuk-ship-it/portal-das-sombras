@@ -784,3 +784,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v247: rig do Arquiteto corrigido: peças inteiras por osso (ilhas soldadas por posição), regras por lado (punho/compasso/pernas), transição suave peito↔braço, corte de triângulos que ligavam punho↔pé e perna↔perna; golpe do punho mais curto.
 - v248: Arquiteto no estilo da arte do Ian (archMat247): toon 3 tons + recolor da textura em paleta (pedra azulada, dourado, roxo emissivo, máscara branca) e contorno 3,2x mais grosso.
 - v249: Arquiteto com juntas de plasma da fenda (plasmaOrb231) presas aos ossos dos ombros, cotovelos e pulsos.
+- v250: peças do Arquiteto como esferas do dragão (piece250): âncora rompida → peça foge 3–12 km; fechar Fenda não prende; achar e derrotar ([Supremo], fragmento real do modelo) tranca; HUD com distância/direção; 5 soltas → junção (joinCine250) na capital da última e marcha para Aster. Juntas com líquido da fenda (goo250) e rachaduras azul-violeta.
