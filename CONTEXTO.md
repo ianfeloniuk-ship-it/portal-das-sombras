@@ -1,3 +1,7 @@
+## Correção de Ian — passivas simultâneas v265, 05/10/2026
+
+As doze passivas gerais funcionam todas juntas desde o início: sem limite de três, espaços por nível, seleção, equipar/retirar ou troca na cidade. Listas antigas optionalPassives263 não restringem os efeitos. Habilidades ativas continuam usando seus próprios espaços e recursos; condições de efeito descritas nas passivas permanecem. Esta correção substitui as regras de seleção da v264 abaixo.
+
 ## Recursos e passivas opcionais v264 — 05/10/2026
 
 Custos físicos revistos por técnica (configuração em tools/resource-balance263.json); +10% por melhoria, sem depender de mana máxima ou nível do personagem. Vigor recupera 8/s após 1,5s; Fúria mantém geração por combate e Grito. Doze passivas opcionais de efeito único em Personagem → Passivas, até três espaços nos níveis máximos 10/30/60, troca gratuita na cidade sem recuperar saldos. Seleção opcional persiste no perfil; isso não muda o reset por morte dos talentos comprados e Transmigrador. Descontos de 10% por recurso, arredondados para cima, com piso 1 para técnicas pagas. Combinações somam os custos individuais já descontados e cobram atomicamente. Preserva correções v262 e XP por desafio/missões v263.

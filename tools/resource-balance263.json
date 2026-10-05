@@ -52,11 +52,6 @@
   "vigorRate": 8,
   "vigorWait": 1.5,
   "furyWait": 6,
-  "slots": [
-    10,
-    30,
-    60
-  ],
   "passives": [
     {
       "id": "vigor_saver",

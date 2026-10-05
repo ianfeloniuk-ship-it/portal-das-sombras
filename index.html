@@ -246,8 +246,8 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/balance-rpg.js?v=263"></script>
 <script src="tools/monster-balance.js?v=259"></script>
 <script src="tools/mana258.js?v=258"></script>
-<script src="tools/resource-balance263.js?v=263"></script>
-<script src="tools/passives263.js?v=263"></script>
+<script src="tools/resource-balance263.js?v=265"></script>
+<script src="tools/passives263.js?v=265"></script>
 <script src="tools/resources260.js?v=263"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -6790,7 +6790,7 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
 }
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria um item <b>novo</b> do rank escolhido, com raridade melhor que a da loja (pode sair Épico, Lendário...). Usa núcleos e cristais que caem dos monstros nas masmorras. O item vai para a bolsa, e a bolsa diz se ele é melhor que o seu.</div>';for(let t=0;t<=9;t++){const gc=Math.round(PRICE[t]*equipFactor(sl)*.3),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
-function extraActions(a,v){if(a==='passive263'){togglePassive263(String(v));passivesView();return 'close0'}if(a==='comboview261'){comboView261();return 'close0'}if(a==='comboset261'){comboConfigure261(String(v));comboView261();return 'close0'}if(a==='modalback118'){if(MODAL_NAV118.back.length||modalParent118())modalBack118();else closeModal();return 'close0'}if(a==='extractstart117'){startExtractionMission117();return 'close0'}if(a==='extractclaim117'){claimExtractionMission117();guildView('quests');return 'close0'}if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
+function extraActions(a,v){if(a==='comboview261'){comboView261();return 'close0'}if(a==='comboset261'){comboConfigure261(String(v));comboView261();return 'close0'}if(a==='modalback118'){if(MODAL_NAV118.back.length||modalParent118())modalBack118();else closeModal();return 'close0'}if(a==='extractstart117'){startExtractionMission117();return 'close0'}if(a==='extractclaim117'){claimExtractionMission117();guildView('quests');return 'close0'}if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
 
   if(a==='expact'){const [kind,index,op]=v.split('|');expAction(kind,Number(index),op);return 'close0'}
   if(a==='lootmode'){const [sl,mode]=v.split('|');L.lootMode=mode;lootForgeView(sl);return 'close0'}
@@ -8520,9 +8520,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v264</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v265</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=264;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=265;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
