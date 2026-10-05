@@ -1,4 +1,4 @@
-# Ecos da Fenda
+# Jogo — título definitivo pendente
 
 RPG de ação 3D para PC, com suporte a celular. Explore as Fendas, enfrente guardiões e descubra os ecos de mundos mortos. Roda no navegador e pode ser instalado como app.
 
