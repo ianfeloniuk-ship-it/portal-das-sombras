@@ -783,3 +783,4 @@ Ian identificou goblin sobreposto ao cristal. Base sólida de 1,2m mais raio do 
 - v246: Arquiteto = modelo do Ian (Tripo) com esqueleto/pesos/animações feitos no Blender (tools/blender246/rig_arquiteto.py, fonte em tools/blender246/arquiteto-fonte-tripo.glb) → models/arquiteto246.glb (textura 1024). R = punho gigante, L = compasso.
 - v247: rig do Arquiteto corrigido: peças inteiras por osso (ilhas soldadas por posição), regras por lado (punho/compasso/pernas), transição suave peito↔braço, corte de triângulos que ligavam punho↔pé e perna↔perna; golpe do punho mais curto.
 - v248: Arquiteto no estilo da arte do Ian (archMat247): toon 3 tons + recolor da textura em paleta (pedra azulada, dourado, roxo emissivo, máscara branca) e contorno 3,2x mais grosso.
+- v249: Arquiteto com juntas de plasma da fenda (plasmaOrb231) presas aos ossos dos ombros, cotovelos e pulsos.
