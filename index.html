@@ -244,6 +244,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="tools/terrain245.js?v=1"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=199"></script>
 <script src="tools/hunters138.js"></script>
@@ -3830,7 +3831,7 @@ const Environment128=(()=>{
   const out={p:g.attributes.position.array,n:g.attributes.normal.array,c:g.attributes.color.array,i:g.index.array,nv:p.length/3,min:box.min.toArray(),max:box.max.toArray(),h:box.max.y-box.min.y,w:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)};g.dispose();cache.set(key,out);return out;
  }
  /* v244: sombras de nuvens andando no chão */
- function groundMaterial(bio){const m=groundMaterial0(bio),ob=m.onBeforeCompile;m.onBeforeCompile=function(sh,r){ob.call(this,sh,r);sh.uniforms.uCl244=typeof ENV!=='undefined'?ENV.wind:{value:0};sh.fragmentShader='uniform float uCl244;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>',`{vec2 cq=terrainWorld128.xz*.012+vec2(uCl244*.018,uCl244*.007);float cl=noise128(cq)*.65+noise128(cq*2.3+7.)*.35;diffuseColor.rgb*=1.-.26*smoothstep(.52,.7,cl);}
+ function groundMaterial(bio){const m=groundMaterial0(bio),ob=m.onBeforeCompile;m.onBeforeCompile=function(sh,r){ob.call(this,sh,r);sh.vertexShader='#define TER_NORMAL245\n'+sh.vertexShader;sh.uniforms.uCl244=typeof ENV!=='undefined'?ENV.wind:{value:0};sh.fragmentShader='uniform float uCl244;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>',`{vec2 cq=terrainWorld128.xz*.012+vec2(uCl244*.018,uCl244*.007);float cl=noise128(cq)*.65+noise128(cq*2.3+7.)*.35;diffuseColor.rgb*=1.-.26*smoothstep(.52,.7,cl);}
  #include <emissivemap_fragment>`)};return m}
  function groundMaterial0(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainSnow154:[bio==='neve'||bio==='cristal'?1:0],terrainMix154:[bio==='deserto'?1:0,bio==='vulcao'?1:0,bio==='pantano'?1:0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
   s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;attribute float terrainSnow154;attribute vec3 terrainMix154;varying float snow154;varying vec3 mix154;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;snow154=terrainSnow154;mix154=terrainMix154;');
@@ -4482,7 +4483,7 @@ function speech153(n,line,sub){if(!n||typeof document==='undefined')return;
   const el=document.createElement('div');el.className='speech153';el.innerHTML='<b>'+(n.short||n.name||'')+'</b>'+line+(sub?'<small>'+sub+'</small>':'');document.body.appendChild(el);
   b={el,until:performance.now()+Math.min(9000,3200+line.length*45),raf:0};SPEECH153.set(n,b);const v=new THREE.Vector3();
   const tick=()=>{const P=player,far=!P||Math.hypot(P.x-n.x,P.z-n.z)>14;if(performance.now()>b.until||far||n.gone||!started){el.classList.add('out');setTimeout(()=>el.remove(),260);SPEECH153.delete(n);return}
-    const h=(n.m&&n.m.root?n.m.root.position.y:0)+2.55;v.set(n.x,h,n.z).project(camera);const r=renderer.domElement.getBoundingClientRect();
+    const h=(n.m&&n.m.root?n.m.root.position.y:0)+2.55+terrH(n.x,n.z);v.set(n.x,h,n.z).project(camera);const r=renderer.domElement.getBoundingClientRect();
     el.style.display=v.z<1&&!modalOpen?'':'none';el.style.left=(r.left+(v.x*.5+.5)*r.width)+'px';el.style.top=(r.top+(-v.y*.5+.5)*r.height)+'px';b.raf=requestAnimationFrame(tick)};tick()}
 function talk(n){speech153(n,regionLine116(n.home)||pick(HLINES),'Caçador de '+n.home.name)}
 
@@ -5464,7 +5465,7 @@ function xpNeed(){const l=run.level;return Math.round(60+l*40+Math.pow(l,1.8)*4)
 /* PC: mira pelo mouse. O golpe/habilidade vai para onde o cursor aponta no chão. */
 const mouseAim={x:0,y:0,ok:false},aimRay=new THREE.Raycaster(),aimPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),aimV=new THREE.Vector3();
 if(!touch)addEventListener('mousemove',e=>{mouseAim.x=e.clientX;mouseAim.y=e.clientY;mouseAim.ok=true});
-function aimPoint(){if(touch||!mouseAim.ok)return null;/* v165: mira relativa à área real do jogo (o canvas pode não ocupar a janela toda) */const rc=renderer.domElement.getBoundingClientRect(),rw=rc.width||W,rh=rc.height||H;aimRay.setFromCamera({x:(mouseAim.x-rc.left)/rw*2-1,y:-((mouseAim.y-rc.top)/rh)*2+1},camera);const hit=aimRay.ray.intersectPlane(aimPlane,aimV);if(hit)return hit;const d=aimRay.ray.direction;return aimV.set(player.x+d.x*30,0,player.z+d.z*30)} /* câmera baixa: mira acima do horizonte segue a direção do mouse */
+function aimPoint(){if(touch||!mouseAim.ok)return null;/* v165: mira relativa à área real do jogo (o canvas pode não ocupar a janela toda) */const rc=renderer.domElement.getBoundingClientRect(),rw=rc.width||W,rh=rc.height||H;aimPlane.constant=-terrH(player.x,player.z);aimRay.setFromCamera({x:(mouseAim.x-rc.left)/rw*2-1,y:-((mouseAim.y-rc.top)/rh)*2+1},camera);const hit=aimRay.ray.intersectPlane(aimPlane,aimV);if(hit)return hit;const d=aimRay.ray.direction;return aimV.set(player.x+d.x*30,0,player.z+d.z*30)} /* câmera baixa: mira acima do horizonte segue a direção do mouse */
 function faceTarget(max=7){
   const ap=aimPoint();
   if(ap){const fa=Math.atan2(ap.x-player.x,ap.z-player.z);player.face=fa;let best=null,bd=1e9;
@@ -5769,7 +5770,7 @@ function frame(now){
   if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0){rareUpdate103(dt);update(dt);narratorUpdate105(dt);updateReadySounds();tutorialTick93(dt)}
-  camUpdate(rdt);ENV.pl.value.set(player.x,1.1,player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
+  camUpdate(rdt);ENV.pl.value.set(player.x,1.1+terrH(player.x,player.z),player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused)hud();
 }
 let tcA=0;function titleCam(dt){tcA+=dt*.06;camera.position.set(Math.sin(tcA)*46,24,Math.cos(tcA)*46);camera.lookAt(0,2,0);if(L.crystal)L.crystal.rotation.y+=dt}
 /* v243: vida no mundo — folhas caindo, borboletas de dia e vaga-lumes à noite, só perto do jogador */
@@ -5818,7 +5819,14 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
   for(let j=0;j<(wet?6:3);j++){const v=LF244.pv[LF244.pi=(LF244.pi+1)%90];const a=Math.random()*6.28;v.x=P.x+(Math.random()-.5)*.4;v.z=P.z+(Math.random()-.5)*.4;v.y=.1;v.vx=Math.cos(a)*(wet?1.6:.7);v.vz=Math.sin(a)*(wet?1.6:.7);v.vy=wet?2.5+Math.random()*1.5:.5;v.l=v.L=wet?.55:.6;v.w=wet;pm.setColorAt(LF244.pv.indexOf(v),new THREE.Color(...col))}
   pm.instanceColor.needsUpdate=true;if(wet&&Math.random()<.4)fxRing(P.x,P.z,0xbfe4ff,1.6,.5)}
  LF244.pv.forEach((v,i)=>{if(v.l>0){v.l-=dt;v.x+=v.vx*dt;v.z+=v.vz*dt;v.y+=v.vy*dt;if(v.w)v.vy-=9*dt;const k=Math.max(0,v.l/v.L),s=v.w?.7*k+.2:(1.6-k)*.9*k+.15;m.compose(ps.set(v.x,Math.max(.05,v.y),v.z),q.identity(),sc.set(s,s,s))}else m.makeScale(0,0,0);pm.setMatrixAt(i,m)});pm.instanceMatrix.needsUpdate=true}
-function update(dt){try{life243(dt);life244(dt)}catch(_){}
+/* v245: relevo — zonas planas perto do jogador (cidades, lagos, estradas) */
+function ter245tick(){const T=window.TER245;if(!T)return;const on=L.mode==='world'&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player)return;
+ const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
+ for(const c of citiesAround(P.x,P.z,1800))D.push([c.x,c.z,CITYR+16,0]);
+ const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
+ D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
+ const sd=r=>Math.hypot(P.x-clamp(P.x,Math.min(r[0],r[2]),Math.max(r[0],r[2])),P.z-clamp(P.z,Math.min(r[1],r[3]),Math.max(r[1],r[3]))),R=roadSegs(P.x,P.z,1).sort((a,b)=>sd(a)-sd(b));T.R.value.forEach((v,i)=>{const r=R[i];if(r)v.set(r[0],r[1],r[2],r[3]);else v.set(1e7,1e7,1e7,1e7)})}
+function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
   const P=player;
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
@@ -5925,13 +5933,13 @@ function camUpdate(dt){
   // v165 (Ian/Irror): câmera pode descer até a altura do herói para vê-lo de frente.
   const pt=FX2.cine>0?0:pcCam.pitch,pe=pt*pt*(3-2*pt),H=hgt*cz+(2.1-hgt*cz)*pe,B=back*cz+(5.2*cz-back*cz)*pe;
   const[ox,oz]=camRot(0,B),[fx,fz]=camRot(0,-2*(1-pe));
-  camera.position.set(lx+ox+rnd(-s,s),H+rnd(-s,s),lz+oz);camera.lookAt(lx+fx,1+.5*pe,lz+fz);
-  {const C=window.CINE231;if(C){C.t+=1/60;const a=C.t*.35;camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4,C.z);if(C.t>C.dur)window.CINE231=null}}
+  const th245=terrH(lx,lz);camera.position.set(lx+ox+rnd(-s,s),H+th245+rnd(-s,s),lz+oz);camera.lookAt(lx+fx,1+.5*pe+th245,lz+fz);
+  {const C=window.CINE231;if(C){C.t+=1/60;const a=C.t*.35;const ch245=terrH(C.x,C.z);camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+ch245+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4+ch245,C.z);if(C.t>C.dur)window.CINE231=null}}
 }
 
 /* ================= OVERLAY E HUD ================= */
 const v3=new THREE.Vector3();
-function proj(x,y,z){v3.set(x,y,z).project(camera);return{x:(v3.x+1)/2*W,y:(1-v3.y)/2*H,ok:v3.z<1&&v3.x>-1.2&&v3.x<1.2&&v3.y>-1.2&&v3.y<1.2}}
+function proj(x,y,z){v3.set(x,y+terrH(x,z),z).project(camera);return{x:(v3.x+1)/2*W,y:(1-v3.y)/2*H,ok:v3.z<1&&v3.x>-1.2&&v3.x<1.2&&v3.y>-1.2&&v3.y<1.2}}
 function bar(x,y,w,f,col,name,ncol){oc.fillStyle='rgba(0,0,0,.65)';oc.fillRect(x-w/2-1,y-1,w+2,6);oc.fillStyle=col;oc.fillRect(x-w/2,y,w*clamp(f,0,1),4);if(name){oc.font='700 10px "Chakra Petch",sans-serif';oc.fillStyle=ncol||'#e8f6ff';oc.fillText(name,x,y-4)}}
 function combatStatusList(e){const s=[];if(e.stun>0)s.push(['ATORD.','#ffd66e']);if(e.kitRoot111>time)s.push(['PRESO','#8af0c5']);if(e.slow>0)s.push(['LENTO','#94dfff']);const d=e.basicDots||{};if(d.burn?.t>0)s.push(['QUEIMA','#ff9b55']);if(d.bleed?.t>0)s.push(['SANGRA','#ff7085']);if(d.venom?.t>0)s.push(['VENENO','#a8e879']);if(d.reprise?.t>0||d.rune?.t>0)s.push(['ECO','#c7a1ff']);if(e.echoMarkUntil>time)s.push(['MARCADO','#bd8bff']);return s}
 function playerStatusList(p){const s=[];if(p.slowT>0)s.push(['LENTO','#94dfff']);if(p.bleedT>0)s.push(['SANGRA','#ff7085']);if(p.stunT>0||p.stun>0)s.push(['ATORD.','#ffd66e']);if(p.kitGuard111?.until>time||p.guard>0)s.push(['DEFESA','#8bdcff']);if(p.buff>0||p.kitBuff111?.until>time)s.push(['FORÇA','#ffd66e']);if(p.stealth>0||p.kitStealth111)s.push(['FURT.','#c7a1ff']);if(p.venomUntil>time)s.push(['VENENO','#a8e879']);return s}
@@ -8296,9 +8304,9 @@ requestAnimationFrame(frame);
 <script>/* v177: Eco gratuito (talento de rank) — 25% de chance de a habilidade não gastar mana nem entrar em recarga. */(()=>{const u=useSkill;useSkill=function(sk){const ok=sk&&!sk.empty&&player&&rankTalent('freecast');const mp0=ok?player.mp:0,s0=ok?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk):null,c0=s0?s0.cdT:0;const r=u.apply(this,arguments);if(ok&&s0.cdT>c0&&Math.random()<.25){s0.cdT=0;player.mp=Math.max(player.mp,mp0);floater(player.x,player.z,'ECO GRATUITO','#9fe8ff',true)}return r}})();</script>
 <script>/* v178 (Irror): sinergia — usar uma habilidade diferente até 3 s depois de outra dá +30% de dano a ela. */(()=>{const sd=skillDamage;skillDamage=function(){const v=sd.apply(this,arguments);return player&&player.syn178?v*1.3:v};const u=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return u.apply(this,arguments);const s0=player.skills.find(x=>!x.empty&&x.n===sk.n)||sk,c0=s0.cdT,last=player.last178;player.syn178=!!(last&&last.n!==sk.n&&time-last.t<3);let r;try{r=u.apply(this,arguments)}finally{const cast=s0.cdT>c0;if(cast){if(player.syn178)floater(player.x,player.z,'SINERGIA +30%','#ffd070',true);player.last178={n:sk.n,t:time}}player.syn178=false}return r}})();</script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v244</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v245</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=244;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=245;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
