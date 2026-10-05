@@ -1,4 +1,4 @@
-/* Campanha narrativa v4: textos entre realidades; IDs, eventos, recompensas e saves preservados. */
+/* Campanha narrativa v5: leitura da crônica e registro de contenção; prêmios e combate preservados. */
 (function (root) {
   'use strict';
   const story = root.SOLO_RPG_STORY;
@@ -19,7 +19,8 @@
     boss: ['Guardiões das masmorras', 'Derrotar um guardião atual desfaz a ligação da masmorra. Esta função é diferente da contenção exercida pelo antigo Primeiro Guardião.'],
     past: ['Um selo anterior', 'Registros antigos mencionam um guardião que impedia a passagem. Sua morte precedeu a abertura geral das Fendas. Quem o matou e por quê ainda são perguntas sem resposta.'],
     towerEnd: [story.acts[6].title + ' · O mapa', story.acts[6].diary + ' Aldric deixou um registro para a Ordem. O andar 100 encerra esta etapa; a Torre continua acima dele.'],
-    act13: [story.lore.victory.title, story.lore.victory.text]
+    act13: [story.lore.victory.title, story.lore.victory.text],
+    containmentV5: [story.lore.containment.title, story.lore.containment.text]
   });
   story.acts.slice(7, 12).forEach(act => {
     const confession = act.id === 'act_12' ? '<br><br>' + story.lore.narratorMemory.paragraphs.join('<br><br>') : '';
@@ -34,6 +35,25 @@
   storyCh220 = function (key) {
     if (key === 'act12' && !hasLore('act11')) return false;
     return originalChapter.apply(this, arguments);
+  };
+  // Uma ofensiva contida é um registro narrativo. Não executa o prêmio do chefe.
+  const containmentReady = () => {
+    const p = getProfile();
+    if (!p || p.creationPending91 || !hasLore('act11') || !hasLore('act12') || p.arch223 || Object.keys(p.piece250 || {}).length) return false;
+    const capitals = caps223();
+    return capitals.length === 5 && capitals.every(c => !anchorOpen221(c) && !cityFallen(c));
+  };
+  const recordContainment = () => {
+    if (hasLore('containmentV5') || hasLore('act13') || !containmentReady()) return false;
+    originalUnlock.call(this, 'containmentV5');
+    return true;
+  };
+  const originalArchTick = archTick223;
+  archTick223 = function () {
+    const result = originalArchTick.apply(this, arguments);
+    // A reunião e o Fim do Ciclo continuam sendo tratados pelo código original primeiro.
+    if (!root._wipe) recordContainment();
+    return result;
   };
   NPCQ.Lyra.d = 'Feche 3 portais e registre os sinais das travessias';
   NPCQ.Mira.d = 'Pesque 5 vezes para abastecer os sobreviventes';
@@ -54,8 +74,62 @@
   };
   STORIES.forEach(s => { const update = reframed[s.id]; if (!update) return; s.n = update[0]; if (update[1]) s.steps.forEach((step, i) => { step[2] = update[1][i]; }); });
   // Resolve a macro uma vez, na entrada da tela; o nome vira texto escapado.
+  let journalTab = null;
+  const chapterUnlocked = index => {
+    const p = getProfile();
+    if (!Number.isInteger(index) || index < 0 || index >= 13 || !p || p.creationPending91) return false;
+    if (index === 0) return true;
+    if (index < 6) return p.rank >= index + 1 || (p.acts || []).includes(index + 1);
+    if (index === 6) return hasLore('towerEnd');
+    if (index === 7) return hasLore('towerEnd') && hasLore('act8');
+    if (index < 12) return chapterUnlocked(index - 1) && hasLore('act' + (index + 1));
+    return chapterUnlocked(11) && (hasLore('act13') || hasLore('containmentV5'));
+  };
+  const bookList = () => {
+    const chapters = story.book.chapters;
+    const available = chapters.filter((_, index) => chapterUnlocked(index)).length;
+    let blockedShown = false;
+    let html = '<div class="sec">' + esc(story.book.title) + '</div><div class="sysline">' + available + ' de 13 capítulos revelados. As próximas páginas se abrem conforme você avança e encontra novas provas.</div>';
+    chapters.forEach((chapter, index) => {
+      const unlocked = chapterUnlocked(index);
+      if (unlocked) html += row('<b>' + esc(chapter.title) + '</b>', 'Página disponível para leitura.', btn('Ler capítulo', 'storyreadV5', index));
+      else if (!blockedShown) { blockedShown = true; html += row('Capítulo ' + (index + 1) + ' · ainda não revelado', 'Continue a jornada para encontrar as próximas páginas.', ''); }
+    });
+    return html;
+  };
+  const readChapter = value => {
+    const index = Number(value);
+    if (!Number.isInteger(index) || index < 0 || index >= story.book.chapters.length || !chapterUnlocked(index)) return false;
+    const chapter = story.book.chapters[index];
+    let paragraphs = chapter.paragraphs, title = chapter.title;
+    if (index === 12) {
+      if (hasLore('act13')) paragraphs = story.book.confrontation;
+      else { title = story.lore.containment.title; paragraphs = story.book.containment; }
+    }
+    let html = '<div class="story-reading" style="max-width:680px;margin:0 auto;font-size:15px;line-height:1.7">' + paragraphs.map(p => '<p style="margin:0 0 1em">' + esc(p) + '</p>').join('') + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between">' + (index > 0 && chapterUnlocked(index - 1) ? btn('Capítulo anterior', 'storyreadV5', index - 1) : '') + btn('Voltar à história', 'journeytab', 'story') + (index < 12 && chapterUnlocked(index + 1) ? btn('Próximo capítulo', 'storyreadV5', index + 1) : '') + '</div>';
+    view = () => readChapter(index);
+    openModal(title, html);
+    const body = document.getElementById('mb');
+    if (body) body.scrollTop = 0;
+    return true;
+  };
+  const originalJourney = journeyView;
+  journeyView = function (tab = 'goals') {
+    journalTab = tab;
+    try { return originalJourney.apply(this, arguments); }
+    finally { journalTab = null; }
+  };
   const originalModal = openModal;
-  openModal = function (title, html, route) { return originalModal.call(this, title, format(html), route); };
+  openModal = function (title, html, route) {
+    if (journalTab === 'story' && title === 'DIÁRIO DE JORNADA') html += bookList();
+    return originalModal.call(this, title, format(html), route);
+  };
+  const originalActions = extraActions3;
+  extraActions3 = function (action, value) {
+    if (action === 'storyreadV5') { readChapter(value); return 'close0'; }
+    return originalActions.apply(this, arguments);
+  };
   const originalShow = showSys;
   showSys = function (html) { return originalShow.call(this, format(html)); };
   // A origem continua como texto; confirmar a criação não abre nenhuma cena.
@@ -71,7 +145,7 @@
     if (!p || p.creationPending91) return list;
     let index = Math.max(0, Math.min(6, (p.rank || 0) - 1));
     for (let i = 7; i < 12; i++) if (hasLore('act' + (i + 1))) index = i;
-    if (hasLore('act13')) index = 12;
+    if (hasLore('act13') || hasLore('containmentV5')) index = 12;
     const act = story.acts[index];
     let action = 'Continue as provas e as missões da Ordem para investigar os próximos registros.';
     if (index === 6) action = hasLore('towerEnd') ? 'Procure os caçadores do Clã Ferrugem nas estradas.' : 'Alcance o andar 100 da Torre.';
@@ -80,9 +154,9 @@
     if (index === 9) action = 'Investigue e feche o Portal Primordial durante o Fim do Mundo.';
     if (index === 10) action = 'Conquiste o rank Arconte e investigue a memória da voz que acompanha você.';
     if (index === 11) action = 'Proteja as Âncoras. Contenha as partes que escaparem; se reunidas, detenha o Arquiteto antes de Aster abrir caminho para as outras realidades.';
-    if (index === 12) action = 'Esta frente entre realidades foi protegida. Cuide da reconstrução de Aster e das rotas.';
+    if (index === 12) action = containmentReady() ? 'Esta ofensiva foi contida. Leia o encerramento no Diário e cuide de Aster e das rotas.' : 'A vitória está registrada. Novos sinais de pressão exigem proteger as capitais e conter as peças que escaparem.';
     list.unshift({ id: 'campaignV3', n: act.title, d: act.objective + '<br>' + action, progress: 'Registro atual da campanha', ready: false });
     return list;
   };
-  root.NarrativeCampaignIntegration = { version: story.version, story, format, name, actUnlocked: key => key === 'act_01' || hasLore(key.replace('act_', 'act')) };
+  root.NarrativeCampaignIntegration = { version: story.version, story, format, name, chapterUnlocked, readChapter, containmentReady, actUnlocked: key => chapterUnlocked(story.acts.findIndex(act => act.id === key)) };
 })(window);

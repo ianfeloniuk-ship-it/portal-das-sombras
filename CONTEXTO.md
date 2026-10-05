@@ -1,3 +1,11 @@
+## Campanha em prosa v257 — 05/10/2026
+
+Pedido atual de Ian: terminar a história. A campanha central possui treze capítulos completos e desfechos de contenção, confronto e Fim do Ciclo. As cenas e a ligação da coalizão que criou as prisões são desenvolvimento da IA; nenhum novo título do jogo foi aprovado. Aldric vivo; cinco capitais prendem cinco partes, Aster é o nexo separado; superiores desconhecidos; Narrador e Clã fora do combate final.
+
+O Diário → História oferece leitura dos capítulos liberados pela progressão. A confissão e o capítulo XII exigem provas XI e descobertas anteriores. O final corresponde a act13 (chefe derrotado) ou containmentV5 (Portal Primordial fechado, confissão conhecida, cinco capitais preservadas/reconstruídas, nenhuma Âncora aberta, peça livre ou corpo em marcha). O registro preventivo concede apenas uma página: não chama a vitória do chefe, não distribui seus prêmios e não força prisões a romper. Reabrir ameaças mantém o registro histórico e exige nova defesa.
+
+Chronologia: pedras e Torre antigas; resgate e morte do Primeiro Guardião abrem as grandes Fendas; depois, uma resistência precursora divide a manifestação física e usa as cinco pedras como prisões. Memórias da voz são confrontadas com registros, inclusive uma rota de outra realidade. A procura pela origem e pelos superiores continua depois da vitória concreta de Aster. As escolhas e os resgates da prosa não são novos sistemas físicos implementados. Cinemáticas rejeitadas continuam retiradas. Combate, classes, resets e recompensas mantidos.
+
 ## Atualização narrativa v256 — publicação em 05/10/2026
 
 Direção atual de Ian: publicar as atualizações do jogo ao concluir, mantendo a main como fonte oficial. Esta publicação parte da main v252 e preserva seus ajustes de balanceamento, conjuração, maldições, economia e relevo.
