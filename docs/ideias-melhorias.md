@@ -27,3 +27,11 @@ Anotações do que dá para melhorar ou adicionar. Riscar quando feito.
 
 ## História
 - ~~Textos curtos no jogo (v206): ameaça (1ª vez), Divindade, pergaminho, morte~~
+
+## ⭐ Pontos importantes para decidir depois (relevo v245)
+- Subida é só visual: morro não deixa mais lento nem dá vantagem de altura no combate.
+- Câmera alta esconde o relevo; só aparece de longe ou com câmera baixa.
+- Custo no celular: relevo calculado em todo vértice; medir FPS.
+- Água sob as pontes pode subir até o nível da estrada.
+- Relevo distante recalcula a cada 24 m andados (pode dar pequenos saltos).
+- Altura dos morros (hoje até ~20 m), montanhas de verdade, relevo por bioma (vulcão/neve).
