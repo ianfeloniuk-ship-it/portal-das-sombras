@@ -1,3 +1,9 @@
+## Mana e habilidades v258 — 05/10/2026
+
+Ian corrigiu a regra: o custo cresce ao melhorar a própria habilidade, nunca por ganhar mana ou apenas subir o nível do personagem. Autorizou implementar e publicar na versão mais recente. A base v257 e sua campanha foram preservadas.
+
+Implementado custo-base × (1 + 10% por melhoria), com arredondamento para cima e limite de 10 melhorias. Lista e tooltip mostram custo atual/próximo. Cobrança compartilhada nas rotas atuais e legadas; Égide só após execução confirmada; Eco gratuito restitui a mana paga sem resetar recarga. Regeneração reduzida em combate e bônus após seis segundos sem combate. Saves, classes, recursos especiais, narrativa, XP, ouro e morte/ciclo preservados. Escopo completo e limites em [docs/mana-habilidades-v258.md](docs/mana-habilidades-v258.md).
+
 ## Campanha em prosa v257 — 05/10/2026
 
 Pedido atual de Ian: terminar a história. A campanha central possui treze capítulos completos e desfechos de contenção, confronto e Fim do Ciclo. As cenas e a ligação da coalizão que criou as prisões são desenvolvimento da IA; nenhum novo título do jogo foi aprovado. Aldric vivo; cinco capitais prendem cinco partes, Aster é o nexo separado; superiores desconhecidos; Narrador e Clã fora do combate final.
