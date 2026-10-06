@@ -1,3 +1,9 @@
+## v269 — loja de armas e pontos na morte, 06/10/2026
+
+Relatos de jogo de 06/10 (áudios), confirmados no jogo rodando e corrigidos por Claude com autorização de Ian:
+- **Loja de armas:** o tipo de arma de cada rank era sorteado toda vez que a loja era desenhada e de novo na compra, então o jogador comprava um item e recebia outro. Agora `shopWeaponKind269(t)` fixa o tipo por cidade e por dia do jogo; a compra entrega o item mostrado. O estoque muda a cada dia do jogo (pedido de Ian).
+- **Morte:** os 5 pontos da criação voltam em `run.pts` depois da morte verdadeira (antes eram perdidos e o personagem ficava mais fraco que um recém-criado). O texto da tela de morte avisa.
+
 ## Nome definitivo — Hollow Rank, v268, 06/10/2026
 
 Ian escolheu o título **Hollow Rank** ("Ranque Vazio": o Transmigrador chega vazio, no rank F, e preenche o próprio ranque). Aplicado na aba/janela (`<title>`), na tela inicial (`#ttl`, antes vazio e escondido), no manifesto do app instalado e no `apple-mobile-web-app-title` (`tools/build.py`). Saves não mudam: chaves `pds*` do localStorage e prefixo `pds-v` do `sw.js` mantidos. Termos do jogo (Ecos, ERGUER ECO, Fendas) continuam. O endereço continua `/portal-das-sombras/` até Ian renomear o repositório para `hollow-rank` no GitHub (decisão dele: trocar o link). Ícones ainda são os antigos — troca só após Ian aprovar uma prévia.
