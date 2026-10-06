@@ -1,3 +1,11 @@
+## v281 — 9 atributos e defesas (Grimório), 06/10/2026
+- Aprovado pelo Ian. Referência: cofre Projetos/Solo RPG/Entregas/Grimorio-Atributos-2026-10-06/Grimorio-de-Atributos-e-Bestiario.pdf.
+- Atributos: Força (corpo a corpo, fúria por golpe), Destreza (ataque físico à distância no lugar da Força, penetração), Agilidade, Percepção (+dano crítico), Inteligência (+regeneração de mana), Vitalidade (+vigor e cura recebida), Resistência (def. física), Espírito (def. mágica), Vontade (def. universal fraca + resistência a efeitos). Regra do Ian: um efeito, um atributo; física e mágica separadas.
+- Fórmula pts/(pts+K+nível) com teto (estável em nível infinito). Defesa total máx. 75%.
+- Criaturas: pontos = 0,5 × nível × papel × ameaça, divididos por perfil (8 perfis, 61 espécies) — mobAttr281.
+- Criação dá 9 pontos (devolvidos ao morrer). Saves antigos ganham 1 ponto por nível já alcançado (run.attr281).
+- balance-rpg.js: classes físicas (guerreiro, assassino, tanque, arqueiro, espada rara) com mana/magia mínimas; ganho foi para vida e ataque físico; Tanque > Guerreiro em vida.
+
 ## v280 — volta o bloqueio por estilo, 06/10/2026
 - REGRA DO IAN (não remover): para usar arma do outro tipo, troca-se o estilo antes (físico/mágico). Ataque básico mágico só existe com pelo menos uma classe mágica, que decide qual magia sai. A v278 tinha tirado o bloqueio e a v275 fazia classe física lançar 'orb' genérico com cajado — ambos desfeitos.
 

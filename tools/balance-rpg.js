@@ -13,12 +13,13 @@
   var G_GOLD = [1, 2.5, 6, 14, 30, 70, 160, 380, 600, 900];
   var ROLES = { normal: 1, elite: 2, boss: 4, rival: 2.5 };
   var GOLD_ROLES = { normal: 1, elite: 2, boss: 25, rival: 6 };
+  // v281 (Ian): classes físicas não crescem em mana/magia que não usam; o ganho foi para vida e ataque físico. Tanque passa a ter mais vida que o Guerreiro.
   var GROWTH = [
-    { id: 'warrior', hp: [120, 14], mp: [35, 2], physical: [12, 2.4], magic: [4, .4] },
-    { id: 'assassin', hp: [96, 10], mp: [42, 2.5], physical: [11, 2.0], magic: [5, .7] },
-    { id: 'tank', hp: [112, 13], mp: [38, 2], physical: [10, 1.8], magic: [4, .4] },
+    { id: 'warrior', hp: [120, 14], mp: [28, .9], physical: [12, 2.4], magic: [2.5, .25] },
+    { id: 'assassin', hp: [100, 11], mp: [30, 1], physical: [11, 2.3], magic: [3, .3] },
+    { id: 'tank', hp: [130, 16], mp: [30, 1], physical: [10, 1.9], magic: [3, .3] },
     { id: 'mage', hp: [80, 8], mp: [70, 5], physical: [6, .6], magic: [12, 2] },
-    { id: 'archer', hp: [88, 9], mp: [48, 3], physical: [9, 1.7], magic: [6, .8] },
+    { id: 'archer', hp: [95, 10.5], mp: [30, 1], physical: [10, 2.2], magic: [3, .3] },
     { id: 'paladin', hp: [105, 11], mp: [58, 3.5], physical: [9, 1.5], magic: [9, 1.3] },
     { id: 'summoner', hp: [84, 8.5], mp: [64, 4.5], physical: [6, .7], magic: [10, 1.7] },
     { id: 'necromancer', hp: [78, 7.5], mp: [68, 4.8], physical: [5, .6], magic: [11, 1.9] },
@@ -31,7 +32,7 @@
     { id: 'guardian', hp: [108, 12], mp: [55, 3.2], physical: [9.5, 1.6], magic: [8, 1.1] },
     { id: 'shapeshifter', hp: [100, 10.5], mp: [48, 2.8], physical: [10.5, 1.9], magic: [7, .9] },
     { id: 'rare-mage', hp: [80, 7.8], mp: [76, 5.5], physical: [6, .6], magic: [12.5, 2.1] },
-    { id: 'rare-sword', hp: [104, 11], mp: [44, 2.4], physical: [11, 2], magic: [5, .6] },
+    { id: 'rare-sword', hp: [108, 12], mp: [30, 1], physical: [11, 2.3], magic: [3, .3] },
     { id: 'rare-staff-a', hp: [82, 8], mp: [76, 5.5], physical: [6, .6], magic: [12.5, 2.1] },
     { id: 'rare-staff-b', hp: [84, 8.2], mp: [74, 5.3], physical: [6, .6], magic: [13, 2.15] },
     { id: 'rare-staff-c', hp: [86, 8.4], mp: [72, 5.1], physical: [6, .6], magic: [13.2, 2.2] }
