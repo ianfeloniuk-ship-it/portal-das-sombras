@@ -1,3 +1,7 @@
+## v276 — monstros não ficam presos, 06/10/2026
+- moveEnt agora detecta quando o monstro/aliado quase não anda (parede, cristal). Na masmorra calcula caminho pelo grid (expPath) até o alvo; no mundo aberto escolhe um desvio livre (50°–170°) e segue por ~0,7 s. Vale para todos os monstros, chefes, fugitivos e aliados.
+- Teste: monstros chegando ao jogador numa masmorra: 4/21 antes, 20/21 agora.
+
 ## v275 — mira e arma em todas as classes, 06/10/2026
 - Regra do Ian: toda mecânica vale para TODAS as classes e armas.
 - Flecha e adaga arremessada agora sobem/descem com a mira (antes iam retas).
