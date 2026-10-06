@@ -231,7 +231,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=265"></script>
 <script src="tools/passives263.js?v=265"></script>
-<script src="tools/resources260.js?v=282"></script>
+<script src="tools/resources260.js?v=283"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -5323,17 +5323,19 @@ function resolveEnemyStun(e,oldStun){if(e.stun>oldStun){try{e.stun=oldStun+(e.st
    Um efeito, um atributo. Defesa física (Resistência), mágica (Espírito) e universal (Vontade) separadas.
    Fórmula com retorno decrescente: pts ÷ (pts + K + nível), com teto — funciona para nível infinito. ===== */
 const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=9;
-function attrRed281(pts,L,k,cap){pts=Math.max(0,+pts||0);return pts>0?Math.min(cap,pts/(pts+k+Math.max(1,L))):0}
+/* v283 (Ian): nada tem teto. A fórmula sozinha nunca chega a 100%; o resto (pontos) cresce sem limite. */
+function attrRed281(pts,L,k){pts=Math.max(0,+pts||0);return pts>0?pts/(pts+k+Math.max(1,L)):0}
 function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
 function pDef281(type){const L=run?.level||1;const phy=attrRed281(st281('res'),L,40,.5),mag=attrRed281(st281('esp'),L,40,.5),uni=attrRed281(st281('von'),L,100,.25);return 1-(1-uni)*(1-(type==='mag'?mag:phy))}
 function pStatusRes281(){return attrRed281(st281('von'),run?.level||1,40,.4)}
 function pPen281(){return attrRed281(st281('des'),run?.level||1,60,.25)}
-function furyMax281(){return 100+Math.min(60,.5*st281('res'))}
+function furyMax281(){return 100+.5*st281('res')}
+function vigorMax281(){return 100+.5*st281('vit')}
 function pManaRegen281(){return attrRed281(st281('esp'),run?.level||1,40,.5)}
 function pHealBonus281(){return 0}
-function pVigorRegen281(){return attrRed281(st281('vit'),run?.level||1,40,.5)}
-function pFuryHit281(){return Math.min(5,Math.floor(st281('for')/20))}
-function pCritDmg281(){return Math.min(1,st281('per')*.005)}
+function pVigorRegen281(){return 0}
+function pFuryHit281(){return Math.floor(st281('for')/20)}
+function pCritDmg281(){return st281('per')*.005}
 /* Destreza: ataque físico à distância (arco, adaga arremessada, classes físicas que atiram) usa Destreza no lugar de Força */
 function atkRanged281(){return atkOf('phy')-atkPer(run.level)*st281('for')+atkPer(run.level)*st281('des')}
 function rangedPhysBasic281(){const k=weaponKind272(run.equip.w)||'';if(/^(bow|dagger)$/.test(k))return true;if(/^(sword|axe|mace|spear|hammer)$/.test(k))return false;return !basicIsMagic()&&!!basicAttackClass()?.ranged}
@@ -5344,9 +5346,9 @@ const MSPEC281={Blindado:'escaravelho guardiao abelha abelharainha golenzinho go
 const KPROF281={};for(const [p,l] of Object.entries(MSPEC281))for(const k of l.split(' '))KPROF281[k]=p;
 function mobRole281(e){return e.isBoss?2:e.rival?1.6:e.elite?1.4:1}
 function mobAttr281(e){const role=mobRole281(e),key=role+':'+(e.threat184||0);if(e.att281&&e.att281.key===key)return e.att281;const L=Math.max(1,(()=>{try{return eLvl(e)}catch(_){return 1}})()),ti=Math.max(0,THREAT_ORDER281.indexOf(e.threat184||0)),P=.5*L*role*(1+.05*ti),pr=MPROF281[KPROF281[e.kind]||'Equilibrado'],a={key,L,P,prof:KPROF281[e.kind]||'Equilibrado'};for(const k in pr)a[k]=P*pr[k];
-  a.phy=attrRed281(a.res,L,40,.5);a.mag=attrRed281(a.esp,L,40,.5);a.uni=attrRed281(a.von,L,100,.25);a.status=attrRed281(a.von,L,40,e.isBoss?.6:.4);a.pen=attrRed281(a.des,L,60,.25);a.spd=Math.min(.4,.003*a.agi);
+  a.phy=attrRed281(a.res,L,40,.5);a.mag=attrRed281(a.esp,L,40,.5);a.uni=attrRed281(a.von,L,100,.25);a.status=attrRed281(a.von,L,40,e.isBoss?.6:.4);a.pen=attrRed281(a.des,L,60,.25);a.spd=attrRed281(a.agi,L,40);
   if(!e.spd281Done&&Number.isFinite(e.speed)){e.speed*=1+a.spd;e.spd281Done=1}e.att281=a;return a}
-function mobDefFor281(e,type){const a=mobAttr281(e),pen=pPen281();const spec=type==='mag'?a.mag:a.phy;return Math.min(.75,1-(1-a.uni*(1-pen))*(1-spec*(1-pen)))}
+function mobDefFor281(e,type){const a=mobAttr281(e),pen=pPen281();const spec=type==='mag'?a.mag:a.phy;return 1-(1-a.uni*(1-pen))*(1-spec*(1-pen))}
 let curDType281='phy',inDType281='phy';
 const MAGIC_PT281=/^(orb|fire|ice|stone|spark|soul|holy|big|meteor|arcane|rift|time|stone_lance)$/;
 
@@ -5555,7 +5557,7 @@ const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   if(player.dead)return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
-  if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(1,Math.round(amt*(1-Math.min(.75,1-(1-player.def)*(1-pDef281(inDType281)*(1-(curAtk?.att281?.pen||0)))))*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
+  if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(1,Math.round(amt*(1-player.def)*(1-pDef281(inDType281)*(1-(curAtk?.att281?.pen||0)))*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))));
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}
   amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}
@@ -6678,13 +6680,13 @@ function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
 function statDesc(){const D0=statDesc0();const L=run.level,f=n=>String(Math.round(n*1000)/10).replace('.',','),sp=n=>' · agora <b>'+f(n)+'%</b>';
-  D0.for[1]+='<br><b>Fúria:</b> +1 por golpe a cada 20 pontos (máx. +5) · agora +'+pFuryHit281()+'.';
-  D0.vit[1]+='<br><b>Recuperação de vigor:</b> pontos ÷ (pontos + 40 + nível), teto 50%'+sp(pVigorRegen281())+'.';
-  D0.per[1]+='<br><b>Dano crítico:</b> +0,5% por ponto (máx. +100%) · agora +'+f(pCritDmg281())+'%.';
-  D0.des=['Ataque à distância: <b>+'+fmt(atkPer(L)*st281('des'))+'</b> · penetração <b>'+f(pPen281())+'%</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de ataque físico <b>à distância</b> (arco, adaga arremessada e classes físicas que atiram, no lugar da Força).<br><b>Penetração:</b> ignora parte da defesa do alvo: pontos ÷ (pontos + 60 + nível), teto 25%.'];
-  D0.res=['Defesa física: <b>'+f(attrRed281(st281('res'),L,40,.5))+'%</b> · fúria máxima <b>'+Math.round(furyMax281())+'</b>','Reduz só golpes <b>físicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%.<br><b>Fúria máxima:</b> +0,5 por ponto (100 → até 160). Cada ponto rende um pouco menos que o anterior; o efeito se mantém em qualquer nível se você continuar investindo.'];
-  D0.esp=['Defesa mágica: <b>'+f(attrRed281(st281('esp'),L,40,.5))+'%</b> · regeneração de mana <b>+'+f(pManaRegen281())+'%</b>','Reduz só golpes <b>mágicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%.<br><b>Regeneração de mana:</b> pontos ÷ (pontos + 40 + nível), teto +50%.'];
-  D0.von=['Defesa universal: <b>'+f(attrRed281(st281('von'),L,100,.25))+'%</b> · efeitos <b>'+f(pStatusRes281())+'%</b>','Reduz <b>qualquer</b> golpe, físico ou mágico, mas rende menos: pontos ÷ (pontos + 100 + nível), teto 25%.<br>Também encurta lentidão, atordoamento e sangramento: pontos ÷ (pontos + 40 + nível), teto 40%.<br>Toda defesa somada (armadura + atributos) nunca passa de 75%.'];
+  D0.for[1]+='<br><b>Fúria:</b> +1 por golpe a cada 20 pontos, sem limite · agora +'+pFuryHit281()+'.';
+  D0.vit[1]+='<br><b>Vigor máximo:</b> +0,5 por ponto, sem limite · agora <b>'+Math.round(vigorMax281())+'</b>.';
+  D0.per[1]+='<br><b>Dano crítico:</b> +0,5% por ponto, sem limite · agora +'+f(pCritDmg281())+'%.';
+  D0.des=['Ataque à distância: <b>+'+fmt(atkPer(L)*st281('des'))+'</b> · penetração <b>'+f(pPen281())+'%</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de ataque físico <b>à distância</b> (arco, adaga arremessada e classes físicas que atiram, no lugar da Força).<br><b>Penetração:</b> ignora parte da defesa do alvo, física <b>e mágica</b>: pontos ÷ (pontos + 60 + nível), sem teto.'];
+  D0.res=['Defesa física: <b>'+f(attrRed281(st281('res'),L,40,.5))+'%</b> · fúria máxima <b>'+Math.round(furyMax281())+'</b>','Reduz só golpes <b>físicos</b>: pontos ÷ (pontos + 40 + nível), sem teto.<br><b>Fúria máxima:</b> +0,5 por ponto sem limite. Cada ponto rende um pouco menos que o anterior; o efeito se mantém em qualquer nível se você continuar investindo.'];
+  D0.esp=['Defesa mágica: <b>'+f(attrRed281(st281('esp'),L,40,.5))+'%</b> · regeneração de mana <b>+'+f(pManaRegen281())+'%</b>','Reduz só golpes <b>mágicos</b>: pontos ÷ (pontos + 40 + nível), sem teto.<br><b>Regeneração de mana:</b> pontos ÷ (pontos + 40 + nível), sem teto.'];
+  D0.von=['Defesa universal: <b>'+f(attrRed281(st281('von'),L,100,.25))+'%</b> · efeitos <b>'+f(pStatusRes281())+'%</b>','Reduz <b>qualquer</b> golpe, físico ou mágico, mas rende menos: pontos ÷ (pontos + 100 + nível), sem teto.<br>Também encurta lentidão, atordoamento e sangramento: pontos ÷ (pontos + 40 + nível), sem teto.'];
   return D0}
 function statDesc0(){const L=run.level,s=run.stats||{},cc=critChance(),g=s.agi||0,nx=nextStep(L),retro='A mudança vale também para os pontos que você já distribuiu. Acontece novamente a cada 25 níveis do personagem.',f=n=>String(Math.round(n*100)/100).replace('.',',');
   return{for:['Bônus dos pontos: <b>+'+fmt(atkPer(L)*(s.for||0))+' de ataque físico</b>','<b>Ao gastar 1 ponto agora:</b> +'+atkPer(L)+' de ataque físico.<br><b>No nível '+nx+':</b> cada ponto passa a dar +'+atkPer(nx)+' de ataque físico. '+retro+'<br><b>Uso:</b> aumenta ataques básicos e habilidades de classes físicas, mesmo quando sua classe inicial é mágica.'],
@@ -7895,7 +7897,7 @@ function creationDraft(){const d=profile.creationDraft91||(profile.creationDraft
 function creationUsed(){return Object.values(creationDraft().stats).reduce((a,b)=>a+b,0)}
 function creationEdit(k,v){if(!profile.creationPending91)return;const d=creationDraft();if(k==='name'){d.name=String(v).slice(0,24)}else if(k==='skill'&&initialSkill259(+v))d.skill=+v;else if(k in d.stats&&[1,-1].includes(v)){if(v>0&&creationUsed()>=CREATION_PTS281||v<0&&d.stats[k]<=0)return;d.stats[k]+=v}store.set('pds2_profile',profile);if(k!=='name')creationView()}
 function creationView(){if(!profile.creationPending91)return;const d=creationDraft();view=creationView;let h='<div class="sysline">Escolha uma habilidade e distribua 9 pontos (ou guarde para depois).</div><label for="heroName">Nome do personagem</label><input id="heroName" maxlength="24" value="'+safeText(d.name)+'" placeholder="Como você se chama?" oninput="creationEdit(\'name\',this.value)" style="display:block;width:100%;box-sizing:border-box;margin:8px 0"><div class="sec">ESCOLHA SUA PRIMEIRA HABILIDADE</div>';
- CLASSES[profile.cls].sk.slice(0,3).forEach((sk,i)=>{const full=classSkill(profile.cls,i);h+=row(sk.n,skillDesc(full),'<button class="btn '+(d.skill===i?'on':'')+'" onclick="creationEdit(\'skill\','+i+')">'+(d.skill===i?'Selecionada':'Escolher')+'</button>')});h+='<div class="sec">ATRIBUTOS · '+(CREATION_PTS281-creationUsed())+' PONTOS DISPONÍVEIS</div>';const desc=statDesc();for(const k of Object.keys(STATN))h+=row('<span class="tipi" style="cursor:help" data-tip154="'+tipAttr154(desc[k][1])+'">'+STATN[k]+' · '+d.stats[k]+'</span>',({for:'Ataque corpo a corpo e fúria',des:'Ataque à distância e penetração',agi:'Velocidade de ataque, movimento e esquiva',per:'Crítico (chance e dano)',int:'Ataque mágico e mana',vit:'Vida e recuperação de vigor',res:'Defesa física e fúria máxima',esp:'Defesa mágica e regeneração de mana',von:'Defesa universal e resistência a efeitos'})[k],'<button class="btn" '+(!d.stats[k]?'disabled':'')+' onclick="creationEdit(\''+k+'\',-1)">−1</button> <button class="btn" '+(creationUsed()>=CREATION_PTS281?'disabled':'')+' onclick="creationEdit(\''+k+'\',1)">+1</button>');h+='<button class="btn hot" onclick="finishCreation()">Começar aventura</button>';openModal('CRIAÇÃO DO PERSONAGEM',h)}
+ CLASSES[profile.cls].sk.slice(0,3).forEach((sk,i)=>{const full=classSkill(profile.cls,i);h+=row(sk.n,skillDesc(full),'<button class="btn '+(d.skill===i?'on':'')+'" onclick="creationEdit(\'skill\','+i+')">'+(d.skill===i?'Selecionada':'Escolher')+'</button>')});h+='<div class="sec">ATRIBUTOS · '+(CREATION_PTS281-creationUsed())+' PONTOS DISPONÍVEIS</div>';const desc=statDesc();for(const k of Object.keys(STATN))h+=row('<span class="tipi" style="cursor:help" data-tip154="'+tipAttr154(desc[k][1])+'">'+STATN[k]+' · '+d.stats[k]+'</span>',({for:'Ataque corpo a corpo e fúria',des:'Ataque à distância e penetração',agi:'Velocidade de ataque, movimento e esquiva',per:'Crítico (chance e dano)',int:'Ataque mágico e mana',vit:'Vida e vigor máximo',res:'Defesa física e fúria máxima',esp:'Defesa mágica e regeneração de mana',von:'Defesa universal e resistência a efeitos'})[k],'<button class="btn" '+(!d.stats[k]?'disabled':'')+' onclick="creationEdit(\''+k+'\',-1)">−1</button> <button class="btn" '+(creationUsed()>=CREATION_PTS281?'disabled':'')+' onclick="creationEdit(\''+k+'\',1)">+1</button>');h+='<button class="btn hot" onclick="finishCreation()">Começar aventura</button>';openModal('CRIAÇÃO DO PERSONAGEM',h)}
 function finishCreation(){if(!profile.creationPending91)return false;const d=creationDraft(),name=d.name.trim().replace(/[\x00-\x1f]/g,'').slice(0,24);if(!name){toast('Digite um nome para o personagem.');return false}if(creationUsed()>CREATION_PTS281||Object.values(d.stats).some(n=>!Number.isInteger(n)||n<0)||!CLASSES[profile.cls].sk[d.skill])return false;profile.name=name;for(const k in d.stats)run.stats[k]=(run.stats[k]||0)+d.stats[k];run.pts+=CREATION_PTS281-creationUsed();run.classLoadout=[profile.cls+':'+d.skill];run.initialSkillFix259=true;profile.creationPending91=false;delete profile.creationDraft91;player.skills=pSkills();refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;showG();closeModal();$('mx').hidden=false;startFirstEquipment();saveRun();tutorial();return true}
 function transmigratorLevel253(){return Math.max(0,Math.min(10,Math.floor(Number(profile.transmigratorLv)||0)));}
 function transmigratorBonus(){return .10*transmigratorLevel253();}

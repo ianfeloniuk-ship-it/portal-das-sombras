@@ -1,3 +1,9 @@
+## v283 — sem teto, vigor máximo, penetração mágica, 06/10/2026
+- REGRA DO IAN: nada tem teto no jogo (personagem e criaturas). Pontos crescem sem limite; porcentagens usam pts/(pts+K+nível), que nunca chega a 100% sozinha. Removidos os tetos dos atributos e o limite somado de 75% da defesa de atributos.
+- Vitalidade: vida + vigor máximo (+0,5/ponto, vigorMaxR260). Recuperação de vigor por atributo removida.
+- Destreza: penetração vale contra defesa física E mágica.
+- Fúria máxima (Resistência), fúria por golpe (Força) e dano crítico (Percepção) sem limite.
+
 ## v282 — dois efeitos por atributo, 06/10/2026
 - Pedido do Ian: distribuir os efeitos de forma equilibrada. Resistência agora dá também fúria máxima (+0,5/ponto, 100→160; furyMaxR260 em resources260/kit111). Regeneração de mana passou da Inteligência para o Espírito. Cura recebida removida (seria 3º efeito da Vitalidade). Cada atributo tem 2 efeitos.
 
