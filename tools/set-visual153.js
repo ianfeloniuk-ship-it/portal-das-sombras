@@ -24,7 +24,31 @@ window.SetVisual153=(()=>{
   const holder=new T.Group();piece.position.sub(center);holder.add(piece);
   const axis=longestAxis(box),len=Math.max(size.x,size.y,size.z);
   holder.userData={axis,len,size};return holder}
- function attach(root,item){/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);return}
+ /* v291 (Ian): elmos que não encaixavam viram coroas temáticas, modeladas aqui: Necromante (coroa de ossos), Mago do Tempo (diadema-relógio), Tecelão de Fendas (aro com cristais da Fenda). */
+ const CROWN291={
+  necromante(){const g=new T.Group(),bone=new T.MeshToonMaterial({color:0xe8dcc0}),dark=new T.MeshToonMaterial({color:0x2a1840}),glow=new T.MeshBasicMaterial({color:0x9b5cff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.12,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
+   for(let i=0;i<9;i++){const a=i/9*Math.PI*2,h=i%2?.55:.85,sp=new T.Mesh(new T.ConeGeometry(.11,h,5),bone);sp.position.set(Math.sin(a),h/2+.05,Math.cos(a));sp.rotation.z=-Math.sin(a)*.18;sp.rotation.x=Math.cos(a)*.18;g.add(sp)}
+   const sk=new T.Group();sk.position.set(0,.22,1.05);const cr=new T.Mesh(new T.SphereGeometry(.26,10,8),bone);cr.scale.set(1,1.05,.8);sk.add(cr);const jaw=new T.Mesh(new T.BoxGeometry(.3,.12,.18),bone);jaw.position.set(0,-.24,0);sk.add(jaw);for(const x of [-.1,.1]){const e=new T.Mesh(new T.SphereGeometry(.065,6,5),glow);e.position.set(x,.03,.2);sk.add(e)}g.add(sk);return g},
+  tempo(){const g=new T.Group(),gold=new T.MeshToonMaterial({color:0xd9b25a}),face=new T.MeshToonMaterial({color:0xf3ecd8}),ink=new T.MeshToonMaterial({color:0x2a2a38}),glow=new T.MeshBasicMaterial({color:0x8fe8ff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.09,6,28),gold);band.rotation.x=Math.PI/2;g.add(band);
+   const clock=new T.Group();clock.position.set(0,.32,1.02);const rim=new T.Mesh(new T.TorusGeometry(.34,.06,6,24),gold);clock.add(rim);const disc=new T.Mesh(new T.CircleGeometry(.32,24),face);disc.position.z=.01;clock.add(disc);
+   for(let i=0;i<12;i++){const a=i/12*Math.PI*2,t=new T.Mesh(new T.BoxGeometry(.03,.07,.02),ink);t.position.set(Math.sin(a)*.25,Math.cos(a)*.25,.03);t.rotation.z=-a;clock.add(t)}
+   const h1=new T.Mesh(new T.BoxGeometry(.035,.18,.02),ink);h1.position.set(0,.08,.04);clock.add(h1);const h2=new T.Mesh(new T.BoxGeometry(.03,.25,.02),ink);h2.position.set(.08,-.05,.045);h2.rotation.z=2.2;clock.add(h2);g.add(clock);
+   const gear=new T.Group();gear.position.set(0,.25,-1.0);const gr=new T.Mesh(new T.TorusGeometry(.24,.06,6,16),gold);gear.add(gr);for(let i=0;i<10;i++){const a=i/10*Math.PI*2,tth=new T.Mesh(new T.BoxGeometry(.08,.1,.06),gold);tth.position.set(Math.sin(a)*.31,Math.cos(a)*.31,0);tth.rotation.z=-a;gear.add(tth)}g.add(gear);
+   const halo=new T.Mesh(new T.TorusGeometry(1.25,.025,4,40),glow);halo.rotation.x=Math.PI/2;halo.position.y=.55;g.add(halo);g.userData.spin291=halo;g.userData.spinGear291=gear;return g},
+  tecelao(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x3a2a55}),cry=new T.MeshToonMaterial({color:0xb48cff,emissive:0x5a2fa0}),glow=new T.MeshBasicMaterial({color:0xc2a2ff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.1,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
+   for(let i=0;i<5;i++){const a=(i-2)*.42,c=new T.Mesh(new T.OctahedronGeometry(i===2?.26:.17,0),cry);c.scale.y=1.8;c.position.set(Math.sin(a)*1.05,(i===2?.75:.5)-Math.abs(i-2)*.05,Math.cos(a)*1.05);g.add(c);const th=new T.Mesh(new T.CylinderGeometry(.012,.012,c.position.y,4),glow);th.position.set(c.position.x,c.position.y/2,c.position.z);g.add(th)}
+   const gem=new T.Mesh(new T.OctahedronGeometry(.14,0),glow);gem.position.set(0,.05,1.08);g.add(gem);g.userData.float291=g.children.filter(o=>o.geometry&&o.geometry.type==='OctahedronGeometry'&&o!==gem);return g}};
+ function crownAttach291(root,item){const id=item.set153;let head=null,headBone=null;root.traverse(o=>{if(!head&&o.name==='tripo_part_6')head=o;if(!headBone&&o.isBone&&o.name==='head')headBone=o});if(!head||!headBone)return false;
+  root.updateMatrixWorld(true);const hb=new T.Box3().setFromObject(head),hs=hb.getSize(new T.Vector3()),hc=hb.getCenter(new T.Vector3());
+  const c=CROWN291[id](),holder=new T.Group();holder.add(c);holder.name='set153_h';
+  const r=Math.max(hs.x,hs.z)*.5;c.scale.setScalar(r*1.05);const top=new T.Vector3(hc.x,hb.max.y-hs.y*.36,hc.z);
+  const ws=headBone.getWorldScale(new T.Vector3()).x||1;holder.scale.setScalar(1/ws);holder.position.copy(headBone.worldToLocal(top.clone()));
+  const rq=root.getWorldQuaternion(new T.Quaternion()),bq=headBone.getWorldQuaternion(new T.Quaternion());holder.quaternion.copy(bq.invert().multiply(rq));
+  headBone.add(holder);const t0=performance.now();const tick=()=>{if(!holder.parent)return;const t=(performance.now()-t0)/1000;if(c.userData.spin291)c.userData.spin291.rotation.z=t*.6;if(c.userData.spinGear291)c.userData.spinGear291.rotation.z=-t*.8;(c.userData.float291||[]).forEach((o,i)=>{o.rotation.y=t*(.8+i*.1);o.position.y+=Math.sin(t*2+i)*.0015});requestAnimationFrame(tick)};tick();return true}
+ function attach(root,item){if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(item.uid+'h')){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);return}
   /* v175 (Ian): peça sem conjunto raro usa a armadura comum do Tripo, pintada com a cor do rank. */const id=item.set153||'comum',slot=item.slot,fit=FIT[slot];/* v289 (Ian): armadura comum também troca a roupa — some a roupa larga daquela parte, aparece o corpo base justo e a peça vai por cima */if(id==='comum'&&BODY289.includes(slot))attachRig169(root,item,true);if(!fit||!root||!(id==='comum'?slot!=='w':HAS165(id,slot)))return;
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;

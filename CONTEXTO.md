@@ -1,3 +1,6 @@
+## v291 — coroas temáticas, 06/10/2026
+- Ideia do Ian: elmos que não encaixavam viram coroas modeladas no código (set-visual153.js CROWN291): Necromante = coroa de ossos com caveira; Mago do Tempo = diadema dourado com relógio, engrenagem girando e aro de luz; Tecelão de Fendas = aro com cristais da Fenda flutuando. Assentam no cabelo, medidas pela cabeça.
+
 ## v290 — elmos dos conjuntos e loja, 06/10/2026
 - Elmos dos conjuntos raros vinham do encaixe do Blender (set169_h) e ficavam atrás da cabeça (Necromante, Tempo, Tecelão) ou grandes demais (Metamorfo, Oráculo). Agora usam o encaixe medido no osso da cabeça e são dimensionados por 1,3× a largura da cabeça (set-visual153.js). Peitoral, braçais e grevas dos conjuntos continuam no encaixe do Blender (estavam bons).
 - Loja (decisão do Ian): a arma da classe fica sempre à venda em todos os ranks; as outras mudam por dia (shopKinds290).
