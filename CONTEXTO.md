@@ -1,3 +1,7 @@
+## v274 — adaga, 06/10/2026
+- O GLB comum-adaga vinha com o cabo na ponta errada: a mão segurava a lâmina. Agora é virado 180° ao carregar (warrior-player127.js, norm171) e a mão pega no cabo.
+- A adaga arremessada usa o mesmo modelo da mão (Warrior127.daggerModel), lâmina para frente.
+
 ## v273 — tipo de dano do ataque básico, 06/10/2026
 - Regra do Ian: com arma física (arco, adaga, espada, machado) o ataque básico dá dano FÍSICO (Força + ataque da arma), mesmo em classe mágica. Habilidades continuam com o tipo da própria habilidade (habilidade mágica = dano mágico). Cajado/varinha/tomo e mão vazia seguem a classe.
 
