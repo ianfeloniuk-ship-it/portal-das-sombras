@@ -1,3 +1,8 @@
+## v292 — coroas em todos os conjuntos, rank ★ escondido, 06/10/2026
+- Pedido do Ian: todos os 10 conjuntos raros usam coroas temáticas modeladas no código (CROWN291): Metamorfo (garras/chifres), Necromante (ossos/caveira), Tempo (relógio/engrenagem), Tecelão (cristais), Guardião (elos dourados), Artífice (engrenagens rúnicas), Duelista (lâminas), Condutor (raios), Oráculo (olho e raios), Devorador (chifres e orbe do vazio).
+- Condutor não tem peitoral próprio: usa o peitoral comum em azul (antes parecia sem peitoral).
+- Rank ★ só aparece (loja do Kael) depois de ganhar uma classe secreta (secretRankKnown292).
+
 ## v291 — coroas temáticas, 06/10/2026
 - Ideia do Ian: elmos que não encaixavam viram coroas modeladas no código (set-visual153.js CROWN291): Necromante = coroa de ossos com caveira; Mago do Tempo = diadema dourado com relógio, engrenagem girando e aro de luz; Tecelão de Fendas = aro com cristais da Fenda flutuando. Assentam no cabelo, medidas pela cabeça.
 

@@ -37,6 +37,39 @@ window.SetVisual153=(()=>{
    const h1=new T.Mesh(new T.BoxGeometry(.035,.18,.02),ink);h1.position.set(0,.08,.04);clock.add(h1);const h2=new T.Mesh(new T.BoxGeometry(.03,.25,.02),ink);h2.position.set(.08,-.05,.045);h2.rotation.z=2.2;clock.add(h2);g.add(clock);
    const gear=new T.Group();gear.position.set(0,.25,-1.0);const gr=new T.Mesh(new T.TorusGeometry(.24,.06,6,16),gold);gear.add(gr);for(let i=0;i<10;i++){const a=i/10*Math.PI*2,tth=new T.Mesh(new T.BoxGeometry(.08,.1,.06),gold);tth.position.set(Math.sin(a)*.31,Math.cos(a)*.31,0);tth.rotation.z=-a;gear.add(tth)}g.add(gear);
    const halo=new T.Mesh(new T.TorusGeometry(1.25,.025,4,40),glow);halo.rotation.x=Math.PI/2;halo.position.y=.55;g.add(halo);g.userData.spin291=halo;g.userData.spinGear291=gear;return g},
+  metamorfo(){const g=new T.Group(),bone=new T.MeshToonMaterial({color:0x3a2a22}),claw=new T.MeshToonMaterial({color:0xe8d8c0}),red=new T.MeshBasicMaterial({color:0xff3b2a});
+   const band=new T.Mesh(new T.TorusGeometry(1,.13,6,24),bone);band.rotation.x=Math.PI/2;g.add(band);
+   for(const sd of [-1,1]){const h=new T.Mesh(new T.ConeGeometry(.16,1.1,6),claw);h.position.set(sd*.85,.45,-.1);h.rotation.z=-sd*.7;g.add(h)}
+   for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2+.26,c=new T.Mesh(new T.ConeGeometry(.08,.38,4),claw);c.position.set(Math.sin(a),.2,Math.cos(a));c.rotation.x=Math.cos(a)*.5;c.rotation.z=-Math.sin(a)*.5;g.add(c)}
+   const gem=new T.Mesh(new T.SphereGeometry(.13,8,6),red);gem.position.set(0,.12,1.08);g.add(gem);return g},
+  guardiao(){const g=new T.Group(),gold=new T.MeshToonMaterial({color:0xe0b45a}),glow=new T.MeshBasicMaterial({color:0xffdb86});
+   for(let i=0;i<14;i++){const a=i/14*Math.PI*2,l=new T.Mesh(new T.TorusGeometry(.17,.05,5,10),gold);l.position.set(Math.sin(a),0,Math.cos(a));l.rotation.y=a;l.rotation.x=i%2?Math.PI/2:0;g.add(l)}
+   for(let i=0;i<5;i++){const a=(i-2)*.38,p=new T.Mesh(new T.ConeGeometry(.09,i===2?.6:.38,4),gold);p.position.set(Math.sin(a)*1.02,(i===2?.32:.2),Math.cos(a)*1.02);g.add(p)}
+   const gem=new T.Mesh(new T.OctahedronGeometry(.13,0),glow);gem.position.set(0,.68,1.0);g.add(gem);return g},
+  artifice(){const g=new T.Group(),iron=new T.MeshToonMaterial({color:0x40464f}),rune=new T.MeshBasicMaterial({color:0x5fe8ff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.1,6,28),iron);band.rotation.x=Math.PI/2;g.add(band);
+   const gear=(r,x,y,z,ry)=>{const q=new T.Group();q.position.set(x,y,z);q.rotation.y=ry;const rg=new T.Mesh(new T.TorusGeometry(r,.05,5,14),iron);q.add(rg);for(let i=0;i<8;i++){const a=i/8*Math.PI*2,t=new T.Mesh(new T.BoxGeometry(.07,.08,.06),iron);t.position.set(Math.sin(a)*(r+.06),Math.cos(a)*(r+.06),0);t.rotation.z=-a;q.add(t)}const c=new T.Mesh(new T.CircleGeometry(r*.55,10),rune);c.position.z=.02;q.add(c);g.add(q);return q};
+   g.userData.spinGear291=gear(.3,0,.32,1.0,0);gear(.2,.75,.25,.7,.8);gear(.2,-.75,.25,.7,-.8);
+   for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r=new T.Mesh(new T.BoxGeometry(.05,.14,.02),rune);r.position.set(Math.sin(a)*1.03,.02,Math.cos(a)*1.03);r.rotation.y=a;g.add(r)}return g},
+  duelista(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x1d1a3a}),blade=new T.MeshToonMaterial({color:0xb8c4ff,emissive:0x3a3fa0});
+   const band=new T.Mesh(new T.TorusGeometry(1,.09,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
+   for(let i=0;i<7;i++){const a=(i-3)*.33,h=i===3?.8:.5-Math.abs(i-3)*.05,b=new T.Mesh(new T.ConeGeometry(.07,h,3),blade);b.scale.z=.35;b.position.set(Math.sin(a)*1.0,h/2+.04,Math.cos(a)*1.0);b.rotation.y=a;b.rotation.z=(i-3)*-.12;g.add(b)}
+   g.userData.float291=[];return g},
+  condutor(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x22304a}),bolt=new T.MeshBasicMaterial({color:0x7fd4ff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.1,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
+   const zig=(x,z,a,h)=>{const q=new T.Group();q.position.set(x,0,z);q.rotation.y=a;let y=.05;for(let k=0;k<3;k++){const seg=new T.Mesh(new T.BoxGeometry(.06,h/3,.05),bolt);seg.position.set(k%2?.07:-.07,y+h/6,0);seg.rotation.z=k%2?.5:-.5;q.add(seg);y+=h/3}g.add(q)};
+   for(let i=0;i<6;i++){const a=i/6*Math.PI*2;zig(Math.sin(a),Math.cos(a),a,i%2?.45:.7)}
+   const orb=new T.Mesh(new T.SphereGeometry(.14,10,8),bolt);orb.position.set(0,.15,1.08);g.add(orb);
+   const halo=new T.Mesh(new T.TorusGeometry(1.2,.02,4,40),bolt);halo.rotation.x=Math.PI/2;halo.position.y=.5;g.add(halo);g.userData.spin291=halo;return g},
+  oraculo(){const g=new T.Group(),gold=new T.MeshToonMaterial({color:0xe8bb4a}),white=new T.MeshToonMaterial({color:0xf8f0dc}),eye=new T.MeshBasicMaterial({color:0x2a1a0a}),glow=new T.MeshBasicMaterial({color:0xfff0a0});
+   const band=new T.Mesh(new T.TorusGeometry(1,.09,6,28),gold);band.rotation.x=Math.PI/2;g.add(band);
+   for(let i=0;i<11;i++){const a=(i-5)*.2,r=new T.Mesh(new T.ConeGeometry(.04,.55,4),glow);r.position.set(Math.sin(a)*1.0,.35,Math.cos(a)*1.0);r.rotation.x=.25;r.rotation.z=-Math.sin(a)*.6;g.add(r)}
+   const e=new T.Group();e.position.set(0,.28,1.05);const w=new T.Mesh(new T.SphereGeometry(.22,12,8),white);w.scale.set(1.4,.8,.5);e.add(w);const ir=new T.Mesh(new T.CircleGeometry(.1,12),gold);ir.position.z=.12;e.add(ir);const pu=new T.Mesh(new T.CircleGeometry(.045,10),eye);pu.position.z=.125;e.add(pu);g.add(e);return g},
+  devorador(){const g=new T.Group(),black=new T.MeshToonMaterial({color:0x14101e}),voidm=new T.MeshBasicMaterial({color:0xb34dff});
+   const band=new T.Mesh(new T.TorusGeometry(1,.12,6,24),black);band.rotation.x=Math.PI/2;g.add(band);
+   for(const sd of [-1,1]){const h=new T.Mesh(new T.ConeGeometry(.15,1.0,6),black);h.position.set(sd*.7,.45,.35);h.rotation.z=-sd*.45;h.rotation.x=-.25;g.add(h)}
+   for(let i=0;i<5;i++){const a=(i-2)*.5,sp=new T.Mesh(new T.ConeGeometry(.07,.35,4),black);sp.position.set(Math.sin(a)*1.0,.18,Math.cos(a)*1.0);g.add(sp)}
+   const orb=new T.Mesh(new T.SphereGeometry(.18,12,10),voidm);orb.position.set(0,.55,.95);g.add(orb);g.userData.float291=[orb];return g},
   tecelao(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x3a2a55}),cry=new T.MeshToonMaterial({color:0xb48cff,emissive:0x5a2fa0}),glow=new T.MeshBasicMaterial({color:0xc2a2ff});
    const band=new T.Mesh(new T.TorusGeometry(1,.1,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
    for(let i=0;i<5;i++){const a=(i-2)*.42,c=new T.Mesh(new T.OctahedronGeometry(i===2?.26:.17,0),cry);c.scale.y=1.8;c.position.set(Math.sin(a)*1.05,(i===2?.75:.5)-Math.abs(i-2)*.05,Math.cos(a)*1.05);g.add(c);const th=new T.Mesh(new T.CylinderGeometry(.012,.012,c.position.y,4),glow);th.position.set(c.position.x,c.position.y/2,c.position.z);g.add(th)}
@@ -44,17 +77,17 @@ window.SetVisual153=(()=>{
  function crownAttach291(root,item){const id=item.set153;let head=null,headBone=null;root.traverse(o=>{if(!head&&o.name==='tripo_part_6')head=o;if(!headBone&&o.isBone&&o.name==='head')headBone=o});if(!head||!headBone)return false;
   root.updateMatrixWorld(true);const hb=new T.Box3().setFromObject(head),hs=hb.getSize(new T.Vector3()),hc=hb.getCenter(new T.Vector3());
   const c=CROWN291[id](),holder=new T.Group();holder.add(c);holder.name='set153_h';
-  const r=Math.max(hs.x,hs.z)*.5;c.scale.setScalar(r*1.05);const top=new T.Vector3(hc.x,hb.max.y-hs.y*.36,hc.z);
+  const r=Math.max(hs.x,hs.z)*.5;c.scale.setScalar(r*1.05);const top=new T.Vector3(hc.x,hb.max.y-hs.y*.42,hc.z);
   const ws=headBone.getWorldScale(new T.Vector3()).x||1;holder.scale.setScalar(1/ws);holder.position.copy(headBone.worldToLocal(top.clone()));
   const rq=root.getWorldQuaternion(new T.Quaternion()),bq=headBone.getWorldQuaternion(new T.Quaternion());holder.quaternion.copy(bq.invert().multiply(rq));
   headBone.add(holder);const t0=performance.now();const tick=()=>{if(!holder.parent)return;const t=(performance.now()-t0)/1000;if(c.userData.spin291)c.userData.spin291.rotation.z=t*.6;if(c.userData.spinGear291)c.userData.spinGear291.rotation.z=-t*.8;(c.userData.float291||[]).forEach((o,i)=>{o.rotation.y=t*(.8+i*.1);o.position.y+=Math.sin(t*2+i)*.0015});requestAnimationFrame(tick)};tick();return true}
- function attach(root,item){if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(item.uid+'h')){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);return}
+ function attach(root,item){if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(item.uid+'h')){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);if(!(item.slot==='a'&&(NOSLOT181[item.set153]||[]).includes('a')))return;/* v292 (Ian): Condutor não tem peitoral próprio — usa o peitoral comum na cor do conjunto */item={...item,set153:undefined,tint292:0x3a6cff}}
   /* v175 (Ian): peça sem conjunto raro usa a armadura comum do Tripo, pintada com a cor do rank. */const id=item.set153||'comum',slot=item.slot,fit=FIT[slot];/* v289 (Ian): armadura comum também troca a roupa — some a roupa larga daquela parte, aparece o corpo base justo e a peça vai por cima */if(id==='comum'&&BODY289.includes(slot))attachRig169(root,item,true);if(!fit||!root||!(id==='comum'?slot!=='w':HAS165(id,slot)))return;
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
    const bones=SIDES[slot]||[[fit.bone,null]];root.updateMatrixWorld(true);
    bones.forEach(([bn,cn],i)=>{const bone=boneOf(root,bn);if(!bone)return;
-    const holder=prepare(src,{...fit,red165:id==='metamorfo',tint171:id==='comum'?((typeof TIER_COL!=='undefined'&&TIER_COL[Math.max(0,Math.min(9,item.tier||0))])||0xb0b0b8):null}),piece=holder.children[0],ws=bone.getWorldScale(new T.Vector3()).x||1,rootQ=root.getWorldQuaternion(new T.Quaternion());
+    const holder=prepare(src,{...fit,red165:id==='metamorfo',tint171:id==='comum'?(item.tint292||(typeof TIER_COL!=='undefined'&&TIER_COL[Math.max(0,Math.min(9,item.tier||0))])||0xb0b0b8):null}),piece=holder.children[0],ws=bone.getWorldScale(new T.Vector3()).x||1,rootQ=root.getWorldQuaternion(new T.Quaternion());
     let q=rootQ.clone();
     if(!fit.upright){
      // Point the piece's longest axis along the limb (bone → child bone) in the current pose.
@@ -90,7 +123,7 @@ window.SetVisual153=(()=>{
  const HIDE={a:['tripo_part_0','tripo_part_3'],h:['tripo_part_6'],g:['tripo_part_1','tripo_part_2'],b:['tripo_part_4']};
  /* v181 (Ian): a armadura substitui a roupa larga do Viajante (mangas, casaco, calça). Onde a roupa some aparece um corpo base justo e escuro (base169_*). Cabeça nunca some (capuzes mostram o rosto). */
  const NOSLOT181={condutor:['a']};const BODY289=['a','g','b'];
- function clothing(root,slots,rig){const R={a:HIDE.a,g:HIDE.g,b:HIDE.b};root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?R:HIDE).some(([sl,list])=>{if(!slots.includes(sl)||!list.includes(o.name))return false;if(!rig)return true;const it=rig.find(i=>i.slot===sl);return !!it&&!(NOSLOT181[it.set153]||[]).includes(sl)})}})}
+ function clothing(root,slots,rig){const R={a:HIDE.a,g:HIDE.g,b:HIDE.b};root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?R:HIDE).some(([sl,list])=>{if(!slots.includes(sl)||!list.includes(o.name))return false;if(!rig)return true;const it=rig.find(i=>i.slot===sl);return !!it})}})}
  function clear(root){const old=[];root.traverse(o=>{if(/^set153_/.test(o.name))old.push(o)});old.forEach(o=>o.parent.remove(o));root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=true})}
  function apply(){if(!player||!player.m||!player.m.root||typeof equippedItems!=='function')return;const root=player.m.root,items=equippedItems().filter(it=>it.set153||['h','a','g','b'].includes(it.slot));
   const key=items.map(it=>it.uid+it.slot).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);
