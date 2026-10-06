@@ -1,3 +1,7 @@
+## Nome definitivo — Hollow Rank, v268, 06/10/2026
+
+Ian escolheu o título **Hollow Rank** ("Ranque Vazio": o Transmigrador chega vazio, no rank F, e preenche o próprio ranque). Aplicado na aba/janela (`<title>`), na tela inicial (`#ttl`, antes vazio e escondido), no manifesto do app instalado e no `apple-mobile-web-app-title` (`tools/build.py`). Saves não mudam: chaves `pds*` do localStorage e prefixo `pds-v` do `sw.js` mantidos. Termos do jogo (Ecos, ERGUER ECO, Fendas) continuam. O endereço continua `/portal-das-sombras/` até Ian renomear o repositório para `hollow-rank` no GitHub (decisão dele: trocar o link). Ícones ainda são os antigos — troca só após Ian aprovar uma prévia.
+
 ## Correção de Ian — passivas simultâneas v265, 05/10/2026
 
 As doze passivas gerais funcionam todas juntas desde o início: sem limite de três, espaços por nível, seleção, equipar/retirar ou troca na cidade. Listas antigas optionalPassives263 não restringem os efeitos. Habilidades ativas continuam usando seus próprios espaços e recursos; condições de efeito descritas nas passivas permanecem. Esta correção substitui as regras de seleção da v264 abaixo.
@@ -42,15 +46,15 @@ Direção atual de Ian: publicar as atualizações do jogo ao concluir, mantendo
 
 Campanha textual v4 em `historia-campanha.js` e `narrativa-campanha.js`: nome escolhido nas falas/Diário, pistas nos atos iniciais/Torre, confissão no Ato XII após XI, Narrador orienta vários Transmigradores em realidades/tempos diferentes e libertação completa do Arquiteto numa realidade ameaça todas. Abertura de passagens e projeção de influência são distintas dessa liberdade completa; cinco Âncoras e Aster separado mantidos. Narrador não é onisciente; Aldric vivo, superiores desconhecidos e Narrador/Clã fora da batalha final.
 
-Cenas 2D e replays rejeitados: não carregados nem publicados. O campo cinematics nos dados é somente histórico, sem renderização atual. Título criativo pendente; “Jogo” é rótulo técnico da aba/PWA. Texto é integrado aos eventos existentes; resgates/escoltas e decisões físicas novos continuam em desenvolvimento. Saves, regras de morte/ciclo, IDs, requisitos, contagens e recompensas mantidos.
+Cenas 2D e replays rejeitados: não carregados nem publicados. O campo cinematics nos dados é somente histórico, sem renderização atual. Título definido em 05/10/2026: **Hollow Rank** (ver topo). Texto é integrado aos eventos existentes; resgates/escoltas e decisões físicas novos continuam em desenvolvimento. Saves, regras de morte/ciclo, IDs, requisitos, contagens e recompensas mantidos.
 
 ## Histórico anterior
 
-# Contexto do projeto Ecos da Fenda (antigo Portal das Sombras) (para outra conversa/IA continuar)
+# Contexto do projeto Hollow Rank (antes Ecos da Fenda / Portal das Sombras) (para outra conversa/IA continuar)
 
 > **Versão atual e regras para começar: veja [`VERSAO.md`](VERSAO.md).** Sempre parta da `main` do GitHub; cópias locais podem estar atrasadas.
 
-Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, com foco em PC e suporte a celular, ambientado nas Fendas e ecos de mundos mortos. Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes. A identidade atual é **Ecos da Fenda**, com a ação **ERGUER ECO**; os registros históricos abaixo descrevem versões anteriores.
+Autor e decisões: **Ian**. Jogo RPG de ação 3D no navegador, com foco em PC e suporte a celular, ambientado nas Fendas e ecos de mundos mortos. Nomes, personagens e termos são originais do projeto — não usar nomes, falas ou termos marcantes de obras existentes. O título definitivo é **Hollow Rank** (escolha de Ian em 05/10/2026; Ecos da Fenda e Portal das Sombras são nomes antigos), com a ação **ERGUER ECO**; os registros históricos abaixo descrevem versões anteriores.
 Versão para celular jogável em https://ianfeloniuk-ship-it.github.io/portal-das-sombras/ (GitHub Pages, branch `main`, pasta raiz).
 
 ## Arquivos

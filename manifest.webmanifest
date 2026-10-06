@@ -1,6 +1,6 @@
 {
-  "name": "Jogo",
-  "short_name": "Jogo",
+  "name": "Hollow Rank",
+  "short_name": "Hollow Rank",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
