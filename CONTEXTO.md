@@ -1,3 +1,7 @@
+## v272 — ataque básico segue a arma, 06/10/2026
+- Pedido do Ian: qualquer classe com arco atira flechas, com adaga arremessa adagas (pelo cabo, lâmina na frente), com espada/machado bate corpo a corpo — inclusive magos. Cajado/varinha/tomo e mãos vazias seguem a regra da classe. Animação também segue a arma.
+- Ian confirmou que o gasto de vigor do arqueiro estava certo (não era bug).
+
 ## v271 — lentidão sem arma, 06/10/2026
 - Regra corrigida pelo Ian: só fica 60% mais lento quem ataca à distância (arqueiro, magos que atiram projéteis) sem NENHUMA arma. Arma de outro tipo não deixa lento, e o assassino (atira adagas) nunca sofre a lentidão.
 
