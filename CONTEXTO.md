@@ -1,3 +1,6 @@
+## v280 — volta o bloqueio por estilo, 06/10/2026
+- REGRA DO IAN (não remover): para usar arma do outro tipo, troca-se o estilo antes (físico/mágico). Ataque básico mágico só existe com pelo menos uma classe mágica, que decide qual magia sai. A v278 tinha tirado o bloqueio e a v275 fazia classe física lançar 'orb' genérico com cajado — ambos desfeitos.
+
 ## v279 — tiro de monstro mira a altura do alvo, 06/10/2026
 - Projétil de monstro (team != player) mira a altura do alvo (jogador ou aliado na direção do tiro) no momento do disparo e segue reto: não é teleguiado. Teste em terreno com 2+ m de desnível: acertos 0/15 antes, 13/15 agora; esquivando 3 m para o lado: 0/15.
 
