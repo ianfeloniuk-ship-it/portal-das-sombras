@@ -1,3 +1,9 @@
+## v275 — mira e arma em todas as classes, 06/10/2026
+- Regra do Ian: toda mecânica vale para TODAS as classes e armas.
+- Flecha e adaga arremessada agora sobem/descem com a mira (antes iam retas).
+- Arma mágica (cajado, varinha, tomo) em qualquer classe lança magia com dano mágico (antes guerreiro batia com o cajado e arqueiro atirava flecha). Animação segue a arma.
+- Dano do básico = ataque do tipo da arma (pontos) + ataque da arma. Testado em 8 classes x 6 armas.
+
 ## v274 — adaga, 06/10/2026
 - O GLB comum-adaga vinha com o cabo na ponta errada: a mão segurava a lâmina. Agora é virado 180° ao carregar (warrior-player127.js, norm171) e a mão pega no cabo.
 - A adaga arremessada usa o mesmo modelo da mão (Warrior127.daggerModel), lâmina para frente.
