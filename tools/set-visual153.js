@@ -24,7 +24,7 @@ window.SetVisual153=(()=>{
   const holder=new T.Group();piece.position.sub(center);holder.add(piece);
   const axis=longestAxis(box),len=Math.max(size.x,size.y,size.z);
   holder.userData={axis,len,size};return holder}
- function attach(root,item){if(item.slot!=='w'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);return}
+ function attach(root,item){/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);return}
   /* v175 (Ian): peça sem conjunto raro usa a armadura comum do Tripo, pintada com a cor do rank. */const id=item.set153||'comum',slot=item.slot,fit=FIT[slot];/* v289 (Ian): armadura comum também troca a roupa — some a roupa larga daquela parte, aparece o corpo base justo e a peça vai por cima */if(id==='comum'&&BODY289.includes(slot))attachRig169(root,item,true);if(!fit||!root||!(id==='comum'?slot!=='w':HAS165(id,slot)))return;
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
@@ -46,7 +46,7 @@ window.SetVisual153=(()=>{
     const boneQ=bone.getWorldQuaternion(new T.Quaternion());holder.quaternion.copy(boneQ.invert().multiply(q));
     const off=(holder.userData.offset||new T.Vector3(0,fit.lift||0,0).add(new T.Vector3(0,0,fit.fwd||0).applyQuaternion(rootQ))).clone().divideScalar(ws);
     holder.position.copy(off.applyQuaternion(bone.getWorldQuaternion(new T.Quaternion()).invert()));
-    holder.name='set153_'+slot;bone.add(holder);
+    holder.name='set153_'+slot;bone.add(holder);if(slot==='h'&&id!=='comum'){/* v290: elmo de conjunto do tamanho da cabeça (um pouco maior, para cobrir o cabelo) */let head=null;root.traverse(o=>{if(!head&&o.name==='tripo_part_6')head=o});if(head){root.updateMatrixWorld(true);const hs=new T.Box3().setFromObject(head).getSize(new T.Vector3()),bs=new T.Box3().setFromObject(holder).getSize(new T.Vector3()),want=Math.max(hs.x,hs.z)*1.3,have=Math.max(bs.x,bs.z);if(have>0)holder.scale.multiplyScalar(want/have)}}
     if(slot==='w'&&/^(staff|bonestaff|tome)$/.test(item.kind155||'')&&window.Warrior127&&player?.m?.root===root)Warrior127.registerStaffVisual(player.m,holder);
    });
    if(slot==='w')root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=false});

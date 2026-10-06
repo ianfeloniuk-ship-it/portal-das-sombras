@@ -269,7 +269,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/biome-materials132.js"></script>
 <script src="tools/citizens133.js"></script>
 <script src="tools/rift131.js?v=221"></script>
-<script src="tools/set-visual153.js?v=289"></script>
+<script src="tools/set-visual153.js?v=290"></script>
 <script>
 /* v154: balão de explicação ao passar o mouse (Irror: só o tooltip, sem texto extra na lista). */
 (()=>{const tip=document.createElement('div');tip.className='tip154';tip.hidden=true;document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(tip));
@@ -5139,7 +5139,10 @@ function addItem(it){
 function equipmentBagRoom(){if(run.items.length<24)return true;toast('<b>[NARRADOR]</b> Bolsa cheia. Libere um espaço antes de comprar ou forjar equipamentos.');return false}
 /* v269 (Ian): o estoque de armas muda só a cada dia do jogo e a compra entrega o item mostrado (antes o tipo era sorteado de novo ao desenhar e ao comprar). */
 function shopWeaponKind269(t){const c=nearestCity(player.x,player.z).c,day=Math.floor(dayT/DAYLEN),h=(Math.imul(day+1,73856093)^Math.imul(t+1,19349663)^Math.imul(Math.round((c?c.x:0)+31*(c?c.z:0))+7,83492791))>>>0;return WEAPON_LOOT_KINDS[h%WEAPON_LOOT_KINDS.length]}
-function buyEquipment(sl,t){if(!EQUIP_SLOTS.includes(sl)||!Number.isInteger(t)||t<0||t>9||!PRICE[t])return false;const pp=equipmentShopPrice(sl,t);if(run.gold<pp||!equipmentBagRoom())return false;const it=makeItem(sl,t,0,sl==='w'?shopWeaponKind269(t):undefined);run.gold-=pp;if(window.Econ154)Econ154.notePurchase(pp);it.purchasePaidBalance=pp;if(profile.firstEquipment92&&!profile.firstEquipment92.done)it.firstPurchase92=true;addItem(it);narratorEvent105('buy');return true}
+/* v290 (Ian): a arma da sua classe fica sempre à venda; as outras mudam por dia */
+function classShopKind290(){const k=CLASSES[profile.cls]?.wep;return WEAPON_LOOT_KINDS.includes(k)?k:null}
+function shopKinds290(t){return [...new Set([classShopKind290(),shopWeaponKind269(t)].filter(Boolean))]}
+function buyEquipment(sl,t,k){if(!EQUIP_SLOTS.includes(sl)||!Number.isInteger(t)||t<0||t>9||!PRICE[t])return false;const pp=equipmentShopPrice(sl,t);if(run.gold<pp||!equipmentBagRoom())return false;const it=makeItem(sl,t,0,sl==='w'?(shopKinds290(t).includes(k)?k:shopWeaponKind269(t)):undefined);run.gold-=pp;if(window.Econ154)Econ154.notePurchase(pp);it.purchasePaidBalance=pp;if(profile.firstEquipment92&&!profile.firstEquipment92.done)it.firstPurchase92=true;addItem(it);narratorEvent105('buy');return true}
 function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const it=run.items[i];if(!EQUIP_SLOTS.includes(it.slot))return false;if(it.slot==='w'&&!weaponFitsStyle259(it)){toast('Esta arma exige estilo '+(weaponIsMagic173(it)?'mágico':'físico')+'. Troque o estilo antes de equipar.');return false;}/* v280 (Ian): o bloqueio por estilo é regra do jogo — volta */run.items.splice(i,1);if(run.equip[it.slot])run.items.push(run.equip[it.slot]);run.equip[it.slot]=it;finishFirstEquipment();refreshStats();saveRun();toast('<b>[NARRADOR]</b> Equipado: '+it.name);return true}
 
 /* ================= MISSÕES ================= */
@@ -7730,7 +7733,7 @@ function openShop(id){
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.give.pots?(p.give.pots>1?'Cada poção: ':'')+potionDescription():p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':(EQUIP_SLOTS.includes(L.armorSlot)&&L.armorSlot!=='w'?L.armorSlot:'a');if(id==='arm')h+='<div class="tabs">'+EQUIP_SLOTS.filter(k=>k!=='w').map(k=>btn(EQUIP_LABEL[k],'armorpart',k,true,sl===k?'on':'')).join('')+'</div>';const eq=run.equip[sl];
     if(eq){const up=eq.up||0,q=equipmentUpgradeCost(eq),gc=q.gold,cc=q.cry,have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
-    if(sl==='w')h+='<div class="sysline" style="font-size:12px">O estoque de armas muda a cada dia do jogo.</div>';for(let t=0;t<10;t++){const it=makeItem(sl,t,0,sl==='w'?shopWeaponKind269(t):undefined);const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+' · uso livre'+(()=>{const w=sl==='w',u=w?wDelta278(it).u:' de escudo',d=w?wDelta278(it).d:itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+EQUIP_LABEL[sl].toLowerCase()+' nesta posição</b>'})(),btn(fmt(equipmentShopPrice(sl,t))+' ouro','buyi',sl+t,run.gold>=equipmentShopPrice(sl,t)))}}
+    if(sl==='w')h+='<div class="sysline" style="font-size:12px">A arma da sua classe está sempre à venda; as outras mudam a cada dia do jogo.</div>';for(let t=0;t<10;t++)for(const wk of (sl==='w'?shopKinds290(t):[undefined])){const it=makeItem(sl,t,0,wk);const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+' · uso livre'+(()=>{const w=sl==='w',u=w?wDelta278(it).u:' de escudo',d=w?wDelta278(it).d:itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+EQUIP_LABEL[sl].toLowerCase()+' nesta posição</b>'})(),btn(fmt(equipmentShopPrice(sl,t))+' ouro','buyi',sl+t+(wk?':'+wk:''),run.gold>=equipmentShopPrice(sl,t)))}}
   if((id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':(L.armorSlot||'a')))+forgeRows(id==='wep'?'w':(L.armorSlot||'a'),pr);
   h+=regionSummary116(nearestCity(player.x,player.z).c)+affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
@@ -7833,7 +7836,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='enter'){const g=gates.find(x=>x.id==v);if(g&&!g.dead)enterGate(g);return}
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;if(window.Econ154)Econ154.notePurchase(pp);for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[NARRADOR]</b> Comprado: '+p.n)}
-  if(a==='buyi')buyEquipment(v[0],+v.slice(1));
+  if(a==='buyi'){const [st,k]=String(v).split(':');buyEquipment(st[0],+st.slice(1),k)}
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
   if(a==='travel217'){travelGo217(v);return 'close'}if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
   if(a==='sell'){if(!sellEquipment(v))return}
@@ -8641,9 +8644,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v289</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v290</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=289;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=290;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

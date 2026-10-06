@@ -1,3 +1,7 @@
+## v290 — elmos dos conjuntos e loja, 06/10/2026
+- Elmos dos conjuntos raros vinham do encaixe do Blender (set169_h) e ficavam atrás da cabeça (Necromante, Tempo, Tecelão) ou grandes demais (Metamorfo, Oráculo). Agora usam o encaixe medido no osso da cabeça e são dimensionados por 1,3× a largura da cabeça (set-visual153.js). Peitoral, braçais e grevas dos conjuntos continuam no encaixe do Blender (estavam bons).
+- Loja (decisão do Ian): a arma da classe fica sempre à venda em todos os ranks; as outras mudam por dia (shopKinds290).
+
 ## v289 — armadura comum troca a roupa, 06/10/2026
 - Só os conjuntos raros escondiam a roupa do Viajante; a armadura comum ficava por cima da roupa larga. Agora peitoral, luvas e botas comuns escondem a roupa da parte, mostram o corpo base justo (base169_* do guardiao-rig.glb) e a peça vai por cima. tools/set-visual153.js (BODY289).
 
