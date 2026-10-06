@@ -42,8 +42,10 @@ window.Econ154=(()=>{
   return m*scale*ipc*(1+tax)};
  // Peça grande custa 0,8 H do rank do item; slots pequenos custam 20%.
  equipmentShopPrice=function(sl,t){return Math.max(1,Math.round(.8*H(t)*equipFactor(sl)*priceMul(sl==='w'?'wep':'arm')))};
- const baseTravel=travelCost;travelCost=function(c){return Math.round(baseTravel(c)*Math.pow(GR[rank()].gold,.6))};
- guildCost=function(){return Math.round(8*H(rank()))};
+ // Serviços compartilham a tarifa; a viagem já inclui o fator de rank no módulo puro.
+ function localPrice(base,kind='service'){const b=Number(base),m=priceMul(kind);if(!Number.isFinite(b)||b<=0||!Number.isFinite(m)||m<=0)throw new RangeError('service price');return Math.max(1,Math.min(Number.MAX_SAFE_INTEGER,Math.ceil(b*m)))}
+ function servicePrice(kind,options){const category=kind==='elixir'?'pot':['forge','upgrade','rune'].includes(kind)?(options.slot==='w'?'wep':'arm'):'service';return localPrice(ServicePrices265.base(kind,options),category)}
+ guildCost=function(){return servicePrice('guild',{rankFactor:GR[rank()].gold})};
  // Loot sold at the market: glut, index and tax; tax goes to the city treasury.
  const baseLoot=lootTotal;
   lootTotal=function(){const k=cur(),g=baseLoot();if(!k)return g;const sat=k.s.sat.loot||0;return Math.round(g*Math.sqrt(k.s.ipc)*(1-k.s.tax)*Math.max(.5,1-sat))};
@@ -58,25 +60,27 @@ window.Econ154=(()=>{
  // Preço sem descontos de afinidade: a maior revenda possível fica abaixo de 50%.
  function resourceBuyPrice(r,n=10){const k=cur(),ipc=k?k.s.ipc:1,tax=k?k.s.tax:.08;return Math.ceil(CRY_P[r]*n*3*ipc*(1+tax))}
  function resourceSalePrice(kind,r){refreshECON();const base=(kind==='core'?CORE_P:CRY_P)[r];return Math.max(0,Math.round(base*ECON[r]*(1+.03*Math.min(10,Math.max(0,affL('Dorian'))))))}
+ function salePrice(category,base){const k=cur();if(!k)return Math.max(0,Math.round(base));return Math.max(0,Math.round(base*Math.sqrt(k.s.ipc)*(1-k.s.tax)*Math.max(.5,1-(k.s.sat[category]||0))))}
+ function noteMarketSale(category,net){const k=cur();if(!k||!(net>0))return;const gross=net/(1-k.s.tax);k.s.treasury+=Math.round(gross*k.s.tax);k.s.sat[category]=Math.min(.5,(k.s.sat[category]||0)+gross/(6*cityH));save()}
  function notePurchase(totalPaid){const k=cur();if(!k)return;const paid=Math.max(0,Number(totalPaid)||0);k.s.flow+=paid;k.s.treasury+=Math.round(paid*k.s.tax/(1+k.s.tax));save()}
  // ---------- dome numbers (used by Dome154) ----------
  function cityTier(){const c=cityOf();return c?Math.max(0,Math.min(5,Math.round(cityL(c)||0))):0}
  function cityResourceRank(){return Math.max(0,Math.min(9,cityTier()));}
- function domeBuild(){const r=cityResourceRank(),t=cityTier();return {gold:Math.round(6*cityH*(.75+.1*t)/100)*100,cry:40,core:15,r}}
- function domeRepair(frac){const r=cityResourceRank(),f=Math.max(0,Math.min(1,frac)),t=cityTier();return {gold:Math.round(.4*6*cityH*(.75+.1*t)*f/100)*100,cry:Math.ceil(15*f),core:Math.ceil(5*f),r}}
+ function domeBuild(){const r=cityResourceRank(),t=cityTier();return {gold:localPrice(Math.round(6*cityH*(.75+.1*t)/100)*100),cry:40,core:15,r}}
+ function domeRepair(frac){const r=cityResourceRank(),f=Math.max(0,Math.min(1,frac)),t=cityTier();return {gold:f>0?localPrice(Math.max(1,Math.round(.4*6*cityH*(.75+.1*t)*f/100)*100)):0,cry:Math.ceil(15*f),core:Math.ceil(5*f),r}}
  function canPay(k){return run.gold>=k.gold&&run.res.cry[k.r]>=k.cry&&run.res.core[k.r]>=k.core}
- function pay(k){if(!canPay(k))return false;run.gold-=k.gold;run.res.cry[k.r]-=k.cry;run.res.core[k.r]-=k.core;const c=cityOf();if(c){const s=st(c);s.treasury+=Math.round(k.gold*.1)}return true}
+ function pay(k){if(!canPay(k))return false;run.gold-=k.gold;run.res.cry[k.r]-=k.cry;run.res.core[k.r]-=k.core;notePurchase(k.gold);return true}
  function costText(k){return fmt(k.gold)+' ouro'+(k.cry?' + '+k.cry+' cristais '+GR[k.r].id:'')+(k.core?' + '+k.core+' núcleos '+GR[k.r].id:'')}
  // ---------- panel shown at Dorian's market ----------
  function panel(){const k=cur();if(!k)return '';const s=k.s,trend=s.hist.length>1?s.ipc-s.hist[s.hist.length-2]:0;
   return '<div class="sec">ECONOMIA DE '+k.c.name.toUpperCase()+'</div>'+
    row('Índice de preços',(s.ipc>1.03?'<span style="color:#ff8fa3">Inflação</span>':s.ipc<.97?'<span style="color:#6fe39a">Deflação</span>':'Estável')+' · preços '+fmtPct(s.ipc-1)+' (ontem '+fmtPct(trend)+'). Compras locais, cerco e domo rompido afetam os preços; festival e abastecimento recuperado ajudam a estabilizar.','')+
-   row('Imposto do conselho',Math.round(s.tax*100)+'% nas lojas de equipamento, poções comuns e cristais e na venda de recursos/espólios. Vai para o tesouro da cidade.','')+
+   row('Imposto do conselho',Math.round(s.tax*100)+'% nas lojas, viagens e serviços e na venda de equipamentos, peixes, recursos e espólios. Doações e transferências são isentas. Vai para o tesouro da cidade.','')+
    row('Tesouro da cidade',fmt(s.treasury)+' ouro · paga a manutenção do domo ('+fmt(Math.round(.15*cityH))+'/dia).',btn('Doar '+fmt(Math.round(.25*cityH)),'econdonate',k.c.id,run.gold>=Math.round(.25*cityH)))}
  function donate(id){const k=cur();if(!k||k.c.id!==id)return false;const g=Math.round(.25*cityH);if(run.gold<g)return false;run.gold-=g;k.s.treasury+=g;if(typeof regionEvent116==='function')regionEvent116(k.c,3,0,'Você doou ao tesouro da cidade. Confiança +3.');save();return true}
  const baseModal=openModal;
  openModal=function(title,html,...rest){if(/MERCADO/.test(title))html=panel()+html;return baseModal(title,html,...rest)};
  // per-frame refresh through the event loop already used by the dome
  const baseSiege=updSiege;updSiege=function(dt){baseSiege(dt);refreshECON()};
- return {H,cur,st,panel,donate,domeBuild,domeRepair,canPay,pay,costText,noteResSale,noteResourcePurchase,notePurchase,resourceBuyPrice,resourceSalePrice};
+ return {H,cur,st,panel,donate,domeBuild,domeRepair,canPay,pay,costText,noteResSale,noteResourcePurchase,notePurchase,resourceBuyPrice,resourceSalePrice,servicePrice,localPrice,salePrice,noteMarketSale};
 })();
