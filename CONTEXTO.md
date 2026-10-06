@@ -1,3 +1,6 @@
+## v286 — passivas por nível, 06/10/2026
+- As 12 passivas gerais estavam todas ativas no nível 1 sem explicação. Agora liberam nos níveis 3, 6, 10, 14, 18, 22, 26, 30, 35, 40, 45 e 50 (passives263.js, PASSIVE_LV286); a aba Passivas mostra o efeito e o nível de cada uma (🔒 quando bloqueada) e um aviso aparece ao liberar.
+
 ## v285 — portal da torre, 06/10/2026
 - O portal de subir andar da Torre usava o anel dourado antigo (do início do jogo). Agora usa a Fenda nova (Rift131, cor de saída), igual às masmorras.
 

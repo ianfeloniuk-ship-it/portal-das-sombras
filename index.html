@@ -247,7 +247,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/monster-balance.js?v=259"></script>
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=265"></script>
-<script src="tools/passives263.js?v=265"></script>
+<script src="tools/passives263.js?v=286"></script>
 <script src="tools/resources260.js?v=283"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -5598,7 +5598,7 @@ function xpReward253(x,source){const base=Math.max(0,Number(x)||0),transmigrator
 function xpAwardAmount262(x,source){if(!Number.isFinite(x)||x<=0)return 0;return xpReward253(x,source).total}
 function gainXp(x,source){
   const awarded=xpAwardAmount262(x,source);if(!awarded)return 0;run.xp+=awarded;let need=xpNeed();const r0=rankOf();
-  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);/* v165 (Irror): continua ganhando ponto de constelação com tudo cheio; o botão converte em status quantas vezes quiser. */if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[NARRADOR]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Ordem (Lyra).',5000),1500)}toast('<b>[NARRADOR]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status e +1 de habilidade'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
+  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);try{passiveUnlockCheck286()}catch(_){}/* v165 (Irror): continua ganhando ponto de constelação com tudo cheio; o botão converte em status quantas vezes quiser. */if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[NARRADOR]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Ordem (Lyra).',5000),1500)}toast('<b>[NARRADOR]</b> Nível aumentou: <b>NV '+run.level+'</b> · +1 ponto de status e +1 de habilidade'+(touch?' (toque no seu painel)':' (tecla C)'));fxRing(player.x,player.z,0xffd54f,3,.6);refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;sfx('level')}
   {const nx=profile.rank+1;if(profile.rk2&&rankTrialReady(nx)&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ORDEM]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[NARRADOR]</b> Missão de troca de classe disponível. Fale com a Ordem em qualquer cidade.',5000),800)}
   const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[NARRADOR]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
@@ -8636,9 +8636,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v285</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v286</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=285;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=286;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
