@@ -860,3 +860,11 @@ Ian pediu que enfrentar inimigos mais fortes compense e autorizou corrigir o sis
 
 ## v267 — portais acessíveis no começo
 Pedido do Ian: portais de rank acima do jogador nascem mais longe das cidades (+25 m por rank acima, até +100 m, sempre a menos de 200 m do jogador para não quebrar a reposição). Sempre há ao menos 2 portais do rank do jogador ou abaixo. O sorteio de rank da v153 continua. Teste no navegador (NV 1, rank F): 12 portais estáveis, os F a 96–167 m de Aster, de A até SS+ a ~195 m. Removidos 40 scripts antigos de `tools/verify-*` que não rodavam mais.
+Ainda na v267 (pedido do Ian: mais coisas caras do rank C em diante, menos a ideia de cosméticos). Novo `tools/lux267.js`, carregado depois do `economy154.js`. Preços em H do rank (C = 5.600):
+- **Relíquias regionais** (aba Cidade da Ordem): uma por cidade, 6 H, exige 50 de confiança. Permanentes, não usam espaço de relíquia e não se perdem na morte. Oito efeitos: dano, vida, XP, ouro, velocidade, mana, escudo, defesa.
+- **Investimento na cidade**: 5 níveis por cidade, 2 H × (nível+1)^1,5. Cada nível dá −3% nos preços daquela cidade e +5 de confiança.
+- **Cômodos de luxo na casa**: sala de treino (+4% dano, 4 H), biblioteca (+5% XP, 6 H), cofre reforçado (+2 no cofre de relíquias, 5 H), jardim de mana (+8% vida e mana, 4 H).
+- **Encantamento** dos equipados: +3% de qualidade por nível, até +20; 0,25 H do rank da peça × 1,3^nível.
+- **Mercenários de elite**: 1 (1,5 H) ou 2 (2,5 H) caçadores do seu rank, NV +3, na próxima masmorra.
+- **Portal encomendado**: rank de (seu −2) até (seu +1), 1,2 H do rank do portal, aberto perto de você.
+Celular (Ian: "travado ou lento"): no toque não há antialias; LEVE vira o padrão até o jogador escolher HD; LEVE usa resolução 0,75 no celular e o HUD em 1x; a resolução cai sozinha até 60% quando o FPS fica abaixo de 30 e volta quando passa de 55. Testado em navegador (PC 1280×720 e celular 390×844 com toque): compras, efeitos, mercenários entrando na masmorra, portal encomendado; sem erros de console. Sem teste em celular real.
