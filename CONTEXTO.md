@@ -1,3 +1,6 @@
+## v271 — lentidão sem arma, 06/10/2026
+- Regra corrigida pelo Ian: só fica 60% mais lento quem ataca à distância (arqueiro, magos que atiram projéteis) sem NENHUMA arma. Arma de outro tipo não deixa lento, e o assassino (atira adagas) nunca sofre a lentidão.
+
 ## v270 — exploits de portal, 06/10/2026
 - Portal em fechamento não aceita mais entrada (antes dava para reentrar e o chefe voltava, com reputação de novo).
 - Sair/recarregar o jogo dentro de um portal sela aquele portal por 1 hora real: não dá para sair, tomar poção e voltar.
