@@ -5622,7 +5622,10 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
     else if(unarmed)muzzle=Warrior127.handMuzzle(m,{face:player.face,combo:player.combo,pitch253:pitch});
     if(muzzle){x=muzzle.x+(x-player.x);z=muzzle.z+(z-player.z);o={...o,originY:muzzle.y,terrainLaunch245:TER245.heightFor(m.root)};}
   }
-  if(team!=='player'){dmg=kitWeakDamage111(curAtk,dmg);o.fromBoss111=!!curAtk?.isBoss;}const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
+  if(team!=='player'){dmg=kitWeakDamage111(curAtk,dmg);o.fromBoss111=!!curAtk?.isBoss;}
+  /* v279 (Ian): tiro de monstro mira a ALTURA do alvo no momento do disparo (terreno com relevo), mas segue reto depois — não é teleguiado, dá para esquivar */
+  if(team!=='player'&&!o.dir3D&&player){let best=null,bd=1e9;for(const t of [player,...allies]){if(!t||t.dead)continue;const tx=t.x-x,tz=t.z-z,td=Math.hypot(tx,tz);if(td<.5||td>60)continue;let da=Math.atan2(tx,tz)-a;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)<.6&&td<bd){bd=td;best=t}}
+    if(best){const y0=(o.originY??1.1)+(o.terrainLaunch245??terrH(x,z)),ty=terrH(best.x,best.z)+1.0,pitch=Math.atan2(ty-y0,bd);o={...o,dir3D:{x:Math.sin(a)*Math.cos(pitch),y:Math.sin(pitch),z:Math.cos(a)*Math.cos(pitch)}}}}const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const y=o.worldOriginY253??((o.originY??1.1)+(o.terrainLaunch245??terrH(x,z)));
   let dir=o.dir3D?Projectiles253.unit(o.dir3D):{x:Math.sin(a),y:0,z:Math.cos(a)};
   if(target){dir=Projectiles253.aim3D({x,y,z},target);const da=a-player.face,cs=Math.cos(da),sn=Math.sin(da),dx=dir.x;dir.x=dx*cs+dir.z*sn;dir.z=dir.z*cs-dx*sn;}
@@ -8577,9 +8580,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v278</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v279</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=278;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=279;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

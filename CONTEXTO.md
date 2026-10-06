@@ -1,3 +1,6 @@
+## v279 — tiro de monstro mira a altura do alvo, 06/10/2026
+- Projétil de monstro (team != player) mira a altura do alvo (jogador ou aliado na direção do tiro) no momento do disparo e segue reto: não é teleguiado. Teste em terreno com 2+ m de desnível: acertos 0/15 antes, 13/15 agora; esquivando 3 m para o lado: 0/15.
+
 ## v278 — comparação de armas por tipo, 06/10/2026
 - Loja e bolsa comparam a arma pelo ataque do tipo dela (wDelta278): cajado mostra quanto o ataque MÁGICO sobe, espada quanto o FÍSICO sobe (antes comparava número com número e dava '+1').
 - Tirado o bloqueio 'esta arma exige estilo': qualquer classe equipa qualquer arma (o ataque segue a arma desde a v272).
