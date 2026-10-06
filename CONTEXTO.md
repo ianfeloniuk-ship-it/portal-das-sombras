@@ -1,3 +1,6 @@
+## v282 — dois efeitos por atributo, 06/10/2026
+- Pedido do Ian: distribuir os efeitos de forma equilibrada. Resistência agora dá também fúria máxima (+0,5/ponto, 100→160; furyMaxR260 em resources260/kit111). Regeneração de mana passou da Inteligência para o Espírito. Cura recebida removida (seria 3º efeito da Vitalidade). Cada atributo tem 2 efeitos.
+
 ## v281 — 9 atributos e defesas (Grimório), 06/10/2026
 - Aprovado pelo Ian. Referência: cofre Projetos/Solo RPG/Entregas/Grimorio-Atributos-2026-10-06/Grimorio-de-Atributos-e-Bestiario.pdf.
 - Atributos: Força (corpo a corpo, fúria por golpe), Destreza (ataque físico à distância no lugar da Força, penetração), Agilidade, Percepção (+dano crítico), Inteligência (+regeneração de mana), Vitalidade (+vigor e cura recebida), Resistência (def. física), Espírito (def. mágica), Vontade (def. universal fraca + resistência a efeitos). Regra do Ian: um efeito, um atributo; física e mágica separadas.

@@ -248,7 +248,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=265"></script>
 <script src="tools/passives263.js?v=265"></script>
-<script src="tools/resources260.js?v=263"></script>
+<script src="tools/resources260.js?v=282"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -5345,8 +5345,9 @@ function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
 function pDef281(type){const L=run?.level||1;const phy=attrRed281(st281('res'),L,40,.5),mag=attrRed281(st281('esp'),L,40,.5),uni=attrRed281(st281('von'),L,100,.25);return 1-(1-uni)*(1-(type==='mag'?mag:phy))}
 function pStatusRes281(){return attrRed281(st281('von'),run?.level||1,40,.4)}
 function pPen281(){return attrRed281(st281('des'),run?.level||1,60,.25)}
-function pManaRegen281(){return attrRed281(st281('int'),run?.level||1,40,.5)}
-function pHealBonus281(){return attrRed281(st281('vit'),run?.level||1,40,.5)}
+function furyMax281(){return 100+Math.min(60,.5*st281('res'))}
+function pManaRegen281(){return attrRed281(st281('esp'),run?.level||1,40,.5)}
+function pHealBonus281(){return 0}
 function pVigorRegen281(){return attrRed281(st281('vit'),run?.level||1,40,.5)}
 function pFuryHit281(){return Math.min(5,Math.floor(st281('for')/20))}
 function pCritDmg281(){return Math.min(1,st281('per')*.005)}
@@ -6695,12 +6696,11 @@ function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',
 
 function statDesc(){const D0=statDesc0();const L=run.level,f=n=>String(Math.round(n*1000)/10).replace('.',','),sp=n=>' · agora <b>'+f(n)+'%</b>';
   D0.for[1]+='<br><b>Fúria:</b> +1 por golpe a cada 20 pontos (máx. +5) · agora +'+pFuryHit281()+'.';
-  D0.int[1]+='<br><b>Regeneração de mana:</b> pontos ÷ (pontos + 40 + nível), teto 50%'+sp(pManaRegen281())+'.';
-  D0.vit[1]+='<br><b>Vigor e cura recebida:</b> pontos ÷ (pontos + 40 + nível), teto 50% cada'+sp(pVigorRegen281())+'.';
+  D0.vit[1]+='<br><b>Recuperação de vigor:</b> pontos ÷ (pontos + 40 + nível), teto 50%'+sp(pVigorRegen281())+'.';
   D0.per[1]+='<br><b>Dano crítico:</b> +0,5% por ponto (máx. +100%) · agora +'+f(pCritDmg281())+'%.';
   D0.des=['Ataque à distância: <b>+'+fmt(atkPer(L)*st281('des'))+'</b> · penetração <b>'+f(pPen281())+'%</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de ataque físico <b>à distância</b> (arco, adaga arremessada e classes físicas que atiram, no lugar da Força).<br><b>Penetração:</b> ignora parte da defesa do alvo: pontos ÷ (pontos + 60 + nível), teto 25%.'];
-  D0.res=['Defesa física: <b>'+f(attrRed281(st281('res'),L,40,.5))+'%</b>','Reduz só golpes <b>físicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%. Cada ponto rende um pouco menos que o anterior; o efeito se mantém em qualquer nível se você continuar investindo.'];
-  D0.esp=['Defesa mágica: <b>'+f(attrRed281(st281('esp'),L,40,.5))+'%</b>','Reduz só golpes <b>mágicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%.'];
+  D0.res=['Defesa física: <b>'+f(attrRed281(st281('res'),L,40,.5))+'%</b> · fúria máxima <b>'+Math.round(furyMax281())+'</b>','Reduz só golpes <b>físicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%.<br><b>Fúria máxima:</b> +0,5 por ponto (100 → até 160). Cada ponto rende um pouco menos que o anterior; o efeito se mantém em qualquer nível se você continuar investindo.'];
+  D0.esp=['Defesa mágica: <b>'+f(attrRed281(st281('esp'),L,40,.5))+'%</b> · regeneração de mana <b>+'+f(pManaRegen281())+'%</b>','Reduz só golpes <b>mágicos</b>: pontos ÷ (pontos + 40 + nível), teto 50%.<br><b>Regeneração de mana:</b> pontos ÷ (pontos + 40 + nível), teto +50%.'];
   D0.von=['Defesa universal: <b>'+f(attrRed281(st281('von'),L,100,.25))+'%</b> · efeitos <b>'+f(pStatusRes281())+'%</b>','Reduz <b>qualquer</b> golpe, físico ou mágico, mas rende menos: pontos ÷ (pontos + 100 + nível), teto 25%.<br>Também encurta lentidão, atordoamento e sangramento: pontos ÷ (pontos + 40 + nível), teto 40%.<br>Toda defesa somada (armadura + atributos) nunca passa de 75%.'];
   return D0}
 function statDesc0(){const L=run.level,s=run.stats||{},cc=critChance(),g=s.agi||0,nx=nextStep(L),retro='A mudança vale também para os pontos que você já distribuiu. Acontece novamente a cada 25 níveis do personagem.',f=n=>String(Math.round(n*100)/100).replace('.',',');
@@ -7912,7 +7912,7 @@ function creationDraft(){const d=profile.creationDraft91||(profile.creationDraft
 function creationUsed(){return Object.values(creationDraft().stats).reduce((a,b)=>a+b,0)}
 function creationEdit(k,v){if(!profile.creationPending91)return;const d=creationDraft();if(k==='name'){d.name=String(v).slice(0,24)}else if(k==='skill'&&initialSkill259(+v))d.skill=+v;else if(k in d.stats&&[1,-1].includes(v)){if(v>0&&creationUsed()>=CREATION_PTS281||v<0&&d.stats[k]<=0)return;d.stats[k]+=v}store.set('pds2_profile',profile);if(k!=='name')creationView()}
 function creationView(){if(!profile.creationPending91)return;const d=creationDraft();view=creationView;let h='<div class="sysline">Escolha uma habilidade e distribua 9 pontos (ou guarde para depois).</div><label for="heroName">Nome do personagem</label><input id="heroName" maxlength="24" value="'+safeText(d.name)+'" placeholder="Como você se chama?" oninput="creationEdit(\'name\',this.value)" style="display:block;width:100%;box-sizing:border-box;margin:8px 0"><div class="sec">ESCOLHA SUA PRIMEIRA HABILIDADE</div>';
- CLASSES[profile.cls].sk.slice(0,3).forEach((sk,i)=>{const full=classSkill(profile.cls,i);h+=row(sk.n,skillDesc(full),'<button class="btn '+(d.skill===i?'on':'')+'" onclick="creationEdit(\'skill\','+i+')">'+(d.skill===i?'Selecionada':'Escolher')+'</button>')});h+='<div class="sec">ATRIBUTOS · '+(CREATION_PTS281-creationUsed())+' PONTOS DISPONÍVEIS</div>';const desc=statDesc();for(const k of Object.keys(STATN))h+=row('<span class="tipi" style="cursor:help" data-tip154="'+tipAttr154(desc[k][1])+'">'+STATN[k]+' · '+d.stats[k]+'</span>',({for:'Ataque corpo a corpo e fúria',des:'Ataque à distância e penetração',agi:'Velocidade de ataque, movimento e esquiva',per:'Crítico (chance e dano)',int:'Ataque mágico, mana e regeneração',vit:'Vida, vigor e cura recebida',res:'Defesa física',esp:'Defesa mágica',von:'Defesa universal e resistência a efeitos'})[k],'<button class="btn" '+(!d.stats[k]?'disabled':'')+' onclick="creationEdit(\''+k+'\',-1)">−1</button> <button class="btn" '+(creationUsed()>=CREATION_PTS281?'disabled':'')+' onclick="creationEdit(\''+k+'\',1)">+1</button>');h+='<button class="btn hot" onclick="finishCreation()">Começar aventura</button>';openModal('CRIAÇÃO DO PERSONAGEM',h)}
+ CLASSES[profile.cls].sk.slice(0,3).forEach((sk,i)=>{const full=classSkill(profile.cls,i);h+=row(sk.n,skillDesc(full),'<button class="btn '+(d.skill===i?'on':'')+'" onclick="creationEdit(\'skill\','+i+')">'+(d.skill===i?'Selecionada':'Escolher')+'</button>')});h+='<div class="sec">ATRIBUTOS · '+(CREATION_PTS281-creationUsed())+' PONTOS DISPONÍVEIS</div>';const desc=statDesc();for(const k of Object.keys(STATN))h+=row('<span class="tipi" style="cursor:help" data-tip154="'+tipAttr154(desc[k][1])+'">'+STATN[k]+' · '+d.stats[k]+'</span>',({for:'Ataque corpo a corpo e fúria',des:'Ataque à distância e penetração',agi:'Velocidade de ataque, movimento e esquiva',per:'Crítico (chance e dano)',int:'Ataque mágico e mana',vit:'Vida e recuperação de vigor',res:'Defesa física e fúria máxima',esp:'Defesa mágica e regeneração de mana',von:'Defesa universal e resistência a efeitos'})[k],'<button class="btn" '+(!d.stats[k]?'disabled':'')+' onclick="creationEdit(\''+k+'\',-1)">−1</button> <button class="btn" '+(creationUsed()>=CREATION_PTS281?'disabled':'')+' onclick="creationEdit(\''+k+'\',1)">+1</button>');h+='<button class="btn hot" onclick="finishCreation()">Começar aventura</button>';openModal('CRIAÇÃO DO PERSONAGEM',h)}
 function finishCreation(){if(!profile.creationPending91)return false;const d=creationDraft(),name=d.name.trim().replace(/[\x00-\x1f]/g,'').slice(0,24);if(!name){toast('Digite um nome para o personagem.');return false}if(creationUsed()>CREATION_PTS281||Object.values(d.stats).some(n=>!Number.isInteger(n)||n<0)||!CLASSES[profile.cls].sk[d.skill])return false;profile.name=name;for(const k in d.stats)run.stats[k]=(run.stats[k]||0)+d.stats[k];run.pts+=CREATION_PTS281-creationUsed();run.classLoadout=[profile.cls+':'+d.skill];run.initialSkillFix259=true;profile.creationPending91=false;delete profile.creationDraft91;player.skills=pSkills();refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;showG();closeModal();$('mx').hidden=false;startFirstEquipment();saveRun();tutorial();return true}
 function transmigratorLevel253(){return Math.max(0,Math.min(10,Math.floor(Number(profile.transmigratorLv)||0)));}
 function transmigratorBonus(){return .10*transmigratorLevel253();}
@@ -8215,12 +8215,12 @@ function kitVisible111(s,choosing=false){const v=L[choosing?'loadoutClass111':'s
 function kitCanonical111(sk){if(!sk)return null;const found=Object.values(KIT_DEFS111).flat().find(s=>s.n===sk.n);if(!found)return null;if(sk.kit111||sk.skillId===found.skillId||sk.sourceClass===found.sourceClass||!sk.t)return found;const old=ADV[found.sourceClass]?.sk;return old&&old.n===sk.n&&old.t===sk.t&&old.pow===sk.pow?found:null}
 /* Etapa 4 (02/10/2026) — mecânicas próprias de classe, piloto: Guerreiro (Fúria) e Arqueiro (tiro carregado + alvo preso = crítico). */
 const CM154={furyAt:0,charge:null,firing:false,held:new Set(),ptr:false,fxAt:0};
-Object.defineProperty(CM154,'fury',{get:()=>martialState260().fury,set:v=>{martialState260().fury=Math.max(0,Math.min(100,Number(v)||0))}});
+Object.defineProperty(CM154,'fury',{get:()=>martialState260().fury,set:v=>{martialState260().fury=Math.max(0,Math.min(furyMaxR260(),Number(v)||0))}});
 addEventListener('keydown',e=>{CM154.held.add(e.code)},true);addEventListener('keyup',e=>{CM154.held.delete(e.code)},true);function release154(){CM154.held.clear();CM154.ptr=false;try{for(const k in keys)keys[k]=false;input.x=0;input.z=0}catch(_){}}addEventListener('blur',release154);document.addEventListener('visibilitychange',()=>{if(document.hidden)release154()});
 addEventListener('pointerdown',e=>{if(e.target?.closest?.('#bQ,#bR,#bT,#bG,#bY,#bU,#b5'))CM154.ptr=true},true);addEventListener('pointerup',()=>{CM154.ptr=false},true);addEventListener('pointercancel',()=>{CM154.ptr=false},true);
 const CM154_MOVE=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space'];
 function cm154HasWarrior(){return basicAttackId()===0||(player.skills||[]).some(s=>s&&!s.empty&&String(s.skillId||'').startsWith('0:'))}
-function cm154Gain(n){CM154.fury=Math.min(100,CM154.fury+n);CM154.furyAt=time;martialState260().furyWait=resourceWait263('fury');if(CM154.fury>=100&&!CM154.fullShown){CM154.fullShown=true;floater(player.x,player.z,'FÚRIA CHEIA','#ff7a3a',true)}}
+function cm154Gain(n){CM154.fury=Math.min(furyMaxR260(),CM154.fury+n);CM154.furyAt=time;martialState260().furyWait=resourceWait263('fury');if(CM154.fury>=furyMaxR260()&&!CM154.fullShown){CM154.fullShown=true;floater(player.x,player.z,'FÚRIA CHEIA','#ff7a3a',true)}}
 function cm154Basic(o,e){if(o.basicClass===1&&e&&time-(e.markHit181||-9)>=.05){e.markHit181=time;cm181Mark(e,o.third?2:1)}if(o.basicClass===2&&time-(CM154.lastTank181||-9)>=.05){CM154.lastTank181=time;cm181Firm(5)}if(o.basicClass!==0||time-(CM154.lastBasic||-9)<.05)return;CM154.lastBasic=time;cm154Gain((o.third?12:6)+Number(hasPassive263('warm_blood')))}
 function cm154ChargeLevel(){const c=CM154.charge;return c?1+Math.min(2,Math.floor(time-c.t0)):0}
 function cm154Charge(s){if(s.skillId!=='4:2'||CM154.firing)return false;if(CM154.charge)return true;if(s.cdT>0||kitCheck111(s)||!!resourceError260(s))return false;CM154.charge={s,t0:time,codes:null,ptr:false};faceTarget(s.range||14);return true}
@@ -8629,9 +8629,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v281</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v282</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=281;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=282;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
