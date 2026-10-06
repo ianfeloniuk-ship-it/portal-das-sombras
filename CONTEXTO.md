@@ -1,3 +1,7 @@
+## v278 — comparação de armas por tipo, 06/10/2026
+- Loja e bolsa comparam a arma pelo ataque do tipo dela (wDelta278): cajado mostra quanto o ataque MÁGICO sobe, espada quanto o FÍSICO sobe (antes comparava número com número e dava '+1').
+- Tirado o bloqueio 'esta arma exige estilo': qualquer classe equipa qualquer arma (o ataque segue a arma desde a v272).
+
 ## v277 — avisos menores, um por vez, 06/10/2026
 - popNews194 virou fila: um aviso por vez, fonte 12px, no alto, some em até 3,2 s se houver monstro perto (5,5 s fora de luta). Avisos iguais não repetem. Tudo continua no Histórico.
 - Falha de desafio (ex.: 'sem esquivar') não abre mais aviso; fica só no Histórico e na aba de missões.
