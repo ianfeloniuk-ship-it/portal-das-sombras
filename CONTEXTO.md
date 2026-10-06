@@ -1,3 +1,6 @@
+## v273 — tipo de dano do ataque básico, 06/10/2026
+- Regra do Ian: com arma física (arco, adaga, espada, machado) o ataque básico dá dano FÍSICO (Força + ataque da arma), mesmo em classe mágica. Habilidades continuam com o tipo da própria habilidade (habilidade mágica = dano mágico). Cajado/varinha/tomo e mão vazia seguem a classe.
+
 ## v272 — ataque básico segue a arma, 06/10/2026
 - Pedido do Ian: qualquer classe com arco atira flechas, com adaga arremessa adagas (pelo cabo, lâmina na frente), com espada/machado bate corpo a corpo — inclusive magos. Cajado/varinha/tomo e mãos vazias seguem a regra da classe. Animação também segue a arma.
 - Ian confirmou que o gasto de vigor do arqueiro estava certo (não era bug).
