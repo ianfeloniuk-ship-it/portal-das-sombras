@@ -1,3 +1,8 @@
+## v284 — missões por rank, 06/10/2026
+- XP da missão usa o nível do jogador quando a missão é gerada (q.lvl283; antes usava sempre o nível mínimo do rank e dava XP minúsculo). Base de XP de missão 0,04→0,07 e matar conta 0,3 min por monstro.
+- Quantidade por rank: portais 1+rank/3, caçadores 1+rank/2, monstros 20+10×rank.
+- Novos tipos: 'Derrote N elites' (rank D+, 3+rank) e 'Derrote N chefes de portal' (rank B+). Missões antigas são recalculadas ao carregar.
+
 ## v283 — sem teto, vigor máximo, penetração mágica, 06/10/2026
 - REGRA DO IAN: nada tem teto no jogo (personagem e criaturas). Pontos crescem sem limite; porcentagens usam pts/(pts+K+nível), que nunca chega a 100% sozinha. Removidos os tetos dos atributos e o limite somado de 75% da defesa de atributos.
 - Vitalidade: vida + vigor máximo (+0,5/ponto, vigorMaxR260). Recuperação de vigor por atributo removida.

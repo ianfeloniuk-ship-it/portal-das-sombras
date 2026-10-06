@@ -78,20 +78,22 @@
     var o = input || {}, level = levelOf(o.level), count = levelOf(o.count);
     var minutes, difficulty;
     switch (o.type) {
-      case 'kill': minutes = count * .18; difficulty = 1; break;
+      case 'kill': minutes = count * .3; difficulty = 1; break;
       case 'clear': minutes = count * 8; difficulty = 1.25; break;
       case 'pvp': minutes = count * 2.5; difficulty = 1.25; break;
+      case 'elite': minutes = count * 1.2; difficulty = 1.3; break;
+      case 'boss': minutes = count * 6; difficulty = 1.4; break;
       case 'extract': minutes = 8; difficulty = 1.15; break;
       case 'daily': minutes = 8; difficulty = .5; break;
       case 'story_miner': minutes = 20; difficulty = 1.2; break;
       case 'story_lake': minutes = 30; difficulty = 1.25; break;
       case 'story_tower': minutes = 60; difficulty = 1.4; break;
       case 'story_city': minutes = 35; difficulty = 1.35; break;
-      case 'night': minutes = count * .22; difficulty = 1.15; break;
-      case 'nopot': case 'nododge': minutes = count * .18; difficulty = 1.25; break;
+      case 'night': minutes = count * .35; difficulty = 1.15; break;
+      case 'nopot': case 'nododge': minutes = count * .3; difficulty = 1.25; break;
       default: return { xp: 0, level: level, minutes: 0, difficulty: 0 };
     }
-    return { xp: Math.max(1, Math.round(xpNeed(level) * .04 * minutes * difficulty)), level: level, minutes: minutes, difficulty: difficulty };
+    return { xp: Math.max(1, Math.round(xpNeed(level) * .07 * minutes * difficulty)), level: level, minutes: minutes, difficulty: difficulty };
   }
   function reward(input) {
     var o = input || {}; if (o.noExpLoot || o.allied) return { xp: 0, gold: 0, threat: 0, role: 'none' };

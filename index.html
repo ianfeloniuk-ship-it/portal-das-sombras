@@ -243,7 +243,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
   </div>
 </div>
 
-<script src="tools/balance-rpg.js?v=281"></script>
+<script src="tools/balance-rpg.js?v=284"></script>
 <script src="tools/monster-balance.js?v=259"></script>
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=265"></script>
@@ -3623,7 +3623,7 @@ function orderRep(){ensureOrderRep();return profile.orderRep97}
 function orderRepReward(rank,mul=1){const r=Math.min(9,Math.max(0,Math.floor(Number(rank)||0))),gap=Math.max(0,(profile.rank||0)-r-1);return Math.max(1,Math.round(ORDER_REP_PORTAL[r]*mul/Math.pow(2,gap)))}
 function questOrderRep(q){const r=Number.isInteger(q.repRank97)?q.repRank97:q.t==='clear'?q.rank:q.t==='kill'?Math.max(0,Math.floor((q.n-20)/10)):0;return orderRepReward(r,.6)}
 function addOrderRep(amount,reason){ensureOrderRep();if(!Number.isFinite(amount)||amount<=0)return 0;amount=Math.floor(amount);profile.orderRep97+=amount;toast('<b>[ORDEM]</b> '+reason+': +'+fmt(amount)+' de reputação · total '+fmt(profile.orderRep97)+'.');return amount}
-function claimOrderQuest(index){const q=run.quests?.[index];if(!q||q.claimed262||q.got<q.n)return false;ensureOrderRep();const rq=Math.min(9,q.repRank97??q.rank??rankOf()),budget=(q.t==='kill'?70:q.t==='clear'?80:20)*GR[rq].gold,rw=Math.round(Math.min(q.rw,budget)*(1+.05*affL('Lyra'))),rep=questOrderRep(q),baseXp=questBudget262(q).xp;q.claimed262=true;run.quests[index]=genQuest(q.t);profile.guildClaims=(profile.guildClaims||0)+1;run.gold+=rw;addOrderRep(rep,'Missão concluída');const xp=gainXp(baseXp,'quest');narratorEvent105(q.t==='kill'?'order_kill':q.t==='clear'?'order_clear':'order_pvp');toast('<b>[NARRADOR]</b> Recompensa: +'+xpNumber(xp)+' XP · +'+fmt(rw)+' ouro · +'+rep+' reputação');beep(990,.15,.05);saveRun();return true}
+function claimOrderQuest(index){const q=run.quests?.[index];if(!q||q.claimed262||q.got<q.n)return false;ensureOrderRep();const rq=Math.min(9,q.repRank97??q.rank??rankOf()),budget=questGold283(q)*(q.t==='clear'||q.t==='pvp'?(q.n||1):1),rw=Math.round(Math.min(q.rw,budget)*(1+.05*affL('Lyra'))),rep=questOrderRep(q),baseXp=questBudget262(q).xp;q.claimed262=true;run.quests[index]=genQuest(q.t);profile.guildClaims=(profile.guildClaims||0)+1;run.gold+=rw;addOrderRep(rep,'Missão concluída');const xp=gainXp(baseXp,'quest');narratorEvent105(q.t==='kill'?'order_kill':q.t==='clear'?'order_clear':'order_pvp');toast('<b>[NARRADOR]</b> Recompensa: +'+xpNumber(xp)+' XP · +'+fmt(rw)+' ouro · +'+rep+' reputação');beep(990,.15,.05);saveRun();return true}
 function rankPortalCount(rank){return Math.max(0,Number(profile.closedPortalsByRank?.[rank])||0)}
 function recordRankPortal(rank){const g=L.gate;if(!g||L.special||!L.bossDead||g.rankCounted||rank!==g.rank||!Number.isInteger(rank)||rank<0||rank>9)return false;ensureOrderRep();g.rankCounted=true;regionPortal116(g);addOrderRep(orderRepReward(rank),'Masmorra rank '+RANKS[rank].id+' fechado');profile.closedPortalsByRank=profile.closedPortalsByRank||{};profile.closedPortalsByRank[rank]=rankPortalCount(rank)+1;store.set('pds2_profile',profile);return true}
 function recordSpecialOrderRep(){const g=L.gate,sp=L.special,ref=g?.ref;if(!ref||!ref.id||ref.rankCounted||!sp||!(sp.done||sp.cleared)||!Number.isInteger(g.rank)||g.rank<0||g.rank>9)return false;ensureOrderRep();ref.rankCounted=true;regionPortal116(ref);addOrderRep(orderRepReward(g.rank),'Masmorra especial rank '+RANKS[g.rank].id+' fechado');return true}
@@ -5144,18 +5144,23 @@ function equipBagItem(uid){const i=run.items.findIndex(x=>x.uid===uid);if(i<0)re
 
 /* ================= MISSÕES ================= */
 /* v262: reward quotes depend on the contract, never time spent waiting or the level at claim. */
-function questBudget262(q,type){if(!q)return {xp:0,level:1,minutes:0,difficulty:0};if(!q.xpBudget262){const rank=Math.max(0,Math.min(9,q.repRank97??q.rank??rankOf()));q.repRank97=rank;q.xpBudget262=RpgBalance.questReward({type:type||q.t,level:GR[rank].lvl,count:q.n||1})}return q.xpBudget262}
+function questBudget262(q,type){if(!q)return {xp:0,level:1,minutes:0,difficulty:0};if(!q.xpBudget262){const rank=Math.max(0,Math.min(9,q.repRank97??q.rank??rankOf()));q.repRank97=rank;q.xpBudget262=RpgBalance.questReward({type:type||q.t,level:Math.max(GR[rank].lvl,q.lvl283||0),count:q.n||1})}return q.xpBudget262}
 function questXpText262(q,type){const b=questBudget262(q,type);return xpNumber(type==='daily'&&profile.dailyXp262Day===q.day?0:xpAwardAmount262(b.xp,'quest'))+' XP · duração estimada '+String(Math.round(b.minutes*10)/10).replace('.',',')+' min'}
 function questTargetText262(q){return ['kill','pvp','night','nopot','nododge'].includes(q.t)?' · NV '+questBudget262(q).level+' ou desafio equivalente':''}
 function questEnemyEligible262(q,e){if(!e||e.noExpLoot||e.rewardBlocked||e.ally||e.statue)return false;const b=questBudget262(q);return eLvl(e)>=b.level||enemyRewardBalance(e).xp>=RpgBalance.reward({level:b.level,speciesXp:6}).xp}
 
-function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1;/* Orçamento por objetivo, sem fator ilimitado do nível do jogador. */
-  if(t==='kill'){const n=20+pr*10;const q={t,repRank97:pr,n,got:0,rw:Math.round(70*GR[pr].gold*lvM),d:'Mate '+n+' monstros'};questBudget262(q);return q}
-  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));const q={t,repRank97:r,rank:r,n:1,got:0,rw:Math.round(80*GR[r].gold*lvM),d:'Feche um portal rank '+GR[r].id+' ou maior'};questBudget262(q);return q}
-  const q={t:'pvp',repRank97:pr,n:1,got:0,rw:Math.round(20*GR[pr].gold*lvM),d:'Derrote um caçador hostil'};questBudget262(q);return q}
-function normalizeRewardBudgetsBalance(){for(const q of run.quests||[]){const r=Math.min(9,q.repRank97??q.rank??rankOf());q.rw=Math.min(q.rw,(q.t==='kill'?70:q.t==='clear'?80:20)*GR[r].gold);questBudget262(q)}if(run.extractMission117){const q=run.extractMission117;q.rw=Math.min(q.rw,120*GR[Math.min(9,q.rank)].gold);questBudget262(q,'extract')}if(run.demand)questBudget262(run.demand)}
-function genQuests(){return[genQuest('kill'),genQuest('clear'),genQuest('pvp')]}
-function qev(type,val){if(type==='clear'){recordRankPortal(val);npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;if((type==='kill'||type==='pvp')&&!questEnemyEligible262(q,val))continue;q.got++;if(q.got>=q.n)toast('<b>[NARRADOR]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}}
+/* v284 (Ian): XP da missão pelo nível em que ela foi gerada (fixo no contrato); quantidade e tipos de objetivo crescem com o rank. */
+function questGold283(q){const r=Math.min(9,q.repRank97??q.rank??rankOf());return ({kill:70,clear:80,pvp:20,elite:12*(q.n||1),boss:60*(q.n||1)}[q.t]||20)*GR[r].gold}
+function questTypes283(){const pr=Math.min(9,rankOf());return ['kill','clear','pvp',...(pr>=2?['elite']:[]),...(pr>=4?['boss']:[])]}
+function genQuest(t){const pr=Math.min(9,rankOf()),lvM=1,lv=Math.max(GR[pr].lvl,run.level||1);/* Orçamento por objetivo, sem fator ilimitado do nível do jogador. */
+  if(t==='elite'){const n=3+pr;const q={t,repRank97:pr,lvl283:lv,n,got:0,d:'Derrote '+n+' monstros elite'};q.rw=Math.round(questGold283(q));questBudget262(q);return q}
+  if(t==='boss'){const n=1+Math.floor((pr-4)/2);const q={t,repRank97:pr,lvl283:lv,n,got:0,d:'Derrote '+n+(n>1?' chefes':' chefe')+' de portal'};q.rw=Math.round(questGold283(q));questBudget262(q);return q}
+  if(t==='kill'){const n=20+pr*10;const q={t,repRank97:pr,lvl283:lv,n,got:0,rw:Math.round(70*GR[pr].gold*lvM),d:'Mate '+n+' monstros'};questBudget262(q);return q}
+  if(t==='clear'){const r=Math.max(0,pr-(Math.random()<.5?1:0));const nc=1+Math.floor(pr/3);const q={t,repRank97:r,rank:r,lvl283:lv,n:nc,got:0,rw:Math.round(80*nc*GR[r].gold*lvM),d:(nc>1?'Feche '+nc+' portais':'Feche um portal')+' rank '+GR[r].id+' ou maior'};questBudget262(q);return q}
+  const np=1+Math.floor(pr/2);const q={t:'pvp',repRank97:pr,lvl283:lv,n:np,got:0,rw:Math.round(20*np*GR[pr].gold*lvM),d:np>1?'Derrote '+np+' caçadores hostis':'Derrote um caçador hostil'};questBudget262(q);return q}
+function normalizeRewardBudgetsBalance(){run.quests=run.quests||[];for(const q of run.quests){if(!q.lvl283){q.lvl283=Math.max(GR[Math.min(9,q.repRank97??q.rank??rankOf())].lvl,run.level||1);delete q.xpBudget262}q.rw=Math.min(q.rw,questGold283(q)*(q.t==='clear'||q.t==='pvp'?(q.n||1):1));questBudget262(q)}for(const t of questTypes283())if(!run.quests.some(q=>q.t===t))run.quests.push(genQuest(t));if(run.extractMission117){const q=run.extractMission117;q.rw=Math.min(q.rw,120*GR[Math.min(9,q.rank)].gold);questBudget262(q,'extract')}if(run.demand)questBudget262(run.demand)}
+function genQuests(){return questTypes283().map(genQuest)}
+function qev(type,val){if(type==='kill'&&val&&run.quests){if(val.elite)qev('elite',val);if(val.isBoss&&!val.rival)qev('boss',val)}if(type==='elite'||type==='boss'){for(const q of run.quests||[]){if(q.t!==type||q.got>=q.n||!questEnemyEligible262(q,val))continue;q.got++;if(q.got>=q.n)toast('<b>[NARRADOR]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}return}if(type==='clear'){recordRankPortal(val);npcEv('clear');storyEv('clear')}if(!run.quests)return;for(const q of run.quests){if(q.t!==type||q.got>=q.n)continue;if(type==='clear'&&val<q.rank)continue;if((type==='kill'||type==='pvp')&&!questEnemyEligible262(q,val))continue;q.got++;if(q.got>=q.n)toast('<b>[NARRADOR]</b> Missão concluída: '+q.d+'. Receba na Ordem.',3500)}}
 
 /* ================= EFEITOS ================= */
 /* v179 (Ian): área de habilidade marcada por um contorno discreto no chão (sem disco branco brilhando). */
@@ -8631,9 +8636,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v283</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v284</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=283;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=284;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
