@@ -1,3 +1,6 @@
+## v285 — portal da torre, 06/10/2026
+- O portal de subir andar da Torre usava o anel dourado antigo (do início do jogo). Agora usa a Fenda nova (Rift131, cor de saída), igual às masmorras.
+
 ## v284 — missões por rank, 06/10/2026
 - XP da missão usa o nível do jogador quando a missão é gerada (q.lvl283; antes usava sempre o nível mínimo do rank e dava XP minúsculo). Base de XP de missão 0,04→0,07 e matar conta 0,3 min por monstro.
 - Quantidade por rank: portais 1+rank/3, caçadores 1+rank/2, monstros 20+10×rank.
