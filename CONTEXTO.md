@@ -1,3 +1,7 @@
+## v270 — exploits de portal, 06/10/2026
+- Portal em fechamento não aceita mais entrada (antes dava para reentrar e o chefe voltava, com reputação de novo).
+- Sair/recarregar o jogo dentro de um portal sela aquele portal por 1 hora real: não dá para sair, tomar poção e voltar.
+
 ## v269 — loja de armas e pontos na morte, 06/10/2026
 
 Relatos de jogo de 06/10 (áudios), confirmados no jogo rodando e corrigidos por Claude com autorização de Ian:

@@ -3488,7 +3488,7 @@ function rankOf(){if(profile&&profile.rk2)return profile.rank;return rankOfOld()
 function rankOfOld(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
 function newRun(){run={rankSchema:78,level:1,xp:0,gold:profile?.journey92?0:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0,0]},pos:null}}
 function saveRun(){if(window._wipe||!run||!player||player.dead)return;profile.maxLevel111=Math.max(profile.maxLevel111||0,run.level||1);rememberClassCooldowns();run.summons=savedSummons();if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
-function loadRun(){const r=store.get('pds3_run');if(!r)return false;backupRanks78();migrateRankRun(r);if(!r.v71&&!store.get('pds3_backup_v70'))store.set('pds3_backup_v70',{profile:store.get('pds2_profile'),run:r});newRun();Object.assign(run,r);run.v71=1;
+function loadRun(){const r=store.get('pds3_run');if(!r)return false;backupRanks78();migrateRankRun(r);if(!r.v71&&!store.get('pds3_backup_v70'))store.set('pds3_backup_v70',{profile:store.get('pds2_profile'),run:r});newRun();Object.assign(run,r);run.v71=1;if(run.inGate269){run.sealed269=(run.sealed269||[]).concat([{x:run.inGate269.x,z:run.inGate269.z,t:Date.now()+36e5}]);delete run.inGate269;run.abandon269=1}
   run.stolen=(r.stolen||[]).map(n=>loadedPower111(n,r.lib||[])).filter(Boolean).map(sk=>({...sk,cdT:0}));
   run.shadows=r.shadows||[];run.equip=r.equip||{w:null,a:null};run.party=r.party||[];run.items=r.items||[];if(!r.res)run.res={core:[0,0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0,0]};for(const k of['core','cry'])while(run.res[k].length<10)run.res[k].push(0);return true}
 
@@ -4419,7 +4419,7 @@ function riftContact131(){
  if(!window.RIFT131_ENABLE||!player||player.dead||paused)return false;
  const now=[player.x,1.05,player.z],old=riftPrevious131||now;riftPrevious131=now;
  if(performance.now()<riftArrival131||Math.hypot(now[0]-old[0],now[2]-old[2])>8)return false;
- const entries=L.mode==='world'?gates.filter(g=>!g.dead&&!g.coreFailed103&&g.mesh?.userData.rift131).map(g=>({root:g.mesh,g,x:g.x,z:g.z})):L.mode==='dungeon'?(L.exits||[]).filter(it=>it.type==='exit'&&it.grp?.userData.rift131).map(it=>({root:it.grp,it,x:it.x,z:it.z})):[];
+ const entries=L.mode==='world'?gates.filter(g=>!g.dead&&!g.closing131&&!g.coreFailed103&&g.mesh?.userData.rift131).map(g=>({root:g.mesh,g,x:g.x,z:g.z})):L.mode==='dungeon'?(L.exits||[]).filter(it=>it.type==='exit'&&it.grp?.userData.rift131).map(it=>({root:it.grp,it,x:it.x,z:it.z})):[];
  for(const e of entries){if(Math.hypot(e.x-player.x,e.z-player.z)>6)continue;e.root.updateMatrixWorld(true);const a=e.root.worldToLocal(new THREE.Vector3(...old)),b=e.root.worldToLocal(new THREE.Vector3(...now));if(!Rift131.crosses(a.toArray(),b.toArray()))continue;if(e.g)return riftEnter131(e.g);const before=L;if(!e.it.locked||performance.now()>(e.it.riftNotice131||0)){e.it.riftNotice131=performance.now()+2500;tryExit(e.it);}return L!==before;}
  return false;
 }
@@ -4891,7 +4891,7 @@ function mine(it,rank){
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}
 }
 function tryExit(it){if(it&&it.locked&&!(L.gate&&L.gate.red&&!L.bossDead)){toast('<b>[NARRADOR]</b> '+(L.special&&L.special.kind==='tower'?'A saída da torre só abre nos andares de chefe (10, 20, 30...). Limpe o andar e suba pelo portal dourado.':'Esta saída está fechada.'));return}if(L.gate.red&&!L.bossDead){toast('<b>[NARRADOR]</b> Portal vermelho: derrote o guardião para abrir a única saída.');return}leaveDungeon(false)}
-function enterGate(g){if(run&&!(run.rez187>0)&&(g.red||g.rank>=Math.max(2,(profile.rank||0))))setTimeout(()=>toast('<b>[NARRADOR]</b> Sem Pergaminho de Ressurgimento. Se cair aqui, perde tudo o que não está no banco ou na casa.',6000),1500);if(g.dead||g.coreFailed103)return;rollRareGate155(g);if(g.set153&&SETS153[g.set153]){bigText('PORTAL DE CLASSE RARA',1600);toast('<b>[NARRADOR]</b> Este portal guarda o rastro do <b>'+(CLASSES[SETS153[g.set153].cls]?.n||'')+'</b>. Ele ficou vermelho: não há saída até o guardião cair.',7000)}if(g.set153&&SETS153[g.set153])logNews('<b>[NARRADOR]</b> '+SETS153[g.set153].lore);
+function enterGate(g){if(run&&!(run.rez187>0)&&(g.red||g.rank>=Math.max(2,(profile.rank||0))))setTimeout(()=>toast('<b>[NARRADOR]</b> Sem Pergaminho de Ressurgimento. Se cair aqui, perde tudo o que não está no banco ou na casa.',6000),1500);if(g.dead||g.closing131||g.coreFailed103)return;run.sealed269=(run.sealed269||[]).filter(q=>q.t>Date.now());if(run.sealed269.some(q=>Math.hypot(q.x-g.x,q.z-g.z)<8)){toast('<b>[NARRADOR]</b> Este portal colapsou quando você o abandonou. Ele não aceita você de novo.',5000);return}run.inGate269={x:g.x,z:g.z};saveRun();rollRareGate155(g);if(g.set153&&SETS153[g.set153]){bigText('PORTAL DE CLASSE RARA',1600);toast('<b>[NARRADOR]</b> Este portal guarda o rastro do <b>'+(CLASSES[SETS153[g.set153].cls]?.n||'')+'</b>. Ele ficou vermelho: não há saída até o guardião cair.',7000)}if(g.set153&&SETS153[g.set153])logNews('<b>[NARRADOR]</b> '+SETS153[g.set153].lore);
 
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
@@ -4909,7 +4909,7 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(9,L.gate.rank);
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(activeDungeonPool124(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
-function leaveDungeon(toCity){expAbandon();if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
+function leaveDungeon(toCity){expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
   if(cleared){g.cleared=true;g.dead=true;if(g.anchor221){profile.anchorShut221=profile.anchorShut221||{};profile.anchorShut221[g.anchor221]=1;store.set('pds2_profile',profile);setTimeout(()=>{bigText('ÂNCORA SELADA',1800);showSys('A Fenda da Âncora se fechou. A Pedra-Âncora voltou a dormir. Agora a cidade pode ser reconstruída.')},1500)}qev('clear',g.rank);rareOnPortal103(g);if(riftClosure){const pending=awakening103().pending;riftClosure.storyScar131=!!pending&&Math.hypot(pending.x-g.x,pending.z-g.z)<.1}run.clears++;profile.best=Math.max(profile.best||0,g.rank);store.set('pds2_profile',profile)}
@@ -8557,9 +8557,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v269</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v270</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=269;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=270;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
