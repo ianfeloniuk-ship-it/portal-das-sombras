@@ -1,3 +1,6 @@
+## v289 — armadura comum troca a roupa, 06/10/2026
+- Só os conjuntos raros escondiam a roupa do Viajante; a armadura comum ficava por cima da roupa larga. Agora peitoral, luvas e botas comuns escondem a roupa da parte, mostram o corpo base justo (base169_* do guardiao-rig.glb) e a peça vai por cima. tools/set-visual153.js (BODY289).
+
 ## v288 — cômodos da casa, 06/10/2026
 - 'Jardim de mana' (dava vida) virou 'Estufa de ervas' (+8% vida; mesmo cômodo salvo). Novos: Sala de meditação (+8% mana), Arena de combate (+1 fúria por golpe, +10 fúria máxima), Pista de corrida (+10 vigor máximo, vigor 10% mais rápido). tools/lux267.js ROOMS.
 
