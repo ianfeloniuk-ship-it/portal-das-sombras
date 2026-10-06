@@ -1,3 +1,7 @@
+## v277 — avisos menores, um por vez, 06/10/2026
+- popNews194 virou fila: um aviso por vez, fonte 12px, no alto, some em até 3,2 s se houver monstro perto (5,5 s fora de luta). Avisos iguais não repetem. Tudo continua no Histórico.
+- Falha de desafio (ex.: 'sem esquivar') não abre mais aviso; fica só no Histórico e na aba de missões.
+
 ## v276 — monstros não ficam presos, 06/10/2026
 - moveEnt agora detecta quando o monstro/aliado quase não anda (parede, cristal). Na masmorra calcula caminho pelo grid (expPath) até o alvo; no mundo aberto escolhe um desvio livre (50°–170°) e segue por ~0,7 s. Vale para todos os monstros, chefes, fugitivos e aliados.
 - Teste: monstros chegando ao jogador numa masmorra: 4/21 antes, 20/21 agora.
