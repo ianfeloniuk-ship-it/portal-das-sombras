@@ -5334,12 +5334,13 @@ function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
 function pDef281(type){const L=run?.level||1;const phy=attrRed281(st281('res'),L,40,.5),mag=attrRed281(st281('esp'),L,40,.5),uni=attrRed281(st281('von'),L,100,.25);return 1-(1-uni)*(1-(type==='mag'?mag:phy))}
 function pStatusRes281(){return attrRed281(st281('von'),run?.level||1,40,.4)}
 function pPen281(){return attrRed281(st281('des'),run?.level||1,60,.25)}
-function furyMax281(){return 100+.5*st281('res')}
-function vigorMax281(){return 100+.5*st281('vit')}
+function lux288(k){try{return (window.Lux267&&Lux267.bonus()[k])||0}catch(_){return 0}}
+function furyMax281(){return 100+.5*st281('res')+lux288('furyMax')}
+function vigorMax281(){return 100+.5*st281('vit')+lux288('vigorMax')}
 function pManaRegen281(){return attrRed281(st281('esp'),run?.level||1,40,.5)}
 function pHealBonus281(){return 0}
-function pVigorRegen281(){return 0}
-function pFuryHit281(){return Math.floor(st281('for')/20)}
+function pVigorRegen281(){return lux288('vigorRate')}
+function pFuryHit281(){return Math.floor(st281('for')/20)+lux288('furyHit')}
 function pCritDmg281(){return st281('per')*.005}
 /* Destreza: ataque físico à distância (arco, adaga arremessada, classes físicas que atiram) usa Destreza no lugar de Força */
 function atkRanged281(){return atkOf('phy')-atkPer(run.level)*st281('for')+atkPer(run.level)*st281('des')}
@@ -8610,7 +8611,7 @@ requestAnimationFrame(frame);
 </script>
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=266"></script>
-<script src="tools/lux267.js?v=267"></script>
+<script src="tools/lux267.js?v=288"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>

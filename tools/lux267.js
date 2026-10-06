@@ -32,10 +32,14 @@ window.Lux267=(()=>{
   {k:'treino',n:'Sala de treino',d:'+4% de dano',m:4,b:{dmg:.04}},
   {k:'biblio',n:'Biblioteca',d:'+5% de XP',m:6,b:{xp:.05}},
   {k:'cofre',n:'Cofre reforçado',d:'+2 espaços no cofre de relíquias',m:5,b:{vault:2}},
-  {k:'jardim',n:'Jardim de mana',d:'+8% de vida e +8% de mana',m:4,b:{hp:.08,mp:.08}}];
+  /* v288 (Ian): 'jardim de mana' dando vida não fazia sentido. Mesmo cômodo salvo (k:'jardim'), novo nome e efeito; cômodos novos para fúria, vigor e mana. */
+  {k:'jardim',n:'Estufa de ervas',d:'+8% de vida',m:4,b:{hp:.08}},
+  {k:'medita',n:'Sala de meditação',d:'+8% de mana',m:4,b:{mp:.08}},
+  {k:'arena',n:'Arena de combate',d:'+1 de fúria por golpe e +10 de fúria máxima',m:5,b:{furyHit:1,furyMax:10}},
+  {k:'pista',n:'Pista de corrida',d:'+10 de vigor máximo e vigor volta 10% mais rápido',m:5,b:{vigorMax:10,vigorRate:.1}}];
  const roomPrice=R=>price(R.m*H());
 
- function bonus(){const out={dmg:0,hp:0,xp:0,gold:0,spd:0,mp:0,sh:0,def:0,vault:0};if(!profile)return out;const x=P();
+ function bonus(){const out={dmg:0,hp:0,xp:0,gold:0,spd:0,mp:0,sh:0,def:0,vault:0,furyHit:0,furyMax:0,vigorMax:0,vigorRate:0};if(!profile)return out;const x=P();
   const add=b=>{for(const k in b)out[k]+=b[k]};
   for(const k in x.relics){const R=RELICS.find(r=>r.k===x.relics[k]);if(R)add(R.b)}
   if(profile.house)for(const R of ROOMS)if(x.rooms[R.k])add(R.b);

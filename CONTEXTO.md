@@ -1,3 +1,6 @@
+## v288 — cômodos da casa, 06/10/2026
+- 'Jardim de mana' (dava vida) virou 'Estufa de ervas' (+8% vida; mesmo cômodo salvo). Novos: Sala de meditação (+8% mana), Arena de combate (+1 fúria por golpe, +10 fúria máxima), Pista de corrida (+10 vigor máximo, vigor 10% mais rápido). tools/lux267.js ROOMS.
+
 ## v287 — pousada importa, 06/10/2026
 - Regeneração de vida na cidade 8%/s → 1,5%/s (antes enchia em ~12 s, descanso era inútil).
 - Dormir (pousada): cura 50% + 10% por nível da pousada (100% no nível 5), Bem descansado para todos os níveis: +10% de XP (+2% por nível) por 10 min, além do +5% de vida por nível.
