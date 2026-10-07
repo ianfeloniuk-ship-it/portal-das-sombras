@@ -1,3 +1,6 @@
+## v294 — Bestiário estilo Pokédex, 06/10/2026
+- Pedido do Ian: ao VER uma espécie pela primeira vez aparece no canto 'MONSTRO DESCOBERTO · N de 61' (tools/bestiary294.js). Lore escrita para as 61 espécies: descrição (1 abate), alimentação (10), comportamento (50), onde vive (100, tirado dos habitats do jogo). Aviso 'LORE DESBLOQUEADA' a cada trecho. Bestiário mostra '???' para não descobertos.
+
 ## v293 — escolha de classe e Bestiário, 06/10/2026
 - Escolha de classe mostra recurso (Mana/Fúria/Vigor), atributo principal e a passiva com descrição, mais uma linha explicando os três recursos.
 - Bestiário mede um monstro real da espécie no seu rank (antes usava fórmula antiga e errava vida/dano) e mostra perfil de atributos, distribuição dos pontos e defesa física/mágica atual (bestStats293).

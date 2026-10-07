@@ -6628,7 +6628,7 @@ function cycleOrder(){if(!allies.some(a=>a.shadow&&!a.dead)){toast('Você não t
 const BEST_STEPS=[[10,.03,'Conhecido'],[50,.06,'Estudado'],[200,.10,'Dominado'],[1000,.15,'Lenda']];
 function bestLvl(k){const n=((profile.bestiary||{})[k])||0;let l=null;for(const s of BEST_STEPS)if(n>=s[0])l=s;return l}
 function bestMul(k){const l=k&&bestLvl(k);return l?1+l[1]:1}
-function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k);profile.bestiary[k]=(profile.bestiary[k]||0)+1;const after=bestLvl(k);
+function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k),n0=profile.bestiary[k]||0;profile.bestiary[k]=n0+1;const after=bestLvl(k);try{const S=Bestiary294.seen();if(!S[k]){S[k]=1}Bestiary294.loreCheck(k,n0,n0+1)}catch(_){}
   if(after&&after!==before){toast('<b>[BESTIÁRIO]</b> '+KINDS[k].n+': <b>'+after[2]+'</b> — +'+Math.round(after[1]*100)+'% de dano contra essa espécie.',5000);sfx('level')}
   if(profile.bestiary[k]%5===1||after!==before)store.set('pds2_profile',profile)}
 const AIDESC={melee:'Luta corpo a corpo',ranged:'Ataca de longe e mantém distância',lunge:'Dá saltos rápidos em você',slam:'Golpes pesados em área',wraith:'Flutua e dispara magia',rival:'Luta como um caçador'};
@@ -6643,9 +6643,9 @@ const BEST293={};
 function bestStats293(k){const g=Math.min(9,rankOf()),key=k+':'+g;let m=BEST293[key];if(!m){try{const e=spawnKind(k,player.x+900,player.z+900,g,{});m={hp:e.maxhp,dmg:e.dmg,lvl:(()=>{try{return eLvl(e)}catch(_){return GR[g].lvl}})()};const a=mobAttr281(e);m.prof=a.prof;m.P=a.P;m.phy=mobDefFor281(e,'phy');m.mag=mobDefFor281(e,'mag');m.pr=MPROF281[a.prof];e.dead=true;e.gone=true;if(e.m&&e.m.root)scene.remove(e.m.root);enemies=enemies.filter(x=>x!==e)}catch(_){return ''}BEST293[key]=m}
   const pc=x=>Math.round(x*100)+'%',pr=m.pr,dist=['res','esp','von','agi','des'].filter(x=>pr[x]>0).map(x=>({res:'Resistência',esp:'Espírito',von:'Vontade',agi:'Agilidade',des:'Destreza'})[x]+' '+pc(pr[x])).join(' · ');
   return '<br><span style="color:var(--dim)">No rank '+rkN(g)+' (nível '+m.lvl+'): vida <b>'+fmt(Math.round(m.hp))+'</b> · dano <b>'+fmt(Math.round(m.dmg))+'</b> por golpe</span><br><span style="color:var(--dim)">Perfil <b>'+m.prof+'</b>: ganha 0,5 ponto por nível (elite ×1,4, chefe ×2) e distribui em '+dist+'. Defesa agora: física <b>'+pc(m.phy)+'</b> · mágica <b>'+pc(m.mag)+'</b>.</span>'}
-function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS);let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies encontradas: <b>'+ks.filter(k=>b[k]).length+'/'+ks.length+'</b>. Cada espécie estudada dá dano extra contra ela, para sempre (10, 50, 200 e 1000 abates).</div>';
+function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS);const S294=(window.Bestiary294&&Bestiary294.seen())||{};let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies descobertas: <b>'+ks.filter(k=>S294[k]||b[k]).length+'/'+ks.length+'</b>. Derrotar uma espécie revela sua história (1, 10, 50 e 100 abates) e dá dano extra contra ela (10, 50, 200 e 1000 abates).</div>';
   for(const k of ks){const n=b[k]||0,l=bestLvl(k),nx=BEST_STEPS.find(s=>n<s[0]);
-    h+=n?row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+bestStats293(k)+bestInfo(k,n),''):''}
+    h+=(!n&&!S294[k])?row('<span style="color:var(--dim)">??? · não descoberto</span>','',''):!n?row('<b>'+KINDS[k].n+'</b>','Visto, mas ainda não derrotado.'+(window.Bestiary294?Bestiary294.loreHtml(k,0):''),''):row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+bestStats293(k)+bestInfo(k,n)+(window.Bestiary294?Bestiary294.loreHtml(k,n):''),'')}
   openModal('BESTIÁRIO',h)}
 /* VIAGEM RÁPIDA: pelos Portais de Viagem das cidades já visitadas (Ordem → Viagem). */
 function markVisited(){if(!started||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d<30*CITYK){profile.visited=profile.visited||{};if(!profile.visited[n.c.id]){profile.visited[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z};store.set('pds2_profile',profile);(n.c.name==='Aster'?logNews:toast)('<b>[NARRADOR]</b> Portal de Viagem de <b>'+n.c.name+'</b> registrado. Viaje pela Ordem (aba Viagem).',4500)}}}
@@ -8639,6 +8639,7 @@ requestAnimationFrame(frame);
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=266"></script>
 <script src="tools/lux267.js?v=288"></script>
+<script src="tools/bestiary294.js?v=294"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
@@ -8651,9 +8652,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v293</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v294</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=293;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=294;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
