@@ -3450,7 +3450,7 @@ function animDraconico318(m,st,t){
  if(!clip)return;
  if(m.state318!==name){m.mixer.stopAllAction();m.action318=m.mixer.clipAction(clip);m.action318.play();m.state318=name;}
  const a=m.action318;
- if(st.dead>0)a.time=Math.min(clip.duration,st.dead*clip.duration);
+ if(st.dead>0)a.time=Math.min(Math.max(0,clip.duration-0.000001),st.dead*clip.duration);
  else if(name==='Hit')a.time=clip.duration*(1-m.hit318/.35);
  else if(st.wind>0)a.time=clip.duration*.68*st.wind;
  else if(st.atk>0)a.time=clip.duration*(.68+.32*st.atk);
@@ -8736,9 +8736,9 @@ requestAnimationFrame(frame);
 
 <script src="tools/classes316.js?v=316"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v318</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v319</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=318;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=319;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

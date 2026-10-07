@@ -3433,7 +3433,7 @@ function animDraconico318(m,st,t){
  if(!clip)return;
  if(m.state318!==name){m.mixer.stopAllAction();m.action318=m.mixer.clipAction(clip);m.action318.play();m.state318=name;}
  const a=m.action318;
- if(st.dead>0)a.time=Math.min(clip.duration,st.dead*clip.duration);
+ if(st.dead>0)a.time=Math.min(Math.max(0,clip.duration-0.000001),st.dead*clip.duration);
  else if(name==='Hit')a.time=clip.duration*(1-m.hit318/.35);
  else if(st.wind>0)a.time=clip.duration*.68*st.wind;
  else if(st.atk>0)a.time=clip.duration*(.68+.32*st.atk);

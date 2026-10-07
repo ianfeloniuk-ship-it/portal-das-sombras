@@ -1049,3 +1049,5 @@ Celular (Ian: "travado ou lento"): no toque não há antialias; LEVE vira o padr
 
 ## v318 — Dracônico sem armadura — 07/10/2026
 Mob dragao usa modelo próprio m_draconico318.glb (18.080 triângulos, textura 2048, 21 ossos e 8 clipes). Mascote dragao mantém modelo anterior. Garra/cauda têm preparação, alcance e acerto único; ataque à distância preservado. Build idempotente e sintaxe passaram; 8 cenários de alcance/morte/congelamento, reação ao dano e preservação do pet passaram em Chromium isolado. Inspeção visual em poses no motor; sem benchmark de FPS ou campanha longa. Textura procedural e pesos automáticos são primeira iteração, não aprovação estética de Ian. Armaduras excluídas: outra sessão cria referências; aguardar para 3D/encaixes. Fontes e validações: https://drive.google.com/drive/folders/149RlfYBoaI6YehqenWGwOAqD-9n4qK30 .
+
+- v319: pose final de morte do Dracônico mantida sem retornar ao primeiro quadro; teste de morte prolongada adicionado.
