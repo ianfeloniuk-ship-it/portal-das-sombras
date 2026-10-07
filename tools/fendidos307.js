@@ -23,6 +23,7 @@ const ready=k=>!!MON.list[k];
 function mutate(e){if(!e||!NEW[e.kind]||e.mut307)return;let bio='campos';try{bio=biomeAt(e.x,e.z)}catch(_){}if(typeof L!=='undefined'&&L.mode==='dungeon'){try{bio=(L.gate&&L.gate.bio124)||bio}catch(_){}}const M=MUT[bio]||MUT.campos;e.mut307=bio;
  if(M[0])e.name=NEW[e.kind].n+' '+M[0];
  try{e.m.root.traverse(o=>{if(!o.isMesh||!o.material)return;const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m.name==='FendaCristal'){m.color.setHex(M[1]);if(m.emissive)m.emissive.setHex(M[1])}else if(m.name==='FendaBrilho'){m.color.setHex(M[2]);if(m.emissive)m.emissive.setHex(M[2])}}})}catch(_){}
+ try{window.Crystal310&&Crystal310.upgrade(e.m.root,M[1])}catch(_){}
  try{const l=new THREE.PointLight(M[1],1.1,7,1.8);l.position.y=1.4;e.m.root.add(l)}catch(_){}}
 // substitui parte dos monstros por Fendidos: 12% nas Fendas (portais), 8% no mundo perto de portais abertos
 const sk0=spawnKind;spawnKind=function(k,x,z,gr,extra){try{if(!(extra&&extra.noFendido)&&KINDS[k]&&!KINDS[k].fendido&&!(extra&&(extra.boss||extra.rival))){const inDun=typeof L!=='undefined'&&L.mode==='dungeon';let near=false;if(!inDun&&typeof gates!=='undefined')near=gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<60);const ch=inDun?.12:near?.08:0;if(ch&&Math.random()<ch){const opts=ids.filter(id=>ready(id)&&(NEW[id].rk<=Math.max(1,gr||0)+1));if(opts.length){const pick=opts[Math.floor(Math.random()*opts.length)];const e=sk0.call(this,pick,x,z,gr,extra);mutate(e);return e}}}}catch(_){}return sk0.apply(this,arguments)};

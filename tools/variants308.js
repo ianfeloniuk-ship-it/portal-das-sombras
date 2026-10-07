@@ -22,7 +22,7 @@ for(const k in BLENDER){const id=BLENDER[k];if(KINDS[id])KINDS[id].alias308=k+'_
 /* ---------- visual ---------- */
 const MUT=(window.Fendidos307&&Fendidos307.MUT)||{campos:['',0x9b5cff,0x66f0ff]};
 function bones(root){const out=[];root.traverse(o=>{if(o.isBone&&/spine|back|torso|body|chest|abdomen|neck|head/i.test(o.name))out.push(o)});return out}
-function crystalMat(col){return new T.MeshToonMaterial({name:'FendaCristal',color:col,emissive:col,emissiveIntensity:.9})}
+function crystalMat(col){if(window.Crystal310)return Crystal310.mat(col);return new T.MeshToonMaterial({name:'FendaCristal',color:col,emissive:col,emissiveIntensity:.9})}
 function dressF(e,col){const root=e.m.root,b=new T.Box3().setFromObject(root),H=Math.max(.4,b.max.y-b.min.y);const bs=bones(root);const m=crystalMat(col);const n=5+Math.floor(Math.random()*3);
  for(let i=0;i<n;i++){const c=new T.Mesh(new T.ConeGeometry(H*.06,H*.22,5),m);if(bs.length){const bone=bs[i%bs.length];const s=bone.getWorldScale(new T.Vector3()).x||1;c.scale.setScalar(1/s);c.position.set((Math.random()-.5)*.3*H/s,H*.08/s,(Math.random()-.5)*.3*H/s);c.rotation.set((Math.random()-.5),(Math.random()-.5),(Math.random()-.5));bone.add(c)}else{c.position.set((Math.random()-.5)*H*.4,H*(.75+Math.random()*.2),(Math.random()-.5)*H*.4);c.rotation.set((Math.random()-.5)*.8,0,(Math.random()-.5)*.8);(e.m.body||root).add(c)}}
  try{e.m.root.traverse(o=>{if(o.isMesh&&o.material&&o.material.name!=='FendaCristal'&&o.material.color){o.material=o.material.clone();o.material.color.lerp(new T.Color(0x3a2466),.3)}})}catch(_){}}

@@ -1,3 +1,6 @@
+## v310 — shader de cristal, 07/10/2026
+- Direção visual do Ian (cartunesco + shaders, cristais reais): tools/crystal310.js — shader compartilhado com faces lapidadas, fresnel, luz fluindo por dentro, especular em degraus e cintilância. Aplicado nos cristais das Fendidas (Blender e código), fragmentos dos Abissais, espinhos de gelo dos efeitos e cristais da coroa do Tecelão.
+
 ## v309 — 200 criaturas (4 inéditas do Blender), 07/10/2026
 - Olho Errante, Arraia do Vazio, Arauto da Fenda e Semente da Fenda modeladas do zero no Blender (peças em ossos, animações Idle/Run/Attack/Hit/Death), script no cofre Entregas/Fendidos-2026-10-07/ineditas-blender.py. Aparecem nas Fendas (Arauto só em Fendas fundas; Sementes também perto de portais). Bestiário: 183 espécies + 13 chefes + 4 inéditas = 200 (tools/ineditas309.js).
 - DIREÇÃO VISUAL DO IAN: estilo cartunesco mas com shaders bonitos (como água e Fenda); cristais mais reais. Aplicar em tudo que for criado.

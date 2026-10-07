@@ -70,7 +70,7 @@ window.SetVisual153=(()=>{
    for(const sd of [-1,1]){const h=new T.Mesh(new T.ConeGeometry(.15,1.0,6),black);h.position.set(sd*.7,.45,.35);h.rotation.z=-sd*.45;h.rotation.x=-.25;g.add(h)}
    for(let i=0;i<5;i++){const a=(i-2)*.5,sp=new T.Mesh(new T.ConeGeometry(.07,.35,4),black);sp.position.set(Math.sin(a)*1.0,.18,Math.cos(a)*1.0);g.add(sp)}
    const orb=new T.Mesh(new T.SphereGeometry(.18,12,10),voidm);orb.position.set(0,.55,.95);g.add(orb);g.userData.float291=[orb];return g},
-  tecelao(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x3a2a55}),cry=new T.MeshToonMaterial({color:0xb48cff,emissive:0x5a2fa0}),glow=new T.MeshBasicMaterial({color:0xc2a2ff});
+  tecelao(){const g=new T.Group(),dark=new T.MeshToonMaterial({color:0x3a2a55}),cry=(window.Crystal310?Crystal310.mat(0xb48cff):new T.MeshToonMaterial({color:0xb48cff,emissive:0x5a2fa0})),glow=new T.MeshBasicMaterial({color:0xc2a2ff});
    const band=new T.Mesh(new T.TorusGeometry(1,.1,6,24),dark);band.rotation.x=Math.PI/2;g.add(band);
    for(let i=0;i<5;i++){const a=(i-2)*.42,c=new T.Mesh(new T.OctahedronGeometry(i===2?.26:.17,0),cry);c.scale.y=1.8;c.position.set(Math.sin(a)*1.05,(i===2?.75:.5)-Math.abs(i-2)*.05,Math.cos(a)*1.05);g.add(c);const th=new T.Mesh(new T.CylinderGeometry(.012,.012,c.position.y,4),glow);th.position.set(c.position.x,c.position.y/2,c.position.z);g.add(th)}
    const gem=new T.Mesh(new T.OctahedronGeometry(.14,0),glow);gem.position.set(0,.05,1.08);g.add(gem);g.userData.float291=g.children.filter(o=>o.geometry&&o.geometry.type==='OctahedronGeometry'&&o!==gem);return g}};
