@@ -9,7 +9,7 @@ function reg(){profile.rare298=profile.rare298||{};return profile.rare298}
 function mark(e,bio){const v=V[bio];if(!v)return;e.rare298={bio,name:(KINDS[e.kind]?.n||'Criatura')+' '+v[0]};e.name=e.rare298.name;
  e.hp*=3;e.maxhp*=3;e.dmg*=1.4;e.gold=(e.gold||1)*10;
  try{const s=1.25;e.m.root.scale.multiplyScalar(s);e.r=(e.r||.5)*s}catch(_){}
- try{const ring=new THREE.Mesh(new THREE.TorusGeometry(1.1,.07,6,32),new THREE.MeshBasicMaterial({color:v[1],transparent:true,opacity:.85}));ring.rotation.x=Math.PI/2;ring.position.y=.15;e.m.root.add(ring);e.rare298.ring=ring;const l=new THREE.PointLight(v[1],1.4,8,1.8);l.position.y=1.5;e.m.root.add(l)}catch(_){}}
+ try{const ring=new THREE.Mesh(new THREE.TorusGeometry(1.1,.08,8,40),window.Shaders312?Shaders312.energy(v[1],.95):new THREE.MeshBasicMaterial({color:v[1],transparent:true,opacity:.85}));ring.rotation.x=Math.PI/2;ring.position.y=.15;e.m.root.add(ring);e.rare298.ring=ring;const l=new THREE.PointLight(v[1],1.4,8,1.8);l.position.y=1.5;e.m.root.add(l)}catch(_){}}
 function scan(){try{if(typeof started==='undefined'||!started||!run||!player||typeof enemies==='undefined')return;
  for(const e of enemies){
   if(!e.chk298){e.chk298=1;if(L.mode==='world'&&!e.isBoss&&!e.rival&&!e.ally&&!e.friendly217&&!e.statue&&!e.breaker&&!e.raid155&&KINDS[e.kind]&&Math.random()<CHANCE){let bio=null;try{bio=biomeAt(e.x,e.z)}catch(_){}if(bio)mark(e,bio)}}

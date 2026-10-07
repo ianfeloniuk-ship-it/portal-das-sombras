@@ -13,7 +13,8 @@ float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n2(p);p*=2.03;a*=.5;
 const VS=`varying vec2 vUv;varying vec3 vN;varying vec3 vW;
 void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*w;}`;
 function make(fs,uni,opts){const m=new T.ShaderMaterial({uniforms:{uTime:U.uTime,uOpacity:{value:1},...uni},vertexShader:VS,fragmentShader:fs,transparent:true,depthWrite:false,side:T.DoubleSide,...opts});
- Object.defineProperty(m,'opacity',{get(){return m.uniforms.uOpacity.value},set(v){if(m.uniforms)m.uniforms.uOpacity.value=v},configurable:true});return m}
+ Object.defineProperty(m,'opacity',{get(){return m.uniforms.uOpacity.value},set(v){if(m.uniforms)m.uniforms.uOpacity.value=v},configurable:true});
+ /* o jogo usa material.color.set(...) (ex.: cor do rank); aponta para a cor do shader */if(m.uniforms.uCol)Object.defineProperty(m,'color',{get(){return m.uniforms.uCol.value},configurable:true});return m}
 const FS_ENERGY=`uniform float uTime;uniform float uOpacity;uniform vec3 uCol;varying vec2 vUv;varying vec3 vN;varying vec3 vW;${NOISE}
 void main(){vec3 V=normalize(cameraPosition-vW);float fres=pow(1.-abs(dot(normalize(vN),V)),2.);
  float flow=fbm(vec2(vUv.x*6.-uTime*1.4,vUv.y*3.+uTime*.6));float band=smoothstep(.35,.85,flow);

@@ -3578,8 +3578,8 @@ function playerModel(){
   const equip=run&&run.equip||{};
   const m=window.WARRIOR127_ENABLE&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
-  const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.12;aura.material=aura.material.clone();aura.material.depthWrite=false;aura.material.polygonOffset=true;aura.material.polygonOffsetFactor=-4;aura.material.polygonOffsetUnits=-4;aura.renderOrder=3; /* v165: o anel não briga mais com o chão (piscava) */m.root.add(aura);
-  if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,24),glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
+  const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),window.Shaders312?Shaders312.energy(new THREE.Color(RANKS[rankOf()].c).getHex(),.7):glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.12;if(!aura.material.isShaderMaterial)aura.material=aura.material.clone();aura.material.depthWrite=false;aura.material.polygonOffset=true;aura.material.polygonOffsetFactor=-4;aura.material.polygonOffsetUnits=-4;aura.renderOrder=3; /* v165: o anel não briga mais com o chão (piscava) */m.root.add(aura);
+  if(profile&&eqTitles()[0]){const ti=TITLES.findIndex(t=>t.id===eqTitles()[0]),hc=[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5];const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.045,8,32),window.Shaders312?Shaders312.energy(hc,.95):glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
   scene.add(m.root);return{m,aura}}
 const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
  gelo:{n:'Água e Gelo',c:'#70ddff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x70ddff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
@@ -4707,6 +4707,7 @@ const CRY230={},CRYCOL230={2:0x2fd0ff,4:0x3a8cff,8:0xffb51e};
 function cryGeo230(){if(CRY230.g)return CRY230.g;const b=new THREE.CylinderGeometry(.42,.5,1,6,1);b.translate(0,.5,0);const t=new THREE.ConeGeometry(.42,.55,6,1);t.translate(0,1.27,0);
  const a=b.toNonIndexed(),c=t.toNonIndexed(),pa=a.attributes.position.array,pc=c.attributes.position.array,m=new Float32Array(pa.length+pc.length);m.set(pa);m.set(pc,pa.length);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m,3));g.computeVertexNormals();return CRY230.g=g}
 function cryMat230(rank,broken){const k=rank+':'+(broken?1:0);if(CRY230[k])return CRY230[k];const col=new THREE.Color(CRYCOL230[rank]??RANKS[Math.min(RANKS.length-1,rank)].c);if(broken)col.setHex(0xc81e32);
+ if(window.Crystal310){const m=Crystal310.mat(col.getHex(),broken?.85:.9);m.userData.shared=true;return CRY230[k]=m}/* v313: cristais do mundo com o shader de cristal */
  const m=new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:broken?.2:.32,roughness:.25,metalness:.05,transparent:true,opacity:.9,flatShading:true});m.userData.shared=true;return CRY230[k]=m}
 function crystalCluster230(rank,size,broken){const g=new THREE.Group(),geo=cryGeo230(),mat=cryMat230(rank,broken),R=mulberry32((rank*97+size*31)|0);
  const parts=[[0,0,1,0,0],[.45,.1,.62,.42,0],[-.42,.15,.55,-.38,.3],[.1,-.42,.5,.1,-.45],[-.2,.4,.42,-.15,.5],[.32,.38,.36,.3,.4]];
@@ -8666,15 +8667,15 @@ requestAnimationFrame(frame);
 <script src="tools/lux267.js?v=288"></script>
 <script src="tools/bestiary294.js?v=308"></script>
 <script src="tools/biomes295.js?v=295"></script>
-<script src="tools/rare298.js?v=298"></script>
+<script src="tools/rare298.js?v=313"></script>
 <script src="tools/corrupt299.js?v=299"></script>
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=312"></script>
-<script src="tools/shaders312.js?v=312"></script>
+<script src="tools/shaders312.js?v=313"></script>
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=305"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=311"></script>
+<script src="tools/variants308.js?v=313"></script>
 <script src="tools/ineditas309.js?v=309"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>

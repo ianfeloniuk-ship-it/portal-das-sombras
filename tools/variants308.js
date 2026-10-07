@@ -29,7 +29,7 @@ function dressF(e,col){const root=e.m.root,b=new T.Box3().setFromObject(root),H=
 function dressA(e,col){const root=e.m.root,b=new T.Box3().setFromObject(root),H=Math.max(.4,b.max.y-b.min.y);
  e.m.root.traverse(o=>{if(o.isMesh&&o.material&&o.material.color){if(o.material.name==='FendaCristal')return;o.material=o.material.clone();o.material.color.lerp(new T.Color(0x0e0818),.78);if(o.material.emissive)o.material.emissive.setHex(0x12061e)}});
  const orb=new T.Group();orb.position.y=H*.6;const m=crystalMat(col);for(let i=0;i<4;i++){const s=new T.Mesh(new T.OctahedronGeometry(H*.08,0),m);const a=i/4*Math.PI*2;s.position.set(Math.cos(a)*H*.55,0,Math.sin(a)*H*.55);orb.add(s)}root.add(orb);e.orb308=orb;
- const ring=new T.Mesh(new T.RingGeometry(H*.45,H*.55,32),new T.MeshBasicMaterial({color:col,transparent:true,opacity:.6,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.08;root.add(ring);
+ const ring=new T.Mesh(new T.RingGeometry(H*.45,H*.55,32),(window.Shaders312?Shaders312.energy(col,.8):new T.MeshBasicMaterial({color:col,transparent:true,opacity:.6,depthWrite:false})));ring.rotation.x=-Math.PI/2;ring.position.y=.08;root.add(ring);
  try{const l=new T.PointLight(col,1.4,8,1.8);l.position.y=H*.7;root.add(l)}catch(_){}}
 function dress(e){const K=KINDS[e.kind];if(!K||!K.variant||e.dress308)return;e.dress308=1;let bio='campos';try{bio=biomeAt(e.x,e.z)}catch(_){}const M=MUT[bio]||MUT.campos;
  if(K.variant==='f'){if(!BLENDER[K.baseKind])dressF(e,M[1]);else{try{Fendidos307.mutate(e)}catch(_){}}if(M[0]&&!BLENDER[K.baseKind])e.name=K.n+' '+M[0]}

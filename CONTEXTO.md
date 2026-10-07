@@ -1,3 +1,6 @@
+## v313 — mais shaders, 07/10/2026
+- Cristais do mundo (cryMat230) usam o shader Crystal310. Anel do rank do jogador, auréola do título, anel das criaturas raras e anel dos Abissais usam o shader de energia (Shaders312). Materiais de shader expõem .color para o jogo trocar a cor do rank.
+
 ## v312 — biblioteca de shaders, 07/10/2026
 - tools/shaders312.js: energy (fluxo de ruído + fresnel, aditivo), fire (gradiente de calor + tremulação), lava (brilho escorrendo), metal (rampa em degraus + reflexo em faixa + borda). Efeitos das habilidades (vfx302) usam energy em vez de brilho chapado; anel de fogo usa fire; fissuras usam lava. Coroas: metal, joias com Crystal310, partes luminosas com energy.
 
