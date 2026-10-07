@@ -1045,3 +1045,7 @@ Ainda na v267 (pedido do Ian: mais coisas caras do rank C em diante, menos a ide
 - **Mercenários de elite**: 1 (1,5 H) ou 2 (2,5 H) caçadores do seu rank, NV +3, na próxima masmorra.
 - **Portal encomendado**: rank de (seu −2) até (seu +1), 1,2 H do rank do portal, aberto perto de você.
 Celular (Ian: "travado ou lento"): no toque não há antialias; LEVE vira o padrão até o jogador escolher HD; LEVE usa resolução 0,75 no celular e o HUD em 1x; a resolução cai sozinha até 60% quando o FPS fica abaixo de 30 e volta quando passa de 55. Testado em navegador (PC 1280×720 e celular 390×844 com toque): compras, efeitos, mercenários entrando na masmorra, portal encomendado; sem erros de console. Sem teste em celular real.
+
+
+## v318 — Dracônico sem armadura — 07/10/2026
+Mob dragao usa modelo próprio m_draconico318.glb (18.080 triângulos, textura 2048, 21 ossos e 8 clipes). Mascote dragao mantém modelo anterior. Garra/cauda têm preparação, alcance e acerto único; ataque à distância preservado. Build idempotente e sintaxe passaram; 8 cenários de alcance/morte/congelamento, reação ao dano e preservação do pet passaram em Chromium isolado. Inspeção visual em poses no motor; sem benchmark de FPS ou campanha longa. Textura procedural e pesos automáticos são primeira iteração, não aprovação estética de Ian. Armaduras excluídas: outra sessão cria referências; aguardar para 3D/encaixes. Fontes e validações: https://drive.google.com/drive/folders/149RlfYBoaI6YehqenWGwOAqD-9n4qK30 .

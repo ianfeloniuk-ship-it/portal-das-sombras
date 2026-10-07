@@ -2545,7 +2545,7 @@ const KINDS={
  yeti:{mon:'yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
  gigante:{mon:'gigante',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
  raptor:{mon:'raptor',gk:'Skeleton_Rogue',n:'Raptor',hp:70,dmg:14,spd:5.2,ai:'lunge',range:1.8,wind:.3,atkCd:1.3,xp:18,scale:1,body:0x6a8a3a,wep:'none',r:.7},
- dragao:{mon:'dragao',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
+ dragao:{mon:'draconico318',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
  rogue:{gk:'Skeleton_Rogue',n:'Esqueleto Ladino',hp:44,dmg:11,spd:3.4,ai:'lunge',range:1.5,wind:.5,atkCd:2.2,xp:12,scale:.95,body:0x3c3c46,wep:'dagger',r:.55}};
 // ranks de portal
 const GR=[
@@ -3394,6 +3394,7 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   escaravelho:{h:2.1,actor:true},monarca:{h:2.8,actor:true},guardiao:{h:2,st:1,a:{}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
+MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Cast',Hit:'Hit'}};
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
@@ -3402,7 +3403,7 @@ function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=toToon(c.material,c.isSkinnedMesh,.16);if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=k==='draconico318'?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(k==='draconico318')mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -3412,7 +3413,7 @@ function gAct(m,n){if(m.act[n])return m.act[n];let c;
   else if(m.customClips)c=m.customClips.find(a=>a.name===n);
   else c=MODELS.anims.find(a=>a.name===n);
   if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
-function gPlay(m,n,once,spd){const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
+function gPlay(m,n,once,spd){if(m.mon==='draconico318'&&n==='Hit_A'){m.hit318=.35;return}const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
@@ -3425,11 +3426,26 @@ function animGlb(m,st){
   m.mixer.update(ADT);
 }
 
+function animDraconico318(m,st,t){
+ if(m.hit318>0)m.hit318=Math.max(0,m.hit318-ADT);
+ const name=st.dead>0?'Death':m.hit318>0?'Hit':(st.wind>0||st.atk>0)?(m.attack318||'Cast'):st.move>.1?'Run':'Idle';
+ const clip=m.clips.find(c=>c.name===name||c.name.startsWith(name+'_'));
+ if(!clip)return;
+ if(m.state318!==name){m.mixer.stopAllAction();m.action318=m.mixer.clipAction(clip);m.action318.play();m.state318=name;}
+ const a=m.action318;
+ if(st.dead>0)a.time=Math.min(clip.duration,st.dead*clip.duration);
+ else if(name==='Hit')a.time=clip.duration*(1-m.hit318/.35);
+ else if(st.wind>0)a.time=clip.duration*.68*st.wind;
+ else if(st.atk>0)a.time=clip.duration*(.68+.32*st.atk);
+ else a.time=(t*(name==='Run'?Math.max(.35,st.move):1))%clip.duration;
+ m.mixer.update(0);
+}
 function animChibi(m,st,t){
   if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
   if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
+  if(m.mon==='draconico318'){animDraconico318(m,st,t);return}
   if(m.glb){animGlb(m,st);return}
   const sw=Math.sin(t*11)*.7*st.move;
   m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;
@@ -5887,10 +5903,18 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const spd=e.speed*(e.slow>0?(e.isBoss?.75:.5):1)*(L.mode==='world'&&WX.type==='snow'?.8:1);
   if(e.act){
     const A=e.act;A.t+=dt;
-    if(A.type==='swing'){wind=Math.min(1,A.t/A.wind);if(A.t<A.wind)turnTo(e,ang,dt,e.isBoss?9:4);
+    if(A.type==='draco_claw'||A.type==='draco_tail'){
+      e.m.attack318=A.type==='draco_tail'?'TailSwipe':'Claw';wind=Math.min(1,A.t/A.wind);
+      if(A.t<A.wind)turnTo(e,ang,dt,3);
+      if(!A.done&&A.t>=A.wind){A.done=true;let da=Math.atan2(Math.sin(ang-e.face),Math.cos(ang-e.face));
+        if(d<3.3+(T.r||.5)&&(A.type==='draco_tail'||Math.abs(da)<1.15))dmgTo(T,e.dmg);
+        fxSlash(e.x,e.z,e.face,0xff9d4e,3.3);}
+      if(A.done){wind=0;atk=Math.min(1,(A.t-A.wind)/.45)}
+      if(A.t>A.wind+.45){e.act=null;e.cd=e.atkCd;}
+    }else if(A.type==='swing'){wind=Math.min(1,A.t/A.wind);if(A.t<A.wind)turnTo(e,ang,dt,e.isBoss?9:4);
       if(!A.done&&A.t>=A.wind){A.done=true;if(e.isBoss||e.rival)sfx('swing');let da=ang-e.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(d<e.range+1+(T.r||.5)&&Math.abs(da)<1.2)dmgTo(T,e.dmg*(A.mul||1));fxSlash(e.x,e.z,e.face,e.isBoss?0xff4040:0xff8a8a,e.range+.8);tierSwing177(e,T);familySwing182(e,T)}
       if(A.done){wind=0;atk=(A.t-A.wind)/.3}if(A.t>A.wind+.3){e.act=null;e.cd=e.atkCd}}
-    else if(A.type==='shoot'){wind=Math.min(1,A.t/A.wind);turnTo(e,ang,dt,8);if(!A.done&&A.t>=A.wind){A.done=true;if(A.spread){for(const o of[-.25,0,.25])shoot(e.x,e.z,e.face+o,13,e.dmg,'enemy',0x9cf0ff,'orb')}else goblinShot118(e);tierShoot177(e)}if(e.m.organic&&A.done){wind=0;atk=Math.max(.000001,(A.t-A.wind)/.25)}if(A.t>A.wind+.25){e.act=null;e.cd=e.atkCd}}
+    else if(A.type==='shoot'){if(e.m.mon==='draconico318')e.m.attack318='Cast';wind=Math.min(1,A.t/A.wind);turnTo(e,ang,dt,8);if(!A.done&&A.t>=A.wind){A.done=true;if(A.spread){for(const o of[-.25,0,.25])shoot(e.x,e.z,e.face+o,13,e.dmg,'enemy',0x9cf0ff,'orb')}else goblinShot118(e);tierShoot177(e)}if((e.m.organic||e.m.mon==='draconico318')&&A.done){wind=0;atk=Math.max(.000001,(A.t-A.wind)/.25)}if(A.t>A.wind+.25){e.act=null;e.cd=e.atkCd}}
     else if(A.type==='lunge'||A.type==='charge'){
       if(A.t<A.wind){wind=A.t/A.wind;turnTo(e,ang,dt,6);A.dir={x:Math.sin(e.face),z:Math.cos(e.face)}}
       else{const sp=A.type==='charge'?18:13;moveEnt(e,A.dir.x*sp*dt,A.dir.z*sp*dt);mv=1;atk=.5;if(!A.hit&&Math.hypot(T.x-e.x,T.z-e.z)<e.r+1.1){A.hit=true;dmgTo(T,e.dmg*(A.type==='charge'?1.5:1.2))}}
@@ -5908,6 +5932,8 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
     }else if(e.ai==='slam'){
       if(d>e.range+(T.r||.5)*.6){moveEnt(e,dx/d*spd*dt,dz/d*spd*dt);mv=1}
       else if(e.cd<=0){e.act={type:'slam',t:0,wind:e.wind};hazard(e.x+Math.sin(e.face)*1.6,e.z+Math.cos(e.face)*1.6,3.2,e.wind,e.dmg*1.3,'enemy',0xff6030)}
+    }else if(e.m.mon==='draconico318'&&d<3.3&&e.cd<=0){
+      e.strike318=(e.strike318||0)+1;e.act={type:e.strike318%3===0?'draco_tail':'draco_claw',t:0,wind:e.wind};
     }else if(e.ai==='wraith'){
       e.blinkCd=(e.blinkCd||0)-dt;
       if(d<5&&e.blinkCd<=0){for(let t=0;t<8;t++){const a=rnd(0,TAU),nx=T.x+Math.cos(a)*9,nz=T.z+Math.sin(a)*9;if(freeAt(nx,nz,.5)){fxBurst(e.x,1,e.z,0x9cf0ff,8,3);e.x=nx;e.z=nz;e.blinkCd=4;break}}}
