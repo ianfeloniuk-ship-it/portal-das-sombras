@@ -1,3 +1,6 @@
+## v312 — biblioteca de shaders, 07/10/2026
+- tools/shaders312.js: energy (fluxo de ruído + fresnel, aditivo), fire (gradiente de calor + tremulação), lava (brilho escorrendo), metal (rampa em degraus + reflexo em faixa + borda). Efeitos das habilidades (vfx302) usam energy em vez de brilho chapado; anel de fogo usa fire; fissuras usam lava. Coroas: metal, joias com Crystal310, partes luminosas com energy.
+
 ## v310 — shader de cristal, 07/10/2026
 - Direção visual do Ian (cartunesco + shaders, cristais reais): tools/crystal310.js — shader compartilhado com faces lapidadas, fresnel, luz fluindo por dentro, especular em degraus e cintilância. Aplicado nos cristais das Fendidas (Blender e código), fragmentos dos Abissais, espinhos de gelo dos efeitos e cristais da coroa do Tecelão.
 

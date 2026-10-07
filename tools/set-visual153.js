@@ -76,7 +76,7 @@ window.SetVisual153=(()=>{
    const gem=new T.Mesh(new T.OctahedronGeometry(.14,0),glow);gem.position.set(0,.05,1.08);g.add(gem);g.userData.float291=g.children.filter(o=>o.geometry&&o.geometry.type==='OctahedronGeometry'&&o!==gem);return g}};
  function crownAttach291(root,item){const id=item.set153;let head=null,headBone=null;root.traverse(o=>{if(!head&&o.name==='tripo_part_6')head=o;if(!headBone&&o.isBone&&o.name==='head')headBone=o});if(!head||!headBone)return false;
   root.updateMatrixWorld(true);const hb=new T.Box3().setFromObject(head),hs=hb.getSize(new T.Vector3()),hc=hb.getCenter(new T.Vector3());
-  const c=CROWN291[id](),holder=new T.Group();holder.add(c);holder.name='set153_h';
+  const c=CROWN291[id](),holder=new T.Group();/* v312: coroas com shaders (metal com reflexo, joias de cristal, partes luminosas com energia) */try{const S=window.Shaders312,K=window.Crystal310;if(S)c.traverse(o=>{if(!o.isMesh||!o.material)return;const m=o.material,g=o.geometry&&o.geometry.type;if(m.userData&&m.userData.crystal310)return;if(K&&/Octahedron|Icosahedron/.test(g||'')){o.material=K.mat(m.color?m.color.getHex():0xb48cff);return}if(m.isMeshBasicMaterial){o.material=S.energy(m.color.getHex(),m.opacity??1);return}if(m.isMeshToonMaterial){o.material=S.metal(m.color.getHex())}})}catch(_){}holder.add(c);holder.name='set153_h';
   const r=Math.max(hs.x,hs.z)*.5;c.scale.setScalar(r*1.05);const top=new T.Vector3(hc.x,hb.max.y-hs.y*.42,hc.z);
   const ws=headBone.getWorldScale(new T.Vector3()).x||1;holder.scale.setScalar(1/ws);holder.position.copy(headBone.worldToLocal(top.clone()));
   const rq=root.getWorldQuaternion(new T.Quaternion()),bq=headBone.getWorldQuaternion(new T.Quaternion());holder.quaternion.copy(bq.invert().multiply(rq));
