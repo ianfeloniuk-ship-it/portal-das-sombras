@@ -1,5 +1,5 @@
 /* v294 (Ian): Bestiário como uma Pokédex.
-   - Ao VER uma espécie pela primeira vez aparece, no canto, "Monstro descoberto · N de 61".
+   - Ao DERROTAR uma espécie pela primeira vez aparece, no canto, "Monstro descoberto · N de 61".
    - A lore abre com os abates: 1 descrição · 10 alimentação · 50 comportamento · 100 habitat. */
 (function(){
 const LORE294={
@@ -67,17 +67,12 @@ const LORE294={
 };
 const STEPS294=[[1,'Descrição'],[10,'Alimentação'],[50,'Comportamento'],[100,'Onde vive']];
 function habitat294(k){try{const out=[];const NB={campos:'Campos',flores:'Campos floridos',floresta:'Floresta',deserto:'Deserto',vulcao:'Vulcão',neve:'Neve',cristal:'Cavernas de cristal',pantano:'Pântano'};for(const b in HABITATS124){for(let g=0;g<10;g++){if(kindsFor(g,b).some(x=>x.k===k)){out.push(NB[b]||b);break}}}return out.length?out.join(', '):'Só dentro das Fendas (portais)'}catch(_){return 'Desconhecido'}}
-function seen(){profile.seen294=profile.seen294||{};if(!profile.seen294Init){profile.seen294Init=1;for(const k in (profile.bestiary||{}))if(profile.bestiary[k]>0)profile.seen294[k]=1}return profile.seen294}
+function seen(){return Object.fromEntries(Object.entries(profile.bestiary||{}).filter(([k,n])=>n>0&&KINDS[k]).map(([k])=>[k,1]))}
 function corner(title,body,col){let box=document.getElementById('ach294');if(!box){box=document.createElement('div');box.id='ach294';box.style.cssText='position:fixed;right:14px;bottom:170px;z-index:61;display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none';document.body.appendChild(box)}
- const d=document.createElement('div');d.style.cssText='background:rgba(14,12,22,.9);border:1px solid '+(col||'#ffd54f')+';border-left:4px solid '+(col||'#ffd54f')+';border-radius:6px;padding:6px 12px;color:#f4ead8;font-size:12px;line-height:1.35;max-width:260px;box-shadow:0 3px 10px rgba(0,0,0,.45);transform:translateX(30px);opacity:0;transition:all .35s';d.innerHTML='<div style="font-size:10px;letter-spacing:.08em;color:'+(col||'#ffd54f')+';font-weight:700">'+title+'</div>'+body;box.appendChild(d);requestAnimationFrame(()=>{d.style.opacity='1';d.style.transform='none'});while(box.children.length>3)box.firstChild.remove();setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),400)},4200)}
-/* v306 (Ian): só conta como visto se o monstro estiver na tela (dentro do campo da câmera) */
-const FR=new THREE.Frustum(),PM=new THREE.Matrix4(),V3=new THREE.Vector3();
-function onScreen(e){try{camera.updateMatrixWorld();PM.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);FR.setFromProjectionMatrix(PM);const p=(e.m&&e.m.root)?e.m.root.getWorldPosition(V3):V3.set(e.x,0,e.z);p.y+=.8;if(!FR.containsPoint(p))return false;const n=p.clone().project(camera);return Math.abs(n.x)<.92&&Math.abs(n.y)<.92}catch(_){return false}}
-function total(){return window.Variants308?Variants308.total():Object.keys(KINDS).length}
-function tick(){try{if(typeof started==='undefined'||!started||!run||!player||player.dead||typeof enemies==='undefined')return;const S=seen();for(const e of enemies){if(e.dead||!e.kind||!KINDS[e.kind]||S[e.kind]||e.ally||e.friendly217||e.isBoss)continue;if(Math.hypot(e.x-player.x,e.z-player.z)>30||!onScreen(e))continue;S[e.kind]=1;store.set('pds2_profile',profile);try{sfx('level')}catch(_){}corner('MONSTRO DESCOBERTO','<b>'+KINDS[e.kind].n+'</b> · '+Object.keys(S).filter(k=>KINDS[k]).length+' de '+total()+'<br><span style="opacity:.75">Veja no Bestiário. Derrote para conhecer sua história.</span>')}}catch(_){}}
-setInterval(tick,500);
+ const d=document.createElement('div');d.style.cssText='background:rgba(14,12,22,.9);border:1px solid '+(col||'#ffd54f')+';border-left:4px solid '+(col||'#ffd54f')+';border-radius:6px;padding:6px 12px;color:#f4ead8;font-size:16px;line-height:1.5;max-width:min(380px,88vw);box-shadow:0 3px 10px rgba(0,0,0,.45);transform:translateX(30px);opacity:0;transition:all .35s';d.innerHTML='<div style="font-size:14px;letter-spacing:.08em;color:'+(col||'#ffd54f')+';font-weight:700">'+title+'</div>'+body;box.appendChild(d);requestAnimationFrame(()=>{d.style.opacity='1';d.style.transform='none'});while(box.children.length>3)box.firstChild.remove();setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),400)},6500)}
+function total(){return Object.keys(KINDS).filter(k=>!KINDS[k].alias308).length}
 /* lore por abates: avisa quando um novo trecho abre */
-function loreCheck(k,before,after){for(const [n,lbl] of STEPS294)if(before<n&&after>=n&&n>1)corner('LORE DESBLOQUEADA','<b>'+KINDS[k].n+'</b> · '+lbl+'<br><span style="opacity:.75">'+(n===100?habitat294(k):LORE294[k]?LORE294[k][n===10?1:2]:'')+'</span>','#9fd0ff')}
+function loreCheck(k,before,after){if(before===0&&after>0){corner('MONSTRO DESCOBERTO','<b>'+KINDS[k].n+'</b> · '+Object.keys(seen()).filter(k=>!KINDS[k].alias308).length+' de '+total()+'<br>Primeiro abate registrado no Bestiário.');sfx('level')}for(const [n,lbl] of STEPS294)if(before<n&&after>=n&&n>1)corner('LORE DESBLOQUEADA','<b>'+KINDS[k].n+'</b> · '+lbl+'<br><span style="opacity:.75">'+(n===100?habitat294(k):LORE294[k]?LORE294[k][n===10?1:2]:'')+'</span>','#9fd0ff')}
 function loreHtml(k,n){const L=LORE294[k]||['Criatura pouco estudada.','Desconhecido.','Desconhecido.'];let h='';STEPS294.forEach(([need,lbl],i)=>{const txt=i<3?L[i]:habitat294(k);h+='<br><span style="color:'+(n>=need?'var(--txt,#f4ead8)':'var(--dim)')+'">'+(n>=need?'<b>'+lbl+':</b> '+txt:'🔒 '+lbl+' · '+need+(need===1?' abate':' abates'))+'</span>'});return h}
 window.Bestiary294={LORE:LORE294,seen,loreCheck,loreHtml,habitat:habitat294,total,corner};
 })();

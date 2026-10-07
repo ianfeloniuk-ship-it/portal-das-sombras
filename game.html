@@ -231,7 +231,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=265"></script>
 <script src="tools/passives263.js?v=286"></script>
-<script src="tools/resources260.js?v=314"></script>
+<script src="tools/resources260.js?v=316"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -3469,7 +3469,7 @@ function backupRanks78(){if(profile&&profile.rankSchema!==78&&!store.get('pds_ba
 
 function rankOf(){if(profile&&profile.rk2)return profile.rank;return rankOfOld()}
 function rankOfOld(){let lv=run.level-1,r=profile.rank;const top=profile.rank>TOPR?profile.rank:TOPR;while(r<top){const need=RANK_STEPS[Math.min(r,RANK_STEPS.length-1)];if(lv>=need){lv-=need;r++}else break}return r}
-function newRun(){run={rankSchema:78,level:1,xp:0,gold:profile?.journey92?0:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0,0]},pos:null}}
+function newRun(){run={attr281:1,rankSchema:78,level:1,xp:0,gold:profile?.journey92?0:60,pots:3,scrolls:1,items:[],equip:{w:null,a:null},stolen:[],shadows:[],party:[],kills:0,clears:0,quests:null,res:{core:[0,0,0,0,0,0,0,0,0,0],cry:[0,0,0,0,0,0,0,0,0,0]},pos:null}}
 function saveRun(){if(window._wipe||!run||!player||player.dead)return;profile.maxLevel111=Math.max(profile.maxLevel111||0,run.level||1);rememberClassCooldowns();run.summons=savedSummons();if(profile){profile.dayT=dayT;store.set('pds2_profile',profile)}if(L.mode==='world')run.pos={x:player.x,z:player.z};store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows})}
 function loadRun(){const r=store.get('pds3_run');if(!r)return false;backupRanks78();migrateRankRun(r);if(!r.v71&&!store.get('pds3_backup_v70'))store.set('pds3_backup_v70',{profile:store.get('pds2_profile'),run:r});newRun();Object.assign(run,r);run.v71=1;if(run.inGate269){run.sealed269=(run.sealed269||[]).concat([{x:run.inGate269.x,z:run.inGate269.z,t:Date.now()+36e5}]);delete run.inGate269;run.abandon269=1}
   run.stolen=(r.stolen||[]).map(n=>loadedPower111(n,r.lib||[])).filter(Boolean).map(sk=>({...sk,cdT:0}));
@@ -5179,10 +5179,10 @@ function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory
 /* v194 (Ian): aviso aparece em destaque no topo e depois fica nas Notícias. Tempo cresce com o tamanho do texto; no máximo 3 na tela. */
 /* v277 (Ian): avisos um de cada vez, pequenos, no alto — não tampam a luta. Repetidos são ignorados; tudo continua no Histórico. */
 const POPQ277=[];let popBusy277=false;
-function popNews194(html,ms){const key=String(html).replace(/<[^>]*>/g,'').replace(/\d+/g,'#');if(POPQ277.some(q=>q.key===key)||popBusy277===key)return;POPQ277.push({html,key});while(POPQ277.length>3)POPQ277.shift();if(!popBusy277)popNext277()}
-function popNext277(){const q=POPQ277.shift();if(!q){popBusy277=false;return}popBusy277=q.key;let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;pointer-events:none;width:min(400px,86vw)';document.body.appendChild(box)}
- const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.82);border:1px solid rgba(255,179,71,.4);border-radius:6px;padding:4px 10px;color:#f4ead8;font-size:12px;line-height:1.3;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;max-height:3.9em;overflow:hidden';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
- const fight=typeof enemies!=='undefined'&&player&&enemies.some(e=>!e.dead&&Math.hypot(e.x-player.x,e.z-player.z)<14),t=Math.min(fight?3200:5500,1800+d.textContent.length*28);setTimeout(()=>{d.style.opacity='0';setTimeout(()=>{d.remove();popNext277()},320)},t)}
+function popNews194(html,ms){const key=String(html).replace(/<[^>]*>/g,'').replace(/\d+/g,'#');if(POPQ277.some(q=>q.key===key)||popBusy277===key)return;POPQ277.push({html,key,ms});while(POPQ277.length>3)POPQ277.shift();if(!popBusy277)popNext277()}
+function popNext277(){const q=POPQ277.shift();if(!q){popBusy277=false;return}popBusy277=q.key;let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:clamp(84px,12vh,140px);left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;align-items:center;pointer-events:none;width:min(640px,92vw)';document.body.appendChild(box)}
+ const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.96);border:1px solid rgba(255,179,71,.7);border-radius:8px;padding:12px 18px;color:#fff6e6;font-size:clamp(17px,1.5vw,21px);line-height:1.5;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;max-height:60vh;overflow:auto;pointer-events:auto;box-sizing:border-box;width:100%';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
+ const fight=typeof enemies!=='undefined'&&player&&enemies.some(e=>!e.dead&&Math.hypot(e.x-player.x,e.z-player.z)<14),t=Math.max(q.ms||0,Math.min(18000,5000+d.textContent.length*45));setTimeout(()=>{d.style.opacity='0';setTimeout(()=>{d.remove();popNext277()},320)},t)}
 function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
 function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
@@ -6632,7 +6632,7 @@ function cycleOrder(){if(!allies.some(a=>a.shadow&&!a.dead)){toast('Você não t
 const BEST_STEPS=[[10,.03,'Conhecido'],[50,.06,'Estudado'],[200,.10,'Dominado'],[1000,.15,'Lenda']];
 function bestLvl(k){const n=((profile.bestiary||{})[k])||0;let l=null;for(const s of BEST_STEPS)if(n>=s[0])l=s;return l}
 function bestMul(k){const l=k&&bestLvl(k);return l?1+l[1]:1}
-function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k),n0=profile.bestiary[k]||0;profile.bestiary[k]=n0+1;const after=bestLvl(k);try{const S=Bestiary294.seen();if(!S[k]){S[k]=1}Bestiary294.loreCheck(k,n0,n0+1)}catch(_){}
+function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k),n0=profile.bestiary[k]||0;profile.bestiary[k]=n0+1;const after=bestLvl(k);try{Bestiary294.loreCheck(k,n0,n0+1)}catch(_){}
   if(after&&after!==before){toast('<b>[BESTIÁRIO]</b> '+KINDS[k].n+': <b>'+after[2]+'</b> — +'+Math.round(after[1]*100)+'% de dano contra essa espécie.',5000);sfx('level')}
   if(profile.bestiary[k]%5===1||after!==before)store.set('pds2_profile',profile)}
 const AIDESC={melee:'Luta corpo a corpo',ranged:'Ataca de longe e mantém distância',lunge:'Dá saltos rápidos em você',slam:'Golpes pesados em área',wraith:'Flutua e dispara magia',rival:'Luta como um caçador'};
@@ -6739,7 +6739,7 @@ function statDesc(){const D0=statDesc0();const L=run.level,f=n=>String(Math.roun
   D0.vit[1]+='<br><b>Vigor máximo:</b> +0,5 por ponto, sem limite · agora <b>'+Math.round(vigorMax281())+'</b>.';
   D0.per[1]+='<br><b>Dano crítico:</b> +0,5% por ponto, sem limite · agora +'+f(pCritDmg281())+'%.';
   D0.des=['Ataque à distância: <b>+'+fmt(atkPer(L)*st281('des'))+'</b> · penetração <b>'+fmt(Math.round(pPenVal296()))+'</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de ataque físico <b>à distância</b> (arco, adaga arremessada e classes físicas que atiram, no lugar da Força) e +'+fmt(atkPer(L)*.5)+' de penetração.<br><b>Penetração:</b> ignora essa quantidade da defesa do alvo, física <b>e mágica</b>.'];
-  D0.res=['Defesa física: <b>+'+fmt(Math.round(pDefNums296().phy))+'</b> · fúria máxima <b>'+Math.round(furyMax281())+'</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de defesa física e +0,5 de fúria máxima.<br><b>Defesa física:</b> esse número é <b>descontado</b> de cada golpe físico que você recebe. Ex.: golpe de 100 com 30 de defesa = 70 de dano; com 100 ou mais, você não leva dano.'];
+  D0.res=['Defesa física: <b>+'+fmt(Math.round(pDefNums296().phy))+'</b> · capacidade atual de Fúria: <b>'+preciseNumber(furyMax281())+'</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de defesa física e +0,5 na capacidade de Fúria, sem teto de crescimento.<br><b>Fúria:</b> começa com capacidade de 100; Resistência e bônus aumentam esse valor. 100 é a base, não um limite fixo.<br><b>Defesa física:</b> esse número é <b>descontado</b> de cada golpe físico que você recebe. Ex.: golpe de 100 com 30 de defesa = 70 de dano; com 100 ou mais, você não leva dano.'];
   D0.esp=['Defesa mágica: <b>+'+fmt(Math.round(pDefNums296().mag))+'</b> · regeneração de mana <b>'+(pManaRegen281()>=0?'+':'')+f(pManaRegen281())+'%</b>','<b>Ao gastar 1 ponto:</b> +'+atkPer(L)+' de defesa mágica.<br><b>Defesa mágica:</b> esse número é <b>descontado</b> de cada golpe mágico que você recebe.<br><b>Regeneração de mana:</b> também aumenta.'];
   D0.von=['Defesa universal: <b>+'+fmt(Math.round(pDefNums296().uni))+'</b> · resistência a efeitos <b>+'+st281('von')+'</b>','<b>Ao gastar 1 ponto:</b> +'+fmt(atkPer(L)*.5)+' de defesa universal e +1 de resistência a efeitos.<br><b>Defesa universal:</b> é <b>descontada</b> de qualquer golpe, físico ou mágico (soma com a física ou a mágica). Vale metade por ponto porque serve para os dois.<br><b>Resistência a efeitos:</b> quanto maior, mais curtos ficam lentidão, atordoamento e sangramento.'];
   return D0}
@@ -8168,7 +8168,7 @@ function kitState111(){if(AR103.region!==L)AR103={region:L,reserve:0};return AR1
 function kitAmount111(s){return Math.min(1,(s.amount||0)+(s.growth||0)*healerLevel(s))}
 function kitRadius111(s){return s.radius+(s.radiusGrowth||0)*healerLevel(s)}
 function kitRequirement111(ci,si){const s=KIT_DEFS111[ci]?.[si];if(!s)return '';if(s.expansion260)return ci>=12?s.research260+' investigações neste caminho':'Nível '+s.unlock260;if(s.evolution)return 'Prova de evolução da classe (nível 30)';if(ci>=12)return si<3?'Aprender o caminho':(si-1)+' investigações neste caminho';if(ci===7&&si>=3&&si<=5)return 'Aprender o caminho do Necromante';if(ci===7&&si===7)return 'Caminho do Necromante e nível 80';if(si<3)return 'Aprender a classe';const extra=KIT_DEFS111[ci].filter((s,i)=>i>=3&&!s.evolution&&!(ci===7&&i<=5));return 'Nível '+([30,45,80,100,120][extra.indexOf(s)]||100)}
-function kitUnlocked111(ci,si){const s=KIT_DEFS111[ci]?.[si];if(!s)return Number.isInteger(si)&&si>=0&&si<3&&!!CLASSES[ci]?.sk[si]&&!CLASSES[ci].rare&&jobsOf().includes(ci);const p=profile.kitLearning111||(profile.kitLearning111={});if(p[s.skillId])return true;let ok=false;if(s.expansion260)ok=ci>=12?awakening103().unlocked.includes(ci)&&(awakening103().points[ci]||0)>=s.research260:Math.max(run.level,profile.maxLevel111||0)>=s.unlock260;else if(s.evolution)ok=!!(profile.cls===ci&&run.adv||run.jobData?.[ci]?.adv||(run.lib||[]).some(x=>x.n===s.n)||(run.stolen||[]).some(x=>x.n===s.n)||ci===5&&profile.paladinSolar109);else if(ci>=12)ok=awakening103().unlocked.includes(ci)&&(si<3||(awakening103().points[ci]||0)>=si-1);else if(ci===7&&si>=3&&si<=5)ok=awakening103().unlocked.includes(7);else if(ci===7&&si===7)ok=awakening103().unlocked.includes(7)&&Math.max(run.level,profile.maxLevel111||0)>=80;else if(si<3)ok=true;else ok=Math.max(run.level,profile.maxLevel111||0)>=Number(kitRequirement111(ci,si).split(' ').pop())||ci===5&&profile.paladinSkills109?.includes(si);if(ok){p[s.skillId]=true;store.set('pds2_profile',profile)}return ok}
+function kitUnlocked111(ci,si){const s=KIT_DEFS111[ci]?.[si];if(!s)return Number.isInteger(si)&&si>=0&&(si<3||CLASSES[ci]?.sk[si]?.new316)&&!!CLASSES[ci]?.sk[si]&&!CLASSES[ci].rare&&jobsOf().includes(ci);const p=profile.kitLearning111||(profile.kitLearning111={});if(p[s.skillId])return true;let ok=false;if(s.expansion260)ok=ci>=12?awakening103().unlocked.includes(ci)&&(awakening103().points[ci]||0)>=s.research260:Math.max(run.level,profile.maxLevel111||0)>=s.unlock260;else if(s.evolution)ok=!!(profile.cls===ci&&run.adv||run.jobData?.[ci]?.adv||(run.lib||[]).some(x=>x.n===s.n)||(run.stolen||[]).some(x=>x.n===s.n)||ci===5&&profile.paladinSolar109);else if(ci>=12)ok=awakening103().unlocked.includes(ci)&&(si<3||(awakening103().points[ci]||0)>=si-1);else if(ci===7&&si>=3&&si<=5)ok=awakening103().unlocked.includes(7);else if(ci===7&&si===7)ok=awakening103().unlocked.includes(7)&&Math.max(run.level,profile.maxLevel111||0)>=80;else if(si<3)ok=true;else ok=Math.max(run.level,profile.maxLevel111||0)>=Number(kitRequirement111(ci,si).split(' ').pop())||ci===5&&profile.paladinSkills109?.includes(si);if(ok){p[s.skillId]=true;store.set('pds2_profile',profile)}return ok}
 function kitProgress111(){let h='';if(jobsOf().includes(15)){const forms=kitForms111();h+='<details open><summary onclick="event.preventDefault()" style="list-style:none;cursor:default;font-weight:700">Formas preparadas · '+forms.length+'/'+2*affinity103(15)+'</summary>';for(const s of KIT_DEFS111[15].filter(s=>s.form&&kitUnlocked111(15,Number(s.skillId.split(':')[1]))))h+=row(s.n,forms.includes(s.form)?'Preparada':'Não preparada',btn(forms.includes(s.form)?'Retirar':'Preparar','kitform111',s.form,canRedistribute()));h+='</details>'}return h}
 function kitForms111(){const valid=['feral','alada','blindada','agil'];profile.forms111=(profile.forms111||valid.slice(0,2)).filter(x=>valid.includes(x));return profile.forms111.slice(0,2*affinity103(15))}
 function kitToggleForm111(f){if(!canRedistribute()||!['feral','alada','blindada','agil'].includes(f))return;const a=kitForms111(),s=KIT_DEFS111[15].find(s=>s.form===f);if(!kitUnlocked111(15,Number(s.skillId.split(':')[1])))return;if(a.includes(f))profile.forms111=a.filter(x=>x!==f);else if(a.length<2*affinity103(15))profile.forms111=[...a,f];else{toast('Retire uma forma preparada para abrir espaço.');return}saveRun();skillsView()}
@@ -8665,7 +8665,7 @@ requestAnimationFrame(frame);
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=266"></script>
 <script src="tools/lux267.js?v=288"></script>
-<script src="tools/bestiary294.js?v=308"></script>
+<script src="tools/bestiary294.js?v=316"></script>
 <script src="tools/biomes295.js?v=295"></script>
 <script src="tools/rare298.js?v=313"></script>
 <script src="tools/corrupt299.js?v=299"></script>
@@ -8675,7 +8675,7 @@ requestAnimationFrame(frame);
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=305"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=313"></script>
+<script src="tools/variants308.js?v=316"></script>
 <script src="tools/ineditas309.js?v=315"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
@@ -8688,3 +8688,5 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
+
+<script src="tools/classes316.js?v=316"></script>
