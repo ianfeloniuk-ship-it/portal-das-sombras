@@ -1,3 +1,7 @@
+## v300 — Afinidade elemental (nível 55), 07/10/2026
+- Criaturas têm fraqueza/resistência (fogo, gelo, terra, raio) pelo perfil (Espectral, Arcano, Blindado, Universal) ou bioma. Fraqueza +30% ('FRACO A X!'), resistência −30%. Projéteis pelo tipo (fire/ice/stone/spark), golpes pela arma encantada (Mercado, 60× ouro do rank), habilidades pela classe elemental. Bestiário mostra após 10 abates (tools/elem300.js).
+- PENDENTE (prioridade alta, pedido do Ian): refazer efeitos visuais de TODAS as habilidades (terremoto abre fissura e treme; flecha perfurante etc.) e animações próprias das classes novas; criar mais monstros com peças grátis/Blender (Tripo sem créditos).
+
 ## v299 — Fendas corrompidas (nível 50), 07/10/2026
 - Primeiro sistema novo depois do nível 45. Do nível 50 em diante, 15% dos portais nascem corrompidos com 1–3 modificadores: Monstros fortes (+50% vida/dano), Sem poção, Frenesi (+30% velocidade), Sem regeneração. Rótulo 'CORROMPIDA · ... · +N%'. Ao fechar: ouro (80 × ouro do rank × nº de riscos × bônus) e XP extra (tools/corrupt299.js). Entrada nova no UNLOCK (nível 50).
 
