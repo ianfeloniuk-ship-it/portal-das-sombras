@@ -1,3 +1,7 @@
+## v302 — efeitos visuais das habilidades, 07/10/2026
+- Pedido do Ian (prioridade): habilidades eram só anéis brilhando. tools/vfx302.js liga as 415 habilidades (classes + kits) a efeitos próprios por nome/elemento/tipo: Terremoto/Tremor/Erupção = fissuras no chão com brilho de lava, pedras e tremor de tela; pedra = espinhos de rocha; gelo = espinhos de gelo/cúpula; fogo = anel de chamas com brasas, meteoros em chuva, jato; raio = relâmpagos do céu; luz = pilar; flechas = rastro perfurante/leque; giratórios = corte 360°; fumaça, veneno, cura, cúpula de escudo, círculo rúnico, vórtice, vento, rastro de investida. O anel antigo é silenciado no instante do lançamento.
+- Próximo: refinar efeitos por habilidade (feedback do Ian) e animações próprias das classes novas; mais monstros (peças grátis/Blender).
+
 ## v301 — tela de escolha de classe, 07/10/2026
 - A lista vazava da caixa e o texto ficava minúsculo (print do Ian). Agora: botões curtos (nome + estilo + recurso) em 2 colunas dentro da caixa; ao clicar abre o detalhe (recurso, atributo, passiva, habilidades) e o botão 'Escolher'.
 
