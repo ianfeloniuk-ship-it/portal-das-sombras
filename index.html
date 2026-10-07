@@ -3808,7 +3808,7 @@ function biomeWarp(x,z){return[x+(WN(x*.021+5.3,z*.021+9.1)-.5)*46+(WN(x*.09+3.7
 function biomeMix154(x,z){const w=biomeWarp(x,z),b=WN(w[0]*.0028+311,w[1]*.0028+733),b2=WN(w[0]*.004+91,w[1]*.004+57),snow=clamp((.35-b)/.08,0,1),cold=clamp((b2-.58)/.08,0,1),heat=clamp((b-.65)/.08,0,1),lava=clamp((b2-.51)/.08,0,1),wet=clamp((b2-.64)/.08,0,1)*(1-snow)*(1-heat);return{snow:snow*(1-cold),crystal:snow*cold,sand:heat*(1-lava),ash:heat*lava,wet}}
 function bare154(x,z){const m=biomeMix154(x,z);return m.sand>.6||m.ash>.6}
 function snowB(x,z){const w=biomeWarp(x,z);return WN(w[0]*.0028+311,w[1]*.0028+733)}
-function biomeAt(x,z){const w=biomeWarp(x,z);x=w[0];z=w[1];const b=WN(x*.0028+311,z*.0028+733),b2=WN(x*.004+91,z*.004+57);if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.005+17,z*.005+29)>.74?'flores':'campos'}
+function biomeAt(x,z){const w=biomeWarp(x,z);x=w[0];z=w[1];/* v295 (Ian): biomas mais longos (frequência ~2,2× menor) */const b=WN(x*.00125+311,z*.00125+733),b2=WN(x*.0018+91,z*.0018+57);if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.0022+17,z*.0022+29)>.74?'flores':'campos'}
 const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens',vulcao:'Terras Vulcânicas',cristal:'Geleira de Cristal',floresta:'Floresta Sombria',flores:'Campos Floridos'};
 const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x10261a,.45],flores:[0x3a7a3a,.25]};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
@@ -8640,6 +8640,7 @@ requestAnimationFrame(frame);
 <script src="tools/economy154.js?v=266"></script>
 <script src="tools/lux267.js?v=288"></script>
 <script src="tools/bestiary294.js?v=294"></script>
+<script src="tools/biomes295.js?v=295"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
@@ -8652,9 +8653,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v294</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v295</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=294;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=295;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

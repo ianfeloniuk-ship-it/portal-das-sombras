@@ -1,3 +1,7 @@
+## v295 — biomas com efeito, 06/10/2026
+- Pedido do Ian: biomas ~2,5× mais longos (biomeAt com frequência menor; média ~320 m numa linha). Ao entrar, aviso com o efeito. Penalidades: Deserto (cansaço 2×, vigor −25%), Neve (movimento −12%, mana −20%), Vulcão (−0,3% vida/s, até 20%), Pântano (movimento −10%, vigor −15%). Bônus: Floresta (+5% crítico), Campos floridos (vida fora de combate), Cristal (+25% mana).
+- Mercado (Dorian) vende Cantil, Capa de pele, Unguento e Botas de lodo: anulam a penalidade do bioma por 5 min (tools/biomes295.js).
+
 ## v294 — Bestiário estilo Pokédex, 06/10/2026
 - Pedido do Ian: ao VER uma espécie pela primeira vez aparece no canto 'MONSTRO DESCOBERTO · N de 61' (tools/bestiary294.js). Lore escrita para as 61 espécies: descrição (1 abate), alimentação (10), comportamento (50), onde vive (100, tirado dos habitats do jogo). Aviso 'LORE DESBLOQUEADA' a cada trecho. Bestiário mostra '???' para não descobertos.
 
