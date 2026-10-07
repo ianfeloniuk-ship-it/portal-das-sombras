@@ -1064,3 +1064,8 @@ Celular (Ian: "travado ou lento"): no toque não há antialias; LEVE vira o padr
 Mob dragao usa modelo próprio m_draconico318.glb (18.080 triângulos, textura 2048, 21 ossos e 8 clipes). Mascote dragao mantém modelo anterior. Garra/cauda têm preparação, alcance e acerto único; ataque à distância preservado. Build idempotente e sintaxe passaram; 8 cenários de alcance/morte/congelamento, reação ao dano e preservação do pet passaram em Chromium isolado. Inspeção visual em poses no motor; sem benchmark de FPS ou campanha longa. Textura procedural e pesos automáticos são primeira iteração, não aprovação estética de Ian. Armaduras excluídas: outra sessão cria referências; aguardar para 3D/encaixes. Fontes e validações: https://drive.google.com/drive/folders/149RlfYBoaI6YehqenWGwOAqD-9n4qK30 .
 
 - v319: pose final de morte do Dracônico mantida sem retornar ao primeiro quadro; teste de morte prolongada adicionado.
+
+
+## v322 — Dracônico: textura da referência aprovada
+
+Substituído models/m_draconico318.glb pelo export Blender v011 da projeção v008 aprovada por Ian. GameUV único em TEXCOORD_0 e sem normal derivada da imagem de cor, compatível com o carregador atual. 21 ossos e oito clipes preservados; corrigidos os eixos de deslocamento da queda para eliminar a suspensão do corpo. Combate e variantes Fendida/Abissal testados em Chromium isolado; mascote continua no modelo dragao. Nenhuma mudança em saves ou balanceamento. Armaduras TripoSG continuam candidatas no Drive: elmo menor requer revisão de cabelo/encaixe e materiais; não publicar o piloto procedural antigo. Fontes e provas: https://drive.google.com/drive/folders/1Tb7vOq-UQGP34xLDPzL3QiNfTajmNbCC .
