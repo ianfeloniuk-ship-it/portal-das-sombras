@@ -19,8 +19,8 @@ function price(k){const g=(typeof GR!=='undefined'&&GR[Math.min(9,rankOf())])?GR
 // ---- efeitos ----
 const ms0=movementSpeed;movementSpeed=function(raw){const f=fx();return ms0(f&&f.move?raw*(1+f.move):raw)};
 const cc0=critChance;critChance=function(){const f=fx();return cc0()+(f&&f.crit?f.crit:0)};
-const mr0=pManaRegen281;pManaRegen281=function(){const f=fx();return mr0()+(f&&f.mana?f.mana:0)};
-const vr0=pVigorRegen281;pVigorRegen281=function(){const f=fx();return vr0()+(f&&f.vigor?f.vigor:0)};
+const mr0=pManaRegen281;pManaRegen281=function(){const f=fx();return (1+mr0())*(1+(f&&f.mana?f.mana:0))-1};
+const vr0=pVigorRegen281;pVigorRegen281=function(){const f=fx();return (1+vr0())*(1+(f&&f.vigor?f.vigor:0))-1};
 let last=null,acc=0,lastT=performance.now();
 function tick(){const now=performance.now(),dt=Math.min(1,(now-lastT)/1000);lastT=now;try{if(typeof started==='undefined'||!started||!run||!player||player.dead||paused)return;
   const G=gear();for(const k in G){G[k]-=dt;if(G[k]<=0){delete G[k];try{toast('<b>[VIAGEM]</b> O efeito de '+ITEMS[k].n+' acabou.',3500)}catch(_){}}}
@@ -29,14 +29,14 @@ function tick(){const now=performance.now(),dt=Math.min(1,(now-lastT)/1000);last
   if(!f)return;
   if(f.tired&&run.awake287!=null)run.awake287+=dt*(f.tired-1);
   const fight=enemies.some(e=>!e.dead&&!e.ally&&Math.hypot(e.x-player.x,e.z-player.z)<14);
-  if(f.regen&&!fight)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*f.regen*dt);
+  if(f.regen&&!fight&&!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*f.regen*dt);
   if(f.burn&&player.hp>player.maxhp*.2)player.hp=Math.max(player.maxhp*.2,player.hp-player.maxhp*f.burn*dt);
  }catch(_){}}
 setInterval(tick,250);
 // ---- Mercado ----
 const mv0=mktView;mktView=function(){mv0();try{const mb=document.getElementById('mb');if(!mb)return;const G=gear();let h='<div class="sec">EQUIPAMENTO DE VIAGEM</div><div class="sysline" style="font-size:12px">Cada bioma muda o personagem. Estes itens anulam a penalidade de um bioma por 5 minutos de jogo.</div>';
   for(const k in ITEMS){const I=ITEMS[k],left=G[k]>0?Math.ceil(G[k]):0;h+=row('<b>'+I.n+'</b>',I.d+' ('+FX[I.b].d+')'+(left?' · <b style="color:#6fe39a">ativo: '+Math.floor(left/60)+'min '+(left%60)+'s</b>':''),btn(fmt(price(k))+' ouro','bio295buy',k,run.gold>=price(k)))}
-  h+='<div class="sysline" style="font-size:12px">Biomas bons: <b>Floresta</b> (+5% crítico), <b>Campos floridos</b> (recupera vida fora de combate), <b>Cavernas de cristal</b> (+25% de mana).</div>';
+  h+='<div class="sysline" style="font-size:12px">Biomas bons: <b>Floresta</b> (+5% crítico), <b>Campos floridos</b> (recupera vida fora de combate), <b>Cavernas de cristal</b> (+25% de regeneração de mana).</div>';
   mb.insertAdjacentHTML('beforeend',h)}catch(_){}};
 const ea0=extraActions;extraActions=function(a,v){if(a==='bio295buy'){const I=ITEMS[v];if(!I)return;const p=price(v);if(run.gold<p)return;run.gold-=p;gear()[v]=(gear()[v]>0?gear()[v]:0)+DUR;try{sfx('buy')}catch(_){}toast('<b>[MERCADO]</b> '+I.n+' ativo por 5 minutos.',3500);saveRun();mktView();return 'close0'}return ea0(a,v)};
 window.Biomes295={FX,ITEMS,here,fx};

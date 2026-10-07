@@ -62,13 +62,13 @@ const baseNewRun=newRun;newRun=function(){if(typeof player!=='undefined'&&player
 const baseUse=useSkill;useSkill=function(s){if(s?.new316){if(!player||player.dead||paused||s.cdT>0)return false;if(!learnedSkills().some(x=>x.skillId===s.skillId)||!player.skills.some(x=>!x.empty&&x.skillId===s.skillId))return false;const err=check(s);if(err){toast(err);return false}}return baseUse.apply(this,arguments)};
 const baseDesc=skillEffect102;skillEffect102=function(s){return s?.new316?s.brief316:baseDesc.apply(this,arguments)};
 const baseDamage=skillHasDamage;skillHasDamage=function(s){return s?.new316?s.pow>0:baseDamage.apply(this,arguments)};
-const baseRun=runSkill;runSkill=function(s){if(!s?.new316)return baseRun.apply(this,arguments);const P=player,k=state(),ts=targets(),e=ts[0],d=skillDamage(s);let mult=1;
+const baseRun=runSkill;runSkill=function(s){if(!s?.new316){const scar=state().scar;if(s?.sourceClass===24&&s.pow>0&&scar?.until>time){const mult=1+Math.min(2,Math.max(0,scar.hp-player.hp)/player.maxhp*5);state().scar=null;return baseRun.call(this,{...s,pow:s.pow*mult})}return baseRun.apply(this,arguments);}const P=player,k=state(),ts=targets(),e=ts[0],d=skillDamage(s);let mult=1;
  if(s.sourceClass===24&&s.pow>0&&k.scar&&k.scar.until>time){mult+=Math.min(2,Math.max(0,k.scar.hp-P.hp)/P.maxhp*5);k.scar=null}
- const hit=(enemy,power=1,extra=0)=>{if(!enemy||enemy.dead)return 0;return hurtEnemy(enemy,Math.max(0,d*power*mult+extra),P.x,P.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0})||0};
+ const hit=(enemy,power=1,extra=0)=>{if(!enemy||enemy.dead)return 0;return hurtEnemy(enemy,Math.max(0,d*power*mult+extra),P.x,P.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0,...skillHitOptions318(s)})||0};
  const mark=(enemy,key,data)=>{enemy[key]={until:time+8,...data}};
  skillAnim155({...s,t:s.sourceClass===22?'bolt':'cone'});fxRing(P.x,P.z,s.col,3,.45);sfx('skill');
  switch(s.mode316){
- case 'echo':mark(e,'echo316',{hits:0,damage:d*1.8});hit(e);break;
+ case 'echo':mark(e,'echo316',{hits:0,damage:d*1.8,dtype281:skillHitOptions318(s).dtype281});hit(e);break;
  case 'eight':{const dest=sidePoint(k.side||1),a={x:P.x,z:P.z};if(!dest)break;k.side=-(k.side||1);P.x=dest.x;P.z=dest.z;for(const x of ts)if(segment(x,a,dest,1))hit(x);fxRing(a.x,a.z,s.col,1,.5);break}
  case 'breath':{const r=martialState260(),n=Math.min(30,r.vigor,(furyMaxR260()-r.fury)/2);r.vigor-=n;r.vigorWait=resourceWait263('vigor');fury(n*2);break}
  case 'cadence':{const casting=e.act&&!e.act.done&&e.act.t<e.act.wind;hit(e,casting?2:1);if(casting&&!e.isBoss&&!e.dead){e.act=null;e.stun=Math.max(e.stun||0,1)}break}
@@ -98,11 +98,11 @@ const baseRun=runSkill;runSkill=function(s){if(!s?.new316)return baseRun.apply(t
  }
 };
 const baseHit=hurtEnemy;hurtEnemy=function(e,amt,x,z,o={}){if(!e||e.dead)return baseHit.apply(this,arguments);const basic=o.fromPlayer&&Number.isInteger(o.basicClass)&&!o.skillHit,alt=e.alternate316;
- if(o.fromPlayer&&!o.new316&&alt?.until>time){const type=MAGIC_CLS.includes(o.basicClass??profile.cls)?'mag':'phy';if(alt.last&&alt.last!==type)amt*=1.35}
+ if(o.fromPlayer&&!o.new316&&alt?.until>time){const type=o.dtype281||(o.fromPlayer?curDType281:'phy');if(alt.last&&alt.last!==type)amt*=1.35}
  if(basic){if(e.five316?.until>time){amt*=1+.08*(e.five316.hits+1)}if(e.retreat316?.until>time){if(dist(e)>=4)amt*=1.8}if(e.measure316?.until>time){amt*=1+Math.min(1.5,Math.max(0,e.measure316.distance-dist(e))*.25)}}
  const dealt=baseHit.call(this,e,amt,x,z,o);
- if(o.fromPlayer&&!o.new316&&dealt>0&&alt?.until>time)alt.last=MAGIC_CLS.includes(o.basicClass??profile.cls)?'mag':'phy';
- if(basic&&dealt>0){if(e.five316?.until>time&&++e.five316.hits>=5)e.five316=null;e.retreat316=null;e.measure316=null;if(e.tithe316?.until>time){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.04);if(++e.tithe316.hits>=3)e.tithe316=null}if(e.echo316?.until>time&&++e.echo316.hits>=3){const echo=e.echo316;e.echo316=null;for(const a of targets(12))if(Math.hypot(a.x-e.x,a.z-e.z)<=3&&los(e.x,e.z,a.x,a.z))baseHit(a,echo.damage,e.x,e.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0});fxRing(e.x,e.z,0xffc86a,3,.5)}const reserve=state().reserve;if(reserve?.until>time){state().reserve=null;const oldType=curDType281;try{curDType281='mag';for(const a of targets(12))if(a!==e&&Math.hypot(a.x-e.x,a.z-e.z)<=3&&los(e.x,e.z,a.x,a.z))baseHit(a,reserve.damage,e.x,e.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0})}finally{curDType281=oldType}fxRing(e.x,e.z,0x8fa0ff,3,.5)}}
+ if(o.fromPlayer&&!o.new316&&dealt>0&&alt?.until>time)alt.last=o.dtype281||curDType281;
+ if(basic&&dealt>0){if(e.five316?.until>time&&++e.five316.hits>=5)e.five316=null;e.retreat316=null;e.measure316=null;if(e.tithe316?.until>time){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.04);if(++e.tithe316.hits>=3)e.tithe316=null}if(e.echo316?.until>time&&++e.echo316.hits>=3){const echo=e.echo316;e.echo316=null;for(const a of targets(12))if(Math.hypot(a.x-e.x,a.z-e.z)<=3&&los(e.x,e.z,a.x,a.z))baseHit(a,echo.damage,e.x,e.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0,dtype281:echo.dtype281||'phy'});fxRing(e.x,e.z,0xffc86a,3,.5)}const reserve=state().reserve;if(reserve?.until>time){state().reserve=null;const oldType=curDType281;try{curDType281='mag';for(const a of targets(12))if(a!==e&&Math.hypot(a.x-e.x,a.z-e.z)<=3&&los(e.x,e.z,a.x,a.z))baseHit(a,reserve.damage,e.x,e.z,{fromPlayer:true,skillHit:true,new316:true,kb:0,stun:0,dtype281:'mag'})}finally{curDType281=oldType}fxRing(e.x,e.z,0x8fa0ff,3,.5)}}
  if(o.fromPlayer&&e.dead&&e.pledge316?.until>time){heal(e.pledge316.heal);e.pledge316=null}return dealt;
 };
 window.Classes316={defs,check,targets};

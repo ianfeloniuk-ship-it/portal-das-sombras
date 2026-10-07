@@ -12,9 +12,9 @@ function mark(e,bio){const v=V[bio];if(!v)return;e.rare298={bio,name:(KINDS[e.ki
  try{const ring=new THREE.Mesh(new THREE.TorusGeometry(1.1,.08,8,40),window.Shaders312?Shaders312.energy(v[1],.95):new THREE.MeshBasicMaterial({color:v[1],transparent:true,opacity:.85}));ring.rotation.x=Math.PI/2;ring.position.y=.15;e.m.root.add(ring);e.rare298.ring=ring;const l=new THREE.PointLight(v[1],1.4,8,1.8);l.position.y=1.5;e.m.root.add(l)}catch(_){}}
 // v317: removal from the scene is not a kill. Reward only the confirmed killEnemy path.
 function reward(e){if(e.rare298.done)return;e.rare298.done=1;const R=reg(),key=e.kind+':'+e.rare298.bio;R[key]=(Number(R[key])||0)+1;store.set('pds2_profile',profile);
- try{const tier=Math.max(0,Math.min(9,rankOf())),sl=EQUIP_SLOTS[Math.floor(Math.random()*EQUIP_SLOTS.length)];addItem(makeItem(sl,tier,2))}catch(_){}
+ let received=null;try{const tier=Math.max(0,Math.min(9,rankOf())),sl=EQUIP_SLOTS[Math.floor(Math.random()*EQUIP_SLOTS.length)];received=addItem(makeItem(sl,tier,2))}catch(_){}
  try{gainXp(Math.round(xpNeed()*.15),'monster')}catch(_){}
- try{Bestiary294.corner('CRIATURA RARA DERROTADA','<b>'+e.rare298.name+'</b> · equipamento Épico na bolsa e XP extra.<br><span style="opacity:.75">Variantes raras vencidas: '+Object.values(R).reduce((a,b)=>a+(Number(b)||0),0)+'</span>','#ff9fe0')}catch(_){}
+ try{Bestiary294.corner('CRIATURA RARA DERROTADA','<b>'+e.rare298.name+'</b> · '+(received===null?'equipamento não entregue':received?'equipamento Épico na bolsa':'bolsa cheia: equipamento Épico convertido em ouro')+' e XP extra.<br><span style="opacity:.75">Variantes raras vencidas: '+Object.values(R).reduce((a,b)=>a+(Number(b)||0),0)+'</span>','#ff9fe0')}catch(_){}
 }
 const kill0=killEnemy;killEnemy=function(e){const eligible=e&&!e.dead&&e.rare298&&!e.noExpLoot&&!e.ally&&!e.statue&&!e.friendly217;const result=kill0.apply(this,arguments);if(eligible&&e.dead)reward(e);return result};
 function scan(){try{if(typeof started==='undefined'||!started||!run||!player||typeof enemies==='undefined')return;

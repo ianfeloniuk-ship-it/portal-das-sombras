@@ -86,7 +86,7 @@
     {
       "id": "warm_blood",
       "n": "Sangue quente",
-      "d": "Cada acerto básico de Guerreiro gera +1 de Fúria."
+      "d": "Golpes básicos de Guerreiro, Monge e Berserker geram +1 de Fúria."
     },
     {
       "id": "fury_hold",

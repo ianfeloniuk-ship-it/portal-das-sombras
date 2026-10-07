@@ -1,3 +1,11 @@
+## v320 — Primeva e revisão de consistência, 07/10/2026
+- Decisão de Ian: jogo Primeva; Primeva é a oitava raridade de equipamento. IDs anteriores e chaves de save preservados. Padrões iniciais de balanceamento: multiplicador 5,2, três afixos e pesos 0,001/0,01 em saque comum/chefe.
+- Bolsa contém ouro carregado, equipamentos guardados, recursos e consumíveis. Ficha de combate e regeneração em Personagem → Status; progressão da arma viva em Build. Painel opaco evita ler o HUD por trás.
+- Correções: tipo/elemento das habilidades mantém a classe de origem, inclusive projéteis e queimadura; defesa não vaza dano mínimo; mana natural corresponde ao valor exibido e não multiplica poções; proibição de cura vale na recuperação natural e no bioma florido.
+- Passivas aprendidas das quatro classes permanecem ativas após mudar classe; cadeia do Monge expira, Cicatriz inclui golpes antigos e marca alternada usa o tipo real do dano. Bestiário não inventa afinidade com base na localização do jogador. Recompensa informa conversão em ouro quando a bolsa está cheia.
+- Validação: 17 regressões, 243 descrições geradas, 69 scripts analisados, interface em 1100×720 e 390×844, round-trip de save com raridade 7. Teste de navegador isolado com animação contínua suspensa; não equivale a campanha longa nem celular físico.
+- Integradas v318/v319 do Dracônico (28c55ca), preservadas sem reverter modelo/animações. Cache inclui recursos e versões efetivamente referenciados.
+
 ## v315 — quatro criaturas remodeladas, 07/10/2026
 - Pedido de Ian: substituir as quatro inéditas pelos modelos Blender recém-criados. Olho Errante, Arraia do Vazio, Arauto da Fenda e Semente da Fenda nos mesmos IDs e arquivos; regras de combate/lore preservadas.
 - Movimentos de Idle/Run/Attack/Hit/Death adaptados por grupos, tentáculos/raízes/anéis; sem skinning novo. Escala e flutuação normalizadas; Arraia dimensionada pelo comprimento para não ampliar pela espessura. Carregador exclusivo evita corrida que sobrescreveria as animações.

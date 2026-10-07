@@ -4,7 +4,7 @@
 (function(){
 const LV=50,CH=.15;
 const MODS={forte:{n:'Monstros fortes',d:'+50% de vida e dano dos monstros',b:.4},sempocao:{n:'Sem poção',d:'poções não funcionam',b:.3},frenesi:{n:'Frenesi',d:'monstros 30% mais rápidos',b:.25},semcura:{n:'Sem regeneração',d:'a vida não se recupera sozinha',b:.25}};
-try{UNLOCK.push(['corrupt',LV,'Fendas corrompidas: portais com riscos escolhidos e recompensas maiores'])}catch(_){}
+try{UNLOCK.push(['corrupt',LV,'Fendas corrompidas: portais com riscos aleatórios e recompensas maiores'])}catch(_){}
 function active(){return typeof L!=='undefined'&&L.mode==='dungeon'&&L.gate&&L.gate.corrupt299}
 function has(m){const c=active();return !!c&&c.includes(m)}
 function bonus(c){return c.reduce((a,m)=>a+(MODS[m]?.b||0),0)}
