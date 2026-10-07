@@ -1,3 +1,9 @@
+## v315 — quatro criaturas remodeladas, 07/10/2026
+- Pedido de Ian: substituir as quatro inéditas pelos modelos Blender recém-criados. Olho Errante, Arraia do Vazio, Arauto da Fenda e Semente da Fenda nos mesmos IDs e arquivos; regras de combate/lore preservadas.
+- Movimentos de Idle/Run/Attack/Hit/Death adaptados por grupos, tentáculos/raízes/anéis; sem skinning novo. Escala e flutuação normalizadas; Arraia dimensionada pelo comprimento para não ampliar pela espessura. Carregador exclusivo evita corrida que sobrescreveria as animações.
+- Testes: nascimento das quatro em partida isolada, 20 estados de animação, prévia com materiais do jogo, sem erros de console; build estável. Sem campanha longa ou teste em celular físico. Entrega: https://drive.google.com/drive/folders/1l6XNUEtghfniCZGZsKBlzZPNbEhMqNMR
+- Base preservada: v314 de habilidades/fúria (585e0fa), recebida durante a integração.
+
 ## v313 — mais shaders, 07/10/2026
 - Cristais do mundo (cryMat230) usam o shader Crystal310. Anel do rank do jogador, auréola do título, anel das criaturas raras e anel dos Abissais usam o shader de energia (Shaders312). Materiais de shader expõem .color para o jogo trocar a cor do rank.
 
