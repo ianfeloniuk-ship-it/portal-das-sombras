@@ -3288,7 +3288,7 @@ function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Sk
 /* ARTE NUM ESTILO SÓ (decisão do Ian: CC0 num estilo só): todo modelo GLB vira material "desenho" (toon) com a mesma rampa de luz do chão,
    e as cores passam por uma paleta comum (leve puxada para o azul do Oráculo). */
 const PAL=new THREE.Color(0x9fb4d8);
-function toToon(mm,skinned,pal){const t=new THREE.MeshToonMaterial({color:mm.color?mm.color.clone():new THREE.Color(0xffffff),map:mm.map||null,gradientMap:gmap,emissive:mm.emissive?mm.emissive.clone():new THREE.Color(0),transparent:!!mm.transparent,opacity:mm.opacity??1,vertexColors:!!mm.vertexColors,skinning:!!skinned,side:mm.side});if(pal)t.color.lerp(PAL,pal);return t}
+function toToon(mm,skinned,pal){const t=new THREE.MeshToonMaterial({name:mm.name||'',color:mm.color?mm.color.clone():new THREE.Color(0xffffff),map:mm.map||null,gradientMap:gmap,emissive:mm.emissive?mm.emissive.clone():new THREE.Color(0),transparent:!!mm.transparent,opacity:mm.opacity??1,vertexColors:!!mm.vertexColors,skinning:!!skinned,side:mm.side});if(pal)t.color.lerp(PAL,pal);return t}
 function makeActor(o){
   const gk=o.gk,src=MODELS.list[gk];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -8688,6 +8688,7 @@ requestAnimationFrame(frame);
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=302"></script>
 <script src="tools/anim303.js?v=305"></script>
+<script src="tools/fendidos307.js?v=307"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
@@ -8700,9 +8701,9 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v306</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v307</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=306;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=307;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

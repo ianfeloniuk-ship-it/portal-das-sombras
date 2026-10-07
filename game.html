@@ -3271,7 +3271,7 @@ function wfor(gk,wep,shield){const sk=/^Skeleton/.test(gk);const m={sword:sk?'Sk
 /* ARTE NUM ESTILO SÓ (decisão do Ian: CC0 num estilo só): todo modelo GLB vira material "desenho" (toon) com a mesma rampa de luz do chão,
    e as cores passam por uma paleta comum (leve puxada para o azul do Oráculo). */
 const PAL=new THREE.Color(0x9fb4d8);
-function toToon(mm,skinned,pal){const t=new THREE.MeshToonMaterial({color:mm.color?mm.color.clone():new THREE.Color(0xffffff),map:mm.map||null,gradientMap:gmap,emissive:mm.emissive?mm.emissive.clone():new THREE.Color(0),transparent:!!mm.transparent,opacity:mm.opacity??1,vertexColors:!!mm.vertexColors,skinning:!!skinned,side:mm.side});if(pal)t.color.lerp(PAL,pal);return t}
+function toToon(mm,skinned,pal){const t=new THREE.MeshToonMaterial({name:mm.name||'',color:mm.color?mm.color.clone():new THREE.Color(0xffffff),map:mm.map||null,gradientMap:gmap,emissive:mm.emissive?mm.emissive.clone():new THREE.Color(0),transparent:!!mm.transparent,opacity:mm.opacity??1,vertexColors:!!mm.vertexColors,skinning:!!skinned,side:mm.side});if(pal)t.color.lerp(PAL,pal);return t}
 function makeActor(o){
   const gk=o.gk,src=MODELS.list[gk];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -8671,6 +8671,7 @@ requestAnimationFrame(frame);
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=302"></script>
 <script src="tools/anim303.js?v=305"></script>
+<script src="tools/fendidos307.js?v=307"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>

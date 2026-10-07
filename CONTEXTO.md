@@ -1,3 +1,7 @@
+## v307 — Fendidos (4 primeiros), 07/10/2026
+- Lore nova do Ian: criaturas tocadas pela Fenda. Lobo Fendido, Tecelã de Vidro, Colosso Rachado, Yeti Corrompido: modelos CC0 da Quaternius transformados no Blender (cristais presos aos ossos, corpo escurecido, olhos brilhando; materiais FendaCristal/FendaBrilho). Mutação por bioma (cor dos cristais + nome: Gélido, Ígneo, de Âmbar, Tóxico, Musgoso, Florido, Prismático). Aparecem em 12% das criaturas nas Fendas e 8% perto de portais abertos (tools/fendidos307.js). Script do Blender no cofre (Entregas/Fendidos-2026-10-07).
+- Próximo: PDF de escalas; 200 criaturas com lore; prompts de imagem para o Tripo.
+
 ## v306 — habilidades das classes novas; Bestiário só com o que está na tela, 07/10/2026
 - Bug (Ian, Berserker): as 4 classes novas não tinham habilidades 'aprendidas' (kitUnlocked111 só aceitava classes com catálogo KIT_DEFS111), então nada entrava no espaço. Agora as 3 habilidades das classes 21+ contam como aprendidas. 'Varredura' do Lanceiro virou 'Varredura de Lança' (nome igual ao do Guerreiro confundia o kit).
 - Bestiário: espécie só conta como vista se o monstro estiver dentro do campo da câmera (frustum + margem), até 30 m.
