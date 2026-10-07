@@ -1,3 +1,6 @@
+## v298 — criaturas raras por bioma, 06/10/2026
+- No mundo, 1,5% dos monstros comuns nascem como variante rara do bioma (Alfa, Encantado, Ancião, Dourado, Infernal, Ancestral, Prismático, Venenoso): vida ×3, dano ×1,4, maior, anel e luz na cor do bioma; ouro ×10, XP extra e equipamento Épico garantido. Aviso 'CRIATURA RARA AVISTADA/DERROTADA' e seção no Bestiário (tools/rare298.js).
+
 ## v297 — 4 classes corpo a corpo, 06/10/2026
 - Pedido do Ian (mais corpo a corpo): Monge (21, punhos, Fúria, passiva Punho Ressonante), Lâmina Arcana (22, mago corpo a corpo com dano mágico, Mana, passiva Lâmina Sedenta), Lanceiro (23, lança, Vigor, passiva Primeiro Sangue), Berserker (24, machado, Fúria, passiva Fúria Sanguinária). MELEE_MAGIC297: Lâmina Arcana ataca corpo a corpo com dano mágico. Nova arma 'spear' (Lança, modelo comum-lanca). GROWTH com 4 entradas novas; resourceType260 com os índices novos.
 
