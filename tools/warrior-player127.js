@@ -89,7 +89,7 @@
     for(const m of waiting163){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}waiting163.clear()},undefined,()=>{})})();
   /* v171 (Ian: "cajado, escudo etc" das classes normais): armas comuns do Tripo em metal neutro, pintadas com a cor do rank.
      [arquivo, comprimento, ponto de pegada (fração a partir da base)]. Tanque e Paladino levam escudo na outra mão. */
-  const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],axe:['comum-maca',.6,.14],wand:['comum-lanca',1.35,.4]};
+  const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],spear:['comum-lanca',1.35,.4],axe:['comum-maca',.6,.14],wand:['comum-lanca',1.35,.4]};
   const SHIELD171={axe:1,wand:1},w171={},wait171=new Set();
   const isStaff251=kind=>/^(staff|bonestaff|tome)$/.test(kind||'');
   function staffTip251(w,axis='y'){

@@ -2,7 +2,7 @@
 function furyMaxR260(){return typeof furyMax281==='function'?furyMax281():100}
 function vigorMaxR260(){return typeof vigorMax281==='function'?vigorMax281():100}
 function martialState260(){if(!run)return {vigor:100,fury:0,vigorWait:0,furyWait:0};if(!run.resources260)run.resources260={vigor:100,fury:0,vigorWait:0,furyWait:0};const r=run.resources260;for(const k of ['vigor','fury'])r[k]=Math.max(0,Math.min(k==='fury'?furyMaxR260():vigorMaxR260(),Number.isFinite(r[k])?r[k]:(k==='vigor'?100:0)));return r}
-function resourceType260(s){return s?.resource260||([0,1,2,4].includes(s?.sourceClass)?(s.sourceClass===0?'fury':'vigor'):'mana')}
+function resourceType260(s){return s?.resource260||([0,1,2,4,21,23,24].includes(s?.sourceClass)?([0,21,24].includes(s.sourceClass)?'fury':'vigor'):'mana')}
 function resourceName260(s){return {fury:'Fúria',vigor:'Vigor',mana:'mana'}[resourceType260(s)]}
 function resourceCost260(s,level){return manaCost177(s,level)}
 function resourceAvailable260(s,mp=player?.mp||0){const t=resourceType260(s);return t==='mana'?mp:martialState260()[t]}

@@ -1,3 +1,6 @@
+## v297 — 4 classes corpo a corpo, 06/10/2026
+- Pedido do Ian (mais corpo a corpo): Monge (21, punhos, Fúria, passiva Punho Ressonante), Lâmina Arcana (22, mago corpo a corpo com dano mágico, Mana, passiva Lâmina Sedenta), Lanceiro (23, lança, Vigor, passiva Primeiro Sangue), Berserker (24, machado, Fúria, passiva Fúria Sanguinária). MELEE_MAGIC297: Lâmina Arcana ataca corpo a corpo com dano mágico. Nova arma 'spear' (Lança, modelo comum-lanca). GROWTH com 4 entradas novas; resourceType260 com os índices novos.
+
 ## v296 — defesa em número, 06/10/2026
 - REGRA DO IAN: defesa é NÚMERO descontado do dano, não porcentagem (100 de dano contra 200 de defesa = 0). Resistência = defesa física, Espírito = defesa mágica, Vontade = defesa universal (metade por ponto, soma com as duas). Cada ponto vale atkPer(nível). Penetração da Destreza também é número (metade por ponto). Monstros: pontos × atkPer(nível) × 0,5. A armadura (player.def 12%) continua como antes.
 

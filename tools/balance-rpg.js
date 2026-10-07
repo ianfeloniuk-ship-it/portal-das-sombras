@@ -35,7 +35,12 @@
     { id: 'rare-sword', hp: [108, 12], mp: [30, 1], physical: [11, 2.3], magic: [3, .3] },
     { id: 'rare-staff-a', hp: [82, 8], mp: [76, 5.5], physical: [6, .6], magic: [12.5, 2.1] },
     { id: 'rare-staff-b', hp: [84, 8.2], mp: [74, 5.3], physical: [6, .6], magic: [13, 2.15] },
-    { id: 'rare-staff-c', hp: [86, 8.4], mp: [72, 5.1], physical: [6, .6], magic: [13.2, 2.2] }
+    { id: 'rare-staff-c', hp: [86, 8.4], mp: [72, 5.1], physical: [6, .6], magic: [13.2, 2.2] },
+    // v297: novas classes corpo a corpo (índices 21 a 24)
+    { id: 'monk', hp: [110, 12.5], mp: [30, 1], physical: [11, 2.3], magic: [3, .3] },
+    { id: 'spellblade', hp: [100, 11], mp: [60, 4], physical: [6, .6], magic: [12, 2.1] },
+    { id: 'lancer', hp: [112, 12.5], mp: [30, 1], physical: [11.5, 2.3], magic: [3, .3] },
+    { id: 'berserker', hp: [122, 13.8], mp: [29, .95], physical: [12, 2.38], magic: [2.6, .26] }
   ];
 
   function levelOf(value) { var n = Number(value); return Number.isFinite(n) ? Math.max(1, Math.floor(n)) : 1; }
