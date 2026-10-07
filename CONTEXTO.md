@@ -1,3 +1,6 @@
+## v303 — animação de lançamento por habilidade, 07/10/2026
+- Pedido do Ian: o personagem faz um movimento ao lançar cada habilidade (skillAnim155), usando as 24 animações do Viajante: pesado2 (terremoto, golpes brutais), golpe3 (giratórios), arco2/arremesso_flecha (flechas), soco (Monge e punhos), lanca1 (Lanceiro, estocadas), guarda (defesas), esquiva (deslocamentos), adaga2 (Assassino), pesado1/golpe2 (golpes), magia_mao/cajado2 (magias, curas, buffs). Animações novas feitas no Blender ficam para depois.
+
 ## v302 — efeitos visuais das habilidades, 07/10/2026
 - Pedido do Ian (prioridade): habilidades eram só anéis brilhando. tools/vfx302.js liga as 415 habilidades (classes + kits) a efeitos próprios por nome/elemento/tipo: Terremoto/Tremor/Erupção = fissuras no chão com brilho de lava, pedras e tremor de tela; pedra = espinhos de rocha; gelo = espinhos de gelo/cúpula; fogo = anel de chamas com brasas, meteoros em chuva, jato; raio = relâmpagos do céu; luz = pilar; flechas = rastro perfurante/leque; giratórios = corte 360°; fumaça, veneno, cura, cúpula de escudo, círculo rúnico, vórtice, vento, rastro de investida. O anel antigo é silenciado no instante do lançamento.
 - Próximo: refinar efeitos por habilidade (feedback do Ian) e animações próprias das classes novas; mais monstros (peças grátis/Blender).

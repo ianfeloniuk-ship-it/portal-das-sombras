@@ -1,6 +1,6 @@
 # Hollow Rank — versão atual do jogo
 
-**Versão do código: <!--v-->v302<!--/v-->** · site: https://ianfeloniuk-ship-it.github.io/portal-das-sombras/
+**Versão do código: <!--v-->v303<!--/v-->** · site: https://ianfeloniuk-ship-it.github.io/portal-das-sombras/
 (este número é atualizado sozinho pelo `python3 tools/build.py`, a partir do `sw.js`)
 
 ## Antes de mexer no jogo (qualquer IA, PC ou nuvem)

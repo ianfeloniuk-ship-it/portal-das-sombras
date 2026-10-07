@@ -5736,7 +5736,20 @@ function magicEvolution(sk,dmg){const P=player,col=sk.col;
   return false;
 }
 // v155: habilidades com animação própria no Viajante (Chuva de Flechas: com arco mira para o alto; sem arco joga um punhado de flechas para cima).
-function skillAnim155(sk){if(/Chuva de Flechas/.test(sk?.n||''))player.skillAnim155={k:!hasBow259()?'chuva_sem_arco':'chuva_com_arco',until:time+.8}}
+/* v303 (Ian): cada habilidade tem a sua animação de lançamento (antes só a Chuva de Flechas tinha). Usa as animações do modelo do Viajante. */
+function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),src=sk.sourceClass??profile.cls,mag=MAGIC_CLS.includes(src),wk=weaponKind272(run.equip.w)||'',staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null,d=.75;
+ if(/Chuva de Flechas/.test(n))k=!hasBow259()?'chuva_sem_arco':'chuva_com_arco';
+ else if(/terremoto|tremor|sísm|abalo|erup|impacto|golpe brutal|golpe pesado|quebra|rompante|pisão|esmag/i.test(n))k='pesado2';
+ else if(/girat|redemoinho|varredura|meia-lua|garras em arco|rodopio/i.test(n))k='golpe3';
+ else if(/flecha|disparo|tiro|leque/i.test(n))k=hasBow259()?'arco2':'arremesso_flecha';
+ else if(/punho|soco|chute|palma/i.test(n)||src===21)k='soco';
+ else if(/estocada|lança|lanca|salto do dragão/i.test(n)||src===23)k='lanca1';
+ else if(/guard|ward|block|parry|barrier|anchorward|interpose|form/.test(t))k='guarda';
+ else if(/move|dash_strike|evade|relocate/.test(t))k='esquiva';
+ else if(src===1||/adaga|faca|lâmina envenenada|cortes/i.test(n))k='adaga2';
+ else if(/cone|target|execute|line/.test(t)&&!mag)k=wk==='axe'||src===2||src===24?'pesado1':'golpe2';
+ else if(mag||/heal|healzone|summon|buff|rally260|allybuff|speed|order|cleanse|pulses|area|nova|bolt|chain|slow|slowzone|root|weaken/.test(t))k=staff?'cajado2':'magia_mao';
+ if(k)player.skillAnim155={k,until:time+d}}
 function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);
   if(sk.rare103){rareSkillRun103(sk);return}
