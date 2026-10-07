@@ -1,3 +1,6 @@
+## v325 — tutorial sem texto cortado, 07/10/2026
+- Remove altura fixa e corte de três linhas dos avisos. A caixa cresce conforme o texto, preservando fonte de 13 px, largura máxima de 420 px e posição superior. Normaliza o bloco interno do tutorial para evitar borda, margens e espaçamento duplicados. Avisos continuam ocultos sobre menus e sem capturar cliques.
+
 ## v324 — lembranças e Bestiário/Grimório, 07/10/2026
 - Corrige retorno indevido da ação narrator105 que redesenhava o Diário sobre a tela recém-aberta. A tela de lembranças registra sua própria função de atualização, preservando a navegação e o histórico de Voltar.
 

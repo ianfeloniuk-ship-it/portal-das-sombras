@@ -118,6 +118,8 @@ body.pc #btns .b[hidden]{display:none}
 #modal{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-start;padding-top:max(14px,4vh);justify-content:center;padding-inline:16px;background:rgba(2,6,14,.6)}
 body:has(#modal:not([hidden])) #tb,body:has(#modal:not([hidden])) #cam165{visibility:hidden}
 body:has(#modal:not([hidden])) #pop194,body:has(#gameMenu95:not([hidden])) #pop194{display:none!important}
+#pop194 .guide93{margin:0;padding:0;border:0;background:none;font-size:inherit;line-height:inherit}
+#pop194 p{margin:3px 0 0;font-size:inherit;line-height:inherit}
 #mbox{background:#180c1e;width:min(600px,100%);max-height:calc(100% - max(28px,8vh));display:flex;flex-direction:column;padding:12px 14px}
 #mhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
 #mt{font-family:"Russo One",sans-serif;font-size:17px;letter-spacing:.06em;color:#dff4ff;text-shadow:0 0 10px var(--sys)}
@@ -5218,7 +5220,7 @@ function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory
 const POPQ277=[];let popBusy277=false;
 function popNews194(html,ms){const key=String(html).replace(/<[^>]*>/g,'').replace(/\d+/g,'#');if(POPQ277.some(q=>q.key===key)||popBusy277===key)return;POPQ277.push({html,key,ms});while(POPQ277.length>3)POPQ277.shift();if(!popBusy277)popNext277()}
 function popNext277(){if(modalOpen){POPQ277.length=0;popBusy277=false;return}const q=POPQ277.shift();if(!q){popBusy277=false;return}popBusy277=q.key;let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;pointer-events:none;width:min(420px,calc(100vw - 32px))';document.body.appendChild(box)}
- const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.96);border:1px solid rgba(255,179,71,.7);border-radius:8px;padding:6px 10px;color:#fff6e6;font-size:13px;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;max-height:66px;overflow:hidden;pointer-events:none;box-sizing:border-box;width:100%;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
+ const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.96);border:1px solid rgba(255,179,71,.7);border-radius:8px;padding:6px 10px;color:#fff6e6;font-size:13px;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;pointer-events:none;box-sizing:border-box;width:100%;overflow-wrap:anywhere';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
  const t=Math.min(6500,Math.max(q.ms||0,2500+d.textContent.length*18));setTimeout(()=>{d.style.opacity='0';setTimeout(()=>{d.remove();popNext277()},320)},t)}
 function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
@@ -8739,9 +8741,9 @@ requestAnimationFrame(frame);
 
 <script src="tools/bestiary324.js?v=324"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v324</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v325</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=324;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=325;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
