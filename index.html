@@ -3805,10 +3805,11 @@ const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed'
 const ROCKS=['rock_largeA','rock_largeB','rock_largeC','rock_largeD','rock_tallA','rock_tallB','rock_tallC','stone_tallA','stone_largeA'];
 // Etapa 2 (Ian, 02/10): borders are not straight lines; warp the lookup so biomes reach into each other in fingers and islands.
 function biomeWarp(x,z){return[x+(WN(x*.021+5.3,z*.021+9.1)-.5)*46+(WN(x*.09+3.7,z*.09+7.2)-.5)*14,z+(WN(x*.021+41.2,z*.021+77.5)-.5)*46+(WN(x*.09+61.4,z*.09+13.8)-.5)*14]}
-function biomeMix154(x,z){const w=biomeWarp(x,z),b=WN(w[0]*.0028+311,w[1]*.0028+733),b2=WN(w[0]*.004+91,w[1]*.004+57),snow=clamp((.35-b)/.08,0,1),cold=clamp((b2-.58)/.08,0,1),heat=clamp((b-.65)/.08,0,1),lava=clamp((b2-.51)/.08,0,1),wet=clamp((b2-.64)/.08,0,1)*(1-snow)*(1-heat);return{snow:snow*(1-cold),crystal:snow*cold,sand:heat*(1-lava),ash:heat*lava,wet}}
-function bare154(x,z){const m=biomeMix154(x,z);return m.sand>.6||m.ash>.6}
-function snowB(x,z){const w=biomeWarp(x,z);return WN(w[0]*.0028+311,w[1]*.0028+733)}
-function biomeAt(x,z){const w=biomeWarp(x,z);x=w[0];z=w[1];/* v295 (Ian): biomas mais longos (frequência ~2,2× menor) */const b=WN(x*.00125+311,z*.00125+733),b2=WN(x*.0018+91,z*.0018+57);if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.0022+17,z*.0022+29)>.74?'flores':'campos'}
+function biomeSample317(x,z){const w=biomeWarp(x,z);return {w,b:WN(w[0]*.00125+311,w[1]*.00125+733),b2:WN(w[0]*.0018+91,w[1]*.0018+57)}}
+function biomeMix154(x,z){const {b,b2}=biomeSample317(x,z),snow=clamp((.35-b)/.08,0,1),cold=clamp((b2-.58)/.08,0,1),heat=clamp((b-.65)/.05,0,1),lava=clamp((b2-.55)/.08,0,1),wet=clamp((b2-.64)/.08,0,1)*(1-snow)*(1-heat);return{snow:snow*(1-cold),crystal:snow*cold,sand:heat*(1-lava),ash:heat*lava,wet}}
+function bare154(x,z){const B=biomeAt(x,z),m=biomeMix154(x,z);return B==='deserto'||B==='vulcao'||m.sand>.6||m.ash>.6}
+function snowB(x,z){return biomeSample317(x,z).b}
+function biomeAt(x,z){const {w,b,b2}=biomeSample317(x,z);x=w[0];z=w[1];if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.0022+17,z*.0022+29)>.74?'flores':'campos'}
 const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens',vulcao:'Terras Vulcânicas',cristal:'Geleira de Cristal',floresta:'Floresta Sombria',flores:'Campos Floridos'};
 const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x10261a,.45],flores:[0x3a7a3a,.25]};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
@@ -3999,17 +4000,18 @@ const TINTS=[0xffffff,0xeef5d6,0xdcebdc,0xf5eccc,0xe2e8d2];
 function tintB(h,k){return(Math.min(255,((h>>16)&255)*k)<<16)|(Math.min(255,((h>>8)&255)*k)<<8)|Math.min(255,(h&255)*k)}
 function envChunk(g,R,x0,z0,cityD,addCol){
   const Q=()=>[0,1,2,3].map(()=>new EnvBatch()),TR=Q(),FL=Q(),SO=Q(),qi=(x,z)=>(x>x0?1:0)+(z>z0?2:0),dg=danger(x0,z0),bio=WN(x0*.004+900,z0*.004+900),st=CH/12,lite=ENV.lite;let tr,fl,so;const at=(x,z)=>{const i=qi(x,z);tr=TR[i];fl=FL[i];so=SO[i]};
-  const B=biomeAt(x0,z0),SE=seasonI(),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
+  const B=biomeAt(x0,z0),SE=seasonI();
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44*CITYK||q.clear)continue;
+    const B=biomeAt(px,pz),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
     const n=WN(px*.035,pz*.035);at(px,pz);
-    if(B==='deserto'&&(n>.56||R()<.035)){if(R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
+    if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
     else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();EW(so,pk(R,ROCKS),px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
-  if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK)continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
+  if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK||biomeAt(px,pz)!=='flores')continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
   if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<44*CITYK)continue;at(px,pz);const s2=.7+R()*.9;EW(so,pk(R,['rock_tallA','rock_tallB','stone_tallA']),px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2})}
   for(let k=0,nc=lite?60:150;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<37*CITYK)continue;
-    const fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
+    const B=biomeAt(px,pz),fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
     if(B==='deserto'){if(r<.5)EW(so,pk(R,['rock_smallA','rock_smallC','rock_largeA','stone_smallA']),px,-.03,pz,ry,.6+R()*1.2,0xe8d2a0);else if(r<.62)EH(so,pk(R,['bone_A','skull','ribcage']),px,0,pz,ry,.4+R()*.3);else if(r<.8)EH(fl,'plant_bushSmall',px,0,pz,ry,.5+R()*.3,0xc9a86a);continue}
     // Etapa 2: no green plants on snow, sand or ash, decided per spot (borders are ragged now).
     if(bare154(px,pz))continue;
@@ -4023,7 +4025,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     else if(r<.72)EH(fl,pk(R,['plant_bush','plant_bushLarge','plant_bushSmall','plant_flatShort','plant_flatTall']),px,0,pz,ry,.7+R()*.6);
     else if(r<.85)EW(so,pk(R,['rock_smallA','rock_smallC','stone_smallA','rock_smallFlatA']),px,-.03,pz,ry,.5+R()*.7);
     else EH(fl,'blades',px,0,pz,ry,.7+R()*.5)}
-  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz);if(q.clear||q.d<36*CITYK||B==='deserto'||B==='neve'||['neve','cristal'].includes(biomeAt(px,pz))||snowB(px,pz)<.33||bare154(px,pz))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
+  for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz),B=biomeAt(px,pz);if(q.clear||q.d<36*CITYK||B==='deserto'||B==='neve'||['neve','cristal'].includes(biomeAt(px,pz))||snowB(px,pz)<.33||bare154(px,pz))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
   for(let i=0;i<4;i++){envOwn(g,TR[i].mesh(TREEMAT));envOwn(g,FL[i].mesh(FLORAMAT));envOwn(g,SO[i].mesh(ENVMAT));registerChestBatch253(SO[i],g.userData.chestObstacles253||(g.userData.chestObstacles253=[]));}
 }
 ENV.cast=[];
@@ -8684,7 +8686,7 @@ requestAnimationFrame(frame);
 <script src="tools/lux267.js?v=288"></script>
 <script src="tools/bestiary294.js?v=316"></script>
 <script src="tools/biomes295.js?v=295"></script>
-<script src="tools/rare298.js?v=313"></script>
+<script src="tools/rare298.js?v=317"></script>
 <script src="tools/corrupt299.js?v=299"></script>
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=312"></script>
@@ -8708,9 +8710,9 @@ requestAnimationFrame(frame);
 
 <script src="tools/classes316.js?v=316"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v316</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v317</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=316;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=317;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
