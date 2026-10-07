@@ -1,3 +1,8 @@
+## v321 — avisos compactos e ficha de volta à Build, 07/10/2026
+- Correção explícita de Ian: ficha de combate e regeneração pertencem à Build. Status volta a priorizar atributos e pontos disponíveis. Reverte a mudança de localização introduzida na v320.
+- Avisos flutuantes: até 420 px, fonte 13 px, até três linhas, margem superior 10 px, duração até 6,5 s e sem interceptar cliques. Texto completo preservado no Histórico.
+- Avisos ocultos imediatamente ao abrir qualquer janela ou o menu do jogo; fila não inicia novos avisos enquanto há janela aberta.
+
 ## v320 — Primeva e revisão de consistência, 07/10/2026
 - Decisão de Ian: jogo Primeva; Primeva é a oitava raridade de equipamento. IDs anteriores e chaves de save preservados. Padrões iniciais de balanceamento: multiplicador 5,2, três afixos e pesos 0,001/0,01 em saque comum/chefe.
 - Bolsa contém ouro carregado, equipamentos guardados, recursos e consumíveis. Ficha de combate e regeneração em Personagem → Status; progressão da arma viva em Build. Painel opaco evita ler o HUD por trás.
