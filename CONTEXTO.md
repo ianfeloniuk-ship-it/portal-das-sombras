@@ -1,3 +1,7 @@
+## v306 — habilidades das classes novas; Bestiário só com o que está na tela, 07/10/2026
+- Bug (Ian, Berserker): as 4 classes novas não tinham habilidades 'aprendidas' (kitUnlocked111 só aceitava classes com catálogo KIT_DEFS111), então nada entrava no espaço. Agora as 3 habilidades das classes 21+ contam como aprendidas. 'Varredura' do Lanceiro virou 'Varredura de Lança' (nome igual ao do Guerreiro confundia o kit).
+- Bestiário: espécie só conta como vista se o monstro estiver dentro do campo da câmera (frustum + margem), até 30 m.
+
 ## v305 — espada não atravessa o peito; movimento dos chefes, 07/10/2026
 - Poses novas: com arma na mão, o braço direito nunca cruza o peito (a espada atravessava o corpo).
 - Chefes, elites e rivais se movem nos ataques (Anim303.enemyPost): pancada = sobe, tomba para trás e desce com fissuras e tremor; investida = inclina e solta poeira; magia = flutua com círculo rúnico; golpe = gira o tronco e solta com arco de corte; tiro = recuo.
