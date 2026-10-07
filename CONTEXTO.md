@@ -1,3 +1,8 @@
+## v324 — lembranças e Bestiário/Grimório, 07/10/2026
+- Corrige retorno indevido da ação narrator105 que redesenhava o Diário sobre a tela recém-aberta. A tela de lembranças registra sua própria função de atualização, preservando a navegação e o histórico de Voltar.
+
+- Bestiário sempre no menu e Diário, busca por descobertas, fichas com imagem do modelo, abates, lore e domínio. Avisos de descoberta, lore, domínio, raros e chefes clicáveis para a criatura; ocultos sobre menus, prazo ampliado enquanto focados. Prévia cria modelo isolado, sem spawn/abate.
+
 ## v323 — equipamentos Ferro/Comum, 07/10/2026
 - Prioridade de Ian: todas as armas, armaduras e acessórios após concluir o piloto. Inventário online: 139 referências de armas observadas entre 720 combinações planejadas, 80 conjuntos de armadura e 10 coroas. Isso não equivale a modelos 3D prontos.
 - Primeiro piloto: espada Ferro/Comum modelada no Blender conforme três vistas; elmo TripoSG ajustado ao Viajante original, textura da referência e variante de cabelo apenas na área coberta. Corpo/rosto originais preservados, cabelo restaurado ao retirar.

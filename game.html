@@ -182,7 +182,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <div id="boss" class="ui panel" hidden><div id="bn">GUARDIÃO</div><div style="display:flex;justify-content:center;align-items:center;gap:6px"><div id="bpips"></div><b id="bx"></b></div><div class="bar" id="bbar"><i id="bb" style="background:#ff2d55"></i></div></div>
 <canvas id="mm" class="ui panel" width="192" height="192" hidden></canvas>
 <div id="tb" hidden><button class="mini" id="bMenu" aria-expanded="false" aria-controls="gameMenu95" onclick="toggleGameMenu95()">☰ MENU</button><nav id="gameMenu95" aria-label="Menu do jogo" hidden>
-<button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bDiary" onclick="modalOpen?closeModal():journeyView()">DIÁRIO</button><button class="mini" id="bNews" onclick="newsView()">HISTÓRICO</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">CONFIGURAÇÕES</button></nav></div>
+<button class="mini" id="bChar" onclick="modalOpen?closeModal():bagView('char')">PERSONAGEM</button><button class="mini" id="bBestiary324" onclick="bestView()">BESTIÁRIO / GRIMÓRIO</button><button class="mini" id="bDiary" onclick="modalOpen?closeModal():journeyView()">DIÁRIO</button><button class="mini" id="bNews" onclick="newsView()">HISTÓRICO</button><button class="mini" id="bStyle" onclick="toggleStyle()" hidden>ESTILO</button><button class="mini" id="bMap">MAPA</button><button class="mini" id="bBag">BOLSA</button><button class="mini" id="bWorld" onclick="modalOpen?closeModal():bagView('world')">MUNDO</button><button class="mini" id="bSnd" hidden>SOM</button><button class="mini" id="bGfx" hidden>HD</button><button class="mini" id="bCfg">CONFIGURAÇÕES</button></nav></div>
 <div id="mission" class="ui panel" hidden style="pointer-events:auto"></div>
 <section id="history95" aria-label="Histórico de mensagens" hidden>
 <header><button id="historyToggle95" aria-expanded="true" aria-controls="historyBody95" onclick="toggleHistory95()">HISTÓRICO ▾</button><button id="historyUnread95" onclick="latestHistory95()" hidden></button><button id="historyResize95" aria-label="Ajustar tamanho do histórico" title="Arraste para ajustar. Use as setas do teclado quando selecionado.">⤢</button></header>
@@ -6662,7 +6662,7 @@ const BEST_STEPS=[[10,.03,'Conhecido'],[50,.06,'Estudado'],[200,.10,'Dominado'],
 function bestLvl(k){const n=((profile.bestiary||{})[k])||0;let l=null;for(const s of BEST_STEPS)if(n>=s[0])l=s;return l}
 function bestMul(k){const l=k&&bestLvl(k);return l?1+l[1]:1}
 function bestKill(k){if(!k||!KINDS[k])return;profile.bestiary=profile.bestiary||{};const before=bestLvl(k),n0=profile.bestiary[k]||0;profile.bestiary[k]=n0+1;const after=bestLvl(k);try{Bestiary294.loreCheck(k,n0,n0+1)}catch(_){}
-  if(after&&after!==before){toast('<b>[BESTIÁRIO]</b> '+KINDS[k].n+': <b>'+after[2]+'</b> — +'+Math.round(after[1]*100)+'% de dano contra essa espécie.',5000);sfx('level')}
+  if(after&&after!==before){logNews('<b>[BESTIÁRIO]</b> '+KINDS[k].n+': <b>'+after[2]+'</b> — +'+Math.round(after[1]*100)+'% de dano contra essa espécie.');Bestiary294.corner('ESPÉCIE ESTUDADA',KINDS[k].n+' · '+after[2]+' · +'+Math.round(after[1]*100)+'% de dano','#ffd54f',k);sfx('level')}
   if(profile.bestiary[k]%5===1||after!==before)store.set('pds2_profile',profile)}
 const AIDESC={melee:'Luta corpo a corpo',ranged:'Ataca de longe e mantém distância',lunge:'Dá saltos rápidos em você',slam:'Golpes pesados em área',wraith:'Flutua e dispara magia',rival:'Luta como um caçador'};
 function bestInfo(k,n){const K=KINDS[k];let t='';
@@ -6673,7 +6673,7 @@ function bestInfo(k,n){const K=KINDS[k];let t='';
   return t+'<br><span style="color:var(--dim)">Traços possíveis em portais altos: '+Object.values(TRAITS).map(x=>x.n).join(', ')+'.</span>'}
 /* v293 (Ian): o Bestiário mede um monstro real (vida e dano batiam errado) e mostra os atributos da espécie. */
 const BEST293={};
-function bestStats293(k){const g=Math.min(9,rankOf()),key=k+':'+g;let m=BEST293[key];if(!m){try{const e=spawnKind(k,player.x+900,player.z+900,g,{});m={hp:e.maxhp,dmg:e.dmg,lvl:(()=>{try{return eLvl(e)}catch(_){return GR[g].lvl}})()};const a=mobAttr281(e);m.prof=a.prof;m.P=a.P;m.phy=mobDefVal296(e,'phy');m.mag=mobDefVal296(e,'mag');m.pr=MPROF281[a.prof];e.dead=true;e.gone=true;if(e.m&&e.m.root)scene.remove(e.m.root);enemies=enemies.filter(x=>x!==e)}catch(_){return ''}BEST293[key]=m}
+function bestStats293(k){const g=Math.min(9,rankOf()),key=k+':'+g;let m=BEST293[key];if(!m){try{const e=spawnKind(k,player.x+900,player.z+900,g,{noFendido:true,noInedita:true,noExpLoot:true});m={hp:e.maxhp,dmg:e.dmg,lvl:(()=>{try{return eLvl(e)}catch(_){return GR[g].lvl}})()};const a=mobAttr281(e);m.prof=a.prof;m.P=a.P;m.phy=mobDefVal296(e,'phy');m.mag=mobDefVal296(e,'mag');m.pr=MPROF281[a.prof];e.dead=true;e.gone=true;if(e.m&&e.m.root)scene.remove(e.m.root);enemies=enemies.filter(x=>x!==e)}catch(_){return ''}BEST293[key]=m}
   const pc=x=>Math.round(x*100)+'%',pr=m.pr,dist=['res','esp','von','agi','des'].filter(x=>pr[x]>0).map(x=>({res:'Resistência',esp:'Espírito',von:'Vontade',agi:'Agilidade',des:'Destreza'})[x]+' '+pc(pr[x])).join(' · ');
   return '<br><span style="color:var(--dim)">No rank '+rkN(g)+' (nível '+m.lvl+'): vida <b>'+fmt(Math.round(m.hp))+'</b> · dano <b>'+fmt(Math.round(m.dmg))+'</b> por golpe</span><br><span style="color:var(--dim)">Perfil <b>'+m.prof+'</b>: ganha 0,5 ponto por nível (elite ×1,4, chefe ×2) e distribui em '+dist+'. Defesa agora (descontada de cada golpe): física <b>'+fmt(Math.round(m.phy))+'</b> · mágica <b>'+fmt(Math.round(m.mag))+'</b>.</span>'}
 function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS).filter(k=>!KINDS[k].alias308);const S294=(window.Bestiary294&&Bestiary294.seen())||{};let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies descobertas: <b>'+ks.filter(k=>S294[k]||b[k]).length+'/'+ks.length+'</b>. Derrotar uma espécie revela sua história (1, 10, 50 e 100 abates) e dá dano extra contra ela (10, 50, 200 e 1000 abates).</div>';
@@ -6884,7 +6884,7 @@ function journeyObjectives(){const list=[],nx=profile.rank+1;const eq=run.extrac
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d+questTargetText262(q),d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+questXpText262(q)+' · '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda.',progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
-function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+(Object.keys(profile.dk||{}).length?btn('Bestiário','bestv',0):'')+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+btn('Bestiário / Grimório','bestv',0)+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){if(profile.firstEquipment92?.done)h+=row('Seu primeiro equipamento · concluído','Você conquistou ouro, comprou uma peça e aprendeu a equipá-la.','✓');h+='<div class="sysline">Acompanhe um objetivo no painel do personagem. Histórias iniciadas na Ordem e missões continuam registradas aqui; as recompensas são recebidas com Lyra.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
@@ -7697,7 +7697,7 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     if(run.tmap)h+=row('Mapa do tesouro','Um X marcado no seu mapa','');
     if(L.car)h+=row('Caravana','Escoltando para '+L.car.dest.name,'')}
   openModal(tab==='world'?'MUNDO':'PERSONAGEM',h)}
-function extraActions3(a,v){if(a==='region116'){regionView116();return 'close0'}if(a==='aid116'||a==='supply116'){if(a==='aid116')regionAid116();else regionSupply116();regionView116();return 'close0'}if(a==='narrator105'){narratorView105();return true}const rareAction=rareActions103(a,v);if(rareAction)return rareAction;
+function extraActions3(a,v){if(a==='region116'){regionView116();return 'close0'}if(a==='aid116'||a==='supply116'){if(a==='aid116')regionAid116();else regionSupply116();regionView116();return 'close0'}if(a==='narrator105'){narratorView105();return 'close0'}const rareAction=rareActions103(a,v);if(rareAction)return rareAction;
  if(a==='character'){characterView(v);return 'close0'}
  if(a==='resetattributes'){redistributeAttributes();statusView();return 'close0'}
  if(a==='armorpart'){if(EQUIP_SLOTS.includes(v)&&v!=='w'){L.armorSlot=v;openShop('arm')}return 'close0'}
@@ -8182,7 +8182,7 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
  }
 }
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Comentários do Narrador no histórico, nos momentos de calma. Avisos de perigo e objetivos aparecem sempre.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}
-function narratorView105(){const m=narratorMemory105();if(!m)return;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa.</p></div>';
+function narratorView105(){const m=narratorMemory105();if(!m)return;view=narratorView105;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa.</p></div>';
  h+=row('Experiências compartilhadas','Fendas concluídas: '+(m.clears||0)+' · Quedas acompanhadas: '+(m.counts.death||0)+' · Falas diferentes ouvidas: '+Object.keys(m.seen).length+'.','');
  const names={victory:'Fenda concluída',hard:'Vitória acima do seu rank',narrow:'Volta com pouca vida',retreat:'Expedição interrompida',death:'Queda',returnwin:'Vitória em rank de Fenda com derrota anterior',higher:'Entrada acima do seu rank',red:'Entrada em portal vermelho',explore:'Novo trecho explorado',city:'Chegada à cidade',support:'Cura de aliado ferido',necro:'Eco especial convocado',time:'Retorno à âncora temporal',fenda:'Portal superior criado',fissure:'Fissura persistente descoberta',trial:'Investigação concluída',awakening:'Segundo Despertar concluído',rank:'Promoção pela prova',shift:'Mudança no uso de classes',veteran:'Marco de expedições concluídas'};
  for(const f of m.facts.slice(-12).reverse())h+=row(names[f.kind]||NR_META107[f.kind]?.name||'Experiência',f.rank!==null&&RANKS[f.rank]?'Rank da experiência: '+RANKS[f.rank].id:'Registrado durante sua jornada.','');openModal('O NARRADOR E VOCÊ',h)}
@@ -8694,9 +8694,9 @@ requestAnimationFrame(frame);
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=266"></script>
 <script src="tools/lux267.js?v=288"></script>
-<script src="tools/bestiary294.js?v=316"></script>
+<script src="tools/bestiary294.js?v=324"></script>
 <script src="tools/biomes295.js?v=320"></script>
-<script src="tools/rare298.js?v=320"></script>
+<script src="tools/rare298.js?v=324"></script>
 <script src="tools/corrupt299.js?v=320"></script>
 <script src="tools/elem300.js?v=320"></script>
 <script src="tools/vfx302.js?v=312"></script>
@@ -8704,7 +8704,7 @@ requestAnimationFrame(frame);
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=305"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=316"></script>
+<script src="tools/variants308.js?v=324"></script>
 <script src="tools/ineditas309.js?v=315"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
@@ -8719,3 +8719,5 @@ requestAnimationFrame(frame);
 <script src="narrativa-campanha.js"></script>
 
 <script src="tools/classes316.js?v=320"></script>
+
+<script src="tools/bestiary324.js?v=324"></script>
