@@ -1,3 +1,7 @@
+## v309 — 200 criaturas (4 inéditas do Blender), 07/10/2026
+- Olho Errante, Arraia do Vazio, Arauto da Fenda e Semente da Fenda modeladas do zero no Blender (peças em ossos, animações Idle/Run/Attack/Hit/Death), script no cofre Entregas/Fendidos-2026-10-07/ineditas-blender.py. Aparecem nas Fendas (Arauto só em Fendas fundas; Sementes também perto de portais). Bestiário: 183 espécies + 13 chefes + 4 inéditas = 200 (tools/ineditas309.js).
+- DIREÇÃO VISUAL DO IAN: estilo cartunesco mas com shaders bonitos (como água e Fenda); cristais mais reais. Aplicar em tudo que for criado.
+
 ## v308 — 196 criaturas no Bestiário, 07/10/2026
 - Pedido do Ian (200 criaturas com lore): cada uma das 61 espécies ganhou versão FENDIDA (_f: cristais por bioma, +60% vida) e ABISSAL (_a: corpo de vazio, fragmentos orbitando, anel roxo, +140% vida). Lobo/Aranha/Gigante/Yeti Fendidos usam os modelos do Blender. Nas Fendas: 14% vira Fendida; em Fendas vermelhas/corrompidas/rank B+, 5% Abissal; perto de portais abertos no mundo: 8% Fendida. Lore gerada a partir da lore da espécie. 13 chefes entram no Bestiário com lore própria e aviso 'CHEFE DESCOBERTO'. Total: 183 espécies + 13 chefes = 196 (tools/variants308.js). Faltam 4 inéditas (Blender) para 200.
 
