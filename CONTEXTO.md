@@ -1,3 +1,10 @@
+## v323 — equipamentos Ferro/Comum, 07/10/2026
+- Prioridade de Ian: todas as armas, armaduras e acessórios após concluir o piloto. Inventário online: 139 referências de armas observadas entre 720 combinações planejadas, 80 conjuntos de armadura e 10 coroas. Isso não equivale a modelos 3D prontos.
+- Primeiro piloto: espada Ferro/Comum modelada no Blender conforme três vistas; elmo TripoSG ajustado ao Viajante original, textura da referência e variante de cabelo apenas na área coberta. Corpo/rosto originais preservados, cabelo restaurado ao retirar.
+- Seleção restrita a tier 0 / rar 0 sem conjunto especial; outros equipamentos mantêm seus modelos. Ligações do elmo ao esqueleto original e espada ao encaixe da mão. Respostas assíncronas descartadas após trocar/remover item.
+- Validação: pegada, repouso/corrida/ataque, retirada e restauração da cabeça, cancelamento de carregamento tardio; build/sintaxe. Sem benchmark em celular ou campanha longa.
+- Fontes, referências e evidências: https://drive.google.com/drive/folders/1Tb7vOq-UQGP34xLDPzL3QiNfTajmNbCC . Próximos lotes seguem pendentes, sem geração contínua.
+
 ## v321 — avisos compactos e ficha de volta à Build, 07/10/2026
 - Correção explícita de Ian: ficha de combate e regeneração pertencem à Build. Status volta a priorizar atributos e pontos disponíveis. Reverte a mudança de localização introduzida na v320.
 - Avisos flutuantes: até 420 px, fonte 13 px, até três linhas, margem superior 10 px, duração até 6,5 s e sem interceptar cliques. Texto completo preservado no Histórico.

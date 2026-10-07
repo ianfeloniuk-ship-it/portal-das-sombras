@@ -81,10 +81,29 @@ window.SetVisual153=(()=>{
   const ws=headBone.getWorldScale(new T.Vector3()).x||1;holder.scale.setScalar(1/ws);holder.position.copy(headBone.worldToLocal(top.clone()));
   const rq=root.getWorldQuaternion(new T.Quaternion()),bq=headBone.getWorldQuaternion(new T.Quaternion());holder.quaternion.copy(bq.invert().multiply(rq));
   headBone.add(holder);const t0=performance.now();const tick=()=>{if(!holder.parent)return;const t=(performance.now()-t0)/1000;if(c.userData.spin291)c.userData.spin291.rotation.z=t*.6;if(c.userData.spinGear291)c.userData.spinGear291.rotation.z=-t*.8;(c.userData.float291||[]).forEach((o,i)=>{o.rotation.y=t*(.8+i*.1);o.position.y+=Math.sin(t*2+i)*.0015});requestAnimationFrame(tick)};tick();return true}
- function attach(root,item){if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(item.uid+'h')){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);if(!(item.slot==='a'&&(NOSLOT181[item.set153]||[]).includes('a')))return;/* v292 (Ian): Condutor não tem peitoral próprio — usa o peitoral comum na cor do conjunto */item={...item,set153:undefined,tint292:0x3a6cff}}
+ function refreshOutline323(root){if(root.userData.ol210&&typeof outlineRemove210==='function'&&typeof outlineAdd210==='function'){outlineRemove210(root);outlineAdd210(root)}}
+ const token323=it=>[it.uid,it.slot,it.tier||0,it.rar||0,it.set153||''].join(':');
+ function helmet323(root,item){
+  load('models/equipment323/helmet-F-common.glb').then(src=>{
+   if(!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
+   if(!src){attach(root,{...item,_skip323:true});return}
+   let body=null,head=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o;if(o.name==='tripo_part_6')head=o});if(!body||!head)return;
+   const pieces=[];src.traverse(sm=>{if(sm.isSkinnedMesh)pieces.push(sm)});
+   const ready=pieces.map(sm=>({sm,bones:sm.skeleton.bones.map(b=>boneOf(root,b.name))}));
+   if(!ready.length||ready.some(x=>x.bones.some(b=>!b))){console.warn('Equipment323: incompatible skeleton');return}
+   for(const {sm,bones} of ready){
+    const mats=(Array.isArray(sm.material)?sm.material:[sm.material]).map(x=>{const m=x.clone();m.skinning=true;m.side=T.DoubleSide;return m});
+    const mesh=new T.SkinnedMesh(sm.geometry,Array.isArray(sm.material)?mats:mats[0]);mesh.name='set153_h_reference323';mesh.userData.equipment323=sm.name;
+    mesh.position.copy(sm.position);mesh.quaternion.copy(sm.quaternion);mesh.scale.copy(sm.scale);mesh.castShadow=true;mesh.frustumCulled=false;
+    body.parent.add(mesh);mesh.updateMatrixWorld(true);mesh.bind(new T.Skeleton(bones,sm.skeleton.boneInverses.map(x=>x.clone())),sm.bindMatrix.clone());
+   }
+   head.visible=false;root.userData.equipment323HeadHidden=true;refreshOutline323(root);
+  });
+ }
+ function attach(root,item){if(item.slot==='h'&&!item.set153&&(item.tier||0)===0&&(item.rar||0)===0&&!item._skip323){helmet323(root,item);return}if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(token323(item))){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);if(!(item.slot==='a'&&(NOSLOT181[item.set153]||[]).includes('a')))return;/* v292 (Ian): Condutor não tem peitoral próprio — usa o peitoral comum na cor do conjunto */item={...item,set153:undefined,tint292:0x3a6cff}}
   /* v175 (Ian): peça sem conjunto raro usa a armadura comum do Tripo, pintada com a cor do rank. */const id=item.set153||'comum',slot=item.slot,fit=FIT[slot];/* v289 (Ian): armadura comum também troca a roupa — some a roupa larga daquela parte, aparece o corpo base justo e a peça vai por cima */if(id==='comum'&&BODY289.includes(slot))attachRig169(root,item,true);if(!fit||!root||!(id==='comum'?slot!=='w':HAS165(id,slot)))return;
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
-  load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
+  load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
    const bones=SIDES[slot]||[[fit.bone,null]];root.updateMatrixWorld(true);
    bones.forEach(([bn,cn],i)=>{const bone=boneOf(root,bn);if(!bone)return;
     const holder=prepare(src,{...fit,red165:id==='metamorfo',tint171:id==='comum'?(item.tint292||(typeof TIER_COL!=='undefined'&&TIER_COL[Math.max(0,Math.min(9,item.tier||0))])||0xb0b0b8):null}),piece=holder.children[0],ws=bone.getWorldScale(new T.Vector3()).x||1,rootQ=root.getWorldQuaternion(new T.Quaternion());
@@ -111,7 +130,7 @@ window.SetVisual153=(()=>{
  }
  // v169: peças encaixadas no Blender no corpo do Viajante, com pesos copiados do corpo (dobram junto). Ligadas aos ossos do herói pelo nome.
  const RIG169=Object.fromEntries(['metamorfo','necromante','tempo','tecelao','guardiao','artifice','duelista','condutor','oraculo','devorador'].map(id=>[id,'models/set153/'+id+'-rig.glb']));window.SET_RIG169=RIG169;
- function attachRig169(root,item,baseOnly){const slot=item.slot;load(RIG169[baseOnly?'guardiao':item.set153]).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(item.uid+slot))return;
+ function attachRig169(root,item,baseOnly){const slot=item.slot;load(RIG169[baseOnly?'guardiao':item.set153]).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
    let body=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o});if(!body)return;
    const parts=[];src.traverse(o=>{if(o.isSkinnedMesh&&((!baseOnly&&o.name.startsWith('set169_'+slot))||(o.name.startsWith('base169_'+slot)&&!(NOSLOT181[item.set153]||[]).includes(slot))))parts.push(o)}); /* v181: corpo base justo onde a roupa some */
    for(const sm of parts){const bones=sm.skeleton.bones.map(b=>boneOf(root,b.name));if(bones.some(b=>!b))continue;
@@ -124,10 +143,10 @@ window.SetVisual153=(()=>{
  /* v181 (Ian): a armadura substitui a roupa larga do Viajante (mangas, casaco, calça). Onde a roupa some aparece um corpo base justo e escuro (base169_*). Cabeça nunca some (capuzes mostram o rosto). */
  const NOSLOT181={condutor:['a']};const BODY289=['a','g','b'];
  function clothing(root,slots,rig){const R={a:HIDE.a,g:HIDE.g,b:HIDE.b};root.traverse(o=>{if(o.isMesh&&/^tripo_part_/.test(o.name)){o.visible=!Object.entries(rig?R:HIDE).some(([sl,list])=>{if(!slots.includes(sl)||!list.includes(o.name))return false;if(!rig)return true;const it=rig.find(i=>i.slot===sl);return !!it})}})}
- function clear(root){const old=[];root.traverse(o=>{if(/^set153_/.test(o.name))old.push(o)});old.forEach(o=>o.parent.remove(o));root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=true})}
+ function clear(root){if(root.userData.equipment323HeadHidden){root.traverse(o=>{if(o.name==='tripo_part_6')o.visible=true});delete root.userData.equipment323HeadHidden}const old=[];root.traverse(o=>{if(/^set153_/.test(o.name))old.push(o)});old.forEach(o=>o.parent.remove(o));root.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=true});refreshOutline323(root)}
  function apply(){if(!player||!player.m||!player.m.root||typeof equippedItems!=='function')return;const root=player.m.root,items=equippedItems().filter(it=>it.set153||['h','a','g','b'].includes(it.slot));
-  const key=items.map(it=>it.uid+it.slot).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);
-  root.userData.set153Tokens=new Set(items.map(it=>it.uid+it.slot));{const swap=items.filter(it=>RIG169[it.set153]||(!it.set153&&BODY289.includes(it.slot)));clothing(root,items.filter(it=>it.set153||BODY289.includes(it.slot)).map(it=>it.slot),swap.length?swap:null)}items.forEach(it=>attach(root,it))}
+  const key=items.map(token323).join('|');if(root.userData.set153Key===key)return;root.userData.set153Key=key;clear(root);
+  root.userData.set153Tokens=new Set(items.map(token323));{const swap=items.filter(it=>RIG169[it.set153]||(!it.set153&&BODY289.includes(it.slot)));clothing(root,items.filter(it=>it.set153||BODY289.includes(it.slot)).map(it=>it.slot),swap.length?swap:null)}items.forEach(it=>attach(root,it))}
  setInterval(()=>{try{apply();const r=player&&player.m&&player.m.root;if(r){const w=equippedItems().some(it=>it.set153&&it.slot==='w'&&HAS165(it.set153,'w'));r.traverse(o=>{if(o.name==='weapon_socket_r')o.visible=!w})}}catch(e){console.warn('SetVisual153',e)}},400);
  return {apply,clear,FIT};
 })();

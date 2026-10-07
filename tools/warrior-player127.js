@@ -110,6 +110,19 @@
   API.daggerModel=function(){const k=W171.dagger;load171(k[0],k[1],k[2],'dagger');const src=w171.dagger;if(!src)return null;const w=src.clone(true);w.traverse(x=>{if(x.isMesh&&x.material){x.material=x.material.clone();x.castShadow=false}});return w};
   function make171(key,color){const src=w171[key];if(!src)return null;const w=src.clone(true),mats=[],c=new T.Color(color);w.traverse(x=>{if(x.isMesh){x.castShadow=true;x.material=x.material.clone();x.material.color.copy(c).lerp(new T.Color(1,1,1),.35);mats.push(x.material)}});w.userData.materials=mats;return w}
   function tripoSword163(item){const w=sword163.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;return w}
+  // v323: first reference-fitted equipment pilot, F/Common sword only.
+  let sword323=null,loading323=false;const wait323=new Set();
+  const isSword323=it=>it&&it.kind155==='sword'&&(it.tier||0)===0&&(it.rar||0)===0&&!it.set153;
+  function requestSword323(m){if(sword323)return;if(m)wait323.add(m);if(loading323)return;loading323=true;
+    new T.GLTFLoader().load('models/equipment323/sword-F-common.glb',g=>{
+      const f=new T.Group();f.add(g.scene);f.rotation.x=Math.PI;
+      sword323=norm171(f,.68,.132,false);sword323.userData.equipment323='sword-F-common';
+      for(const x of wait323){x.gearSignature=null;if(x.lastGear163)API.gear(x,...x.lastGear163)}wait323.clear();
+    },undefined,()=>{wait323.clear();loading323=false});
+  }
+  function referenceSword323(item){const w=sword323.clone(true),mats=[];w.traverse(o=>{if(o.isMesh){o.geometry=o.geometry.clone();o.material=o.material.clone();o.castShadow=true;mats.push(o.material)}});
+    w.userData={materials:mats,shape:'sword',color:item.visual.color,rank:0,equipment323:'sword-F-common'};return w;
+  }
   API.gear=function(m,equip,options){m.lastGear163=[equip,options];
     options=options||{};const colors=options.tierColors||[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
     const signature=JSON.stringify(['w','a','h','g','b'].map(k=>{const i=equip[k];return i?[k,i.uid,i.tier,i.rar,i.visual,i.visualWeapon]:[k,null]}));
@@ -123,7 +136,7 @@
       // Empunhadura: o meio do arco (y≈0,49 do modelo) na palma; em pose T o arco fica de pé no mundo e acompanha a mão.
       bow.position.set(0,-.49,0);const hl=m.bones.hand_l;m.model.updateMatrixWorld(true);const hq=hl.getWorldQuaternion(new T.Quaternion()),hs=hl.getWorldScale(new T.Vector3()).x;
       holder.quaternion.copy(hq.invert()).multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWROT155)));holder.scale.setScalar(1.3/hs);holder.position.set(...BOWPOS155);hl.add(holder);holder.userData.aimQ155=holder.quaternion.clone();holder.userData.aimP155=holder.position.clone();m.wnodes.push(holder);m.bow155=true;const it=itemFor(heldWeapon);aura162(bow,it.visual.color,it.tier||0,.98,true)}
-    else if(heldWeapon){m.bow155=false;m.kind195=heldWeapon.kind155;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const isSword163=heldWeapon.kind155!=='staff'&&/^(sword|broad|long)$/.test(item.visual.shape||'');if(isSword163&&!sword163)waiting163.add(m);const k171=W171[heldWeapon.kind155];if(k171){load171(k171[0],k171[1],k171[2],heldWeapon.kind155);if(!w171[heldWeapon.kind155])wait171.add(m)}const c171=k171&&make171(heldWeapon.kind155,item.visual.color);const weapon=c171||(heldWeapon.kind155==='staff'?staff162(item):isSword163&&sword163?tripoSword163(item):global.WarriorEquipment127.weapon(T,item));
+    else if(heldWeapon){m.bow155=false;m.kind195=heldWeapon.kind155;const item=itemFor(heldWeapon);if(!item.visual.shape)item.visual.shape=API.visualWeapon(item.tier||0,'sword').shape;const isSword163=heldWeapon.kind155!=='staff'&&/^(sword|broad|long)$/.test(item.visual.shape||'');if(isSword163&&!sword163)waiting163.add(m);const k171=W171[heldWeapon.kind155];if(k171){load171(k171[0],k171[1],k171[2],heldWeapon.kind155);if(!w171[heldWeapon.kind155])wait171.add(m)}if(isSword323(heldWeapon))requestSword323(m);const c171=k171&&make171(heldWeapon.kind155,item.visual.color);const weapon=(isSword323(heldWeapon)&&sword323?referenceSword323(item):null)||c171||(heldWeapon.kind155==='staff'?staff162(item):isSword163&&sword163?tripoSword163(item):global.WarriorEquipment127.weapon(T,item));
       if(SHIELD171[heldWeapon.kind155]&&m.bones.hand_l){load171('comum-escudo',.55,.5,'shield');const sh=make171('shield',item.visual.color);if(sh){const hold=new T.Group();hold.add(sh);hold.rotation.set(0,Math.PI/2,0);hold.position.set(.03,0,.02);hold.scale.setScalar(1/m.model.scale.x);m.bones.hand_l.add(hold);m.wnodes.push(hold)}else wait171.add(m)}
       fist162(m,true);const staff=isStaff251(heldWeapon.kind155);if(staff)staffTip251(weapon);aura162(weapon,item.visual.color,item.tier||0,...(staff?[.32,false,.7]:[isSword163&&sword163?.6:item.visual.shape==='long'?.6:.5]));m.socket.add(weapon);m.wnodes.push(weapon);m.staff174=staff?weapon:null;m.wmats=weapon.userData.materials||[];m.mats.push(...m.wmats);}
     const add=(slot,bone,pos,scale=1,rot=null)=>{if(!equip[slot])return;const p=global.WarriorEquipment127.armor(T,slot,itemFor(equip[slot]));p.position.fromArray(pos);p.scale.setScalar(scale);if(rot)p.rotation.set(...rot);m.bones[bone].add(p);m.armorParts.push(p);m.mats.push(...(p.userData.materials||[]));};
