@@ -1,3 +1,6 @@
+## v301 — tela de escolha de classe, 07/10/2026
+- A lista vazava da caixa e o texto ficava minúsculo (print do Ian). Agora: botões curtos (nome + estilo + recurso) em 2 colunas dentro da caixa; ao clicar abre o detalhe (recurso, atributo, passiva, habilidades) e o botão 'Escolher'.
+
 ## v300 — Afinidade elemental (nível 55), 07/10/2026
 - Criaturas têm fraqueza/resistência (fogo, gelo, terra, raio) pelo perfil (Espectral, Arcano, Blindado, Universal) ou bioma. Fraqueza +30% ('FRACO A X!'), resistência −30%. Projéteis pelo tipo (fire/ice/stone/spark), golpes pela arma encantada (Mercado, 60× ouro do rank), habilidades pela classe elemental. Bestiário mostra após 10 abates (tools/elem300.js).
 - PENDENTE (prioridade alta, pedido do Ian): refazer efeitos visuais de TODAS as habilidades (terremoto abre fissura e treme; flecha perfurante etc.) e animações próprias das classes novas; criar mais monstros com peças grátis/Blender (Tripo sem créditos).
