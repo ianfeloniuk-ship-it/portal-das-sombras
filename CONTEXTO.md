@@ -1,3 +1,7 @@
+## v305 — espada não atravessa o peito; movimento dos chefes, 07/10/2026
+- Poses novas: com arma na mão, o braço direito nunca cruza o peito (a espada atravessava o corpo).
+- Chefes, elites e rivais se movem nos ataques (Anim303.enemyPost): pancada = sobe, tomba para trás e desce com fissuras e tremor; investida = inclina e solta poeira; magia = flutua com círculo rúnico; golpe = gira o tronco e solta com arco de corte; tiro = recuo.
+
 ## v304 — animações novas de lançamento, 07/10/2026
 - Pedido do Ian: animações criadas no código direto nos ossos do Viajante (tools/anim303.js), aplicadas por cima da animação normal: salto_impacto (terremoto, Salto do Dragão), giro 360° (giratórios), ceu (raios, meteoros, tempestades), palmas (jatos e rajadas mágicas), ajoelhar (curas), firme (escudos/guarda).
 

@@ -53,10 +53,21 @@ function post(P){if(!cur||!P||!P.m||!P.m.bones)return;const an=A[cur.name],t=(pe
  const charQ=root.getWorldQuaternion(qa.clone());
  if(s.root.y)root.position.y+=s.root.y;
  root.updateMatrixWorld(true);
- for(const n of ORDER){const r=s.b[n];if(!r)continue;const b=m.bones[n];if(!b||!b.parent)continue;
+ const armed=!!(run&&run.equip&&run.equip.w);
+ for(const n of ORDER){let r=s.b[n];if(!r)continue;/* v305 (Ian): com arma na mão direita, o braço direito nunca cruza o peito (a espada atravessava o corpo) */if(armed&&n==='upperarm_r')r=[r[0],r[1],Math.min(r[2],-25)];if(armed&&n==='forearm_r')r=[r[0],r[1],r[2]];const b=m.bones[n];if(!b||!b.parent)continue;
   e.set(r[0]*D,r[1]*D,r[2]*D,'XYZ');const dLocal=new T.Quaternion().setFromEuler(e);
   const dWorld=charQ.clone().multiply(dLocal).multiply(charQ.clone().invert());
   const bw=b.getWorldQuaternion(new T.Quaternion()),pw=b.parent.getWorldQuaternion(new T.Quaternion());
   b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}}
-window.Anim303={play,post,list:Object.keys(A)};
+/* v305 (Ian): chefes, elites e rivais também se movem ao usar ataques, com efeito visual no momento do impacto. */
+function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)return;const A=e.act,root=e.m.root,sc=e.isBoss?1.3:1;
+ const body=e.m.body||root.children.find(c=>c.isObject3D&&!c.isLight)||null;if(body&&body.userData.y305==null)body.userData.y305=body.position.y;const lift=v=>{if(body)body.position.y=body.userData.y305+v/(root.scale.y||1)};
+ if(!A){root.rotation.x=0;root.rotation.z=0;lift(0);return}lift(0);
+ const w=Math.min(1,A.t/Math.max(.05,A.wind||.6)),after=A.t-(A.wind||.6),V=window.VFX302;
+ if(A.type==='slam'){if(after<0){lift(Math.sin(w*Math.PI*.5)*1.2*sc);root.rotation.x=-.35*w}else{const k=Math.min(1,after/.15);lift(1.2*sc*(1-k));root.rotation.x=-.35+(.6)*k;if(!A.vfx305&&k>=1){A.vfx305=1;try{V&&V.quakeRing(e.x,e.z,e.isBoss?6:4)}catch(_){}}}}
+ else if(A.type==='charge'||A.type==='lunge'){root.rotation.x=after<0?-.15*w:.35;if(after>=0&&!A.vfx305){A.vfx305=1;try{V&&V.dashTrail}catch(_){}}if(after>=0&&Math.random()<.4)try{const d=new THREE.Mesh(new THREE.SphereGeometry(.3,5,4),new THREE.MeshToonMaterial({color:0x9a8a70,transparent:true,opacity:.6}));d.position.set(e.x,.3,e.z);scene.add(d);setTimeout(()=>scene.remove(d),500)}catch(_){}}
+ else if(A.type==='cast'){lift(.5*Math.sin(Math.min(1,A.t/.6)*Math.PI*.5)*sc);if(!A.vfx305){A.vfx305=1;try{V&&V.runeCircle(e.x,e.z,0xb48cff,e.isBoss?3:2)}catch(_){}}}
+ else if(A.type==='swing'){if(after<0)root.rotation.y=(e.face||0)-.9*w;else{root.rotation.y=(e.face||0)+Math.min(1,after/.12)*.6;if(!A.vfx305){A.vfx305=1;try{V&&V.slash(e.x,e.z,e.face||0,0xffc8a0,(e.r||.6)*4+2,2.4)}catch(_){}}}}
+ else if(A.type==='shoot'){root.rotation.x=after<0?-.12*w:0}}
+window.Anim303={play,post,enemyPost,list:Object.keys(A)};
 })();

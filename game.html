@@ -5919,7 +5919,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   }
   for(const o of enemies){if(o===e||o.dead||o.sleep)continue;const sx=e.x-o.x,sz=e.z-o.z;if(Math.abs(sx)>2.5||Math.abs(sz)>2.5)continue;const sd=Math.hypot(sx,sz),m=e.r+o.r;if(sd<m&&sd>0)moveEnt(e,sx/sd*(m-sd)*.5,sz/sd*(m-sd)*.5)}
   if(e.act&&e.act.t<e.act.wind&&!e.isBoss)e.mats.forEach(m=>m.emissive.setHex(Math.sin(e.t*40)>0?0x552200:(m.userData.e0??0)));
-  animChibi(e.m,{move:mv,speed:Math.hypot(e.x-e.m.root.position.x,e.z-e.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind},e.t);if(e.isBoss||e.elite)juice233(e,mv,clamp(atk,0,1),wind||0,dt);
+  animChibi(e.m,{move:mv,speed:Math.hypot(e.x-e.m.root.position.x,e.z-e.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind},e.t);if(e.isBoss||e.elite)juice233(e,mv,clamp(atk,0,1),wind||0,dt);if(window.Anim303)Anim303.enemyPost(e,dt);
   e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;
 }
 /* v166 (Irror): barras de vida sobrepostas e coloridas; a da frente esvazia e revela a de trás. Bolinhas em cima marcam quantas faltam. */
@@ -8670,7 +8670,7 @@ requestAnimationFrame(frame);
 <script src="tools/corrupt299.js?v=299"></script>
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=302"></script>
-<script src="tools/anim303.js?v=304"></script>
+<script src="tools/anim303.js?v=305"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
