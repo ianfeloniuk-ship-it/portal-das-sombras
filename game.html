@@ -4947,7 +4947,7 @@ function mkEnemy(K,x,z,mulHp,mulDmg,extra={}){
     cd:rnd(.5,1.5),act:null,stun:0,slow:0,dotT:0,dotD:0,flash:0,dead:false,deadT:0,aggro:false,kb:{x:0,z:0},t:Math.random()*9,team:'enemy',gold:0,...extra};
   enemies.push(e);return e;
 }
-function kindsFor(gr,bio){if(bio&&HABITATS124[bio])return HABITATS124[bio].flatMap(id=>familyPool124(id,gr));const X=[];for(const k in KINDS){const K=KINDS[k];if(K.rk==null||gr<K.rk)continue;if(K.bio&&bio&&K.bio!==bio)continue;X.push({k,w:K.bio&&bio===K.bio?22:K.bio&&bio?0:9})}return kindsFor0(gr).concat(X.filter(x=>x.w>0))}
+function kindsFor(gr,bio){if(bio&&HABITATS124[bio])return HABITATS124[bio].flatMap(id=>familyPool124(id,gr));const X=[];for(const k in KINDS){const K=KINDS[k];if(K.variant||K.fendido)continue;if(K.rk==null||gr<K.rk)continue;if(K.bio&&bio&&K.bio!==bio)continue;X.push({k,w:K.bio&&bio===K.bio?22:K.bio&&bio?0:9})}return kindsFor0(gr).concat(X.filter(x=>x.w>0))}
 function kindsFor0(gr){const a=[{k:'minion',w:26},{k:'rogue',w:18},{k:'mage',w:18},{k:'warrior',w:18},{k:'goblin',w:22},{k:'lobo',w:16},{k:'aranha',w:14}];if(gr>=1)a.push({k:'vespa',w:12},{k:'raptor',w:10});if(gr>=2)a.push({k:'orc',w:14+gr*2});if(gr>=3)a.push({k:'golem',w:12+gr*2},{k:'yeti',w:8+gr*2});if(gr>=4)a.push({k:'wraith',w:12+gr*2},{k:'gigante',w:6+gr*2});if(gr>=5)a.push({k:'demon',w:10+gr*3},{k:'dragao',w:4+gr*2});return a}
 /* O nível numérico vem do portal; ameaça e recompensas são calculadas separadamente. */
 function dunLvl(gr){const G=GR[Math.min(9,gr)];return (L&&L.mode==='dungeon'&&!L.special&&L.gate&&L.gate.id>0)?Math.max(G.lvl,gateLvl207(L.gate)):G.lvl}
@@ -6646,7 +6646,7 @@ const BEST293={};
 function bestStats293(k){const g=Math.min(9,rankOf()),key=k+':'+g;let m=BEST293[key];if(!m){try{const e=spawnKind(k,player.x+900,player.z+900,g,{});m={hp:e.maxhp,dmg:e.dmg,lvl:(()=>{try{return eLvl(e)}catch(_){return GR[g].lvl}})()};const a=mobAttr281(e);m.prof=a.prof;m.P=a.P;m.phy=mobDefVal296(e,'phy');m.mag=mobDefVal296(e,'mag');m.pr=MPROF281[a.prof];e.dead=true;e.gone=true;if(e.m&&e.m.root)scene.remove(e.m.root);enemies=enemies.filter(x=>x!==e)}catch(_){return ''}BEST293[key]=m}
   const pc=x=>Math.round(x*100)+'%',pr=m.pr,dist=['res','esp','von','agi','des'].filter(x=>pr[x]>0).map(x=>({res:'Resistência',esp:'Espírito',von:'Vontade',agi:'Agilidade',des:'Destreza'})[x]+' '+pc(pr[x])).join(' · ');
   return '<br><span style="color:var(--dim)">No rank '+rkN(g)+' (nível '+m.lvl+'): vida <b>'+fmt(Math.round(m.hp))+'</b> · dano <b>'+fmt(Math.round(m.dmg))+'</b> por golpe</span><br><span style="color:var(--dim)">Perfil <b>'+m.prof+'</b>: ganha 0,5 ponto por nível (elite ×1,4, chefe ×2) e distribui em '+dist+'. Defesa agora (descontada de cada golpe): física <b>'+fmt(Math.round(m.phy))+'</b> · mágica <b>'+fmt(Math.round(m.mag))+'</b>.</span>'}
-function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS);const S294=(window.Bestiary294&&Bestiary294.seen())||{};let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies descobertas: <b>'+ks.filter(k=>S294[k]||b[k]).length+'/'+ks.length+'</b>. Derrotar uma espécie revela sua história (1, 10, 50 e 100 abates) e dá dano extra contra ela (10, 50, 200 e 1000 abates).</div>';
+function bestView(){view=bestView;const b=profile.bestiary||{};const ks=Object.keys(KINDS).filter(k=>!KINDS[k].alias308);const S294=(window.Bestiary294&&Bestiary294.seen())||{};let h='<div class="sysline"><b>[BESTIÁRIO]</b> Espécies descobertas: <b>'+ks.filter(k=>S294[k]||b[k]).length+'/'+ks.length+'</b>. Derrotar uma espécie revela sua história (1, 10, 50 e 100 abates) e dá dano extra contra ela (10, 50, 200 e 1000 abates).</div>';
   for(const k of ks){const n=b[k]||0,l=bestLvl(k),nx=BEST_STEPS.find(s=>n<s[0]);
     h+=(!n&&!S294[k])?row('<span style="color:var(--dim)">??? · não descoberto</span>','',''):!n?row('<b>'+KINDS[k].n+'</b>','Visto, mas ainda não derrotado.'+(window.Bestiary294?Bestiary294.loreHtml(k,0):''),''):row('<b>'+KINDS[k].n+'</b>'+(l?' <span style="color:#ffd54f">· '+l[2]+'</span>':''),'Abates: <b>'+fmt(n)+'</b>'+(l?' · +'+Math.round(l[1]*100)+'% de dano':'')+(nx?' · próximo nível em '+nx[0]:' · nível máximo')+bestStats293(k)+bestInfo(k,n)+(window.Bestiary294?Bestiary294.loreHtml(k,n):''),'')}
   openModal('BESTIÁRIO',h)}
@@ -8664,7 +8664,7 @@ requestAnimationFrame(frame);
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=266"></script>
 <script src="tools/lux267.js?v=288"></script>
-<script src="tools/bestiary294.js?v=306"></script>
+<script src="tools/bestiary294.js?v=308"></script>
 <script src="tools/biomes295.js?v=295"></script>
 <script src="tools/rare298.js?v=298"></script>
 <script src="tools/corrupt299.js?v=299"></script>
@@ -8672,6 +8672,7 @@ requestAnimationFrame(frame);
 <script src="tools/vfx302.js?v=302"></script>
 <script src="tools/anim303.js?v=305"></script>
 <script src="tools/fendidos307.js?v=307"></script>
+<script src="tools/variants308.js?v=308"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>

@@ -1,3 +1,6 @@
+## v308 — 196 criaturas no Bestiário, 07/10/2026
+- Pedido do Ian (200 criaturas com lore): cada uma das 61 espécies ganhou versão FENDIDA (_f: cristais por bioma, +60% vida) e ABISSAL (_a: corpo de vazio, fragmentos orbitando, anel roxo, +140% vida). Lobo/Aranha/Gigante/Yeti Fendidos usam os modelos do Blender. Nas Fendas: 14% vira Fendida; em Fendas vermelhas/corrompidas/rank B+, 5% Abissal; perto de portais abertos no mundo: 8% Fendida. Lore gerada a partir da lore da espécie. 13 chefes entram no Bestiário com lore própria e aviso 'CHEFE DESCOBERTO'. Total: 183 espécies + 13 chefes = 196 (tools/variants308.js). Faltam 4 inéditas (Blender) para 200.
+
 ## v307 — Fendidos (4 primeiros), 07/10/2026
 - Lore nova do Ian: criaturas tocadas pela Fenda. Lobo Fendido, Tecelã de Vidro, Colosso Rachado, Yeti Corrompido: modelos CC0 da Quaternius transformados no Blender (cristais presos aos ossos, corpo escurecido, olhos brilhando; materiais FendaCristal/FendaBrilho). Mutação por bioma (cor dos cristais + nome: Gélido, Ígneo, de Âmbar, Tóxico, Musgoso, Florido, Prismático). Aparecem em 12% das criaturas nas Fendas e 8% perto de portais abertos (tools/fendidos307.js). Script do Blender no cofre (Entregas/Fendidos-2026-10-07).
 - Próximo: PDF de escalas; 200 criaturas com lore; prompts de imagem para o Tripo.
