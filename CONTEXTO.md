@@ -1,3 +1,6 @@
+## v296 — defesa em número, 06/10/2026
+- REGRA DO IAN: defesa é NÚMERO descontado do dano, não porcentagem (100 de dano contra 200 de defesa = 0). Resistência = defesa física, Espírito = defesa mágica, Vontade = defesa universal (metade por ponto, soma com as duas). Cada ponto vale atkPer(nível). Penetração da Destreza também é número (metade por ponto). Monstros: pontos × atkPer(nível) × 0,5. A armadura (player.def 12%) continua como antes.
+
 ## v295 — biomas com efeito, 06/10/2026
 - Pedido do Ian: biomas ~2,5× mais longos (biomeAt com frequência menor; média ~320 m numa linha). Ao entrar, aviso com o efeito. Penalidades: Deserto (cansaço 2×, vigor −25%), Neve (movimento −12%, mana −20%), Vulcão (−0,3% vida/s, até 20%), Pântano (movimento −10%, vigor −15%). Bônus: Floresta (+5% crítico), Campos floridos (vida fora de combate), Cristal (+25% mana).
 - Mercado (Dorian) vende Cantil, Capa de pele, Unguento e Botas de lodo: anulam a penalidade do bioma por 5 min (tools/biomes295.js).
