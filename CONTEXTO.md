@@ -1,3 +1,6 @@
+## v299 — Fendas corrompidas (nível 50), 07/10/2026
+- Primeiro sistema novo depois do nível 45. Do nível 50 em diante, 15% dos portais nascem corrompidos com 1–3 modificadores: Monstros fortes (+50% vida/dano), Sem poção, Frenesi (+30% velocidade), Sem regeneração. Rótulo 'CORROMPIDA · ... · +N%'. Ao fechar: ouro (80 × ouro do rank × nº de riscos × bônus) e XP extra (tools/corrupt299.js). Entrada nova no UNLOCK (nível 50).
+
 ## v298 — criaturas raras por bioma, 06/10/2026
 - No mundo, 1,5% dos monstros comuns nascem como variante rara do bioma (Alfa, Encantado, Ancião, Dourado, Infernal, Ancestral, Prismático, Venenoso): vida ×3, dano ×1,4, maior, anel e luz na cor do bioma; ouro ×10, XP extra e equipamento Épico garantido. Aviso 'CRIATURA RARA AVISTADA/DERROTADA' e seção no Bestiário (tools/rare298.js).
 
