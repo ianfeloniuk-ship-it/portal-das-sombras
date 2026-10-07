@@ -1,3 +1,7 @@
+## v293 — escolha de classe e Bestiário, 06/10/2026
+- Escolha de classe mostra recurso (Mana/Fúria/Vigor), atributo principal e a passiva com descrição, mais uma linha explicando os três recursos.
+- Bestiário mede um monstro real da espécie no seu rank (antes usava fórmula antiga e errava vida/dano) e mostra perfil de atributos, distribuição dos pontos e defesa física/mágica atual (bestStats293).
+
 ## v292 — coroas em todos os conjuntos, rank ★ escondido, 06/10/2026
 - Pedido do Ian: todos os 10 conjuntos raros usam coroas temáticas modeladas no código (CROWN291): Metamorfo (garras/chifres), Necromante (ossos/caveira), Tempo (relógio/engrenagem), Tecelão (cristais), Guardião (elos dourados), Artífice (engrenagens rúnicas), Duelista (lâminas), Condutor (raios), Oráculo (olho e raios), Devorador (chifres e orbe do vazio).
 - Condutor não tem peitoral próprio: usa o peitoral comum em azul (antes parecia sem peitoral).
