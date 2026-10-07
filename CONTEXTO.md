@@ -1,3 +1,7 @@
+## v326 — Lanceiro arremessa lanças, 07/10/2026
+- Pedido de Ian: básico do Lanceiro arremessa lanças pela mão, como o Arqueiro. Sem arma, reaproveita penalidade existente de intervalo ×1,6; não é 60% mais lento que o Arqueiro. Assassino desarmado continua corpo a corpo, sem gerar adagas.
+- Lança equipada lança projétil físico, preservando prioridade da arma. Lanceiro desarmado lança lança física, animação de arremesso e origem na mão. Habilidades e escala por Força do Lanceiro preservadas. Descrição explica o intervalo de ataque.
+
 ## v325 — tutorial sem texto cortado, 07/10/2026
 - Remove altura fixa e corte de três linhas dos avisos. A caixa cresce conforme o texto, preservando fonte de 13 px, largura máxima de 420 px e posição superior. Normaliza o bloco interno do tutorial para evitar borda, margens e espaçamento duplicados. Avisos continuam ocultos sobre menus e sem capturar cliques.
 
