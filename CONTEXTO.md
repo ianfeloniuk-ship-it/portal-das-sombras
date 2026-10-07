@@ -1,3 +1,6 @@
+## v304 — animações novas de lançamento, 07/10/2026
+- Pedido do Ian: animações criadas no código direto nos ossos do Viajante (tools/anim303.js), aplicadas por cima da animação normal: salto_impacto (terremoto, Salto do Dragão), giro 360° (giratórios), ceu (raios, meteoros, tempestades), palmas (jatos e rajadas mágicas), ajoelhar (curas), firme (escudos/guarda).
+
 ## v303 — animação de lançamento por habilidade, 07/10/2026
 - Pedido do Ian: o personagem faz um movimento ao lançar cada habilidade (skillAnim155), usando as 24 animações do Viajante: pesado2 (terremoto, golpes brutais), golpe3 (giratórios), arco2/arremesso_flecha (flechas), soco (Monge e punhos), lanca1 (Lanceiro, estocadas), guarda (defesas), esquiva (deslocamentos), adaga2 (Assassino), pesado1/golpe2 (golpes), magia_mao/cajado2 (magias, curas, buffs). Animações novas feitas no Blender ficam para depois.
 

@@ -5749,7 +5749,8 @@ function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit1
  else if(src===1||/adaga|faca|lâmina envenenada|cortes/i.test(n))k='adaga2';
  else if(/cone|target|execute|line/.test(t)&&!mag)k=wk==='axe'||src===2||src===24?'pesado1':'golpe2';
  else if(mag||/heal|healzone|summon|buff|rally260|allybuff|speed|order|cleanse|pulses|area|nova|bolt|chain|slow|slowzone|root|weaken/.test(t))k=staff?'cajado2':'magia_mao';
- if(k)player.skillAnim155={k,until:time+d}}
+ if(k)player.skillAnim155={k,until:time+d};
+ /* v304: animações novas por cima */try{const C=/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null;if(C&&window.Anim303)Anim303.play(C)}catch(_){}}
 function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);
   if(sk.rare103){rareSkillRun103(sk);return}
@@ -6092,7 +6093,7 @@ function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
     else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
-    animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);
+    animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
   P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
@@ -8669,6 +8670,7 @@ requestAnimationFrame(frame);
 <script src="tools/corrupt299.js?v=299"></script>
 <script src="tools/elem300.js?v=300"></script>
 <script src="tools/vfx302.js?v=302"></script>
+<script src="tools/anim303.js?v=304"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
