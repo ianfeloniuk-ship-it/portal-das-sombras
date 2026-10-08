@@ -44,13 +44,12 @@ test('um monstro sozinho que dá 0 continua dando 0; o grupo passa',()=>{
 test('3 golpes seguidos sem dano disparam; dano ou pausa longa zeram',()=>{
   let s=0;s=C.nextStreak(s,-99,10,0);s=C.nextStreak(s,10,11,0);assert.equal(s,2);s=C.nextStreak(s,11,12,0);assert.equal(s,C.CFG.hits);
   assert.equal(C.nextStreak(2,11,12,7),0);assert.equal(C.nextStreak(2,11,11+C.CFG.streakWindow+.1,0),1);});
-test('dano em área = 2 conspiradores atingidos na mesma janela',()=>{
-  const a={},b={};assert.equal(C.distinctRecent([{e:a,at:5},{e:a,at:5.05}],5.05),1);assert.equal(C.distinctRecent([{e:a,at:5},{e:b,at:5.1}],5.1),2);assert.equal(C.distinctRecent([{e:a,at:5},{e:b,at:5.6}],5.6),1);});
 test('só quem acerta entra na conta, um por vez',()=>{const def={res:90,esp:0,von:0},m={atk:50,pen:10,type:'phy'},p={hits:[],applied:0};assert.equal(C.addHit(p,m,def),0);assert.equal(C.addHit(p,m,def),30);assert.equal(C.addHit(p,{atk:40,pen:0,type:'mag'},def),40);assert.equal(p.applied,70);assert.equal(p.hits.length,3);const q={hits:[],applied:0};C.addHit(q,m,def);assert.equal(q.applied,0)});
+test('formação não quebra: sem código de quebra por área ou atordoamento',()=>{const s=fs.readFileSync('tools/conspiracy333.js','utf8');assert(!/breakFormation|aoeWindow|hurtEnemy/.test(s));assert.equal(C.BROKEN,undefined)});
 test('regras pedidas: 3 golpes, 8,5 m, 1,8 s',()=>assert.deepEqual([C.CFG.hits,C.CFG.radius,C.CFG.channel],[3,8.5,1.8]));
 test('script e versão integrados',()=>{
-  assert(html.includes('<script src="tools/conspiracy333.js?v=333"></script>'));assert(sw.includes("const V='pds-v333'"));
-  for(const f of ['tools/conspiracy333.js?v=333','tools/balance-rpg.js?v=332','tools/bestiary324.js?v=332'])assert(sw.includes('"'+f+'"'),f);
+  assert(html.includes('<script src="tools/conspiracy333.js?v=335"></script>'));assert(sw.includes("const V='pds-v335'"));
+  for(const f of ['tools/conspiracy333.js?v=335','tools/balance-rpg.js?v=332','tools/bestiary324.js?v=335'])assert(sw.includes('"'+f+'"'),f);
   assert(fs.readFileSync('tools/bestiary324.js','utf8').includes(C.TIP));});
 test('passivas gerais: 12 até o nível 50 e 10 do 55 ao 100',()=>{
   const p263=fs.readFileSync('tools/passives263.js','utf8'),p327=fs.readFileSync('tools/passives327.js','utf8');

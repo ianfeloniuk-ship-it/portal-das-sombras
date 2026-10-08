@@ -2,17 +2,16 @@
    chama os da mesma facção a até 8,5 m. Eles se aproximam segurando o ataque por 1,8 s e, ao sinal, atacam todos juntos com os ataques normais.
    v333 (Ian): sem círculo no chão. Só entra na conta quem realmente acertar; tiro e corpo a corpo somam igual.
    A soma é por DOIS canais que não se misturam: físico contra Resistência + metade da Vontade, mágico contra Espírito + metade da Vontade.
-   Depois da primeira vez o grupo continua conspirando sem pausa (quebrar a formação só atrasa 2,5 s).
-   Dano em área (2 ou mais conspiradores atingidos juntos) ou atordoamento enquanto se preparam quebra a formação. */
+   Depois da primeira vez o grupo continua conspirando sem pausa.
+   v335 (Ian): a formação não quebra por dano em área nem atordoamento (o jogador bate neles o tempo todo). Só acaba se sobrar menos de 2. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else { root.Conspiracy333 = factory(); root.Conspiracy333.install(); }
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var CFG = { hits: 3, radius: 8.5, channel: 1.8, strike: 2.4, minMembers: 2, streakWindow: 5, cooldown: 0, brokenCooldown: 2.5, aoeWindow: .2, stun: .5 };
+  var CFG = { hits: 3, radius: 8.5, channel: 1.8, strike: 2.4, minMembers: 2, streakWindow: 5, cooldown: 0, regroup: 1 };
   var LINES = ['As lâminas não entram! Juntem as lanças no mesmo ponto!', 'Sozinho ninguém fura essa armadura. Todos juntos, agora!', 'Parem de bater à toa! No mesmo ponto, ao meu sinal!'];
-  var BROKEN = 'A formação quebrou!';
-  var TIP = 'Conspiração: Monstros que não perfuram sua defesa se unirão para um golpe coordenado. Interrompa-os com habilidades em área antes que concluam o ataque.';
+  var TIP = 'Conspiração: Monstros que não perfuram sua defesa se unem e atacam todos juntos. Só os golpes que acertam somam: esquive, saia do alcance ou reduza o grupo para menos de dois.';
 
   function num(v) { v = Number(v); return Number.isFinite(v) ? Math.max(0, v) : 0; }
   /* hits: [{atk,pen,type:'phy'|'mag'}] de quem acertou · def: {res,esp,von} já em pontos de defesa (von = metade da Vontade, como no resto do jogo). */
@@ -39,14 +38,9 @@
     if (dealt > 0) return 0;
     return (now - lastAt > c.streakWindow ? 0 : streak) + 1;
   }
-  function distinctRecent(hits, now, cfg) {
-    var c = cfg || CFG, seen = [];
-    hits.forEach(function (h) { if (now - h.at <= c.aoeWindow && seen.indexOf(h.e) < 0) seen.push(h.e); });
-    return seen.length;
-  }
 
   function install() {
-    if (typeof hurtPlayer !== 'function' || typeof updEnemy !== 'function' || typeof hurtEnemy !== 'function') return false;
+    if (typeof hurtPlayer !== 'function' || typeof updEnemy !== 'function') return false;
     var S = { streak: 0, lastAt: -99, nextAt: 0, C: null, striking: false, lastTick: -1, tipShown: false };
     var api = this;
     api.state = S;
@@ -78,7 +72,7 @@
       var fam = familyOf(leader);
       var members = enemies.filter(function (e) { return usable(e) && !e.cons333 && familyOf(e) === fam && Math.min(Math.hypot(e.x - leader.x, e.z - leader.z), Math.hypot(e.x - player.x, e.z - player.z)) <= CFG.radius; }); /* 8,5 m de quem chamou ou do alvo: atiradores ficam espalhados em volta do jogador */
       if (members.indexOf(leader) < 0 || members.length < CFG.minMembers) { S.streak = 0; S.nextAt = time + 3; return null; }
-      var C = { members: members, leader: leader, phase: 'gather', t0: time, signalAt: time + CFG.channel, pulseAt: time, aoe: [], hits: [], hitBy: [], applied: 0, result: jointDamage([], {}) };
+      var C = { members: members, leader: leader, phase: 'gather', t0: time, signalAt: time + CFG.channel, pulseAt: time, hits: [], hitBy: [], applied: 0, result: jointDamage([], {}) };
       members.forEach(function (e) { e.cons333 = C; e.knows333 = true; e.aggro = true; });
       S.C = C; S.streak = 0; S.nextAt = time + CFG.channel + CFG.strike + CFG.cooldown;
       if (!again) say(leader, LINES[Math.floor(Math.random() * LINES.length)]);
@@ -87,11 +81,8 @@
       if (!S.tipShown) { S.tipShown = true; try { toast('<b>[COMBATE]</b> ' + TIP, 9000); } catch (_) {} }
       return C;
     }
-    function breakFormation(C, why) {
-      var left = alive(C), who = left.indexOf(C.leader) >= 0 ? C.leader : left[0];
-      if (who) { say(who, BROKEN); try { floater(who.x, who.z, 'FORMAÇÃO QUEBRADA', '#9fe8ff', true, 3); } catch (_) {} }
-      C.broken = why; release(C, 1.4); S.nextAt = time + CFG.brokenCooldown;
-    }
+    /* sobrou menos de 2: quem ficou volta a atacar sozinho */
+    function disband(C) { C.ended = 'few'; release(C, 0); S.nextAt = time + CFG.regroup; }
     function signal(C) {
       C.phase = 'strike'; C.strikeEnd = time + CFG.strike;
       alive(C).forEach(function (e) { e.cd = 0; try { fxRing(e.x, e.z, 0xff2030, 1.4, .3); } catch (_) {} });
@@ -109,8 +100,7 @@
       var C = S.C; if (!C || time === S.lastTick) return; S.lastTick = time;
       var left = alive(C);
       if (C.phase === 'gather') {
-        if (left.length < CFG.minMembers) return breakFormation(C, 'few');
-        if (left.some(function (e) { return e.stun >= CFG.stun; })) return breakFormation(C, 'stun');
+        if (left.length < CFG.minMembers) return disband(C);
         if (time >= C.pulseAt) { C.pulseAt = time + .45; left.forEach(function (e) { try { fxRing(e.x, e.z, 0xff2030, 1.1, .3); } catch (_) {} }); }
         if (time >= C.signalAt) signal(C);
       } else if (!left.length || time >= C.strikeEnd || left.every(function (e) { return C.hitBy.indexOf(e) >= 0; })) finish(C);
@@ -151,16 +141,6 @@
       return out;
     };
 
-    var baseHurtEnemy = hurtEnemy;
-    hurtEnemy = function (e, amt, sx, sz, o) {
-      var C = e && e.cons333, out = baseHurtEnemy.apply(this, arguments);
-      if (C && S.C === C && C.phase === 'gather' && o && o.fromPlayer) {
-        if ((o.stun || 0) >= CFG.stun) breakFormation(C, 'stun');
-        else { C.aoe.push({ e: e, at: time }); if (distinctRecent(C.aoe, time) >= 2) breakFormation(C, 'aoe'); }
-      }
-      return out;
-    };
-
     var baseUpd = updEnemy;
     updEnemy = function (e, dt) {
       tick();
@@ -177,5 +157,5 @@
     return true;
   }
 
-  return { CFG: CFG, TIP: TIP, LINES: LINES, BROKEN: BROKEN, jointDamage: jointDamage, addHit: addHit, nextStreak: nextStreak, distinctRecent: distinctRecent, install: install };
+  return { CFG: CFG, TIP: TIP, LINES: LINES, jointDamage: jointDamage, addHit: addHit, nextStreak: nextStreak, install: install };
 }));

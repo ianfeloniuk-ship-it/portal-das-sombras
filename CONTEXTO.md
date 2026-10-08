@@ -1169,3 +1169,7 @@ Correções de Ian no chat sobre a v332: sem círculo; os monstros vêm e atacam
 - A página do Diário continua com a chave `conspira332`.
 
 Testes: `node tools/verify-v333.cjs` (12 verificações) e jogo local: 3 goblins acertando = 19 de dano conjunto; 2 acertando = 2; 1 acertando = 0; esquiva = 0; guerreiro + arqueiro somaram; 2 arqueiros dispararam a conspiração só com tiro; área e atordoamento quebraram e o grupo voltou em 2,5 s; monstro sozinho não conspira.
+
+## v335 — Conspirar: a formação não quebra — 08/10/2026
+
+Correção de Ian no chat: a formação não deve ser quebrada, porque o jogador pode atacar os monstros sem parar. Removida de `tools/conspiracy333.js` a quebra por dano em área e por atordoamento (e a fala "A formação quebrou!"). A conspiração só acaba se sobrar menos de 2 conspiradores; quem fica volta a atacar sozinho. Um monstro atordoado só atrasa o próprio golpe, pelas regras normais. Dica do Diário e do Bestiário reescrita sem "interrompa-os". Teste no jogo: 59 golpes em área com atordoamento durante o preparo e o golpe conjunto saiu igual (3 acertaram, 19 de dano); matando 2 de 3 a conspiração acabou.
