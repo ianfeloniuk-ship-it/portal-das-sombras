@@ -4528,7 +4528,7 @@ function releaseRedPortalBreaks(){
 
 function genCands(){const pr=Math.min(9,run?rankOf():0);const out=[];for(let i=0;i<3;i++){const rank=clamp(pr+Math.floor(rnd(-1,2)),0,TOPR);const lvl=Math.max(1,(run?run.level:1)+Math.floor(rnd(-3,5)));out.push({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank,lvl,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),cost:Math.round(HIRE[rank]*(1+lvl*.03))})}return out}
 function spawnHunter(c,inside){
-  const cl=CLASSES[Math.floor(Math.random()*7)],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
+  const cl=/* v337: sem o Mago Elemental (classe extinta) */CLASSES.filter((c,i)=>i<7&&!c.legacy)[Math.floor(Math.random()*6)],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
   const m=makeChibi({body:cl.body,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),wep:cl.wep,wcol:cl.sk[0].col,gk:CLASS_GK[CLASSES.indexOf(cl)],tint:CLASS_TINT[CLASSES.indexOf(cl)],shield:CLASSES.indexOf(cl)===0});
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
   m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);
@@ -5010,7 +5010,7 @@ function threatApply184(e,t){if(!t)return;if(started&&run)lore206('threat','A Or
  try{const a=auraMesh184(t),R=(e.r||.6)*1.5,H=(e.scale||1)*2.2*(1+.04*t);a.scale.set(R,H,R);e.m.root.add(a);e.aura184=a}catch(_){}if(t>=5&&e.m&&e.m.body)e.m.body.scale.multiplyScalar(1+.025*(t-4))}
 function spawnKind(k,x,z,gr,extra={}){const G=GR[gr];const e=mkEnemy(KINDS[k],x,z,G.hp,G.dmg,extra);e.kind=k;if(extra.wild&&gr>=2){const w=1+.2*(gr-1);e.hp*=w;e.maxhp*=w;e.dmg*=1+.12*(gr-1)}if(gr>=2&&Math.random()<Math.min(.6,.15+gr*.06))giveTrait(e);e.xp=KINDS[k].xp*G.xp;e.gold=rnd(2,6)*G.gold;e.gr=gr;dunScale(e,gr,extra.wild?Math.max(1,Math.round(G.lvl*(1+.15*Math.max(0,gr-1)))):undefined);if(L&&L.mode==='dungeon')threatApply184(e,threatRoll184(gr,false));return e}
 function spawnRival(x,z,gr,extra={}){
-  const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=CLASSES[Math.floor(Math.random()*7)];
+  const ri=clamp(gr+Math.floor(rnd(-1,2)),0,TOPR),rk=RANKS[ri],cl=/* v337: sem o Mago Elemental (classe extinta) */CLASSES.filter((c,i)=>i<7&&!c.legacy)[Math.floor(Math.random()*6)];
   const K={gk:CLASS_GK[CLASSES.indexOf(cl)],gtint:CLASS_TINT[CLASSES.indexOf(cl)],n:'',hp:150,dmg:13,spd:3.4,ai:'rival',range:1.9,wind:.38,atkCd:.9,xp:0,scale:1,r:.55,body:cl.body,wep:['bow','staff','wand','tome','bonestaff'].includes(cl.wep)?'sword':cl.wep,skin:0xffd8b8,eye:0x111111,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a])};
   const G=GR[Math.min(gr,8)];const e=mkEnemy(K,x,z,G.hp*rk.mult*.8,G.dmg*rk.mult*.8,extra);
   Object.assign(e,{name:pick(NAMES)+' ['+rk.id+']',rival:true,xp:60*G.xp*rk.mult,gold:rnd(40,90)*G.gold,dashCd:3,gr});return e;
@@ -8095,7 +8095,7 @@ $('goBtn').addEventListener('click',()=>{
     $('rolls').innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;max-height:46vh;overflow-y:auto">'+C.map(o=>{const I=info(o.i);return '<button class="btn" data-cls="'+o.i+'" style="text-align:left;white-space:normal;line-height:1.25;padding:7px 9px"><b style="font-size:14px">'+o.c.n+'</b><br><small style="opacity:.8;font-size:11.5px">'+I.st+' · '+I.rs+'</small></button>'}).join('')+'</div><div id="clsDetail301" style="margin-top:8px;font-size:13px;line-height:1.45;text-align:left;min-height:64px;opacity:.9">Clique numa classe para ver os detalhes.</div>';
     $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{const ci=+b.dataset.cls,I=info(ci);document.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('clsDetail301').innerHTML='<b style="font-size:15px">'+I.c.n+'</b> · '+I.st+'<br>Recurso: <b>'+I.rs+'</b> · atributo principal: <b>'+I.at+'</b><br>Passiva <b>'+(PASSIVES[ci]?PASSIVES[ci].n:'')+'</b>: '+(PASSIVES[ci]?PASSIVES[ci].d:'')+'<br>Habilidades: '+I.c.sk.map(s=>s.n).join(' · ')+'<br><button class="btn hot" id="clsPick301" style="margin-top:6px">Escolher '+I.c.n+'</button>';$('clsPick301').addEventListener('click',()=>{profile=pickAwaken(ci);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent='ENTRAR NA CIDADE';beep(880,.3,.06);$('reroll').hidden=!DEV})}));return}
   if(false){let n=0;
-    const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES[Math.floor(Math.random()*8)].n.toUpperCase();beep(300+n*20,.04,.03);
+    const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES.filter((c,i)=>i<8&&!c.legacy)[Math.floor(Math.random()*7)].n.toUpperCase();beep(300+n*20,.04,.03);
       if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent='ENTRAR NA CIDADE';$('reroll').hidden=!DEV}},80);return}
   startGame();
 });
@@ -8716,11 +8716,11 @@ requestAnimationFrame(frame);
 <script src="tools/vfx302.js?v=334"></script>
 <script src="tools/shaders312.js?v=334"></script>
 <script src="tools/crystal310.js?v=310"></script>
-<script src="tools/anim303.js?v=330"></script>
+<script src="tools/anim303.js?v=337"></script>
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=324"></script>
 <script src="tools/ineditas309.js?v=315"></script>
-<script src="tools/vfx328.js?v=334"></script>
+<script src="tools/vfx328.js?v=337"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>

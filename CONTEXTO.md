@@ -1,3 +1,10 @@
+## v337 — pendências dos efeitos: folha das 24 classes, animações com arma na mão, Mago Elemental, 08/10/2026
+- Pedido de Ian: fazer o que faltava da v334.
+- Folha de prints das 24 classes refeita com os shaders novos (2 momentos por habilidade): 0 erros. Único ajuste: `Clarão` durava tão pouco que quase não se via (agora com onda e arco elétrico).
+- Animações das classes novas conferidas com a arma na mão (lança e machado equipados; `gearLook()` é quem desenha a arma). A estocada e a mira apontavam a lança para o chão: `hand_r` levanta a ponta. Nada atravessa o corpo.
+- Mago Elemental (Ian: "não existe mais"): a entrada 3 de `CLASSES` continua, marcada `legacy`, porque apagar mudaria o número de todas as classes seguintes e quebraria saves; saves antigos de classe 3 já são migrados para o mago do elemento. Corrigidos os três sorteios que ainda podiam mostrá-lo ao jogador: classe de caçadores/rivais (2) e a roleta de nomes do despertar.
+- Conferência visual da IA em prints, não aprovação estética de Ian. As v335 (Conspirar) e v336 (armadura Ferro/Comum) são de outras sessões e foram preservadas.
+
 ## v334 — shaders próprios e projéteis reais nas habilidades, 08/10/2026
 - Pedido de Ian: "quero shaders nas habilidades, se tiver fogo que se movimente como uma chama, mais visualmente bonito e não só luzinha; se precisar usa os projéteis que já estão, que nem na chuva de flecha, muito importante".
 - `tools/shaders312.js`: shaders novos por tipo de efeito — `fire` (chama com a ponta balançando, aceita cor), `fireball`, `smoke` (volume macio que se desfaz), `electric` (fio que treme e ramifica), `ray` (pilar de luz), `shield` (colmeia com onda), `magic` (círculo mágico girando), `slash` (meia-lua que afina nas pontas), `swirl`, `water` (onda com espuma), `voidm` (núcleo negro). `make()` aceita vertex shader próprio.

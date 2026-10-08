@@ -220,7 +220,7 @@
   def('Abalo', c => { V.quakeRing(c.P.x, c.P.z, 5, 0xc8a060); });
   def('Reserva de Guarda', c => { V.dome(c.P.x, c.P.z, C.tank, 2, true); V.aura(C.tank); });
   def('Rompante', c => { V.dashTrail(C.tank); V.spikeLine(c.P.x, c.P.z, c.ang, 7, 0x8a7a60, 'rock'); });
-  /* Mago Elemental e magos */
+  /* magos (Bola de Fogo, Nova de Gelo e Corrente de Raios são compartilhadas) */
   def('Bola de Fogo', c => { if (c.real) { const p = c.at(9); blast(p.x, p.z, 1.6); } else fly('fire', { ang: c.ang, dist: 9, speed: 22, sc: 2, col: C.fire, cls: 8, onHit: (x, z) => blast(x, z, 1.6) }); });
   def('Nova de Gelo', c => { V.spikes(c.P.x, c.P.z, C.ice, 14, 4.2, 'ice'); V.shockwave(c.P.x, c.P.z, C.ice, 4.5); });
   def('Corrente de Raios|Descarga', c => { const L = foes(10).slice(0, 4); const pts = [{ x: c.P.x, z: c.P.z }, ...L.map(e => ({ x: e.x, z: e.z }))]; if (pts.length < 2) pts.push(c.at(8)); for (let i = 0; i < pts.length - 1; i++) setTimeout(() => { V.zap(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, c.col === 0xffffff ? C.bolt : c.col, .4, 1.8); star(pts[i + 1].x, pts[i + 1].z, C.bolt, 1); }, i * 90); });
@@ -305,7 +305,8 @@
   def('Aceleração|Corpo de Tempestade', c => { V.aura(c.col); afterimages(c.col, 3); V.storm(c.P.x, c.P.z, 1.4, c.col, 2); });
   def('Campo Estático', c => { ground(c.tx, c.tz, C.bolt, 3.6, 2.6); V.storm(c.tx, c.tz, 3, C.bolt, 4); });
   def('Agulha Elétrica|Arco Voltaico', c => { const e = c.t(12), p = e || c.at(10); V.zap(c.P.x, c.P.z, p.x, p.z, C.bolt, .3, 1); fly('orb', { ang: Math.atan2(p.x - c.P.x, p.z - c.P.z), dist: Math.hypot(p.x - c.P.x, p.z - c.P.z), speed: 60, sc: 1.6, col: C.bolt, cls: c.sk.sourceClass === 18 ? 18 : 11, onHit: (x, z) => star(x, z, C.bolt, 1.4) }); });
-  def('Clarão', c => { orb(c.P.x, c.P.z, 0xffffff, 3, false, false, .35); star(c.P.x, c.P.z, 0xffffff, 3, 1.4); });
+  /* v337: o clarão durava tão pouco que quase não se via */
+  def('Clarão', c => { orb(c.P.x, c.P.z, 0xfff6b0, 3, false, false, .7); star(c.P.x, c.P.z, 0xffffff, 3, 1.4); V.shockwave(c.P.x, c.P.z, C.bolt, 5); V.zap(c.P.x - 3, c.P.z, c.P.x + 3, c.P.z, C.bolt, .5, 2); });
   def('Campo de Repulsão|Repulsão', c => { V.shockwave(c.P.x, c.P.z, c.col, 5); V.dome(c.P.x, c.P.z, c.col, 2, false); });
   def('Pulso Estático', c => { V.shockwave(c.P.x, c.P.z, C.storm, 4); V.storm(c.P.x, c.P.z, 3, C.storm, 4); });
   def('Barreira Elétrica', c => { V.dome(c.P.x, c.P.z, C.storm, 2.4, true); V.storm(c.P.x, c.P.z, 2, C.storm, 3); });

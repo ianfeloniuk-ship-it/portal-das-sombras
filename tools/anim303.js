@@ -51,10 +51,11 @@ const A={
  const PALMA={chest:[12,30,0],spine:[10,0,0],upperarm_r:[-110,0,-6],forearm_r:[0,0,0],hand_r:[-70,0,0],upperarm_l:[20,0,10],forearm_l:[-90,0,0],thigh_l:[-35,0,0],shin_l:[35,0,0],thigh_r:[15,0,0]};
  const DIR={chest:[10,35,0],spine:[12,0,0],upperarm_r:[-110,0,-5],forearm_r:[0,0,0],upperarm_l:[-35,0,10],forearm_l:[-95,0,0],thigh_l:[-35,0,0],shin_l:[35,0,0],thigh_r:[15,0,0]};
  const DUP={upperarm_l:[-98,0,35],upperarm_r:[-98,0,-35],spine:[14,0,0],thigh_l:[-25,0,0],shin_l:[30,0,0]};
- const EST={spine:[18,0,0],chest:[8,35,0],upperarm_r:[-116,0,-25],forearm_r:[0,0,0],upperarm_l:[-95,0,25],thigh_l:[-55,0,0],shin_l:[55,0,0],thigh_r:[28,0,0],shin_r:[15,0,0]};
+ /* v337: punho levanta a ponta da lança para a frente (antes apontava para o chão) */
+ const EST={spine:[18,0,0],chest:[8,35,0],upperarm_r:[-116,0,-25],forearm_r:[0,0,0],hand_r:[-40,0,0],upperarm_l:[-95,0,25],thigh_l:[-55,0,0],shin_l:[55,0,0],thigh_r:[28,0,0],shin_r:[15,0,0]};
  const ALTO={chest:[-8,-30,0],upperarm_r:[-150,0,-45],forearm_r:[-30,0,0]};
  const BAIXO={chest:[15,40,0],spine:[12,0,0],upperarm_r:[-35,0,-25],forearm_r:[-10,0,0]};
- const MIRA={upperarm_r:[-90,0,-25],upperarm_l:[-80,0,20],chest:[0,20,0],head:[5,-10,0],thigh_l:[-15,0,0],thigh_r:[10,0,0]};
+ const MIRA={hand_r:[-35,0,0],upperarm_r:[-90,0,-25],upperarm_l:[-80,0,20],chest:[0,20,0],head:[5,-10,0],thigh_l:[-15,0,0],thigh_r:[10,0,0]};
  const BATE={spine:[45,0,0],chest:[15,0,0],upperarm_l:[-50,0,5],upperarm_r:[-50,0,-25],thigh_l:[-45,0,0],thigh_r:[-45,0,0],shin_l:[70,0,0],shin_r:[70,0,0]};
  const RUGE={chest:[-28,0,0],head:[-32,0,0],upperarm_l:[15,0,55],upperarm_r:[15,0,-55],forearm_l:[-55,0,0],forearm_r:[-55,0,0],thigh_l:[0,0,-22],thigh_r:[0,0,22]};
  const PEITO={spine:[15,0,0],head:[18,0,0],upperarm_r:[-55,0,-25],forearm_r:[-115,0,0],upperarm_l:[0,0,25]};
