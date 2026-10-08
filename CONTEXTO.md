@@ -1,3 +1,11 @@
+## v342 — habilidades sem projétil duplicado; efeito no ponto do dano, 08/10/2026
+- Ian: "bola de fogo e chuva de flechas usam junto com as novas a mesma animação, mas só a antiga dá o dano; saiu uma menor que deu o dano e uma grande que não fez nada".
+- Causa (erro da v334): o teste "o jogo já atira o projétil" olhava `sk.t==='bolt'`, mas as habilidades do kit têm `t:'kit111'` e o tipo em `effect`; o efeito soltava um segundo projétil só de enfeite. Além disso a Chuva de Flechas e a Chuva de Meteoros já tinham queda real por pulso (`pulseFx156`/`fallFx`) e ganhavam outra por cima.
+- Agora: em `bolt`, `fan` e `release` o vfx328 não cria projétil (`REAL`); fica só um brilho curto no lançamento. Chuva de Flechas e Chuva de Meteoros mostram só o círculo no chão; quem cai é o projétil real.
+- Os shaders foram para o que dá o dano: o meteoro real usa bola e cauda de fogo e deixa chamas ao cair; a flecha real fica cravada um instante (`VFX328.stuck`); o projétil de habilidade do kit sai maior (`sc:1.7`) que o do ataque básico.
+- Efeitos de área do kit nascem no ponto de `kitPoint111` (o mesmo do dano). Antes iam para a mira mesmo quando a área real era em volta do personagem.
+- Testado no navegador pelo caminho real (`runSkill` + efeito): Bola de Fogo, Adaga e Arremesso de Rocha = 1 projétil; Leque = 3; chuvas = só a queda real; sem erros. Habilidades de linha/alvo (dano instantâneo, sem projétil real) continuam com o projétil visual, que é o único.
+
 ## v341 — ponto de habilidade sem erro, habilidade não troca ao morrer, portões das cidades, 08/10/2026
 - Ian (áudio 1): começou com Redemoinho de Aço (Berserker); a lista de Habilidades mostrava todas, ele pôs um ponto na errada e a habilidade em uso virou outra. **Causa da troca:** gastar o ponto não muda a habilidade equipada (conferido); quem trocava era a morte — `die()` recriava o `run` guardando só a posição, então `classLoadout` voltava para a 1ª habilidade da classe (Golpe Brutal). Agora `die()` guarda `classLoadout` e `initialSkillFix259`.
 - Personagem → Habilidades: só as habilidades **em uso** aparecem com o botão Melhorar; as outras ficam em "Habilidades fora de uso · N", recolhido (`<details data-skill114="others341">`, estado lembrado em `CHAR_UI118.details`). Ainda dá para melhorar ali dentro; trocar continua em Equipar habilidades, na cidade.

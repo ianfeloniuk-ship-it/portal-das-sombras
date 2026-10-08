@@ -5289,11 +5289,11 @@ function trailFx(p){ // partícula atrás do projétil
 // v156: habilidades de chuva mostram o que cai de verdade (flechas do Tripo, meteoros), não só um anel de luz.
 function pulseFx156(z){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col)}}
 function fallFx(x,z,dur,kind,col){
-  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);g.add(new THREE.Mesh(geo('mglow',()=>new THREE.SphereGeometry(.85,10,8)),gl(0xff6a1e,.55)));const t=new THREE.Mesh(geo('mtail',()=>new THREE.ConeGeometry(.7,3,8)),gl(0xffa040,.45));t.position.y=1.8;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
+  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);/* v342 (Ian): o meteoro que dá o dano usa os shaders de fogo (antes havia um segundo, só de enfeite) */const S342=window.Shaders312;g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.9,2),S342?S342.fireball(null,.9):gl(0xff6a1e,.55)));const t=new THREE.Mesh(new THREE.ConeGeometry(.75,4.5,10,6,true),S342?S342.fire(1):gl(0xffa040,.45));t.position.y=2.4;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
   if(kind==='arrow'){o.rotation.x=Math.PI/2;o.scale.setScalar(o.userData.proj155?1.15:1.7)}
   // v153: the PC camera sits ~12 m up; anything spawned at 16 m fell from behind the lens and was never seen.
   const sx=x+(kind==='meteor'?-6:0),sy=kind==='meteor'?16:Math.min(16,Math.max(5,(camera?camera.position.y:16)-4)),sz=z+(kind==='meteor'?-6:0);o.position.set(sx,sy,sz);
-  fxCustom(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow')dustPuff178(x,z)}});
+  fxCustom(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow'){dustPuff178(x,z);try{window.VFX328&&VFX328.stuck&&VFX328.stuck(x,z,col)}catch(_){}}else if(kind==='meteor')try{window.VFX302&&VFX302.flames&&VFX302.flames(x,z,{n:5,r:.9,h:2,dur:.8})}catch(_){}}});
 }
 function spikes(x,z,n,r0,r1,col,h=2.2,dark=false){
   const g=new THREE.Group();g.position.set(x,0,z);
@@ -8756,7 +8756,7 @@ requestAnimationFrame(frame);
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=324"></script>
 <script src="tools/ineditas309.js?v=315"></script>
-<script src="tools/vfx328.js?v=339"></script>
+<script src="tools/vfx328.js?v=342"></script>
 <script src="tools/dome154.js"></script>
 <script src="tools/look154.js"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
@@ -8775,9 +8775,9 @@ requestAnimationFrame(frame);
 <script src="tools/bestiary324.js?v=335"></script>
 <script src="tools/conspiracy333.js?v=335"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v341</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v342</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=341;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=342;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
