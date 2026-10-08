@@ -1,3 +1,9 @@
+## v330 — Viajante: linha do pescoço à mão direita corrigida no próprio GLB, 08/10/2026
+- Causa: o vértice 0 de `tripo_part_7` (luva direita) em `models/viajante153.glb` tinha o X zerado (ficava no centro do corpo, com pesos de antebraço), formando 6 triângulos-fio de ~48 cm até a mão.
+- Correção direta no buffer, sem reexportar pelo Blender: X do vértice = média dos 6 vizinhos (volta para a superfície da luva, sem buraco) e ossos/pesos copiados do vizinho mais próximo; `max` do acessor de posição recalculado. Mudam 13 bytes do BIN e um `max` no JSON; esqueleto, materiais, UVs, normais e todas as outras malhas ficam byte a byte iguais (12 malhas, 19 ossos, 97 nós, mesmos nomes).
+- O corte em tempo de execução da v156 (`sliver156`, em `tools/warrior-player127.js`) continua no código: agora corta 0 triângulos na luva. Ainda corta 3 em `tripo_part_4` e 1 em `tripo_part_10` (mesmo defeito, Y zerado, dentro das botas) — conferidos em render cru de perto em 4 ângulos e não aparecem, por isso não foram alterados.
+- Testado no navegador: GLB cru em repouso, corrida e ataque sem a linha; no jogo, Guerreiro novo andando e atacando, maior aresta da luva em pose = 2,6 cm, sem erros do jogo no console. Sem mudança em saves ou balanceamento.
+
 ## v329 — efeito visual próprio para todas as habilidades, 08/10/2026
 - Pedido de Ian: arrumar o visual das habilidades de TODAS as classes, não só as 3 primeiras. Antes, 126 das 200 habilidades do catálogo usavam efeito genérico (anel, cúpula, brilho) e as 7 habilidades novas de Monge, Lâmina Arcana, Lanceiro e Berserker só um anel.
 - tools/vfx328.js: uma receita por habilidade (243 das 24 classes, todas cobertas), com peças novas: punhos, estocada de luz, sangue, relógio do tempo, fenda, correntes, espíritos, ossos, totem rúnico, selos (palma, cinco pontos, oito), grito, faísca de aparo, jaula, imagens residuais. Habilidades de chefes/roubadas seguem no vfx302.
