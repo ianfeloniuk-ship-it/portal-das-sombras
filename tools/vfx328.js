@@ -1,4 +1,5 @@
-/* v328 (Ian): efeito visual próprio para TODAS as habilidades das 24 classes, não só as 3 primeiras.
+/* v334 (Ian): shaders próprios e projéteis reais nas habilidades (chama, fumaça, raio, água; flechas, adagas, lanças de verdade).
+   v328 (Ian): efeito visual próprio para TODAS as habilidades das 24 classes, não só as 3 primeiras.
    Antes, 126 das 200 habilidades do catálogo e 28 das classes novas caíam num anel/cúpula genérico.
    Aqui cada habilidade tem uma receita escolhida pelo nome, montada com as peças do vfx302 e peças novas
    (punhos, estocada de luz, sangue, relógio, fenda, corrente, espíritos, ossos, totem, selos, grito, faísca de aparo).
@@ -76,11 +77,10 @@
     add(g, dur, k => { g.rotation.y = Math.atan2(camera.position.x - g.position.x, camera.position.z - g.position.z); g.scale.x = k < .2 ? k * 5 : k > .8 ? (1 - k) * 5 : 1; for (const s of sp) { s.position.x += s.userData.v * .02 * (s.position.x > 0 ? 1 : -1); } fade(g, k > .8 ? (1 - k) * 5 : 1); });
   }
   function orb(x, z, col, r = 1.4, implode = false, dark = false, dur = .8) {
-    const g = new T.Group(); g.position.set(x, 1.2, z);
-    const core = new T.Mesh(new T.SphereGeometry(r * .55, 20, 14), dark ? new T.MeshBasicMaterial({ color: 0x07020d, transparent: true }) : E(0xffffff, .9)); g.add(core);
-    const shell = new T.Mesh(new T.SphereGeometry(r, 24, 16), E(col, .45)); g.add(shell);
+    const g = new T.Group(); g.position.set(x, 1.2, z); const SHD = window.Shaders312, fiery = col === 0xff6a1e || col === 0xff3a00;
+    const core = new T.Mesh(new T.IcosahedronGeometry(r, 3), dark ? SHD.voidm(col, 1) : SHD.fireball(fiery ? null : col, 1)); g.add(core);
     const ring = new T.Mesh(new T.TorusGeometry(r * 1.25, .05, 6, 40), E(col, .9)); ring.rotation.x = Math.PI / 2.4; g.add(ring);
-    add(g, dur, (k, t) => { const s = implode ? 1.4 - k * 1.3 : .3 + k * 1.1; g.scale.setScalar(s); ring.rotation.z = t * 6; fade(g, implode ? 1 - k * .6 : 1 - k); });
+    add(g, dur, (k, t) => { const s = implode ? 1.4 - k * 1.3 : .3 + k * 1.1; g.scale.setScalar(s); ring.rotation.z = t * 6; fade(g, implode ? 1 - k * .6 : 1 - k * k); });
   }
   function blood(x, z, n = 14, col = 0xc0182a) {
     const g = new T.Group(); g.position.set(x, 1, z); const ds = [];
@@ -138,9 +138,47 @@
     }, i * 110);
   }
   function mark(e, col, kind = 'sigil') { if (!e) return; glyph(e.x, e.z, col, 1, kind, 1.6, 2.6); star(e.x, e.z, col, .9, 1.4); }
-  function ground(x, z, col, r, dur = 2) { const g = new T.Group(); g.position.set(x, .05, z); const d = new T.Mesh(new T.CircleGeometry(r, 40), E(col, .3)); d.rotation.x = -Math.PI / 2; g.add(d); const o = new T.Mesh(new T.RingGeometry(r * .95, r, 48), E(col, .9)); o.rotation.x = -Math.PI / 2; g.add(o); add(g, dur, (k, t) => { d.material.opacity = .25 + .1 * Math.sin(t * 6); fade(g, k > .75 ? (1 - k) * 4 : 1); }); }
+  function ground(x, z, col, r, dur = 2) { const g = new T.Group(); g.position.set(x, .06, z); const d = new T.Mesh(new T.CircleGeometry(r, 48), window.Shaders312.magic(col, 1, 6)); d.rotation.x = -Math.PI / 2; g.add(d); add(g, dur, k => { g.scale.setScalar(k < .12 ? k / .12 : 1); fade(g, k > .75 ? (1 - k) * 4 : 1); }); }
   function cage(x, z, col, r = 1.2) { const g = new T.Group(); g.position.set(x, 0, z); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU, b = new T.Mesh(new T.CylinderGeometry(.06, .06, 2.4, 6), E(col, .9)); b.position.set(Math.cos(a) * r, 1.2, Math.sin(a) * r); g.add(b); } const top = new T.Mesh(new T.TorusGeometry(r, .06, 6, 24), E(col, .9)); top.rotation.x = Math.PI / 2; top.position.y = 2.4; g.add(top); g.scale.y = .01; add(g, 1.6, k => { g.scale.y = Math.min(1, k * 8); fade(g, k > .75 ? (1 - k) * 4 : 1); }); }
   function afterimages(col, n = 3) { const P = player; if (!P || !P.m) return; for (let i = 0; i < n; i++) setTimeout(() => { if (!player) return; const g = new T.Group(); g.position.set(player.x, 0, player.z); /* v331: o teste da geometria quebrava (não existe cápsula nesta versão do three) e a imagem residual nunca aparecia */const b = new T.Mesh(T.CapsuleGeometry ? new T.CapsuleGeometry(.4, 1, 4, 8) : new T.CylinderGeometry(.32, .4, 1.7, 10), E(col, .4)); b.position.y = 1; g.add(b); add(g, .45, k => fade(g, 1 - k)); }, i * 70); }
+
+  /* ---------- v334 (Ian): projéteis de verdade dentro dos efeitos (os mesmos modelos que o jogo já usa) e peças com shader ---------- */
+  const S = () => window.Shaders312;
+  function pmodel(type, col, sc, cls) { try { const m = projModel(type, col, sc, cls); if (!m) return null; m.traverse(o => { if (o.geometry) (o.geometry.userData || (o.geometry.userData = {})).shared = true; }); if (/arrow|tspear|tdagger/.test(type)) { /* bainha de luz: de noite o modelo virava silhueta preta */ const L = type === 'tspear' ? 1.9 : type === 'tdagger' ? .7 : 1.1, h = new T.Mesh(new T.CylinderGeometry(.022, .022, L, 5, 1, true), E(col, .6)); h.rotation.x = Math.PI / 2; const w = new T.Group(); w.add(m); const hh = new T.Group(); hh.scale.setScalar(sc || 1); hh.add(h); w.add(hh); return w; } return m; } catch (_) { return null; } }
+  /* voa em linha reta; não usa fade (o material do modelo é compartilhado com os projéteis reais) */
+  function fly(type, o = {}) {
+    const x = o.x ?? player.x, z = o.z ?? player.z, ang = o.ang ?? (player.face || 0), dist = o.dist ?? 12, speed = (o.speed ?? 32) * .62, col = o.col ?? 0xffffff, sc = o.sc ?? 1.5, y = o.y ?? 1.15;
+    const go = () => {
+      const ex = x + Math.sin(ang) * dist, ez = z + Math.cos(ang) * dist, m = pmodel(type, col, sc, o.cls ?? null);
+      if (!m) { V.streak(x, z, ang, dist, col); o.onHit && o.onHit(ex, ez); return; }
+      const g = new T.Group(); g.add(m); g.position.set(x, y, z); g.rotation.y = ang;
+      const tr = new T.Mesh(new T.CylinderGeometry(.13, .02, 1, 6, 1, true), E(col, .65)); tr.rotation.x = Math.PI / 2; g.add(tr);
+      add(g, Math.max(.08, dist / speed), k => { const d = dist * k; g.position.set(x + Math.sin(ang) * d, y, z + Math.cos(ang) * d); if (o.spin) m.rotation.x += o.spin; const L = Math.min(d, 2.6); tr.scale.y = Math.max(.01, L); tr.position.z = -L / 2 - .35; if (k >= 1 && o.onHit) o.onHit(ex, ez); });
+    };
+    o.delay ? setTimeout(go, o.delay) : go();
+  }
+  /* chuva de flechas: flechas de verdade caem do céu e ficam cravadas no chão */
+  function rainArrows(x, z, r = 3.6, n = 22, col = 0xd8f0ff) {
+    for (let i = 0; i < n; i++) setTimeout(() => {
+      const a = R(0, TAU), d = Math.sqrt(Math.random()) * r, px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d, m = pmodel('sarrow', col, 3, 4);
+      if (!m) { V.bolt(px, pz, col); return; }
+      const g = new T.Group(); g.add(m); const sx = px + R(-.8, .8) - 2.2, sz = pz + 3.2, sy = 13; g.position.set(sx, sy, sz); g.lookAt(px, 0, pz);
+      const tr = new T.Mesh(new T.CylinderGeometry(.12, .02, 4, 6, 1, true), E(col, .7)); tr.rotation.x = Math.PI / 2; tr.position.z = -2.6; g.add(tr); let hit = false;
+      add(g, 1.5, k => { const f = Math.min(1, k / .15); g.position.set(sx + (px - sx) * f, sy * (1 - f) + .55 * f, sz + (pz - sz) * f); if (f >= 1 && !hit) { hit = true; tr.visible = false; V.dust(px, pz, 0xb8a888, 2); star(px, pz, col, .7, .4); } if (k > .8) g.scale.setScalar(Math.max(.01, (1 - k) / .2)); });
+    }, i * 55);
+  }
+  /* estocada com a lança de verdade dentro do rastro de luz */
+  function jab(x, z, ang, len, col, w = .35) { thrust(x, z, ang, len, col, w); fly('tspear', { x, z, ang, dist: Math.max(1, len - 1), speed: 30, sc: 3, col }); }
+  /* onda de água: parede curva com espuma na crista avançando */
+  function wave(x, z, ang, col = 0x3aa0ff, len = 8, w = 6) {
+    const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = ang; const geo = new T.PlaneGeometry(w, 2.6, 20, 8), p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) { const px = p.getX(i), h = (p.getY(i) + 1.3) / 2.6, env = .35 + .65 * Math.cos(px / w * Math.PI); p.setY(i, h * 2.6 * env - 1.3); p.setZ(i, -(px * px) * .16 + h * h * 1.4 * env); } p.needsUpdate = true; geo.computeVertexNormals();
+    const m = new T.Mesh(geo, S().water(col, 1)); g.add(m); const dr = [];
+    for (let i = 0; i < 16; i++) { const q = new T.Mesh(new T.SphereGeometry(R(.05, .11), 6, 5), E(0xe8f6ff, .95)); q.userData = { x: R(-w / 2, w / 2), v: R(2, 5), t: R(0, 1) }; g.add(q); dr.push(q); }
+    add(g, .95, (k, t) => { const d = 1 + k * len, sy = k < .2 ? k / .2 : k > .7 ? (1 - k) / .3 : 1; m.position.set(0, 1.3 * sy, d); m.scale.y = Math.max(.01, sy); for (const q of dr) { const u = (q.userData.t + t * 1.6) % 1; q.position.set(q.userData.x, 2.4 * sy + q.userData.v * u - 6 * u * u, d + .8 + u); } });
+  }
+  /* explosão de fogo: bola que cresce + fogueira + anel de chamas */
+  function blast(x, z, r = 2, col = null) { const b = new T.Mesh(new T.IcosahedronGeometry(r * .6, 3), S().fireball(col, 1)); b.position.set(x, 1, z); add(b, .5, k => { b.scale.setScalar(.4 + k * 1.3); b.material.opacity = 1 - k * k; }); V.flames(x, z, { n: 6, r: r * .5, h: r * 1.1, dur: .9, col }); V.fireRing(x, z, r * 1.4, col == null ? 0xff6a1e : col); }
 
   /* ---------- paletas por classe ---------- */
   const C = { war: 0xffb84a, ass: 0x9a7bff, tank: 0x8fc8ff, arch: 0xd8f0ff, pal: 0xffe9a0, inv: 0x7fe8c8, necro: 0x9b6bff, fire: 0xff6a1e, ice: 0xbfe8ff, earth: 0xc8a060,
@@ -167,10 +205,10 @@
   def('Mil Cortes', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; for (let i = 0; i < 9; i++) setTimeout(() => V.slash(x - Math.sin(c.ang) * 1.5, z - Math.cos(c.ang) * 1.5, R(0, TAU), i % 2 ? C.ass : 0xffffff, 2, 1.4), i * 70); });
   def('Execução', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; afterimages(C.ass, 2); V.slash(x, z, c.ang + Math.PI / 4, 0xff2a4a, 2.4, 1.2); setTimeout(() => V.slash(x, z, c.ang - Math.PI / 4, 0xff2a4a, 2.4, 1.2), 90); blood(x, z, 12); });
   def('Cortina de Fumaça', c => { V.smoke(c.P.x, c.P.z, 0x5a5a6a, 3.4); V.smoke(c.tx, c.tz, 0x5a5a6a, 2.4); });
-  def('Adaga', c => { V.streak(c.P.x, c.P.z, c.ang, 12, C.ass); const e = c.t(12); if (e) star(e.x, e.z, C.ass, .9); });
+  def('Adaga', c => { fly('tdagger', { ang: c.ang, dist: 12, speed: 34, sc: 2, col: C.ass, spin: .5, onHit: (x, z) => star(x, z, C.ass, .9) }); });
   def('Evasão|Corpo Etéreo', c => { afterimages(c.col, 4); V.wind(c.P.x, c.P.z, c.ang + Math.PI, 0xd8d0ff, 3); });
   def('Ferida Profunda', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.slash(x, z, c.ang, 0xff2a4a, 2.2, 1.6); blood(x, z, 16); });
-  def('Faca de Interrupção', c => { V.streak(c.P.x, c.P.z, c.ang, 10, 0xffffff); const e = c.t(10); if (e) { star(e.x, e.z, 0xffe070, 1.3); glyph(e.x, e.z, 0xffe070, .9, 'sigil', .8, 2.6); } });
+  def('Faca de Interrupção', c => { fly('tdagger', { ang: c.ang, dist: 10, speed: 40, sc: 2, col: 0xffe070, spin: .5, onHit: (x, z) => { star(x, z, 0xffe070, 1.3); glyph(x, z, 0xffe070, .9, 'sigil', .8, 2.6); } }); });
   /* Tanque */
   def('Golpe de Escudo', c => { V.slash(c.P.x, c.P.z, c.ang, C.tank, 2.6, 1.8); V.shockwave(c.P.x + Math.sin(c.ang) * 2, c.P.z + Math.cos(c.ang) * 2, C.tank, 2); });
   def('Impacto', c => { V.quakeRing(c.P.x, c.P.z, 3.5, C.tank); V.shockwave(c.P.x, c.P.z, C.tank, 4); });
@@ -183,19 +221,19 @@
   def('Reserva de Guarda', c => { V.dome(c.P.x, c.P.z, C.tank, 2, true); V.aura(C.tank); });
   def('Rompante', c => { V.dashTrail(C.tank); V.spikeLine(c.P.x, c.P.z, c.ang, 7, 0x8a7a60, 'rock'); });
   /* Mago Elemental e magos */
-  def('Bola de Fogo', c => { V.streak(c.P.x, c.P.z, c.ang, 9, C.fire); orb(c.at(9).x, c.at(9).z, C.fire, 1.2); V.fireRing(c.at(9).x, c.at(9).z, 1.8); });
+  def('Bola de Fogo', c => { if (c.real) { const p = c.at(9); blast(p.x, p.z, 1.6); } else fly('fire', { ang: c.ang, dist: 9, speed: 22, sc: 2, col: C.fire, cls: 8, onHit: (x, z) => blast(x, z, 1.6) }); });
   def('Nova de Gelo', c => { V.spikes(c.P.x, c.P.z, C.ice, 14, 4.2, 'ice'); V.shockwave(c.P.x, c.P.z, C.ice, 4.5); });
-  def('Corrente de Raios|Descarga', c => { const L = foes(10).slice(0, 4); const pts = [{ x: c.P.x, z: c.P.z }, ...L.map(e => ({ x: e.x, z: e.z }))]; if (pts.length < 2) pts.push(c.at(8)); for (let i = 0; i < pts.length - 1; i++) setTimeout(() => { beam(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, C.bolt, .14, .35); V.bolt(pts[i + 1].x, pts[i + 1].z, C.bolt); }, i * 90); });
+  def('Corrente de Raios|Descarga', c => { const L = foes(10).slice(0, 4); const pts = [{ x: c.P.x, z: c.P.z }, ...L.map(e => ({ x: e.x, z: e.z }))]; if (pts.length < 2) pts.push(c.at(8)); for (let i = 0; i < pts.length - 1; i++) setTimeout(() => { V.zap(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, c.col === 0xffffff ? C.bolt : c.col, .4, 1.8); star(pts[i + 1].x, pts[i + 1].z, C.bolt, 1); }, i * 90); });
   /* Arqueiro */
-  def('Chuva de Flechas', c => { for (let i = 0; i < 16; i++) setTimeout(() => { const x = c.tx + R(-3.5, 3.5), z = c.tz + R(-3.5, 3.5); V.bolt(x, z, C.arch); star(x, z, C.arch, .5, .3); }, i * 80); ground(c.tx, c.tz, C.arch, 3.8, 1.6); });
+  def('Chuva de Flechas', c => { ground(c.tx, c.tz, C.arch, 3.8, 1.8); rainArrows(c.tx, c.tz, 3.6, 22, C.arch); });
   def('Salto Evasivo', c => { V.dashTrail(C.arch); V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.arch, 3); });
-  def('Flecha Perfurante', c => { thrust(c.P.x, c.P.z, c.ang, 14, C.arch, .25); });
-  def('Flecha Estelar', c => { for (const d of [-.3, 0, .3]) V.streak(c.P.x, c.P.z, c.ang + d, 13, 0xfff0a0); star(c.at(12).x, c.at(12).z, 0xfff0a0, 1.6); });
-  def('Tiro Preciso', c => { const e = c.t(16); if (e) glyph(e.x, e.z, 0xff4a4a, 1, 'sigil', .6, 1.4); setTimeout(() => thrust(player.x, player.z, c.ang, e ? Math.hypot(e.x - player.x, e.z - player.z) : 14, 0xffffff, .2), 120); });
-  def('Flecha Enredante', c => { V.streak(c.P.x, c.P.z, c.ang, 10, 0x8de06a); const p = c.at(10); cage(p.x, p.z, 0x6ac04a, 1.3); });
+  def('Flecha Perfurante', c => { thrust(c.P.x, c.P.z, c.ang, 14, C.arch, .2); if (!c.real) fly('sarrow', { ang: c.ang, dist: 15, speed: 48, sc: 2.2, col: C.arch }); });
+  def('Flecha Estelar', c => { for (const d of [-.3, 0, .3]) { if (c.real) V.streak(c.P.x, c.P.z, c.ang + d, 13, 0xfff0a0); else fly('sarrow', { ang: c.ang + d, dist: 13, speed: 40, sc: 2, col: 0xfff0a0, onHit: (x, z) => star(x, z, 0xfff0a0, 1.3) }); } star(c.at(12).x, c.at(12).z, 0xfff0a0, 1.6); });
+  def('Tiro Preciso', c => { const e = c.t(16), d = e ? Math.hypot(e.x - c.P.x, e.z - c.P.z) : 14; if (e) glyph(e.x, e.z, 0xff4a4a, 1, 'sigil', .6, 1.4); fly('sarrow', { ang: c.ang, dist: d, speed: 60, sc: 2, col: 0xffffff, delay: 120, onHit: (x, z) => star(x, z, 0xffffff, 1.8) }); });
+  def('Flecha Enredante', c => { fly('sarrow', { ang: c.ang, dist: 10, speed: 36, sc: 1.9, col: 0x8de06a, onHit: (x, z) => { cage(x, z, 0x6ac04a, 1.3); V.poison(x, z, 0x6ac04a, 1.2); } }); });
   def('Armadilha', c => { glyph(c.tx, c.tz, 0xffb84a, 1.3, 'sigil', 2.2); V.spikes(c.tx, c.tz, 0x8a7a60, 6, 1.2, 'rock'); });
-  def('Disparo Rápido', c => { for (let i = 0; i < 3; i++) setTimeout(() => V.streak(player.x, player.z, c.ang + R(-.05, .05), 12, C.arch), i * 70); });
-  def('Leque de Flechas', c => { for (const d of [-.5, -.25, 0, .25, .5]) V.streak(c.P.x, c.P.z, c.ang + d, 11, C.arch); });
+  def('Disparo Rápido', c => { for (let i = 0; i < 3; i++) fly('sarrow', { ang: c.ang + R(-.05, .05), dist: 12, speed: 44, sc: 1.8, col: C.arch, delay: i * 80, onHit: (x, z) => star(x, z, C.arch, .7) }); });
+  def('Leque de Flechas', c => { for (const d of [-.5, -.25, 0, .25, .5]) fly('sarrow', { ang: c.ang + d, dist: 11, speed: 40, sc: 1.8, col: C.arch }); });
   def('Olho de Caçador', c => { glyph(c.P.x, c.P.z, 0xffd070, 6, 'sigil', 1.4); V.aura(0xffd070); });
   /* Paladino */
   def('Luz Curativa', c => { V.pillar(c.P.x, c.P.z, C.pal, 1.2); V.heal(c.P.x, c.P.z, 0xfff2b0); });
@@ -207,7 +245,7 @@
   def('Passo da Luz', c => { V.pillar(c.P.x, c.P.z, C.pal, .8); V.dashTrail(C.pal); setTimeout(() => V.pillar(player.x, player.z, C.pal, .8), 160); });
   def('Correntes Sagradas', c => { const L = foes(9).slice(0, 4); chain([{ x: c.P.x, z: c.P.z }, ...(L.length ? L : [c.at(7)])], C.pal); L.forEach(e => glyph(e.x, e.z, C.pal, .9, 'sigil', 1.4)); });
   def('Censura', c => { const e = c.t(); if (e) { V.pillar(e.x, e.z, 0xffe070, .9); mark(e, 0xffe070); } else V.pillar(c.tx, c.tz, 0xffe070, .9); });
-  def('Lança Solar', c => { thrust(c.P.x, c.P.z, c.ang, 11, 0xffd070, .55); V.pillar(c.at(11).x, c.at(11).z, 0xffd070, 1); });
+  def('Lança Solar', c => { thrust(c.P.x, c.P.z, c.ang, 11, 0xffd070, .55); fly('tspear', { ang: c.ang, dist: 10, speed: 40, sc: 2.6, col: 0xffd070, onHit: (x, z) => V.pillar(x, z, 0xffd070, 1) }); });
   /* Invocador */
   def('Lobo Espiritual|Sentinela', c => { const p = c.at(2); glyph(p.x, p.z, C.inv, 1.6, 'sigil', 1.4); wisps(p.x, p.z, C.inv, 14, 2); });
   def('Matilha Espiritual', c => { for (let i = 0; i < 3; i++) { const a = c.ang + (i - 1) * .9, x = c.P.x + Math.sin(a) * 2.5, z = c.P.z + Math.cos(a) * 2.5; glyph(x, z, C.inv, 1.1, 'sigil', 1.4); wisps(x, z, C.inv, 8, 2); } });
@@ -227,18 +265,18 @@
   def('Jaula de Ossos', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; bones(x, z, 9, 1.3); });
   def('Maldição da Fraqueza|Fome Silenciosa|Enfraquecer|Desarmar', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; glyph(x, z, c.col, 1.3, 'seal5', 1.6); wisps(x, z, c.col, 8, 2.2); });
   /* Mago de Fogo */
-  def('Chuva de Meteoros', c => { ground(c.tx, c.tz, C.fire, 4, 2); for (let i = 0; i < 8; i++) V.meteor(c.tx + R(-3.5, 3.5), c.tz + R(-3.5, 3.5), i * 200); });
-  def('Explosão Ígnea', c => { orb(c.tx, c.tz, C.fire, 2.4); V.fireRing(c.tx, c.tz, 4); });
-  def('Sol Negro', c => { orb(c.tx, c.tz, 0xff3a00, 2.6, true, true, 1.6); setTimeout(() => { V.fireRing(c.tx, c.tz, 5); V.shockwave(c.tx, c.tz, 0xff3a00, 5.5); }, 1100); });
-  def('Combustão', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.fireRing(x, z, 1.4); orb(x, z, C.fire, 1); });
-  def('Jato de Chamas', c => { for (let i = 0; i < 6; i++) setTimeout(() => { const d = 1.2 + i * 1.2; V.fireRing(player.x + Math.sin(c.ang) * d, player.z + Math.cos(c.ang) * d, .7 + i * .12); }, i * 50); });
-  def('Passo de Cinzas', c => { V.fireRing(c.P.x, c.P.z, 1.4); V.dashTrail(C.fire); setTimeout(() => V.fireRing(player.x, player.z, 1.4), 160); });
-  def('Muralha de Fogo', c => { for (let i = -3; i <= 3; i++) { const a = c.ang + Math.PI / 2; V.fireRing(c.tx + Math.sin(a) * i * 1.1, c.tz + Math.cos(a) * i * 1.1, .8); } });
-  def('Brasa Latente', c => { glyph(c.tx, c.tz, C.fire, 2, 'sigil', 2.2); for (let i = 0; i < 3; i++) setTimeout(() => V.fireRing(c.tx, c.tz, 2 + i), 700 + i * 400); });
-  def('Manto de Cinzas', c => { V.dome(c.P.x, c.P.z, C.fire, 2.2, true); V.aura(C.fire); });
+  def('Chuva de Meteoros', c => { ground(c.tx, c.tz, C.fire, 4, 2.4); for (let i = 0; i < 8; i++) V.meteor(c.tx + R(-3.5, 3.5), c.tz + R(-3.5, 3.5), i * 200); });
+  def('Explosão Ígnea', c => { blast(c.tx, c.tz, 3); });
+  def('Sol Negro', c => { orb(c.tx, c.tz, 0xff3a00, 2.6, true, true, 1.6); V.flames(c.tx, c.tz, { n: 8, r: 2.6, h: 1.4, dur: 1.5 }); setTimeout(() => { blast(c.tx, c.tz, 3.6); V.shockwave(c.tx, c.tz, 0xff3a00, 5.5); }, 1100); });
+  def('Combustão', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.flames(x, z, { n: 6, r: .6, h: 2.6, dur: 1.4 }); });
+  def('Jato de Chamas', c => { for (let i = 0; i < 7; i++) setTimeout(() => { const d = 1.2 + i * 1.1; V.flames(player.x + Math.sin(c.ang) * d, player.z + Math.cos(c.ang) * d, { n: 3, r: .35 + i * .06, h: 1.2 + i * .22, dur: .7 }); }, i * 45); });
+  def('Passo de Cinzas', c => { V.flames(c.P.x, c.P.z, { n: 5, r: .7, h: 1.8, dur: 1 }); V.dashTrail(C.fire); setTimeout(() => V.flames(player.x, player.z, { n: 5, r: .7, h: 1.8, dur: 1 }), 160); });
+  def('Muralha de Fogo', c => { const a = c.ang + Math.PI / 2; for (let i = -4; i <= 4; i++) V.flames(c.tx + Math.sin(a) * i * .85, c.tz + Math.cos(a) * i * .85, { n: 3, r: .3, h: 2.6, dur: 2.6 }); });
+  def('Brasa Latente', c => { ground(c.tx, c.tz, C.fire, 2, 2.2); V.flames(c.tx, c.tz, { n: 3, r: .5, h: .6, dur: 1.2 }); setTimeout(() => blast(c.tx, c.tz, 2.2), 1100); });
+  def('Manto de Cinzas', c => { V.dome(c.P.x, c.P.z, C.fire, 2.2, true); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; V.flames(c.P.x + Math.cos(a) * 2.2, c.P.z + Math.sin(a) * 2.2, { n: 2, r: .2, h: 1.3, dur: 1.4 }); } });
   /* Mago de Gelo */
-  def('Lança de Gelo', c => { V.spikeLine(c.P.x, c.P.z, c.ang, 9, C.ice, 'ice'); thrust(c.P.x, c.P.z, c.ang, 9, C.ice, .4); });
-  def('Maremoto', c => { V.wind(c.P.x, c.P.z, c.ang, 0x5ab8ff, 8); V.slash(c.P.x, c.P.z, c.ang, 0x8ad8ff, 5, 2.6); });
+  def('Lança de Gelo', c => { V.spikeLine(c.P.x, c.P.z, c.ang, 9, C.ice, 'ice'); fly('ice', { ang: c.ang, dist: 9, speed: 30, sc: 2.4, col: C.ice, cls: 9, onHit: (x, z) => { V.spikes(x, z, C.ice, 8, 1.4, 'ice'); star(x, z, C.ice, 1.4); } }); });
+  def('Maremoto', c => { wave(c.P.x, c.P.z, c.ang, 0x3aa8ff, 8, 6); V.wind(c.P.x, c.P.z, c.ang, 0xbfe8ff, 8); });
   def('Era do Gelo', c => { ground(c.tx, c.tz, C.ice, 4.5, 2.6); for (let i = 0; i < 4; i++) setTimeout(() => V.spikes(c.tx + R(-2, 2), c.tz + R(-2, 2), C.ice, 8, 2.4, 'ice'), i * 300); });
   def('Prisão Glacial', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.spikes(x, z, C.ice, 10, 1.2, 'ice'); cage(x, z, C.ice, 1.2); });
   def('Armadura de Gelo', c => { V.dome(c.P.x, c.P.z, C.ice, 2.2, true); V.spikes(c.P.x, c.P.z, C.ice, 6, 1.6, 'ice'); });
@@ -254,9 +292,9 @@
   def('Colosso de Pedra', c => { const p = c.at(2.5); V.spikes(p.x, p.z, 0x8a7a60, 12, 1.6, 'rock'); V.quakeRing(p.x, p.z, 2.5); });
   def('Muralha de Rocha', c => { const a = c.ang + Math.PI / 2, sx = Math.sin(a), sz = Math.cos(a); beam(c.tx - sx * 3.6, c.tz - sz * 3.6, c.tx + sx * 3.6, c.tz + sz * 3.6, C.earth, .25, 1.2, .15); for (let i = -3; i <= 3; i++) V.spikes(c.tx + sx * i * 1.1, c.tz + sz * i * 1.1, 0xa08a66, 3, .5, 'rock'); });
   def('Areia Movediça', c => { ground(c.tx, c.tz, 0xd8b870, 3.5, 2.6); V.vortex(c.tx, c.tz, 0xd8b870, 3.2); });
-  def('Arremesso de Rocha', c => { orb(c.at(8).x, c.at(8).z, 0x8a7a60, 1, false); V.streak(c.P.x, c.P.z, c.ang, 8, 0xc8a060); V.dust(c.at(8).x, c.at(8).z, 0x9a8a70, 10); });
-  def('Erupção', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0xff7a2a); V.fireRing(c.at(5).x, c.at(5).z, 2); });
-  def('Pedra Suspensa', c => { for (let i = 0; i < 5; i++) setTimeout(() => { const x = c.tx + R(-3, 3), z = c.tz + R(-3, 3); V.meteor(x, z, 0, 0x8a7a60); }, i * 250); });
+  def('Arremesso de Rocha', c => { fly('orb', { ang: c.ang, dist: 8, speed: 20, sc: 2.6, col: 0xc8a060, cls: 10, spin: .25, onHit: (x, z) => { V.dust(x, z, 0x9a8a70, 12); V.spikes(x, z, 0xa08a66, 5, 1.2, 'rock'); V.shockwave(x, z, C.earth, 2); } }); });
+  def('Erupção', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0xff7a2a); for (let i = 1; i <= 4; i++) setTimeout(() => V.flames(player.x + Math.sin(c.ang) * i * 1.6, player.z + Math.cos(c.ang) * i * 1.6, { n: 4, r: .5, h: 2.4, dur: .9 }), i * 90); });
+  def('Pedra Suspensa', c => { ground(c.tx, c.tz, C.earth, 3.4, 1.8); for (let i = 0; i < 5; i++) V.meteor(c.tx + R(-3, 3), c.tz + R(-3, 3), i * 250, 0x8a7a60, true); });
   def('Casca de Cristal', c => { V.dome(c.P.x, c.P.z, 0xbfa0ff, 2.3, true); V.spikes(c.P.x, c.P.z, 0xbfa0ff, 8, 1.8, 'ice'); });
   /* Mago do Raio e Condutor */
   def('Rajada de Vento', c => { V.wind(c.P.x, c.P.z, c.ang, 0xd8f4ff, 8); shout(c.P.x, c.P.z, c.ang, 0xd8f4ff, 3, 1.2); });
@@ -266,13 +304,13 @@
   def('Passo Relâmpago|Correnteza Elétrica', c => { V.bolt(c.P.x, c.P.z, C.bolt); V.dashTrail(C.bolt); setTimeout(() => V.bolt(player.x, player.z, C.bolt), 160); });
   def('Aceleração|Corpo de Tempestade', c => { V.aura(c.col); afterimages(c.col, 3); V.storm(c.P.x, c.P.z, 1.4, c.col, 2); });
   def('Campo Estático', c => { ground(c.tx, c.tz, C.bolt, 3.6, 2.6); V.storm(c.tx, c.tz, 3, C.bolt, 4); });
-  def('Agulha Elétrica|Arco Voltaico', c => { const e = c.t(12), p = e || c.at(10); beam(c.P.x, c.P.z, p.x, p.z, C.bolt, .1, .3); V.bolt(p.x, p.z, C.bolt); });
+  def('Agulha Elétrica|Arco Voltaico', c => { const e = c.t(12), p = e || c.at(10); V.zap(c.P.x, c.P.z, p.x, p.z, C.bolt, .3, 1); fly('orb', { ang: Math.atan2(p.x - c.P.x, p.z - c.P.z), dist: Math.hypot(p.x - c.P.x, p.z - c.P.z), speed: 60, sc: 1.6, col: C.bolt, cls: c.sk.sourceClass === 18 ? 18 : 11, onHit: (x, z) => star(x, z, C.bolt, 1.4) }); });
   def('Clarão', c => { orb(c.P.x, c.P.z, 0xffffff, 3, false, false, .35); star(c.P.x, c.P.z, 0xffffff, 3, 1.4); });
   def('Campo de Repulsão|Repulsão', c => { V.shockwave(c.P.x, c.P.z, c.col, 5); V.dome(c.P.x, c.P.z, c.col, 2, false); });
   def('Pulso Estático', c => { V.shockwave(c.P.x, c.P.z, C.storm, 4); V.storm(c.P.x, c.P.z, 3, C.storm, 4); });
   def('Barreira Elétrica', c => { V.dome(c.P.x, c.P.z, C.storm, 2.4, true); V.storm(c.P.x, c.P.z, 2, C.storm, 3); });
   def('Trovoada', c => { V.storm(c.tx, c.tz, 4, C.storm, 8); V.shockwave(c.tx, c.tz, C.storm, 4); });
-  def('Raio Retardado', c => { glyph(c.tx, c.tz, C.storm, 2, 'sigil', 1.6); setTimeout(() => { V.bolt(c.tx, c.tz, 0xffffff); V.pillar(c.tx, c.tz, C.storm, 1); }, 1200); });
+  def('Raio Retardado', c => { ground(c.tx, c.tz, C.storm, 2, 1.6); setTimeout(() => { V.bolt(c.tx, c.tz, 0xdff0ff); V.pillar(c.tx, c.tz, C.storm, 1); }, 1200); });
   def('Olho da Tempestade', c => { V.vortex(c.P.x, c.P.z, C.storm, 3.4); V.dome(c.P.x, c.P.z, C.storm, 2.6, true); });
   /* Mago do Tempo */
   def('Âncora Temporal', c => { glyph(c.P.x, c.P.z, C.time, 2, 'clock', 2.4); });
@@ -314,10 +352,10 @@
   def('Armadilha Rúnica', c => { glyph(c.tx, c.tz, C.rune, 1.4, 'sigil', 2.4); });
   def('Reparar', c => { V.heal(c.P.x, c.P.z, C.rune); glyph(c.P.x, c.P.z, C.rune, 1.6, 'sigil', 1.2); });
   def('Desmontar', c => { V.dust(c.tx, c.tz, 0x9aa0b0, 12); glyph(c.tx, c.tz, C.rune, 1.4, 'sigil', .8); });
-  def('Sobrecarga', c => { orb(c.tx, c.tz, C.rune, 2.2); V.storm(c.tx, c.tz, 2.4, C.rune, 4); });
-  def('Projetar', c => { glyph(c.P.x, c.P.z, C.rune, 1.2, 'sigil', .8); glyph(c.tx, c.tz, C.rune, 1.2, 'sigil', 1); beam(c.P.x, c.P.z, c.tx, c.tz, C.rune, .1, .4, .3); });
+  def('Sobrecarga', c => { orb(c.tx, c.tz, C.rune, 2.2); V.storm(c.tx, c.tz, 2.4, C.rune, 4); ground(c.tx, c.tz, C.rune, 2.6, 1.2); });
+  def('Projetar', c => { ground(c.P.x, c.P.z, C.rune, 1.2, .8); ground(c.tx, c.tz, C.rune, 1.2, 1); V.zap(c.P.x, c.P.z, c.tx, c.tz, C.rune, .45, 1, .5); });
   def('Pulso Rúnico', c => { glyph(c.tx, c.tz, C.rune, 3, 'sigil', .9); V.shockwave(c.tx, c.tz, C.rune, 4.5); });
-  def('Lança Rúnica', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.rune, .45); });
+  def('Lança Rúnica', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.rune, .3); fly('orb', { ang: c.ang, dist: 10, speed: 38, sc: 2, col: C.rune, cls: 16, onHit: (x, z) => glyph(x, z, C.rune, 1.2, 'sigil', .8) }); });
   def('Placas de Emergência', c => { V.dome(c.P.x, c.P.z, C.rune, 2.2, true); glyph(c.P.x, c.P.z, C.rune, 2.2, 'sigil', 1.6); });
   /* Duelista Espectral */
   /* v331: quase não aparecia; ganhou vento do deslocamento */
@@ -336,7 +374,7 @@
   def('Futuro Resguardado', c => { V.dome(c.P.x, c.P.z, C.orac, 2.3, true); glyph(c.P.x, c.P.z, C.orac, 2.3, 'clock', 1.6); });
   /* Devorador do Vazio */
   def('Boca do Vazio|Consumir', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; orb(x, z, C.void, 1.6, true, true, 1); V.vortex(x, z, C.void, 2.4); });
-  def('Devolver', c => { orb(c.at(3).x, c.at(3).z, C.void, 1.4, false, true, .7); V.streak(c.P.x, c.P.z, c.ang, 9, C.void); });
+  def('Devolver', c => { fly('orb', { ang: c.ang, dist: 9, speed: 26, sc: 2, col: C.void, cls: 20, onHit: (x, z) => { orb(x, z, C.void, 1.4, false, true, .6); V.shockwave(x, z, C.void, 2.5); } }); });
   def('Carapaça Vazia', c => { V.dome(c.P.x, c.P.z, 0x2a0a4a, 2.3, true); wisps(c.P.x, c.P.z, C.void, 8, 2.2); });
   def('Rasgo', c => { V.slash(c.P.x, c.P.z, c.ang, C.void, 3.4, 2); rift(c.at(2.5).x, c.at(2.5).z, c.ang + Math.PI / 2, C.void, 2, .5); });
   def('Silêncio', c => { orb(c.P.x, c.P.z, C.void, 3.2, false, true, .5); V.shockwave(c.P.x, c.P.z, C.void, 4); });
@@ -354,7 +392,7 @@
   def('Roda dos Meridianos', c => { const L = foes(6).slice(0, 5); glyph(c.P.x, c.P.z, C.monk, 2.2, 'sigil', 1); (L.length ? L : [c.at(3)]).forEach((e, i) => setTimeout(() => { beam(player.x, player.z, e.x, e.z, C.monk, .1, .25); star(e.x, e.z, C.monk, 1.1); }, i * 110)); });
   /* Lâmina Arcana */
   def('Corte Arcano', c => { V.slash(c.P.x, c.P.z, c.ang, C.arc, 3.2, 2); glyph(c.at(2).x, c.at(2).z, C.arc, 1, 'sigil', .7, 1.2); });
-  def('Lâmina Flamejante', c => { V.aura(C.fire); V.fireRing(c.P.x, c.P.z, 1.2); });
+  def('Lâmina Flamejante', c => { V.flames(c.P.x, c.P.z, { n: 6, r: .8, h: 2.2, dur: 1.4 }); V.aura(C.fire); });
   def('Salto Rúnico', c => { glyph(c.P.x, c.P.z, C.arc, 1.2, 'sigil', .8); V.dashTrail(C.arc); setTimeout(() => { V.shockwave(player.x, player.z, C.arc, 3); glyph(player.x, player.z, C.arc, 2, 'sigil', .8); }, 170); });
   def('Inscrição Alternada', c => { const e = c.t(8); if (e) { glyph(e.x, e.z, C.arc, 1, 'sigil', 2.2, 1.6); glyph(e.x, e.z, 0xffb84a, .7, 'sigil', 2.2, 1.65); } V.slash(c.P.x, c.P.z, c.ang, C.arc, 2.4, 1.6); });
   def('Reserva Incandescente', c => { V.aura(C.arc); orb(c.P.x, c.P.z, C.arc, .9, true, false, 1); wisps(c.P.x, c.P.z, C.arc, 10, 1.8); });
@@ -364,18 +402,18 @@
   def('Díade Arcana', c => { const L = foes(10).slice(0, 2); if (L.length === 2) { beam(L[0].x, L[0].z, L[1].x, L[1].z, C.arc, .14, .6); L.forEach(e => glyph(e.x, e.z, C.arc, .9, 'sigil', 1, 1.4)); } else V.slash(c.P.x, c.P.z, c.ang, C.arc, 3, 2); });
   def('Órbita Reversa', c => { glyph(c.P.x, c.P.z, C.arc, 8, 'sigil', .9); glyph(c.P.x, c.P.z, C.arc, 3, 'sigil', .9); V.shockwave(c.P.x, c.P.z, C.arc, 8); });
   /* Lanceiro */
-  def('Estocada Longa', c => thrust(c.P.x, c.P.z, c.ang, 6.5, C.lance, .4));
+  def('Estocada Longa', c => jab(c.P.x, c.P.z, c.ang, 6.5, C.lance, .4));
   def('Varredura de Lança', c => { V.whirl(C.lance, 4); V.slash(c.P.x, c.P.z, c.ang, 0xffffff, 4.2, TAU * .9); });
   def('Salto do Dragão', c => { V.dashTrail(0xffb84a); setTimeout(() => { V.pillar(player.x, player.z, 0xffb84a, .9); V.quakeRing(player.x, player.z, 3, 0xffb84a); }, 180); });
   /* v331: só a faixa de 4 a 8 m, como na descrição */
-  def('Ponta Absoluta', c => { const p = c.at(4); thrust(p.x, p.z, c.ang, 4, C.lance, .6); ground(c.at(6).x, c.at(6).z, C.lance, .9, .6); star(c.at(8).x, c.at(8).z, C.lance, 2.2); });
-  def('Recuo de Caça', c => { V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.lance, 3); afterimages(C.lance, 3); thrust(c.P.x, c.P.z, c.ang, 4, C.lance, .3); });
+  def('Ponta Absoluta', c => { const p = c.at(4); jab(p.x, p.z, c.ang, 4, C.lance, .6); ground(c.at(6).x, c.at(6).z, C.lance, .9, .6); star(c.at(8).x, c.at(8).z, C.lance, 2.2); });
+  def('Recuo de Caça', c => { V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.lance, 3); afterimages(C.lance, 3); jab(c.P.x, c.P.z, c.ang, 4, C.lance, .3); });
   /* v331: X de dois cortes diagonais à frente (antes era um +) */
-  def('Cruz de Hastes', c => { const p = c.at(3.5); [Math.PI / 4, -Math.PI / 4].forEach((d, i) => setTimeout(() => { const a = c.ang + d; thrust(p.x - Math.sin(a) * 3, p.z - Math.cos(a) * 3, a, 6, C.lance, .35); }, i * 120)); setTimeout(() => star(p.x, p.z, 0xffffff, 1.6), 140); });
-  def('Cravo de Muralha', c => { thrust(c.P.x, c.P.z, c.ang, 5, C.lance, .4); V.spikeLine(c.at(4).x, c.at(4).z, c.ang, 3, 0x8a7a60, 'rock'); });
-  def('Fio da Fileira', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.lance, .3); foes(10).filter(e => Math.abs(Math.atan2(e.x - c.P.x, e.z - c.P.z) - c.ang) < .25).forEach(e => star(e.x, e.z, C.lance, 1)); });
+  def('Cruz de Hastes', c => { const p = c.at(3.5); [Math.PI / 4, -Math.PI / 4].forEach((d, i) => setTimeout(() => { const a = c.ang + d; jab(p.x - Math.sin(a) * 3, p.z - Math.cos(a) * 3, a, 6, C.lance, .35); }, i * 120)); setTimeout(() => star(p.x, p.z, 0xffffff, 1.6), 140); });
+  def('Cravo de Muralha', c => { jab(c.P.x, c.P.z, c.ang, 5, C.lance, .4); V.spikeLine(c.at(4).x, c.at(4).z, c.ang, 3, 0xa08a66, 'rock'); });
+  def('Fio da Fileira', c => { jab(c.P.x, c.P.z, c.ang, 10, C.lance, .3); foes(10).filter(e => Math.abs(Math.atan2(e.x - c.P.x, e.z - c.P.z) - c.ang) < .25).forEach(e => star(e.x, e.z, C.lance, 1)); });
   /* v331: só os flancos esquerdo e direito, de 2 a 6 m (frente e trás ficam de fora) */
-  def('Bússola Partida', c => { [1, -1].forEach((s, i) => setTimeout(() => { for (const d of [-.3, 0, .3]) { const a = c.ang + s * Math.PI / 2 + d; thrust(player.x + Math.sin(a) * 2, player.z + Math.cos(a) * 2, a, 4, C.lance, .3); } }, i * 90)); });
+  def('Bússola Partida', c => { [1, -1].forEach((sd, i) => setTimeout(() => { for (const d of [-.3, 0, .3]) { const a = c.ang + sd * Math.PI / 2 + d; jab(player.x + Math.sin(a) * 2, player.z + Math.cos(a) * 2, a, 4, C.lance, .3); } }, i * 90)); });
   def('Medida do Caçador', c => { const e = c.t(12); if (e) { glyph(e.x, e.z, C.lance, 1.2, 'sigil', 1.6, 1.4); beam(c.P.x, c.P.z, e.x, e.z, C.lance, .04, 1, .2); } });
   /* Berserker */
   def('Golpe Brutal', c => { const p = c.at(2); V.slash(c.P.x, c.P.z, c.ang, C.blood, 3, 2); V.fissure(p.x, p.z, c.ang, 3, 0xff3a2a); blood(p.x, p.z, 10); });
@@ -395,8 +433,8 @@
     const P = player, ang = P.face || 0;
     let tx = P.x + Math.sin(ang) * 6, tz = P.z + Math.cos(ang) * 6;
     try { const t = sk.t === 'kit111' ? sk.effect : (sk.effect || sk.t); if (/area|pulses|rain|slowzone|healzone|trap|device|barrier|gate|passage|relocate|anchorward/.test(t)) { const g = skillGroundPoint(); if (g) { tx = g.x; tz = g.z; } } } catch (_) {}
-    const c = { P, ang, tx, tz, col: sk.col || 0xffffff, at: d => ({ x: P.x + Math.sin(ang) * d, z: P.z + Math.cos(ang) * d }), t: (r = 9) => front(r) };
+    const c = { P, ang, tx, tz, sk, real: sk.t === 'bolt', col: sk.col || 0xffffff, at: d => ({ x: P.x + Math.sin(ang) * d, z: P.z + Math.cos(ang) * d }), t: (r = 9) => front(r) };
     try { fn(c); } catch (e) { console.warn('vfx328', sk.n, e); try { old(sk); } catch (_) {} }
   };
-  window.VFX328 = { X, fists, thrust, star, beam, chain, rift, orb, blood, wisps, bones, totem, glyph, shout, cage, afterimages, ground };
+  window.VFX328 = { X, fly, rainArrows, jab, wave, blast, fists, thrust, star, beam, chain, rift, orb, blood, wisps, bones, totem, glyph, shout, cage, afterimages, ground };
 })();
