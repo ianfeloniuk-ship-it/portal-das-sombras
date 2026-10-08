@@ -100,7 +100,26 @@ window.SetVisual153=(()=>{
    head.visible=false;root.userData.equipment323HeadHidden=true;refreshOutline323(root);
   });
  }
- function attach(root,item){if(item.slot==='h'&&!item.set153&&(item.tier||0)===0&&(item.rar||0)===0&&!item._skip323){helmet323(root,item);return}if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(token323(item))){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);if(!(item.slot==='a'&&(NOSLOT181[item.set153]||[]).includes('a')))return;/* v292 (Ian): Condutor não tem peitoral próprio — usa o peitoral comum na cor do conjunto */item={...item,set153:undefined,tint292:0x3a6cff}}
+ /* v336 (Ian aprovou o peitoral v025 em 08/10/2026): armadura Ferro/Comum nova — peitoral com ombreiras, braçais e grevas feitos no corpo do Viajante. Um GLB só; cada malha eq331_<slot>_* é ligada aos ossos do herói pelo nome. Com o peitoral somem também as mangas/capinha e a saia da túnica, que apareciam por baixo. */
+ const GAIN332=1.25,EXTRA332={a:['tripo_part_1','tripo_part_2','tripo_part_11']};
+ function armor332(root,item){const slot=item.slot;
+  Promise.all([load('models/equipment332/armor-F-common.glb'),load(RIG169.guardiao)]).then(([src,rig])=>{
+   if(!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
+   if(!src){attach(root,{...item,_skip323:true});return}
+   let body=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o});if(!body)return;
+   const add=(sm,gain)=>{const bones=sm.skeleton.bones.map(b=>boneOf(root,b.name));if(bones.some(b=>!b))return;
+    const mats=(Array.isArray(sm.material)?sm.material:[sm.material]).map(x=>{const m=x.clone();m.skinning=true;m.side=T.DoubleSide;if(gain&&m.color)m.color.multiplyScalar(gain);if(!gain){/* ferro escuro some sob a luz do jogo: menos metal, cor levantada */m.metalness=Math.min(m.metalness??0,.15);m.roughness=Math.max(m.roughness??1,.6);if(m.color)m.color.multiplyScalar(GAIN332);/* o jogo não aplica gama na saída: sem isto a textura fica quase preta */if(m.map){m.map=m.map.clone();m.map.encoding=T.LinearEncoding;m.map.needsUpdate=true}}return m});
+    const mesh=new T.SkinnedMesh(sm.geometry,Array.isArray(sm.material)?mats:mats[0]);mesh.name='set153_'+slot;mesh.userData.equipment332=sm.name;
+    mesh.position.copy(sm.position);mesh.quaternion.copy(sm.quaternion);mesh.scale.copy(sm.scale);mesh.castShadow=true;mesh.frustumCulled=false;
+    body.parent.add(mesh);mesh.updateMatrixWorld(true);mesh.bind(new T.Skeleton(bones,sm.skeleton.boneInverses.map(x=>x.clone())),sm.bindMatrix.clone())};
+   src.traverse(sm=>{if(sm.isSkinnedMesh&&sm.name.startsWith('eq331_'+slot+'_'))add(sm,0)});
+   if(slot==='a'){const arms=typeof equippedItems==='function'&&equippedItems().some(it=>it.slot==='g');
+    if(rig&&!arms)rig.traverse(sm=>{if(sm.isSkinnedMesh&&sm.name.startsWith('base169_g'))add(sm,1.45)});
+    root.traverse(o=>{if(EXTRA332.a.includes(o.name))o.visible=false})}
+   refreshOutline323(root);
+  });
+ }
+ function attach(root,item){if(['a','g','b'].includes(item.slot)&&!item.set153&&!item.tint292&&(item.tier||0)===0&&(item.rar||0)===0&&!item._skip323){attachRig169(root,item,true);armor332(root,item);return}if(item.slot==='h'&&!item.set153&&(item.tier||0)===0&&(item.rar||0)===0&&!item._skip323){helmet323(root,item);return}if(item.slot==='h'&&CROWN291[item.set153]&&(root.userData.set153Tokens||new Set()).has(token323(item))){if(crownAttach291(root,item))return}/* v290 (Ian): elmos dos conjuntos raros saíam atrás da cabeça ou grandes demais no encaixe do Blender; agora usam o encaixe medido na cabeça, como o elmo comum */if(item.slot!=='w'&&item.slot!=='h'&&item.set153&&RIG169[item.set153]){attachRig169(root,item);if(!(item.slot==='a'&&(NOSLOT181[item.set153]||[]).includes('a')))return;/* v292 (Ian): Condutor não tem peitoral próprio — usa o peitoral comum na cor do conjunto */item={...item,set153:undefined,tint292:0x3a6cff}}
   /* v175 (Ian): peça sem conjunto raro usa a armadura comum do Tripo, pintada com a cor do rank. */const id=item.set153||'comum',slot=item.slot,fit=FIT[slot];/* v289 (Ian): armadura comum também troca a roupa — some a roupa larga daquela parte, aparece o corpo base justo e a peça vai por cima */if(id==='comum'&&BODY289.includes(slot))attachRig169(root,item,true);if(!fit||!root||!(id==='comum'?slot!=='w':HAS165(id,slot)))return;
   const url='models/set153/'+id+'-'+({h:'elmo',a:'peitoral',g:'bracal',b:'greva',w:'arma'})[slot]+'.glb';
   load(url).then(src=>{if(!src||!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
