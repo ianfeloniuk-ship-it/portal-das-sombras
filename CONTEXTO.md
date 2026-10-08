@@ -1,3 +1,8 @@
+## v329 — efeito visual próprio para todas as habilidades, 08/10/2026
+- Pedido de Ian: arrumar o visual das habilidades de TODAS as classes, não só as 3 primeiras. Antes, 126 das 200 habilidades do catálogo usavam efeito genérico (anel, cúpula, brilho) e as 7 habilidades novas de Monge, Lâmina Arcana, Lanceiro e Berserker só um anel.
+- tools/vfx328.js: uma receita por habilidade (243 das 24 classes, todas cobertas), com peças novas: punhos, estocada de luz, sangue, relógio do tempo, fenda, correntes, espíritos, ossos, totem rúnico, selos (palma, cinco pontos, oito), grito, faísca de aparo, jaula, imagens residuais. Habilidades de chefes/roubadas seguem no vfx302.
+- Validação: todas as 243 disparadas no navegador sem erro; print dos punhos do Monge. Conferência visual das demais NÃO concluída (Ian pediu para parar e publicar). Pendente: revisar por print e ajustar; animações próprias das classes novas.
+
 ## v328 — 10 passivas novas (55–100) e passivas ocultas até liberar, 08/10/2026
 - Pedido de Ian: passivas gerais novas por nível, depois do 50 (`tools/passives327.js`): Golpe Resoluto 55, Respiro 60, Ímpeto 65, Elo Elemental 70, Desgaste 75, Caçador de Marcas 80, Leitura de Combate 85, Sangue-Frio 90, Contra-Fluxo 95, Último Fôlego 100.
 - Aba Passivas só mostra as liberadas (sem 🔒 nem nível futuro); o aviso [PASSIVA] continua ao liberar.

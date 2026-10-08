@@ -107,6 +107,6 @@ function play(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit111'?sk.e
 /* liga ao lançamento: detecta quando a habilidade realmente saiu (recarga começou) */
 let mute=0;const fr0=fxRing;fxRing=function(){if(performance.now()<mute)return;return fr0.apply(this,arguments)};
 const wf0=waveFwd;waveFwd=function(){if(performance.now()<mute)return;return wf0.apply(this,arguments)};
-const us0=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return us0.apply(this,arguments);const s0=(player.skills||[]).find(x=>x&&!x.empty&&x.n===sk.n)||sk,c0=s0.cdT||0;mute=performance.now()+30;let r;try{r=us0.apply(this,arguments)}finally{mute=0}if((s0.cdT||0)>c0)try{play(sk)}catch(e){console.warn('vfx302',e)}return r};
-window.VFX302={play,whirl,fissure,quakeRing,spikes,fireRing,meteor,bolt,storm,pillar,streak,slash,dome,aura,heal,runeCircle,vortex,wind,smoke,poison,dashTrail,shockwave};
+const us0=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player)return us0.apply(this,arguments);const s0=(player.skills||[]).find(x=>x&&!x.empty&&x.n===sk.n)||sk,c0=s0.cdT||0;mute=performance.now()+30;let r;try{r=us0.apply(this,arguments)}finally{mute=0}if((s0.cdT||0)>c0)try{(window.VFX302&&window.VFX302.play||play)(sk)}catch(e){console.warn('vfx302',e)}return r};
+window.VFX302={add,fade,add2,dust,spikeLine,play,whirl,fissure,quakeRing,spikes,fireRing,meteor,bolt,storm,pillar,streak,slash,dome,aura,heal,runeCircle,vortex,wind,smoke,poison,dashTrail,shockwave};
 })();
