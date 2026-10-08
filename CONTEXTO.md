@@ -1,3 +1,12 @@
+## v327 — campanha jogável, missões dos NPCs, Torvo e Tomo, 08/10/2026
+- Pedido de Ian (revisão da história): os passos dos atos agora são missões de verdade (`tools/campaign327.js`). Um ato por vez, na ordem, liberado pelo rank (I a VII; o Ato I já no início) ou pelo evento que libera a página do Diário (VIII a XIII). Tipos de passo: ir até uma luz no mundo (dourada = ato, azul = NPC), com inimigos que aparecem ao chegar, figura (guarda, Aldric, sobreviventes, Torvo) e F para interagir; falar com o NPC na cidade (a fala aparece no topo da janela dele); eventos já contados pelo jogo (guardiões, elites, portais, cristais); andar da Torre; capitais visitadas; ler a confissão no Diário.
+- As 7 missões de NPC da Crônica (Lyra, Mira, Brann, Kael, Selene, Dorian, Torvo) existem: aparecem na janela de afinidade de cada NPC depois do ato correspondente, com botão Aceitar; a do Torvo começa sozinha na estrada. Cada conclusão dá XP, ouro, reputação e uma página no Diário.
+- Torvo é personagem único: aparece nas missões do Ato VIII e na dele; saiu da lista de nomes aleatórios dos goblins dos postos (no lugar: Ossa).
+- Tela de rank mostra os 13 atos com o passo atual, como liberar os bloqueados e botão Acompanhar.
+- Tomo da Pele de Ferro: deixou de reduzir dano em porcentagem; dá defesa universal em número (1,5 × poder do nível por nível do tomo), conforme a regra de defesa em número. Livraria continua até o nível 10 (Ian: não mudar).
+- Nome: título da Crônica = Primeva; estudos visuais e licença dos NPCs trocados de Ecos da Fenda para Primeva.
+- Validação: personagem de teste novo, Ato I jogado no navegador (luta, guarda, muralha, Lyra), todos os 13 atos e 7 missões de NPC completados por roteiro automático sem erro no console, Torvo e luz conferidos em print, tela de rank e Tomo conferidos. Sem campanha longa jogada à mão.
+
 ## v326 — Lanceiro arremessa lanças, 07/10/2026
 - Pedido de Ian: básico do Lanceiro arremessa lanças pela mão, como o Arqueiro. Sem arma, reaproveita penalidade existente de intervalo ×1,6; não é 60% mais lento que o Arqueiro. Assassino desarmado continua corpo a corpo, sem gerar adagas.
 - Lança equipada lança projétil físico, preservando prioridade da arma. Lanceiro desarmado lança lança física, animação de arremesso e origem na mão. Habilidades e escala por Força do Lanceiro preservadas. Descrição explica o intervalo de ataque.
@@ -255,7 +264,7 @@ Cenas 2D e replays rejeitados: não carregados nem publicados. O campo cinematic
 
 ## Histórico anterior
 
-# Contexto do projeto Hollow Rank (antes Ecos da Fenda / Portal das Sombras) (para outra conversa/IA continuar)
+# Contexto do projeto Primeva (antes Hollow Rank / Ecos da Fenda / Portal das Sombras) (para outra conversa/IA continuar)
 
 > **Versão atual e regras para começar: veja [`VERSAO.md`](VERSAO.md).** Sempre parta da `main` do GitHub; cópias locais podem estar atrasadas.
 

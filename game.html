@@ -3590,7 +3590,7 @@ function statsFor(){
   const maxhp=(classBaseStats().hp+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
   const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(classBaseStats().mp+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
-  const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0)+.015*pb('res'));
+  const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
   const spd=6.4*(1+.005*(s.agi||0)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
   return{maxhp:Math.max(1,Math.round(maxhp)),maxmp:Math.max(0,Math.round(maxmp)),maxsh:Math.max(0,Math.round(maxsh)),dmg,def,spd:Math.max(0,spd)}}
 function playerModel(){
@@ -5384,7 +5384,9 @@ function mobAttr281(e){const role=mobRole281(e),key=role+':'+(e.threat184||0);if
   if(!e.spd281Done&&Number.isFinite(e.speed)){e.speed*=1+a.spd;e.spd281Done=1}e.att281=a;return a}
 function mobDefFor281(e,type){const a=mobAttr281(e),pen=pPen281();const spec=type==='mag'?a.mag:a.phy;return 1-(1-a.uni*(1-pen))*(1-spec*(1-pen))}
 /* v296 (Ian): defesa é NÚMERO que se desconta do dano (100 de dano contra 200 de defesa = 0). Cada ponto vale atkPer(nível); a universal vale metade e conta contra os dois tipos. Penetração da Destreza também é número. */
-function pDefNums296(){const k=atkPer(run?.level||1);return {phy:st281('res')*k,mag:st281('esp')*k,uni:st281('von')*k*.5}}
+function pDefNums296(){const k=atkPer(run?.level||1);return {phy:st281('res')*k,mag:st281('esp')*k,uni:st281('von')*k*.5+tomeDef327()}}
+/* v327 (Ian): Tomo da Pele de Ferro dá defesa em número (desconta de todo dano), não porcentagem. */
+function tomeDef327(){return Math.round(1.5*pb('res')*atkPer(run?.level||1))}
 function pDefVal296(type){const d=pDefNums296();return (type==='mag'?d.mag:d.phy)+d.uni}
 function pPenVal296(){return st281('des')*atkPer(run?.level||1)*.5}
 function mobDefNums296(e){const a=mobAttr281(e),k=atkPer(a.L)*.5;if(a.penV==null)a.penV=(a.des||0)*k;return {phy:(a.res||0)*k,mag:(a.esp||0)*k,uni:(a.von||0)*k*.5}}
@@ -7175,7 +7177,7 @@ function rankTab(){const r=profile.rank,nx=r+1,can=nx<=9,need=can?GR[nx].lvl:0;l
   if(can&&MAIN_ACTS[nx])h+=row('<span style="opacity:.5">Próximo: '+MAIN_ACTS[nx][0]+'</span>','Passe na prova para o rank '+RANKS[nx].id+'.','');return h}
 /* ===== LIVRARIA (ideia do Irror): passivas que servem para qualquer classe. Custam 1 ponto de habilidade + ouro por nível (máx. 10). ===== */
 const PBOOK=[{k:'xp',n:'Tomo da Sabedoria',d:l=>'+'+(3*l)+'% de XP',u:'+3% de XP por nível'},{k:'ls',n:'Tomo do Vampiro',d:l=>String(.5*l).replace('.',',')+'% do dano volta como vida',u:'+0,5% de roubo de vida por nível'},
- {k:'sh',n:'Tomo da Égide',d:l=>'+'+(4*l)+'% de escudo máximo',u:'+4% de escudo por nível'},{k:'res',n:'Tomo da Pele de Ferro',d:l=>'−'+String(1.5*l).replace('.',',')+'% de dano recebido',u:'−1,5% de dano recebido por nível'},
+ {k:'sh',n:'Tomo da Égide',d:l=>'+'+(4*l)+'% de escudo máximo',u:'+4% de escudo por nível'},{k:'res',n:'Tomo da Pele de Ferro',d:l=>'+'+fmt(Math.round(1.5*l*atkPer(run?.level||1)))+' de defesa universal (desconta de todo dano)',get u(){return '+'+fmt(Math.round(1.5*atkPer(run?.level||1)))+' de defesa universal por nível (cresce com seu nível)'}},
  {k:'eva',n:'Tomo do Vento',d:l=>String(1.5*l).replace('.',',')+'% de chance de evitar um golpe',u:'+1,5% de evasão por nível'},{k:'area',n:'Tomo do Alcance',d:l=>'+'+(4*l)+'% de alcance do ataque corpo a corpo',u:'+4% de alcance por nível'}];
 function pb(k){return ((run&&run.pbook)||{})[k]||0}
 function pbCost(l){return servicePrice265('passive',{passiveLevel:l})}
@@ -7507,7 +7509,7 @@ function buildOutpost217(ch,g,addCol){const x0=ch.cx*CH+9,z0=ch.cz*CH+9,R=mulber
  L.inter.push({type:'outpost',chunk:ch,x:x0+1.5,z:z0+1.5,r:2.6,label:'F · DESCANSAR NA FOGUEIRA',use:()=>{player.hp=player.maxhp;player.mp=player.maxmp;floater(player.x,player.z,'Descansou','#ffd08a',true);toast('<b>['+nm.toUpperCase()+']</b> Você descansou na fogueira. Vida e mana cheias.',4000);saveRun()}});
  L.inter.push({type:'outpost',chunk:ch,x:x0-4,z:z0+3.5,r:2.4,label:'F · MASCATE',use:()=>openShop('pot')});
  try{const R2=mulberry32(rh(ch.cx,ch.cz,12)),k=['gobArcher118','gobShaman118','gobShield118','orc','gobBrute118'][Math.floor(R2()*5)],e=spawnKind(KINDS[k]?k:'goblin',x0+3.5,z0+2.5,0,{wild:true});
-  {const ix=enemies.indexOf(e);if(ix>=0)enemies.splice(ix,1)}FRIENDS217.push(e);e.friendly217=true;e.hp=e.maxhp=1e9;e.name=['Grak','Mizzu','Torvo','Uzra','Kepp','Brunna'][Math.floor(R2()*6)]+', caçador do Clã Ferrugem';e.short=e.name.split(',')[0];e.face=-2.4;ch.friend217=e;
+  {const ix=enemies.indexOf(e);if(ix>=0)enemies.splice(ix,1)}FRIENDS217.push(e);e.friendly217=true;e.hp=e.maxhp=1e9;e.name=['Grak','Mizzu','Ossa','Uzra','Kepp','Brunna'][Math.floor(R2()*6)]+', caçador do Clã Ferrugem';e.short=e.name.split(',')[0];e.face=-2.4;ch.friend217=e;
   L.inter.push({type:'outpost',chunk:ch,x:x0+3.5,z:z0+2.5,r:2.6,label:'F · FALAR COM '+e.short.toUpperCase(),use:()=>{speech153(e,pick(MONSTERHUNT217));storyCh220('act8');lore206('monsterhunt','Nem todo monstro que atravessa a fenda é inimigo. Alguns aprenderam a viver aqui e caçam portais como você. O Clã Ferrugem é o maior deles.')}})}catch(_){} }
 /* v218 (Ian): monstros inteligentes que viraram caçadores. Não atacam, não podem ser atacados, conversam. */
 const FRIENDS217=[];
@@ -7667,7 +7669,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Dano por golpe ('+(m?'mágico':'físico')+')',fmt(player.dmg),'Seu ataque '+(m?'mágico':'físico')+' de '+fmt(atkOf(m?'mag':'phy'))+(bp.edmg?' · +'+pct(bp.edmg*100)+' dos bônus de dano':'')+(cb.dmg!==1?' · '+clsName+' causa '+pct(cb.dmg*100)+' do dano normal':''));
   h+=line('Vida',fmt(player.maxhp),growth.hp.base+' de base · +'+growth.hp.perLevel*Lv+' da classe por nível ('+growth.hp.perLevel+'/nível) · +'+(s.vit||0)*hpPer(Lv)+' da Vitalidade ('+(s.vit||0)+' pontos × '+hpPer(Lv)+')'+(bp.ehp?' · +'+pct(bp.ehp*100)+' dos bônus de vida':'')+(cb.hp!==1?' · '+clsName+' tem '+pct(cb.hp*100)+' da vida normal':''));
   h+=line('Mana',fmt(player.maxmp),growth.mp.base+' de base · +'+growth.mp.perLevel*Lv+' da classe por nível ('+growth.mp.perLevel+'/nível) · +'+(s.int||0)*mpPer(Lv)+' da Inteligência ('+(s.int||0)+' pontos × '+mpPer(Lv)+')');
-  h+=line('Escudo',fmt(player.maxsh),'Peças equipadas: '+equipmentShield()+' de escudo base, mais bônus de escudo.');h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%',(()=>{const cd=Math.round(((CLS_BAL[profile.cls]||{def:0}).def||0)*100),bd=npcHas('Brann')?8:0,td=Math.round(1.5*pb('res')*10)/10;return cd+'% da classe '+clsName+(bd?' · +8% do Brann':'')+(td?' · +'+String(td).replace('.',',')+'% do Tomo da Pele de Ferro':'')+' · máximo 70%. Armadura não dá defesa: dá escudo.'})());
+  h+=line('Escudo',fmt(player.maxsh),'Peças equipadas: '+equipmentShield()+' de escudo base, mais bônus de escudo.');h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%',(()=>{const cd=Math.round(((CLS_BAL[profile.cls]||{def:0}).def||0)*100),bd=npcHas('Brann')?8:0,td=tomeDef327();return cd+'% da classe '+clsName+(bd?' · +8% do Brann':'')+(td?' · Tomo da Pele de Ferro: +'+fmt(td)+' de defesa universal (número, à parte)':'')+' · máximo 70%. Armadura não dá defesa: dá escudo.'})());
   h+=line('Chance de crítico',pct(cc*100),'5% de base · +'+pct(.25*(s.per||0))+' da Percepção ('+(s.per||0)+' pontos)'+(af.crit?' · +'+af.crit+'% dos itens':'')+(cons('fur')?' · +'+(cons('fur')+(cons('fur')>=10?10:0))+'% da Fúria':''));
   h+=line('Dano crítico',cc<1?'×2':'×'+(1+Math.floor(cc))+(cc%1?' / ×'+(2+Math.floor(cc)):''),'Um crítico dá o dobro do dano. Acima de 100% de chance, cada 100% a mais soma ×1.');
   h+=line('Velocidade de ataque','+'+Math.round(.4*g)+'%','+0,4% por ponto de Agilidade ('+g+' pontos). Sem limite.');
@@ -8722,6 +8724,7 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
+<script src="tools/campaign327.js?v=327"></script>
 
 <script src="tools/classes316.js?v=320"></script>
 

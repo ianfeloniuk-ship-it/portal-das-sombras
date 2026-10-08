@@ -1,7 +1,7 @@
 /* Dados portáveis da campanha; cinemáticas históricas não são executadas. */
 window.SOLO_RPG_STORY = {
   "version": "narrativa-v5-2026-10-05",
-  "title": "",
+  "title": "Primeva",
   "status": "Campanha central completa em prosa. Capítulos integrados ao Diário; missões físicas novas e escolhas dramatizadas ainda não são sistemas implementados.",
   "acts": [
     {
