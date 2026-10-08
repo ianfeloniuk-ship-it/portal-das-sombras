@@ -1128,3 +1128,23 @@ Mob dragao usa modelo próprio m_draconico318.glb (18.080 triângulos, textura 2
 ## v322 — Dracônico: textura da referência aprovada
 
 Substituído models/m_draconico318.glb pelo export Blender v011 da projeção v008 aprovada por Ian. GameUV único em TEXCOORD_0 e sem normal derivada da imagem de cor, compatível com o carregador atual. 21 ossos e oito clipes preservados; corrigidos os eixos de deslocamento da queda para eliminar a suspensão do corpo. Combate e variantes Fendida/Abissal testados em Chromium isolado; mascote continua no modelo dragao. Nenhuma mudança em saves ou balanceamento. Armaduras TripoSG continuam candidatas no Drive: elmo menor requer revisão de cabelo/encaixe e materiais; não publicar o piloto procedural antigo. Fontes e provas: https://drive.google.com/drive/folders/1Tb7vOq-UQGP34xLDPzL3QiNfTajmNbCC .
+
+## v332 — XP de missão sem salto na morte e Conspirar — 08/10/2026
+
+Pedido de Ian (texto colado no chat, pedia v330; a numeração já estava em v331 na main, então saiu como v332).
+
+**XP de missão.** Antes: a morte volta o nível para 1 mas o ranque fica; a missão da Ordem era orçada pelo nível do ranque (`GR[rank].lvl`), então uma entrega de ranque alto pagava 80 a 150 mil de XP no nível 1.
+- `RpgBalance.questXpAt(budget, level)`: o XP é recalculado pelo nível atual de quem entrega, toda vez que é mostrado ou pago (`questXpNow332` dentro de `questBudget262` e `storyBudget262`). O orçamento guardado continua com o nível do ranque para alvo mínimo, ouro e reputação.
+- `RpgBalance.questXpCap`: em `xpAwardAmount262`, toda fonte `'quest'` (quadro da Ordem, extração, diária, exigência, histórias, campanha v327, fenda corrompida) enche no máximo a barra do nível atual: sobe 1 nível e o excesso é descartado. XP de monstro não muda.
+- `clearMissionsOnDeath332()` em `die()`: apaga quadro, extração, exigência e diária. O `newRun()` já zerava; agora é explícito e não depende do que entrar em `keep`. A campanha (`profile.camp327`) não é apagada: é progresso de história e já pagava pelo nível do jogador.
+- Texto novo no quadro da Lyra, no Diário e no aviso de recompensa (`QUEST_XP_RULE332`): "O XP concedido pela Ordem é calibrado pelo nível atual do Transmigrador e possui limite de 1 avanço de nível por entrega." O pedido dizia "Associação"; no jogo o nome é Ordem.
+
+**Conspirar (`tools/conspiracy332.js`).** Monstro comum (não chefe, não rival) que dá 3 golpes corpo a corpo seguidos sem tirar vida nem escudo do jogador chama os da mesma facção (mesmo `group`, mesma família de `FAMILIES124` ou mesma espécie) a até 8,5 m dele. Precisa de 2 ou mais. Eles recuam, param de atacar e canalizam 1,8 s com círculo vermelho de 3,2 m onde o jogador estava e fala em balão.
+- Dano em dois canais separados: físico = soma dos ataques físicos − (Resistência + metade da Vontade − soma da penetração física); mágico igual com Espírito. Perfis Arcano e Espectral contam como mágicos, o resto como físico. "Metade da Vontade" é o `uni` de `pDefNums296` (que inclui o Tomo da Pele de Ferro). O total entra por `hurtPlayer` com a defesa em número desligada (já foi descontada); esquiva, escudos, guarda e defesa percentual continuam valendo.
+- Sair do círculo evita o golpe. Atingir 2 conspiradores em 0,2 s (dano em área) ou um golpe com atordoamento de 0,5 s ou mais quebra a formação ("A formação quebrou!"); sobrar menos de 2 também. Recarga de 8 s depois do golpe e 10 s depois de quebrada.
+- Golpes de projétil não contam para o gatilho (não têm atacante no momento do impacto), mas atiradores entram na formação.
+- Dica na página "Tática · Conspiração" do Diário (abre na primeira vez), aviso na primeira vez e no texto do Bestiário. O jogo não tem tela de dicas de carregamento, então isso não foi criado.
+
+**Passivas.** Só conferência: 12 passivas do nível 3 ao 50 e 10 do 55 ao 100 estão no código. A lista continua mostrando só as liberadas, sem cadeado, como Ian decidiu em 08/10 (v328); o pedido de mostrar cadeado e nível não foi aplicado por contradizer essa decisão.
+
+Testes: `node tools/verify-v332.cjs` (11 verificações) e jogo local: 5 missões de ranque SS+ entregues no nível 1 deram 1 nível cada; morte apagou as missões; conspiração com 3 Goblins Guerreiros disparou, causou o dano calculado, quebrou por área e por atordoamento, não acertou fora do círculo. `tools/verify-v320.cjs` já falhava antes desta versão (`passiveCrit327` não existe no ambiente de teste dele).

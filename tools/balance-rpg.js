@@ -100,6 +100,18 @@
     }
     return { xp: Math.max(1, Math.round(xpNeed(level) * .07 * minutes * difficulty)), level: level, minutes: minutes, difficulty: difficulty };
   }
+  // v332 (Ian): XP de missão segue o nível atual de quem entrega, não o ranque da missão. Ouro e reputação continuam pelo ranque.
+  function questXpAt(budget, level) {
+    var b = budget || {}, minutes = Number(b.minutes), difficulty = Number(b.difficulty);
+    if (!(minutes > 0 && difficulty > 0)) return 0;
+    return Math.max(1, Math.round(xpNeed(level) * .07 * minutes * difficulty));
+  }
+  // v332 (Ian): uma entrega enche no máximo a barra do nível atual, ou seja, sobe 1 nível e o excesso é descartado.
+  function questXpCap(amount, need, current) {
+    var a = Number(amount); if (!(a > 0)) return 0;
+    var room = Math.max(1, Math.floor(Number(need) || 0) - Math.max(0, Math.floor(Number(current) || 0)));
+    return Math.min(Math.round(a), room);
+  }
   function reward(input) {
     var o = input || {}; if (o.noExpLoot || o.allied) return { xp: 0, gold: 0, threat: 0, role: 'none' };
     var l = levelOf(o.level), threat = threatOf(o.threat), ti = THREAT_INDEX[threat];
@@ -118,5 +130,5 @@
     for (var l = 1; l <= 2000; l += 17) if (xpNeed(l) < xpNeed(Math.max(1, l - 1))) return false;
     return true;
   }
-  return { xpNeed: xpNeed, growthFor: growthFor, baseStats: baseStats, reward: reward, combatEffort: combatEffort, questReward: questReward, threatOrder: THREATS.slice(), runSelfTests: runSelfTests };
+  return { xpNeed: xpNeed, growthFor: growthFor, baseStats: baseStats, reward: reward, combatEffort: combatEffort, questReward: questReward, questXpAt: questXpAt, questXpCap: questXpCap, threatOrder: THREATS.slice(), runSelfTests: runSelfTests };
 }));
