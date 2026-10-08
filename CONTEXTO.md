@@ -1,3 +1,14 @@
+## v341 — ponto de habilidade sem erro, habilidade não troca ao morrer, portões das cidades, 08/10/2026
+- Ian (áudio 1): começou com Redemoinho de Aço (Berserker); a lista de Habilidades mostrava todas, ele pôs um ponto na errada e a habilidade em uso virou outra. **Causa da troca:** gastar o ponto não muda a habilidade equipada (conferido); quem trocava era a morte — `die()` recriava o `run` guardando só a posição, então `classLoadout` voltava para a 1ª habilidade da classe (Golpe Brutal). Agora `die()` guarda `classLoadout` e `initialSkillFix259`.
+- Personagem → Habilidades: só as habilidades **em uso** aparecem com o botão Melhorar; as outras ficam em "Habilidades fora de uso · N", recolhido (`<details data-skill114="others341">`, estado lembrado em `CHAR_UI118.details`). Ainda dá para melhorar ali dentro; trocar continua em Equipar habilidades, na cidade.
+- Ian (áudio 2): de dentro da cidade dava para bater à distância nos monstros sem eles reagirem; sugeriu portão ou os monstros perseguirem. Feito (proposta minha juntando as duas ideias, **Ian ainda não aprovou**):
+  - `cityGates341` (chamado em `envCity`): portão de duas folhas nas 4 entradas da muralha de toda cidade (e na muralha externa, nível 6+). `updGates341`: abre quando o jogador chega perto (meia largura + 6 m) ou quando um invasor chega; fecha depois. Cidade caída = portão arrombado.
+  - `cityRaider341(e)` = `raid155 || breaker || inv || siege || aw103`. Monstro comum agora é barrado na borda da zona segura (36*CITYK), não mais a 38 m do centro; invasor continua entrando.
+  - `hurtEnemy`: jogador dentro da cidade não fere monstro comum que está fora ("MURALHA" + aviso do Narrador a cada 45 s).
+  - `pickTarget`: invasor que está dentro da cidade pode mirar o jogador lá dentro (antes o jogador era intocável na cidade e matava invasor de graça).
+- Testado no navegador: lista de habilidades; morte mantém Redemoinho de Aço; monstro comum barrado a 64,1 m; golpe de dentro para fora = 0; fora da cidade luta normal; invasor ataca o jogador dentro (136→85 de vida); portão abre/fecha. Sem erros no console.
+- Pendente: Ian ver o visual do portão (primeira versão, madeira com ferragens) e dizer se a regra ficou boa; o portão é só regra + visual, não tem colisão própria.
+
 ## v339 — Lanceiro arremessa a própria lança; sem lança bate de perto, 08/10/2026
 - Ian: "ele tem que arremessar a mesma lança que ele usa e não outras; sem lança ele é igual o assassino sem adaga, deve bater de perto". **Substitui a regra da v326** (Lanceiro desarmado arremessava lanças).
 - Lanceiro sem `basicRanged`: desarmado usa o caminho corpo a corpo (animação de soco, sem projétil, sem a penalidade de intervalo dos desarmados à distância). Descrição do ataque básico atualizada.
