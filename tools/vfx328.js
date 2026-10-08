@@ -168,7 +168,7 @@
     }, i * 55);
   }
   /* estocada com a lança de verdade dentro do rastro de luz */
-  function jab(x, z, ang, len, col, w = .35) { thrust(x, z, ang, len, col, w); fly('tspear', { x, z, ang, dist: Math.max(1, len - 1), speed: 30, sc: 3, col }); }
+  function jab(x, z, ang, len, col, w = .35) { thrust(x, z, ang, len, col, w); fly('tspear', { x, z, ang, dist: Math.max(1, len - 1), speed: 30, sc: 1, col }); }
   /* onda de água: parede curva com espuma na crista avançando */
   function wave(x, z, ang, col = 0x3aa0ff, len = 8, w = 6) {
     const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = ang; const geo = new T.PlaneGeometry(w, 2.6, 20, 8), p = geo.attributes.position;
@@ -245,7 +245,7 @@
   def('Passo da Luz', c => { V.pillar(c.P.x, c.P.z, C.pal, .8); V.dashTrail(C.pal); setTimeout(() => V.pillar(player.x, player.z, C.pal, .8), 160); });
   def('Correntes Sagradas', c => { const L = foes(9).slice(0, 4); chain([{ x: c.P.x, z: c.P.z }, ...(L.length ? L : [c.at(7)])], C.pal); L.forEach(e => glyph(e.x, e.z, C.pal, .9, 'sigil', 1.4)); });
   def('Censura', c => { const e = c.t(); if (e) { V.pillar(e.x, e.z, 0xffe070, .9); mark(e, 0xffe070); } else V.pillar(c.tx, c.tz, 0xffe070, .9); });
-  def('Lança Solar', c => { thrust(c.P.x, c.P.z, c.ang, 11, 0xffd070, .55); fly('tspear', { ang: c.ang, dist: 10, speed: 40, sc: 2.6, col: 0xffd070, onHit: (x, z) => V.pillar(x, z, 0xffd070, 1) }); });
+  def('Lança Solar', c => { thrust(c.P.x, c.P.z, c.ang, 11, 0xffd070, .55); fly('tspear', { ang: c.ang, dist: 10, speed: 40, sc: 1.2, col: 0xffd070, onHit: (x, z) => V.pillar(x, z, 0xffd070, 1) }); });
   /* Invocador */
   def('Lobo Espiritual|Sentinela', c => { const p = c.at(2); glyph(p.x, p.z, C.inv, 1.6, 'sigil', 1.4); wisps(p.x, p.z, C.inv, 14, 2); });
   def('Matilha Espiritual', c => { for (let i = 0; i < 3; i++) { const a = c.ang + (i - 1) * .9, x = c.P.x + Math.sin(a) * 2.5, z = c.P.z + Math.cos(a) * 2.5; glyph(x, z, C.inv, 1.1, 'sigil', 1.4); wisps(x, z, C.inv, 8, 2); } });

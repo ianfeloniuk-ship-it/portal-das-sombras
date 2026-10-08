@@ -107,6 +107,11 @@
     holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder);inner.scale.multiplyScalar(len/(b2.max.y-b2.min.y));holder.updateMatrixWorld(true);
     const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*grip),-c.z);return holder}
   function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key==='dagger');for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}
+  /* v339 (Ian): a lança arremessada é a mesma da mão (modelo, cor do rank); sem lança na mão usa a comum. Ponta em +Z. */
+  API.spearModel=function(m){let w=null,ax=new T.Vector3(0,1,0);const held=m&&m.kind195==='spear'&&m.socket&&m.socket.children[0];
+    if(held){w=held.clone(true);const a=sheathAxis195(m.socket);if(a)ax=a.clone()}else{const k=W171.spear;load171(k[0],k[1],k[2],'spear');if(!w171.spear)return null;w=w171.spear.clone(true)}
+    w.traverse(x=>{if(x.isMesh&&x.material){x.material=Array.isArray(x.material)?x.material.map(q=>q.clone()):x.material.clone();x.castShadow=false}});
+    const g=new T.Group();g.add(w);g.quaternion.setFromUnitVectors(ax.normalize(),new T.Vector3(0,0,1));return g};
   API.daggerModel=function(){const k=W171.dagger;load171(k[0],k[1],k[2],'dagger');const src=w171.dagger;if(!src)return null;const w=src.clone(true);w.traverse(x=>{if(x.isMesh&&x.material){x.material=x.material.clone();x.castShadow=false}});return w};
   function make171(key,color){const src=w171[key];if(!src)return null;const w=src.clone(true),mats=[],c=new T.Color(color);w.traverse(x=>{if(x.isMesh){x.castShadow=true;x.material=x.material.clone();x.material.color.copy(c).lerp(new T.Color(1,1,1),.35);mats.push(x.material)}});w.userData.materials=mats;return w}
   function tripoSword163(item){const w=sword163.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;return w}

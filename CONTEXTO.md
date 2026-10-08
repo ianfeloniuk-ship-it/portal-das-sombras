@@ -1,3 +1,10 @@
+## v339 — Lanceiro arremessa a própria lança; sem lança bate de perto, 08/10/2026
+- Ian: "ele tem que arremessar a mesma lança que ele usa e não outras; sem lança ele é igual o assassino sem adaga, deve bater de perto". **Substitui a regra da v326** (Lanceiro desarmado arremessava lanças).
+- Lanceiro sem `basicRanged`: desarmado usa o caminho corpo a corpo (animação de soco, sem projétil, sem a penalidade de intervalo dos desarmados à distância). Descrição do ataque básico atualizada.
+- Com lança equipada: `projModel('tspear')` usa `Warrior127.spearModel(m)`, clone da lança que está na mão (modelo e cor do rank); a lança some da mão por 0,3 s enquanto voa (`player.spearGone339`). Sem lança na mão (ex.: efeitos de habilidade) cai no modelo comum.
+- Efeitos de estocada (vfx328) passam a usar a lança no tamanho real.
+- Testado no navegador: desarmado = soco, 0 projéteis; com lança = 1 projétil com o modelo da mão, mão vazia durante o voo, acerto no inimigo; sem erros. Dano/alcance/cadência com lança não mudaram.
+
 ## v338 — lança segurada do jeito certo, 08/10/2026
 - Ian: "o jeito que ele segura a lança eu percebi que é estranho". Causa: a lança usava a pegada de espada — ficava em pé (ponta para cima) durante a estocada e o arremesso, e deitada na cintura com o braço duro quando parado.
 - `Warrior127.spearAim` (tools/warrior-player127.js), chamado em game.html depois de todas as animações: gira só o encaixe da mão para a ponta seguir uma direção — para a frente em golpes e arremesso, em pé ao lado do corpo parado (cabo no chão), de lado no giro (`gira_lanca`), para baixo no `salto_impacto`. Guardada nas costas (correndo) não muda. Só o jogador; caçadores/NPCs não foram alterados.
