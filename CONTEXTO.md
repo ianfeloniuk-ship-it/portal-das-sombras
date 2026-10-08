@@ -1148,3 +1148,15 @@ Pedido de Ian (texto colado no chat, pedia v330; a numeração já estava em v33
 **Passivas.** Só conferência: 12 passivas do nível 3 ao 50 e 10 do 55 ao 100 estão no código. A lista continua mostrando só as liberadas, sem cadeado, como Ian decidiu em 08/10 (v328); o pedido de mostrar cadeado e nível não foi aplicado por contradizer essa decisão.
 
 Testes: `node tools/verify-v332.cjs` (11 verificações) e jogo local: 5 missões de ranque SS+ entregues no nível 1 deram 1 nível cada; morte apagou as missões; conspiração com 3 Goblins Guerreiros disparou, causou o dano calculado, quebrou por área e por atordoamento, não acertou fora do círculo. `tools/verify-v320.cjs` já falhava antes desta versão (`passiveCrit327` não existe no ambiente de teste dele).
+
+## v333 — Conspirar refeito a pedido de Ian — 08/10/2026
+
+Correções de Ian no chat sobre a v332: sem círculo; os monstros vêm e atacam juntos tentando acertar; só quem acerta entra no cálculo; tiro soma igual a corpo a corpo; sem recarga, porque eles já sabem que sozinhos não ferem. Chefes e rivais continuam fora.
+- `tools/conspiracy333.js` substitui `conspiracy332.js`. Fases: `gather` (1,8 s: continuam vindo com o AI normal, mas com o ataque segurado; anel vermelho pulsando em cada um) e `strike` (até 2,4 s: todos soltam o ataque normal ao mesmo tempo).
+- Cada golpe de conspirador que acerta entra numa soma (`addHit`); o jogador recebe só a diferença entre a soma nova e o que já recebeu. Um só acertando = 0. Esquiva (invulnerável) não conta como acerto. O tipo (físico/mágico) vem do próprio golpe (`inDType281`), não mais do perfil do monstro.
+- Tiro e área de monstro agora têm dono: `shoot` marca `owner333` no projétil e o jogo põe `window.projOwner333` ao aplicar o dano (projétil e `hazard`). Com isso tiro conta para os 3 golpes sem dano e para a soma.
+- Depois da primeira conspiração o grupo (`knows333`) volta a conspirar em seguida, sem precisar de mais 3 golpes, enquanto houver 2 ou mais perto (14 m) e em combate. Quebrar a formação (área ou atordoamento, só na fase de preparo) atrasa 2,5 s.
+- Entram os da mesma facção a até 8,5 m de quem chamou ou do jogador (atiradores ficam espalhados).
+- A página do Diário continua com a chave `conspira332`.
+
+Testes: `node tools/verify-v333.cjs` (12 verificações) e jogo local: 3 goblins acertando = 19 de dano conjunto; 2 acertando = 2; 1 acertando = 0; esquiva = 0; guerreiro + arqueiro somaram; 2 arqueiros dispararam a conspiração só com tiro; área e atordoamento quebraram e o grupo voltou em 2,5 s; monstro sozinho não conspira.

@@ -5338,7 +5338,7 @@ function updHazards(dt){
     if(h.t>=h.dur){
       if(h.invert113){inversionHit113(h)}
       else if(h.healFraction){solarHeal(h.x,h.z,h.r,h.healFraction)}
-      else if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r)hurtPlayer(h.dmg);for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
+      else if(h.team==='enemy'){if(h.dmg>0&&!player.dead&&Math.hypot(player.x-h.x,player.z-h.z)<h.r+player.r){window.projOwner333=h.owner||null;hurtPlayer(h.dmg);window.projOwner333=null}for(const a of allies)if(Math.hypot(a.x-h.x,a.z-h.z)<h.r)hurtAlly(a,h.dmg)}
       else{for(const e of enemies)if(!e.dead&&Math.hypot(e.x-h.x,e.z-h.z)<h.r+e.r)hurtEnemy(e,h.dmg,h.x,h.z,{kb:h.kb??3,stun:h.stun,slow:h.slow||0,fromPlayer:true,skillHit:true,passive:!!h.passive})}
       if(h.icePulse)spikes(h.x,h.z,8,1,h.r,h.col,1);if(h.firePulse)pillar(h.x,h.z,h.col,.8,.35);
       if(h.bladeStrike)fxSlash(h.x,h.z,h.t*7,h.col,h.r);if(h.runeStrike){circle(h.x,h.z,h.col);pillar(h.x,h.z,h.col,.6,.4)}
@@ -5716,7 +5716,7 @@ function updateProjectiles253(dt){
     hits.sort((a,b)=>a.hit.t-b.hit.t);
     for(const {e,hit} of hits){p.x=hit.p.x;p.y=hit.p.y;p.z=hit.p.z;p.hit.add(e);
       if(p.team==='player'){hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,ptype300:p.ptype,elem300:p.elem300,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third,dtype281:p.dtype281});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3);}projectileImpact253(p);if(bounceBasic(p)){bounced=true;break;}if(!p.pierce){done=true;break;}}
-      else{if(e===player){inDType281=MAGIC_PT281.test(p.ptype||'')?'mag':'phy';hurtPlayer(p.dmg,!p.fromBoss111);inDType281='phy'}else hurtAlly(e,p.dmg);projectileImpact253(p);done=true;break;}
+      else{if(e===player){window.projOwner333=p.owner333||null;inDType281=MAGIC_PT281.test(p.ptype||'')?'mag':'phy';hurtPlayer(p.dmg,!p.fromBoss111);inDType281='phy';window.projOwner333=null}else hurtAlly(e,p.dmg);projectileImpact253(p);done=true;break;}
     }
     if(!done&&!bounced){p.x=after.x;p.y=after.y;p.z=after.z;if(terrain){p.x=terrain.x;p.y=terrain.y;p.z=terrain.z;done=true;projectileImpact253(p);}}
     if(!done){const fr=(x,z)=>L.grid?gfree(x,z):worldFree(x,z,.1);if(!fr(p.x,p.z)){if(p.wallBounce177>0){if(!fr(p.x,before.z))p.vx=-p.vx;if(!fr(before.x,p.z))p.vz=-p.vz;if(fr(p.x,before.z)&&fr(before.x,p.z)){p.vx=-p.vx;p.vz=-p.vz;}p.x=before.x;p.y=before.y;p.z=before.z;p.wallBounce177--;p.mesh.rotation.y=Math.atan2(p.vx,p.vz);}else done=true;}}
@@ -8737,4 +8737,4 @@ requestAnimationFrame(frame);
 <script src="tools/classes316.js?v=320"></script>
 
 <script src="tools/bestiary324.js?v=332"></script>
-<script src="tools/conspiracy332.js?v=332"></script>
+<script src="tools/conspiracy333.js?v=333"></script>

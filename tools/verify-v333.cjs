@@ -1,6 +1,6 @@
-/* v332: XP de missão pelo nível do jogador com limite de 1 nível por entrega; Conspirar com dois canais de dano. Rodar: node tools/verify-v332.cjs */
+/* v332: XP de missão pelo nível do jogador com limite de 1 nível por entrega; Conspirar com dois canais de dano. Rodar: node tools/verify-v333.cjs */
 const fs=require('fs'),assert=require('assert/strict');
-const B=require('./balance-rpg.js'),C=require('./conspiracy332.js');
+const B=require('./balance-rpg.js'),C=require('./conspiracy333.js');
 const html=fs.readFileSync('game.html','utf8'),sw=fs.readFileSync('sw.js','utf8');let checks=0;const test=(n,fn)=>{fn();checks++;console.log('PASS '+n)};
 const G_LEVELS=[1,8,20,35,55,80,120,180,220,260];
 
@@ -46,10 +46,11 @@ test('3 golpes seguidos sem dano disparam; dano ou pausa longa zeram',()=>{
   assert.equal(C.nextStreak(2,11,12,7),0);assert.equal(C.nextStreak(2,11,11+C.CFG.streakWindow+.1,0),1);});
 test('dano em área = 2 conspiradores atingidos na mesma janela',()=>{
   const a={},b={};assert.equal(C.distinctRecent([{e:a,at:5},{e:a,at:5.05}],5.05),1);assert.equal(C.distinctRecent([{e:a,at:5},{e:b,at:5.1}],5.1),2);assert.equal(C.distinctRecent([{e:a,at:5},{e:b,at:5.6}],5.6),1);});
+test('só quem acerta entra na conta, um por vez',()=>{const def={res:90,esp:0,von:0},m={atk:50,pen:10,type:'phy'},p={hits:[],applied:0};assert.equal(C.addHit(p,m,def),0);assert.equal(C.addHit(p,m,def),30);assert.equal(C.addHit(p,{atk:40,pen:0,type:'mag'},def),40);assert.equal(p.applied,70);assert.equal(p.hits.length,3);const q={hits:[],applied:0};C.addHit(q,m,def);assert.equal(q.applied,0)});
 test('regras pedidas: 3 golpes, 8,5 m, 1,8 s',()=>assert.deepEqual([C.CFG.hits,C.CFG.radius,C.CFG.channel],[3,8.5,1.8]));
 test('script e versão integrados',()=>{
-  assert(html.includes('<script src="tools/conspiracy332.js?v=332"></script>'));assert(sw.includes("const V='pds-v332'"));
-  for(const f of ['tools/conspiracy332.js?v=332','tools/balance-rpg.js?v=332','tools/bestiary324.js?v=332'])assert(sw.includes('"'+f+'"'),f);
+  assert(html.includes('<script src="tools/conspiracy333.js?v=333"></script>'));assert(sw.includes("const V='pds-v333'"));
+  for(const f of ['tools/conspiracy333.js?v=333','tools/balance-rpg.js?v=332','tools/bestiary324.js?v=332'])assert(sw.includes('"'+f+'"'),f);
   assert(fs.readFileSync('tools/bestiary324.js','utf8').includes(C.TIP));});
 test('passivas gerais: 12 até o nível 50 e 10 do 55 ao 100',()=>{
   const p263=fs.readFileSync('tools/passives263.js','utf8'),p327=fs.readFileSync('tools/passives327.js','utf8');
