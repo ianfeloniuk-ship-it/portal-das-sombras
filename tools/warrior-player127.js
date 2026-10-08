@@ -214,9 +214,20 @@
   /* v195 (Ian): correndo, a arma vai nas costas (como aljava). Ao parar, ele leva a mão ao ombro, saca e segura;
      3 s parado sem atacar, guarda de novo. Atacar, usar habilidade ou mirar saca na hora. */
   const SH195={draw:.32};
-  function sheathRestore195(m){for(const W of [m.socket,m.bowHolder155])if(W&&W.userData.base195){const b=W.userData.base195;W.position.copy(b.p);W.quaternion.copy(b.q);W.scale.copy(b.s);W.userData.base195=null}}
+  function sheathRestore195(m){if(m.socket&&m.socket.userData.base338){m.socket.quaternion.copy(m.socket.userData.base338);m.socket.userData.base338=null}for(const W of [m.socket,m.bowHolder155])if(W&&W.userData.base195){const b=W.userData.base195;W.position.copy(b.p);W.quaternion.copy(b.q);W.scale.copy(b.s);W.userData.base195=null}}
   function sheathAxis195(W){if(W.userData.axis195)return W.userData.axis195;W.updateMatrixWorld(true);const inv=new T.Matrix4().copy(W.matrixWorld).invert(),b=new T.Box3();W.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).applyMatrix4(inv);b.union(bb)}});
     if(b.isEmpty())return null;const sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),ax=sz.x>=sz.y&&sz.x>=sz.z?'x':sz.y>=sz.z?'y':'z',v=new T.Vector3();v[ax]=c[ax]>=0?1:-1;return W.userData.axis195=v}
+  /* v338 (Ian: "o jeito que ele segura a lança é estranho"): a lança era segurada como espada — em pé durante a estocada e deitada na cintura parado.
+     Agora a ponta segue uma direção no mundo: para a frente nos golpes, em pé ao lado do corpo parado (cabo apoiado no chão),
+     de lado no giro e para baixo no salto. Roda só o encaixe da mão, depois de todas as animações; guardada nas costas não muda. */
+  API.spearAim=function(m,o={}){const W=m&&m.socket;if(!W||m.kind195!=='spear'||!W.children.length||!W.parent)return;const axis=sheathAxis195(W);if(!axis)return;
+    const s=m.sh195?m.sh195.s:0,w=1-s*s*(3-2*s);if(w<=.001){m.aim338=null;return}
+    m.root.updateMatrixWorld(true);const rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),U=new T.Vector3(0,1,0),R=new T.Vector3(1,0,0).applyQuaternion(rq);
+    const a=o.anim,want=(a==='gira_lanca'?R.clone().addScaledVector(U,.1):a==='salto_impacto'?F.clone().multiplyScalar(.45).addScaledVector(U,-1):a==='rest'?U.clone().multiplyScalar(.95).addScaledVector(F,.28):o.throwing?F.clone().addScaledVector(U,.18):F.clone().addScaledVector(U,.04)).normalize();
+    /* guarda a direção em relação ao corpo, para virar junto quando ele gira */
+    const inv=rq.clone().invert(),wl=want.clone().applyQuaternion(inv);m.aim338=m.aim338?m.aim338.lerp(wl,.35).normalize():wl;const dir=m.aim338.clone().applyQuaternion(rq).normalize();
+    const hq=W.getWorldQuaternion(new T.Quaternion()),cur=axis.clone().applyQuaternion(hq).normalize(),nq=new T.Quaternion().setFromUnitVectors(cur,dir).multiply(hq),fq=hq.clone().slerp(nq,w),pq=W.parent.getWorldQuaternion(new T.Quaternion()).invert();
+    W.userData.base338=W.quaternion.clone();W.quaternion.copy(pq.multiply(fq));W.updateMatrixWorld(true)};
   function sheath195(m,st,dt){
     // Sem arma não há transição de guardar/sacar nem pose de ombro: idle deve permanecer neutro.
     if(!m.staff174&&!m.equipmentState?.weapon){if(m.sh195)m.sh195={s:1,idle:0,wasMove:false};return}

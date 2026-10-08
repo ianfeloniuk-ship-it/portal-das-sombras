@@ -261,7 +261,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/terrain245.js?v=252"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=326"></script>
+<script src="tools/warrior-player127.js?v=338"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
@@ -6157,7 +6157,7 @@ function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
     animChibi(P.m,{move:mv,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
-  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
+  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
   tickGates(dt);
   for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
@@ -8733,7 +8733,7 @@ requestAnimationFrame(frame);
 <script src="tools/vfx302.js?v=334"></script>
 <script src="tools/shaders312.js?v=334"></script>
 <script src="tools/crystal310.js?v=310"></script>
-<script src="tools/anim303.js?v=337"></script>
+<script src="tools/anim303.js?v=338"></script>
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=324"></script>
 <script src="tools/ineditas309.js?v=315"></script>
@@ -8756,9 +8756,9 @@ requestAnimationFrame(frame);
 <script src="tools/bestiary324.js?v=335"></script>
 <script src="tools/conspiracy333.js?v=335"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v337</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v338</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=337;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=338;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

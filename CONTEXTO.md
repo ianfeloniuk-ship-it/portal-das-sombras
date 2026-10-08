@@ -1,3 +1,9 @@
+## v338 — lança segurada do jeito certo, 08/10/2026
+- Ian: "o jeito que ele segura a lança eu percebi que é estranho". Causa: a lança usava a pegada de espada — ficava em pé (ponta para cima) durante a estocada e o arremesso, e deitada na cintura com o braço duro quando parado.
+- `Warrior127.spearAim` (tools/warrior-player127.js), chamado em game.html depois de todas as animações: gira só o encaixe da mão para a ponta seguir uma direção — para a frente em golpes e arremesso, em pé ao lado do corpo parado (cabo no chão), de lado no giro (`gira_lanca`), para baixo no `salto_impacto`. Guardada nas costas (correndo) não muda. Só o jogador; caçadores/NPCs não foram alterados.
+- `Anim303.active()` informa a animação de habilidade em curso.
+- Conferido em close de vários ângulos (parado, estocada, mira, recuo, cruz, giro, salto, arremesso básico), sem erros. Conferência da IA, não aprovação de Ian.
+
 ## v337 — pendências dos efeitos: folha das 24 classes, animações com arma na mão, Mago Elemental, 08/10/2026
 - Pedido de Ian: fazer o que faltava da v334.
 - Folha de prints das 24 classes refeita com os shaders novos (2 momentos por habilidade): 0 erros. Único ajuste: `Clarão` durava tão pouco que quase não se via (agora com onda e arco elétrico).

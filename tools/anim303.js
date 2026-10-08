@@ -147,5 +147,5 @@ function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)retur
  else if(A.type==='shoot'){root.rotation.x=after<0?-.12*w:0}}
 /* v331: o jogo reposiciona a raiz depois do post; o giro e a altura são reaplicados aqui */
 function rootFix(P){if(!cur||!rootNow||!P||!P.m||!P.m.root)return;const r=P.m.root;if(rootNow.spin)r.rotation.y+=rootNow.spin*D;if(rootNow.y)r.position.y+=rootNow.y}
-window.Anim303={play,post,enemyPost,root:rootFix,list:Object.keys(A),map:MAP,A};
+window.Anim303={play,post,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
 })();
