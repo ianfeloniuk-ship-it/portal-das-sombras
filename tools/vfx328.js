@@ -67,12 +67,13 @@
   }
   function rift(x, z, ang, col, h = 3.2, dur = 1.1) {
     const g = new T.Group(); g.position.set(x, h / 2 + .2, z); g.rotation.y = ang + Math.PI / 2;
-    const shape = new T.Mesh(new T.PlaneGeometry(.9, h, 1, 8), E(col, .85));
+    const shape = new T.Mesh(new T.PlaneGeometry(1.3, h, 1, 8), E(col, .85));
     const pos = shape.geometry.attributes.position; for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); pos.setX(i, pos.getX(i) * (1 - Math.abs(y) / (h / 2)) + Math.sin(y * 3) * .15); } pos.needsUpdate = true; g.add(shape);
     const edge = new T.Mesh(shape.geometry, E(0xffffff, .6)); edge.scale.set(.35, 1, 1); g.add(edge);
     const sp = []; for (let i = 0; i < 14; i++) { const s = new T.Mesh(new T.OctahedronGeometry(.06), E(col, 1)); s.position.set(R(-.4, .4), R(-h / 2, h / 2), R(-.3, .3)); s.userData.v = R(.5, 1.6); g.add(s); sp.push(s); }
     g.scale.x = .01;
-    add(g, dur, k => { g.scale.x = k < .2 ? k * 5 : k > .8 ? (1 - k) * 5 : 1; for (const s of sp) { s.position.x += s.userData.v * .02 * (s.position.x > 0 ? 1 : -1); } fade(g, k > .8 ? (1 - k) * 5 : 1); });
+    /* v331: a fenda sempre vira de frente para a câmera (de lado ela sumia) */
+    add(g, dur, k => { g.rotation.y = Math.atan2(camera.position.x - g.position.x, camera.position.z - g.position.z); g.scale.x = k < .2 ? k * 5 : k > .8 ? (1 - k) * 5 : 1; for (const s of sp) { s.position.x += s.userData.v * .02 * (s.position.x > 0 ? 1 : -1); } fade(g, k > .8 ? (1 - k) * 5 : 1); });
   }
   function orb(x, z, col, r = 1.4, implode = false, dark = false, dur = .8) {
     const g = new T.Group(); g.position.set(x, 1.2, z);
@@ -132,18 +133,18 @@
   function shout(x, z, ang, col, n = 3, spread = 1.2) {
     for (let i = 0; i < n; i++) setTimeout(() => {
       const g = new T.Group(); g.position.set(x, 1.3, z); g.rotation.y = ang;
-      const arc = new T.Mesh(new T.RingGeometry(.9, 1.05, 32, 1, -spread / 2 + Math.PI / 2, spread), E(col, .9)); arc.rotation.x = -Math.PI / 2; g.add(arc);
+      const arc = new T.Mesh(new T.RingGeometry(.9, 1.05, 32, 1, -spread / 2 - Math.PI / 2, spread), E(col, .9)); arc.rotation.x = -Math.PI / 2; g.add(arc);
       add(g, .5, k => { g.scale.setScalar(1 + k * 5); fade(g, 1 - k); });
     }, i * 110);
   }
   function mark(e, col, kind = 'sigil') { if (!e) return; glyph(e.x, e.z, col, 1, kind, 1.6, 2.6); star(e.x, e.z, col, .9, 1.4); }
   function ground(x, z, col, r, dur = 2) { const g = new T.Group(); g.position.set(x, .05, z); const d = new T.Mesh(new T.CircleGeometry(r, 40), E(col, .3)); d.rotation.x = -Math.PI / 2; g.add(d); const o = new T.Mesh(new T.RingGeometry(r * .95, r, 48), E(col, .9)); o.rotation.x = -Math.PI / 2; g.add(o); add(g, dur, (k, t) => { d.material.opacity = .25 + .1 * Math.sin(t * 6); fade(g, k > .75 ? (1 - k) * 4 : 1); }); }
   function cage(x, z, col, r = 1.2) { const g = new T.Group(); g.position.set(x, 0, z); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU, b = new T.Mesh(new T.CylinderGeometry(.06, .06, 2.4, 6), E(col, .9)); b.position.set(Math.cos(a) * r, 1.2, Math.sin(a) * r); g.add(b); } const top = new T.Mesh(new T.TorusGeometry(r, .06, 6, 24), E(col, .9)); top.rotation.x = Math.PI / 2; top.position.y = 2.4; g.add(top); g.scale.y = .01; add(g, 1.6, k => { g.scale.y = Math.min(1, k * 8); fade(g, k > .75 ? (1 - k) * 4 : 1); }); }
-  function afterimages(col, n = 3) { const P = player; if (!P || !P.m) return; for (let i = 0; i < n; i++) setTimeout(() => { if (!player) return; const g = new T.Group(); g.position.set(player.x, 0, player.z); const b = new T.Mesh(new T.CapsuleGeometry ? new T.CapsuleGeometry(.4, 1, 4, 8) : new T.CylinderGeometry(.4, .4, 1.8, 10), E(col, .35)); b.position.y = 1; g.add(b); add(g, .45, k => fade(g, 1 - k)); }, i * 70); }
+  function afterimages(col, n = 3) { const P = player; if (!P || !P.m) return; for (let i = 0; i < n; i++) setTimeout(() => { if (!player) return; const g = new T.Group(); g.position.set(player.x, 0, player.z); /* v331: o teste da geometria quebrava (não existe cápsula nesta versão do three) e a imagem residual nunca aparecia */const b = new T.Mesh(T.CapsuleGeometry ? new T.CapsuleGeometry(.4, 1, 4, 8) : new T.CylinderGeometry(.32, .4, 1.7, 10), E(col, .4)); b.position.y = 1; g.add(b); add(g, .45, k => fade(g, 1 - k)); }, i * 70); }
 
   /* ---------- paletas por classe ---------- */
   const C = { war: 0xffb84a, ass: 0x9a7bff, tank: 0x8fc8ff, arch: 0xd8f0ff, pal: 0xffe9a0, inv: 0x7fe8c8, necro: 0x9b6bff, fire: 0xff6a1e, ice: 0xbfe8ff, earth: 0xc8a060,
-    bolt: 0xfff36b, time: 0x7fd8ff, rift: 0xd36bff, bond: 0x8affc2, beast: 0xffa24a, rune: 0x6fd8ff, spec: 0xa8c8ff, storm: 0x8ab8ff, orac: 0xf0d080, void: 0x7a3cff, monk: 0xffd27a, arc: 0xc07bff, lance: 0xcfe6ff, blood: 0xd0202a };
+    bolt: 0xfff36b, time: 0x7fd8ff, rift: 0xd36bff, bond: 0x8affc2, beast: 0xffa24a, rune: 0x6fd8ff, spec: 0x6fa8ff, storm: 0x8ab8ff, orac: 0xf0d080, void: 0x7a3cff, monk: 0xffd27a, arc: 0xa050ff, lance: 0x8fc4ff, blood: 0xd0202a };
 
   /* ---------- receitas (uma por habilidade) ---------- */
   const X = {};
@@ -175,7 +176,8 @@
   def('Impacto', c => { V.quakeRing(c.P.x, c.P.z, 3.5, C.tank); V.shockwave(c.P.x, c.P.z, C.tank, 4); });
   def('Muralha', c => { V.dome(c.P.x, c.P.z, C.tank, 2.4, true); glyph(c.P.x, c.P.z, C.tank, 2.4, 'sigil', 2); });
   def('Fortaleza Viva', c => { V.dome(c.P.x, c.P.z, 0xd8e8ff, 2.8, true); V.pillar(c.P.x, c.P.z, C.tank, 1.6); });
-  def('Aparo|Aparo Espectral', c => { star(c.P.x + Math.sin(c.ang) * .9, c.P.z + Math.cos(c.ang) * .9, c.col, 1.6); V.slash(c.P.x, c.P.z, c.ang, 0xffffff, 1.6, 1.6); });
+  /* v331: o aparo quase não aparecia; ganhou arco de guarda e onda curta na frente */
+  def('Aparo|Aparo Espectral', c => { const p = c.at(.9); star(p.x, p.z, c.col, 2); V.slash(c.P.x, c.P.z, c.ang, c.col, 2, 1.8); shout(c.P.x, c.P.z, c.ang, 0xffffff, 2, 1.6); V.shockwave(p.x, p.z, c.col, 1.4); });
   def('Passo Pesado', c => { V.dashTrail(C.tank); setTimeout(() => V.quakeRing(player.x, player.z, 2.5, 0x8a7a60), 160); });
   def('Abalo', c => { V.quakeRing(c.P.x, c.P.z, 5, 0xc8a060); });
   def('Reserva de Guarda', c => { V.dome(c.P.x, c.P.z, C.tank, 2, true); V.aura(C.tank); });
@@ -209,7 +211,7 @@
   /* Invocador */
   def('Lobo Espiritual|Sentinela', c => { const p = c.at(2); glyph(p.x, p.z, C.inv, 1.6, 'sigil', 1.4); wisps(p.x, p.z, C.inv, 14, 2); });
   def('Matilha Espiritual', c => { for (let i = 0; i < 3; i++) { const a = c.ang + (i - 1) * .9, x = c.P.x + Math.sin(a) * 2.5, z = c.P.z + Math.cos(a) * 2.5; glyph(x, z, C.inv, 1.1, 'sigil', 1.4); wisps(x, z, C.inv, 8, 2); } });
-  def('Elo Arcano|Ordem Fúnebre|Sinal', c => { const A = (typeof allies !== 'undefined' ? allies : []).filter(a => a && !a.dead).slice(0, 4); if (A.length) A.forEach(a => beam(c.P.x, c.P.z, a.x, a.z, c.col, .12, .6)); else shout(c.P.x, c.P.z, c.ang, c.col, 2, 1.4); V.aura(c.col); });
+  def('Elo Arcano|Ordem Fúnebre|Sinal', c => { const A = /* v331: só aliados por perto (o raio ia até um aliado do outro lado do mapa) */(typeof allies !== 'undefined' ? allies : []).filter(a => a && !a.dead && Math.hypot(a.x - c.P.x, a.z - c.P.z) < 16).slice(0, 4); if (A.length) A.forEach(a => beam(c.P.x, c.P.z, a.x, a.z, c.col, .12, .6)); else shout(c.P.x, c.P.z, c.ang, c.col, 2, 1.4); V.aura(c.col); });
   def('Pacto|Pacto dos Mortos|Alívio Compartilhado|Regenerar', c => { V.heal(c.P.x, c.P.z, c.col); wisps(c.P.x, c.P.z, c.col, 10, 2.6); });
   def('Recolher|Reunir', c => { V.vortex(c.P.x, c.P.z, c.col, 3); wisps(c.P.x, c.P.z, c.col, 10, 1.6); });
   def('Frenesi|Pacto Sombrio', c => { V.aura(c.col); shout(c.P.x, c.P.z, c.ang, c.col, 2, TAU); });
@@ -245,11 +247,12 @@
   def('Fratura Glacial', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0x8ad8ff); V.spikeLine(c.P.x, c.P.z, c.ang, 7, C.ice, 'ice'); });
   def('Névoa Fria', c => { V.smoke(c.P.x, c.P.z, 0xd8f0ff, 3.4); });
   /* Mago da Terra */
-  def('Estaca de Pedra', c => { V.spikeLine(c.P.x, c.P.z, c.ang, 9, 0x8a7a60, 'rock'); });
+  /* v331: as estacas sumiam no chão de pedra; ganharam rachadura acesa */
+  def('Estaca de Pedra', c => { V.fissure(c.P.x, c.P.z, c.ang, 9, 0xe0a050); V.spikeLine(c.P.x, c.P.z, c.ang, 9, 0xa08a66, 'rock'); });
   def('Tremor Sísmico', c => { V.quakeRing(c.tx, c.tz, 5.5, C.earth); });
   def('Pele de Pedra', c => { V.dome(c.P.x, c.P.z, 0xa08a60, 2.2, true); V.spikes(c.P.x, c.P.z, 0x8a7a60, 6, 1.6, 'rock'); });
   def('Colosso de Pedra', c => { const p = c.at(2.5); V.spikes(p.x, p.z, 0x8a7a60, 12, 1.6, 'rock'); V.quakeRing(p.x, p.z, 2.5); });
-  def('Muralha de Rocha', c => { const a = c.ang + Math.PI / 2; for (let i = -3; i <= 3; i++) V.spikes(c.tx + Math.sin(a) * i * 1.1, c.tz + Math.cos(a) * i * 1.1, 0x8a7a60, 2, .4, 'rock'); });
+  def('Muralha de Rocha', c => { const a = c.ang + Math.PI / 2, sx = Math.sin(a), sz = Math.cos(a); beam(c.tx - sx * 3.6, c.tz - sz * 3.6, c.tx + sx * 3.6, c.tz + sz * 3.6, C.earth, .25, 1.2, .15); for (let i = -3; i <= 3; i++) V.spikes(c.tx + sx * i * 1.1, c.tz + sz * i * 1.1, 0xa08a66, 3, .5, 'rock'); });
   def('Areia Movediça', c => { ground(c.tx, c.tz, 0xd8b870, 3.5, 2.6); V.vortex(c.tx, c.tz, 0xd8b870, 3.2); });
   def('Arremesso de Rocha', c => { orb(c.at(8).x, c.at(8).z, 0x8a7a60, 1, false); V.streak(c.P.x, c.P.z, c.ang, 8, 0xc8a060); V.dust(c.at(8).x, c.at(8).z, 0x9a8a70, 10); });
   def('Erupção', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0xff7a2a); V.fireRing(c.at(5).x, c.at(5).z, 2); });
@@ -292,7 +295,7 @@
   def('Agulha de Fenda', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.rift, .25); rift(c.at(10).x, c.at(10).z, c.ang, C.rift, 1.6, .5); });
   def('Colapso Local', c => { orb(c.tx, c.tz, C.rift, 2.6, true, true, 1.2); setTimeout(() => V.shockwave(c.tx, c.tz, C.rift, 5), 900); });
   /* Guardião dos Vínculos */
-  def('Elo Protetor', c => { const A = (typeof allies !== 'undefined' ? allies : []).filter(a => a && !a.dead).slice(0, 3); if (A.length) chain([{ x: c.P.x, z: c.P.z }, A[0]], C.bond); V.aura(C.bond); glyph(c.P.x, c.P.z, C.bond, 1.6, 'sigil', 1.2); });
+  def('Elo Protetor', c => { const A = (typeof allies !== 'undefined' ? allies : []).filter(a => a && !a.dead && Math.hypot(a.x - c.P.x, a.z - c.P.z) < 16).slice(0, 3); if (A.length) chain([{ x: c.P.x, z: c.P.z }, A[0]], C.bond); V.aura(C.bond); glyph(c.P.x, c.P.z, C.bond, 1.6, 'sigil', 1.2); });
   def('Interposição', c => { V.dashTrail(C.bond); setTimeout(() => V.dome(player.x, player.z, C.bond, 2, true), 160); });
   def('Juramento', c => { V.pillar(c.P.x, c.P.z, C.bond, 1); glyph(c.P.x, c.P.z, C.bond, 2, 'seal5', 1.6); });
   def('Âncora Protetora', c => { totem(c.tx, c.tz, C.bond, 2); ground(c.tx, c.tz, C.bond, 3, 2); });
@@ -317,7 +320,8 @@
   def('Lança Rúnica', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.rune, .45); });
   def('Placas de Emergência', c => { V.dome(c.P.x, c.P.z, C.rune, 2.2, true); glyph(c.P.x, c.P.z, C.rune, 2.2, 'sigil', 1.6); });
   /* Duelista Espectral */
-  def('Passo de Flanco|Recuar', c => { afterimages(C.spec, 3); V.dashTrail(C.spec); });
+  /* v331: quase não aparecia; ganhou vento do deslocamento */
+  def('Passo de Flanco|Recuar', c => { afterimages(C.spec, 4); V.dashTrail(C.spec); V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.spec, 3); });
   def('Resposta Fantasma', c => { star(c.P.x + Math.sin(c.ang), c.P.z + Math.cos(c.ang), C.spec, 1.6); afterimages(C.spec, 2); setTimeout(() => V.slash(player.x, player.z, c.ang, C.spec, 2.6, 1.6), 120); });
   def('Estocada', c => { thrust(c.P.x, c.P.z, c.ang, 4.5, C.spec, .3); afterimages(C.spec, 2); });
   def('Corte Espectral', c => { V.slash(c.P.x, c.P.z, c.ang, C.spec, 5, 1.2); thrust(c.P.x, c.P.z, c.ang, 7, C.spec, .3); });
@@ -354,7 +358,7 @@
   def('Salto Rúnico', c => { glyph(c.P.x, c.P.z, C.arc, 1.2, 'sigil', .8); V.dashTrail(C.arc); setTimeout(() => { V.shockwave(player.x, player.z, C.arc, 3); glyph(player.x, player.z, C.arc, 2, 'sigil', .8); }, 170); });
   def('Inscrição Alternada', c => { const e = c.t(8); if (e) { glyph(e.x, e.z, C.arc, 1, 'sigil', 2.2, 1.6); glyph(e.x, e.z, 0xffb84a, .7, 'sigil', 2.2, 1.65); } V.slash(c.P.x, c.P.z, c.ang, C.arc, 2.4, 1.6); });
   def('Reserva Incandescente', c => { V.aura(C.arc); orb(c.P.x, c.P.z, C.arc, .9, true, false, 1); wisps(c.P.x, c.P.z, C.arc, 10, 1.8); });
-  def('Costura Astral', c => { const L = foes(10); const a = L[0], b = L[L.length - 1]; if (a && b && a !== b) { beam(a.x, a.z, b.x, b.z, C.arc, .12, .7); star(a.x, a.z, C.arc, 1.2); } else thrust(c.P.x, c.P.z, c.ang, 10, C.arc, .3); });
+  def('Costura Astral', c => { const L = foes(10); const a = L[0], b = L[L.length - 1]; if (a && b && a !== b) { beam(a.x, a.z, b.x, b.z, C.arc, .22, .8); star(a.x, a.z, C.arc, 1.2); star(b.x, b.z, C.arc, 1.2); } else thrust(c.P.x, c.P.z, c.ang, 10, C.arc, .3); });
   def('Dízimo Rúnico', c => { const e = c.t(8); if (e) { glyph(e.x, e.z, 0x6fb8ff, 1, 'sigil', 2, 1.6); beam(e.x, e.z, c.P.x, c.P.z, 0x6fb8ff, .06, .6); } V.aura(0x6fb8ff); });
   def('Corte do Reservatório', c => { orb(c.P.x, c.P.z, C.arc, 1, true, false, .4); setTimeout(() => { V.slash(player.x, player.z, c.ang, C.arc, 3.4, 1.6); thrust(player.x, player.z, c.ang, 5, 0xffffff, .5); }, 200); });
   def('Díade Arcana', c => { const L = foes(10).slice(0, 2); if (L.length === 2) { beam(L[0].x, L[0].z, L[1].x, L[1].z, C.arc, .14, .6); L.forEach(e => glyph(e.x, e.z, C.arc, .9, 'sigil', 1, 1.4)); } else V.slash(c.P.x, c.P.z, c.ang, C.arc, 3, 2); });
@@ -363,12 +367,15 @@
   def('Estocada Longa', c => thrust(c.P.x, c.P.z, c.ang, 6.5, C.lance, .4));
   def('Varredura de Lança', c => { V.whirl(C.lance, 4); V.slash(c.P.x, c.P.z, c.ang, 0xffffff, 4.2, TAU * .9); });
   def('Salto do Dragão', c => { V.dashTrail(0xffb84a); setTimeout(() => { V.pillar(player.x, player.z, 0xffb84a, .9); V.quakeRing(player.x, player.z, 3, 0xffb84a); }, 180); });
-  def('Ponta Absoluta', c => { thrust(c.P.x, c.P.z, c.ang, 8, 0xffffff, .55); star(c.at(8).x, c.at(8).z, C.lance, 2.2); });
+  /* v331: só a faixa de 4 a 8 m, como na descrição */
+  def('Ponta Absoluta', c => { const p = c.at(4); thrust(p.x, p.z, c.ang, 4, C.lance, .6); ground(c.at(6).x, c.at(6).z, C.lance, .9, .6); star(c.at(8).x, c.at(8).z, C.lance, 2.2); });
   def('Recuo de Caça', c => { V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.lance, 3); afterimages(C.lance, 3); thrust(c.P.x, c.P.z, c.ang, 4, C.lance, .3); });
-  def('Cruz de Hastes', c => { thrust(c.P.x, c.P.z, c.ang, 6, C.lance, .35); setTimeout(() => { const p = c.at(3); thrust(p.x - Math.sin(c.ang + Math.PI / 2) * 3, p.z - Math.cos(c.ang + Math.PI / 2) * 3, c.ang + Math.PI / 2, 6, C.lance, .35); }, 120); });
+  /* v331: X de dois cortes diagonais à frente (antes era um +) */
+  def('Cruz de Hastes', c => { const p = c.at(3.5); [Math.PI / 4, -Math.PI / 4].forEach((d, i) => setTimeout(() => { const a = c.ang + d; thrust(p.x - Math.sin(a) * 3, p.z - Math.cos(a) * 3, a, 6, C.lance, .35); }, i * 120)); setTimeout(() => star(p.x, p.z, 0xffffff, 1.6), 140); });
   def('Cravo de Muralha', c => { thrust(c.P.x, c.P.z, c.ang, 5, C.lance, .4); V.spikeLine(c.at(4).x, c.at(4).z, c.ang, 3, 0x8a7a60, 'rock'); });
   def('Fio da Fileira', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.lance, .3); foes(10).filter(e => Math.abs(Math.atan2(e.x - c.P.x, e.z - c.P.z) - c.ang) < .25).forEach(e => star(e.x, e.z, C.lance, 1)); });
-  def('Bússola Partida', c => { for (let i = 0; i < 4; i++) setTimeout(() => thrust(player.x, player.z, c.ang + i * Math.PI / 2, 4.5, C.lance, .3), i * 70); });
+  /* v331: só os flancos esquerdo e direito, de 2 a 6 m (frente e trás ficam de fora) */
+  def('Bússola Partida', c => { [1, -1].forEach((s, i) => setTimeout(() => { for (const d of [-.3, 0, .3]) { const a = c.ang + s * Math.PI / 2 + d; thrust(player.x + Math.sin(a) * 2, player.z + Math.cos(a) * 2, a, 4, C.lance, .3); } }, i * 90)); });
   def('Medida do Caçador', c => { const e = c.t(12); if (e) { glyph(e.x, e.z, C.lance, 1.2, 'sigil', 1.6, 1.4); beam(c.P.x, c.P.z, e.x, e.z, C.lance, .04, 1, .2); } });
   /* Berserker */
   def('Golpe Brutal', c => { const p = c.at(2); V.slash(c.P.x, c.P.z, c.ang, C.blood, 3, 2); V.fissure(p.x, p.z, c.ang, 3, 0xff3a2a); blood(p.x, p.z, 10); });

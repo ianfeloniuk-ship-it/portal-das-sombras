@@ -18,12 +18,14 @@ function make(fs,uni,opts){const m=new T.ShaderMaterial({uniforms:{uTime:U.uTime
 const FS_ENERGY=`uniform float uTime;uniform float uOpacity;uniform vec3 uCol;varying vec2 vUv;varying vec3 vN;varying vec3 vW;${NOISE}
 void main(){vec3 V=normalize(cameraPosition-vW);float fres=pow(1.-abs(dot(normalize(vN),V)),2.);
  float flow=fbm(vec2(vUv.x*6.-uTime*1.4,vUv.y*3.+uTime*.6));float band=smoothstep(.35,.85,flow);
- vec3 c=mix(uCol*.55,mix(uCol,vec3(1.),.55),band)+uCol*fres*1.2;float a=uOpacity*(.35+.65*band+.6*fres);
- gl_FragColor=vec4(c,clamp(a,0.,1.));}`;
+ vec3 c=mix(uCol*.85,mix(uCol,vec3(1.),.35),band)+uCol*fres;float a=clamp(uOpacity*(.35+.65*band+.6*fres),0.,1.);
+ /* v331: pré-multiplicado e cobrindo 85% do fundo — de dia a cor da classe não vira branco; no escuro continua brilhando */
+ gl_FragColor=vec4(c*a,a*.85);}`;
 const FS_FIRE=`uniform float uTime;uniform float uOpacity;varying vec2 vUv;${NOISE}
 void main(){float y=vUv.y;float n=fbm(vec2(vUv.x*4.,y*3.-uTime*3.));float shape=smoothstep(1.,.15,y+n*.45);
  vec3 c=mix(vec3(1.,.95,.6),mix(vec3(1.,.45,.08),vec3(.55,.05,.02),smoothstep(.3,.95,y)),smoothstep(.05,.6,y+n*.2));
- gl_FragColor=vec4(c*1.25,uOpacity*shape);}`;
+ /* v331: chamas sobrepostas estouravam em branco; agora cobrem o fundo e mantêm o laranja */
+ float a=clamp(uOpacity*shape,0.,1.);gl_FragColor=vec4(c*1.1*a,a*.8);}`;
 const FS_LAVA=`uniform float uTime;uniform float uOpacity;uniform vec3 uCol;varying vec2 vUv;varying vec3 vW;${NOISE}
 void main(){float n=fbm(vW.xz*1.6+vec2(0.,-uTime*.8));float hot=smoothstep(.35,.9,n);
  vec3 c=mix(uCol*.5,mix(uCol,vec3(1.,.95,.7),.6),hot);gl_FragColor=vec4(c*(1.1+.4*sin(uTime*5.+n*6.)),uOpacity);}`;
@@ -34,8 +36,8 @@ void main(){vec3 N=normalize(vN),V=normalize(cameraPosition-vW),L=normalize(vec3
  float band=smoothstep(.45,.55,fract(dot(N,vec3(.3,1.,.2))*2.+.15));
  vec3 c=uCol*(.35+.75*d)+uCol*band*.25+vec3(1.,.97,.9)*sp*.9+mix(uCol,vec3(1.),.5)*rim*.6;
  gl_FragColor=vec4(c,uOpacity);}`;
-function energy(col=0x9fe8ff,op=1){const m=make(FS_ENERGY,{uCol:{value:new T.Color(col)}},{blending:T.AdditiveBlending});m.opacity=op;return m}
-function fire(op=1){const m=make(FS_FIRE,{},{blending:T.AdditiveBlending});m.opacity=op;return m}
+function energy(col=0x9fe8ff,op=1){const m=make(FS_ENERGY,{uCol:{value:new T.Color(col)}},{blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneMinusSrcAlphaFactor});m.opacity=op;return m}
+function fire(op=1){const m=make(FS_FIRE,{},{blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneMinusSrcAlphaFactor});m.opacity=op;return m}
 function lava(col=0xff7a2a,op=1){const m=make(FS_LAVA,{uCol:{value:new T.Color(col)}},{});m.opacity=op;return m}
 function metal(col=0xd9b25a){const m=make(FS_METAL,{uCol:{value:new T.Color(col)}},{transparent:false,depthWrite:true,side:T.FrontSide});m.opacity=1;return m}
 let last=performance.now();(function tick(){requestAnimationFrame(tick);const n=performance.now();U.uTime.value+=(n-last)/1000;last=n})();

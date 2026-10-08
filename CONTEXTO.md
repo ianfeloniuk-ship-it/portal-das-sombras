@@ -1,3 +1,16 @@
+## v331 — conferência por print das 240 habilidades, correções de efeito e animações das classes novas, 08/10/2026
+- Pedido de Ian: continuar o que faltou na v329 (ver cada habilidade por print e ajustar; animações próprias das classes novas). São 24 classes × 10 habilidades; o Mago Elemental não existe mais (sobra só a entrada interna 3, base dos magos de elemento, fora da escolha de classe). A v330 (luva do Viajante) é de outra sessão e foi preservada.
+- Conferência: folhas de print de todas as 24 classes (2 momentos por habilidade), de dia e à noite, mais varredura das 240 pelo caminho real (`skillAnim155` + `VFX302.play`) capturando também erros atrasados: 0 erros.
+- Defeitos achados e corrigidos:
+  - `vfx302.slash` desenhava o arco de corte ATRÁS do personagem (desde a v302); `shout` da v329 tinha o mesmo erro.
+  - `Shaders312.energy` e `fire` eram só aditivos: de dia viravam branco. Agora pré-multiplicados cobrindo parte do fundo (a cor da classe aparece de dia e continua brilhando à noite). `whirl` passou a usar o mesmo material.
+  - `afterimages` (14 receitas) quebrava em silêncio (`new T.CapsuleGeometry ? …`) dentro de um setTimeout e nunca aparecia.
+  - `anim303`: giro (spin) e altura (y) da raiz eram zerados pelo jogo logo depois do `post`; `Anim303.root(P)` reaplica depois do reposicionamento. Vale também para as animações antigas (giro, salto_impacto, ajoelhar, firme).
+  - Lanceiro conforme a descrição: Cruz de Hastes em X (era +), Bússola Partida só nos flancos (eram 4 lados), Ponta Absoluta só de 4 a 8 m.
+  - Rastro de flecha com aros menores; Aparo/Aparo Espectral, Passo de Flanco/Recuar visíveis; fendas do Tecelão viram para a câmera; estacas/muralha de pedra com rachadura acesa e brilho próprio; raios de vínculo só para aliados a até 16 m; cores de Lanceiro, Duelista e Lâmina Arcana mais saturadas.
+- Animações novas em `tools/anim303.js` (21, por código nos ossos): socos, chute, palma, respirar, direto, duplo, roda (Monge); estocada, gira_lanca, cruz, recuo, mirar (Lanceiro); esmagar, rugido, sacrificio, varrer, explodir (Berserker); corte, erguer (Lâmina Arcana). `Anim303.map` liga 36 habilidades pelo nome e substitui o clipe genérico.
+- Validação visual feita pela IA em prints; NÃO é aprovação estética de Ian. Animações vistas no Monge sem arma; com lança/machado na mão só foi testado que não dá erro. Fumaça do Assassino continua um bloco chapado (não mexido).
+
 ## v330 — Viajante: linha do pescoço à mão direita corrigida no próprio GLB, 08/10/2026
 - Causa: o vértice 0 de `tripo_part_7` (luva direita) em `models/viajante153.glb` tinha o X zerado (ficava no centro do corpo, com pesos de antebraço), formando 6 triângulos-fio de ~48 cm até a mão.
 - Correção direta no buffer, sem reexportar pelo Blender: X do vértice = média dos 6 vizinhos (volta para a superfície da luva, sem buraco) e ossos/pesos copiados do vizinho mais próximo; `max` do acessor de posição recalculado. Mudam 13 bytes do BIN e um `max` no JSON; esqueleto, materiais, UVs, normais e todas as outras malhas ficam byte a byte iguais (12 malhas, 19 ossos, 97 nós, mesmos nomes).
