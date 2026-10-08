@@ -235,6 +235,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=320"></script>
 <script src="tools/passives263.js?v=286"></script>
+<script src="tools/passives327.js?v=328"></script>
 <script src="tools/resources260.js?v=316"></script>
 <script src="tools/combo261.js?v=261"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3707,7 +3708,7 @@ function movementSpeed(raw){if(!Number.isFinite(raw))return 0;return Math.max(0,
 // v155 (Ian): Arqueiro sem arco arremessa a flecha com a mão, mais devagar, até equipar um arco.
 function bareArcher155(){return !basicIsMagic()&&basicAttackClass()?.wep==='bow'&&!MAGIC_CLS.includes(basicAttackId())&&!hasBow259();}
 /* v270 (Ian): só fica 60% mais lento quem ataca à distância (arqueiro, magos) SEM nenhuma arma; arma de outro tipo e o assassino não sofrem */function slowUnarmed270(){const c=basicAttackClass();return !run.equip.w&&!!(c?.ranged||c?.basicRanged)&&c.wep!=='dagger'}
-function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1)*(slowUnarmed270()?1.6:1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
+function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3)*(Number.isFinite(factor)&&factor>0?factor:1)*(slowUnarmed270()?1.6:1)*(typeof passiveSpd327==='function'?passiveSpd327():1),interval=Math.max(.05,desired);return {interval,damage:interval/desired}}
 function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> <span class="tipi" style="cursor:help" data-tip154="100% é a velocidade inicial. O limite só reduz o movimento (também da montaria); não mexe em ataques nem esquiva.">Limitar minha velocidade de movimento</span></label><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%">'}
 
 function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2-x1,z2-z1));for(let i=1;i<n;i++){const t=i/n;if(!gfree(x1+(x2-x1)*t,z1+(z2-z1)*t))return false}return true}
@@ -5412,8 +5413,8 @@ function hurtEnemy(e,amt,sx,sz,o={}){if(!e||e.friendly217||e.ally||!Number.isFin
   if(player.stealth>0&&o.fromPlayer){if(!player.kitStealth111){amt*=3;o.sneak=true}player.stealth=0;player.kitStealth111=false;setStealth(false)}
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
-  const cc=o.fromPlayer?critChance()+((o.crit154||(e.snare154>time))?1:0):.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn*(o.fromPlayer?1+pCritDmg281():1);if(e.res)amt*=1-e.res;amt=Math.max(0,amt-Math.max(0,mobDefVal296(e,o.dtype281||(o.fromPlayer?curDType281:'phy'))-(o.fromPlayer?pPenVal296():0)));
-  if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=identityHitDamage(e,amt,o);amt=passiveDamage263(e,amt,o);amt=passive297(e,amt,o);if(window.elemMul300)amt=elemMul300(e,amt,o);
+  const cc=o.fromPlayer?critChance()+((o.crit154||(e.snare154>time)||(!blocked&&passiveCrit327(o)))?1:0):.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn*(o.fromPlayer?1+pCritDmg281():1);if(e.res)amt*=1-e.res;amt=Math.max(0,amt-Math.max(0,mobDefVal296(e,o.dtype281||(o.fromPlayer?curDType281:'phy'))-passiveShred327(e,o)-(o.fromPlayer?pPenVal296():0)));
+  if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=identityHitDamage(e,amt,o);amt=passiveDamage263(e,amt,o);amt=passive297(e,amt,o);amt=passiveHit327(e,amt,o);if(window.elemMul300){const b327=amt;amt=elemMul300(e,amt,o);passiveElem327(b327,amt,o)}
   if(o.fromPlayer)amt*=1+titleHitBonus(e)+(e.isBoss?trophyB():0);if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(0,Math.round(amt)));if(amt<=0)return 0;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
   if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
@@ -5550,7 +5551,7 @@ function enemyRewardBalance(e){
 }
 function trainingXpBalance(e){return Math.round((e.trainingXp262??e.xp??0)/RpgBalance.xpNeed(eLvl(e))*200)}
 function settleEnemyRewardBalance(e){const reward=enemyRewardBalance(e),cc=cons('cac');e.trainingXp262=Math.round(RpgBalance.reward({level:eLvl(e),threat:e.threat184||0,role:reward.role,speciesXp:e.isBoss||e.rival?undefined:e.speciesXpBalance,risk:reward.riskFactor,noExpLoot:e.noExpLoot||e.rewardBlocked||e.ally||e.statue}).xp*(1+.03*cc));e.xp=Math.round(reward.xp*(1+.03*cc));e.gold=Math.round(reward.gold*(1+.03*cc)*(cc>=10&&e.threat184?1.25:1));return reward}
-function killEnemy(e){if(e.dead)return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
+function killEnemy(e){if(e.dead)return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);try{passiveKill327(e)}catch(_){}if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp,'monster');storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(trainingXpBalance(e))}
   bestKill(e.kind);
@@ -5595,17 +5596,18 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
-function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
+function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;try{passiveDodge327()}catch(_){}bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   if(player.dead)return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(0,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))-Math.max(0,pDefVal296(inDType281)-(curAtk?.att281?.penV||0))));if(amt<=0){if(time>=(player.def296At||0)){floater(player.x,player.z,'BLOQUEADO','#8bdcff');player.def296At=time+.5}return}
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}
-  amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}
+  amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}amt=Math.max(1,Math.round(passiveIncoming327(amt)));
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   if(curAtk&&curAtk.kind){if(['mage','wraith','vespa','yeti'].includes(curAtk.kind)&&!player.slowT){player.slowT=2;floater(player.x,player.z,'LENTO','#ffd08a')}else if(['rogue','aranha','lobo','raptor'].includes(curAtk.kind)&&Math.random()<.35){player.bleedT=3;player.bleedD=amt*.08;floater(player.x,player.z,'SANGRANDO','#ff4d6a')}}
   player.hp-=amt;player.hitAnimT=time+.4;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
+  if(player.hp<=0&&passiveLast327())return;
   if(player.hp<=0)die();
 }
 function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyProtection(a);if(a.buffT>0)amt*=.55;amt=absorbHealingShield(a,amt);amt=guardianDamage108(a,amt);if(amt<=0)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
@@ -6116,7 +6118,7 @@ function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
   if(FX2.inv>0){ix=-ix;iz=-iz}
   const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}
   if(!P.dead){
-    P.atkCd-=dt;P.comboT-=dt;P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
+    P.atkCd-=dt;P.comboT-=dt;try{passiveTick327(dt)}catch(_){}P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
     if(P.stealth>0){P.stealth-=dt;if(P.stealth<=0)setStealth(false)}
     resourceTick260(dt);recoveryTick258(dt);tick281(dt);const regen=naturalRegen(P);P.mp=Math.max(0,Math.min(P.maxmp,P.mp+dt*regen.mp));
     if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0){P.bleedT-=dt;P.hp-=guardianDamage108(P,absorbHealingShield(P,P.bleedD*dt));if(P.hp<=0&&!P.dead)die()}

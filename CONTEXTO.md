@@ -1,3 +1,10 @@
+## v328 — 10 passivas novas (55–100) e passivas ocultas até liberar, 08/10/2026
+- Pedido de Ian: passivas gerais novas por nível, depois do 50 (`tools/passives327.js`): Golpe Resoluto 55, Respiro 60, Ímpeto 65, Elo Elemental 70, Desgaste 75, Caçador de Marcas 80, Leitura de Combate 85, Sangue-Frio 90, Contra-Fluxo 95, Último Fôlego 100.
+- Aba Passivas só mostra as liberadas (sem 🔒 nem nível futuro); o aviso [PASSIVA] continua ao liberar.
+- Ganchos: hurtEnemy (crítico do Contra-Fluxo, Desgaste, Resoluto/Leitura, Elo Elemental após elemMul300), perfectDodge, hurtPlayer (Respiro; Último Fôlego antes de die), killEnemy (espalha marcas), laço (Ímpeto), attackTiming, passiveCost263 (Sangue-Frio).
+- Último Fôlego: 1× por masmorra/portal; fora, recarga de 3 min. Não conflita com o título Fênix.
+- Validação: 10 passivas testadas em Node com as funções reais, node --check em todos os scripts, build ok. Sem teste no navegador.
+
 ## v327 — campanha jogável, missões dos NPCs, Torvo e Tomo, 08/10/2026
 - Pedido de Ian (revisão da história): os passos dos atos agora são missões de verdade (`tools/campaign327.js`). Um ato por vez, na ordem, liberado pelo rank (I a VII; o Ato I já no início) ou pelo evento que libera a página do Diário (VIII a XIII). Tipos de passo: ir até uma luz no mundo (dourada = ato, azul = NPC), com inimigos que aparecem ao chegar, figura (guarda, Aldric, sobreviventes, Torvo) e F para interagir; falar com o NPC na cidade (a fala aparece no topo da janela dele); eventos já contados pelo jogo (guardiões, elites, portais, cristais); andar da Torre; capitais visitadas; ler a confissão no Diário.
 - As 7 missões de NPC da Crônica (Lyra, Mira, Brann, Kael, Selene, Dorian, Torvo) existem: aparecem na janela de afinidade de cada NPC depois do ato correspondente, com botão Aceitar; a do Torvo começa sozinha na estrada. Cada conclusão dá XP, ouro, reputação e uma página no Diário.
