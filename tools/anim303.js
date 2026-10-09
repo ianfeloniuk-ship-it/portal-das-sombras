@@ -123,6 +123,10 @@ function sample(an,t){const k=an.k;let i=0;while(i<k.length-2&&t>k[i+1].t)i++;co
 let cur=null,rootNow=null;
 function play(name,slow=1){if(!A[name]||!player)return;cur={name,t0:performance.now()/1000,slow}}
 const qa=new T.Quaternion(),qb=new T.Quaternion(),qc=new T.Quaternion(),e=new T.Euler();
+/* v343 (Ian): pose de pulo do Viajante (Espaço). Sobe com as pernas recolhidas, desce com elas esticando; não mexe se uma animação de habilidade estiver tocando. */
+const UP={spine:[-8,0,0],thigh_l:[-38,0,0],thigh_r:[-22,0,0],shin_l:[58,0,0],shin_r:[40,0,0],upperarm_l:[-35,0,22],upperarm_r:[-20,0,-25]},DOWN={spine:[8,0,0],thigh_l:[-14,0,0],thigh_r:[-8,0,0],shin_l:[22,0,0],shin_r:[14,0,0],upperarm_l:[-75,0,40],upperarm_r:[-30,0,-40]};
+function air(P,vy){if(cur||!P||!P.m||!P.m.bones||!P.m.root)return;const u=Math.max(0,Math.min(1,.5-vy/14)),m=P.m,root=m.root;root.updateMatrixWorld(true);const charQ=root.getWorldQuaternion(new T.Quaternion()),armed=!!(run&&run.equip&&run.equip.w);
+ for(const n of ORDER){const a=UP[n],b2=DOWN[n];if(!a)continue;let r=[lerp(a[0],b2[0],u),lerp(a[1],b2[1],u),lerp(a[2],b2[2],u)];if(armed&&n==='upperarm_r')r=[r[0],r[1],Math.min(r[2],-25)];const b=m.bones[n];if(!b||!b.parent)continue;e.set(r[0]*D,r[1]*D,r[2]*D,'XYZ');const dLocal=new T.Quaternion().setFromEuler(e),dWorld=charQ.clone().multiply(dLocal).multiply(charQ.clone().invert()),bw=b.getWorldQuaternion(new T.Quaternion()),pw=b.parent.getWorldQuaternion(new T.Quaternion());b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}}
 function post(P){if(!cur||!P||!P.m||!P.m.bones)return;const an=A[cur.name],t=(performance.now()/1000-cur.t0)/(an.d*(cur.slow||1));if(t>=1){cur=null;rootNow=null;return}
  const s=sample(an,t),m=P.m,root=m.root;rootNow=s.root;
  if(s.root.spin)root.rotation.y+=s.root.spin*D;
@@ -147,5 +151,5 @@ function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)retur
  else if(A.type==='shoot'){root.rotation.x=after<0?-.12*w:0}}
 /* v331: o jogo reposiciona a raiz depois do post; o giro e a altura são reaplicados aqui */
 function rootFix(P){if(!cur||!rootNow||!P||!P.m||!P.m.root)return;const r=P.m.root;if(rootNow.spin)r.rotation.y+=rootNow.spin*D;if(rootNow.y)r.position.y+=rootNow.y}
-window.Anim303={play,post,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
+window.Anim303={play,post,air,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
 })();

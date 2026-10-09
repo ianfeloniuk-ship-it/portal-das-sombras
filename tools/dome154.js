@@ -72,7 +72,9 @@ window.Dome154=(()=>{
    // the siege dragon chews through the shell: ~50 s of contact breaks it
    if(S&&S.c===d.c&&S.b&&!S.b.dead){const dd=Math.hypot(S.b.x-d.c.x,S.b.z-d.c.z);if(dd<d.r+14){d.hp-=dt/50;if(d.hitT<.15){d.hitT=1;const k=d.r/Math.max(.01,dd);d.u.uHit.value.set(d.c.x+(S.b.x-d.c.x)*k,6,d.c.z+(S.b.z-d.c.z)*k)}if(d.hp<=0)shatter(d)}}
    // common monsters cannot cross the shell
-   for(const e of enemies){if(e.dead||e.breaker||e.siege)continue;const dx=e.x-d.c.x,dz=e.z-d.c.z,dist=Math.hypot(dx,dz),lim=d.r+(e.r||.6);
+   /* v343 (Ian): a tropa que ataca ESTA cidade também é barrada e gasta o domo até ele romper (antes atravessava direto) */
+   for(const e of enemies){if(e.dead||e.siege)continue;const raid343=!!(e.raid155&&e.raid155.city===d.c.id);if(e.breaker&&!raid343)continue;const dx=e.x-d.c.x,dz=e.z-d.c.z,dist=Math.hypot(dx,dz),lim=d.r+(e.r||.6);
+    if(raid343&&dist<lim+1.5){d.hp-=dt*(e.isBoss?.006:.0025);if(d.hitT<.2&&Math.random()<dt*3){d.hitT=.8;d.u.uHit.value.set(e.x,1.5,e.z)}if(d.hp<=0){shatter(d);break}}
     if(dist<lim&&dist>d.r-6){const k=lim/Math.max(.01,dist);e.x=d.c.x+dx*k;e.z=d.c.z+dz*k;if(e.m&&e.m.root)e.m.root.position.set(e.x,e.m.root.position.y,e.z);if(d.hitT<.2&&Math.random()<dt*2){d.hitT=.6;d.u.uHit.value.set(e.x,1.5,e.z)}}}
   }
   for(let i=shards.length-1;i>=0;i--){const s=shards[i];s.life-=dt;s.v.y-=9.8*dt;s.m.position.addScaledVector(s.v,dt);s.m.rotation.x+=s.w.x*dt;s.m.rotation.y+=s.w.y*dt;s.m.material.opacity=Math.max(0,Math.min(.75,s.life*.4));if(s.life<=0||s.m.position.y<-1){scene.remove(s.m);s.m.geometry.dispose();s.m.material.dispose();shards.splice(i,1)}}

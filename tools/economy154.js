@@ -13,6 +13,9 @@ window.Econ154=(()=>{
   if(!s)s=profile.econ154[c.id]={ipc:1,tax:.08,treasury:Math.round(2*cityH),day:todayKey(),sat:{},hist:[],flow:0};
   s.ipc=Math.max(.8,Math.min(1.3,Number(s.ipc)||1));s.tax=Math.max(.05,Math.min(.15,Number(s.tax)||.08));s.treasury=Math.max(0,Number(s.treasury)||0);s.sat=s.sat||{};s.hist=s.hist||[];s.flow=Number.isFinite(Number(s.flow))?Number(s.flow):0;return s}
  function save(){store.set('pds2_profile',profile)}
+ /* v343: Herói Local (confiança 75+) não paga imposto nas vendas da cidade. */
+ const stax=k=>window.Civic343&&Civic343.taxFree(k.c)?0:k.s.tax;
+ function treasuryPay(c,amount){if(!c)return 0;const s=st(c),v=Math.max(0,Math.min(Math.floor(s.treasury),Math.round(Number(amount)||0)));s.treasury-=v;save();return v}
  // Daily drift of the price index and tax, paid upkeep. Bank interest is owned by game.html.
  function dayTick(c,s){
   const today=Number(todayKey());const old=Number(s.day);if(Number.isFinite(old)&&old>=today)return;const days=Math.min(7,Math.max(1,Number.isFinite(old)&&Number.isFinite(today)?today-old:1));s.day=today;
@@ -48,20 +51,20 @@ window.Econ154=(()=>{
  guildCost=function(){return servicePrice('guild',{rankFactor:GR[rank()].gold})};
  // Loot sold at the market: glut, index and tax; tax goes to the city treasury.
  const baseLoot=lootTotal;
-  lootTotal=function(){const k=cur(),g=baseLoot();if(!k)return g;const sat=k.s.sat.loot||0;return Math.round(g*Math.sqrt(k.s.ipc)*(1-k.s.tax)*Math.max(.5,1-sat))};
+  lootTotal=function(){const k=cur(),g=baseLoot();if(!k)return g;const sat=k.s.sat.loot||0;return Math.round(g*Math.sqrt(k.s.ipc)*(1-stax(k))*Math.max(.5,1-sat))};
  const baseSellLoot=sellMonsterLoot;
- sellMonsterLoot=function(){const k=cur(),gross=baseLoot(),net=lootTotal();const ok=baseSellLoot();if(ok&&k){const transactionGross=Math.round(net/Math.max(1-k.s.tax,.01));const tax=Math.round(transactionGross*k.s.tax);k.s.treasury+=tax;k.s.sat.loot=Math.min(.5,(k.s.sat.loot||0)+transactionGross/Math.max(1,6*cityH));save()}return ok};
+ sellMonsterLoot=function(){const k=cur(),gross=baseLoot(),net=lootTotal();const ok=baseSellLoot();if(ok&&k){const transactionGross=Math.round(net/Math.max(1-stax(k),.01));const tax=Math.round(transactionGross*stax(k));k.s.treasury+=tax;k.s.sat.loot=Math.min(.5,(k.s.sat.loot||0)+transactionGross/Math.max(1,6*cityH));save()}return ok};
  // Crystals/cores: ECON[] is read by sellP; refresh it with index, tax and glut every frame.
  let econRefreshDay=null,econRefreshCity=null;
- function refreshECON(){const k=cur();const id=k&&k.c.id,day=k&&k.s.day;if(id===econRefreshCity&&day===econRefreshDay)return;econRefreshCity=id;econRefreshDay=day;for(let r=0;r<10;r++){const sat=k?(k.s.sat['res'+r]||0):0,demand=k?(k.s.sat['demand'+r]||0):0;ECON[r]=k?Math.max(.4,Math.min(1.8,Math.sqrt(k.s.ipc)*(1-k.s.tax)*Math.max(.5,1-sat)*(1+Math.min(.15,demand)) )):1}}
+ function refreshECON(){const k=cur();const id=k&&k.c.id+(stax(k)?'':'|livre'),day=k&&k.s.day;if(id===econRefreshCity&&day===econRefreshDay)return;econRefreshCity=id;econRefreshDay=day;for(let r=0;r<10;r++){const sat=k?(k.s.sat['res'+r]||0):0,demand=k?(k.s.sat['demand'+r]||0):0;ECON[r]=k?Math.max(.4,Math.min(1.8,Math.sqrt(k.s.ipc)*(1-stax(k))*Math.max(.5,1-sat)*(1+Math.min(.15,demand)) )):1}}
  function invalidateMarket(){econRefreshDay=null;econRefreshCity=null}
- function noteResSale(r,gold){const k=cur();if(!k)return;const net=Number(gold)||0;const gross=net/Math.max(1-k.s.tax,.01);k.s.sat['res'+r]=Math.min(.5,(k.s.sat['res'+r]||0)+gross/Math.max(1,4*cityH));k.s.treasury+=Math.round(net*k.s.tax/Math.max(1-k.s.tax,.01));invalidateMarket();refreshECON();save()}
+ function noteResSale(r,gold){const k=cur();if(!k)return;const net=Number(gold)||0;const gross=net/Math.max(1-stax(k),.01);k.s.sat['res'+r]=Math.min(.5,(k.s.sat['res'+r]||0)+gross/Math.max(1,4*cityH));k.s.treasury+=Math.round(net*stax(k)/Math.max(1-stax(k),.01));invalidateMarket();refreshECON();save()}
  function noteResourcePurchase(r,amount){const k=cur();if(!k)return;const v=Math.max(0,Number(amount)||0);k.s.sat['demand'+r]=Math.min(.15,(k.s.sat['demand'+r]||0)+v/Math.max(1,8*cityH));invalidateMarket();refreshECON();save()}
  // Preço sem descontos de afinidade: a maior revenda possível fica abaixo de 50%.
  function resourceBuyPrice(r,n=10){const k=cur(),ipc=k?k.s.ipc:1,tax=k?k.s.tax:.08;return Math.ceil(CRY_P[r]*n*3*ipc*(1+tax))}
  function resourceSalePrice(kind,r){refreshECON();const base=(kind==='core'?CORE_P:CRY_P)[r];return Math.max(0,Math.round(base*ECON[r]*(1+.03*Math.min(10,Math.max(0,affL('Dorian'))))))}
- function salePrice(category,base){const k=cur();if(!k)return Math.max(0,Math.round(base));return Math.max(0,Math.round(base*Math.sqrt(k.s.ipc)*(1-k.s.tax)*Math.max(.5,1-(k.s.sat[category]||0))))}
- function noteMarketSale(category,net){const k=cur();if(!k||!(net>0))return;const gross=net/(1-k.s.tax);k.s.treasury+=Math.round(gross*k.s.tax);k.s.sat[category]=Math.min(.5,(k.s.sat[category]||0)+gross/(6*cityH));save()}
+ function salePrice(category,base){const k=cur();if(!k)return Math.max(0,Math.round(base));return Math.max(0,Math.round(base*Math.sqrt(k.s.ipc)*(1-stax(k))*Math.max(.5,1-(k.s.sat[category]||0))))}
+ function noteMarketSale(category,net){const k=cur();if(!k||!(net>0))return;const gross=net/(1-stax(k));k.s.treasury+=Math.round(gross*stax(k));k.s.sat[category]=Math.min(.5,(k.s.sat[category]||0)+gross/(6*cityH));save()}
  function notePurchase(totalPaid){const k=cur();if(!k)return;const paid=Math.max(0,Number(totalPaid)||0);k.s.flow+=paid;k.s.treasury+=Math.round(paid*k.s.tax/(1+k.s.tax));save()}
  // ---------- dome numbers (used by Dome154) ----------
  function cityTier(){const c=cityOf();return c?Math.max(0,Math.min(5,Math.round(cityL(c)||0))):0}
@@ -82,5 +85,5 @@ window.Econ154=(()=>{
  openModal=function(title,html,...rest){if(/MERCADO/.test(title))html=panel()+html;return baseModal(title,html,...rest)};
  // per-frame refresh through the event loop already used by the dome
  const baseSiege=updSiege;updSiege=function(dt){baseSiege(dt);refreshECON()};
- return {H,cur,st,panel,donate,domeBuild,domeRepair,canPay,pay,costText,noteResSale,noteResourcePurchase,notePurchase,resourceBuyPrice,resourceSalePrice,servicePrice,localPrice,salePrice,noteMarketSale};
+ return {H,cur,st,panel,donate,domeBuild,domeRepair,canPay,pay,costText,noteResSale,noteResourcePurchase,notePurchase,resourceBuyPrice,resourceSalePrice,servicePrice,localPrice,salePrice,noteMarketSale,treasuryPay};
 })();
