@@ -89,7 +89,7 @@ window.Civic343=(()=>{
  const baseRV=rebuildView;
  rebuildView=function(c){if(riftOpen(c)){view=()=>rebuildView(c);openModal('RECONSTRUIR '+c.name.toUpperCase(),'<div class="sysline">Uma <b>Fenda Invasora</b> vermelha está aberta na praça de '+safeText(c.name)+'.</div>'+row('1. Limpar a praça','Derrote os monstros que ocuparam a cidade.','')+row('2. Fechar a Fenda','Entre na Fenda vermelha no centro e derrote o chefe invasor.','<span style="color:#ff8fa3">Fenda aberta</span>')+row('3. Pagar a reconstrução','Depois de fechar a Fenda, volte a este marco.',''));return}return baseRV(c)};
  const baseDR=doRebuild;
- doRebuild=function(id){if(riftOpen(nearestCity(player.x,player.z).c))return;return baseDR(id)};
+ doRebuild=function(id){if(riftOpen(nearestCity(player.x,player.z).c)){toast('<b>[RECONSTRUÇÃO]</b> A Fenda Invasora da praça ainda está aberta. Feche-a primeiro.',6000);return}return baseDR(id)};
 
  /* ---------- guardas das muralhas (Defensor Local) ---------- */
  let guardT=0,volley=0,guardTold=0;

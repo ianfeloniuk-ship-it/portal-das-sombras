@@ -1,3 +1,9 @@
+## v344 — parar em cima de pedras e troncos; botão de reconstruir diz por que não funciona, 09/10/2026
+Pedido de Ian (chat): "o botão de reconstruir cidade não faz nada" e "quando pulo por uma pedra não consigo parar em cima dela, é como se ela fosse infinitamente pra cima".
+- **Colisão com altura:** os obstáculos eram círculos sem altura. Pedras (`ROCKS` e as pedras altas de cristal/vulcão) e troncos caídos agora guardam `c.h` (85% da altura real do modelo, `envTop344`). Quem está acima do topo passa por cima e pousa em cima (`floor344`); sair andando faz cair. Dá para pular de cima da pedra. Árvores, muros e prédios continuam sem `c.h` (bloqueiam em qualquer altura). Vale só para o jogador; monstros continuam contornando.
+- **Reconstruir:** o botão ficava apagado sem dizer o motivo, e `doRebuild` saía calado. Agora o botão mostra "Limpe a cidade antes", "Falta ouro" ou "Faltam cristais", e toda recusa vira aviso na tela. Não achei caso em que o botão aceso falhasse; hipótese do Claude: Ian estava sem os 30 cristais ou sem ouro.
+- **Testado no navegador local:** andar contra a pedra bloqueia; pulo pousa em cima (1,14 m), fica, pula de novo, sai andando e cai; os três textos do botão e a reconstrução completa.
+
 ## v343 — Espaço pula, cidade ocupada por Fenda, status cívico, carroças e Alvos Notórios, 08/10/2026
 Pedido de Ian (texto colado no chat, confirmado ponto a ponto). Módulo novo: `tools/civic343.js` (carregado depois de `dome154.js`); ganchos pequenos em `game.html`, `tools/dome154.js`, `tools/economy154.js` e `tools/anim303.js`.
 - **Controles:** Espaço só pula (`jump343`, impulso 8,2 e gravidade 24: ~1,3 m, ~0,66 s; pose em `Anim303.air`). Ataque básico só no botão esquerdo do mouse. A ação "Atacar" saiu da lista de teclas; entrou "Pular". Montado não pula.
