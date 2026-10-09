@@ -172,6 +172,16 @@
   }
   /* flecha cravada no chão por um instante: chamada pela chuva de flechas do próprio jogo, quando cada flecha cai */
   function stuck(x, z, col = 0xd8f0ff) { const m = pmodel('sarrow', col, 2.2, 4); if (!m) return; const g = new T.Group(); g.add(m); g.position.set(x, .45, z); g.rotation.set(Math.PI / 2 + R(-.25, .25), R(0, TAU), R(-.2, .2)); add(g, 1.3, k => { if (k > .75) g.scale.setScalar(Math.max(.01, (1 - k) / .25)); }); star(x, z, col, .6, .3); }
+  /* v345 (Ian: conferir as 240): o efeito pergunta ao jogo ONDE a habilidade age — o mesmo ponto (kitPoint111), raio e alvos (kitTargets111) usados no dano. */
+  function truth(sk) {
+    if (!sk || sk.t !== 'kit111' || typeof kitPoint111 !== 'function') return null;
+    try { const pt = kitPoint111(sk), d = e => Math.hypot(e.x - pt.x, e.z - pt.z), single = !!sk.single || /^(target|execute|burn|counter)$/.test(sk.effect);
+      return { pt, single, r: kitRadius111(sk), list: kitTargets111(sk, pt).slice().sort((a, b) => d(a) - d(b)), self: Math.hypot(pt.x - player.x, pt.z - player.z) < .3 }; } catch (_) { return null; }
+  }
+  /* corrente real: começa no alvo do jogo e salta para o mais próximo a até 7 m, até 5 alvos */
+  function chainReal(sk) { const pts = []; try { let e = kitTarget111(sk); const hit = new Set(); while (e && hit.size < 5) { hit.add(e); pts.push({ x: e.x, z: e.z }); const prev = e; e = enemies.filter(x => !x.dead && !hit.has(x) && Math.hypot(x.x - prev.x, x.z - prev.z) <= 7).sort((a, b) => Math.hypot(a.x - prev.x, a.z - prev.z) - Math.hypot(b.x - prev.x, b.z - prev.z))[0]; } } catch (_) {} return pts; }
+  /* anel fino no raio verdadeiro + faísca em cada alvo atingido */
+  function reach(x, z, r, col) { const g = new T.Group(); g.position.set(x, .07, z); const m = new T.Mesh(new T.RingGeometry(.95, 1, 64), E(col, .8)); m.rotation.x = -Math.PI / 2; g.add(m); add(g, .45, k => { g.scale.setScalar(Math.max(.01, r * (.25 + .75 * Math.min(1, k * 2.2)))); fade(g, 1 - k * k); }); }
   /* estocada com a lança de verdade dentro do rastro de luz */
   function jab(x, z, ang, len, col, w = .35) { thrust(x, z, ang, len, col, w); fly('tspear', { x, z, ang, dist: Math.max(1, len - 1), speed: 30, sc: 1, col }); }
   /* onda de água: parede curva com espuma na crista avançando */
@@ -207,13 +217,13 @@
   def('Passo Sombrio', c => { V.smoke(c.P.x, c.P.z, 0x3a2a5a, 1.6); afterimages(C.ass, 4); setTimeout(() => V.smoke(player.x, player.z, 0x3a2a5a, 1.4), 160); });
   def('Furtividade', c => { V.smoke(c.P.x, c.P.z, 0x2a2a3a, 2.4); wisps(c.P.x, c.P.z, C.ass, 8, 2); });
   def('Lâmina Envenenada', c => { V.slash(c.P.x, c.P.z, c.ang, 0x8de06a, 2.4, 1.8); const e = c.t(); V.poison(e ? e.x : c.tx, e ? e.z : c.tz, 0x8de06a, 1.6); });
-  def('Mil Cortes', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; for (let i = 0; i < 9; i++) setTimeout(() => V.slash(x - Math.sin(c.ang) * 1.5, z - Math.cos(c.ang) * 1.5, R(0, TAU), i % 2 ? C.ass : 0xffffff, 2, 1.4), i * 70); });
+  def('Mil Cortes', c => { for (let i = 0; i < 10; i++) setTimeout(() => { const a = R(0, TAU), d = Math.sqrt(Math.random()) * c.rad; V.slash(c.tx + Math.cos(a) * d, c.tz + Math.sin(a) * d, R(0, TAU), i % 2 ? C.ass : 0xffffff, 2, 1.4); }, i * 70); });
   def('Execução', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; afterimages(C.ass, 2); V.slash(x, z, c.ang + Math.PI / 4, 0xff2a4a, 2.4, 1.2); setTimeout(() => V.slash(x, z, c.ang - Math.PI / 4, 0xff2a4a, 2.4, 1.2), 90); blood(x, z, 12); });
-  def('Cortina de Fumaça', c => { V.smoke(c.P.x, c.P.z, 0x5a5a6a, 3.4); V.smoke(c.tx, c.tz, 0x5a5a6a, 2.4); });
+  def('Cortina de Fumaça', c => { V.smoke(c.tx, c.tz, 0x5a5a6a, c.rad * .9); });
   def('Adaga', c => { if (c.real) { star(c.at(1).x, c.at(1).z, C.ass, .8); return; } fly('tdagger', { ang: c.ang, dist: 12, speed: 34, sc: 2, col: C.ass, spin: .5, onHit: (x, z) => star(x, z, C.ass, .9) }); });
   def('Evasão|Corpo Etéreo', c => { afterimages(c.col, 4); V.wind(c.P.x, c.P.z, c.ang + Math.PI, 0xd8d0ff, 3); });
   def('Ferida Profunda', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.slash(x, z, c.ang, 0xff2a4a, 2.2, 1.6); blood(x, z, 16); });
-  def('Faca de Interrupção', c => { fly('tdagger', { ang: c.ang, dist: 10, speed: 40, sc: 2, col: 0xffe070, spin: .5, onHit: (x, z) => { star(x, z, 0xffe070, 1.3); glyph(x, z, 0xffe070, .9, 'sigil', .8, 2.6); } }); });
+  def('Faca de Interrupção', c => { const L = c.list.slice(0, 5); if (!L.length) { star(c.at(1).x, c.at(1).z, 0xffe070, 1); return; } L.forEach((e, i) => fly('tdagger', { ang: Math.atan2(e.x - c.P.x, e.z - c.P.z), dist: Math.max(.6, Math.hypot(e.x - c.P.x, e.z - c.P.z)), speed: 40, sc: 2, col: 0xffe070, spin: .5, delay: i * 40, force: true, onHit: (x, z) => { star(x, z, 0xffe070, 1.3); glyph(x, z, 0xffe070, .9, 'sigil', .8, 2.6); } })); });
   /* Tanque */
   def('Golpe de Escudo', c => { V.slash(c.P.x, c.P.z, c.ang, C.tank, 2.6, 1.8); V.shockwave(c.P.x + Math.sin(c.ang) * 2, c.P.z + Math.cos(c.ang) * 2, C.tank, 2); });
   def('Impacto', c => { V.quakeRing(c.P.x, c.P.z, 3.5, C.tank); V.shockwave(c.P.x, c.P.z, C.tank, 4); });
@@ -228,14 +238,14 @@
   /* magos (Bola de Fogo, Nova de Gelo e Corrente de Raios são compartilhadas) */
   def('Bola de Fogo', c => { if (c.real) { const p = c.at(.9); V.flames(p.x, p.z, { n: 3, r: .25, h: 1.1, dur: .45 }); } else fly('fire', { ang: c.ang, dist: 9, speed: 22, sc: 2, col: C.fire, cls: 8, onHit: (x, z) => blast(x, z, 1.6) }); });
   def('Nova de Gelo', c => { V.spikes(c.P.x, c.P.z, C.ice, 14, 4.2, 'ice'); V.shockwave(c.P.x, c.P.z, C.ice, 4.5); });
-  def('Corrente de Raios|Descarga', c => { const L = foes(10).slice(0, 4); const pts = [{ x: c.P.x, z: c.P.z }, ...L.map(e => ({ x: e.x, z: e.z }))]; if (pts.length < 2) pts.push(c.at(8)); for (let i = 0; i < pts.length - 1; i++) setTimeout(() => { V.zap(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, c.col === 0xffffff ? C.bolt : c.col, .4, 1.8); star(pts[i + 1].x, pts[i + 1].z, C.bolt, 1); }, i * 90); });
+  def('Corrente de Raios|Descarga', c => { const real = c.K ? chainReal(c.sk) : foes(10).slice(0, 4).map(e => ({ x: e.x, z: e.z })); const pts = [{ x: c.P.x, z: c.P.z }, ...real]; if (pts.length < 2) { V.zap(c.P.x, c.P.z, c.at(3).x, c.at(3).z, C.bolt, .3, 1.2); return; } for (let i = 0; i < pts.length - 1; i++) setTimeout(() => { V.zap(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, c.col === 0xffffff ? C.bolt : c.col, .4, 1.8); star(pts[i + 1].x, pts[i + 1].z, C.bolt, 1); }, i * 90); });
   /* Arqueiro */
   def('Chuva de Flechas', c => { ground(c.tx, c.tz, C.arch, 3.8, 2.6); });
   def('Salto Evasivo', c => { V.dashTrail(C.arch); V.wind(c.P.x, c.P.z, c.ang + Math.PI, C.arch, 3); });
   def('Flecha Perfurante', c => { thrust(c.P.x, c.P.z, c.ang, 14, C.arch, .2); if (!c.real) fly('sarrow', { ang: c.ang, dist: 15, speed: 48, sc: 2.2, col: C.arch }); });
   def('Flecha Estelar', c => { if (c.real) { star(c.at(1).x, c.at(1).z, 0xfff0a0, 1.2); return; } for (const d of [-.3, 0, .3]) fly('sarrow', { ang: c.ang + d, dist: 13, speed: 40, sc: 2, col: 0xfff0a0, onHit: (x, z) => star(x, z, 0xfff0a0, 1.3) }); });
   def('Tiro Preciso', c => { const e = c.t(16), d = e ? Math.hypot(e.x - c.P.x, e.z - c.P.z) : 14; if (e) glyph(e.x, e.z, 0xff4a4a, 1, 'sigil', .6, 1.4); fly('sarrow', { ang: c.ang, dist: d, speed: 60, sc: 2, col: 0xffffff, delay: 120, onHit: (x, z) => star(x, z, 0xffffff, 1.8) }); });
-  def('Flecha Enredante', c => { fly('sarrow', { ang: c.ang, dist: 10, speed: 36, sc: 1.9, col: 0x8de06a, onHit: (x, z) => { cage(x, z, 0x6ac04a, 1.3); V.poison(x, z, 0x6ac04a, 1.2); } }); });
+  def('Flecha Enredante', c => { fly('sarrow', { ang: Math.atan2(c.tx - c.P.x, c.tz - c.P.z), dist: Math.max(1, Math.hypot(c.tx - c.P.x, c.tz - c.P.z)), speed: 36, sc: 1.9, col: 0x8de06a, force: true, onHit: () => {} }); cage(c.tx, c.tz, 0x6ac04a, Math.min(c.rad, 3)); V.poison(c.tx, c.tz, 0x6ac04a, c.rad * .6); });
   def('Armadilha', c => { glyph(c.tx, c.tz, 0xffb84a, 1.3, 'sigil', 2.2); V.spikes(c.tx, c.tz, 0x8a7a60, 6, 1.2, 'rock'); });
   def('Disparo Rápido', c => { if (c.real) { star(c.at(1).x, c.at(1).z, C.arch, .8); return; } for (let i = 0; i < 3; i++) fly('sarrow', { ang: c.ang + R(-.05, .05), dist: 12, speed: 44, sc: 1.8, col: C.arch, delay: i * 80, onHit: (x, z) => star(x, z, C.arch, .7) }); });
   def('Leque de Flechas', c => { if (c.real) { star(c.at(1).x, c.at(1).z, C.arch, 1); return; } for (const d of [-.5, -.25, 0, .25, .5]) fly('sarrow', { ang: c.ang + d, dist: 11, speed: 40, sc: 1.8, col: C.arch }); });
@@ -280,14 +290,14 @@
   def('Brasa Latente', c => { ground(c.tx, c.tz, C.fire, 2, 2.2); V.flames(c.tx, c.tz, { n: 3, r: .5, h: .6, dur: 1.2 }); setTimeout(() => blast(c.tx, c.tz, 2.2), 1100); });
   def('Manto de Cinzas', c => { V.dome(c.P.x, c.P.z, C.fire, 2.2, true); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; V.flames(c.P.x + Math.cos(a) * 2.2, c.P.z + Math.sin(a) * 2.2, { n: 2, r: .2, h: 1.3, dur: 1.4 }); } });
   /* Mago de Gelo */
-  def('Lança de Gelo', c => { V.spikeLine(c.P.x, c.P.z, c.ang, 9, C.ice, 'ice'); fly('ice', { ang: c.ang, dist: 9, speed: 30, sc: 2.4, col: C.ice, cls: 9, onHit: (x, z) => { V.spikes(x, z, C.ice, 8, 1.4, 'ice'); star(x, z, C.ice, 1.4); } }); });
-  def('Maremoto', c => { wave(c.P.x, c.P.z, c.ang, 0x3aa8ff, 8, 6); V.wind(c.P.x, c.P.z, c.ang, 0xbfe8ff, 8); });
+  def('Lança de Gelo', c => { V.spikeLine(c.P.x, c.P.z, c.ang, c.range, C.ice, 'ice'); fly('ice', { ang: c.ang, dist: c.range, speed: 30, sc: 2.4, col: C.ice, cls: 9, onHit: (x, z) => { V.spikes(x, z, C.ice, 8, 1.4, 'ice'); star(x, z, C.ice, 1.4); } }); });
+  def('Maremoto', c => { for (let i = 0; i < 6; i++) wave(c.tx, c.tz, c.ang + i * TAU / 6, 0x3aa8ff, Math.max(2, c.rad - 1), 4.6); });
   def('Era do Gelo', c => { ground(c.tx, c.tz, C.ice, 4.5, 2.6); for (let i = 0; i < 4; i++) setTimeout(() => V.spikes(c.tx + R(-2, 2), c.tz + R(-2, 2), C.ice, 8, 2.4, 'ice'), i * 300); });
   def('Prisão Glacial', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.spikes(x, z, C.ice, 10, 1.2, 'ice'); cage(x, z, C.ice, 1.2); });
   def('Armadura de Gelo', c => { V.dome(c.P.x, c.P.z, C.ice, 2.2, true); V.spikes(c.P.x, c.P.z, C.ice, 6, 1.6, 'ice'); });
   def('Estilhaço', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.spikes(x, z, C.ice, 8, 1.6, 'ice'); star(x, z, C.ice, 1.4); });
   def('Deslizar', c => { V.dashTrail(C.ice); V.spikeLine(c.P.x, c.P.z, c.ang, 5, C.ice, 'ice'); });
-  def('Fratura Glacial', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0x8ad8ff); V.spikeLine(c.P.x, c.P.z, c.ang, 7, C.ice, 'ice'); });
+  def('Fratura Glacial', c => { const e = c.t(); if (!e) { V.spikes(c.at(2).x, c.at(2).z, C.ice, 5, 1, 'ice'); return; } const a = Math.atan2(e.x - c.P.x, e.z - c.P.z), d = Math.hypot(e.x - c.P.x, e.z - c.P.z); V.fissure(c.P.x, c.P.z, a, d, 0x8ad8ff); V.spikes(e.x, e.z, C.ice, 9, 1.4, 'ice'); star(e.x, e.z, C.ice, 1.4); });
   def('Névoa Fria', c => { V.smoke(c.P.x, c.P.z, 0xd8f0ff, 3.4); });
   /* Mago da Terra */
   /* v331: as estacas sumiam no chão de pedra; ganharam rachadura acesa */
@@ -298,11 +308,11 @@
   def('Muralha de Rocha', c => { const a = c.ang + Math.PI / 2, sx = Math.sin(a), sz = Math.cos(a); beam(c.tx - sx * 3.6, c.tz - sz * 3.6, c.tx + sx * 3.6, c.tz + sz * 3.6, C.earth, .25, 1.2, .15); for (let i = -3; i <= 3; i++) V.spikes(c.tx + sx * i * 1.1, c.tz + sz * i * 1.1, 0xa08a66, 3, .5, 'rock'); });
   def('Areia Movediça', c => { ground(c.tx, c.tz, 0xd8b870, 3.5, 2.6); V.vortex(c.tx, c.tz, 0xd8b870, 3.2); });
   def('Arremesso de Rocha', c => { if (c.real) { V.dust(c.at(1).x, c.at(1).z, 0x9a8a70, 5); return; } fly('orb', { ang: c.ang, dist: 8, speed: 20, sc: 2.6, col: 0xc8a060, cls: 10, spin: .25, onHit: (x, z) => { V.dust(x, z, 0x9a8a70, 12); V.spikes(x, z, 0xa08a66, 5, 1.2, 'rock'); } }); });
-  def('Erupção', c => { V.fissure(c.P.x, c.P.z, c.ang, 7, 0xff7a2a); for (let i = 1; i <= 4; i++) setTimeout(() => V.flames(player.x + Math.sin(c.ang) * i * 1.6, player.z + Math.cos(c.ang) * i * 1.6, { n: 4, r: .5, h: 2.4, dur: .9 }), i * 90); });
+  def('Erupção', c => { V.quakeRing(c.tx, c.tz, c.rad, 0xff7a2a); for (let i = 0; i < 6; i++) { const a = i * TAU / 6; setTimeout(() => V.flames(c.tx + Math.cos(a) * c.rad * .6, c.tz + Math.sin(a) * c.rad * .6, { n: 3, r: .4, h: 2.2, dur: .9 }), i * 50); } });
   def('Pedra Suspensa', c => { ground(c.tx, c.tz, C.earth, 3.4, 1.8); for (let i = 0; i < 5; i++) V.meteor(c.tx + R(-3, 3), c.tz + R(-3, 3), i * 250, 0x8a7a60, true); });
   def('Casca de Cristal', c => { V.dome(c.P.x, c.P.z, 0xbfa0ff, 2.3, true); V.spikes(c.P.x, c.P.z, 0xbfa0ff, 8, 1.8, 'ice'); });
   /* Mago do Raio e Condutor */
-  def('Rajada de Vento', c => { V.wind(c.P.x, c.P.z, c.ang, 0xd8f4ff, 8); shout(c.P.x, c.P.z, c.ang, 0xd8f4ff, 3, 1.2); });
+  def('Rajada de Vento', c => { for (let i = 0; i < 6; i++) V.wind(c.tx, c.tz, c.ang + i * TAU / 6, 0xd8f4ff, c.rad); shout(c.tx, c.tz, c.ang, 0xd8f4ff, 3, TAU); });
   def('Tempestade de Raios', c => { ground(c.tx, c.tz, C.bolt, 4, 2.4); V.storm(c.tx, c.tz, 4, C.bolt, 9); });
   def('Fúria dos Céus', c => { V.storm(c.tx, c.tz, 5, 0xffffff, 12); V.pillar(c.tx, c.tz, C.bolt, 1.2); });
   def('Paralisia', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; V.bolt(x, z, C.bolt); cage(x, z, C.bolt, 1); });
@@ -330,13 +340,13 @@
   def('Impacto Adiado', c => { glyph(c.tx, c.tz, C.time, 2.4, 'clock', 1.8); setTimeout(() => { V.shockwave(c.tx, c.tz, 0xffffff, 4.5); star(c.tx, c.tz, C.time, 2); }, 1400); });
   /* Tecelão de Fendas */
   def('Passagem Vinculada|Ascensão de Fenda', c => { rift(c.P.x, c.P.z, c.ang, C.rift); rift(c.tx, c.tz, c.ang, C.rift); });
-  def('Corte Espacial', c => { rift(c.at(4).x, c.at(4).z, c.ang + Math.PI / 2, C.rift, 2.2, .7); V.slash(c.P.x, c.P.z, c.ang, C.rift, 4.5, 1.8); });
+  def('Corte Espacial', c => { thrust(c.P.x, c.P.z, c.ang, c.range, C.rift, .5); rift(c.at(c.range * .5).x, c.at(c.range * .5).z, c.ang + Math.PI / 2, C.rift, 2.2, .7); V.slash(c.P.x, c.P.z, c.ang, C.rift, 4.5, 1.8); });
   def('Convergência|Sucção', c => { V.vortex(c.tx, c.tz, c.col, 4.5); orb(c.tx, c.tz, c.col, 1.6, true, c.col === C.void); });
   def('Ruptura', c => { rift(c.tx, c.tz, R(0, TAU), C.rift, 3.4, .9); V.shockwave(c.tx, c.tz, C.rift, 4.5); });
   def('Dobra|Passo Vazio', c => { rift(c.P.x, c.P.z, c.ang, c.col, 2.4, .5); V.dashTrail(c.col); setTimeout(() => rift(player.x, player.z, c.ang, c.col, 2.4, .5), 160); });
   def('Fronteira', c => { const a = c.ang + Math.PI / 2; for (let i = -2; i <= 2; i++) rift(c.tx + Math.sin(a) * i * 1.3, c.tz + Math.cos(a) * i * 1.3, c.ang, C.rift, 2.6, 2); });
   def('Exílio Breve', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; rift(x, z, c.ang, C.rift, 3, .9); orb(x, z, C.rift, 1.2, true); });
-  def('Agulha de Fenda', c => { thrust(c.P.x, c.P.z, c.ang, 10, C.rift, .25); rift(c.at(10).x, c.at(10).z, c.ang, C.rift, 1.6, .5); });
+  def('Agulha de Fenda', c => { const e = c.t(), p = e || c.at(c.range), a = Math.atan2(p.x - c.P.x, p.z - c.P.z), d = Math.max(1, Math.hypot(p.x - c.P.x, p.z - c.P.z)); thrust(c.P.x, c.P.z, a, d, C.rift, .25); rift(p.x, p.z, a, C.rift, 1.6, .5); });
   def('Colapso Local', c => { orb(c.tx, c.tz, C.rift, 2.6, true, true, 1.2); setTimeout(() => V.shockwave(c.tx, c.tz, C.rift, 5), 900); });
   /* Guardião dos Vínculos */
   def('Elo Protetor', c => { const A = (typeof allies !== 'undefined' ? allies : []).filter(a => a && !a.dead && Math.hypot(a.x - c.P.x, a.z - c.P.z) < 16).slice(0, 3); if (A.length) chain([{ x: c.P.x, z: c.P.z }, A[0]], C.bond); V.aura(C.bond); glyph(c.P.x, c.P.z, C.bond, 1.6, 'sigil', 1.2); });
@@ -436,13 +446,15 @@
   V.play = function (sk) {
     const fn = sk && X[sk.n];
     if (!fn || !player) return old(sk);
-    const P = player, ang = P.face || 0;
+    const P = player; let ang = P.face || 0;
     let tx = P.x + Math.sin(ang) * 6, tz = P.z + Math.cos(ang) * 6;
-    /* v342: o efeito nasce no MESMO ponto em que o jogo aplica o dano (kitPoint111); antes ia para a mira mesmo quando a área real era em volta do personagem */
-    try { const t = sk.t === 'kit111' ? sk.effect : (sk.effect || sk.t); if (sk.t === 'kit111' && /^(area|pulses|healzone|slow|root|trap|barrier|slowzone|seal|device|relocate|pull|anchorward)$/.test(t) && typeof kitPoint111 === 'function') { const g = kitPoint111(sk); if (g) { tx = g.x; tz = g.z; } } else if (/area|pulses|rain|slowzone|healzone|trap|device|barrier|gate|passage|relocate|anchorward/.test(t)) { const g = skillGroundPoint(); if (g) { tx = g.x; tz = g.z; } } } catch (_) {}
+    const K = truth(sk), eff = sk.t === 'kit111' ? sk.effect : (sk.effect || sk.t);
+    /* alvo único: o efeito mira no alvo que o jogo escolheu, não só para onde o personagem olha */
+    if (K && (K.single || eff === 'conditional260') && K.list[0]) { ang = Math.atan2(K.list[0].x - P.x, K.list[0].z - P.z); tx = P.x + Math.sin(ang) * 6; tz = P.z + Math.cos(ang) * 6; }
+    try { if (K) { if (!K.self || /^(area|pulses|healzone|slow|root|trap|barrier|slowzone|seal|device|relocate|pull|push|anchorward|blind|weaken|taunt|interrupt)$/.test(eff)) { tx = K.pt.x; tz = K.pt.z; } } else if (/area|pulses|rain|slowzone|healzone|trap|device|barrier|gate|passage|relocate|anchorward/.test(eff)) { const g = skillGroundPoint(); if (g) { tx = g.x; tz = g.z; } } } catch (_) {}
     REAL = /^(bolt|fan|release)$/.test(sk.t === 'kit111' ? sk.effect : sk.t);
-    const c = { P, ang, tx, tz, sk, real: REAL, col: sk.col || 0xffffff, at: d => ({ x: P.x + Math.sin(ang) * d, z: P.z + Math.cos(ang) * d }), t: (r = 9) => front(r) };
-    try { fn(c); REAL = false; } catch (e) { REAL = false; console.warn('vfx328', sk.n, e); try { old(sk); } catch (_) {} }
+    const c = { P, ang, tx, tz, sk, real: REAL, col: sk.col || 0xffffff, K, range: sk.range || 8, rad: K ? K.r : (sk.radius || 4), list: K ? K.list : foes(9), at: d => ({ x: P.x + Math.sin(ang) * d, z: P.z + Math.cos(ang) * d }), t: (r = 9) => K ? (K.list[0] || null) : front(r) };
+    try { fn(c); REAL = false; if (K && !K.single && /^(area|push|pull|blind|weaken|taunt|slow|root|interrupt)$/.test(eff)) { reach(K.pt.x, K.pt.z, K.r, c.col); K.list.slice(0, 8).forEach(e => star(e.x, e.z, c.col, .7)); } } catch (e) { REAL = false; console.warn('vfx328', sk.n, e); try { old(sk); } catch (_) {} }
   };
-  window.VFX328 = { X, stuck, fly, rainArrows, jab, wave, blast, fists, thrust, star, beam, chain, rift, orb, blood, wisps, bones, totem, glyph, shout, cage, afterimages, ground };
+  window.VFX328 = { X, truth, stuck, fly, rainArrows, jab, wave, blast, fists, thrust, star, beam, chain, rift, orb, blood, wisps, bones, totem, glyph, shout, cage, afterimages, ground };
 })();
