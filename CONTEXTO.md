@@ -1,3 +1,12 @@
+## v348 — Cogumelinho: fuga e esporos de sono, 12/10/2026
+- Características e trio v006 consultados antes da produção: cogumelo de floresta, cerca de 1 m, pernas curtas, sem braços, chapéu assimétrico e lamelas; foge e solta esporos soníferos quando encurralado.
+- Tripo multivista H3.1: 60 créditos, sem rig pago. Blender: 24 mil triângulos, cinco ossos e clipes Idle, Walk, Spore, HitRecieve e Death. GLB 3.588.740 bytes. Chapéu funciona como fole na emissão.
+- Espécie cogu tenta fugir; em contato/sem saída prepara esporos por 0,7 s, raio 2,8 m com linha de visão. Sono de até 2 s conforme resistência; bloqueia movimento e ações, dano acorda e há imunidade de 6 s após sono. Morte/atordoamento interrompem emissão. Números são escolhas técnicas da IA. Variantes mantêm IA anterior.
+- Validação no jogo real local: 13 verificações de fuga, aviso, alcance, sono, bloqueios, despertar, imunidade, expiração e interrupções; regressão da Gosma passou 13/13. Reimportação Blender e cinco clipes em Three.js r128, 21 amostras cada. Teste reproduzível: python tools/test_cogu348.py, abrir cogu-playtest.html localmente; não publicar página de teste. Celular não testado; sem aprovação visual de Ian.
+- Fonte: https://drive.google.com/file/d/19cLOtvqC5ulDJhmjcrQd8mNP9XNVw6LE/view
+- Pacote completo: https://drive.google.com/file/d/1OcgxmioUGBk5jgkALxbdb7_quulAj438/view (29.509.780 bytes, SHA256 remoto conferido).
+- Prova no jogo: https://drive.google.com/file/d/1nAW88dAQVszkUd-zF6yk48YdWHl9PHh_/view
+
 ## v347 — Gosma Verde: divisão e reunião noturna, 12/10/2026
 - Pedido de Ian: ler as características antes de produzir cada mob; implementar e testar divisão/reunião da Gosma, depois seguir ao Cogumelinho.
 - Gosma v005 multivista Tripo, otimizada e animada no Blender. Inteiro + três fragmentos fechados, seis ossos, sete clipes, incluindo Split/Merge. PBR preservado. Nenhum rig pago.

@@ -237,7 +237,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/passives263.js?v=286"></script>
 <script src="tools/passives327.js?v=328"></script>
 <script src="tools/resources260.js?v=316"></script>
-<script src="tools/combo261.js?v=261"></script>
+<script src="tools/combo261.js?v=348"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
@@ -3361,7 +3361,7 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
  gosma_part0:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
  gosma_part1:{h:0.5334072269033641,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
  gosma_part2:{h:0.44590008025988936,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
-  cogu:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  cogu:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Spore',Hit:'HitRecieve',Spore:'Spore'}},
   passaro:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   espinhosa:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   cactinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
@@ -3406,12 +3406,12 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('gosma')?'?v=347':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('gosma')?'?v=347':k==='cogu'?'?v=348':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k==='slime'||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k==='slime'||k.startsWith('gosma'))?.42:.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k==='slime'||k==='cogu'||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k==='slime'||k.startsWith('gosma'))?.42:.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -3700,7 +3700,7 @@ function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
 function freeAt(x,z,r){if(!crystalFree126(x,z,r))return false;if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
 /* v276 (Ian): monstros não ficam mais presos andando reto contra parede/cristal — se o passo quase não anda, escolhem um desvio livre e seguem por ele um tempo */
 function navFree276(x,z,r){return crystalFree126(x,z,r)&&(L.grid?freeAt(x,z,r*.85):worldFree(x,z,r))}
-function moveEnt(e,dx,dz){if(e===player||!Number.isFinite(dx)||!Number.isFinite(dz))return moveEnt0(e,dx,dz);const want=Math.hypot(dx,dz);if(want<1e-4)return moveEnt0(e,dx,dz);
+function moveEnt(e,dx,dz){if(window.Cogu348&&Cogu348.asleep(e))return;if(e===player||!Number.isFinite(dx)||!Number.isFinite(dz))return moveEnt0(e,dx,dz);const want=Math.hypot(dx,dz);if(want<1e-4)return moveEnt0(e,dx,dz);
   if(e.path276&&e.path276.n>0&&e.path276.pts.length){e.path276.n--;const q=e.path276.pts[0],qx=q.x-e.x,qz=q.z-e.z,ql=Math.hypot(qx,qz);if(ql<.5){e.path276.pts.shift()}else{dx=qx/ql*want;dz=qz/ql*want}const x1=e.x,z1=e.z;moveEnt0(e,dx,dz);if(Math.hypot(e.x-x1,e.z-z1)<want*.2)e.path276.n-=5;return}
   if(e.detour276&&e.detour276.n>0){e.detour276.n--;const a=e.detour276.a,c=Math.cos(a),s=Math.sin(a);const ndx=dx*c-dz*s,ndz=dx*s+dz*c;dx=ndx;dz=ndz}
   const x0=e.x,z0=e.z;moveEnt0(e,dx,dz);const got=Math.hypot(e.x-x0,e.z-z0);
@@ -5633,12 +5633,12 @@ function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}amt=Math.max(1,Math.round(passiveIncoming327(amt)));
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}
   if(curAtk&&curAtk.kind){if(['mage','wraith','vespa','yeti'].includes(curAtk.kind)&&!player.slowT){player.slowT=2;floater(player.x,player.z,'LENTO','#ffd08a')}else if(['rogue','aranha','lobo','raptor'].includes(curAtk.kind)&&Math.random()<.35){player.bleedT=3;player.bleedD=amt*.08;floater(player.x,player.z,'SANGRANDO','#ff4d6a')}}
-  player.hp-=amt;player.hitAnimT=time+.4;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
+  if(window.Cogu348)Cogu348.wake(player);player.hp-=amt;player.hitAnimT=time+.4;floater(player.x,player.z,'-'+fmt(amt),'#ff4d6a');shake(.3);$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,.55)';setTimeout(()=>$('vig').style.boxShadow='inset 0 0 120px rgba(255,0,40,0)',160);
   if(curAtk){player.lastHit=curAtk;if(curAtk.trait==='vamp')curAtk.hp=Math.min(curAtk.maxhp,curAtk.hp+amt*.3)}flashMats(player.m,1,0x660000);setTimeout(()=>flashMats(player.m,0),90);sfx('hurt');
   if(player.hp<=0&&passiveLast327())return;
   if(player.hp<=0)die();
 }
-function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyProtection(a);if(a.buffT>0)amt*=.55;amt=absorbHealingShield(a,amt);amt=guardianDamage108(a,amt);if(amt<=0)return;a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
+function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyProtection(a);if(a.buffT>0)amt*=.55;amt=absorbHealingShield(a,amt);amt=guardianDamage108(a,amt);if(amt<=0)return;if(window.Cogu348)Cogu348.wake(a);a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
   if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[NARRADOR]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
@@ -5688,7 +5688,7 @@ function faceTarget(max=7){
     for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>max)continue;let da=Math.atan2(dx,dz)-fa;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));if(da<.7&&d<bd){bd=d;best=e}}
     return best}
   const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
-function attack(){
+function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;resourceCombat258();if(kitFormAttack111())return;
   curDType281=(()=>{const k=weaponKind272(run.equip.w)||'';if(/^(sword|axe|mace|spear|hammer|bow|dagger)$/.test(k))return 'phy';if(/^(staff|bonestaff|wand|tome|orb)$/.test(k))return 'mag';return basicIsMagic()?'mag':'phy'})();
   const ci=basicAttackId(),c=CLASSES[ci],effectClass=MAGIC_CLS.includes(ci)===basicIsMagic()?ci:null;
@@ -5753,8 +5753,8 @@ function updateProjectiles253(dt){
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
 function dodgeCdVal(){return Math.max(.1,1.5/(1+.01*((run.stats||{}).agi||0))-(hasT('brk60')?.2:0))*(cons('vel')>=10?.8:1)}
 /* v343 (Ian): Espaço só pula; o ataque básico fica só no botão esquerdo do mouse. */
-function jump343(){const P=player;if(!P||P.dead||paused||P.air344||P.dodgeT>0||run.mounted)return;P.jvy=8.2;P.jy=(P.jy||0)+.001;P.air344=true;beep(330,.05,.03,'triangle')}
-function dodge(){
+function jump343(){if(window.Cogu348&&Cogu348.asleep(player))return;const P=player;if(!P||P.dead||paused||P.air344||P.dodgeT>0||run.mounted)return;P.jvy=8.2;P.jy=(P.jy||0)+.001;P.air344=true;beep(330,.05,.03,'triangle')}
+function dodge(){if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.dodgeCd>0)return;
   let dx=input.x,dz=input.z;if(keys.KeyW)dz-=1;if(keys.KeyS)dz+=1;if(keys.KeyA)dx-=1;if(keys.KeyD)dx+=1;
   if(pcCam.yaw)[dx,dz]=camRot(dx,dz);
@@ -5765,7 +5765,7 @@ function dodge(){
 function potionHealFraction(){return (npcHas('Mira')?.75:.5)*(hasT('lvl50')?1.25:1)}
 function potionDescription(){const p=potionHealFraction();return 'Cura '+String(Math.round(p*10000)/100).replace('.',',')+'% da vida máxima ('+fmt(Math.round(player.maxhp*p))+' de vida). Sem mana nem recarga.'+(hasT('lakeg')?' Recupera também 30% do escudo máximo.':'')}
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;narratorEvent105('potion');player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
-function useSkill(sk){if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
+function useSkill(sk){if(window.Cogu348&&Cogu348.asleep(player))return false;if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
   if(sk&&!sk.empty){const canonical=kitCanonical111(sk);if(canonical){const equipped=player.skills.find(s=>!s.empty&&s.skillId===canonical.skillId);if(!equipped){toast('Equipe esta habilidade em um dos seis espaços.');return}if(!player.dead&&!paused){const c0=equipped.cdT;kitCast111(equipped);if(equipped.cdT>c0)skillAnim155(equipped)}return}}
   if(player.dead||paused||!sk||sk.empty)return;
   if(sk.n==='Sol Nascente'){sk=player.skills.find(s=>!s.empty&&s.n==='Sol Nascente');if(!sk){toast('Equipe Sol Nascente em um dos seis espaços de Personagem → Habilidades.');return}}
@@ -5824,7 +5824,7 @@ function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(
     case 'blink':{for(let d=7;d>0;d-=1){const bx=P.x-Math.sin(P.face)*d,bz=P.z-Math.cos(P.face)*d;if(freeAt(bx,bz,.5)){fxBurst(P.x,1,P.z,col,10,4);P.x=bx;P.z=bz;break}}P.iT=.6;fxRing(P.x,P.z,col,2);break}
     case 'holy_step':{const pt=skillGroundPoint(6,6);if(freeAt(pt.x,pt.z,P.r||.5)&&los(P.x,P.z,pt.x,pt.z)){P.x=pt.x;P.z=pt.z;fxRing(P.x,P.z,col,1.5,.5)}break}
     case 'holy_bind':{const pt=skillGroundPoint(12);for(const e of enemies)if(!e.dead&&!e.isBoss&&Math.hypot(e.x-pt.x,e.z-pt.z)<=4&&los(P.x,P.z,e.x,e.z))e.slow=Math.max(e.slow||0,3);fxRing(pt.x,pt.z,col,4,.7);break}
-    case 'cleanse':case 'holy_shield':{for(const a of [P,...allies])if(!a.dead&&Math.hypot(a.x-P.x,a.z-P.z)<=8){if(sk.t==='cleanse'){a.slowT=0;a.bleedT=0;a.bleedD=0;a.slow=0;a.stun=0}else{const cap=healingShieldCap(sk),previous=healingShield(a);a.healShield=Math.max(previous,a.maxhp*cap);a.healShieldCap=Math.max(a.healShieldCap||0,cap);a.healShieldUntil=time+6}fxRing(a.x,a.z,col,1.3,.6)}break}
+    case 'cleanse':case 'holy_shield':{for(const a of [P,...allies])if(!a.dead&&Math.hypot(a.x-P.x,a.z-P.z)<=8){if(sk.t==='cleanse'){a.sleep348=0;a.slowT=0;a.bleedT=0;a.bleedD=0;a.slow=0;a.stun=0}else{const cap=healingShieldCap(sk),previous=healingShield(a);a.healShield=Math.max(previous,a.maxhp*cap);a.healShieldCap=Math.max(a.healShieldCap||0,cap);a.healShieldUntil=time+6}fxRing(a.x,a.z,col,1.3,.6)}break}
     case 'heal':{applyHealingLight(P,sk);for(const a of allies)if(!a.dead&&a.life>0&&(sk.n!=='Luz Curativa'||Math.hypot(a.x-P.x,a.z-P.z)<=8))applyHealingLight(a,sk);break}
     case 'buff_dmg':{P.buff=8;P.buffMul=sk.pow;toast('<b>[NARRADOR]</b> '+sk.n+': dano x'+sk.pow+' por 8s');break}
     case 'guard':{P.guard=5;P.guardVal=sk.pow;if(sk.n==='Bênção')blessAllies(P);toast('<b>[NARRADOR]</b> '+sk.n+': dano recebido reduzido');break}
@@ -5936,6 +5936,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
+  if(window.Cogu348&&Cogu348.beforeAI(e,dt))return;
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
   if(e.isBoss&&!e.expBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
@@ -6023,7 +6024,7 @@ function bossSpecial(b,T){
   else if(tp==='legion'){const n=p2?4:3;for(let i=0;i<n;i++){const a=i/n*TAU;let x=b.x+Math.cos(a)*3.5,z=b.z+Math.sin(a)*3.5;if(!freeAt(x,z,.5)){x=b.x;z=b.z}const m=spawnKind(bossMinion124(b,b.gr>=6?(i%2?'demon':'wraith'):(i%2?'minion':'rogue')),x,z,b.gr,{room:b.room});m.aggro=true;fxRing(m.x,m.z,0xd0d0d0,1.5)}hazard(b.x,b.z,5,1,b.dmg,'enemy',0xff3030);toast('<b>[NARRADOR]</b> '+b.name+': Legião',1400)}
 }
 function echoAttackMul(a,e){return (a.kitBuff111?.until>time?1+a.kitBuff111.amount:1)*(a.shadow&&e&&e.echoMarkUntil>time?1.2:1)*(a.shadow||a.permanentSummon?1+.08*gearRuneCount('command'):1)}
-function updAlly(a,dt){if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
+function updAlly(a,dt){if(window.Cogu348&&Cogu348.asleep(a)){animChibi(a.m,{move:0,atk:0,dead:0,wind:0},time);return;}if(a.caravan){if(!a.dead)caravanUpd(a,dt);return}
   if(a.dead)return;a.t+=dt;a.cd-=dt;if(!a.permanentSummon)a.life-=dt;if(a.buffT>0){a.buffT-=dt;if(Math.random()<dt*3)fxBurst(a.x,1.2,a.z,0xb98cff,1,1)}a.healCd=(a.healCd||0)-dt;
   if(a.life<=0){a.dead=true;scene.remove(a.m.root);fxBurst(a.x,1,a.z,0x6ff4ff,6,3);return}
   if(a.flash>0){a.flash-=dt;flashMats(a.m,a.flash>0?1:0,0x550000)}
@@ -6149,6 +6150,7 @@ function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
   if(pcCam.yaw)[ix,iz]=camRot(ix,iz);
   if(FX2.inv>0){ix=-ix;iz=-iz}
+  if(window.Cogu348&&Cogu348.asleep(P))ix=iz=0;
   const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}
   if(!P.dead){
     P.atkCd-=dt;P.comboT-=dt;try{passiveTick327(dt)}catch(_){}P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
@@ -6256,7 +6258,7 @@ const v3=new THREE.Vector3();
 function proj(x,y,z){v3.set(x,y+terrH(x,z),z).project(camera);return{x:(v3.x+1)/2*W,y:(1-v3.y)/2*H,ok:v3.z<1&&v3.x>-1.2&&v3.x<1.2&&v3.y>-1.2&&v3.y<1.2}}
 function bar(x,y,w,f,col,name,ncol){oc.fillStyle='rgba(0,0,0,.65)';oc.fillRect(x-w/2-1,y-1,w+2,6);oc.fillStyle=col;oc.fillRect(x-w/2,y,w*clamp(f,0,1),4);if(name){oc.font='700 10px "Chakra Petch",sans-serif';oc.fillStyle=ncol||'#e8f6ff';oc.fillText(name,x,y-4)}}
 function combatStatusList(e){const s=[];if(e.stun>0)s.push(['ATORD.','#ffd66e']);if(e.kitRoot111>time)s.push(['PRESO','#8af0c5']);if(e.slow>0)s.push(['LENTO','#94dfff']);const d=e.basicDots||{};if(d.burn?.t>0||d.kitFire111?.t>0)s.push(['QUEIMA','#ff9b55']);if(d.bleed?.t>0)s.push(['SANGRA','#ff7085']);if(d.venom?.t>0)s.push(['VENENO','#a8e879']);if(d.reprise?.t>0||d.rune?.t>0)s.push(['ECO','#c7a1ff']);if(e.echoMarkUntil>time)s.push(['MARCADO','#bd8bff']);return s}
-function playerStatusList(p){const s=[];if(p.slowT>0)s.push(['LENTO','#94dfff']);if(p.bleedT>0)s.push(['SANGRA','#ff7085']);if(p.stunT>0||p.stun>0)s.push(['ATORD.','#ffd66e']);if(p.kitGuard111?.until>time||p.guard>0)s.push(['DEFESA','#8bdcff']);if(p.buff>0||p.kitBuff111?.until>time)s.push(['FORÇA','#ffd66e']);if(p.stealth>0||p.kitStealth111)s.push(['FURT.','#c7a1ff']);if(p.venomUntil>time)s.push(['VENENO','#a8e879']);return s}
+function playerStatusList(p){const s=[];if(window.Cogu348&&Cogu348.asleep(p))s.push(['SONO','#bed3ff']);if(p.slowT>0)s.push(['LENTO','#94dfff']);if(p.bleedT>0)s.push(['SANGRA','#ff7085']);if(p.stunT>0||p.stun>0)s.push(['ATORD.','#ffd66e']);if(p.kitGuard111?.until>time||p.guard>0)s.push(['DEFESA','#8bdcff']);if(p.buff>0||p.kitBuff111?.until>time)s.push(['FORÇA','#ffd66e']);if(p.stealth>0||p.kitStealth111)s.push(['FURT.','#c7a1ff']);if(p.venomUntil>time)s.push(['VENENO','#a8e879']);return s}
 function drawCombatChips(items,x,y){if(!items.length)return;const shown=items.slice(0,4),extra=items.length-shown.length;oc.save();oc.font='700 9px "Chakra Petch",sans-serif';oc.textBaseline='middle';const widths=shown.map(([t])=>Math.ceil(oc.measureText(t).width)+8);if(extra)widths.push(18);const total=widths.reduce((a,b)=>a+b,0)+(widths.length-1)*3;let left=x-total/2;for(let i=0;i<widths.length;i++){const w=widths[i],label=i<shown.length?shown[i][0]:'+'+extra,col=i<shown.length?shown[i][1]:'#dbe8f2';oc.fillStyle='rgba(8,13,22,.88)';oc.fillRect(left,y-6,w,12);oc.strokeStyle=col;oc.lineWidth=1;oc.strokeRect(left+.5,y-5.5,w-1,11);oc.fillStyle=col;oc.textAlign='center';oc.fillText(label,left+w/2,y);left+=w+3}oc.restore()}
 function drawOverlay(){
   oc.clearRect(0,0,W,H);if(!started)return;oc.textAlign='center';
@@ -8253,7 +8255,7 @@ function kitDevices111(){return allies.filter(a=>!a.dead&&a.kitDevice111)}
 function kitDevice111(s){const pt=skillGroundPoint(s.range);return kitDevices111().filter(a=>Math.hypot(a.x-player.x,a.z-player.z)<=12&&los(player.x,player.z,a.x,a.z)).sort((a,b)=>Math.hypot(a.x-pt.x,a.z-pt.z)-Math.hypot(b.x-pt.x,b.z-pt.z))[0]}
 function kitLanding111(s){const p=skillGroundPoint(s.range,s.range);let dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz);if(!d)return null;dx/=d;dz/=d;if(s.back){dx=-dx;dz=-dz}for(let n=Math.min(s.range,d);n>=.5;n-=.25){const x=player.x+dx*n,z=player.z+dz*n;if(freeAt(x,z,player.r||.5)&&los(player.x,player.z,x,z))return {x,z}}return null}
 function kitCheck111(s){const k=kitState111();if(!kitUnlocked111(s.sourceClass,Number(s.skillId.split(':')[1])))return 'Habilidade ainda não aprendida.';if(s.energy&&k.energy<s.energy)return 'Mova-se durante o combate para acumular energia.';if(['heal','healzone','rewindheal'].includes(s.effect)&&hasAff('nocure'))return 'Sem cura nesta região.';if((s.single||['target','execute','burn','counter','chain'].includes(s.effect))&&!kitTarget111(s))return 'Nenhum alvo visível no alcance.';if(s.effect==='move'&&!kitLanding111(s))return 'Caminho bloqueado.';if(['ward','heal','guard','allybuff','order','recall'].includes(s.effect)&&!kitAllies111(s).length)return 'Nenhum aliado compatível no alcance.';if(s.effect==='summon'&&minionAllies().length>=summonCap())return 'Limite de invocações atingido.';if(s.effect==='device'&&kitDevices111().length>=2*affinity103(16))return 'Limite de construções atingido.';if(['repair','dismantle','detonate','relocate'].includes(s.effect)&&!kitDevice111(s))return 'Mire perto de uma construção sua a até 12 m.';if(['device','barrier','trap','relocate','anchorward','seal'].includes(s.effect)){const p=kitPoint111(s);if(!freeAt(p.x,p.z,.6)||!los(player.x,player.z,p.x,p.z))return 'Escolha chão livre e visível.'}if(s.effect==='form'&&k.form!==s.form&&!kitForms111().includes(s.form))return 'Prepare esta forma na cidade.';if(s.effect==='counter'&&!k.counters)return 'Apare um golpe para conquistar uma resposta.';if(['consume','release'].includes(s.effect)&&!k.captured)return 'Capture um projétil compatível primeiro.';if(s.effect==='capture'&&k.captured>=affinity103(20))return 'Reserva do Vazio cheia.';if(s.effect==='link'&&!guardianAim108())return 'Mire em um aliado visível a até 12 m.';if(s.effect==='interpose'&&!guardianLanding108(guardianState108()||{links:[]}))return 'Crie um vínculo ou âncora em local alcançável.';if(s.effect==='anchor'&&k.anchor&&k.anchor.until>time&&(!freeAt(k.anchor.x,k.anchor.z,player.r)||!los(player.x,player.z,k.anchor.x,k.anchor.z)))return 'Retorno bloqueado.';if(s.effect==='reprise'&&!k.lastAttack)return 'Use uma ativa de dano compatível nesta região.';if(['echo','passage','gate'].includes(s.effect))return rareCastCheck103({...s,t:'rare_'+s.effect});return ''}
-function kitCast111(s){if(!s||s.empty||!player||player.dead||paused)return false;if(typeof cm154Charge==='function'&&cm154Charge(s))return;faceTarget(s.range||12);const k=kitState111(),returning=s.effect==='anchor'&&k.anchor?.until>time;if(s.cdT>0&&!returning)return;const error=kitCheck111(s);if(error){toast(error);return}if(s.effect==='gate'){rareAutoGate153(s);return}const receipt=paySkill258(s,returning);if(!receipt)return false;if(!returning){s.cdT=s.cdMax=skillCooldown(s);player.lastSpellAt=time}if(s.pow>0&&['area','target','line','cone','bolt','fan','chain','pulses'].includes(s.effect)&&!s.rare103)k.lastAttack={...s};const cm154s=typeof cm154Mod==='function'?cm154Mod(s):s;kitRun111(cm154s);if(typeof cm154After==='function')cm154After(cm154s);if(typeof castFluid139==='function')castFluid139(s);narratorSkill105(s);player.atkT=.001;sfx('skill');finishSkill258(s,receipt);return true}
+function kitCast111(s){if(window.Cogu348&&Cogu348.asleep(player))return false;if(!s||s.empty||!player||player.dead||paused)return false;if(typeof cm154Charge==='function'&&cm154Charge(s))return;faceTarget(s.range||12);const k=kitState111(),returning=s.effect==='anchor'&&k.anchor?.until>time;if(s.cdT>0&&!returning)return;const error=kitCheck111(s);if(error){toast(error);return}if(s.effect==='gate'){rareAutoGate153(s);return}const receipt=paySkill258(s,returning);if(!receipt)return false;if(!returning){s.cdT=s.cdMax=skillCooldown(s);player.lastSpellAt=time}if(s.pow>0&&['area','target','line','cone','bolt','fan','chain','pulses'].includes(s.effect)&&!s.rare103)k.lastAttack={...s};const cm154s=typeof cm154Mod==='function'?cm154Mod(s):s;kitRun111(cm154s);if(typeof cm154After==='function')cm154After(cm154s);if(typeof castFluid139==='function')castFluid139(s);narratorSkill105(s);player.atkT=.001;sfx('skill');finishSkill258(s,receipt);return true}
 function skillHitOptions318(s){const ci=s?.sourceClass??profile.cls;return {dtype281:MAGIC_CLS.includes(ci)?'mag':'phy',elem300:CLASSES[ci]?.elem||null}}
 function kitHit111(e,d,s){return hurtEnemy(e,d,player.x,player.z,{fromPlayer:true,skillHit:true,kb:0,stun:0,crit154:!!s?.crit154,...skillHitOptions318(s)})}
 function kitHeal111(a,f){if(a.dead||hasAff('nocure'))return;const h=Math.min(a.maxhp-a.hp,a.maxhp*f);a.hp+=Math.max(0,h);if(h>0){narratorEvent105(a===player?'healself':'support');floater(a.x,a.z,'+'+fmt(h),'#9fffc0')}}
@@ -8275,7 +8277,7 @@ function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoin
  case 'healzone':for(const a of kitAllies111(s))kitHeal111(a,f/2);kitZone111(s,{kind:'heal',fraction:f/6,left:3,at:time+1,interval:1,until:time+3.1});break;
  case 'guard':for(const a of kitAllies111(s)){const amount=a===P?s.selfAmount||f:f;if(!(a.kitGuard111?.until>time&&a.kitGuard111.amount>amount)){a.kitGuard111={until:time+duration,amount};floater(a.x,a.z,'DEFESA','#8bdcff')}}break;
  case 'ward':for(const a of kitAllies111(s))kitWard111(a,f,duration);break;
- case 'cleanse':for(const a of kitAllies111({...s,scope:s.scope||'group'})){a.slowT=a.bleedT=a.bleedD=a.slow=a.stun=0}break;
+ case 'cleanse':for(const a of kitAllies111({...s,scope:s.scope||'group'})){a.sleep348=a.slowT=a.bleedT=a.bleedD=a.slow=a.stun=0}break;
  case 'buff':P.buff=duration;P.buffMul=1+f;break;
  case 'allybuff':for(const a of kitAllies111(s))a.kitBuff111={until:time+duration,amount:f};break;
  case 'stealth':P.stealth=duration;P.kitStealth111=true;setStealth(true);for(const e of enemies)if(!e.isBoss)e.aggro=false;break;
@@ -8751,6 +8753,7 @@ requestAnimationFrame(frame);
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=324"></script>
 <script src="tools/gosma347.js?v=347"></script>
+<script src="tools/cogu348.js?v=348"></script>
 <script src="tools/ineditas309.js?v=315"></script>
 <script src="tools/vfx328.js?v=345"></script>
 <script src="tools/dome154.js?v=343"></script>
