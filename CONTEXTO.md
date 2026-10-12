@@ -1,3 +1,12 @@
+## v349 — Pássaro Bravo, 12/10/2026
+- Catálogo e três referências v006 consultados: ave territorial de campos floridos, mergulhos laterais, nunca aborda de frente. Modelo Tripo H3.1 (60 créditos), tratado no Blender sem rig pago.
+- GLB 3.596.260 bytes, três malhas com asas separadas, 12 ossos e dez clipes. Esticamentos da primeira abertura corrigidos separando regiões e fechando interiores; render e motor inspecionados. Escala no jogo 1,1 m.
+- IA busca lateral do alvo, sinaliza pelo tempo de preparo existente e segue direção fixa no mergulho. Acerto apenas no contato da passagem, uma vez, com dano original 1,2x; velocidade 13 e recarga originais. Esquiva e defesa existentes preservadas. Morte e atordoamento cancelam. Virar para a ave durante preparo obriga nova aproximação. Somente espécie passaro; variantes preservadas.
+- 13 verificações no jogo real local: frente/lateral, aviso, trajetória fixa, desvio, acerto e não duplicação, cancelamento por morte/atordoamento/rotação do alvo. Dez clipes × 21 amostras, todas as malhas, sem vértices inválidos ou chão atravessado; GLB reimportado no Blender. Teste: python tools/test_bird349.py, abrir bird-playtest.html localmente, não publicar página de teste.
+- Fonte: https://drive.google.com/file/d/1q98lrik-UQLWTntAh0qoJ3orOOi0k6pD/view
+- Editáveis, referências, GLB, renders e prova: https://drive.google.com/file/d/1KxWnFTt9dRhOniiEoSxxPZHmO3FGfiwj/view
+- Limites: teste desktop; celular não testado, avaliação visual da IA sem aprovação criativa de Ian. Não há simulação aerodinâmica; voo baixo estilizado, colisões seguem o motor existente.
+
 ## v348 — Cogumelinho: fuga e esporos de sono, 12/10/2026
 - Características e trio v006 consultados antes da produção: cogumelo de floresta, cerca de 1 m, pernas curtas, sem braços, chapéu assimétrico e lamelas; foge e solta esporos soníferos quando encurralado.
 - Tripo multivista H3.1: 60 créditos, sem rig pago. Blender: 24 mil triângulos, cinco ossos e clipes Idle, Walk, Spore, HitRecieve e Death. GLB 3.588.740 bytes. Chapéu funciona como fole na emissão.
