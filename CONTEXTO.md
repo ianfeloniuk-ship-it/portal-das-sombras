@@ -1,3 +1,10 @@
+## v350 — Gosma Espinhosa, 12/10/2026
+- Catálogo online e trio v006 conferidos: gosma de pântano, 1,2 m, cristais, espera imóvel e dispara ao sentir vibração. Tripo multivista H3.1: 55 créditos, sem rig pago.
+- GLB 1.802.992 bytes, duas malhas, quatro ossos, sete clipes: Idle, Walk, Windup, Fire, Regrow, HitRecieve, Death. Ponta central separada/fechada; projétil usa sua malha e nasce no osso Crystal. Materiais revistos para retirar reflexos brancos excessivos.
+- Espécie espinhosa detecta deslocamento do alvo até 9 m e perda da própria vida. Não persegue. Preparo 0,5 s, recarga 1,4 s e dano original; projétil a 12 m/s como lançador existente. Alvo travado no aviso permite esquiva; morte e atordoamento cancelam. Raio de detecção é escolha técnica; não simula propagação física de vibrações. Chefes/variantes mantêm IA anterior.
+- Quinze verificações no combate real local, incluindo dano do projétil e esquiva; sete clipes x 21 amostras em todas as malhas sem vértices inválidos ou chão atravessado. Reimportado no Blender; build idempotente. Teste reproduzível: python tools/test_spiky350.py e spiky-playtest.html local, sem publicar página de teste. Desktop; celular não testado; sem aprovação criativa de Ian.
+- Fonte: https://drive.google.com/file/d/1UPvB1ZLe3Mgl8gJpmArchY5eWOk70s0C/view
+
 ## v349 — Pássaro Bravo, 12/10/2026
 - Catálogo e três referências v006 consultados: ave territorial de campos floridos, mergulhos laterais, nunca aborda de frente. Modelo Tripo H3.1 (60 créditos), tratado no Blender sem rig pago.
 - GLB 3.596.260 bytes, três malhas com asas separadas, 12 ossos e dez clipes. Esticamentos da primeira abertura corrigidos separando regiões e fechando interiores; render e motor inspecionados. Escala no jogo 1,1 m.
