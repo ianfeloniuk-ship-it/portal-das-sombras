@@ -1,3 +1,12 @@
+## v347 — Gosma Verde: divisão e reunião noturna, 12/10/2026
+- Pedido de Ian: ler as características antes de produzir cada mob; implementar e testar divisão/reunião da Gosma, depois seguir ao Cogumelinho.
+- Gosma v005 multivista Tripo, otimizada e animada no Blender. Inteiro + três fragmentos fechados, seis ossos, sete clipes, incluindo Split/Merge. PBR preservado. Nenhum rig pago.
+- Espécie gosma divide uma vez ao sobreviver a dano com HP <= 50%. Fragmentos recebem 60/23/17% da vida restante, vida máxima e dano. Mantêm ataques próprios. Após 8 s separados, à noite pelo relógio existente, aproximam-se com colisão e se reúnem; sem cura ou ressurreição de pedaços. Apenas a derrota do último sobrevivente liquida uma recompensa e uma morte do organismo original. Variantes não alteradas.
+- Validado: reimportação Blender; 28 clipes em Three.js r128, 21 amostras cada, sem vértices inválidos/chão atravessado; 13 verificações no jogo com funções reais e avanço controlado do motor; capturas dia/noite. Teste reproduzível: python tools/test_gosma347.py na raiz e abrir gosma-playtest.html localmente. Não publicar a página de teste. Celular não testado; visual avaliado pela IA, sem aprovação criativa de Ian.
+- Fonte: https://drive.google.com/file/d/1XepV_eZ33B41hKcw1pYEQA2AYnwMuw7v/view . Geração Tripo: 60 créditos.
+
+- Editáveis, GLBs, manifesto e evidências no Drive: https://drive.google.com/file/d/1ZvC379sNT2Jhn-T_bw6lSny7eYjZpIzO/view . Prévia noturna: https://drive.google.com/file/d/1kMG9iEd6jn7iqGnJXCTjBSUakKW1lE3n/view .
+
 ## v346 — Slime Rosa multivista, rig e animações no Blender, 12/10/2026
 - Pedido de Ian: gerar mobs com frente/costas/lado no Tripo e substituir no jogo; rig, reparos e animações no Blender, sem pagar rig Tripo.
 - `models/m_slime.glb`: fonte Tripo v006 otimizada de 1.884.622 para 24.000 triângulos; 1.289.556 bytes, textura incorporada, altura 1 m e rig com 4 ossos. Clipes Idle, Walk, Bite_Front, HitRecieve e Death mantêm os aliases existentes.

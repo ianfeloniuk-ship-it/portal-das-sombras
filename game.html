@@ -3357,7 +3357,10 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   yeti:{h:2.6,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Punch',Hit:'HitReact'}},
   vespa:{h:1.4,a:{Idle:'Wasp_Flying',Running_A:'Wasp_Flying',Death_A:'Wasp_Death',ATK:'Wasp_Attack'}},
   slime:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
-  gosma:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  gosma:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve',Split:'Split',Merge:'Merge'}},
+ gosma_part0:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+ gosma_part1:{h:0.5334072269033641,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+ gosma_part2:{h:0.44590008025988936,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   cogu:{h:1.0,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   passaro:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   espinhosa:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
@@ -3403,12 +3406,12 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb',g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('gosma')?'?v=347':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k==='slime';const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=k==='slime'?.42:.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k==='slime'||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k==='slime'||k.startsWith('gosma'))?.42:.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -5453,7 +5456,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){if(!e||e.friendly217||e.ally||!Number.isFin
   if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true;
   if(e.hp<=0)killEnemy(e);
   else if(e.isBoss&&e.phase===1&&e.hp<e.maxhp*.5)enrage(e);
-  else if(e.isBoss&&e.phase===2&&e.boss.p3&&e.hp<e.maxhp*.25)awaken3(e);return amt;
+  else if(e.isBoss&&e.phase===2&&e.boss.p3&&e.hp<e.maxhp*.25)awaken3(e);if(window.Gosma347)Gosma347.afterDamage(e);return amt;
 }
 /* PASSIVAS DE CLASSE: funcionam sozinhas a cada acerto do jogador (feedback do Irror). */
 const PASSIVES=[
@@ -5576,7 +5579,7 @@ function enemyRewardBalance(e){
 }
 function trainingXpBalance(e){return Math.round((e.trainingXp262??e.xp??0)/RpgBalance.xpNeed(eLvl(e))*200)}
 function settleEnemyRewardBalance(e){const reward=enemyRewardBalance(e),cc=cons('cac');e.trainingXp262=Math.round(RpgBalance.reward({level:eLvl(e),threat:e.threat184||0,role:reward.role,speciesXp:e.isBoss||e.rival?undefined:e.speciesXpBalance,risk:reward.riskFactor,noExpLoot:e.noExpLoot||e.rewardBlocked||e.ally||e.statue}).xp*(1+.03*cc));e.xp=Math.round(reward.xp*(1+.03*cc));e.gold=Math.round(reward.gold*(1+.03*cc)*(cc>=10&&e.threat184?1.25:1));return reward}
-function killEnemy(e){if(e.dead)return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);try{passiveKill327(e)}catch(_){}if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
+function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e))return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);try{passiveKill327(e)}catch(_){}if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp,'monster');storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(trainingXpBalance(e))}
   bestKill(e.kind);
@@ -5923,12 +5926,13 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&!e.aggro&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>12){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:0,dead:0,wind:0},e.t);return}}
-  e.sleep=pd>55&&!e.aggro&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
+  e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
   updateBasicDots(e,dt);if(e.dead)return;
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
+  if(window.Gosma347&&Gosma347.beforeAI(e,dt))return;
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
@@ -6168,7 +6172,7 @@ function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
   P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);if(P.jy>0){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
   tickGates(dt);
-  for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
+  if(window.Gosma347)Gosma347.update(dt);for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
   for(const a of allies)updAlly(a,dt);allies=allies.filter(a=>!a.dead);
   for(const n of npcs)if(!n.gone)updNpc(n,dt);npcs=npcs.filter(n=>!n.gone);
   if(riftContact131())return;
@@ -8746,6 +8750,7 @@ requestAnimationFrame(frame);
 <script src="tools/anim303.js?v=343"></script>
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=324"></script>
+<script src="tools/gosma347.js?v=347"></script>
 <script src="tools/ineditas309.js?v=315"></script>
 <script src="tools/vfx328.js?v=345"></script>
 <script src="tools/dome154.js?v=343"></script>
