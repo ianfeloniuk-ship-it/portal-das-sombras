@@ -1,3 +1,11 @@
+## v346 — Slime Rosa multivista, rig e animações no Blender, 12/10/2026
+- Pedido de Ian: gerar mobs com frente/costas/lado no Tripo e substituir no jogo; rig, reparos e animações no Blender, sem pagar rig Tripo.
+- `models/m_slime.glb`: fonte Tripo v006 otimizada de 1.884.622 para 24.000 triângulos; 1.289.556 bytes, textura incorporada, altura 1 m e rig com 4 ossos. Clipes Idle, Walk, Bite_Front, HitRecieve e Death mantêm os aliases existentes.
+- `makeMonster`: Slime preserva material PBR com roughness .42 para aparência úmida. Outros monstros mantêm o comportamento anterior. Dados de combate e saves não alterados.
+- Validação: reimportação GLB no Blender 5.2.2; renders frente/costas/lado e poses; Three.js r128 com makeMonster/gAct/gPlay do jogo: 5 clipes presentes, deformação não estática e minY >= 0 em 21 amostras por clipe; página principal inicia sem erros de console; build executado duas vezes sem mudar game.html na segunda.
+- Limites: combate completo e celular não testados; visual avaliado pela IA, sem aprovação criativa de Ian. O modelo não simula transparência volumétrica.
+- Fonte online: https://drive.google.com/file/d/1uqiKXM9mAbxH8y7hiFH33-YnS0g4OkuV/view . GLB final: https://drive.google.com/file/d/1BzvAoVIUy7gaS-K-kzVSfZG0Ow62ybTt/view . 65 créditos na geração, zero rig/animação Tripo.
+
 ## v345 — conferência medida das 240: efeito no mesmo lugar do dano, 09/10/2026
 - Pedido de Ian: "confere as 240 habilidades nesse critério" (efeito × onde o dano realmente cai).
 - Método: grade de 48 inimigos em volta do personagem; para cada habilidade, lança a real (`runSkill`) e registra onde `hurtEnemy` acertou, zonas e projéteis; depois dispara só o efeito e registra as caixas do que foi desenhado; compara. Duas rodadas completas das 240.

@@ -3425,7 +3425,7 @@ function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const mm=k==='draconico318'?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(k==='draconico318')mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k==='slime';const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=k==='slime'?.42:.8;mm.metalness=0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -8784,9 +8784,9 @@ requestAnimationFrame(frame);
 <script src="tools/bestiary324.js?v=335"></script>
 <script src="tools/conspiracy333.js?v=335"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v345</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v346</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=345;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=346;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
