@@ -1,3 +1,10 @@
+## v368 — Gosma Espinhosa, Fendida e Abissal, 13/10/2026
+- Três GLBs próprios com oito clipes cada, feitos no Blender. Padrão comprime a massa e perde sustentação; Fendida articula as rosetas e fecha os prismas ao morrer; Abissal orbita quatro rosetas, alinha o disparo e recolhe cristais enquanto o corpo vazado colapsa.
+- Todas ficam imóveis: padrão reage a passos/dano; Fendida também percebe mana no alvo atual; Abissal dispara por proximidade. Alcance 9 m, aviso 0,5 s, direção travada, recarga 1,4 s. Escolhas técnicas de combate; não simula consumo físico de luz/calor nem imunidade por corpo vazado. HP, dano, colisores e recompensas preservados.
+- Morte, atordoamento e congelamento cancelam preparo. Vida do cadáver respeita a duração integral do clipe. Chefes/aliados mantêm comportamento anterior.
+- 59 verificações de combate local passaram, incluindo dano/esquiva reais e provocação por mana. Desktop validado; celular e aprovação criativa de Ian pendentes.
+- Tripo multivista Fendida/Abissal autorizado por Ian por até 120 créditos; 60 + 60 consumidos. Rig/animação no Blender. Abissal corrigida de oito para quatro rosetas; projéteis reutilizam geometria texturizada dos próprios modelos.
+
 ## v367 — Pássaro Bravo, Fendido e Abissal, 13/10/2026
 - Modelos próprios para as três formas, dez clipes cada; asas independentes, patas recolhidas em voo, mergulho e recuperação. Padrão cai de lado, Fendido tomba para frente, Abissal recolhe corpo em rotação e dispersa quatro cristais.
 - Variantes usam abordagem lateral e passagem com direção fixa. Congelamento cancela mergulho; morte completa antes de encerrar atualização, saque preservado. HP, dano e recompensas anteriores preservados.
