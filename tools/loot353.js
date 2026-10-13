@@ -23,7 +23,7 @@ window.Loot353=(()=>{
  function create(e){if(region!==L){clear();region=L}if(e.corpse353)return;const r={id:crypto.randomUUID(),name:e.name||KINDS[e.kind]?.n||'Criatura',kind:e.kind,x:e.x,z:e.z,entries:e.loot353};records().push(r);e.corpse353=r.id;attach(r,e);dirty=true}
  function remove(r){const list=records(),i=list.indexOf(r);if(i>=0)list.splice(i,1);const a=active.get(r.id);if(a){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);a.root.remove(a.marker);if(!a.boss)scene.remove(a.root);active.delete(r.id)}}
  function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.name+' × '+x.n}
- function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?'Material de fabricação.':x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}
+ function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}
  function open(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return;view=()=>open(id);let h='<p>Escolha o que levar. Bolsa: '+run.items.length+'/'+bagCapacity353()+'.</p>';
   for(const x of r.entries)h+=row(safeText(label(x)),detail(x),btn('Pegar','loottake353',id+'|'+x.id,x.type!=='equipment'||run.items.length<bagCapacity353()));
   const boss=bossE&&bossE.dead&&!bossE.absorbed&&Math.hypot(bossE.x-r.x,bossE.z-r.z)<1;
@@ -37,9 +37,9 @@ window.Loot353=(()=>{
   else if(x.type==='core')run.res.core[x.rank]+=x.n;
   else if(x.type==='potion')run.pots+=x.n;
   else if(x.type==='book')run.spts=(run.spts||0)+x.n;
-  else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value)}
+  else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value);old.b=!!(old.b||x.b)}
   else return false;
-  r.entries.splice(i,1);if(!r.entries.length)remove(r);saveRun();sfx('coin');return true;
+  r.entries.splice(i,1);if(!r.entries.length)remove(r);saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
  }
  function buy(tier){if(!Number.isInteger(tier)||tier<=bagTier353()||tier>=BAGS353.length||L.mode!=='world'||!inCity(player.x,player.z)||player.dead)return false;const b=BAGS353[tier];if(rankOf()<b.rank||run.level<b.level||run.gold<b.price)return false;run.gold-=b.price;profile.bagTier353=tier;saveRun();return true}
  function action(a,v){if(a==='bagbuy353'){buy(Number(v));mktView();return 'close0'}if(a==='loottake353'){const [id,entry]=String(v).split('|');take(id,entry);if(records().some(r=>r.id===id))open(id);else closeModal();return 'close0'}if(a==='lootpower353'){const r=records().find(r=>r.id===v);if(r&&nearby(r)&&bossE?.dead&&!bossE.absorbed){closeModal();absorb(bossE)}return 'close0'}return false}

@@ -1,3 +1,8 @@
+## v363 — Equipamentos comuns e relíquias na bolsa, 13/10/2026
+- Equipamentos comuns preservam ataque/escudo, raridade e aprimoramento. Removidos bônus de andar, tecido, maldição, conjunto aleatório, arma viva, afixos e runas; migração inclui bolsa, equipado, casa e saque pendente. Conjuntos de chefes de classe rara preservados.
+- Bolsa separa equipamentos, materiais e relíquias equipáveis. Troféus de chefe identificam o destino; relíquias únicas são salvas imediatamente, repetidas informam conversão em ouro. Tags legadas de relíquia em equipamento recuperam a posse no perfil.
+- Validado coleta com bolsa cheia, bloqueio de coleta duplicada, gravação e recarga. O item exato relatado por Ian é desconhecido; não foi comprovada perda no save dele.
+
 ## v350 — Gosma Espinhosa, 12/10/2026
 - Catálogo online e trio v006 conferidos: gosma de pântano, 1,2 m, cristais, espera imóvel e dispara ao sentir vibração. Tripo multivista H3.1: 55 créditos, sem rig pago.
 - GLB 1.802.992 bytes, duas malhas, quatro ossos, sete clipes: Idle, Walk, Windup, Fire, Regrow, HitRecieve, Death. Ponta central separada/fechada; projétil usa sua malha e nasce no osso Crystal. Materiais revistos para retirar reflexos brancos excessivos.
