@@ -1,3 +1,6 @@
+## v365 — Mira do ataque básico, 13/10/2026
+- Ataques básicos à distância sem criatura sob o cursor seguem a direção do mouse na altura de saída do projétil. Não inclinam para o chão ou céu por causa do ponto livre; alvo direto e assistência no toque preservam a altura real da criatura. Habilidades com alvo no chão preservadas.
+
 ## v364 — Equipamentos comuns e relíquias na bolsa, 13/10/2026
 - Equipamentos comuns preservam ataque/escudo, raridade e aprimoramento. Removidos bônus de andar, tecido, maldição, conjunto aleatório, arma viva, afixos e runas; migração inclui bolsa, equipado, casa e saque pendente. Conjuntos de chefes de classe rara preservados.
 - Bolsa separa equipamentos, materiais e relíquias equipáveis. Troféus de chefe identificam o destino; relíquias únicas são salvas imediatamente, repetidas informam conversão em ouro. Tags legadas de relíquia em equipamento recuperam a posse no perfil.
