@@ -1368,3 +1368,9 @@ Complemento da revisão v361: a área livre ao redor de um acampamento é respei
 - Padrão, Fendida e Abissal com modelos próprios e sete clipes por forma. Bolsas se comprimem e drenam em sequência; Fendida tensiona pontes cristalinas; Abissal ondula e recolhe quatro cristais. Tripo multivista: 120 créditos nas duas variantes, sem rig pago.
 - Três fragmentos por forma, fechados e animados. Fendida mantém ligações rígidas; Abissal mantém fios. Divisão e reunião noturna preservam vida e recompensa únicas.
 - 44 verificações de mecânica no jogo local; 84 clipes (inteiros e fragmentos), 21 amostras por clipe no Three r128. Correção individual de chão em fragmento abissal. Celular não testado; aprovação criativa de Ian pendente.
+
+## v366 — família Cogumelinho, 13/10/2026
+- Padrão com bordas do chapéu articuladas, tropeço e queda lateral; Fendido abre lado cristalino e tomba para frente; Abissal ondula lamelas, recolhe chapéu e dispersa quatro cristais. Rigs 9/10/13 ossos e cinco clipes por forma.
+- Tripo Fendido gerou olho no chapéu: reconstruído no Blender a partir da anatomia válida e cristal texturizado recuperado. Abissal completado de um para quatro cristais. Duas gerações de 60 créditos, sem rig pago.
+- Variantes usam modelos próprios, aproximam-se para nuvem sinalizada de dano nominal e sono; Fendido busca alvo com mana. Padrão conserva fuga e esporos defensivos. Congelamento/atordoamento/morte interrompem emissão, sair do raio evita acerto.
+- 50 verificações no jogo local, 15 clipes × 21 amostras Three r128, GLBs reimportados. Celular não testado, aprovação criativa pendente.

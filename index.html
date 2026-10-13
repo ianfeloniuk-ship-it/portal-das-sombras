@@ -3434,11 +3434,13 @@ MON_DEF.gosma_f_part2={h:0.5405333559028804,a:{...MON_DEF.gosma.a}};
 MON_DEF.gosma_a_part0={h:1.0,a:{...MON_DEF.gosma.a}};
 MON_DEF.gosma_a_part1={h:0.8123278059065342,a:{...MON_DEF.gosma.a}};
 MON_DEF.gosma_a_part2={h:0.7289040395990014,a:{...MON_DEF.gosma.a}};
+MON_DEF.cogu_f={h:1,a:{...MON_DEF.cogu.a}};
+MON_DEF.cogu_a={h:1.1,a:{...MON_DEF.cogu.a}};
 MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Cast',Hit:'Hit'}};
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k==='cogu'?'?v=348':k==='passaro'?'?v=349b':k==='espinhosa'?'?v=350a':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k==='passaro'?'?v=349b':k==='espinhosa'?'?v=350a':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -3458,7 +3460,7 @@ function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
   m.body.position.y=0;m.body.rotation.set(0,0,0);
-  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma)/.test(m.mon||'')?1:1.2)}
+  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu)/.test(m.mon||'')?1:1.2)}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
   else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
@@ -5984,10 +5986,10 @@ function juice233(e,mv,atk,wind,dt){if(e.a242)arch242tick(e,mv,atk,dt);const J=e
 function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);return}if(!e.gap168done){e.gap168done=1;if(!e.rival)levelGap168(e)}if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
-  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
+  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma|cogu)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>6){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:e.raidAttack348>time?.7:0,dead:0,wind:0},e.t);return}}
   e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
-  if(e.frozen||e.hold){e.act=null;if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
+  if(e.frozen||e.hold){e.act=null;if(e.coguCast348){e.coguCast348=null;e.coguCd348=Math.max(e.coguCd348||0,1);}if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
   updateBasicDots(e,dt);if(e.dead)return;
@@ -8843,9 +8845,9 @@ requestAnimationFrame(frame);
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=343"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=363"></script>
+<script src="tools/variants308.js?v=366"></script>
 <script src="tools/gosma347.js?v=363"></script>
-<script src="tools/cogu348.js?v=348"></script>
+<script src="tools/cogu348.js?v=366"></script>
 <script src="tools/bird349.js?v=349"></script><script src="tools/spiky350.js?v=350"></script><script src="tools/beetle352.js?v=358"></script>
 <script src="tools/slime360.js?v=360"></script>
 <script src="tools/ineditas309.js?v=315"></script>
@@ -8871,13 +8873,13 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/workers350.js?v=351"></script>
 
-<script src="tools/loot353.js?v=364"></script>
+<script src="tools/loot353.js?v=366"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v365</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v366</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=365;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=366;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

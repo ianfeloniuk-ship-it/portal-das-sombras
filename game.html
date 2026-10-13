@@ -3423,7 +3423,7 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=364':k==='passaro'?'?v=349b':k==='espinhosa'?'?v=350a':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k==='passaro'?'?v=349b':k==='espinhosa'?'?v=350a':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -8828,9 +8828,9 @@ requestAnimationFrame(frame);
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=343"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=364"></script>
+<script src="tools/variants308.js?v=366"></script>
 <script src="tools/gosma347.js?v=363"></script>
-<script src="tools/cogu348.js?v=364"></script>
+<script src="tools/cogu348.js?v=366"></script>
 <script src="tools/bird349.js?v=349"></script><script src="tools/spiky350.js?v=350"></script><script src="tools/beetle352.js?v=358"></script>
 <script src="tools/slime360.js?v=360"></script>
 <script src="tools/ineditas309.js?v=315"></script>
@@ -8856,6 +8856,6 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/workers350.js?v=351"></script>
 
-<script src="tools/loot353.js?v=364"></script>
+<script src="tools/loot353.js?v=366"></script>
 
 <script src="tools/hud356.js?v=356"></script>
