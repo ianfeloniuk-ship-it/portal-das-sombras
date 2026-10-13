@@ -17,6 +17,8 @@ for(const k of BASES){const B=KINDS[k];if(!B)continue;
  if(BLENDER[k]&&KINDS[BLENDER[k]]){KINDS[fk]={...KINDS[BLENDER[k]],baseKind:k,variant:'f',fendido:true};Bestiary294.LORE[fk]=Bestiary294.LORE[BLENDER[k]]}
  else{KINDS[fk]={...B,n:nameF(B.n),hp:Math.round(B.hp*1.6),dmg:Math.round(B.dmg*1.35),xp:Math.round((B.xp||10)*1.8),rk:Math.max(1,B.rk??0),bio:undefined,baseKind:k,variant:'f',fendido:true};Bestiary294.LORE[fk]=loreF(k,KINDS[fk].n)}
  KINDS[ak]={...B,n:nameA(B.n),hp:Math.round(B.hp*2.4),dmg:Math.round(B.dmg*1.7),xp:Math.round((B.xp||10)*3),rk:Math.max(3,B.rk??0),bio:undefined,baseKind:k,variant:'a',fendido:true,scale:(B.scale||1)*1.15};Bestiary294.LORE[ak]=loreA(k,KINDS[ak].n)}
+// Dedicated meshes include their own articulated shell and crystals.
+for(const suffix of ['_f','_a']){const key='escaravelho'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
 /* as 4 do Blender (lobofendido etc.) viram aliases das versões _f: saem do Bestiário como espécie separada */
 for(const k in BLENDER){const id=BLENDER[k];if(KINDS[id])KINDS[id].alias308=k+'_f'}
 /* ---------- visual ---------- */
@@ -31,7 +33,7 @@ function dressA(e,col){const root=e.m.root,b=new T.Box3().setFromObject(root),H=
  const orb=new T.Group();orb.position.y=H*.6;const m=crystalMat(col);for(let i=0;i<4;i++){const s=new T.Mesh(new T.OctahedronGeometry(H*.08,0),m);const a=i/4*Math.PI*2;s.position.set(Math.cos(a)*H*.55,0,Math.sin(a)*H*.55);orb.add(s)}root.add(orb);e.orb308=orb;
  const ring=new T.Mesh(new T.RingGeometry(H*.45,H*.55,32),(window.Shaders312?Shaders312.energy(col,.8):new T.MeshBasicMaterial({color:col,transparent:true,opacity:.6,depthWrite:false})));ring.rotation.x=-Math.PI/2;ring.position.y=.08;root.add(ring);
  try{const l=new T.PointLight(col,1.4,8,1.8);l.position.y=H*.7;root.add(l)}catch(_){}}
-function dress(e){const K=KINDS[e.kind];if(!K||!K.variant||e.dress308)return;e.dress308=1;let bio='campos';try{bio=biomeAt(e.x,e.z)}catch(_){}const M=MUT[bio]||MUT.campos;
+function dress(e){const K=KINDS[e.kind];if(!K||!K.variant||e.dress308)return;e.dress308=1;if(K.dedicated357&&e.m.mon===K.mon)return;let bio='campos';try{bio=biomeAt(e.x,e.z)}catch(_){}const M=MUT[bio]||MUT.campos;
  if(K.variant==='f'){if(!BLENDER[K.baseKind])dressF(e,M[1]);else{try{Fendidos307.mutate(e)}catch(_){}}if(M[0]&&!BLENDER[K.baseKind])e.name=K.n+' '+M[0]}
  else dressA(e,0x8a3cff)}
 setInterval(()=>{try{for(const e of enemies){if(e.orb308&&!e.dead){e.orb308.rotation.y+=.04}if(!e.dress308&&KINDS[e.kind]?.variant)dress(e)}}catch(_){}},50);

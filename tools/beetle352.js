@@ -13,13 +13,13 @@ function target(e){
  const candidates=[pt.t,...allies];
  if(!player.dead&&player.stealth<=0&&(!inCity(player.x,player.z)||(cityRaider341(e)&&inCity(e.x,e.z))))candidates.push(player);
  let best=null;
- for(const t of candidates){if(t.dead||!shiny(t))continue;const d=Math.hypot(t.x-e.x,t.z-e.z);if(d<10&&(!best||d<best.d)&&los(e.x,e.z,t.x,t.z))best={t,d};}
+ for(const t of candidates){if(t.dead||(!KINDS[e.kind]?.variant&&!shiny(t)))continue;const d=Math.hypot(t.x-e.x,t.z-e.z);if(d<10&&(!best||d<best.d)&&los(e.x,e.z,t.x,t.z))best={t,d};}
  return best;
 }
-function pose(e,n,dt,once=false){const m=e.m;if(m.glb){if(m.cur!==n)gPlay(m,n,once,1);m.mixer.update(dt);}else animChibi(m,{move:n==='Walk'||n==='Charge'?1:0,atk:0,wind:0,dead:0},e.t);m.root.position.set(e.x,0,e.z);m.root.rotation.y=e.face;}
+function pose(e,n,dt,once=false){const m=e.m;if(m.glb){if(m.cur!==n){const duration=gAct(m,n)?.getClip().duration||1;const span=n==='Windup'?e.wind:n==='Impact'?.3:n==='Recover'?Math.max(.1,e.atkCd-.3):duration;gPlay(m,n,once,duration/span);}m.mixer.update(dt);}else animChibi(m,{move:n==='Walk'||n==='Charge'?1:0,atk:0,wind:0,dead:0},e.t);m.root.position.set(e.x,0,e.z);m.root.rotation.y=e.face;}
 function stop(e,a){a.phase='recover';a.t=0;e.cd=e.atkCd;}
 function beforeAI(e,dt){
- if(e.kind!=='escaravelho'||e.isBoss||e.ally)return false;
+ if((KINDS[e.kind]?.baseKind||e.kind)!=='escaravelho'||e.isBoss||e.ally)return false;
  e.act=null;
  if(e.beetleHp352!=null&&e.hp<e.beetleHp352)e.beetleAnger352=5;
  e.beetleHp352=e.hp;e.beetleAnger352=Math.max(0,(e.beetleAnger352||0)-dt);
