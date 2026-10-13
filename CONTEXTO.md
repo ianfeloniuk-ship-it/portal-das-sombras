@@ -1339,3 +1339,9 @@ Novo pedido no mesmo trabalho: subir nível sem pop-up de pontos. Mensagem fica 
 - Modelos Tripo próprios de três vistas para escaravelho_f/a, rig Blender local, oito clipes por modelo. Sem adereços genéricos duplicados. Preparo/impacto sincronizados aos tempos existentes; HP/dano/XP preservados. Variantes reagem sem exigir equipamento brilhante.
 - Cadáveres dessa família completam o clipe antes de encerrar atualização e retornam na pose final quando o saque é reconstruído. Teste local da família em tools/test_beetle_family358.py.
 - Revisão criativa solicitada por Ian; demais cinco famílias anteriores ainda pendentes de revisão e modelos próprios das variantes. Não declarar lote inteiro concluído.
+
+
+## v360 — família Slime Rosa
+- Padrão com sete pétalas controladas separadamente e colapso em sequência. Fendido: membranas tensionadas e abertura dos lóbulos no ataque. Abissal: arco vazado, quatro cristais rígidos, ondulação e fechamento do arco na morte. Dois modelos Tripo próprios, três vistas; rig e animações Blender, sem rig pago.
+- Padrão pacífico sozinho, reage a dano, grupo cerca; variantes agressivas sozinhas. Sufocamento dividido em três contatos interrompíveis por distância/visibilidade/atordoamento/congelamento. HP/XP e dano nominal do ciclo preservados.
+- Quinze clipes checados no Three r128; 21 verificações de combate, morte e saque no jogo local. Arquivos editáveis e comparação ficam no Drive. Demais quatro famílias ainda pendentes da revisão solicitada.

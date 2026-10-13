@@ -19,6 +19,7 @@ for(const k of BASES){const B=KINDS[k];if(!B)continue;
  KINDS[ak]={...B,n:nameA(B.n),hp:Math.round(B.hp*2.4),dmg:Math.round(B.dmg*1.7),xp:Math.round((B.xp||10)*3),rk:Math.max(3,B.rk??0),bio:undefined,baseKind:k,variant:'a',fendido:true,scale:(B.scale||1)*1.15};Bestiary294.LORE[ak]=loreA(k,KINDS[ak].n)}
 // Dedicated meshes include their own articulated shell and crystals.
 for(const suffix of ['_f','_a']){const key='escaravelho'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
+for(const suffix of ['_f','_a']){const key='slime'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
 /* as 4 do Blender (lobofendido etc.) viram aliases das versões _f: saem do Bestiário como espécie separada */
 for(const k in BLENDER){const id=BLENDER[k];if(KINDS[id])KINDS[id].alias308=k+'_f'}
 /* ---------- visual ---------- */
