@@ -1,4 +1,4 @@
-## v363 — Equipamentos comuns e relíquias na bolsa, 13/10/2026
+## v364 — Equipamentos comuns e relíquias na bolsa, 13/10/2026
 - Equipamentos comuns preservam ataque/escudo, raridade e aprimoramento. Removidos bônus de andar, tecido, maldição, conjunto aleatório, arma viva, afixos e runas; migração inclui bolsa, equipado, casa e saque pendente. Conjuntos de chefes de classe rara preservados.
 - Bolsa separa equipamentos, materiais e relíquias equipáveis. Troféus de chefe identificam o destino; relíquias únicas são salvas imediatamente, repetidas informam conversão em ouro. Tags legadas de relíquia em equipamento recuperam a posse no perfil.
 - Validado coleta com bolsa cheia, bloqueio de coleta duplicada, gravação e recarga. O item exato relatado por Ian é desconhecido; não foi comprovada perda no save dele.
@@ -1360,3 +1360,8 @@ Auditoria: 95 scripts JavaScript e 8 blocos inline sem erro de sintaxe; referên
 
 ## v362 — clareira de acampamento entre chunks — 13/10/2026
 Complemento da revisão v361: a área livre ao redor de um acampamento é respeitada também pelos chunks vizinhos. Como o posto agora fica na lateral da estrada, sua clareira pode atravessar a borda do chunk; sem consultar os vizinhos, árvores poderiam reaparecer junto à barraca. Não altera seleção nem distância entre postos.
+
+## v363 — família Gosma Verde, 13/10/2026
+- Padrão, Fendida e Abissal com modelos próprios e sete clipes por forma. Bolsas se comprimem e drenam em sequência; Fendida tensiona pontes cristalinas; Abissal ondula e recolhe quatro cristais. Tripo multivista: 120 créditos nas duas variantes, sem rig pago.
+- Três fragmentos por forma, fechados e animados. Fendida mantém ligações rígidas; Abissal mantém fios. Divisão e reunião noturna preservam vida e recompensa únicas.
+- 44 verificações de mecânica no jogo local; 84 clipes (inteiros e fragmentos), 21 amostras por clipe no Three r128. Correção individual de chão em fragmento abissal. Celular não testado; aprovação criativa de Ian pendente.

@@ -20,6 +20,7 @@ for(const k of BASES){const B=KINDS[k];if(!B)continue;
 // Dedicated meshes include their own articulated shell and crystals.
 for(const suffix of ['_f','_a']){const key='escaravelho'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
 for(const suffix of ['_f','_a']){const key='slime'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
+for(const suffix of ['_f','_a']){const key='gosma'+suffix;KINDS[key].mon=key;KINDS[key].dedicated357=true;}
 /* as 4 do Blender (lobofendido etc.) viram aliases das versões _f: saem do Bestiário como espécie separada */
 for(const k in BLENDER){const id=BLENDER[k];if(KINDS[id])KINDS[id].alias308=k+'_f'}
 /* ---------- visual ---------- */
