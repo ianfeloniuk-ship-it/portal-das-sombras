@@ -3660,8 +3660,9 @@ function loadoutView(slot){view=()=>loadoutView(slot);L.characterTab='skills';le
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
 function rollAff2(tier,rar){const n=[0,0,1,1,2,2,2,3][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
   out.push({k:a.k,v:Math.max(1,Math.round((1+tier*.4)*(1+rar*.15)*(a.f||1)*(.7+Math.random()*.6)))})}return out}
-function affTxt(it){return it.aff&&it.aff.length?it.aff.map(a=>{const A=AFX.find(x=>x.k===a.k);return'+'+a.v+'% '+A.t}).join(' · ')+' · ':''}
-let AFFC=null,AFFK='';function affB(){const items=equippedItems(),key=JSON.stringify(items.map(it=>[it.uid,it.up,it.aff]))+(run?run.elem:'');if(AFFC&&AFFK===key)return AFFC;const o={dmg:0,hp:0,mp:0,crit:0,ls:0,spd:0};for(const it of items)if(it.aff)for(const x of it.aff){if(o[x.k]!=null)o[x.k]+=x.v;else o.dmg+=x.v*(run.elem===x.k?1:.35)}AFFK=key;return AFFC=o}
+function specialGear354(it){return !!it&&Object.prototype.hasOwnProperty.call(SETS153,it.set153)&&!!SETS153[it.set153].pieces[it.slot]}
+function affTxt(it){return specialGear354(it)&&it.aff&&it.aff.length?it.aff.map(a=>{const A=AFX.find(x=>x.k===a.k);return'+'+a.v+'% '+A.t}).join(' · ')+' · ':''}
+let AFFC=null,AFFK='';function affB(){const items=equippedItems().filter(specialGear354),key=JSON.stringify(items.map(it=>[it.uid,it.up,it.aff]))+(run?run.elem:'');if(AFFC&&AFFK===key)return AFFC;const o={dmg:0,hp:0,mp:0,crit:0,ls:0,spd:0};for(const it of items)if(it.aff)for(const x of it.aff){if(o[x.k]!=null)o[x.k]+=x.v;else o.dmg+=x.v*(run.elem===x.k?1:.35)}AFFK=key;return AFFC=o}
 
 function makePlayer(){kitMigrate111();kitArchive111();migrateInitialSkill259();normalizeStyleWeapon259();const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
@@ -4871,7 +4872,7 @@ function openChest(x,z,tier,boss,reward=null){
   const depth=reward?.depth??dungeonFloorAt(z),floorTreasure=!!reward||(boss&&!!L.floors);
   if(!boss&&!floorTreasure&&!goblinDungeon118(L.gate)&&!L.G?.th?.natural124&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');narratorEvent105('mimic');return}
   narratorEvent105('treasure');const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
-  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss);if(boss&&(boss.threat184||0)>=9){profile.godKills192=(profile.godKills192||0)+1;profile.godCalm237=gameDay198()+3;storyCh220('act10');bigText('MATADOR DE DEUSES',2200)}if(boss)uniqueDrop183(boss.threat183||0);if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
+  if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss,x,z);if(boss&&(boss.threat184||0)>=9){profile.godKills192=(profile.godKills192||0)+1;profile.godCalm237=gameDay198()+3;storyCh220('act10');bigText('MATADOR DE DEUSES',2200)}if(boss)uniqueDrop183(boss.threat183||0);if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
   saveRun();
 }
@@ -5115,7 +5116,7 @@ const WEAPON_LOOT_KINDS=['sword','dagger','axe','staff','bow','wand','tome','bon
 function makeItem(slot,tier,rar,kindOverride){
   const R=RAR[rar];const kind=slot==='w'?(kindOverride||WEAPON_LOOT_KINDS[Math.floor(Math.random()*WEAPON_LOOT_KINDS.length)]):null;const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso',spear:'Lança'}[kind]||'Arma';
   const visual=slot==='w'&&window.Warrior127&&Warrior127.visualWeapon?Warrior127.visualWeapon(tier,kind):undefined;
-  return {slot,tier,rar,...(slot==='w'?{kind155:kind}:{}),name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:equipmentBaseValueBalance(tier,slot,rar),uid:Math.random().toString(36).slice(2,9),aff:rollAff2(tier,rar),...(visual?{visual}: {})};
+  return {slot,tier,rar,...(slot==='w'?{kind155:kind}:{}),name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:equipmentBaseValueBalance(tier,slot,rar),uid:Math.random().toString(36).slice(2,9),aff:[],...(visual?{visual}: {})};
 }
 /* v153 (pedido do Ian): sets das classes raras. Peças separadas (cabeça, peito, braços, pernas, arma) que qualquer personagem equipa;
    o bônus só desperta na classe dona do set. Ficam em Fendas de Vestígio, portais raros que surgem ao acaso. */
@@ -5154,13 +5155,15 @@ function setActive153(id){const S=SETS153[id];return !!S&&!!player&&(rareActive1
 function setHas153(id,slot){return setActive153(id)&&equippedItems().some(it=>it.set153===id&&it.slot===slot)}
 function setCount153(id){return equippedItems().filter(it=>it.set153===id).length}
 function setFull153(id){return setActive153(id)&&setCount153(id)>=5}
-function setPiece153(id,slot,tier){const S=SETS153[id],P=S.pieces[slot],it=makeItem(slot,tier,3,CLASSES[S.cls]?.wep||'sword');it.set153=id;it.name=P.n;it.value=Math.round(it.value*2.5);return it}
+function setPiece153(id,slot,tier){const S=SETS153[id],P=S.pieces[slot],it=makeItem(slot,tier,3,CLASSES[S.cls]?.wep||'sword');it.set153=id;it.aff=rollAff2(tier,3);it.name=P.n;it.value=Math.round(it.value*2.5);return it}
 function setText153(it){const S=SETS153[it.set153];if(!S)return '';const n=setCount153(it.set153),on=setActive153(it.set153);
   return '<br>Conjunto '+S.n+' · '+n+'/5: '+S.pieces[it.slot].d+'<br>5 peças: '+S.full.d+(on?'':' (requer '+(CLASSES[S.cls]?.n||'dona do set')+')')}
-function setDrop153(boss){const g=L.gate,id=g&&g.set153,S=SETS153[id];if(!S)return false;if(!boss&&Math.random()>=.3)return false;
-  const owned=new Set([...run.items,...equippedItems(),...(profile.house?.chest||[])].filter(it=>it&&it.set153===id).map(it=>it.slot));
-  const slot=pick(EQUIP_SLOTS); // v155 (Ian): o chefe solta uma das 5 peças ao acaso
-  const it=setPiece153(id,slot,Math.max(0,Math.min(9,g.rank)));addItem(it);floater(player.x,player.z,'PEÇA DE SET: '+it.name,S.col,true);
+function setDrop153(boss,x=player.x,z=player.z){const g=L.gate,id=g&&g.set153,S=SETS153[id];if(!S||!Object.prototype.hasOwnProperty.call(SETS153,id))return false;if(!boss&&Math.random()>=.3)return false;
+  const pending=[...(run.worldLoot353||[]),...(L.corpseLoot353||[])].flatMap(r=>r.entries||[]).filter(e=>e.type==='equipment').map(e=>e.item);
+  const owned=new Set([...run.items,...equippedItems(),...(profile.house?.chest||[]),...pending].filter(it=>it&&it.set153===id).map(it=>it.slot));
+  const missing=EQUIP_SLOTS.filter(sl=>!owned.has(sl));
+  const slot=pick(boss&&missing.length?missing:EQUIP_SLOTS);
+  const it=setPiece153(id,slot,Math.max(0,Math.min(9,g.rank)));const reward={x,z,name:'Recompensa · '+S.n};corpseDrop353(reward,{type:'equipment',item:it});finishCorpse353(reward);floater(x,z,'PEÇA DE CONJUNTO',S.col,true);
   const a=awakening103();if(RARE_IDS111.includes(S.cls)&&!a.unlocked.includes(S.cls)&&!(a.points[S.cls]>0)){a.points[S.cls]=1;logNews('<b>[NARRADOR]</b> A peça vibra no seu corpo. Algo do '+(CLASSES[S.cls]?.n||'dono')+' tenta acordar em você.')}
   saveRun();return true}
 function rollItem(tier,boss,depth=0,minRarity=0){tier=Math.max(0,Math.min(9,tier));depth=Math.max(0,Math.min(2,depth));const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const woven=!!(L.gate&&L.gate.rareCreated103),wovenB=woven?(L.gate.woven153||.15):0;const rar=Math.min(RAR.length-1,Math.max(minRarity,woven?1:0,wpick(w.map((w,i)=>({i,w}))).i+depth+(woven?1:0)));const it=makeItem(pick(EQUIP_SLOTS),tier,rar);if(depth)it.depth105=depth;if(woven){it.woven153=wovenB;it.name+=' (Tecido)'}if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
@@ -6977,14 +6980,14 @@ const GEAR_RUNES={
  command:{n:'Vínculo do Guardião',d:'+8% ao dano dos seus ecos e invocações. Não afeta caçadores contratados.'}
 };
 function lootRune(key){if(GEAR_RUNES[run.loot?.[key]?.rune])return run.loot[key].rune;if(run.loot?.[key]?.b)return 'command';const prefix=key.split(' de ')[0];if(['Presa','Garra','Chifre'].includes(prefix))return 'fang';if(['Couro','Escama','Osso'].includes(prefix))return 'shell';if(['Essência','Olho','Fragmento'].includes(prefix))return 'arcane';if(prefix==='Pena')return 'stride';return 'vigor'}
-function gearRuneCount(id){return EQUIP_SLOTS.reduce((n,sl)=>n+(run?.equip?.[sl]?.rune===id?1:0),0)}
-function gearRuneText(it){const r=GEAR_RUNES[it?.rune];return r?' · Passiva gravada: '+r.n+' — '+r.d:''}
+function gearRuneCount(id){return EQUIP_SLOTS.reduce((n,sl)=>n+(specialGear354(run?.equip?.[sl])&&run.equip[sl].rune===id?1:0),0)}
+function gearRuneText(it){const r=specialGear354(it)&&GEAR_RUNES[it.rune];return r?' · Passiva gravada: '+r.n+' — '+r.d:''}
 function applyGearRuneHit(e,amt){const repeat=gearRuneCount('reprise');if(repeat&&!e.dead&&e.hp>0){player.runeHits=(player.runeHits||0)+1;if(player.runeHits%4===0){e.basicDots=e.basicDots||{};e.basicDots.reprise={t:1,d:Math.max(e.basicDots.reprise?.d||0,amt*.2*repeat),acc:0};fxRing(e.x,e.z,0xb98cff,1,.3)}}const n=gearRuneCount('fang');if(!n||e.dead||e.hp<=0)return;e.basicDots=e.basicDots||{};const old=e.basicDots.rune;e.basicDots.rune={t:3,d:Math.max(old?.d||0,amt*.1*n/3),acc:old?.acc||0}}
 function equipmentUpgradeCost(eq){const up=eq.up||0;return{gold:servicePrice265('upgrade',{tier:eq.tier,slot:eq.slot,upgrade:up}),cry:3*(up+1)}}
 function finishEquipmentUpgrade(eq,safe=false){const up=eq.up||0;if(!safe&&up>=10&&Math.random()<Math.min(.6,.2+(up-10)*.04)){toast('<b>[FORJA]</b> O aprimoramento falhou. Materiais perdidos; equipamento preservado.');sfx('block');narratorEvent105('upgrade_fail');return false}narratorEvent105('upgrade_win');eq.up=up+1;eq.bn=eq.bn||eq.name;eq.name=eq.bn+' +'+eq.up;eq.value=Math.round(eq.value*1.15);refreshStats();fxRing(player.x,player.z,0xffd070,2.5);toast('<b>[FORJA]</b> '+eq.name+': '+statTxt(eq));return true}
 function lootForgeQuote(sl,key,mode){
   const material=Object.prototype.hasOwnProperty.call(run.loot||{},key)?run.loot[key]:null;if(!EQUIP_SLOTS.includes(sl)||!material||!['new','up','rune'].includes(mode))return null;
-  const eq=run.equip[sl];if(mode!=='new'&&!eq)return null;
+  const eq=run.equip[sl];if(mode!=='new'&&!eq)return null;if(mode==='rune'&&!specialGear354(eq))return null;
   if(mode==='rune')return{tier:eq.tier,gold:servicePrice265('rune',{tier:eq.tier,slot:sl}),cry:3,parts:material.recipeParts|| (material.b?3:12),rune:lootRune(key)};
   const tier=mode==='new'?rankOf():eq.tier,up=eq?.up||0,base=mode==='up'?equipmentUpgradeCost(eq):{gold:forgePrice265(sl,tier),cry:5};
   return{tier,gold:mode==='up'&&!material.b?Math.ceil(base.gold*.75):base.gold,cry:mode==='up'&&!material.b?Math.max(1,Math.ceil(base.cry*.75)):base.cry,parts:mode==='new'?(material.b?3:10):(material.b?3+Math.floor(up/5):5+up),rar:material.b?2:1,safe:!!material.b};
@@ -7005,6 +7008,7 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
   if(mode==='new')h+=row('Criar '+EQUIP_LABEL[sl].toLowerCase()+' · rank '+RANKS[rankOf()].id,'Vai para a bolsa. Partes criam item Raro ou melhor; relíquias criam Épico ou melhor.','');
   else if(!eq)h+='<div class="sysline">Equipe uma peça nesta posição antes de continuar.</div>';
   else if(mode==='up')h+=row(gearText(eq.name)+' → +'+((eq.up||0)+1),'Partes: desconto de 25% em ouro e cristais. Relíquias: sucesso garantido.<br>Após +10, usar partes pode falhar e consumir os materiais. A peça permanece.','');
+  else if(!specialGear354(eq))h+='<p>Passivas são exclusivas dos conjuntos de classes raras.</p>';
   else h+=row('Peça: '+gearText(eq.name),'Passiva atual: '+(GEAR_RUNES[eq.rune]?.n||'nenhuma')+'.<br>Cada peça guarda uma passiva. Gravar outra substitui a atual. O bônus vale enquanto a peça estiver equipada; peças com a mesma passiva somam seus efeitos.','');
   h+='<div class="sec">3. ESCOLHA O MATERIAL</div>';
   if(!keys.length)h+='<div class="sysline">Você ainda não tem espólios.<br>Derrote monstros para conseguir partes e chefes para conseguir relíquias.</div>';
@@ -7885,7 +7889,7 @@ function guildView(tab){
 /* RECOMENDAÇÃO DO ORÁCULO: nota de poder de cada item, comparada com o equipado. */
 const AFW={dmg:1,crit:.8,ls:.6,spd:.5,hp:.5,mp:.3};
 function itemScore(it){if(!it)return 0;let sc=it.slot==='w'?itemAtk(it):itemSh(it)/6;
-  for(const a of it.aff||[])sc*=1+a.v*(AFW[a.k]??(run.elem===a.k?1:.35))/100;
+  for(const a of (specialGear354(it)?it.aff:[])||[])sc*=1+a.v*(AFW[a.k]??(run.elem===a.k?1:.35))/100;
   if(it.set){const o=equippedItems().find(x=>x.uid!==it.uid&&x.set===it.set);if(o)sc*=1.05}
   if(it.curse)sc*=.9;return Math.round(sc)}
 function bestInBag(slot){let b=null;for(const it of run.items)if(it.slot===slot&&(!b||itemScore(it)>itemScore(b)))b=it;return b}
