@@ -3,40 +3,40 @@
 'use strict';
 const defs={
 21:[
- ['Palma dos Ecos','echo',9,16,1.2,'Marca um alvo por 8s. Após 3 ataques básicos nele, os ecos explodem em 3 m causando mais 180% do dano desta técnica.'],
- ['Passo em Oito','eight',7,12,1.4,'Desloca 3 m para o lado e golpeia o caminho. Alterna esquerda e direita a cada uso; paredes impedem o movimento.'],
- ['Respiração Inversa','breath',14,0,0,'Converte até 30 de Vigor disponível em duas vezes esse valor de Fúria. Não funciona sem Vigor ou com Fúria cheia.'],
- ['Quebra de Cadência','cadence',10,18,1.6,'Atinge um alvo. Durante a preparação de um ataque dele, causa o dobro de dano e interrompe inimigos comuns.'],
- ['Balança dos Punhos','balance',12,22,1.3,'Atinge os dois inimigos mais próximos. A diferença entre suas porcentagens de vida aumenta o dano nos dois, até o dobro.'],
- ['Selo dos Cinco Pontos','five',16,20,0.8,'Marca um alvo por 10s. Cada um dos próximos 5 ataques básicos recebe um bônus crescente de 8%, até 40%; o quinto encerra o selo.'],
- ['Roda dos Meridianos','wheel',18,12,0.7,'Gasta a Fúria restante: a cada 10 pontos, adiciona um golpe, até 5. Distribui os golpes em rodízio entre inimigos a até 6 m.']
+ ['Palma dos Ecos','echo',9,16,1.2,'Marca por 8s. Após 3 ataques básicos, explode em 3 m com 180% do dano da técnica.'],
+ ['Passo em Oito','eight',7,12,1.4,'Avança 3 m para o lado, golpeando o caminho. Alterna esquerda e direita.'],
+ ['Respiração Inversa','breath',14,0,0,'Troca até 30 de Vigor pelo dobro em Fúria.'],
+ ['Quebra de Cadência','cadence',10,18,1.6,'Atinge um alvo. Durante a preparação do ataque dele, causa dano dobrado e interrompe inimigos comuns.'],
+ ['Balança dos Punhos','balance',12,22,1.3,'Atinge os 2 inimigos mais próximos. A diferença de vida em % entre eles aumenta o dano, até o dobro.'],
+ ['Selo dos Cinco Pontos','five',16,20,0.8,'Marca por 10s. Os próximos 5 ataques básicos ganham de +8% a +40% de dano.'],
+ ['Roda dos Meridianos','wheel',18,12,0.7,'Gasta a Fúria restante: 1 golpe por 10 pontos, até 5. Alterna entre inimigos em 6 m.']
 ],
 22:[
- ['Inscrição Alternada','alternate',10,14,1.1,'Marca por 10s. Alternar ataques físicos e mágicos no alvo aumenta cada acerto alternado em 35%; repetir o tipo não dá bônus.'],
- ['Reserva Incandescente','reserve',16,8,0,'Armazena até 20% da mana máxima restante por 8s. Seu próximo ataque básico consome a reserva e espalha dano mágico nos outros inimigos em 3 m do alvo.'],
- ['Costura Astral','stitch',12,20,1.7,'Traça um corte entre os dois inimigos mais distantes entre si no alcance de 10 m. Atinge todos que cruzam essa linha, sem atravessar paredes.'],
- ['Dízimo Rúnico','tithe',14,12,1.0,'Marca um alvo por 8s. Os próximos 3 ataques básicos nele recuperam, cada um, 4% da sua mana máxima.'],
- ['Corte do Reservatório','reservoir',11,10,1.4,'Consome até 25% da mana máxima restante e atinge um alvo. O dano cresce com a mana adicional realmente gasta, até +150%.'],
- ['Díade Arcana','dyad',17,24,1.4,'Liga os dois inimigos mais próximos com um corte. Quanto mais separados estiverem, maior o dano nos dois: +10% por metro, até +100%.'],
- ['Órbita Reversa','orbit',15,18,1.5,'Atinge apenas inimigos entre 3 e 8 m de distância. Cada inimigo atingido devolve 3% da mana máxima, até 15%.']
+ ['Inscrição Alternada','alternate',10,14,1.1,'Marca por 10s. Alternar golpes físicos e mágicos no alvo causa +35% de dano.'],
+ ['Reserva Incandescente','reserve',16,8,0,'Reserva até 20% da mana máxima por 8s. O próximo ataque consome a reserva e espalha dano em 3 m.'],
+ ['Costura Astral','stitch',12,20,1.7,'Corta a linha entre os 2 inimigos mais separados em 10 m. Atinge quem estiver no caminho.'],
+ ['Dízimo Rúnico','tithe',14,12,1.0,'Marca por 8s. Os próximos 3 ataques básicos recuperam 4% da mana máxima cada.'],
+ ['Corte do Reservatório','reservoir',11,10,1.4,'Golpeia e gasta até 25% da mana máxima adicional para causar até +150% de dano.'],
+ ['Díade Arcana','dyad',17,24,1.4,'Corta os 2 inimigos mais próximos. +10% de dano por metro entre eles, até +100%.'],
+ ['Órbita Reversa','orbit',15,18,1.5,'Atinge inimigos entre 3 e 8 m. Recupera 3% da mana máxima por alvo, até 15%.']
 ],
 23:[
- ['Ponta Absoluta','tip',8,14,2.8,'Estoca apenas na faixa entre 4 e 8 m à frente, em uma linha estreita. Inimigos próximos demais não são atingidos.'],
- ['Recuo de Caça','retreat',10,18,1.1,'Recua 3 m e marca o alvo atingido por 6s. Seu próximo ataque básico nele causa +80% se você estiver a pelo menos 4 m.'],
- ['Cruz de Hastes','cross',12,22,1.1,'Dois cortes diagonais formam um X à frente. Um inimigo no cruzamento pode receber os dois golpes; quem está fora das faixas não é atingido.'],
- ['Cravo de Muralha','wall',12,18,1.7,'Golpeia um alvo. Se houver parede até 2 m atrás dele, causa +80% de dano e prende inimigos comuns por 2s.'],
- ['Fio da Fileira','file',14,24,2.4,'Perfura uma linha de 10 m do mais distante ao mais próximo. O primeiro recebe dano integral; cada alvo seguinte recebe 20% menos que o anterior.'],
- ['Bússola Partida','compass',10,16,1.9,'Atinge os flancos esquerdo e direito entre 2 e 6 m. As faixas diretamente à frente e atrás ficam fora do golpe.'],
- ['Medida do Caçador','measure',14,18,1.2,'Marca a distância até um alvo por 8s. O próximo ataque básico nele causa +25% por metro que você tiver se aproximado, até +150%.']
+ ['Ponta Absoluta','tip',8,14,2.8,'Estoca em linha entre 4 e 8 m. Não atinge inimigos mais próximos.'],
+ ['Recuo de Caça','retreat',10,18,1.1,'Recua 3 m e marca por 6s. O próximo ataque básico causa +80% de dano se lançado a 4 m ou mais.'],
+ ['Cruz de Hastes','cross',12,22,1.1,'Golpeia em X à frente. Inimigos no cruzamento recebem os 2 golpes.'],
+ ['Cravo de Muralha','wall',12,18,1.7,'Golpeia um alvo. Com parede até 2 m atrás dele: +80% de dano e prisão de 2s em inimigos comuns.'],
+ ['Fio da Fileira','file',14,24,2.4,'Perfura 10 m, do alvo mais distante ao mais próximo. Cada alvo seguinte recebe 20% menos dano.'],
+ ['Bússola Partida','compass',10,16,1.9,'Golpeia à esquerda e à direita, entre 2 e 6 m. Não atinge à frente ou atrás.'],
+ ['Medida do Caçador','measure',14,18,1.2,'Marca por 8s. Aproximar-se aumenta o próximo ataque básico em 25% por metro, até +150%.']
 ],
 24:[
- ['Dízimo de Sangue','blood',15,0,0,'Sacrifica até 20% da vida máxima, sem matar você, e ganha Fúria proporcional: até 60. Não funciona com vida insuficiente ou Fúria cheia.'],
- ['Juramento da Cicatriz','scar',16,10,0,'Por 8s, prepara o próximo golpe desta classe. O dano extra cresce com a vida perdida desde o juramento, até +200%; o golpe consome o juramento.'],
- ['Partilha Brutal','share',12,22,4,'Divide o dano igualmente entre inimigos a até 6 m. Cada alvo que sobreviver devolve 5 de Fúria, até 25.'],
- ['Desafio do Maior','challenge',10,16,2.2,'Ataca o inimigo com maior vida atual a até 7 m. Se ele sobreviver, devolve 12 de Fúria; se morrer, não devolve.'],
- ['Penhor Carmesim','pledge',18,20,1.4,'Marca um alvo por 8s e sacrifica até 10% da vida máxima. Se você o abater durante a marca, recupera o dobro da vida sacrificada, respeitando bloqueios de cura.'],
- ['Corrente de Sacrifícios','chainblood',15,18,1,'Atinge até 5 alvos, do mais próximo ao mais distante. Cada golpe custa 2% da vida máxima e causa 30% mais dano que o anterior. Para antes de matar você.'],
- ['Estilhaço da Égide','shatter',14,12,1.3,'Consome todo o seu escudo atual. Atinge inimigos em 5 m, dividindo entre eles dano adicional igual a duas vezes o escudo consumido. Exige escudo.']
+ ['Dízimo de Sangue','blood',15,0,0,'Troca até 20% da vida máxima por até 60 de Fúria. Não mata você.'],
+ ['Juramento da Cicatriz','scar',16,10,0,'Prepara o próximo golpe desta classe por 8s. Perder vida aumenta seu dano, até +200%.'],
+ ['Partilha Brutal','share',12,22,4,'Divide o dano entre inimigos em 6 m. Recupera 5 de Fúria por sobrevivente, até 25.'],
+ ['Desafio do Maior','challenge',10,16,2.2,'Ataca o inimigo com mais vida em 7 m. Recupera 12 de Fúria se ele sobreviver.'],
+ ['Penhor Carmesim','pledge',18,20,1.4,'Marca por 8s e sacrifica até 10% da vida máxima. Abater o alvo recupera o dobro da vida sacrificada.'],
+ ['Corrente de Sacrifícios','chainblood',15,18,1,'Atinge até 5 alvos, do mais próximo ao mais distante. Cada golpe custa 2% da vida máxima e causa 30% mais dano que o anterior. Não mata você.'],
+ ['Estilhaço da Égide','shatter',14,12,1.3,'Consome seu escudo. Divide o dobro desse valor como dano extra entre inimigos em 5 m.']
 ]};
 for(const [key,rows] of Object.entries(defs)){const ci=+key;for(const [n,mode,cd,mp,pow,brief] of rows){const si=CLASSES[ci].sk.length;CLASSES[ci].sk.push({n,t:'class316',new316:true,mode316:mode,cd,mp,pow,col:CLASSES[ci].sk[0].col,range:10,radius:6,sourceClass:ci,skillId:ci+':'+si,resource260:ci===22?'mana':ci===23?'vigor':'fury',brief316:brief})}}
 const state=()=>player.class316||(player.class316={});
