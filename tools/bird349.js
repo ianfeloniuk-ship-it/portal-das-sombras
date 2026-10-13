@@ -7,7 +7,7 @@ function pose(e,name,dt,once=false){
 }
 function lateral(e,t){const d=Math.hypot(e.x-t.x,e.z-t.z)||1;return Math.abs(((e.x-t.x)*Math.sin(t.face||0)+(e.z-t.z)*Math.cos(t.face||0))/d)<.45;}
 function beforeAI(e,dt){
- if(e.kind!=='passaro'||e.isBoss||e.ally)return false;
+ if(!/^passaro(?:_[fa])?$/.test(e.kind)||e.isBoss||e.ally)return false;
  e.act=null;
  if(e.stun>0){e.bird349=null;e.cd=Math.max(e.cd,.5);pose(e,'Idle',dt);return true;}
  const pt=pickTarget(e);if(!pt||pt.d>24){e.bird349=null;pose(e,'Idle',dt);return true;}

@@ -1,3 +1,8 @@
+## v367 — Pássaro Bravo, Fendido e Abissal, 13/10/2026
+- Modelos próprios para as três formas, dez clipes cada; asas independentes, patas recolhidas em voo, mergulho e recuperação. Padrão cai de lado, Fendido tomba para frente, Abissal recolhe corpo em rotação e dispersa quatro cristais.
+- Variantes usam abordagem lateral e passagem com direção fixa. Congelamento cancela mergulho; morte completa antes de encerrar atualização, saque preservado. HP, dano e recompensas anteriores preservados.
+- 51 verificações no jogo local; rigs 12/12/16 ossos reimportados. Geração multivista Tripo: 60 créditos por variante, sem rig pago. Cristais ausentes do Abissal completados no Blender com malha texturizada já produzida para Cogumelinho Abissal.
+- Desktop validado; celular e aprovação criativa de Ian pendentes.
 ## v365 — Mira do ataque básico, 13/10/2026
 - Ataques básicos à distância sem criatura sob o cursor seguem a direção do mouse na altura de saída do projétil. Não inclinam para o chão ou céu por causa do ponto livre; alvo direto e assistência no toque preservam a altura real da criatura. Habilidades com alvo no chão preservadas.
 
