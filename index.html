@@ -4355,13 +4355,13 @@ function onRoad(segs,x,z,w=4.5){for(const [x1,z1,x2,z2] of segs){if(z1===z2){if(
 function danger(x,z){const n=nearestCity(x,z);return clamp(Math.floor((n.d-46)/(26*REG/6))+Math.floor(Math.hypot(x,z)/900),0,9)}
 function worldInit(seed){if(WSEED===(seed|0)&&WN)return;WSEED=seed|0;WN=makeNoise(seed);cityCache.clear();
   const RK=mulberry32(seed+5);ranking=[];for(let i=0;i<14;i++){const ri=Math.min(TOPR,Math.floor(Math.pow(RK(),2.2)*(TOPR+1)));ranking.push({name:NAMES[Math.floor(RK()*NAMES.length)],rank:ri,lvl:Math.round(8+RK()*30+ri*18)})}}
-function hrem(c){const a=HASH.get(hkey(Math.floor(c.x/HB),Math.floor(c.z/HB)));if(a){const i=a.indexOf(c);if(i>=0)a.splice(i,1)}}
+function hrem(c){const a=HASH.get(hkey(Math.floor(c.x/HB),Math.floor(c.z/HB)));if(a){const i=a.indexOf(c);if(i>=0)a.splice(i,1);if(!a.length)HASH.delete(hkey(Math.floor(c.x/HB),Math.floor(c.z/HB)))}}
 function loadChunk(cx,cz){
   const key=cx+','+cz;if(chunks.has(key))return;
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const op217=outpostAt217(cx,cz),lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||(op217&&Math.hypot(x-x0-9,z-z0-9)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
+  const RSEG=roadSegs(x0,z0,2);const op217=outpostPoint361(cx,cz),lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz);const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||(op217&&Math.hypot(x-op217.x,z-op217.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -7586,8 +7586,25 @@ function onIce240(P){if(L.mode!=='world')return false;const rv=riverNear239(P.x,
 function iceMove240(P,vx,vz,dt){const on=onIce240(P);P.iv240=P.iv240||{x:0,z:0};if(!on){P.iv240.x=P.iv240.z=0;return false}
  const k=Math.min(1,dt*(vx||vz?1.4:.35));P.iv240.x+=(vx-P.iv240.x)*k;P.iv240.z+=(vz-P.iv240.z)*k;if(Math.hypot(P.iv240.x,P.iv240.z)<.05)return true;moveEnt(P,P.iv240.x*dt,P.iv240.z*dt);if(!P.iceTip240){P.iceTip240=1;toast('<b>[NARRADOR]</b> Gelo. Cuidado: aqui você desliza.',3500)}return true}
 function riverClear239(x,z){const rv=riverNear239(x,z);return rv.d<riverWidth351(rv.b,z)/2+3}
-function outpostAt217(cx,cz){if(rh(cx,cz,9)%100>=11)return false;const x=cx*CH,z=cz*CH;if(!onRoad(roadSegs(x,z,1),x,z,12))return false;return nearestCity(x,z).d>350}
-function buildOutpost217(ch,g,addCol){const x0=ch.cx*CH+9,z0=ch.cz*CH+9,R=mulberry32(rh(ch.cx,ch.cz,10));
+const OUTPOST361={seed:null,raw:new Map(),placed:new Map()};
+function outpostCandidate361(cx,cz){
+ if(OUTPOST361.seed!==WSEED){OUTPOST361.seed=WSEED;OUTPOST361.raw.clear();OUTPOST361.placed.clear()}
+ const key=cx+','+cz;if(OUTPOST361.raw.has(key))return OUTPOST361.raw.get(key);let result=null;
+ if(rh(cx,cz,9)%100<11){const x=cx*CH,z=cz*CH,segs=roadSegs(x,z,1);let best=null,dist=12;
+  for(const [ax,az,bx,bz] of segs){const dx=bx-ax,dz=bz-az,len=Math.hypot(dx,dz);if(!len)continue;const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(len*len))),px=ax+dx*t,pz=az+dz*t,d=Math.hypot(x-px,z-pz);if(d<dist){dist=d;best={x:px,z:pz,nx:-dz/len,nz:dx/len}}}
+  if(best)for(const side of (rh(cx,cz,12)%2?[-1,1]:[1,-1])){const px=best.x+best.nx*28*side,pz=best.z+best.nz*28*side;if(onRoad(segs,px,pz,22)||nearestCity(px,pz).d<=350||riverClear239(px,pz))continue;
+   let blocked=false;for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const xx=Math.round(px/CH)+i,zz=Math.round(pz/CH)+j,lake=lakeAt239(xx,zz);if(lake&&Math.hypot(px-lake.x,pz-lake.z)<lake.r+18||ruinAt(xx,zz)&&Math.hypot(px-xx*CH,pz-zz*CH)<30)blocked=true}
+   if(!blocked){result={x:px,z:pz,cx,cz,priority:rh(cx,cz,13)};break}
+  }
+ }
+ OUTPOST361.raw.set(key,result);return result;
+}
+function outpostPoint361(cx,cz){if(OUTPOST361.raw.size>12000){OUTPOST361.raw.clear();OUTPOST361.placed.clear()}const p=outpostCandidate361(cx,cz),key=cx+','+cz;if(OUTPOST361.placed.has(key))return OUTPOST361.placed.get(key);let result=p;
+ if(p)for(let i=-6;i<=6;i++)for(let j=-6;j<=6;j++){if(!i&&!j)continue;const q=outpostCandidate361(cx+i,cz+j);if(q&&Math.hypot(p.x-q.x,p.z-q.z)<320&&(q.priority<p.priority||q.priority===p.priority&&(q.cx<p.cx||q.cx===p.cx&&q.cz<p.cz)))result=null}
+ OUTPOST361.placed.set(key,result);return result;
+}
+function outpostAt217(cx,cz){return !!outpostPoint361(cx,cz)}
+function buildOutpost217(ch,g,addCol){const point=outpostPoint361(ch.cx,ch.cz);if(!point)return;const x0=point.x,z0=point.z,R=mulberry32(rh(ch.cx,ch.cz,10));
  if(ENV.ok){const b=new EnvBatch();EH(b,'campfire_stones',x0,0,z0,0,.7);EH(b,'tent_detailedOpen',x0+4,0,z0-3,R()*TAU,2.6);EW(b,'stall',x0-4,0,z0+2,Math.PI/2,3.2);EW(b,'cart',x0+1,0,z0+5,R()*TAU,2.6);EH(b,'lantern_standing',x0-2,0,z0-3,0,2.4);EW(b,'crates_stacked',x0-5.5,0,z0-1,R()*TAU,1.4);envSolidEW357(addCol,b,'barrel',x0+5.5,0,z0+1,0,.8);envOwn(g,b.mesh(ENVMAT))}
  const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4]])addCol({x,z,r});
  const nm='Posto '+['do Viajante','da Encruzilhada','do Lampião','da Carroça','das Brasas','do Corvo'][rh(ch.cx,ch.cz,11)%6];
@@ -8831,9 +8848,9 @@ requestAnimationFrame(frame);
 
 <script src="tools/hud356.js?v=356"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v360</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v361</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=360;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=361;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
