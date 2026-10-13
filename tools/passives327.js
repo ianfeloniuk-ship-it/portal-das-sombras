@@ -23,7 +23,7 @@ const baseCost=passiveCost263;
 passiveCost263=function(kind,cost){let c=baseCost(kind,cost);if(c>0&&has('cold_blood')&&typeof player!=='undefined'&&player&&player.hp<player.maxhp*.3)c=Math.max(1,Math.ceil(c*.5));return c};
 
 /* Lista: só passivas liberadas */
-passiveRows263=function(){const lv=run.level||1,on=ResourceBalance263.passives.filter((p,i)=>lv>=passiveLevel286(i));let h='<div class="sec">PASSIVAS GERAIS · '+on.length+' LIBERADAS</div><div class="sysline">Passivas funcionam sozinhas: não precisam ser equipadas e não ocupam espaços de habilidade. Novas passivas aparecem aqui quando você chega ao nível delas.<br>Descontos arredondam o custo para cima; técnicas gratuitas continuam gratuitas.</div>';if(!on.length)h+='<div class="sysline">Nenhuma passiva liberada ainda.</div>';on.forEach(p=>{h+=row(p.n,p.d,'<b>Ativa</b>')});return h};
+passiveRows263=function(){const lv=run.level||1,on=ResourceBalance263.passives.filter((p,i)=>lv>=passiveLevel286(i));let h='<div class="sec">PASSIVAS GERAIS · '+on.length+' LIBERADAS</div><div class="sysline">Ativadas automaticamente ao alcançar o nível necessário. Não ocupam espaços de habilidade.</div>';if(!on.length)h+='<div class="sysline">Nenhuma passiva liberada ainda.</div>';on.forEach(p=>{h+=row(p.n,p.d,'<b>Ativa</b>')});return h};
 
 /* Desgaste: pontos de defesa a tirar do alvo */
 window.passiveShred327=function(e,o){if(!o||!o.fromPlayer||!e||!has('wear'))return 0;if(T()-(e.wearAt327??-99)>5)e.wear327=0;const n=e.wear327||0;e.wear327=Math.min(20,n+1);e.wearAt327=T();const lvl=(run&&run.level)||1;const per=typeof atkPer==='function'?atkPer(lvl)*.5:1;return n*per};

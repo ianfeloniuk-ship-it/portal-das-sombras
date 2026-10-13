@@ -20,6 +20,6 @@ const mv0=mktView;mktView=function(){mv0();try{const mb=document.getElementById(
  mb.insertAdjacentHTML('beforeend',h)}catch(_){}};
 const ea0=extraActions;extraActions=function(a,v){if(a==='elem300'){const w=run.equip.w;if(!w||!ELN[v]||!on())return;const p=price();if(run.gold<p)return;run.gold-=p;w.elem300=v;toast('<b>[MERCADO]</b> '+safeText(w.name)+' encantada com <b>'+ELN[v]+'</b>.',4000);saveRun();mktView();return 'close0'}return ea0(a,v)};
 /* Bestiário: mostra fraqueza e resistência (depois de 10 abates) */
-const bs0=bestStats293;bestStats293=function(k){let h=bs0(k);try{if(on()&&((profile.bestiary||{})[k]||0)>=10){const pair=PROF[mobAttr281({kind:k}).prof];const labels=a=>'fraco a '+ELN[a[0]]+'; resiste a '+ELN[a[1]];h+='<br><span style="color:var(--dim)">'+(pair?labels(pair):'Afinidade varia pelo bioma de origem:<br>'+Object.entries(BIO).map(([bio,a])=>(BIO_N[bio]||bio)+': '+labels(a)).join('<br>'))+'</span>'}}catch(_){}return h};
+const bs0=bestStats293;bestStats293=function(k,...args){let h=bs0(k,...args);try{if(on()&&((profile.bestiary||{})[k]||0)>=10){const pair=PROF[mobAttr281({kind:k}).prof];const labels=a=>'fraco a '+ELN[a[0]]+'; resiste a '+ELN[a[1]];h+='<br><span style="color:var(--dim)">'+(pair?labels(pair):'<details><summary>Fraquezas por região</summary>'+Object.entries(BIO).map(([bio,a])=>(BIO_N[bio]||bio)+': '+labels(a)).join('<br>')+'</details>')+'</span>'}}catch(_){}return h};
 window.Elem300={aff,ELN};
 })();

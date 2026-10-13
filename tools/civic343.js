@@ -39,9 +39,9 @@ window.Civic343=(()=>{
   const line=(n,txt)=>row((g>=n?'<b style="color:#6fe39a">✔ ':'<b>')+'Grau '+n+' · '+GRADE_N[n]+'</b> <span style="color:var(--dim)">('+GRADE_MIN[n]+(n<4?'–'+(GRADE_MIN[n+1]-1):'–100')+')</span>',txt,'');
   let h='<div class="sec">STATUS CÍVICO EM '+safeText(c.name).toUpperCase()+' · '+t+'/100</div>';
   h+=line(1,'Preços normais. Moradores e guardas tratam você como qualquer viajante.');
-  h+=line(2,'Os comerciantes abrem o estoque reservado (uma peça rara por dia nas lojas de equipamento; elixires com os mascates). Os moradores cumprimentam você pelo nome.');
-  h+=line(3,'Guardas das muralhas atiram nos monstros que perseguirem você até os portões. Descanso na pousada pela metade do preço. Suprimentos da guarnição.');
-  h+=line(4,'Quarto gratuito na pousada. Sem imposto nas suas vendas nesta cidade. Batedores da Ordem apontam Fendas raras no mapa.');
+  h+=line(2,'Estoque reservado: 1 equipamento raro por dia e elixires nos mascates.');
+  h+=line(3,'Apoio dos guardas, suprimentos e pousada pela metade do preço.');
+  h+=line(4,'Pousada grátis, vendas sem imposto e batedores para localizar Fendas raras.');
   if(g>=4)h+=row('Batedores da Ordem','Uma vez por dia do jogo, os batedores marcam no mapa as Fendas raras da região e a direção das peças soltas.',btn(st().scout[c.id]===day?'Já enviados hoje':'Requisitar batedores','scout343',0,local&&st().scout[c.id]!==day,'hot'));
   return h}
 
