@@ -3513,15 +3513,15 @@ function equipmentShopPrice(sl,t){return Math.round(PRICE[t]*equipFactor(sl)*10*
 function equipFactor(sl){return sl==='h'||sl==='g'||sl==='b'?.2:1}
 function equippedItems(){return Object.values(run?.equip||{}).filter(Boolean)}
 function equipmentShield(){return equippedItems().reduce((n,it)=>n+itemSh(it),0)}
-function unequipItem(sl){const it=run.equip[sl];if(!it)return false;if(run.items.length>=24){gearPicker(sl);return false}run.items.push(it);run.equip[sl]=null;refreshStats();saveRun();return true}
+function unequipItem(sl){const it=run.equip[sl];if(!it)return false;if(run.items.length>=bagCapacity353()){gearPicker(sl);return false}run.items.push(it);run.equip[sl]=null;refreshStats();saveRun();return true}
 function dropEquipment(uid,sl){const it=run.items.find(it=>it.uid===uid);if(!it||it.slot!==sl)return false;return equipBagItem(uid)}
 function gearText(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function crystalPurchasePriceBalance(t){return window.Econ154?Econ154.resourceBuyPrice(t,10):CRY_P[t]*30}
-function equipmentPanel(){let h='<div class="sec">SEU EQUIPAMENTO <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Armas aumentam o ataque. Armaduras aumentam o escudo."></span></div><div class="gear-layout">';for(const sl of EQUIP_SLOTS){const it=run.equip[sl];h+='<div class="gear-slot gear-'+sl+'" data-gear-slot="'+sl+'"><button class="mini" data-a="gearpick" data-v="'+sl+'"><b>'+EQUIP_LABEL[sl]+'</b><br><span style="color:'+(it?RAR[it.rar].c:'#89929d')+'">'+(it?gearText(it.name):'Vazio')+'</span></button>'+(it?'<small>'+gearText(statTxt(it).replace(/<[^>]*>/g,''))+'</small>'+(run.items.length<24?btn('Retirar','unequip',sl,true):btn('Trocar','gearpick',sl,true)):'<small>Clique para escolher uma peça</small>')+'</div>'}h+='<div class="gear-figure"><svg viewBox="0 0 100 190" role="img" aria-label="Silhueta do personagem com espaços de equipamento"><circle cx="50" cy="25" r="17" fill="'+(run.equip.h?'#e7bd6a':'#657080')+'"/><path d="M30 49 L70 49 L78 100 L62 115 L38 115 L22 100 Z" fill="'+(run.equip.a?'#aa8957':'#394354')+'"/><path d="M28 53 L14 62 L8 109 L21 111 L35 71 M72 53 L86 62 L92 109 L79 111 L65 71" fill="'+(run.equip.g?'#d8ad62':'#657080')+'"/><path d="M37 113 L48 113 L46 159 L31 159 Z M52 113 L63 113 L69 159 L54 159 Z" fill="#657080"/><path d="M31 154 H46 V175 H24 V163 Z M54 154 H69 L76 163 V175 H54 Z" fill="'+(run.equip.b?'#d8ad62':'#394354')+'"/>'+(run.equip.w?'<path d="M10 103 L5 49 L10 32 L15 49 Z" fill="#d9e4ef"/>':'')+'</svg><small>'+gearText(CLASSES[profile.cls].n)+'</small></div></div>'+relicPanel183();return h}
+function equipmentPanel(){let h='<div class="sec">SEU EQUIPAMENTO <span class="tipi" style="cursor:help;text-transform:none;font-weight:400" data-tip154="Armas aumentam o ataque. Armaduras aumentam o escudo."></span></div><div class="gear-layout">';for(const sl of EQUIP_SLOTS){const it=run.equip[sl];h+='<div class="gear-slot gear-'+sl+'" data-gear-slot="'+sl+'"><button class="mini" data-a="gearpick" data-v="'+sl+'"><b>'+EQUIP_LABEL[sl]+'</b><br><span style="color:'+(it?RAR[it.rar].c:'#89929d')+'">'+(it?gearText(it.name):'Vazio')+'</span></button>'+(it?'<small>'+gearText(statTxt(it).replace(/<[^>]*>/g,''))+'</small>'+(run.items.length<bagCapacity353()?btn('Retirar','unequip',sl,true):btn('Trocar','gearpick',sl,true)):'<small>Clique para escolher uma peça</small>')+'</div>'}h+='<div class="gear-figure"><svg viewBox="0 0 100 190" role="img" aria-label="Silhueta do personagem com espaços de equipamento"><circle cx="50" cy="25" r="17" fill="'+(run.equip.h?'#e7bd6a':'#657080')+'"/><path d="M30 49 L70 49 L78 100 L62 115 L38 115 L22 100 Z" fill="'+(run.equip.a?'#aa8957':'#394354')+'"/><path d="M28 53 L14 62 L8 109 L21 111 L35 71 M72 53 L86 62 L92 109 L79 111 L65 71" fill="'+(run.equip.g?'#d8ad62':'#657080')+'"/><path d="M37 113 L48 113 L46 159 L31 159 Z M52 113 L63 113 L69 159 L54 159 Z" fill="#657080"/><path d="M31 154 H46 V175 H24 V163 Z M54 154 H69 L76 163 V175 H54 Z" fill="'+(run.equip.b?'#d8ad62':'#394354')+'"/>'+(run.equip.w?'<path d="M10 103 L5 49 L10 32 L15 49 Z" fill="#d9e4ef"/>':'')+'</svg><small>'+gearText(CLASSES[profile.cls].n)+'</small></div></div>'+relicPanel183();return h}
 const GEAR166={slot:'all',sort:'bonus'};
 function gearBonus166(it){return it?(it.slot==='w'?itemAtk(it):itemSh(it)):0}
 /* v167 (Irror): peças da bolsa separadas em abas por tipo e ordenadas por bônus (dano/escudo), raridade ou valor; mostra a diferença para o que está equipado. */
-function bagGearRows156(){const all=run.items.filter(it=>EQUIP_SLOTS.includes(it.slot));let h='<div class="sec">PEÇAS NA BOLSA ('+run.items.length+'/24)</div>';if(!all.length)return h+'<div class="sysline">Nenhuma peça para equipar na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';
+function bagGearRows156(){const all=run.items.filter(it=>EQUIP_SLOTS.includes(it.slot));let h='<div class="sec">PEÇAS NA BOLSA ('+run.items.length+'/'+bagCapacity353()+')</div>';if(!all.length)return h+'<div class="sysline">Nenhuma peça para equipar na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';
   if(GEAR166.slot!=='all'&&!all.some(x=>x.slot===GEAR166.slot))GEAR166.slot='all';
   h+='<div class="tabs">'+btn('Todas ('+all.length+')','gtab166','all',true,GEAR166.slot==='all'?'on':'')+EQUIP_SLOTS.map(sl=>{const n=all.filter(x=>x.slot===sl).length;return n?btn(EQUIP_LABEL[sl]+' ('+n+')','gtab166',sl,true,GEAR166.slot===sl?'on':''):''}).join('')+'</div>';
   h+='<div class="tabs" style="font-size:12px">Ordenar: '+[['bonus','Maior bônus'],['rar','Raridade'],['value','Valor']].map(([k,n])=>btn(n,'gsort166',k,true,GEAR166.sort===k?'on':'')).join('')+'</div>';
@@ -3534,7 +3534,7 @@ function equipmentBaseValueBalance(t,sl,rar=0){return Math.max(1,Math.round((win
 function equipmentSaleValueBalance(it){const raw=Math.min(Math.max(0,it.value||0),equipmentBaseValueBalance(it.tier,it.slot,it.rar));const market=window.Econ154?Econ154.salePrice('equipment',raw):raw;return Math.round(Math.min(market,it.purchasePaidBalance!=null?it.purchasePaidBalance*.35:market))}
 function equipmentSellButton(it){const city=L.mode==='world'&&!!inCity(player.x,player.z);return btn('Vender · '+fmt(equipmentSaleValueBalance(it))+' ouro','sell',it.uid,city)+(city?'':'<small>Venda disponível na cidade.</small>')}
 function sellEquipment(uid){if(L.mode!=='world'||!inCity(player.x,player.z))return false;const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;const value=equipmentSaleValueBalance(run.items[i]);run.gold+=value;if(window.Econ154)Econ154.noteMarketSale('equipment',value);run.items.splice(i,1);toast('<b>[NARRADOR]</b> Vendido por '+fmt(value)+' ouro');return true}
-function gearPicker(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>gearPicker(sl);let h=equipmentPanel()+'<div class="sec">ESCOLHER '+EQUIP_LABEL[sl].toUpperCase()+'</div>'+(run.items.length>=24&&run.equip[sl]?'<div class="sysline">Bolsa cheia: escolha a peça nova. A '+gearText(EQUIP_LABEL[sl].toLowerCase())+' atual volta para a bolsa no lugar dela.</div>':'');const items=run.items.filter(it=>it.slot===sl);for(const it of items)h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab">'+gearText(it.name)+'</b>',statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it));if(!items.length)h+='<div class="sysline">Nenhuma peça desta posição na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';h+=btn('Voltar à Build','character','build');openModal('EQUIPAMENTOS',h)}
+function gearPicker(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>gearPicker(sl);let h=equipmentPanel()+'<div class="sec">ESCOLHER '+EQUIP_LABEL[sl].toUpperCase()+'</div>'+(run.items.length>=bagCapacity353()&&run.equip[sl]?'<div class="sysline">Bolsa cheia: escolha a peça nova. A '+gearText(EQUIP_LABEL[sl].toLowerCase())+' atual volta para a bolsa no lugar dela.</div>':'');const items=run.items.filter(it=>it.slot===sl);for(const it of items)h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab">'+gearText(it.name)+'</b>',statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it));if(!items.length)h+='<div class="sysline">Nenhuma peça desta posição na bolsa. Encontre em baús, compre com Kael ou fabrique na forja.</div>';h+=btn('Voltar à Build','character','build');openModal('EQUIPAMENTOS',h)}
 
 function itemAtk(it){return it&&it.slot==='w'?Math.round(WATK[Math.min(9,it.tier)]*gearQ(it)):0}
 function itemHp(it){return it&&EQUIP_SLOTS.includes(it.slot)&&it.slot!=='w'?Math.round(AHPV[Math.min(9,it.tier)]*gearQ(it)*equipFactor(it.slot)):0}
@@ -3583,7 +3583,7 @@ function basicWeaponReady259(){const w=run.equip.w;if(!w||!weaponFitsStyle259(w)
 function animWep173(){const w=run.equip.w;{const k272=weaponKind272(w);if(k272&&/^(sword|axe|mace|spear|hammer|bow|dagger)$/.test(k272))return k272==='spear'?'spear_throw':k272;if(weaponIsMagic173(w))return w.kind155||'staff'}if(basicIsMagic())return weaponIsMagic173(w)?w.kind155||'staff':'orb';if(bareArcher155())return 'bow_bare';if(!basicWeaponReady259())return 'fist';if(weaponIsMagic173(w))return 'mace';return w.kind155||basicAttackClass().wep||'fist';}
 function resetBasicPose259(){if(!player)return;player.combo=0;player.comboT=0;player.atkT=0;player.skillAnim155=null;player.aimPitch253=0;if(player.m){player.m.staffCast251=0;player.m.aimPitch253=0;}}
 function normalizeStyleWeapon259(){const w=run.equip.w;if(!w||weaponFitsStyle259(w))return;if(!run.items.some(i=>i.uid===w.uid))run.items.push(w);run.equip.w=null;store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows});}
-function prepareStyleWeapon259(magic){const w=run.equip.w;if(weaponFitsStyle259(w,magic))return true;if(run.items.length>=24){toast('Libere um espaço na bolsa para guardar a arma antes de trocar o estilo.');return false;}run.items.push(w);run.equip.w=null;refreshStats();toast('Arma guardada na bolsa. Equipe uma arma '+(magic?'mágica':'física')+' para este estilo.');return true;}
+function prepareStyleWeapon259(magic){const w=run.equip.w;if(weaponFitsStyle259(w,magic))return true;if(run.items.length>=bagCapacity353()){toast('Libere um espaço na bolsa para guardar a arma antes de trocar o estilo.');return false;}run.items.push(w);run.equip.w=null;refreshStats();toast('Arma guardada na bolsa. Equipe uma arma '+(magic?'mágica':'física')+' para este estilo.');return true;}
 function classBaseStats(){return RpgBalance.baseStats(run.level,profile.cls)}
 function atkOf(kind){const s=run.stats||{},w=run.equip.w,b=classBaseStats();return (kind==='mag'?b.magic:b.physical)+atkPer(run.level)*(kind==='mag'?(s.int||0):(s.for||0))+(w&&(kind==='mag')===weaponIsMagic173(w)?itemAtk(w):0)}
 function bonusPool(){const rk=rankOf(),tb=titleB(),cb=curseB(),fb=foodB(),stb=setB(),af=affB(),ms=run.mastery||0,rb=profile.rebirths||0,tr=tierOf(),rkB=(rk===9?1:rk*.1)*(.5+.5*Math.min(1,(run.level||1)/Math.max(1,GR[Math.min(9,rk)].lvl)));/* v214 (Ian): metade do bônus do rank já no nível 1; o resto volta com o nível */
@@ -3723,7 +3723,7 @@ function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2
 const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);return n.d<36*CITYK&&!cityFallen(n.c)};
 
 /* ================= NÍVEL: LIMPEZA ================= */
-function clearLevel(){FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
+function clearLevel(){if(window.Loot353)Loot353.clear();FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
   if(window.Rift131){for(const gate of gates)if(gate.mesh?.userData.rift131)Rift131.dispose(gate.mesh);if(L&&L.exits)for(const it of L.exits)if(it.grp?.userData.rift131)Rift131.dispose(it.grp);}if(riftLight131)riftLight131.intensity=0;if(riftSound131)riftSound131.silence();
   if(player&&player.mountM){scene.remove(player.mountM.root);player.mountM=null;run.mounted=false}
   if(L&&L.group)envDispose(L.group);scene.remove(L.group);chunks.clear();HASH.clear();
@@ -5164,13 +5164,13 @@ function setDrop153(boss){const g=L.gate,id=g&&g.set153,S=SETS153[id];if(!S)retu
   saveRun();return true}
 function rollItem(tier,boss,depth=0,minRarity=0){tier=Math.max(0,Math.min(9,tier));depth=Math.max(0,Math.min(2,depth));const red=L.gate&&L.gate.red;const w=(boss?RARWB:RARW).slice();if(red){w[2]+=10;w[3]+=5;w[4]+=1}const woven=!!(L.gate&&L.gate.rareCreated103),wovenB=woven?(L.gate.woven153||.15):0;const rar=Math.min(RAR.length-1,Math.max(minRarity,woven?1:0,wpick(w.map((w,i)=>({i,w}))).i+depth+(woven?1:0)));const it=makeItem(pick(EQUIP_SLOTS),tier,rar);if(depth)it.depth105=depth;if(woven){it.woven153=wovenB;it.name+=' (Tecido)'}if(unl('sets')&&rar>=1&&Math.random()<.3){it.set=pick(SETS).n;it.name+=' ['+it.set+']'}if(rar>=3&&Math.random()<.35){it.curse=pick(CURSES);it.name+=' (Amaldiçoado)'}return it}
 function dungeonEquipmentChance(e){if(L.mode!=='dungeon'||L.special||e.noExpLoot||e.rival||e.isBoss)return 0;const depth=dungeonFloorAt(e.z);return e.elite?.35+.1*depth:.08+.04*depth}
-function dropDungeonEquipment(e){const chance=dungeonEquipmentChance(e);if(chance<=0||Math.random()>=chance)return false;return addItem(rollItem(e.gr??L.gate.rank,false,dungeonFloorAt(e.z)))}
+function dropDungeonEquipment(e){const chance=dungeonEquipmentChance(e);if(chance<=0||Math.random()>=chance)return false;return corpseDrop353(e,{type:'equipment',item:rollItem(e.gr??L.gate.rank,false,dungeonFloorAt(e.z))})}
 function statTxt(it){return affTxt(it)+(it.slot==='w'?'+'+itemAtk(it)+' de ataque'+(weaponIsMagic173(it)?' mágico':' físico'):'+'+itemSh(it)+' de escudo')+(it.curse?' · MALDIÇÃO: '+it.curse.n+' ('+it.curse.d+')':'')+(it.set153?setText153(it):'')+(it.unique183&&UNIQ183[it.unique183]?' · <b style="color:#ff3d1e">ÚNICO:</b> '+UNIQ183[it.unique183].d:'')+(it.woven153?' · Tecido: +'+Math.round((it.woven153===1?.15:it.woven153)*100)+'% de ataque/escudo (incluído)':'')+(it.depth105?' · Andar '+(it.depth105+1)+': +'+(it.depth105*25)+'% de ataque/escudo (incluído)':'')+gearRuneText(it)}
 function addItem(it){
-  if(run.items.length>=24){const value=equipmentSaleValueBalance(it);run.gold+=value;if(window.Econ154)Econ154.noteMarketSale('equipment',value);toast('<b>[NARRADOR]</b> Bolsa cheia. '+it.name+' convertido por '+fmt(value)+' ouro.');return false}
+  if(run.items.length>=bagCapacity353()){const value=equipmentSaleValueBalance(it);run.gold+=value;if(window.Econ154)Econ154.noteMarketSale('equipment',value);toast('<b>[NARRADOR]</b> Bolsa cheia. '+it.name+' convertido por '+fmt(value)+' ouro.');return false}
   run.items.push(it);toast('<b>[NARRADOR]</b> Item na bolsa: <b style="color:'+RAR[it.rar].c+'">'+RAR[it.rar].n+' · '+it.name+'</b>. Abra a Bolsa para equipar.',3500);return true
 }
-function equipmentBagRoom(){if(run.items.length<24)return true;toast('<b>[NARRADOR]</b> Bolsa cheia. Libere um espaço antes de comprar ou forjar equipamentos.');return false}
+function equipmentBagRoom(){if(run.items.length<bagCapacity353())return true;toast('<b>[NARRADOR]</b> Bolsa cheia. Libere um espaço antes de comprar ou forjar equipamentos.');return false}
 /* v269 (Ian): o estoque de armas muda só a cada dia do jogo e a compra entrega o item mostrado (antes o tipo era sorteado de novo ao desenhar e ao comprar). */
 function shopWeaponKind269(t){const c=nearestCity(player.x,player.z).c,day=Math.floor(dayT/DAYLEN),h=(Math.imul(day+1,73856093)^Math.imul(t+1,19349663)^Math.imul(Math.round((c?c.x:0)+31*(c?c.z:0))+7,83492791))>>>0;return WEAPON_LOOT_KINDS[h%WEAPON_LOOT_KINDS.length]}
 /* v290 (Ian): a arma da sua classe fica sempre à venda; as outras mudam por dia */
@@ -5564,9 +5564,8 @@ function skillDesc(sk){if(!sk)return '';if(sk.combo261)return comboDescription26
 /* espólio de monstros */
 const LOOTP=['Presa','Couro','Essência','Osso','Garra','Escama','Gel','Pena','Chifre','Olho','Coração','Fragmento'];
 function lootName(e){const k=e.kind||e.name||'x';let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;const base=(e.name||'').replace(/^Elite /,'').replace(/ (Gélido|das Areias|do Pântano)$/,'');return LOOTP[h%LOOTP.length]+' de '+base}
-function dropLoot(e){if(e.rival||e.statue||e.rewardBlocked||!run)return;/* Espólios complementam o ouro; chefes não multiplicam a renda por mais 4,5. */const n=e.isBoss?1+(Math.random()<.5?1:0):e.elite?2:Math.random()<.4?1:0;if(!n)return;run.loot=run.loot||{};
-  const nm=e.isBoss?'Relíquia de '+(e.name||'Chefe'):lootName(e),v=Math.max(1,Math.round((e.gold||0)*(e.isBoss?.65:e.elite?.9:1.25))),L0=run.loot[nm]||(run.loot[nm]={n:0,v,b:!!e.isBoss});L0.n+=n;L0.v=Math.max(L0.v,v);
-  floater(e.x,e.z,'+'+n+' '+nm,e.isBoss?'#ffb84d':'#c9d3de',false,3.6)}
+function dropLoot(e){if(e.rival||e.statue||e.rewardBlocked||!run)return;const n=e.isBoss?1+(Math.random()<.5?1:0):e.elite?2:Math.random()<.4?1:0;if(!n)return;const name=e.isBoss?'Relíquia de '+(e.name||'Chefe'):lootName(e),value=Math.max(1,Math.round((e.gold||0)*(e.isBoss?.65:e.elite?.9:1.25)));corpseDrop353(e,{type:'material',name,n,value,b:!!e.isBoss})}
+
 function lootTotal(){let t=0;for(const k in run.loot||{})t+=run.loot[k].n*run.loot[k].v;return t}
 /* Nível numérico e ameaça são eixos independentes. Valores legados de e.xp/e.gold
    em eventos antigos não são compostos de novo: esta é a fonte final da recompensa. */
@@ -5586,17 +5585,18 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp,'monster');storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(trainingXpBalance(e))}
   bestKill(e.kind);
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
-  if(e.elite&&!e.isBoss&&Math.random()<.08){run.spts=(run.spts||0)+1;floater(e.x,e.z,'LIVRO DE HABILIDADE','#b18cff',true,3);toast('<b>[NARRADOR]</b> Livro de Habilidade obtido: <b>+1 ponto de habilidade</b> (Status).',4000);sfx('coin')}
+  if(e.elite&&!e.isBoss&&Math.random()<.08){corpseDrop353(e,{type:'book',n:1})}
   if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER ECO',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('DESPERTE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
-  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0){run.gold+=g;sfx('coin');floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',false,1.4)}
+  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0)corpseDrop353(e,{type:'gold',n:g})
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
   qev('kill',e);demandKill(e);
   if(e.expl){hazard(e.x,e.z,2.4,.6,e.dmg*1.5,'enemy',0xff6030)}
   if(e.nemesis){profile.nemKills=(profile.nemKills||0)+1;profile.nemesis=null;store.set('pds2_profile',profile);bigText('VINGANÇA',1400);toast('<b>[NÊMESIS]</b> Você derrotou quem te matou.',5000)}
-  if(!e.rival){const gr=e.gr??0,ch=e.isBoss||e.elite?1:(npcHas('Dorian')?.5:.35);if(Math.random()<ch){const n=e.isBoss?3:1;run.res.core[gr]+=n;floater(e.x,e.z,'+'+n+' núcleo '+GR[gr].id,'#b18cff',false,3)}}
-  if(e.rival){qev('pvp',e);toast('<b>[NARRADOR]</b> Caçador '+e.name+' derrotado. O ouro dele agora é seu.');}
+  if(!e.rival){const gr=e.gr??0,ch=e.isBoss||e.elite?1:(npcHas('Dorian')?.5:.35);if(Math.random()<ch){const n=e.isBoss?3:1;corpseDrop353(e,{type:'core',rank:gr,n})}}
+  if(e.rival){qev('pvp',e);toast('<b>[NARRADOR]</b> Caçador '+e.name+' derrotado. Vasculhe o corpo para recolher o saque.');}
   weaponXp(trainingXpBalance(e));if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
-  else if(Math.random()<.06){run.pots++;floater(e.x,e.z,'+POÇÃO','#ff8fa3',false,3)}
+  else if(Math.random()<.06)corpseDrop353(e,{type:'potion',n:1});
+  finishCorpse353(e);
 }
 function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;$('boss').hidden=true;
@@ -5928,7 +5928,7 @@ function juice233(e,mv,atk,wind,dt){if(e.a242)arch242tick(e,mv,atk,dt);const J=e
 function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);return}if(!e.gap168done){e.gap168done=1;if(!e.rival)levelGap168(e)}if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
-  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){scene.remove(e.m.root);e.gone=true}return}
+  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>1.4){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>6){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:e.raidAttack348>time?.7:0,dead:0,wind:0},e.t);return}}
   e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
@@ -6151,7 +6151,7 @@ function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.user
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
  const sd=r=>Math.hypot(P.x-clamp(P.x,Math.min(r[0],r[2]),Math.max(r[0],r[2])),P.z-clamp(P.z,Math.min(r[1],r[3]),Math.max(r[1],r[3]))),R=roadSegs(P.x,P.z,1).sort((a,b)=>sd(a)-sd(b));T.R.value.forEach((v,i)=>{const r=R[i];if(r)v.set(r[0],r[1],r[2],r[3]);else v.set(1e7,1e7,1e7,1e7)})}
-function update(dt){try{ter245tick();life243(dt);life244(dt)}catch(_){}
+function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(dt);life244(dt)}catch(_){}
   const P=player;
   let ix=input.x,iz=input.z;
   if(keys.KeyW||keys.ArrowUp)iz-=1;if(keys.KeyS||keys.ArrowDown)iz+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
@@ -6988,7 +6988,7 @@ function lootForgeQuote(sl,key,mode){
   return{tier,gold:mode==='up'&&!material.b?Math.ceil(base.gold*.75):base.gold,cry:mode==='up'&&!material.b?Math.max(1,Math.ceil(base.cry*.75)):base.cry,parts:mode==='new'?(material.b?3:10):(material.b?3+Math.floor(up/5):5+up),rar:material.b?2:1,safe:!!material.b};
 }
 function canLootForge(sl,key,mode,q=lootForgeQuote(sl,key,mode)){
-  return !!q&&unl('forge')&&L.mode==='world'&&!!inCity(player.x,player.z)&&run.loot[key].n>=q.parts&&run.gold>=q.gold&&cryUp(q.tier)>=q.cry&&(mode!=='new'||run.items.length<24)&&(mode!=='rune'||run.equip[sl].rune!==q.rune);
+  return !!q&&unl('forge')&&L.mode==='world'&&!!inCity(player.x,player.z)&&run.loot[key].n>=q.parts&&run.gold>=q.gold&&cryUp(q.tier)>=q.cry&&(mode!=='new'||run.items.length<bagCapacity353())&&(mode!=='rune'||run.equip[sl].rune!==q.rune);
 }
 function craftWithLoot(sl,key,mode){const q=lootForgeQuote(sl,key,mode);if(!canLootForge(sl,key,mode,q))return false;
   if(!spendService265(q.gold))return false;run.loot[key].n-=q.parts;spendCry(q.tier,q.cry);
@@ -7006,13 +7006,13 @@ function lootForgeView(sl){if(!EQUIP_SLOTS.includes(sl))return;view=()=>lootForg
   else h+=row('Peça: '+gearText(eq.name),'Passiva atual: '+(GEAR_RUNES[eq.rune]?.n||'nenhuma')+'.<br>Cada peça guarda uma passiva. Gravar outra substitui a atual. O bônus vale enquanto a peça estiver equipada; peças com a mesma passiva somam seus efeitos.','');
   h+='<div class="sec">3. ESCOLHA O MATERIAL</div>';
   if(!keys.length)h+='<div class="sysline">Você ainda não tem espólios.<br>Derrote monstros para conseguir partes e chefes para conseguir relíquias.</div>';
-  keys.forEach(k=>{const q=lootForgeQuote(sl,k,mode);if(!q)return;const ok=canLootForge(sl,k,mode,q),missing=[];if(!unl('forge'))missing.push('nível 12');if(run.loot[k].n<q.parts)missing.push((q.parts-run.loot[k].n)+' materiais');if(run.gold<q.gold)missing.push(fmt(q.gold-run.gold)+' ouro');if(cryUp(q.tier)<q.cry)missing.push((q.cry-cryUp(q.tier))+' cristais');if(mode==='new'&&run.items.length>=24)missing.push('espaço na bolsa');if(mode==='rune'&&eq.rune===q.rune)missing.push('esta passiva já está gravada');
+  keys.forEach(k=>{const q=lootForgeQuote(sl,k,mode);if(!q)return;const ok=canLootForge(sl,k,mode,q),missing=[];if(!unl('forge'))missing.push('nível 12');if(run.loot[k].n<q.parts)missing.push((q.parts-run.loot[k].n)+' materiais');if(run.gold<q.gold)missing.push(fmt(q.gold-run.gold)+' ouro');if(cryUp(q.tier)<q.cry)missing.push((q.cry-cryUp(q.tier))+' cristais');if(mode==='new'&&run.items.length>=bagCapacity353())missing.push('espaço na bolsa');if(mode==='rune'&&eq.rune===q.rune)missing.push('esta passiva já está gravada');
     h+=row(gearText(k)+' · '+run.loot[k].n+' disponíveis',(mode==='rune'?'<b>'+GEAR_RUNES[q.rune].n+'</b>: '+GEAR_RUNES[q.rune].d+'<br>':'')+'Custo: '+q.parts+' materiais · '+fmt(q.gold)+' ouro · '+q.cry+' cristais rank '+RANKS[q.tier].id+' ou superior.'+(missing.length?'<br><b>Falta:</b> '+missing.join(', ')+'.':''),btn(mode==='new'?'Criar':mode==='up'?'Melhorar':'Gravar','lootcraft',sl+'|'+mode+'|'+encodeURIComponent(k),ok));});
   h+=btn('Voltar ao Kael','equipshop',sl==='w'?'wep':'arm');openModal('KAEL · FORJA DE ESPÓLIOS',h);
 }
 function forgeRows(sl,pr){let h='<div class="sec">FORJAR (NÚCLEOS + CRISTAIS)</div><div class="sysline" style="font-size:12px">Cria equipamento do rank escolhido e envia à bolsa. Usa ouro, núcleos e cristais. Pode gerar raridades melhores que as da loja.</div>';for(let t=0;t<=9;t++){const gc=forgePrice265(sl,t),nc=run.res.core[t],cc=run.res.cry[t];
   h+=row('Forjar '+EQUIP_LABEL[sl].toLowerCase()+' <span class="rl" style="color:'+RANKS[t].c+'">'+GR[t].id+'</span>','5 núcleos + 5 cristais '+GR[t].id+' + '+fmt(gc)+' ouro · você tem '+nc+'/'+cc+' · raridade melhor que a loja',btn('Forjar','forge',sl+t,nc>=5&&cc>=5&&run.gold>=gc))}return h}
-function extraActions(a,v){if(a==='comboview261'){comboView261();return 'close0'}if(a==='comboset261'){comboConfigure261(String(v));comboView261();return 'close0'}if(a==='modalback118'){if(MODAL_NAV118.back.length||modalParent118())modalBack118();else closeModal();return 'close0'}if(a==='extractstart117'){startExtractionMission117();return 'close0'}if(a==='extractclaim117'){claimExtractionMission117();guildView('quests');return 'close0'}if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
+function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);if(handled)return handled;}if(a==='comboview261'){comboView261();return 'close0'}if(a==='comboset261'){comboConfigure261(String(v));comboView261();return 'close0'}if(a==='modalback118'){if(MODAL_NAV118.back.length||modalParent118())modalBack118();else closeModal();return 'close0'}if(a==='extractstart117'){startExtractionMission117();return 'close0'}if(a==='extractclaim117'){claimExtractionMission117();guildView('quests');return 'close0'}if(a==='professions114'){view=()=>openModal('PROFISSÕES',profRows());view();return 'close0'}
 
   if(a==='expact'){const [kind,index,op]=v.split('|');expAction(kind,Number(index),op);return 'close0'}
   if(a==='lootmode'){const [sl,mode]=v.split('|');L.lootMode=mode;lootForgeView(sl);return 'close0'}
@@ -7243,7 +7243,7 @@ function houseView(){view=houseView;const c=nearestCity(player.x,player.z).c,H=p
   if(hasF('altar')){const ok=H.altar!==todayKey();h+=row('Altar de Mana','3 poções por dia',btn(ok?'Pegar 3 poções':'Volte amanhã','haltar',0,ok))}
   if(hasF('trof')){const T=profile.trophies||[];h+='<div class="sec">TROFÉUS ('+T.length+') · +'+String(Math.round(trophyB()*1000)/10).replace('.',',')+'% de dano contra chefes</div><div class="sysline" style="font-size:12px">'+(T.join(' · ')||'Derrote guardiões para encher a estante.')+'</div>'}
   if(hasF('aqua')){const A=profile.aqua||{};h+='<div class="sec">AQUÁRIO</div><div class="sysline" style="font-size:12px">'+(Object.entries(A).map(([k,v])=>k+' '+String(v).replace('.',',')+' kg').join(' · ')||'Vazio. Vá pescar.')+'</div>'}
-  if(hasF('bau')){const B=H.chest=H.chest||[];h+='<div class="sec">BAÚ ('+B.length+'/20)</div>';B.forEach((it,i)=>{h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>',statTxt(it),btn('Pegar','hget',i,run.items.length<24))});
+  if(hasF('bau')){const B=H.chest=H.chest||[];h+='<div class="sec">BAÚ ('+B.length+'/20)</div>';B.forEach((it,i)=>{h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>',statTxt(it),btn('Pegar','hget',i,run.items.length<bagCapacity353()))});
     h+='<div class="sec">GUARDAR DA BOLSA</div>';run.items.forEach(it=>{h+=row('<span style="color:'+RAR[it.rar].c+'">'+it.name+'</span>',statTxt(it),btn('Guardar','hput',it.uid,B.length<20))})}
   openModal('CASA',h)}
 function houseAct(a,v){const H=profile.house;
@@ -7252,7 +7252,7 @@ function houseAct(a,v){const H=profile.house;
   if(a==='hsleep'){narratorEvent105('rest');run.rested={t:600,l:3};run.awake287=0;refreshStats();{const heal=innHeal287(3);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*heal);player.mp=Math.min(player.maxmp,player.mp+player.maxmp*heal)}player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('<b>[CASA]</b> Você dormiu em casa: recuperou '+Math.round(innHeal287(3)*100)+'% da vida e da mana. Bem descansado por 10 min.');return 'close'}
   if(a==='haltar'){if(H.altar===todayKey())return;H.altar=todayKey();run.pots+=3;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CASA]</b> +3 poções do Altar de Mana.');return true}
   if(a==='hput'){const B=H.chest=H.chest||[];if(B.length>=20)return;const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;B.push(run.items.splice(i,1)[0]);store.set('pds2_profile',profile);saveRun();return true}
-  if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=24)return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
+  if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=bagCapacity353())return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
 function buildHouse(c,g,E){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
   if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT))}
     const sg=makeCitySign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
@@ -7820,7 +7820,7 @@ function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODE
   lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,true,slot===k?'on165" data-tip154="Clique de novo para tirar da tecla '+(k+1):'')).join(''))});return h}
 function sellMonsterLoot(){const gold=lootTotal();if(gold<=0)return false;run.loot={};run.gold+=gold;toast('<b>[MERCADO]</b> Espólios vendidos: +'+fmt(gold)+' ouro. Cristais e núcleos preservados.');beep(990,.15,.05);return true}
 function mktView(){
-  view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false;
+  view=mktView;let h='<div class="sysline">Dorian: Núcleos e cristais de mana. Pago à vista. · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';let any=false;h+=bagShop353();
   for(const [k,nm,P] of[['core','Núcleo mágico',CORE_P],['cry','Cristal de mana',CRY_P]])for(let r=0;r<10;r++){const n=run.res[k][r];if(!n)continue;any=true;h+=row(nm+' <span class="rl" style="color:'+RANKS[r].c+'">'+GR[r].id+'</span> × '+n,fmt(sellP(k,r))+' ouro cada ('+arrow(r)+') · total '+fmt(n*sellP(k,r)),btn('Vender estes '+n,'sellres',k+r))}
   {const lt=run.loot||{},ks=Object.keys(lt).filter(k=>lt[k].n);if(ks.length){any=true;h+='<div class="sec">ESPÓLIOS DE MONSTROS</div>';for(const k of ks)h+=row((lt[k].b?'<b style="color:#ffb84d">'+k+'</b>':k)+' × '+lt[k].n,fmt(lt[k].v)+' ouro cada','')}}
   if(!any)h+='<div class="it"><div class="d"><small>Você não tem recursos. Monstros deixam núcleos. Veios nas masmorras dão cristais.</small></div></div>';
@@ -7898,7 +7898,7 @@ function bagItems(){
 
   
   h+=row('Equipamento','Veja e troque o que você usa em Personagem → Build.',btn('Abrir Build','character','build'));
-  h+='<div class="sec">BOLSA ('+run.items.length+'/24)</div>';
+  h+='<div class="sec">BOLSA ('+run.items.length+'/'+bagCapacity353()+')</div><div class="sysline">Melhore sua bolsa no Mercado. Materiais e consumíveis ficam separados.</div>';
   if(!run.items.length)h+='<div class="it"><div class="d"><small>Vazia. Monstros e baús das masmorras dão equipamentos.</small></div></div>';
   run.items.slice().sort((a,b)=>itemScore(b)-itemScore(a)).forEach(it=>{h+=row('<b draggable="true" data-gear-uid="'+gearText(it.uid)+'" style="cursor:grab;color:'+RAR[it.rar].c+'">'+gearText(it.name)+'</b><br>'+recoTag(it),EQUIP_LABEL[it.slot]+' · '+RAR[it.rar].n+' · rank '+rkN(it.tier)+' · '+statTxt(it),btn('Equipar','equip',it.uid,true)+equipmentSellButton(it))});
   h+='<div class="sec">RECURSOS</div>';const rs=[];for(let r=0;r<10;r++){if(run.res.core[r])rs.push(run.res.core[r]+' núcleo '+GR[r].id);if(run.res.cry[r])rs.push(run.res.cry[r]+' cristal '+GR[r].id)}
@@ -8784,3 +8784,5 @@ requestAnimationFrame(frame);
 <script src="tools/conspiracy333.js?v=335"></script>
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/workers350.js?v=351"></script>
+
+<script src="tools/loot353.js?v=353"></script>
