@@ -1,3 +1,8 @@
+## v378 — Correr sem gastar Estamina e corrida travada, 14/10/2026
+- Pedido de Ian: correr não gasta mais Estamina (Sprint373 sem dreno nem cansaço).
+- Toque rápido (<0,25 s) na tecla de correr trava a corrida; outro toque destrava; segurar continua funcionando. Código em tools/witcher377.js (RUNLOCK378).
+- Testado: andar 4,3 m/s, travado 6,5 m/s, Estamina não caiu, destravar volta a andar, sem erros.
+
 ## v377 — Câmera Witcher, travar alvo, corpo sólido, lampião e ciclo 14/10 min, 14/10/2026
 - Pedido de Ian: câmera como The Witcher 3 (perto, sobre o ombro direito, personagem à esquerda, volta devagar para trás ao andar; não gira ao andar para trás). Botão direito continua girando a câmera.
 - Travar câmera no alvo: botão do meio do mouse ou E (configurável). Ataques/magias miram o alvo travado; solta se morrer ou passar de 34 m. Anel vermelho no alvo.
