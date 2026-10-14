@@ -6290,13 +6290,15 @@ const pcCam={yaw:0,pitch:.20,distance:5.2,active:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
-function releaseCamera373(){pcCam.active=false;mouseHeld=false}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;pcCam.active=true;e.preventDefault()});
+let cameraDrag375=null;
+function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 addEventListener('pointerup',e=>{if(e.button===2)releaseCamera373()});
+$('c').addEventListener('lostpointercapture',releaseCamera373);
 addEventListener('pointercancel',releaseCamera373);
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});
 addEventListener('blur',releaseCamera373);
-addEventListener('mousemove',e=>{if(pcCam.active&&!(e.buttons&2)){releaseCamera373();return}if(pcCam.active&&!paused&&!modalOpen)cameraLook373(e.movementX,e.movementY)});
 let cameraTouch372=null;
 $('c').addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!started||paused||modalOpen||!$('gameMenu95').hidden||e.clientX<innerWidth*.5)return;cameraTouch372={id:e.pointerId,x:e.clientX,y:e.clientY};$('c').setPointerCapture(e.pointerId)});
 $('c').addEventListener('pointermove',e=>{const p=cameraTouch372;if(!p||p.id!==e.pointerId)return;cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
@@ -8100,7 +8102,7 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
 addEventListener('keyup',e=>{keys[e.code]=false});
 /* Segurar o botão do mouse ou a tecla de ataque continua atacando (PC). */
 let mouseHeld=false;
-$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&pcCam.active){mouseHeld=true;if(started&&!paused)attack()}});
+$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&!modalOpen){mouseHeld=true;if(started&&!paused)attack()}});
 addEventListener('mouseup',e=>{if(e.button===0)mouseHeld=false});addEventListener('blur',()=>{mouseHeld=false});
 function bindBtn(el,fn,hold){let iv=null;
   el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();el.classList.add('on');fn();if(hold)iv=setInterval(fn,120)});

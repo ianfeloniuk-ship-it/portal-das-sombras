@@ -1,3 +1,7 @@
+## v375 — Controles do mouse, 14/10/2026
+- Correção após relato de Ian: ataque esquerdo não depende mais do giro da câmera. Giro usa pointermove e deslocamento de coordenadas com captura durante botão direito, liberada ao soltar/cancelar/perder foco. Cursor permanece livre.
+- Sete verificações no jogo passaram: giro nos dois sentidos parado, liberação, ataque sem câmera, soltura e bloqueio por menu. Sem erros no console inspecionado. Base 68a24ff.
+
 ## v374 — Viajante e câmera, 14/10/2026
 - Caminhada/corrida humanas no modelo original; fatores .65/1.35 da velocidade-base (4,16/8,64 unidades/s na base 6,4 antes de terreno/bônus), cadência estimada 2,52/3,80 passos/s; Shift corre consumindo 16 vigor/s, esgotamento retorna à caminhada; Alt faz esquiva compacta de 0,32 s/2,72 m. Outros 22 clipes preservados.
 - Câmera em terceira pessoa, botão direito + arrastar, cursor livre para avisos/bestiário, distância fixa, inclinação contínua céu/chão, colisão. Sem zoom nem botões extras; correção de Ian incorporada. Carroça da v373 preservada.
