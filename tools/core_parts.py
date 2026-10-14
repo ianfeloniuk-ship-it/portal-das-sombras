@@ -24,7 +24,7 @@ def read(p):
 def write(p, s):
     p.parent.mkdir(parents=True, exist_ok=True)
     with open(p, 'w', encoding='utf-8', newline='') as f: f.write(s)
-def h(s): return hashlib.sha256(s.encode('utf-8')).hexdigest()
+def h(s): return hashlib.sha256(s.replace(chr(13)+chr(10),chr(10)).encode('utf-8')).hexdigest()  # igual em CRLF e LF
 
 def locate(game):
     m = OPEN_MARK.search(game)
