@@ -1,3 +1,10 @@
+## v379 — Correção urgente: andar sem parar / câmera girando, 14/10/2026
+- Relato de Ian: às vezes o personagem anda sem parar e a câmera buga. Causa provável: soltar Alt (esquiva) manda o foco para o menu do navegador no Windows e o jogo perde o keyup do W; com a câmera que segue o movimento (v377) ela girava junto.
+- Correção (tools/witcher377.js): Alt sem ação padrão na descida e na subida; todas as teclas são soltas quando a página perde o foco (blur, focusout, hasFocus falso, tecla Windows, pagehide).
+- Câmera só se realinha quando você anda quase para frente (não gira mais andando de lado).
+- Travar alvo saiu do E (já era Interagir) e foi para Caps Lock + botão do meio do mouse.
+- Testado: andar, Alt preventDefault, blur solta W e para o personagem, foco falso solta, foco normal mantém, sem erros.
+
 ## v378 — Correr sem gastar Estamina e corrida travada, 14/10/2026
 - Pedido de Ian: correr não gasta mais Estamina (Sprint373 sem dreno nem cansaço).
 - Toque rápido (<0,25 s) na tecla de correr trava a corrida; outro toque destrava; segurar continua funcionando. Código em tools/witcher377.js (RUNLOCK378).

@@ -8068,7 +8068,7 @@ $('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').
 
 /* ================= CONTROLES ================= */
 /* Teclas configuráveis (PC): cada ação pode ganhar outra tecla. */
-const KEYACT=[['jump','Pular','Space'],['sprint','Correr (segurar)','ShiftLeft'],['dodge','Esquiva','AltLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL'],['character','Personagem','KeyP'],['bestiary','Bestiário','KeyJ'],['news','Notícias','KeyN'],['orders','Ordens dos ecos','KeyO'],['style','Estilo físico/arcano','KeyX'],['mount','Montar / desmontar','KeyV'],['absorbed0','Poder absorvido 1','Digit1'],['absorbed1','Poder absorvido 2','Digit2'],['absorbed2','Poder absorvido 3','Digit3'],['fusion','Poder fundido','Digit4'],['combo261','Combinação de técnicas','Digit6'],['lock377','Travar câmera no alvo','KeyE']];
+const KEYACT=[['jump','Pular','Space'],['sprint','Correr (segurar)','ShiftLeft'],['dodge','Esquiva','AltLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL'],['character','Personagem','KeyP'],['bestiary','Bestiário','KeyJ'],['news','Notícias','KeyN'],['orders','Ordens dos ecos','KeyO'],['style','Estilo físico/arcano','KeyX'],['mount','Montar / desmontar','KeyV'],['absorbed0','Poder absorvido 1','Digit1'],['absorbed1','Poder absorvido 2','Digit2'],['absorbed2','Poder absorvido 3','Digit3'],['fusion','Poder fundido','Digit4'],['combo261','Combinação de técnicas','Digit6'],['lock377','Travar câmera no alvo','CapsLock']];
 const KEYRES=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape']);
 let KEYMAP={};try{KEYMAP=JSON.parse(localStorage.getItem('pds_keys'))||{}}catch(e){}
 if(/^Shift(Left|Right)$/.test(KEYMAP.dodge||''))delete KEYMAP.dodge;
@@ -8901,4 +8901,4 @@ requestAnimationFrame(frame);
 <script src="tools/living372.js?v=372"></script>
 <script src="tools/firearms372.js?v=372"></script>
 <!-- pds-v377: câmera Witcher, lock-on, colisão, lampião de viagem -->
-<script src="tools/witcher377.js?v=378"></script>
+<script src="tools/witcher377.js?v=379"></script>

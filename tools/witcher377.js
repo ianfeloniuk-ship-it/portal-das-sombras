@@ -60,7 +60,7 @@
     P.m.root.position.x=P.x;P.m.root.position.z=P.z;
   }
   const upd0=update;
-  update=function(dt){const r=upd0.apply(this,arguments);try{solid()}catch(err){if(!W377.err){W377.err=1;console.warn('solid377',err)}}try{lanternTick(dt)}catch(err){if(!W377.lerr){W377.lerr=1;console.warn('lantern377',err)}}return r};
+  update=function(dt){try{W377.guard()}catch(_){}const r=upd0.apply(this,arguments);try{solid()}catch(err){if(!W377.err){W377.err=1;console.warn('solid377',err)}}try{lanternTick(dt)}catch(err){if(!W377.lerr){W377.lerr=1;console.warn('lantern377',err)}}return r};
 
   /* ---------- Câmera estilo The Witcher ---------- */
   const cam0=camUpdate;
@@ -79,7 +79,7 @@
         const mv=Math.hypot(P.x-W377.lastX,P.z-W377.lastZ)/dt;
         const want=P.face+Math.PI,off=angDiff(want,pcCam.yaw);
         /* andando para trás (rumo à câmera) ela não gira; para frente/lados volta devagar */
-        if(mv>1&&Math.abs(off)<1.9){const k=Math.min(1,mv/8)*Math.cos(off*.8);pcCam.yaw+=off*(1-Math.exp(-1.1*Math.max(0,k)*dt))}
+        if(mv>1&&Math.abs(off)<1.1){const k=Math.min(1,mv/8)*Math.cos(off*.8);pcCam.yaw+=off*(1-Math.exp(-1.1*Math.max(0,k)*dt))}
       }
       W377.lastX=P.x;W377.lastZ=P.z;
     }
@@ -120,6 +120,16 @@
     else if(lv>=3&&L.mode==='world'&&ENV.ok&&cur>.01&&typeof hemi!=='undefined')hemi.intensity+=.05*(lv-2)*cur*night;
   }
   W377.lantern=lanternTick;
+
+  /* v379 (Ian): teclas presas — "ando sem parar e a câmera buga". Soltar Alt (esquiva) manda o foco para o menu do
+     navegador e o jogo perde o "soltou W". Bloqueia isso e solta todas as teclas sempre que a página perde o foco. */
+  function releaseAll379(){try{for(const k in keys)keys[k]=false;input.x=0;input.z=0;mouseHeld=false}catch(_){}try{CM154.held.clear()}catch(_){}}
+  W377.releaseAll=releaseAll379;
+  addEventListener('keyup',e=>{if(e.key==='Alt'||e.code==='AltLeft'||e.code==='AltRight'){e.preventDefault();keys.AltLeft=keys.AltRight=false}},true);
+  addEventListener('keydown',e=>{if(e.key==='Alt'||e.code==='AltRight')e.preventDefault();if(e.key==='Meta'||e.code==='MetaLeft'||e.code==='MetaRight')releaseAll379()},true);
+  document.addEventListener('focusout',e=>{if(!e.relatedTarget&&!document.hasFocus())releaseAll379()});
+  addEventListener('pagehide',releaseAll379);
+  W377.guard=function(){if(!document.hasFocus()||document.hidden){if(Object.keys(keys).some(k=>keys[k])||mouseHeld)releaseAll379()}};
 
   /* v378 (Ian): toque rápido na tecla de correr trava a corrida; outro toque destrava. Segurar continua funcionando. */
   let down378=0;window.RUNLOCK378=false;
