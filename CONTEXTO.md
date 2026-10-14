@@ -1,3 +1,11 @@
+## v390 — Habilidades e passivas em qualquer lugar, 14/10/2026
+- Pedido de Ian (áudio): coisas do próprio personagem (sem comprar/vender itens) não podem exigir cidade/acampamento.
+- `canRedistribute()` agora vale em qualquer lugar (só não morto). Liberados fora da cidade: equipar/trocar habilidades, combinar técnicas, talentos de rank (escolher e redistribuir), redistribuir atributos, preparar formas, aprender despertar e afinidade. Partes: 450-oraculos, 160-jogador, tools/combo261.js, tools/kit111-runtime.js, 660-runtime111-cont.
+- Lista de melhorar habilidades: mostra só as habilidades em uso; as aprendidas fora de uso viram só um aviso ("equipe primeiro").
+- Textos ligados atualizados: "Troque a combinação a qualquer momento", "redistribuir a qualquer momento", "Gratuito por enquanto, em qualquer lugar", "Prepare esta forma/formas no menu do personagem", "Aprendizado e escolha de afinidade podem ser feitos em qualquer lugar".
+- Continuam só na cidade (envolvem loja/serviço ou classe): vender, forja, trocar de trabalho/classe, bolsas, defesas, regiões.
+- Testado fora da cidade: trocar Corte Giratório ↔ Investida (HUD atualiza), botões de Equipar ativos, combinação, textos novos. Sem erros.
+
 ## Regra para IAs (14/10/2026)
 - Pedido de Ian: toda IA (ChatGPT/Codex, Claude) é obrigada a ler `AGENTS.md` e seguir a skill `docs/skills/primeva-codigo.md` antes de mexer no jogo.
 
