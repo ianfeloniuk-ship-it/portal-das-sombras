@@ -37,32 +37,46 @@
      Nadando: corpo deitado, braçadas alternadas (crawl), pernas batendo. Parado: boiando em pé, braços
      abrindo e fechando e pernas pedalando. Rotações em graus no espaço do personagem (x = frente). */
   const D=Math.PI/180,e=new THREE.Euler(),ORDER=['hips','spine','chest','neck','head','upperarm_l','forearm_l','upperarm_r','forearm_r','thigh_l','shin_l','thigh_r','shin_r'];
+  /* v395 (Ian: "nado feio e bugado"): braçada de crawl em volta completa (puxa por baixo, volta por cima,
+     antes ia e voltava no mesmo caminho), corpo deita girando pelo quadril (antes girava pelos pés, afundava e
+     ia parar 2 m atrás, deitado de costas), cabeça para fora, parado = braços remando embaixo d'água, anel de rank escondido. */
   function swimPose(t,moving){const s=Math.sin,c=Math.cos;
-    if(moving){const a=t*5.2,k=t*10.4;return {
-      head:[-35,0,0],neck:[-15,0,0],chest:[0,s(a)*10,0],
-      upperarm_l:[-95+95*s(a),0,10],forearm_l:[-25*Math.max(0,c(a)),0,0],
-      upperarm_r:[-95-95*s(a),0,-10],forearm_r:[-25*Math.max(0,-c(a)),0,0],
-      thigh_l:[12*s(k),0,0],shin_l:[18+12*s(k+1),0,0],thigh_r:[-12*s(k),0,0],shin_r:[18-12*s(k+1),0,0]}}
-    const a=t*2.6;return {
-      spine:[8,0,0],upperarm_l:[-25,0,55+18*s(a)],forearm_l:[-20,0,0],upperarm_r:[-25,0,-55-18*s(a)],forearm_r:[-20,0,0],
-      thigh_l:[-35+20*s(a*1.6),0,0],shin_l:[45+15*s(a*1.6+1),0,0],thigh_r:[-35-20*s(a*1.6),0,0],shin_r:[45-15*s(a*1.6+1),0,0]}}
+    if(moving){const a=t*4.2,k=t*9;
+      const arm=(ph)=>{const f=((ph%(2*Math.PI))+2*Math.PI)%(2*Math.PI),rec=f>Math.PI?s(f-Math.PI):0;return {x:-180+f*180/Math.PI,z:rec*35,el:-15-rec*70}};
+      const L=arm(a),R=arm(a+Math.PI),roll=s(a)*14;return {
+      head:[-40,-s(a)*12,0],neck:[-20,0,0],spine:[0,roll*.5,0],chest:[0,roll,0],
+      upperarm_l:[L.x,0,L.z],forearm_l:[L.el,0,0],upperarm_r:[R.x,0,-R.z],forearm_r:[R.el,0,0],
+      thigh_l:[14*s(k),0,0],shin_l:[16+14*s(k-1),0,0],thigh_r:[-14*s(k),0,0],shin_r:[16-14*s(k-1),0,0]}}
+    const a=t*2.4;return {
+      head:[-6,0,0],spine:[6,0,0],
+      upperarm_l:[-35+12*s(a),0,18],forearm_l:[-30-10*s(a),0,0],upperarm_r:[-35+12*s(a),0,-18],forearm_r:[-30-10*s(a),0,0],
+      thigh_l:[-30+18*s(a*1.5),0,0],shin_l:[40+14*s(a*1.5+1),0,0],thigh_r:[-30-18*s(a*1.5),0,0],shin_r:[40-14*s(a*1.5+1),0,0]}}
   function applyPose(P,pose){const m=P.m,root=m.root;root.updateMatrixWorld(true);const charQ=root.getWorldQuaternion(new THREE.Quaternion());
     for(const n of ORDER){const r=pose[n],b=m.bones[n];if(!r||!b||!b.parent)continue;e.set(r[0]*D,r[1]*D,r[2]*D,'XYZ');
       const dl=new THREE.Quaternion().setFromEuler(e),dw=charQ.clone().multiply(dl).multiply(charQ.clone().invert()),bw=b.getWorldQuaternion(new THREE.Quaternion()),pw=b.parent.getWorldQuaternion(new THREE.Quaternion());
       b.quaternion.copy(pw.invert().multiply(dw.multiply(bw)));b.updateMatrixWorld(true)}}
-  let warned=false,lastX=0,lastZ=0,tilt=0,lastT=performance.now();
+  const HIP=.95,PRONE=1.35; // + = de bruços (o antigo -1,15 deitava de costas, cabeça para trás)
+  function aura(P,on){for(const ch of P.m.root.children)if(ch.isMesh&&ch.geometry?.type==='RingGeometry')ch.visible=on}
+  let warned=false,lastX=0,lastZ=0,tilt=0,lastT=performance.now(),moveT=0;
   function swimFrame(P){
     const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000);lastT=now;
-    const sw=!!P&&!P.dead&&!run?.mounted&&depthAt(P.x,P.z)>SWIM_DEPTH;W.swimming=sw;
-    if(!sw){W.body=BODY;if(P&&P.swim391){P.swim391=false;tilt=0;P.m.root.rotation.x=0}return}
-    const moved=Math.hypot(P.x-lastX,P.z-lastZ)>.002;lastX=P.x;lastZ=P.z;W.moving=moved;
-    P.swim391=true;
+    const d=P&&!P.dead&&!run?.mounted?depthAt(P.x,P.z):0,sw=d>(P?.swim391?SWIM_DEPTH-.15:SWIM_DEPTH);W.swimming=sw;
+    if(!sw){W.body=BODY;W.off=null;if(P&&P.swim391){P.swim391=false;tilt=0;moveT=0;P.m.root.rotation.x=0;aura(P,true)}return}
+    const step=Math.hypot(P.x-lastX,P.z-lastZ);lastX=P.x;lastZ=P.z;moveT=step>.002?.15:Math.max(0,moveT-dt);const moved=moveT>0;W.moving=moved;
+    if(!P.swim391){tilt=0;aura(P,false)}P.swim391=true;W.body=BODY;
     // volta à pose parada antes de aplicar o nado, para a caminhada não misturar com as braçadas
     try{animChibi(P.m,{move:0,atk:0,dead:0,wind:0,wep:animWep173()},time)}catch(_){}
+    const root=P.m.root;root.rotation.x=0;root.rotation.order='YXZ';
     if(!(window.Anim303&&Anim303.active()))applyPose(P,swimPose(now/1000,moved));
-    const want=moved?-1.15:-.12;W.body=(W.body??BODY)+((moved?.45:BODY)-(W.body??BODY))*Math.min(1,dt*5);tilt+=(want-tilt)*Math.min(1,dt*6);P.m.root.rotation.order='YXZ';P.m.root.rotation.x=tilt+Math.sin(now*.004)*.04;
+    const want=moved?PRONE:.1;tilt+=(want-tilt)*Math.min(1,dt*5);const bob=Math.sin(now*.004)*.04;
+    // gira pelo quadril: compensa a posição dos pés para o quadril ficar no lugar e as costas na linha d'água
+    const th=tilt+bob,k=tilt/PRONE,fx=Math.sin(P.face),fz=Math.cos(P.face);
+    const back=HIP*Math.sin(th),up=HIP*(1-Math.cos(th))+k*.12;
+    root.rotation.x=th;W.off={x:-fx*back,z:-fz*back,y:up+bob*.5};
     if(!warned){warned=true;toast('<b>[NADO]</b> Você está nadando: mais devagar, mas atravessa rios e lagos sem ponte.',3500)}
   }
   W.pose=swimPose;W.frame=swimFrame;
+  /* o loop recoloca o corpo em (P.x,0,P.z) depois da animação; o deslocamento do nado entra no gancho root */
+  if(window.Anim303){const r0=Anim303.root;Anim303.root=function(P){const r=r0?r0.apply(this,arguments):undefined;try{if(P===player&&P.swim391&&W.off){const o=P.m.root.position;o.x+=W.off.x;o.z+=W.off.z;o.y+=W.off.y}}catch(_){}return r}}
   if(window.Anim303){const p0=Anim303.post;Anim303.post=function(P){const r=p0.apply(this,arguments);try{if(P===player)swimFrame(P)}catch(_){}return r}}
 })();

@@ -1,3 +1,9 @@
+## v395 — Nado corrigido, 14/10/2026
+- Pedido de Ian: "o jeito que o viajante tá nadando é muito feio e bugado". Problemas achados (tools/water391.js): o corpo deitava de COSTAS com a cabeça para trás e girava pelos pés (ia parar 2 m atrás do ponto real e afundava); a braçada ia e voltava pelo mesmo caminho (parecia abanar); parado, os braços ficavam erguidos acima da cabeça; o anel de rank aparecia torto debaixo d'água; a posição do nado era sobrescrita pelo loop (agora entra no gancho Anim303.root).
+- Agora: de bruços, girando pelo quadril, costas na linha d'água e cabeça para fora; crawl em volta completa (puxa por baixo, volta por cima, cotovelo dobrado na volta, rolagem do tronco); pernas batendo; parado = em pé com ombros fora e braços remando embaixo; anel de rank some na água; entrada/saída com folga de 15 cm para não piscar na margem.
+- Correção ligada (580-bloco-b): a água do lago subia sempre 2,5 m, mas onde há estrada perto a bacia é mais rasa — a superfície desenhada ficava ~0,6 m acima da usada pelo nado (o herói sumia). Água e margem agora sobem o quanto a bacia realmente afunda.
+- Testado com print: lago parado e nadando (braçadas alternadas saindo da água), rio, saída para a margem (pose volta ao normal). Sem erros.
+
 ## v394 — Magote, Magote Fendido e Magote Abissal (família 009), 14/10/2026
 - Pedido de Ian: fila de modelos do catálogo a partir da família 009. Fichas v006 Frente/Costas/Lado do Drive; Tripo Studio H3.1 multivista, 60 créditos por forma (180), sem rig pago.
 - Blender: 24 mil triângulos, comprimento oficial 1,2/1,2/1,4 m (altura 0,46/0,42/0,53), cadeia de ossos nos segmentos (6/7/6, achados pelas dobras) para rastejar por compressão/extensão, osso dos lobos olfativos que pulsa. Fendido: 386 ilhas de cristal com peso rígido (não esticam). Abissal: segmentos com peso rígido (separam na morte) e 4 cristais orbitais criados no Blender (o Tripo omitiu).
