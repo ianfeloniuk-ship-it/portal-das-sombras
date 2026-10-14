@@ -245,7 +245,7 @@
     const sp=(dt||0)/SH195.draw;S.s=target>S.s?Math.min(target,S.s+sp):Math.max(target,S.s-sp*(busy?2:1));
     const B=m.bones,ch=B.chest||B.spine;if(!ch)return;const rq=m.root.getWorldQuaternion(new T.Quaternion()),F=new T.Vector3(0,0,1).applyQuaternion(rq),U=new T.Vector3(0,1,0),R=new T.Vector3(-1,0,0).applyQuaternion(rq);
     // braço vai ao ombro no meio do movimento de sacar/guardar
-    if(S.s>.12&&S.s<.88&&B.upperarm_r&&B.forearm_r&&B.hand_r&&!m.bowHolder155&&m.kind195!=='dagger'){aimBone168(B.upperarm_r,B.forearm_r,U.clone().multiplyScalar(.9).addScaledVector(F,-.35).addScaledVector(R,.25));aimBone168(B.forearm_r,B.hand_r,U.clone().multiplyScalar(.4).addScaledVector(F,-.8).addScaledVector(R,-.4));m.root.updateMatrixWorld(true)}
+    if(!st.dodge&&S.s>.12&&S.s<.88&&B.upperarm_r&&B.forearm_r&&B.hand_r&&!m.bowHolder155&&m.kind195!=='dagger'){aimBone168(B.upperarm_r,B.forearm_r,U.clone().multiplyScalar(.9).addScaledVector(F,-.35).addScaledVector(R,.25));aimBone168(B.forearm_r,B.hand_r,U.clone().multiplyScalar(.4).addScaledVector(F,-.8).addScaledVector(R,-.4));m.root.updateMatrixWorld(true)}
     if(S.s<=0)return;const cp=ch.getWorldPosition(new T.Vector3());
     for(const W of [m.socket,m.bowHolder155]){if(!W||!W.parent||!W.children.length)continue;const axis=sheathAxis195(W);if(!axis)continue;
       W.userData.base195={p:W.position.clone(),q:W.quaternion.clone(),s:W.scale.clone()};W.updateMatrixWorld(true);
@@ -259,13 +259,13 @@
     if(!m.a155)setup155(m);const A=m.a155;let a;
     if(st.dead>0)play155(A,'morte',.12,true);
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
+    else if(st.dodge){a=play155(A,'esquiva',.045,true,A.state!=='esquiva');a.timeScale=a.getClip().duration/.32;A.state='esquiva'}
     else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
     else if(st.atk>0){const seq=ATK155[m.staff174&&/^(staff|bonestaff|wand|tome|orb)$/.test(st.wep||'')?'staff':st.wep]||ATK155.fist,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
       const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
-    else if(st.dodge){a=play155(A,'esquiva',.05,true);a.timeScale=a.getClip().duration/.38;A.state='esquiva'}
     else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
-    else{A.state=null;if((st.move||0)>.08){a=play155(A,'correr',.15);a.timeScale=.65+.5*Math.min(1,st.move)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
+    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?1.8:4.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
     A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
     for(const p of A.pairs){
