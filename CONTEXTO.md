@@ -1,3 +1,8 @@
+## v386 — Trava contra tecla presa, 14/10/2026
+- Ian: o andar sozinho acontece fora do gelo (v385 não era a causa). No PC só as teclas movem o personagem, então o keyup se perde (alerta/janela do navegador, troca de foco).
+- Trava (tools/climb383.js, KEYWATCH386): segurando uma tecla o Windows repete o keydown; se a última tecla de movimento parar de repetir por 1,2 s sem keyup, as teclas de movimento são soltas. KEYWATCH386.fixes conta quantas vezes agiu.
+- Testado: segurar W com repetição mantém andando; sem keyup para em ~1,2 s; apertar/soltar normal funciona.
+
 ## v385 — Andar sem tocar em nada, 14/10/2026
 - Relato de Ian: personagem anda sozinho. Causa encontrada: no gelo (rios/lagos congelados da neve) o deslize depois de soltar as teclas levava ~14 s para parar, devagar. Agora para em ~1 s (1,6 m de deslize a partir da corrida). tools/climb383.js.
 - Reforço: soltar tecla é registrado na fase de captura (nenhum outro código consegue engolir o keyup); teclas soltas ao sair da janela sem foco.

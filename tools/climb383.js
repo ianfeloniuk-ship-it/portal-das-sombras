@@ -79,4 +79,13 @@
   iceMove240=function(P,vx,vz,dt){const r=ice0(P,vx,vz,dt);if(r&&!vx&&!vz&&P.iv240){const k=Math.exp(-3*dt);P.iv240.x*=k;P.iv240.z*=k;if(Math.hypot(P.iv240.x,P.iv240.z)<.3)P.iv240.x=P.iv240.z=0}return r};
   addEventListener('keyup',e=>{try{keys[e.code]=false}catch(_){}},true);
   document.addEventListener('mouseleave',()=>{try{if(!document.hasFocus())for(const k in keys)keys[k]=false}catch(_){}});
+
+  /* v386 (Ian: anda sozinho fora do gelo): o jogo às vezes não recebe o keyup (janela/alerta do navegador, troca de foco).
+     Enquanto uma tecla está segura o Windows repete o keydown (~30x/s). Se a ÚLTIMA tecla apertada parou de repetir
+     por 1,2 s e o keyup não veio, ela não está mais segura: soltamos. */
+  const MOVE386=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+  const W386=window.KEYWATCH386={last:null,at:0,fixes:0};
+  addEventListener('keydown',e=>{W386.last=e.code;W386.at=performance.now()},true);
+  addEventListener('keyup',e=>{if(e.code===W386.last)W386.last=null},true);
+  setInterval(()=>{try{const k=W386.last;if(!k||!MOVE386.includes(k)||!keys[k])return;if(performance.now()-W386.at>1200){for(const m of MOVE386)keys[m]=false;W386.last=null;W386.fixes++}}catch(_){}},200);
 })();
