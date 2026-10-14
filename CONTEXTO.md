@@ -1,3 +1,7 @@
+## v387 — Chuva visível, 14/10/2026
+- Relato de Ian: aviso "Começou a chover" sem chuva. A chuva eram 700 pontos de 0,09 roxos, invisíveis. Agora tools/rain387.js: 2600 gotas finas (InstancedMesh; linhas THREE não renderizam com o shader do relevo) caindo inclinadas com vento ao redor da câmera, mais fracas à noite. Regra do clima inalterada.
+- Testado com print na cidade de dia. A neve continua com os pontos antigos (conferir se Ian reclamar).
+
 ## v386 — Trava contra tecla presa, 14/10/2026
 - Ian: o andar sozinho acontece fora do gelo (v385 não era a causa). No PC só as teclas movem o personagem, então o keyup se perde (alerta/janela do navegador, troca de foco).
 - Trava (tools/climb383.js, KEYWATCH386): segurando uma tecla o Windows repete o keydown; se a última tecla de movimento parar de repetir por 1,2 s sem keyup, as teclas de movimento são soltas. KEYWATCH386.fixes conta quantas vezes agiu.
