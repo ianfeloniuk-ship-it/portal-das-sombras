@@ -1,7 +1,7 @@
 ## v374 — Viajante e câmera, 14/10/2026
-- Caminhada/corrida humanas no modelo original; Shift corre consumindo 16 vigor/s, esgotamento retorna à caminhada; Alt faz esquiva compacta de 0,32 s/2,72 m. Outros 22 clipes preservados.
-- Câmera em terceira pessoa, mouse direto, distância fixa, inclinação contínua céu/chão, colisão e Esc libera cursor. Sem zoom nem botões extras; correção de Ian incorporada. Carroça da v373 preservada.
-- Integração sobre 0571eb1; 23 testes de movimento e 8 de câmera passaram novamente, sintaxe/build conferidos e prévia visual inspecionada. Celular físico não validado. Publicação explicitamente solicitada por Ian nesta sessão.
+- Caminhada/corrida humanas no modelo original; fatores .65/1.35 da velocidade-base (4,16/8,64 unidades/s na base 6,4 antes de terreno/bônus), cadência estimada 2,52/3,80 passos/s; Shift corre consumindo 16 vigor/s, esgotamento retorna à caminhada; Alt faz esquiva compacta de 0,32 s/2,72 m. Outros 22 clipes preservados.
+- Câmera em terceira pessoa, botão direito + arrastar, cursor livre para avisos/bestiário, distância fixa, inclinação contínua céu/chão, colisão. Sem zoom nem botões extras; correção de Ian incorporada. Carroça da v373 preservada.
+- Integração sobre 0571eb1; 23 testes de movimento e 12 de câmera/cursor passaram novamente; aviso do bestiário clicado e aberto, sintaxe/build conferidos e prévia visual inspecionada. Celular físico não validado. Publicação explicitamente solicitada por Ian nesta sessão.
 
 ## v373 — Mundo vivo e segurança de retorno, 13/10/2026
 

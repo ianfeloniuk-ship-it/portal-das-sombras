@@ -265,7 +265,7 @@
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
       const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
     else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
-    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?1.8:4.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
+    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?3.2:6.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
     A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
     for(const p of A.pairs){

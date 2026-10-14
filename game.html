@@ -5722,7 +5722,7 @@ function projectileBody253(e){const m=e.m;let b=m?.projectileBounds253;
   return {x:e.x,y:terrH(e.x,e.z)+(m?.root?.position.y||0)+lift+(low+high)/2,z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
 }
 let aimCache253=null;
-function aimPoint(){if(pcCam.active){mouseAim.x=W/2;mouseAim.y=H/2;mouseAim.ok=true}if(touch||!mouseAim.ok)return null;
+function aimPoint(){if(touch||!mouseAim.ok)return null;
   const key=[time,mouseAim.x,mouseAim.y,camera.position.x,camera.position.y,camera.position.z,camera.quaternion.x,camera.quaternion.y,camera.quaternion.z].join(':');
   if(aimCache253?.key===key){aimV.copy(aimCache253.point);aimV.enemy253=aimCache253.enemy;return aimV;}
   const rc=renderer.domElement.getBoundingClientRect();aimRay.setFromCamera({x:(mouseAim.x-rc.left)/(rc.width||W)*2-1,y:-((mouseAim.y-rc.top)/(rc.height||H))*2+1},camera);
@@ -6217,7 +6217,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     if(P.dodgeT>0){const before372=P.dodgeT,step372=Math.min(dt,before372);P.dodgeT-=dt;const u0=1-before372/.32,u1=1-Math.max(0,P.dodgeT)/.32,envelope372=P.dashSpd?1:.4+.3*(Math.cos(Math.PI*u0)-Math.cos(Math.PI*u1))/Math.max(1e-6,u1-u0);const sp=(P.dashSpd||8.5)*envelope372;moveEnt(P,P.dir.x*sp*step372,P.dir.z*sp*step372);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{execute:P.dashDmg.execute,kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted||sprintState372.running?1:Sprint373.walkFactor);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
+    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted?1:sprintState372.running?Sprint373.runFactor:Sprint373.walkFactor);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
     const moved372=Math.hypot(P.x-motionX372,P.z-motionZ372);Sprint373.spend(sprintState372,martialState260(),dt,moved372>.002,resourceWait263('vigor'));
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     {stepVertical357(P,dt);COLY344=0}
@@ -6285,17 +6285,18 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
-/* Terceira pessoa: mouse controla a câmera durante o jogo; Esc libera o cursor. */
+/* Terceira pessoa: botão direito gira; cursor livre para avisos e menus. */
 const pcCam={yaw:0,pitch:.20,distance:5.2,active:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
-addEventListener('contextmenu',e=>{if(!touch)e.preventDefault()});
-function releaseCamera373(){pcCam.active=false;$('c').style.cursor='';if(document.pointerLockElement)document.exitPointerLock();mouseHeld=false}
-$('c').addEventListener('click',e=>{if(touch||e.pointerType==='touch'||!started||paused||modalOpen||!$('gameMenu95').hidden||pcCam.active)return;pcCam.active=true;$('c').style.cursor='none';document.body.dataset.cameraInput='active';try{$('c').requestPointerLock()?.catch?.(()=>{document.body.dataset.cameraInput='active-window'})}catch(_){document.body.dataset.cameraInput='active-window'}});
-document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement)document.body.dataset.cameraInput='locked';else releaseCamera373()});
+addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
+function releaseCamera373(){pcCam.active=false;mouseHeld=false}
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;pcCam.active=true;e.preventDefault()});
+addEventListener('pointerup',e=>{if(e.button===2)releaseCamera373()});
+addEventListener('pointercancel',releaseCamera373);
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});
 addEventListener('blur',releaseCamera373);
-addEventListener('mousemove',e=>{if(pcCam.active&&!paused&&!modalOpen)cameraLook373(e.movementX,e.movementY)});
+addEventListener('mousemove',e=>{if(pcCam.active&&!(e.buttons&2)){releaseCamera373();return}if(pcCam.active&&!paused&&!modalOpen)cameraLook373(e.movementX,e.movementY)});
 let cameraTouch372=null;
 $('c').addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!started||paused||modalOpen||!$('gameMenu95').hidden||e.clientX<innerWidth*.5)return;cameraTouch372={id:e.pointerId,x:e.clientX,y:e.clientY};$('c').setPointerCapture(e.pointerId)});
 $('c').addEventListener('pointermove',e=>{const p=cameraTouch372;if(!p||p.id!==e.pointerId)return;cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
@@ -8076,7 +8077,7 @@ function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!act
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
 function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
-function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr (16 de Vigor/s). Sem Vigor, volta a andar; solte a tecla para retomar a corrida após recuperar fôlego.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Clique no cenário para controlar a câmera com o mouse. Esc libera o cursor.','')+'<div class="sec">SUAS TECLAS</div>';
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr (16 de Vigor/s). Sem Vigor, volta a andar; solte a tecla para retomar a corrida após recuperar fôlego.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Segure o botão direito e mova o mouse para girar a câmera. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
   h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
 function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e pressione a tecla. Esc cancela. Teclas já usadas trocam de ação. WASD, setas e Esc são reservados.</div>';
