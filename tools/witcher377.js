@@ -120,4 +120,14 @@
     else if(lv>=3&&L.mode==='world'&&ENV.ok&&cur>.01&&typeof hemi!=='undefined')hemi.intensity+=.05*(lv-2)*cur*night;
   }
   W377.lantern=lanternTick;
+
+  /* v378 (Ian): toque rápido na tecla de correr trava a corrida; outro toque destrava. Segurar continua funcionando. */
+  let down378=0;window.RUNLOCK378=false;
+  const isSprint=c=>c===keyOf('sprint')||(c==='ShiftRight'&&keyOf('sprint')==='ShiftLeft');
+  addEventListener('keydown',e=>{if(!e.repeat&&isSprint(e.code))down378=performance.now()});
+  addEventListener('keyup',e=>{if(!isSprint(e.code)||!down378)return;const quick=performance.now()-down378<250;down378=0;
+    if(!started||paused||modalOpen)return;
+    if(quick){RUNLOCK378=!RUNLOCK378;toast(RUNLOCK378?'Corrida travada. Toque '+keyLabel(keyOf('sprint'))+' de novo para andar.':'Corrida destravada.',1800)}
+    else if(RUNLOCK378)RUNLOCK378=false});
+  addEventListener('blur',()=>{down378=0});
 })();

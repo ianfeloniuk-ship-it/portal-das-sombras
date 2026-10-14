@@ -257,7 +257,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/passives263.js?v=351"></script>
 <script src="tools/passives327.js?v=351"></script>
 <script src="tools/resources260.js?v=373"></script>
-<script src="tools/sprint373.js?v=373"></script>
+<script src="tools/sprint373.js?v=378"></script>
 <script src="tools/combo261.js?v=348"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -6228,7 +6228,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     for(const c of Object.values(run.classCooldowns||{}))c.left=Math.max(0,c.left-dt);for(const s of P.skills)s.cdT=Math.max(0,s.cdT-dt);for(const s of run.stolen)s.cdT-=dt;if(run.fused)run.fused.cdT-=dt;if(run.food&&run.food.t>0){run.food.t-=dt;if(run.food.t<=0){refreshStats();toast('O efeito da comida acabou.')}}
     let mv=0;COLY344=P.jy||0;
     const sprintState372=P.sprint372||(P.sprint372={running:false,exhausted:false});
-    const held372=touchSprint373||Object.keys(keys).some(k=>keys[k]&&(remapCode(k)==='ShiftLeft'||k==='ShiftRight'&&keyOf('sprint')==='ShiftLeft'));
+    const held372=touchSprint373||window.RUNLOCK378||Object.keys(keys).some(k=>keys[k]&&(remapCode(k)==='ShiftLeft'||k==='ShiftRight'&&keyOf('sprint')==='ShiftLeft'));
     const allowed372=il>.1&&!run.mounted&&!P.air344&&!(P.dodgeT>0)&&!(P.atkT>0)&&!(P.atkCd>.15)&&!(P.skillAnim155&&P.skillAnim155.until>time)&&!(window.Anim303&&Anim303.active());
     sprintState372.running=Sprint373.canSprint(sprintState372,martialState260(),held372,allowed372);
     if(P.dodgeT>0){const before372=P.dodgeT,step372=Math.min(dt,before372);P.dodgeT-=dt;const u0=1-before372/.32,u1=1-Math.max(0,P.dodgeT)/.32,envelope372=P.dashSpd?1:.4+.3*(Math.cos(Math.PI*u0)-Math.cos(Math.PI*u1))/Math.max(1e-6,u1-u0);const sp=(P.dashSpd||8.5)*envelope372;moveEnt(P,P.dir.x*sp*step372,P.dir.z*sp*step372);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
@@ -8098,7 +8098,7 @@ function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!act
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
 function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
-function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr (16 de Estamina/s). Sem Estamina, volta a andar; solte a tecla para retomar a corrida após recuperar fôlego.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Segure o botão direito e mova o mouse para girar a câmera. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Segure o botão direito e mova o mouse para girar a câmera. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
   h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
 function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e pressione a tecla. Esc cancela. Teclas já usadas trocam de ação. WASD, setas e Esc são reservados.</div>';
@@ -8918,11 +8918,11 @@ requestAnimationFrame(frame);
 <script src="tools/living372.js?v=372"></script>
 <script src="tools/firearms372.js?v=372"></script>
 <!-- pds-v377: câmera Witcher, lock-on, colisão, lampião de viagem -->
-<script src="tools/witcher377.js?v=377"></script>
+<script src="tools/witcher377.js?v=378"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v377</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v378</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=377;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=378;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
