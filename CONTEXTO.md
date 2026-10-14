@@ -1,3 +1,8 @@
+## v392 — Animação de nado no esqueleto, 14/10/2026
+- Pedido de Ian: rig de nadar e boiar no personagem. tools/water391.js aplica poses nos ossos do Viajante (mesmo esquema do pulo, anim303): nadando = corpo deitado, crawl com braçadas alternadas, pernas batendo, cabeça para a frente, sobe para a linha d'água; parado = boiando em pé, braços abrindo/fechando e pernas pedalando. Base parada antes do nado para a caminhada não misturar.
+- Correção ligada: climb383 e water391 usavam `window.player` (o jogador é `let`, não fica em window) — a inclinação do corpo na escalada (v383) nunca rodava; agora roda.
+- Testado com print: boiando parado e nadando (braçada visível). Sem erros.
+
 ## v391 — Rios e lagos fundos + nado, 14/10/2026
 - Relato de Ian (print): o rio parecia uma linha reta sem profundidade (água 6 cm acima do fundo). Agora (tools/terrain245.js, CPU e GLSL juntos): leito em U de 2,2 m nos rios, bacia de 2,5 m nos lagos, margens mais íngremes (7 m em vez de 16). Água do rio mais escura no meio e transparente na margem; água do lago sobe junto com a bacia (580-bloco-b).
 - Nado (tools/water391.js): água com mais de 1,3 m → o herói boia com a cabeça para fora, nada a 60% e deita o corpo. Atravessa rio e lago sem ponte (paredes invisíveis da água removidas). Gelo: anda em cima, na altura da margem. Leito seco (deserto/vulcão): anda no fundo. Monstros comuns não entram na água funda.

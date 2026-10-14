@@ -38,7 +38,7 @@
   /* ---------- Pose: inclina o corpo para a parede enquanto escala ---------- */
   let last=performance.now();
   const tick=()=>{const now=performance.now();window.dtLast383=Math.min(.1,(now-last)/1000);last=now;
-    const P=window.player;if(P&&P.m&&P.m.root){
+    const P=typeof player!=='undefined'?player:null;if(P&&P.m&&P.m.root){
       if(CL.on&&time-CL.t>.2){CL.on=false;CL.climbed=0}
       const want=CL.on?-CL.cfg.lean:0;P.lean383=(P.lean383||0)+(want-(P.lean383||0))*Math.min(1,window.dtLast383*10);
       if(Math.abs(P.lean383)>.002){P.m.root.rotation.order='YXZ';P.m.root.rotation.x=P.lean383}
