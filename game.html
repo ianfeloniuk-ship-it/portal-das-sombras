@@ -242,6 +242,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="tools/wagon369.js?v=369"></script>
 <script src="tools/terrain245.js?v=351"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
@@ -4444,7 +4445,7 @@ function buildCity(c,g,addCol,R){
     const front=cityFront253(sx,sz,ry,dim.d/2+1.6),vx=front.x,vz=front.z;
     addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=window.Water154?Water154.mesh(2.25):new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
-    L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+8,2.4,Z+18);g.add(sg217);L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · CARROÇA DA ORDEM',use:travelView217})}}
+    L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+10.15,2.4,Z+18);g.add(sg217);if(window.Wagon369){Wagon369.station(g,X+8,Z+18);for(const dz of [-1.9,-.5,1,3.1])addCol({x:X+8,z:Z+18+dz,r:dz===3.1?.7:1.18})}L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · TEREN · CARROÇA DA ORDEM',use:travelView217})}}
   buildHouse(c,g,E);
   if(!cityFallen(c)){const lx=X-16,lz=Z-9;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5),e=c.layout253?.inn;
@@ -7628,7 +7629,7 @@ const MONSTERHUNT217=['Atravessei a fenda há cem anos. Hoje caço os que vieram
 function visit217(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d>40*CITYK)return;const V=profile.visited217=profile.visited217||{};if(!V[n.c.id]){V[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z,cap:!!n.c.capital};store.set('pds2_profile',profile);if(n.c.capital&&n.c.name!=='Aster'){storyCh220('act9');bigText(n.c.name.toUpperCase(),1800);showSys('Você chegou a <b>'+n.c.name+'</b>. As capitais guardam o comércio da região e uma Carroça da Ordem para viajar.')}}}
 /* v219 (Ian): preço só pela distância, e crescente (viagem longa pesa). */
 function travelCost219(km){return servicePrice265('travel',{km})}
-function travelView217(){const V=profile.visited217||{},P=player;let h='<div class="sysline">A Carroça da Ordem leva você a qualquer cidade que já visitou. O preço sobe com a distância e já inclui os impostos e preços locais.</div>';
+function travelView217(){const V=profile.visited217||{},P=player;let h='<div class="sysline">Teren, cocheiro da Ordem, leva você a qualquer cidade que já visitou. O preço sobe com a distância e já inclui os impostos e preços locais.</div>';
  const L2=Object.entries(V).map(([id,v])=>({id,...v,d:Math.hypot(v.x-P.x,v.z-P.z)})).filter(v=>v.d>200).sort((a,b)=>a.d-b.d);
  for(const v of L2){const km=v.d/1000,cost=travelCost219(km);h+=row((v.cap?'★ ':'')+gearText(v.n),km.toFixed(1)+' km',btn(fmt(cost)+' ouro','travel217',v.id,run.gold>=cost))}
  if(!L2.length)h+='<div class="sysline">Visite outras cidades para liberar destinos.</div>';openModal('CARROÇA DA ORDEM',h)}
@@ -8841,7 +8842,7 @@ requestAnimationFrame(frame);
 <script src="tools/vfx328.js?v=345"></script>
 <script src="tools/dome154.js?v=343"></script>
 <script src="tools/look154.js"></script>
-<script src="tools/civic343.js?v=351"></script>
+<script src="tools/civic343.js?v=369"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
 <script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>

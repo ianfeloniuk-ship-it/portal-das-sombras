@@ -105,7 +105,7 @@ window.Civic343=(()=>{
 
  /* ---------- carroças de suprimentos ---------- */
  const wagons=[];let wagonT=14;
- function wagonModel(){const g=new THREE.Group(),wood=toonS(0x7a5230),dark=toonS(0x4a3220),cloth=toonS(0xe6dcc2),hide=toonS(0x9a7248),horn=toonS(0xefe6d0);
+ function wagonModel(){const detailed=window.Wagon369&&Wagon369.create();if(detailed)return detailed;const g=new THREE.Group(),wood=toonS(0x7a5230),dark=toonS(0x4a3220),cloth=toonS(0xe6dcc2),hide=toonS(0x9a7248),horn=toonS(0xefe6d0);
   const add=(geom,mat,x,y,z)=>{const m=mesh(geom,mat);m.position.set(x,y,z);g.add(m);return m};
   add(geo('wbed343',()=>new THREE.BoxGeometry(1.7,.5,2.7)),wood,0,.95,-1.2);
   add(geo('wcov343',()=>new THREE.CylinderGeometry(.9,.9,2.5,12,1,false,-Math.PI/2,Math.PI).rotateX(-Math.PI/2)),cloth,0,1.2,-1.25);
@@ -132,7 +132,7 @@ window.Civic343=(()=>{
   wagonT-=dt;if(wagonT<=0){wagonT=35+Math.random()*30;if(wagons.length<2&&!L.siege&&!L.inv)wagonSpawn()}
   for(const w of[...wagons]){w.t+=dt;const pd=Math.hypot(w.x-P.x,w.z-P.z);if(pd>280){wagonRemove(w);continue}
    if(w.wreck){w.wreck-=dt;if(w.wreck<=0)wagonRemove(w);continue}
-   let moving=false;
+   const prevX=w.x,prevZ=w.z,prevFace=w.face;let moving=false;
    if(w.amb){const A=w.amb,alive=A.foes.filter(e=>!e.dead&&!e.gone&&enemies.includes(e));
     if(!alive.length){w.amb=null;w.wait=4;
      if(pd<45){const gold=Math.round(120*GR[clamp(rankOf(),0,9)].gold*(.6+.4*w.hp/100));run.gold+=gold;speech153(w.n,pick(['Você salvou a carga e a minha pele. Obrigado!','Achei que era o fim. Fique com isto, você mereceu.','Vou contar em '+w.dest.name+' quem me tirou dessa.']),'Mercador a caminho de '+w.dest.name);
@@ -149,8 +149,8 @@ window.Civic343=(()=>{
     else{const sp=2.7*dt;w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face=Math.atan2(dx,dz);moving=true}
     if(nearestCity(w.x,w.z).d<70&&w.t>6){wagonRemove(w);continue}}
    w.n.x=w.x;w.n.z=w.z;if(!w.wreck){w.g.position.set(w.x,0,w.z);w.g.rotation.y=w.face}
-   if(moving){for(const wh of w.wheels)wh.rotation.x+=dt*5.4;w.legs.forEach((l,i)=>{l.rotation.x=Math.sin(w.t*6+(i%3?Math.PI:0))*.5})}
-   if(w.driver&&pd<60)try{animChibi(w.driver,{move:0,atk:0,dead:0,wind:0},time)}catch(_){}}}
+   if(w.detailed369){Wagon369.animate(w,dt,Math.hypot(w.x-prevX,w.z-prevZ),Math.atan2(Math.sin(w.face-prevFace),Math.cos(w.face-prevFace)))}else if(moving){for(const wh of w.wheels)wh.rotation.x+=dt*5.4;w.legs.forEach((l,i)=>{l.rotation.x=Math.sin(w.t*6+(i%3?Math.PI:0))*.5})}
+   if(w.driver&&!w.detailed369&&pd<60)try{animChibi(w.driver,{move:0,atk:0,dead:0,wind:0},time)}catch(_){}}}
  function clearWagons(){for(const w of[...wagons])wagonRemove(w)}
 
  /* ---------- Alvos Notórios ---------- */
@@ -202,8 +202,8 @@ window.Civic343=(()=>{
  let slow=0;
  function tick(dt){if(!player||!profile||!run||player.dead)return;if(L.mode!=='world'){if(wagons.length)clearWagons();tgt=tgt&&enemies.includes(tgt)?tgt:null;return}
   slow-=dt;if(slow<=0){slow=.5;riftTick()}
-  guardTick(dt);wagonTick(dt);targetTick(dt)}
+  guardTick(dt);wagonTick(dt);targetTick(dt);if(window.Wagon369)Wagon369.tickStations(dt,scene,player)}
  const baseSiege=updSiege;updSiege=function(dt){baseSiege(dt);try{tick(dt)}catch(err){console.warn('Civic343',err)}};
  return {grade,gradeOf,GRADE_N,restMul,restPaid,innNote,taxFree,reservedRows,regionRows,riftOpen,riftClosed,targetsTab,action,map,wagons,TARGETS,
-  test:{wagonSpawn,ambush,scout,target:()=>tgt,domeDrain,help}};
+  test:{wagonSpawn,wagonTick,wagonRemove,ambush,scout,target:()=>tgt,domeDrain,help}};
 })();
