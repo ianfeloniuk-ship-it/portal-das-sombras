@@ -1,3 +1,8 @@
+## v376 — Coleta completa antes da mão, 14/10/2026
+- Pedido de Ian: recolher corpo após pegar todos os itens ou afastar demais, preservando itens para depois.
+- Pegar tudo coleta o que cabe; coleta individual mantém janela aberta. Mão dispara ao esvaziar ou além de 15 m (distância escolhida na implementação). Vestígios conservam itens e posição, inclusive com bolsa cheia; persistência existente de mundo/masmorra preservada.
+- Doze verificações no jogo passaram: coleta parcial/total, janela, distância, retorno, duplicação e bolsa cheia. Build/sintaxe conferidos. Base f222b55.
+
 ## v375 — Controles do mouse, 14/10/2026
 - Correção após relato de Ian: ataque esquerdo não depende mais do giro da câmera. Giro usa pointermove e deslocamento de coordenadas com captura durante botão direito, liberada ao soltar/cancelar/perder foco. Cursor permanece livre.
 - Sete verificações no jogo passaram: giro nos dois sentidos parado, liberação, ataque sem câmera, soltura e bloqueio por menu. Sem erros no console inspecionado. Base 68a24ff.

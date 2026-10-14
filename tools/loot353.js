@@ -8,6 +8,8 @@ function corpseDrop353(e,entry){(e.loot353||(e.loot353=[])).push({...entry,id:cr
 function finishCorpse353(e){if(!e.loot353?.length)return;Loot353.create(e)}
 window.Loot353=(()=>{
  const active=new Map();let region=null,elapsed=0,dirty=false;
+ const reclaimDistance=15;
+ function reclaim(r){if(r.reclaimed372)return;r.reclaimed372=true;window.Reclaim372?.start(active.get(r.id),r);dirty=true}
  const records=()=>L.mode==='world'?(run.worldLoot353||(run.worldLoot353=[])):(L.corpseLoot353||(L.corpseLoot353=[]));
  const nearby=r=>player&&!player.dead&&Math.hypot(r.x-player.x,r.z-player.z)<=3.5&&los(player.x,player.z,r.x,r.z);
  function clear(){window.Reclaim372?.clear();if(dirty){saveRun();dirty=false}for(const a of active.values()){a.inter.hidden=true;if(L?.inter)L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction()}active.clear();region=null;elapsed=0}
@@ -25,6 +27,7 @@ window.Loot353=(()=>{
  function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.name+' × '+x.n}
  function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}
  function open(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return;view=()=>open(id);let h='<p>Escolha o que levar. Bolsa: '+run.items.length+'/'+bagCapacity353()+'.</p>';
+  if(r.entries.length)h+=btn('Pegar tudo','lootall376',id);
   for(const x of r.entries)h+=row(safeText(label(x)),detail(x),btn('Pegar','loottake353',id+'|'+x.id,x.type!=='equipment'||run.items.length<bagCapacity353()));
   const boss=bossE&&bossE.dead&&!bossE.absorbed&&Math.hypot(bossE.x-r.x,bossE.z-r.z)<1;
   if(boss)h+=btn(canArise()?'Erguer eco / essência':'Absorver essência','lootpower353',id);
@@ -39,12 +42,14 @@ window.Loot353=(()=>{
   else if(x.type==='book')run.spts=(run.spts||0)+x.n;
   else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value);old.b=!!(old.b||x.b)}
   else return false;
-  r.entries.splice(i,1);if(!r.reclaimed372){r.reclaimed372=true;window.Reclaim372?.start(active.get(r.id),r);}if(!r.entries.length)remove(r);saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
+  r.entries.splice(i,1);if(!r.entries.length){reclaim(r);remove(r);}saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
  }
+ function takeAll(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return false;let taken=false;for(const x of [...r.entries])taken=take(id,x.id)||taken;return taken}
+ function refreshLoot(id){if(records().some(r=>r.id===id))open(id);else closeModal()}
  function buy(tier){if(!Number.isInteger(tier)||tier<=bagTier353()||tier>=BAGS353.length||L.mode!=='world'||!inCity(player.x,player.z)||player.dead)return false;const b=BAGS353[tier];if(rankOf()<b.rank||run.level<b.level||run.gold<b.price)return false;run.gold-=b.price;profile.bagTier353=tier;saveRun();return true}
- function action(a,v){if(a==='bagbuy353'){buy(Number(v));mktView();return 'close0'}if(a==='loottake353'){const [id,entry]=String(v).split('|');const ok=take(id,entry);if(ok)closeModal();else if(records().some(r=>r.id===id))open(id);else closeModal();return 'close0'}if(a==='lootpower353'){const r=records().find(r=>r.id===v);if(r&&nearby(r)&&bossE?.dead&&!bossE.absorbed){closeModal();absorb(bossE)}return 'close0'}return false}
+ function action(a,v){if(a==='lootall376'){takeAll(String(v));refreshLoot(String(v));return 'close0'}if(a==='bagbuy353'){buy(Number(v));mktView();return 'close0'}if(a==='loottake353'){const [id,entry]=String(v).split('|');take(id,entry);refreshLoot(id);return 'close0'}if(a==='lootpower353'){const r=records().find(r=>r.id===v);if(r&&nearby(r)&&bossE?.dead&&!bossE.absorbed){closeModal();absorb(bossE)}return 'close0'}return false}
  function tick(dt){if(!run||!player)return;window.Reclaim372?.tick(dt);if(region!==L){clear();region=L}elapsed+=dt;if(elapsed<.5)return;elapsed=0;if(dirty){saveRun();dirty=false}
-  const list=records();for(const [id,a] of active){const r=list.find(x=>x.id===id);if(!r||Math.hypot(r.x-player.x,r.z-player.z)>85){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction();active.delete(id)}}
+  const list=records();for(const r of list)if(!r.reclaimed372&&Math.hypot(r.x-player.x,r.z-player.z)>reclaimDistance)reclaim(r);if(dirty){saveRun();dirty=false}for(const [id,a] of active){const r=list.find(x=>x.id===id);if(!r||Math.hypot(r.x-player.x,r.z-player.z)>85){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction();active.delete(id)}}
   // Render only the nearest bodies; every unclaimed record stays available.
   const near=list.filter(r=>Math.hypot(r.x-player.x,r.z-player.z)<65).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z)).slice(0,32);
   const ids=new Set(near.map(r=>r.id));for(const [id,a] of active)if(!ids.has(id)){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction();active.delete(id)}
@@ -57,5 +62,5 @@ window.Loot353=(()=>{
  function place(){const bar=$('btns'),box=$('steal');if(!bar||!box)return;const r=bar.getBoundingClientRect(),n=box.children.length;box.style.width=Math.min(innerWidth-20,Math.max(0,n*(touch?56:66)+6*(n-1)))+'px';box.style.left=(!touch?Math.max(8,(innerWidth-box.offsetWidth)/2):Math.max(8,innerWidth-box.offsetWidth-10))+'px';box.style.bottom=Math.max(8,innerHeight-r.top+8)+'px';if(touch&&$('bF'))$('bF').style.bottom=Math.max(8,innerHeight-r.top+box.offsetHeight+16)+'px';if($('ach294'))$('ach294').style.bottom=Math.max(16,innerHeight-r.top+box.offsetHeight+(touch?70:16))+'px'}
  const oldBuild=buildSteal;buildSteal=function(){oldBuild();for(let i=0;i<run.stolen.length;i++)if($('st'+i))$('st'+i).title=skillButtonTip(run.stolen[i]);requestAnimationFrame(place)};
  new ResizeObserver(place).observe($('btns'));addEventListener('resize',place);
- return {create,clear,tick,open,take,buy,action,records,active,place};
+ return {create,clear,tick,open,take,takeAll,buy,action,records,active,place};
 })();
