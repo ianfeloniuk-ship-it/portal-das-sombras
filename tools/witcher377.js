@@ -17,7 +17,7 @@
   }
 
   /* ---------- Travar câmera no alvo ---------- */
-  function pickTarget(){
+  function pickLock377(){
     const P=player;if(!P)return null;const fwd=pcCam.yaw+Math.PI;let best=null,bs=1e9;
     for(const e of enemies){if(e.dead||e.gone)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz);if(d>26)continue;
       const da=Math.abs(angDiff(Math.atan2(dx,dz),fwd)),s=d*(1+da*1.6);if(da<1.4&&s<bs){bs=s;best=e}}
@@ -30,7 +30,7 @@
       scene.add(W377.marker);beep(660,.05,.04,'triangle')}
     else if(W377.marker)scene.remove(W377.marker);
   }
-  function toggleLock(){if(!started||paused||modalOpen||player?.dead)return;if(W377.target){setLock(null);return}const e=pickTarget();if(e)setLock(e);else toast('Nenhum alvo por perto para travar a câmera.',1800)}
+  function toggleLock(){if(!started||paused||modalOpen||player?.dead)return;if(W377.target){setLock(null);return}const e=pickLock377();if(e)setLock(e);else toast('Nenhum alvo por perto para travar a câmera.',1800)}
   W377.toggle=toggleLock;
   addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.altKey)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;if(e.code===keyOf('lock377'))toggleLock()});
   $('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==1)return;e.preventDefault();toggleLock()});
@@ -67,7 +67,7 @@
     P.m.root.position.x=P.x;P.m.root.position.z=P.z;
   }
   const upd0=update;
-  update=function(dt){try{W377.guard()}catch(_){}const r=upd0.apply(this,arguments);try{solid()}catch(err){if(!W377.err){W377.err=1;console.warn('solid377',err)}}try{lanternTick(dt)}catch(err){if(!W377.lerr){W377.lerr=1;console.warn('lantern377',err)}}return r};
+  update=function(dt){try{W377.guard();W377.wrapPick&&W377.wrapPick()}catch(_){}const r=upd0.apply(this,arguments);try{solid()}catch(err){if(!W377.err){W377.err=1;console.warn('solid377',err)}}try{lanternTick(dt)}catch(err){if(!W377.lerr){W377.lerr=1;console.warn('lantern377',err)}}return r};
 
   /* ---------- Câmera estilo The Witcher ---------- */
   const cam0=camUpdate;
@@ -130,6 +130,13 @@
 
   /* v381 (Ian): na carona da carroça os monstros não atacam você. */
   const riding381=()=>!!(window.Living372&&Living372.riding&&Living372.riding());
+  /* v382 (Ian): monstros não seguem infinitamente. Na carona deixam de mirar você; a pé, desistem a mais de 35 m. */
+  let pick0=null;const pick382=function(e){const r=pick0.apply(this,arguments);if(!r||r.t!==player||!e)return r;
+    if(riding381()&&!e.isBoss){e.aggro=false;return null}
+    if(L.mode==='world'&&!e.isBoss&&!e.raid155&&!e.breaker&&!e.wagon343&&!e.duel372&&r.d>35){e.aggro=false;return null}
+    return r};pick382.w382=1;
+  /* outros módulos (ex.: living372) trocam pickTarget depois de carregar: reembrulha sempre que isso acontecer */
+  function wrapPick382(){if(pickTarget&&!pickTarget.w382){pick0=pickTarget;pickTarget=pick382}}wrapPick382();W377.wrapPick=wrapPick382;
   const hurt0=hurtPlayer;hurtPlayer=function(){if(riding381())return;return hurt0.apply(this,arguments)};
   const updE0=updEnemy;updEnemy=function(e,dt){const r381=riding381()&&e&&!e.dead&&!e.wagon343;if(r381){e.aggro=false;e.act=null}const r=updE0.apply(this,arguments);if(r381){e.aggro=false;e.act=null}return r};
 

@@ -1,3 +1,8 @@
+## v382 — Monstros param de seguir, 14/10/2026
+- Relato de Ian (print): monstros seguiam infinitamente, inclusive com ele na carroça. Na v381 a proteção da carona só bloqueava dano; a função de alvo dos monstros não era trocada porque o witcher377 tinha uma função local chamada pickTarget (renomeada para pickLock377).
+- Agora (tools/witcher377.js): pickTarget é reembrulhado sempre que outro módulo o troca; na carona os monstros não miram o jogador (param); a pé, monstros comuns desistem além de 35 m (chefes, hordas, emboscada de carroça e duelo seguem as regras antigas).
+- Testado: monstro parado durante a carona sem dano; a 40 m desiste; travar alvo continua funcionando. Sem erros.
+
 ## v381 — Carroças sem sobreposição e carona segura, 14/10/2026
 - Relato de Ian (print): duas carroças uma dentro da outra. Agora cada carroça anda na própria faixa (1,7 m à direita do centro da estrada), espera a da frente no mesmo sentido (9,5 m) e nasce a 30 m+ de outra (tools/civic343.js).
 - Pedido de Ian: na carona da carroça os monstros não atacam (sem dano e sem perseguir; tools/witcher377.js). Monstros da emboscada continuam atacando a carroça.
