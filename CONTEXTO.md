@@ -1,3 +1,10 @@
+## v372 — Cactoros e recolhimento pelo Arquiteto, 13/10/2026
+- Pedido atual de Ian: após pegar o primeiro item de um cadáver, uma mão sai de uma fenda, agarra o corpo e o recolhe com evaporação. Efeito global no saque, não dispara só por abrir ou por tentativa sem espaço. Restos mantêm todos os itens não coletados; flag persistente impede repetição ao recarregar. Chefes mantêm essência e poderes existentes.
+- Cactoro padrão/Fendido/Abissal: Tripo multivista, 180 créditos autorizados e consumidos; rig e oito clipes por forma no Blender, 24 mil triângulos, UV0, 1,2/1,2/1,4 m. Quatro cristais do Abissal corrigidos. Ataque de espinho com alvo travado, aviso e recuperação; padrão/Fendido enraizados de dia, móveis ao entardecer; Abissal sempre móvel. HP/dano/recompensas preservados; alcance 9 m é escolha técnica.
+- Correção final de Ian: mão extraída de hand_R do modelo Tripo models/arquiteto246.glb; Arquiteto completo e fragmentos preservam texturas Tripo, sem recoloração procedural. Rig/animações existentes continuam; nenhuma geração ou crédito adicional.
+- Validação: 91 verificações no navegador (50 Cactoros, 33 saque/famílias, 8 Arquiteto/texturas/clipes); reabertura/reimportação Blender e 21 amostras por clipe. Desktop; celular e aprovação visual de Ian pendentes.
+- Encerrar esta etapa após publicar, mostrar e conferir arquivo online. Não iniciar outros mobs.
+
 ## v368 — Gosma Espinhosa, Fendida e Abissal, 13/10/2026
 - Três GLBs próprios com oito clipes cada, feitos no Blender. Padrão comprime a massa e perde sustentação; Fendida articula as rosetas e fecha os prismas ao morrer; Abissal orbita quatro rosetas, alinha o disparo e recolhe cristais enquanto o corpo vazado colapsa.
 - Todas ficam imóveis: padrão reage a passos/dano; Fendida também percebe mana no alvo atual; Abissal dispara por proximidade. Alcance 9 m, aviso 0,5 s, direção travada, recarga 1,4 s. Escolhas técnicas de combate; não simula consumo físico de luz/calor nem imunidade por corpo vazado. HP, dano, colisores e recompensas preservados.

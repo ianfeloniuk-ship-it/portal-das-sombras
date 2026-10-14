@@ -10,25 +10,25 @@ window.Loot353=(()=>{
  const active=new Map();let region=null,elapsed=0,dirty=false;
  const records=()=>L.mode==='world'?(run.worldLoot353||(run.worldLoot353=[])):(L.corpseLoot353||(L.corpseLoot353=[]));
  const nearby=r=>player&&!player.dead&&Math.hypot(r.x-player.x,r.z-player.z)<=3.5&&los(player.x,player.z,r.x,r.z);
- function clear(){if(dirty){saveRun();dirty=false}for(const a of active.values()){a.inter.hidden=true;if(L?.inter)L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction()}active.clear();region=null;elapsed=0}
+ function clear(){window.Reclaim372?.clear();if(dirty){saveRun();dirty=false}for(const a of active.values()){a.inter.hidden=true;if(L?.inter)L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction()}active.clear();region=null;elapsed=0}
  function attach(r,e){if(active.has(r.id))return;
-  let model=e?.m;
-  if(!model){const K=KINDS[r.kind];if(K){model=makeChibi({...K,tint:K.gtint,atkClip:K.clip});model.root.position.set(r.x,0,r.z);animChibi(model,{move:0,atk:0,dead:1,wind:0},1);model.mixer?.update(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao)/.test(model.mon||'')?(gAct(model,'Death_A')?.getClip().duration||2)+.1:2)}}
+  let model=r.reclaimed372?null:e?.m;
+  if(!model&&!r.reclaimed372){const K=KINDS[r.kind];if(K){model=makeChibi({...K,tint:K.gtint,atkClip:K.clip});model.root.position.set(r.x,0,r.z);animChibi(model,{move:0,atk:0,dead:1,wind:0},1);model.mixer?.update(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho)/.test(model.mon||'')?(gAct(model,'Death_A')?.getClip().duration||2)+.1:2)}}
   const root=model?.root||new THREE.Group();root.position.set(r.x,0,r.z);root.userData.terrainRoot245=true;scene.add(root);
   // A small, unlit marker makes the fallen body readable without adding lights.
-  const marker=new THREE.Mesh(geo('corpse353',()=>new THREE.OctahedronGeometry(.16)),glowS(0xffd08a,.6));marker.position.y=1.2;root.add(marker);
-  const inter={type:'corpse353',x:r.x,z:r.z,r:3.5,label:'F · VASCULHAR '+r.name,use:()=>open(r.id)};L.inter.push(inter);
+  const marker=new THREE.Mesh(geo('corpse353',()=>new THREE.OctahedronGeometry(.16)),glowS(0xffd08a,.6));marker.position.y=r.reclaimed372?.25:1.2;root.add(marker);
+  const inter={type:'corpse353',x:r.x,z:r.z,r:3.5,label:(r.reclaimed372?'F · RECOLHER VESTÍGIOS DE ':'F · VASCULHAR ')+r.name,use:()=>open(r.id)};L.inter.push(inter);
   active.set(r.id,{root,model,marker,inter,original:!!e,boss:!!e?.isBoss});
  }
  function create(e){if(region!==L){clear();region=L}if(e.corpse353)return;const r={id:crypto.randomUUID(),name:e.name||KINDS[e.kind]?.n||'Criatura',kind:e.kind,x:e.x,z:e.z,entries:e.loot353};records().push(r);e.corpse353=r.id;attach(r,e);dirty=true}
- function remove(r){const list=records(),i=list.indexOf(r);if(i>=0)list.splice(i,1);const a=active.get(r.id);if(a){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);a.root.remove(a.marker);if(!a.boss)scene.remove(a.root);active.delete(r.id)}}
+ function remove(r){const list=records(),i=list.indexOf(r);if(i>=0)list.splice(i,1);const a=active.get(r.id);if(a){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);a.root.remove(a.marker);if(!a.boss||r.reclaimed372)scene.remove(a.root);active.delete(r.id)}}
  function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.name+' × '+x.n}
  function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}
  function open(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return;view=()=>open(id);let h='<p>Escolha o que levar. Bolsa: '+run.items.length+'/'+bagCapacity353()+'.</p>';
   for(const x of r.entries)h+=row(safeText(label(x)),detail(x),btn('Pegar','loottake353',id+'|'+x.id,x.type!=='equipment'||run.items.length<bagCapacity353()));
   const boss=bossE&&bossE.dead&&!bossE.absorbed&&Math.hypot(bossE.x-r.x,bossE.z-r.z)<1;
   if(boss)h+=btn(canArise()?'Erguer eco / essência':'Absorver essência','lootpower353',id);
-  h+='<p>O que você deixar continua no corpo.'+(L.mode==='world'?'':' Saques abandonados somem ao sair da masmorra.')+'</p>';
+  h+='<p>O que você deixar permanece nos vestígios, mesmo após a fenda levar o corpo.'+(L.mode==='world'?'':' Saques abandonados somem ao sair da masmorra.')+'</p>';
   openModal('SAQUE · '+r.name,h);
  }
  function take(id,entryId){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return false;const i=r.entries.findIndex(x=>x.id===entryId);if(i<0)return false;const x=r.entries[i];
@@ -39,11 +39,11 @@ window.Loot353=(()=>{
   else if(x.type==='book')run.spts=(run.spts||0)+x.n;
   else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value);old.b=!!(old.b||x.b)}
   else return false;
-  r.entries.splice(i,1);if(!r.entries.length)remove(r);saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
+  r.entries.splice(i,1);if(!r.reclaimed372){r.reclaimed372=true;window.Reclaim372?.start(active.get(r.id),r);}if(!r.entries.length)remove(r);saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
  }
  function buy(tier){if(!Number.isInteger(tier)||tier<=bagTier353()||tier>=BAGS353.length||L.mode!=='world'||!inCity(player.x,player.z)||player.dead)return false;const b=BAGS353[tier];if(rankOf()<b.rank||run.level<b.level||run.gold<b.price)return false;run.gold-=b.price;profile.bagTier353=tier;saveRun();return true}
- function action(a,v){if(a==='bagbuy353'){buy(Number(v));mktView();return 'close0'}if(a==='loottake353'){const [id,entry]=String(v).split('|');take(id,entry);if(records().some(r=>r.id===id))open(id);else closeModal();return 'close0'}if(a==='lootpower353'){const r=records().find(r=>r.id===v);if(r&&nearby(r)&&bossE?.dead&&!bossE.absorbed){closeModal();absorb(bossE)}return 'close0'}return false}
- function tick(dt){if(!run||!player)return;if(region!==L){clear();region=L}elapsed+=dt;if(elapsed<.5)return;elapsed=0;if(dirty){saveRun();dirty=false}
+ function action(a,v){if(a==='bagbuy353'){buy(Number(v));mktView();return 'close0'}if(a==='loottake353'){const [id,entry]=String(v).split('|');const ok=take(id,entry);if(ok)closeModal();else if(records().some(r=>r.id===id))open(id);else closeModal();return 'close0'}if(a==='lootpower353'){const r=records().find(r=>r.id===v);if(r&&nearby(r)&&bossE?.dead&&!bossE.absorbed){closeModal();absorb(bossE)}return 'close0'}return false}
+ function tick(dt){if(!run||!player)return;window.Reclaim372?.tick(dt);if(region!==L){clear();region=L}elapsed+=dt;if(elapsed<.5)return;elapsed=0;if(dirty){saveRun();dirty=false}
   const list=records();for(const [id,a] of active){const r=list.find(x=>x.id===id);if(!r||Math.hypot(r.x-player.x,r.z-player.z)>85){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction();active.delete(id)}}
   // Render only the nearest bodies; every unclaimed record stays available.
   const near=list.filter(r=>Math.hypot(r.x-player.x,r.z-player.z)<65).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z)).slice(0,32);
