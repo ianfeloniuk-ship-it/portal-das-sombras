@@ -1,3 +1,9 @@
+## v384 — Relógio no minimapa e save por arquivo, 14/10/2026
+- Pedido de Ian: relógio do dia perto do minimapa; lugar/perigo/noite saem da ficha do personagem e vão para a caixa em cima do minimapa (linha 1: relógio e noite; linha 2: lugar/bioma e perigo; depois portal e cidade mais próximos). A ficha mostra só "NV n" no mundo aberto (masmorras continuam como antes).
+- Relógio: noite (18h–6h) segue o ciclo real de 14 min de dia + 10 min de noite; ☀ de dia, ☾ de noite.
+- Save: Exportar baixa um arquivo .json pequeno (primeva-save-AAAAMMDD-HHMM.json); Importar abre o seletor de arquivo e pede confirmação. Códigos antigos (texto) salvos em arquivo ainda carregam. Fim da caixa de texto enorme.
+- Testado: cidade, mundo à noite, horários do ciclo, exportar (15 KB), importar arquivo novo, código antigo e arquivo inválido. Sem erros.
+
 ## v383 — Montanhas por ruído, escalada e painel de ajustes, 14/10/2026
 - Pedido de Ian (vídeo do André Elias): técnicas de Perlin noise e escalada estilo Zelda.
 - Terreno (tools/terrain245.js): cordilheiras com cristas (ruído suave "ridged" em 3 camadas), até ~40 m, em ~1/3 do mundo; mesma fórmula no CPU e no shader. Cidades, estradas e rios continuam planos/cavados por cima.

@@ -6422,7 +6422,7 @@ function hud(){
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=(run.adv?ADV[profile.cls].n:c.n).toUpperCase();
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):L.G.th.n+' · '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
-  $('lv').textContent='NV '+run.level+' · '+where2;
+  /* v384 (Ian): lugar, perigo e noite saem da ficha e vão para a caixa do minimapa, com relógio */$('lv').textContent='NV '+run.level+(L.mode==='world'&&!L.special?'':' · '+where2);
   $('sht').title=rareHud103();$('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' ÉGIDE ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp)+(P.venomUntil>time&&P.venomCharges>0?' · VENENO '+P.venomCharges+' ('+Math.ceil(P.venomUntil-time)+'s)':'');
   resourceHud260();
   updateXpHud();$('gold').textContent=fmt(run.gold);
@@ -6434,10 +6434,10 @@ function hud(){
   if($('stCombo261'))renderSkillButton($('stCombo261'),comboSkill261(),P.mp);if(run.fused&&$('stF'))renderSkillButton($('stF'),run.fused,P.mp);run.stolen.forEach((s,i)=>{const b=$('st'+i);if(b)renderSkillButton(b,s,P.mp)});
   $('potn').textContent=run.pots;$('bH').title=potionDescription();$('bH').setAttribute('aria-label','Poção de vida. '+potionDescription());
   let obj='';
-  if(L.mode==='world'){if(pd<36)obj=nc.c.name+' · cidade';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' · '+Math.round(bd)+' m\n'+nc.c.name+' · '+Math.round(pd)+' m':'Explore'}}
+  if(L.mode==='world'){if(pd<36)obj='';else{let bg=null,bd=1e9;for(const g of gates){if(g.dead)continue;const d=Math.hypot(g.x-P.x,g.z-P.z);if(d<bd){bd=d;bg=g}}obj=bg?(bg.secret?'Portal desconhecido':'Portal rank '+GR[bg.rank].id+(bg.red?' vermelho':''))+' · '+Math.round(bd)+' m\n'+nc.c.name+' · '+Math.round(pd)+' m':'Explore'}}
   else if(L.special)obj=L.special.msg;
   else obj=(affN(L.gate).length?'['+affN(L.gate).join(', ')+'] ':'')+(L.brk?'TRANSBORDO DA FENDA · sobreviveu '+fmtT(L.brk.t)+' · recorde '+fmtT(profile.brkBest||0)+' · a saída está aberta':L.bossDead?'Transbordo em '+fmtT(L.closeT)+' · minere, abra o baú e saia (ou fique e sobreviva)':'Salas '+L.seen.size+'/'+L.rooms.length+' · encontre o guardião'+(L.gate.red?' · SEM SAÍDA':''));
-  if(L.combat117&&!L.brk)obj=combatObjective117();if(L.expedition&&!L.brk)obj=expeditionObjective();if(L.defense&&!L.brk)obj=coreObjective();if(L.floors)obj='Andar '+(L.floors.current+1)+'/3 · '+(L.bossDead||L.brk?obj+' · saída no 1º andar':'encontre a escada e derrote seus defensores'+(L.floors.current===2?' · guardião neste andar':''));$('obj').textContent=obj;
+  if(L.combat117&&!L.brk)obj=combatObjective117();if(L.expedition&&!L.brk)obj=expeditionObjective();if(L.defense&&!L.brk)obj=coreObjective();if(L.floors)obj='Andar '+(L.floors.current+1)+'/3 · '+(L.bossDead||L.brk?obj+' · saída no 1º andar':'encontre a escada e derrote seus defensores'+(L.floors.current===2?' · guardião neste andar':''));if(L.mode==='world'&&!L.special){const top384=clock384()+(isNight()?' · noite':'')+'\n'+where+(pd<36?' · cidade':'');obj=obj&&obj!=='Explore'?top384+'\n'+obj:top384}$('obj').textContent=obj;
   if(L.defense){const d=L.defense;$('boss').hidden=d.done||d.failed;$('bn').textContent='NÚCLEO · '+Math.ceil(d.core.hp)+' / '+Math.ceil(d.core.maxhp);$('bb').style.width=(100*d.core.hp/d.core.maxhp)+'%'}
   if(bossE&&!bossE.dead&&bossE.aggro&&(!L.floors||dungeonFloorAt(bossE.z)===L.floors.current)){$('boss').hidden=false;$('bn').textContent=bossE.name.toUpperCase()+(bossE.phase===3?' · PODER VERDADEIRO':bossE.phase===2?' · FÚRIA':'');$('bn').textContent='NV '+eLvl(bossE)+' · '+$('bn').textContent;$('bn').style.color=THREAT184[bossE.threat184||0].col||'';bossBars166(bossE)}
   const _mt=missionPanelText();
@@ -6931,6 +6931,8 @@ const GUILDS=[
 /* dia e noite */
 /* v377 (Ian): dia de 14 min e noite de 10 min (ciclo de 24 min). */
 let dayT=120;const DAYLEN=1440,NIGHT0_377=.55,NIGHT1_377=.55+600/1440;
+/* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
+function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else{const d=(p>=n1?p-n1:p+1-n1)/(1-(n1-n0));h=6+12*d}h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'☾ ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
 /* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
 function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;
@@ -7036,9 +7038,14 @@ function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='wor
 function diaryView(){journeyView('lore')}
 function lookView(){view=lookView;const lk=profile.look||{h:0,b:0};let h='<div class="sysline">Mude a aparência do seu Viajante. Fica salvo no seu despertar.</div>';
   h+=row('Cabelo','Estilo '+(lk.h||'da classe'),btn('Trocar','lookh',0))+row('Roupa','Cor '+(lk.b||'da classe'),btn('Trocar','lookb',0));openModal('APARÊNCIA',h)}
-function saveCodeView(imp){view=()=>saveCodeView(imp);let h;
-  if(!imp){const code=btoa(unescape(encodeURIComponent(JSON.stringify({p:profile,r:store.get('pds3_run')}))));h='<div class="sysline">Copie este código e guarde num lugar seguro (notas, WhatsApp). Com ele você recupera o jogo em outro aparelho.</div><textarea id="savecode" readonly style="width:100%;height:120px;font-size:11px;background:#040a16;color:#e8f6ff;border:1px solid #ffb347">'+code+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('COPIAR','copysave',0,true,'hot')+'</div>'}
-  else h='<div class="sysline">Cole o código do seu save e toque em CARREGAR. Isto substitui o progresso atual deste aparelho.</div><textarea id="loadcode" style="width:100%;height:120px;font-size:11px;background:#040a16;color:#e8f6ff;border:1px solid #ffb347"></textarea><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('CARREGAR','loadsave',0,true,'hot')+'</div>';
+/* v384 (Ian): save por ARQUIVO (.json), sem o texto enorme que travava a tela. Códigos antigos ainda carregam. */
+function saveData384(){return {p:profile,r:store.get('pds3_run'),v:window.PDS_V||0,at:Date.now()}}
+function loadSave384(d){if(!d||!d.p)throw 0;profile=d.p;store.set('pds2_profile',profile);if(d.r)store.set('pds3_run',d.r);else store.del('pds3_run');closeModal();showProfile();$('goBtn').textContent='CONTINUAR';toast('Save carregado.')}
+function exportSave384(){try{saveRun()}catch(e){}const b=new Blob([JSON.stringify(saveData384())],{type:'application/json'}),a=document.createElement('a'),d=new Date(),z=n=>String(n).padStart(2,'0');a.href=URL.createObjectURL(b);a.download='primeva-save-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Save baixado como arquivo. Guarde no Drive, no PC ou mande no WhatsApp.')}
+function importSave384(){const f=document.createElement('input');f.type='file';f.accept='.json,.txt,application/json,text/plain';f.onchange=()=>{const file=f.files&&f.files[0];if(!file)return;file.text().then(t=>{t=t.trim();let d;try{d=JSON.parse(t)}catch(_){d=JSON.parse(decodeURIComponent(escape(atob(t))))}if(!confirm('Carregar este save? Isto substitui o progresso atual deste aparelho.'))return;loadSave384(d)}).catch(()=>toast('Arquivo de save inválido.'))};f.click()}
+function saveCodeView(imp){view=()=>saveCodeView(imp);
+  const h=imp?'<div class="sysline">Escolha o arquivo do save (.json). Isto substitui o progresso atual deste aparelho.</div><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('ESCOLHER ARQUIVO','loadsave',0,true,'hot')+'</div>'
+   :'<div class="sysline">O save é baixado como um arquivo pequeno (.json). Guarde no Drive, no PC ou mande no WhatsApp; para recuperar, use Importar save e escolha o arquivo.</div><div style="display:flex;justify-content:flex-end;margin-top:6px">'+btn('BAIXAR SAVE','copysave',0,true,'hot')+'</div>';
   openModal(imp?'IMPORTAR SAVE':'EXPORTAR SAVE',h)}
 function guildTab(){const g=profile.guild;let h='';
   if(!g){h+='<div class="sysline">Entre numa guilda ou funde a sua. A guilda sobrevive à sua morte.</div>';
@@ -7129,8 +7136,8 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
   if(a==='buymount'){if(run.mount||!spendService265(mountPrice265()))return;run.mount=true;toast('<b>[NARRADOR]</b> Montaria comprada: Lobo de Mana. Use o botão MONTAR na bolsa ou a tecla V.');return true}
   if(a==='mount'){closeModal();setMount(!run.mounted);return 'close'}
   if(a==='lookh'||a==='lookb'){profile.look=profile.look||{h:0,b:0};const k=a==='lookh'?'h':'b',arr=k==='h'?LOOK_H:LOOK_B;profile.look[k]=(profile.look[k]+1)%arr.length;store.set('pds2_profile',profile);rebuildLook();return true}
-  if(a==='copysave'){const t=$('savecode');try{navigator.clipboard.writeText(t.value).then(()=>toast('Código copiado.'),()=>{t.select()})}catch(e){t.select()}return 'close0'}
-  if(a==='loadsave'){try{const d=JSON.parse(decodeURIComponent(escape(atob($('loadcode').value.trim()))));if(!d.p)throw 0;profile=d.p;store.set('pds2_profile',profile);if(d.r)store.set('pds3_run',d.r);else store.del('pds3_run');closeModal();showProfile();$('goBtn').textContent='CONTINUAR';toast('Save carregado.')}catch(e){toast('Código inválido. Confira se copiou tudo.')}return 'close0'}
+  if(a==='copysave'){exportSave384();return 'close0'}
+  if(a==='loadsave'){importSave384();return 'close0'}
   if(a==='reaval'){const cur=rankOf(),off=run.official??profile.rank;if(cur<=off)return;run.official=cur;run.gold+=2000*(cur+1);run.pts=(run.pts||0)+1;closeModal();
     const R=RANKS[cur];bigText('REAVALIAÇÃO · RANK '+R.id,2400);shake(.6);fxRing(player.x,player.z,0xffd54f,5,1);setTimeout(()=>fxRing(player.x,player.z,0xffb347,8,1),300);sfx('level');
     toast('<b>[NARRADOR]</b> A Ordem registrou você como Viajante <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
@@ -8922,9 +8929,9 @@ requestAnimationFrame(frame);
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=383"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v383</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v384</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=383;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=384;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
