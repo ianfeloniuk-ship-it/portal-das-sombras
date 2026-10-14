@@ -3403,8 +3403,9 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   dragaoancio:{h:3.2,a:{Idle:'Flying_Idle',Running_A:'Fast_Flying',Death_A:'Death',ATK:'Headbutt',Hit:'HitReact'}},
   gato:{h:0.7,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
-  escaravelho:{h:2.1,a:{Idle:'Idle',Running_A:'Walk',Walk:'Walk',Death_A:'Death',ATK:'Charge',Hit:'HitRecieve',HitRecieve:'HitRecieve',Windup:'Windup',Charge:'Charge',Impact:'Impact',Recover:'Recover'}},monarca:{h:2.8,actor:true},guardiao:{h:2,st:1,a:{}},
+  escaravelho:{h:2.1,a:{Idle:'Idle',Running_A:'Walk',Walk:'Walk',Death_A:'Death',ATK:'Charge',Hit:'HitRecieve',HitRecieve:'HitRecieve',Windup:'Windup',Charge:'Charge',Impact:'Impact',Recover:'Recover'}},monarca:{h:2.8,actor:true},guardiao:{h:2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve',HitRecieve:'HitRecieve',Wake:'Wake',Walk:'Walk',Windup:'Windup',Attack:'Attack',Recover:'Recover'}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
+MON_DEF.guardiao_f={h:2,a:{...MON_DEF.guardiao.a}};MON_DEF.guardiao_a={h:2,a:{...MON_DEF.guardiao.a}};
 MON_DEF.escaravelho_f={h:2.1,a:{...MON_DEF.escaravelho.a}};MON_DEF.escaravelho_a={h:2.1,a:{...MON_DEF.escaravelho.a}};
 MON_DEF.slime_f={h:1,a:{...MON_DEF.slime.a}};MON_DEF.slime_a={h:1,a:{...MON_DEF.slime.a}};
 MON_DEF.gosma_f={h:1,a:{...MON_DEF.gosma.a}};
@@ -3428,12 +3429,12 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if(k.startsWith('guardiao')&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -3448,7 +3449,7 @@ function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
   m.body.position.y=0;m.body.rotation.set(0,0,0);
-  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu|passaro|espinhosa)/.test(m.mon||'')?1:1.2)}
+  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao)/.test(m.mon||'')?1:1.2)}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
   else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
@@ -5974,10 +5975,10 @@ function juice233(e,mv,atk,wind,dt){if(e.a242)arch242tick(e,mv,atk,dt);const J=e
 function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);return}if(!e.gap168done){e.gap168done=1;if(!e.rival)levelGap168(e)}if(!e.dead)crystalUnstuck126(e);if(L.floors){const active=dungeonFloorAt(e.z)===L.floors.current;e.m.root.visible=active&&!e.gone;if(!active)return}dt*=rareAreaTime103(e.x,e.z,e.isBoss);curAtk=e;if(e.trait==='regen'&&!e.dead&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.02*dt);
   e.t+=dt;
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
-  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
+  if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>6){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:e.raidAttack348>time?.7:0,dead:0,wind:0},e.t);return}}
   e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
-  if(e.frozen||e.hold){e.act=null;e.bird349=null;if(e.spiky350){e.spiky350=null;e.cd=Math.max(e.cd,.3);}if(e.coguCast348){e.coguCast348=null;e.coguCd348=Math.max(e.coguCd348||0,1);}if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
+  if(e.frozen||e.hold){e.act=null;if(e.guard370){e.guard370=null;e.cd=Math.max(e.cd,.3);}e.bird349=null;if(e.spiky350){e.spiky350=null;e.cd=Math.max(e.cd,.3);}if(e.coguCast348){e.coguCast348=null;e.coguCd348=Math.max(e.coguCd348||0,1);}if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
   updateBasicDots(e,dt);if(e.dead)return;
@@ -5989,6 +5990,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   if(window.Cogu348&&Cogu348.beforeAI(e,dt))return;
   if(window.Bird349&&Bird349.beforeAI(e,dt))return;
   if(window.Spiky350&&Spiky350.beforeAI(e,dt))return;
+  if(window.Guardian370&&Guardian370.beforeAI(e,dt))return;
   if(window.Beetle352&&Beetle352.beforeAI(e,dt))return;
   if(window.Slime360&&Slime360.beforeAI(e,dt))return;
   const pt=pickTarget(e);
@@ -8833,7 +8835,7 @@ requestAnimationFrame(frame);
 <script src="tools/crystal310.js?v=310"></script>
 <script src="tools/anim303.js?v=343"></script>
 <script src="tools/fendidos307.js?v=310"></script>
-<script src="tools/variants308.js?v=368"></script>
+<script src="tools/variants308.js?v=370"></script>
 <script src="tools/gosma347.js?v=363"></script>
 <script src="tools/cogu348.js?v=366"></script>
 <script src="tools/bird349.js?v=367"></script><script src="tools/spiky350.js?v=368"></script><script src="tools/beetle352.js?v=358"></script>
@@ -8843,6 +8845,7 @@ requestAnimationFrame(frame);
 <script src="tools/dome154.js?v=343"></script>
 <script src="tools/look154.js"></script>
 <script src="tools/civic343.js?v=369"></script>
+<script src="tools/guardian370.js?v=370"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
 <script>/* v165: no celular, botão de câmera alterna entre a vista de cima e a vista baixa de frente para o herói. */(()=>{const b=document.createElement('button');b.id='cam165';b.className='mini';b.textContent='🎥';b.title='Câmera';b.style.cssText='position:fixed;right:10px;top:56px;z-index:30;min-width:40px;min-height:36px';b.onclick=()=>{if(typeof pcCam==='undefined'||typeof player==='undefined'||!player)return;if(pcCam.pitch<.5){pcCam.pitch=1;pcCam.yaw=player.face||0}else{pcCam.pitch=0;pcCam.yaw=0}};const add=()=>document.body.appendChild(b);document.body?add():addEventListener('DOMContentLoaded',add)})();</script>
@@ -8861,6 +8864,6 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/workers350.js?v=351"></script>
 
-<script src="tools/loot353.js?v=367"></script>
+<script src="tools/loot353.js?v=370"></script>
 
 <script src="tools/hud356.js?v=356"></script>
