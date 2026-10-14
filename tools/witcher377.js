@@ -128,6 +128,11 @@
   }
   W377.lantern=lanternTick;
 
+  /* v381 (Ian): na carona da carroça os monstros não atacam você. */
+  const riding381=()=>!!(window.Living372&&Living372.riding&&Living372.riding());
+  const hurt0=hurtPlayer;hurtPlayer=function(){if(riding381())return;return hurt0.apply(this,arguments)};
+  const updE0=updEnemy;updEnemy=function(e,dt){const r381=riding381()&&e&&!e.dead&&!e.wagon343;if(r381){e.aggro=false;e.act=null}const r=updE0.apply(this,arguments);if(r381){e.aggro=false;e.act=null}return r};
+
   /* v379 (Ian): teclas presas — "ando sem parar e a câmera buga". Soltar Alt (esquiva) manda o foco para o menu do
      navegador e o jogo perde o "soltou W". Bloqueia isso e solta todas as teclas sempre que a página perde o foco. */
   function releaseAll379(){try{for(const k in keys)keys[k]=false;input.x=0;input.z=0;mouseHeld=false}catch(_){}try{CM154.held.clear()}catch(_){}}

@@ -1,3 +1,8 @@
+## v381 — Carroças sem sobreposição e carona segura, 14/10/2026
+- Relato de Ian (print): duas carroças uma dentro da outra. Agora cada carroça anda na própria faixa (1,7 m à direita do centro da estrada), espera a da frente no mesmo sentido (9,5 m) e nasce a 30 m+ de outra (tools/civic343.js).
+- Pedido de Ian: na carona da carroça os monstros não atacam (sem dano e sem perseguir; tools/witcher377.js). Monstros da emboscada continuam atacando a carroça.
+- Testado: sentidos opostos passam a 3,4 m; mesmo sentido não encosta; na carona vida cheia sob ataques; ao descer o dano volta. Sem erros.
+
 ## v380 — Projétil indo para o céu, 14/10/2026
 - Relato de Ian (print): magia subia ao infinito. Com a câmera baixa da v377, cursor fora do corpo do monstro apontava para o céu.
 - Correção (tools/witcher377.js, aimPoint): sem acertar monstro com o cursor, mira o monstro na direção do cursor (até 32 m, cone estreito); sem monstro, o tiro sai reto na altura do peito (máx. +0,6 m), até 40 m. Travar alvo continua mirando no alvo.
