@@ -84,7 +84,7 @@ window.Civic343=(()=>{
   if(riftOpen(c)&&!has){const rank=clamp(Math.max(danger(c.x+90,c.z),rankOf()),0,9);const g={id:++gateSeq,x:c.x,z:c.z-5,rank,lvl207:Math.max(portalLvl207(rank),run.level),aff:rollAff(rank),double:false,red:true,giant:false,life:1e9,max:1e9,seed:(Math.random()*2**31)|0,layout103:null,cleared:false,dead:false,inv343:c.id};gates.push(g);gateMesh(g);if(g.mesh)g.mesh.scale.setScalar(1.5);
    if(n.d<300)showSys('Uma <b>Fenda Invasora</b> vermelha abriu na praça de <b>'+safeText(c.name)+'</b>. Lojas, banco e serviços estão fechados e os moradores se trancaram em casa. Limpe a praça, entre na Fenda e derrote o chefe invasor; depois pague a reconstrução no marco central.')}
   else if(has&&!riftOpen(c)){has.dead=true;if(has.mesh&&has.mesh.parent)has.mesh.parent.remove(has.mesh)}}
- function riftClosed(g){if(!g||!g.inv343)return;if(profile.inv343)delete profile.inv343[g.inv343];save();const c=cityById(g.inv343);
+ function riftClosed(g){if(!g||!g.inv343||g.closed372)return;g.closed372=true;if(profile.inv343)delete profile.inv343[g.inv343];save();const c=cityById(g.inv343);
   setTimeout(()=>{bigText('FENDA INVASORA FECHADA',1800);showSys('A Fenda Invasora'+(c?' de <b>'+safeText(c.name)+'</b>':'')+' se fechou. Volte ao marco no centro da cidade para pagar a reconstrução.')},1500)}
  const baseRV=rebuildView;
  rebuildView=function(c){if(riftOpen(c)){view=()=>rebuildView(c);openModal('RECONSTRUIR '+c.name.toUpperCase(),'<div class="sysline">Uma <b>Fenda Invasora</b> vermelha está aberta na praça de '+safeText(c.name)+'.</div>'+row('1. Limpar a praça','Derrote os monstros que ocuparam a cidade.','')+row('2. Fechar a Fenda','Entre na Fenda vermelha no centro e derrote o chefe invasor.','<span style="color:#ff8fa3">Fenda aberta</span>')+row('3. Pagar a reconstrução','Depois de fechar a Fenda, volte a este marco.',''));return}return baseRV(c)};
@@ -170,8 +170,8 @@ window.Civic343=(()=>{
  function targetsTab(){ensureOrderRep();const s=NS(),rep=profile.orderRep97||0;
   let h='<div class="sysline">Lyra: Alvos Notórios são monstros de elite com nome próprio. Cada um vive num bioma. Aceite o contrato, vá até o bioma (fora das cidades) e ele aparece. Um contrato por vez. Abater o alvo dá um título de caçador com bônus e muita reputação da Ordem. Sua reputação: <b>'+fmt(rep)+'</b>.</div>';
   for(const T of TARGETS){const need=orderRepNeed(T.tier),done=!!s.done[T.id],act=s.active===T.id,open=rep>=need;
-   const info=BIO_N[T.bio]+' · rank '+GR[T.tier].id+' · recompensa: título <b>'+T.t+'</b> ('+T.m+'), +'+fmt(repOf(T))+' de reputação e '+fmt(goldOf(T))+' de ouro';
-   h+=row((done?'<span style="color:#6fe39a">✔</span> ':'')+'<b>'+T.n+'</b>',info+(open||done?'':'<br><span style="color:#ff8fa3">Requer '+fmt(need)+' de reputação da Ordem.</span>')+(act?'<br><b style="color:#ffd54f">Contrato ativo.</b> '+(tgt&&!tgt.dead?'O alvo foi visto por perto; veja a estrela no mapa.':'Vá para '+BIO_N[T.bio]+', longe das cidades.'):''),
+   const info='Pista: '+(window.Living372?Living372.clue(T.id):BIO_N[T.bio])+ '<br>'+BIO_N[T.bio]+' · rank '+GR[T.tier].id+' · recompensa: título <b>'+T.t+'</b> ('+T.m+'), +'+fmt(repOf(T))+' de reputação e '+fmt(goldOf(T))+' de ouro';
+   h+=row((done?'<span style="color:#6fe39a">✔</span> ':'')+'<b>'+T.n+'</b>',info+(open||done?'':'<br><span style="color:#ff8fa3">Requer '+fmt(need)+' de reputação da Ordem.</span>')+(act?'<br><b style="color:#ffd54f">Contrato ativo.</b> '+(tgt&&!tgt.dead?'O alvo foi visto por perto; procure a caveira vermelha no radar de 60 m.':'Vá para '+BIO_N[T.bio]+', longe das cidades.'):''),
     done?'<b>Abatido</b>':act?btn('Desistir','notorx343',0):btn(open?'Aceitar contrato':'Bloqueado','notor343',T.id,open&&!s.active,'hot'))}
   return h}
  function targetDrop(){if(tgt&&!tgt.dead){tgt.gone=true;tgt.dead=true;if(tgt.m&&tgt.m.root&&tgt.m.root.parent)tgt.m.root.parent.remove(tgt.m.root);const i=enemies.indexOf(tgt);if(i>=0)enemies.splice(i,1)}tgt=null}
@@ -182,12 +182,12 @@ window.Civic343=(()=>{
   tgtT+=dt;if(tgtT<5)return;tgtT=0;const k=T.kinds.find(x=>KINDS[x]);if(!k)return;const a=Math.random()*TAU,x=P.x+Math.cos(a)*34,z=P.z+Math.sin(a)*34;if(nearestCity(x,z).d<110)return;
   let e;try{e=spawnKind(k,x,z,T.tier,{wild:true,noFendido:1,noInedita:1})}catch(_){return}
   makeElite(e);e.name=T.n;e.short=T.n;e.notor343=T.id;e.maxhp*=3;e.hp=e.maxhp;e.dmg*=1.25;try{e.m.body.scale.multiplyScalar(1.25);e.r*=1.2}catch(_){}tgt=e;
-  bigText('ALVO NOTÓRIO',1600);sfx('gong');toast('<b>[ORDEM]</b> <b>'+T.n+'</b> foi visto a '+compass(x-P.x,z-P.z)+'. Veja a estrela no mapa.',7000)}
+  bigText('ALVO NOTÓRIO',1600);sfx('gong');toast('<b>[ORDEM]</b> <b>'+T.n+'</b> foi visto a '+compass(x-P.x,z-P.z)+'. Procure a caveira vermelha no radar de 60 m.',7000)}
 
  /* ---------- mapa ---------- */
  function map(ctx,tx,tz,full){const P=player;
   for(const w of wagons){const X=tx(w.x),Z=tz(w.z);ctx.fillStyle=w.wreck?'#555':w.amb?(Math.floor(time*3)%2?'#ff8a4d':'#ffd54f'):'#c9a26b';ctx.fillRect(X-3,Z-2,6,4);if(w.amb&&full){ctx.font='700 11px sans-serif';ctx.textAlign='left';ctx.fillText('Carroça atacada',X+7,Z+4);ctx.textAlign='center'}}
-  if(tgt&&!tgt.dead){const X=tx(tgt.x),Z=tz(tgt.z),r=full?9:6;ctx.fillStyle='#ff5a8a';ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(X+Math.cos(a)*rr,Z+Math.sin(a)*rr)}ctx.closePath();ctx.stroke();ctx.fill();if(full){ctx.font='700 11px sans-serif';ctx.textAlign='left';ctx.fillText(tgt.name,X+11,Z+4);ctx.textAlign='center'}}
+  if(tgt&&!tgt.dead&&(full||Math.hypot(tgt.x-P.x,tgt.z-P.z)<=60)){const X=tx(tgt.x),Z=tz(tgt.z);ctx.save();ctx.fillStyle='#ff3333';ctx.strokeStyle='#180000';ctx.lineWidth=3;ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.strokeText('☠',X,Z+5);ctx.fillText('☠',X,Z+5);ctx.font='bold 10px sans-serif';const name=tgt.name;const width=ctx.measureText(name).width;const nx=clamp(X,8+width/2,ctx.canvas.width-8-width/2);ctx.strokeText(name,nx,Z-12);ctx.fillText(name,nx,Z-12);ctx.restore()}
   const S=run&&run.scout343;if(S&&S.day===gameDay198()){const size=ctx.canvas.width,m=14;for(const k of S.marks){if(k.gate&&!gates.some(g=>g.id===k.gate&&!g.dead))continue;let X=tx(k.x),Z=tz(k.z);const off=X<m||X>size-m||Z<m||Z>size-m;X=clamp(X,m,size-m);Z=clamp(Z,m,size-m);ctx.fillStyle=k.piece?'#ffd070':'#7cf4d2';ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X,Z-7);ctx.lineTo(X+6,Z);ctx.lineTo(X,Z+7);ctx.lineTo(X-6,Z);ctx.closePath();ctx.stroke();ctx.fill();if(full){ctx.font='700 11px sans-serif';ctx.textAlign=X>size/2?'right':'left';ctx.fillText(k.n+(off?' ('+fmt(Math.round(Math.hypot(k.x-P.x,k.z-P.z)))+' m)':''),X+(X>size/2?-10:10),Z+4);ctx.textAlign='center'}}}}
 
  /* ---------- ações dos botões ---------- */
@@ -205,5 +205,5 @@ window.Civic343=(()=>{
   guardTick(dt);wagonTick(dt);targetTick(dt);if(window.Wagon369)Wagon369.tickStations(dt,scene,player)}
  const baseSiege=updSiege;updSiege=function(dt){baseSiege(dt);try{tick(dt)}catch(err){console.warn('Civic343',err)}};
  return {grade,gradeOf,GRADE_N,restMul,restPaid,innNote,taxFree,reservedRows,regionRows,riftOpen,riftClosed,targetsTab,action,map,wagons,TARGETS,
-  test:{wagonSpawn,wagonTick,wagonRemove,ambush,scout,target:()=>tgt,domeDrain,help}};
+  test:{targetTick,wagonSpawn,wagonTick,wagonRemove,ambush,scout,target:()=>tgt,domeDrain,help}};
 })();

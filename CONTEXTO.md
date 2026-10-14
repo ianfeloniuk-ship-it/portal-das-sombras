@@ -1,3 +1,28 @@
+## v373 — Mundo vivo e segurança de retorno, 13/10/2026
+
+- Pedido de Ian implementado sobre a v371 (434bae9), conforme confirmação neste chat. Equipamentos continuam sem afixos; tipos de mercadorias recebem peso regional 4× nas três vagas diárias. Arma da classe permanece fixa.
+
+- Onze clãs em pontos determinísticos fora das estradas. Clareiras reservadas antes da vegetação, fogueira, tenda/totem, modelos base carregados e speech153. Fendidos/Abissais não falam. Patrulha Ferrugem protege viajantes; yetis defendem filhotes provocados.
+
+- Duelo 1v1: rendição a 20%, sem mortes/saque; recompensa por acampamento/dia. Bônus físico +10% por 300 s; respeito dos sapos reduz lentidão de 10% para 5%. Bênção reduz dano mágico em 15% por 300 s; abrigo da neve, cura/descanso e batedores.
+
+- Reconstrução exige 30 cristais do rank regional ou superior, consumindo menores elegíveis primeiro. Como cidades antigas não têm campo rank, usa danger(c.x+90,c.z); rank explícito prevalece. Mensagem/UI e compra preservam o saldo em falha.
+
+- Fenda Invasora grava retorno e estado numa única entrada do run, com token/readback. Entrada bloqueada se a gravação falha. Morte/recarga mantêm cidade caída e portal aberto; chefe grava fechamento antes de alterar o perfil. A animação Rift131.close acontece no retorno ao mundo; marco liberado sem reconstrução automática.
+
+- Oito pistas geográficas nos contratos; caveira vermelha e nome apenas a até 60 m no minimapa. Mapa completo mantém localização.
+
+- Carona F na carroça móvel: banco traseiro, pose sentada, câmera afastada, +1% HP/MP a cada 3 s; F/Espaço desembarca. Movimento, ataques e habilidades bloqueados durante carona. Embarque não é persistido; save guarda posição da estrada.
+
+- Anel de mana é uma relíquia de viagem separada, equipável pela bolsa (+10% regeneração de mana), e poção concentrada recupera 60% de vida. Não reintroduz afixos nem bônus nos equipamentos comuns.
+
+- Armas de fogo autorizadas por Ian neste chat: Pistola da Escama, tipo firearm, vendida no posto dracônico por preço normal de arma do ranque. Modelo próprio no Blender, encaixado na mão direita; projétil físico de 48 m/s, alcance temporal 0,85 s, recarga automática base de 1,2 s reduzida pela agilidade, sem mana e munição básica ilimitada. Não adiciona afixos.
+
+- Limites: Espada arcana é nome regional de espada comum, sem dano mágico adicional. Sem teste em celular ou aprovação criativa. Publicação autorizada por Ian em 13/10/2026. Integração sobre a v372/7952b6e preserva Cactoros e recolhimento de corpos; número ajustado para v373.
+
+
+
+
 ## v372 — Cactoros e recolhimento pelo Arquiteto, 13/10/2026
 - Pedido atual de Ian: após pegar o primeiro item de um cadáver, uma mão sai de uma fenda, agarra o corpo e o recolhe com evaporação. Efeito global no saque, não dispara só por abrir ou por tentativa sem espaço. Restos mantêm todos os itens não coletados; flag persistente impede repetição ao recarregar. Chefes mantêm essência e poderes existentes.
 - Cactoro padrão/Fendido/Abissal: Tripo multivista, 180 créditos autorizados e consumidos; rig e oito clipes por forma no Blender, 24 mil triângulos, UV0, 1,2/1,2/1,4 m. Quatro cristais do Abissal corrigidos. Ataque de espinho com alvo travado, aviso e recuperação; padrão/Fendido enraizados de dia, móveis ao entardecer; Abissal sempre móvel. HP/dano/recompensas preservados; alcance 9 m é escolha técnica.

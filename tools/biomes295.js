@@ -14,7 +14,7 @@ const ITEMS={cantil:{n:'Cantil de couro',d:'anula o calor do deserto',b:'deserto
 const DUR=300;
 function gear(){run.bioGear295=run.bioGear295||{};return run.bioGear295}
 function here(){try{return (typeof L!=='undefined'&&L.mode==='world'&&player)?biomeAt(player.x,player.z):null}catch(_){return null}}
-function fx(){const b=here();const f=b&&FX[b];if(!f)return null;if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true};return f}
+function fx(){const b=here();const f=b&&FX[b];if(!f)return null;if(window.Living372){if(b==='neve'&&Living372.sheltered())return {n:f.n,protegido:true};if(b==='pantano'&&run.clanRespect372&&!gear()[f.item])return {...f,move:-.05};}if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true};return f}
 function price(k){const g=(typeof GR!=='undefined'&&GR[Math.min(9,rankOf())])?GR[Math.min(9,rankOf())].gold:1;return Math.round(ITEMS[k].p*g)}
 // ---- efeitos ----
 const ms0=movementSpeed;movementSpeed=function(raw){const f=fx();return ms0(f&&f.move?raw*(1+f.move):raw)};
