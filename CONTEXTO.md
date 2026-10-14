@@ -1,3 +1,8 @@
+## v393 — Mapa de RPG e dano de queda, 14/10/2026
+- Pedido de Ian: o mapa era escuro só com pontos. tools/map393.js: minimapa e mapa grande com terreno pintado por bioma, sombra de relevo (montanhas, picos claros), rios e lagos (gelo claro), estradas, barracas dos clãs com nome, postos avançados, moldura de pergaminho, rosa dos ventos e legenda no mapa grande. Pontos antigos (cidades, portais, monstros, chefes, carroças, tesouro, batedores) continuam iguais por cima. Abre em ~0,1 s com versão rápida e refina em seguida.
+- Dano de queda (tools/fall393.js): borda que desce mais de 1,4 m por metro faz cair com gravidade; até 6 m sem dano, depois 5% da vida máxima por metro; abaixo de 30 m sempre sobra 1 de vida, acima de 30 m pode matar. Água funda e montaria/carroça sem dano.
+- Testado: mapa aberto (print), queda de 12,4 m = −57 de 181 (31%), caminhar em morro suave não dispara queda, pulo normal sem dano. Sem erros.
+
 ## v392 — Animação de nado no esqueleto, 14/10/2026
 - Pedido de Ian: rig de nadar e boiar no personagem. tools/water391.js aplica poses nos ossos do Viajante (mesmo esquema do pulo, anim303): nadando = corpo deitado, crawl com braçadas alternadas, pernas batendo, cabeça para a frente, sobe para a linha d'água; parado = boiando em pé, braços abrindo/fechando e pernas pedalando. Base parada antes do nado para a caminhada não misturar.
 - Correção ligada: climb383 e water391 usavam `window.player` (o jogador é `let`, não fica em window) — a inclinação do corpo na escalada (v383) nunca rodava; agora roda.
