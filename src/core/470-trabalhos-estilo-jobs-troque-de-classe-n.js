@@ -1,0 +1,39 @@
+/* ===== TRABALHOS (estilo "jobs"): troque de classe na cidade; cada trabalho tem seus próprios atributos. Vagas = 1 + rank. ===== */
+function jobSlots(){return CLASSES.filter(c=>!c.legacy&&!c.rare).length}
+function jobsOf(){const ids=[...new Set([...(Array.isArray(profile.jobs)?profile.jobs:[]),profile.cls,...(Number.isInteger(profile.rareClass)?[profile.rareClass]:[])])].filter(i=>Number.isInteger(i)&&CLASSES[i]);profile.jobs=ids;return ids}
+function ownsRare(ci){return jobsOf().includes(ci)&&!!CLASSES[ci]?.rare}
+function canLearnClass(ci){const c=CLASSES[ci];return !!c&&!c.legacy&&!jobsOf().includes(ci)&&!c.rare}
+function learnClass(ci){if(!canLearnClass(ci)||!classTrainingReady())return false;if(!spendService265(classTraining().gold))return false;if(CLASSES[ci].rare)profile.rareClass=ci;profile.jobs.push(ci);styleTutorial();store.set('pds2_profile',profile);saveRun();return true}
+
+function ptsTotal(){const s=run.stats||{};return Object.values(s).reduce((a,b)=>a+b,0)+(run.pts||0)}
+function switchJob(ci){if(ci===profile.cls||!jobsOf().includes(ci)||CLASSES[ci].complement103)return;if(L.mode!=='world'||!inCity(player.x,player.z)){toast('<b>[NARRADOR]</b> Só dá para trocar de trabalho dentro de uma cidade.');return}
+  rememberClassCooldowns();run.jobData=run.jobData||{};const tot=ptsTotal();run.jobData[profile.cls]={stats:{...run.stats},pts:run.pts,adv:!!run.adv,base:tot,style:run.style};
+  const old=profile.cls;if(old===3&&run.adv&&ADV[old]&&ADV[old].sk&&!powLib().some(s=>s.n===ADV[old].sk.n))try{learnPower({...ADV[old].sk})}catch(e){}
+  const d=run.jobData[ci];if(d){run.stats={...d.stats};run.pts=d.pts+Math.max(0,tot-d.base);run.adv=d.adv;run.style=d.style||'nat'}else{run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=tot;run.adv=false;run.style='nat'}
+  profile.cls=ci;run.elem=CLASSES[ci].elem||(ci===3?run.elem:null);AFFC=null;store.set('pds2_profile',profile);
+  const x=player.x,z=player.z,g=run.gold;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);refreshStats();player.hp=player.maxhp;showG();buildSteal();
+  bigText(CLASSES[ci].n.toUpperCase(),1600);sfx('arise');toast('<b>[TRABALHO]</b> Agora você é <b>'+CLASSES[ci].n+'</b>. Os atributos deste trabalho são separados'+(d?'':': distribua os seus '+run.pts+' pontos')+'.'+(run.jobData[old]&&run.jobData[old].adv?' A habilidade da evolução permanece no repertório de seis espaços.':''),7000);saveRun()}
+function jobsTab(){const J=jobsOf();let h='<div class="sysline">Aprenda as <b>10 classes comuns</b> e combine habilidades. Trocar a classe-base muda a aparência, os atributos e o ataque básico.</div>'+row('Montar habilidades',classSlotCount()+' espaços disponíveis'+' · incluindo evoluções',btn('Personalizar','loadout',0,true,'hot'))+'<div class="sec">CLASSES APRENDIDAS</div>';
+  for(const ci of J){const c=CLASSES[ci];h+=row('<b>'+c.n+'</b>'+(c.rare?' · RARA':'')+(ci===profile.cls?' · classe-base atual':''),(PASSIVES[ci]?PASSIVES[ci].n+': '+PASSIVES[ci].d:'')+'<br>'+c.sk.map(x=>x.n).join(', '),ci===profile.cls||c.complement103?'':btn('Usar como base','jobsw',ci))}
+  const q=classTraining();h+='<div class="sec">APRENDER CLASSES COMUNS</div><div class="sysline">Próxima formação: nível '+q.level+' (atual '+run.level+'), '+q.bosses+' guardiões derrotados (atual '+(profile.bossKills||0)+') e '+fmt(q.gold)+' ouro. As exigências crescem a cada classe aprendida. As passivas de todas as classes aprendidas continuam somando.</div>';CLASSES.forEach((c,ci)=>{if(J.includes(ci)||c.legacy||c.rare)return;h+=row(c.n,PASSIVES[ci]?PASSIVES[ci].d:'',btn('Aprender','joblearn',ci,classTrainingReady()))});
+  return h}
+/* HISTÓRIA PRINCIPAL: um ato por rank conquistado. */
+const MAIN_ACTS=[null,
+ ['Ato I · O Chamado','Lyra: A Ordem reconhece você. Mas os portais estão abrindo cada vez mais perto das cidades. Parece que alguém está chamando eles.'],
+ ['Ato II · O Diário de Aldric','Lyra: Aldric, um caçador veterano, sumiu num portal vermelho. Deixou um diário: "os portais seguem um padrão". Estamos tentando entender qual.'],
+ ['Ato III · A Torre Antiga','Lyra: O diário fala de uma torre que existia antes dos portais. A Torre da Ascensão é tudo o que restou dela. Quem sobe, aprende.'],
+ ['Ato IV · As Marcas','Você reconhece o mesmo símbolo gravado em todos os guardiões. Lyra: "Então alguém cria os guardiões. Alguém que a gente chama de Arquiteto."'],
+ ['Ato V · O Retorno','Aldric aparece ferido na Ordem: "O Arquiteto quer caçadores fortes. Ele se alimenta de quem sobe. Não pare, mas nunca suba sozinho."'],
+ ['Ato VI · As Muralhas','As cidades começam a cair nas estações do fim do mundo. Aldric: "Ele está testando as muralhas. Cada cidade que você fortalece atrapalha o plano."'],
+ ['Ato VII · O Topo','Lyra: Você é o caçador mais forte que a Ordem já teve. Dizem que no alto da torre infinita existe a porta do Arquiteto. Ninguém voltou para contar... ainda.']];
+function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest||0)<100||(profile.lore||[]).includes('towerEnd'))return false;unlockLore('towerEnd');if(announce)showSys('<b>'+LORE.towerEnd[0]+'</b><br>'+LORE.towerEnd[1]+'<br><small>Releia esta conclusão em DIÁRIO → História.</small>');return true}
+function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
+function rankTab(){const r=profile.rank,nx=r+1,can=nx<=9,need=can?GR[nx].lvl:0;let h='<div class="guide93"><strong>SUBIR DE RANK</strong><p>Alcance o nível e a reputação exigidos. Depois vença o Examinador.</p><p>Reputação não é gasta. Cada rank concede bônus de vida, dano e 1 escolha de combate. De E a A, libera mais 1 espaço de habilidade (máx. 6).</p></div>';
+  h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
+  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e masmorras.':'<br>Reputação suficiente!')+(nx===9?'<br>Segundo Despertar: <b>'+(starReady187()?'concluído':'necessário')+'</b>. Rank SS+ obrigatório.':'')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR MASMORRA</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
+
+  if(!can)h+=row('Rank ★ · Arconte','Você ultrapassou SS+.','');
+  h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=row('Escolhas de rank',rankPoints()+' pontos disponíveis em Personagem → Passivas.',btn('Abrir Passivas','character','passives'));h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
+  for(let i=1;i<MAIN_ACTS.length;i++)if(acts.includes(i)||profile.rank>=i){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
+  if(!any)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">A história começa quando você passar na primeira Prova de Rank.</div>';
+  if(can&&MAIN_ACTS[nx])h+=row('<span style="opacity:.5">Próximo: '+MAIN_ACTS[nx][0]+'</span>','Passe na prova para o rank '+RANKS[nx].id+'.','');return h}

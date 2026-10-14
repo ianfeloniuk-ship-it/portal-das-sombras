@@ -1,3 +1,9 @@
+## v388 — Código dividido em partes, 14/10/2026
+- Pedido de Ian: dividir o código para um pedido não mexer em outra coisa e trazer bug novo.
+- O script principal (7,8 MB, um bloco só) agora mora em 68 partes em `src/core/` (util, dados, jogador, colisão, mundo, masmorra, combate, IA, loop, HUD, janelas, controles, telas...). Mapa e regras: `src/LEIA-ME.md`.
+- `tools/build.py` junta as partes no `game.html` (idêntico byte por byte ao anterior — o jogo não mudou) e refaz as partes depois dos syncs. Edição direta no game.html é detectada; mudança dos dois lados para o build com erro.
+- Testado: divisão e junção idênticas; editar parte → vai para o jogo; desfazer → idêntico; edição direta detectada.
+
 ## v387 — Chuva visível, 14/10/2026
 - Relato de Ian: aviso "Começou a chover" sem chuva. A chuva eram 700 pontos de 0,09 roxos, invisíveis. Agora tools/rain387.js: 2600 gotas finas (InstancedMesh; linhas THREE não renderizam com o shader do relevo) caindo inclinadas com vento ao redor da câmera, mais fracas à noite. Regra do clima inalterada.
 - Testado com print na cidade de dia. A neve continua com os pontos antigos (conferir se Ian reclamar).

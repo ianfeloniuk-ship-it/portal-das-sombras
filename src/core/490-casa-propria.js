@@ -1,0 +1,29 @@
+/* ===== CASA PRÓPRIA ===== */
+const HOUSE_P=24000;
+const FURN=[{k:'cama',n:'Cama',p:2000,d:'Dormir em casa é grátis, cura 80%, tira o cansaço e dá Bem descansado (nível 3) por 10 min',m:'bed'},{k:'bau',n:'Baú',p:3200,d:'Guarda até 20 itens para sempre (nem a morte leva)',m:'chest'},{k:'trof',n:'Estante de Troféus',p:3200,d:'Cada guardião diferente derrotado dá +0,5% de dano contra chefes (máx. +25%)',m:'statue_column'},{k:'aqua',n:'Aquário',p:1200,d:'+1 tentativa na pesca e mostra seus recordes',m:'bucket_water'},{k:'altar',n:'Altar de Mana',p:4800,d:'3 poções grátis por dia',m:'candle_triple'}];
+function hasF(k){return !!(profile.house&&profile.house.f&&profile.house.f[k])}
+function trophyB(){return hasF('trof')?Math.min(.25,(profile.trophies||[]).length*.005):0}
+function rebuildCity(c){for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===c.id)unloadChunk(ch);updChunks(true)}
+function houseView(){view=houseView;const c=nearestCity(player.x,player.z).c,H=profile.house;let h='';
+  if(!H||H.city!==c.id){const p=housePrice265(!!H);h+='<div class="sysline">Uma casa perto do portão leste de <b>'+c.name+'</b>.'+(H?' Você já tem casa em outra cidade: mudar para cá custa só a mudança (os móveis e o baú vão junto).':'')+'</div>'+row(H?'Mudar para esta casa':'Comprar a casa','Sua base: móveis com funções, troféus dos guardiões e um baú que nem a morte esvazia.',btn(fmt(p)+' ouro','housebuy',0,run.gold>=p,'hot'));openModal('CASA',h);return}
+  h+='<div class="sysline">Sua casa em <b>'+c.name+'</b>. Cada móvel aparece do lado de fora da casa.</div><div class="sec">MÓVEIS</div>';
+  for(const F of FURN)h+=row(F.n,F.d,hasF(F.k)?'<b style="color:#6fe39a">Seu</b>':btn(fmt(furniturePrice265(F))+' ouro','furn',F.k,run.gold>=furniturePrice265(F)));
+  if(hasF('cama'))h+=row('Dormir em casa','Grátis. Recupera '+Math.round(innHeal287(3)*100)+'% da vida e da mana, escudo cheio, tira o cansaço e dá Bem descansado (como pousada nível 3) por 10 min',btn('Dormir','hsleep',0,true,'hot'));
+  if(hasF('altar')){const ok=H.altar!==todayKey();h+=row('Altar de Mana','3 poções por dia',btn(ok?'Pegar 3 poções':'Volte amanhã','haltar',0,ok))}
+  if(hasF('trof')){const T=profile.trophies||[];h+='<div class="sec">TROFÉUS ('+T.length+') · +'+String(Math.round(trophyB()*1000)/10).replace('.',',')+'% de dano contra chefes</div><div class="sysline" style="font-size:12px">'+(T.join(' · ')||'Derrote guardiões para encher a estante.')+'</div>'}
+  if(hasF('aqua')){const A=profile.aqua||{};h+='<div class="sec">AQUÁRIO</div><div class="sysline" style="font-size:12px">'+(Object.entries(A).map(([k,v])=>k+' '+String(v).replace('.',',')+' kg').join(' · ')||'Vazio. Vá pescar.')+'</div>'}
+  if(hasF('bau')){const B=H.chest=H.chest||[];h+='<div class="sec">BAÚ ('+B.length+'/20)</div>';B.forEach((it,i)=>{h+=row('<b style="color:'+RAR[it.rar].c+'">'+it.name+'</b>',statTxt(it),btn('Pegar','hget',i,run.items.length<bagCapacity353()))});
+    h+='<div class="sec">GUARDAR DA BOLSA</div>';run.items.forEach(it=>{h+=row('<span style="color:'+RAR[it.rar].c+'">'+it.name+'</span>',statTxt(it),btn('Guardar','hput',it.uid,B.length<20))})}
+  openModal('CASA',h)}
+function houseAct(a,v){const H=profile.house;
+  if(a==='housebuy'){const p=housePrice265(!!H);if(!spendService265(p))return;const c=nearestCity(player.x,player.z).c,old=H&&H.city;profile.house={f:{},chest:[],...(H||{}),city:c.id};store.set('pds2_profile',profile);rebuildCity(c);if(old&&old!==c.id){for(const ch of[...chunks.values()])if(ch.city&&ch.city.id===old)unloadChunk(ch);updChunks(true)}storyEv('house');sfx('level');toast('<b>[CASA]</b> A casa em '+c.name+' é sua.');return true}
+  if(a==='furn'){const F=FURN.find(x=>x.k===v);if(!H||!F||hasF(v)||!spendService265(furniturePrice265(F)))return;H.f[v]=1;store.set('pds2_profile',profile);rebuildCity(nearestCity(player.x,player.z).c);sfx('coin');toast('<b>[CASA]</b> '+F.n+' comprado.');return true}
+  if(a==='hsleep'){narratorEvent105('rest');run.rested={t:600,l:3};run.awake287=0;refreshStats();{const heal=innHeal287(3);player.hp=Math.min(player.maxhp,player.hp+player.maxhp*heal);player.mp=Math.min(player.maxmp,player.mp+player.maxmp*heal)}player.shield=player.maxsh;dayT=Math.ceil(dayT/DAYLEN)*DAYLEN+60;closeModal();toast('<b>[CASA]</b> Você dormiu em casa: recuperou '+Math.round(innHeal287(3)*100)+'% da vida e da mana. Bem descansado por 10 min.');return 'close'}
+  if(a==='haltar'){if(H.altar===todayKey())return;H.altar=todayKey();run.pots+=3;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CASA]</b> +3 poções do Altar de Mana.');return true}
+  if(a==='hput'){const B=H.chest=H.chest||[];if(B.length>=20)return;const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;B.push(run.items.splice(i,1)[0]);store.set('pds2_profile',profile);saveRun();return true}
+  if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=bagCapacity353())return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
+function buildHouse(c,g,E){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
+  if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT))}
+    const sg=makeCitySign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
+  else{const sg=makeCitySign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT))}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
+

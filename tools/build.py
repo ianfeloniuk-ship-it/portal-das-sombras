@@ -1,11 +1,16 @@
 """Gera index.html (site instalável) a partir de game.html."""
 import pathlib,re,subprocess,sys
 root=pathlib.Path(__file__).resolve().parent.parent
+# v388: o script principal mora em src/core/ (partes). Junta as partes no game.html antes dos syncs
+# e, depois deles, re-divide para as partes ficarem com o que os syncs gravaram.
+sys.path.insert(0,str(root/'tools'));import core_parts
+print('src/core:',core_parts.assemble())
 subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-kit111.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-ecology124.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-crystals125.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-environment128.py')],check=True)
+core_parts.split()
 # Ensure the detailed citizen models included by the current game scripts ship with Pages.
 for name in ['dorian133.glb','selene133.glb','cacador-veterano138.glb','necromante-tripo-animado.glb']:
     model=root/'models'/name
