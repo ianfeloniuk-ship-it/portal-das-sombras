@@ -49,7 +49,7 @@ function envBlades(){const P=[],N=[],C=[],I=[];const R=mulberry32(77);
   for(let b=0;b<7;b++){const a=R()*Math.PI,r=R()*.22,ox=Math.cos(a*2)*r,oz=Math.sin(a*2)*r,w=.055+R()*.04,h=.42+R()*.5,lean=(R()-.5)*.35,dx=Math.cos(a),dz=Math.sin(a);
     const tipx=ox+Math.cos(a+1.57)*lean,tipz=oz+Math.sin(a+1.57)*lean,base=P.length/3;
     P.push(ox-dx*w,0,oz-dz*w,ox+dx*w,0,oz+dz*w,tipx,h,tipz);
-    const k=.75+R()*.35;C.push(.16*k,.33*k,.1*k,.16*k,.33*k,.1*k,.46*k,.7*k,.25*k);
+    const k=.85+R()*.3;C.push(.28*k,.68*k,.18*k,.28*k,.68*k,.18*k,.55*k,.88*k,.32*k);
     for(let q=0;q<3;q++)N.push(0,1,0);I.push(base,base+1,base+2,base,base+2,base+1)}
   const n=P.length/3;ENV.m.blades={p:new Float32Array(P),n:new Float32Array(N),c:new Float32Array(C),i:new Uint16Array(I),nv:n,min:[-.3,0,-.3],max:[.3,1,.3],h:.9,w:.6}}
 /* textura de detalhe do chão (ruído de grama, bem sutil) */
@@ -91,7 +91,7 @@ const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB',
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
   const pos=pg.attributes.position,cols=new Float32Array(pos.count*3),t=new THREE.Color(),u=new THREE.Color();
-  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
+  const G1=new THREE.Color(0x56be32),G2=new THREE.Color(0x72d43e),DRY=new THREE.Color(0x9cb85c),FOR=new THREE.Color(0x3ea030),DIRT=new THREE.Color(0xd2b57d),COB=new THREE.Color(0x9fa19c),PLZ=new THREE.Color(0xc0b8a8),BAD=new THREE.Color(0x4a3632),SNOW=new THREE.Color(0xf6f9fd),SAND=new THREE.Color(0xd9c288),SWMP=new THREE.Color(0x486438);
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let d=1e9,road=0;
     for(const c of near){const dx=x-c.x,dz=z-c.z,dd=Math.hypot(dx,dz);if(dd<d)d=dd;if(dd<125){const m=Math.min(Math.abs(dx),Math.abs(dz));road=Math.max(road,clamp((4.9-m)/1.8,0,1)*clamp((125-dd)/12,0,1))}}
     t.copy(G1).lerp(G2,WN(x*.02+40,z*.02+40));
@@ -101,5 +101,5 @@ function envGroundColors(pg,near){
     const fo=WN(x*.035,z*.035);if(fo>.48)t.lerp(FOR,Math.min(.7,(fo-.48)*3.5));
     if(road>0)t.lerp(u.copy(DIRT).multiplyScalar(.9+WN(x*.3,z*.3)*.2),road*.95);
     if(d<CITYR-3){t.lerp(COB,clamp((CITYR-3-d)/2.5,0,1));if(d<15)t.lerp(PLZ,clamp((15-d)/2,0,1))}
-    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.42);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
+    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.28);t.multiplyScalar(1.08);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
   pg.setAttribute('color',new THREE.BufferAttribute(cols,3))}

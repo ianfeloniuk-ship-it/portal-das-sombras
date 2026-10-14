@@ -22,4 +22,6 @@ body.position.y=s*(.12*grip+1.2*pull);body.rotation.y+=.003*pull;body.scale.setS
 particles.forEach((p,i)=>{const q=(t*.55+i/36)%1,a=i*2.399+t*2,rad=s*.6*(1-q);p.position.set(Math.cos(a)*rad,s*(.2+q*2),Math.sin(a)*rad);p.visible=t>1.35&&t<3.65;p.scale.setScalar(Math.sin(q*Math.PI)*(1-close));});}
 function dispose(j){scene.remove(j.root);j.geo.forEach(g=>g.dispose());j.mats.forEach(m=>m.dispose());j.owned.forEach(m=>m.dispose())}
 function tick(dt){for(let i=jobs.length-1;i>=0;i--){const j=jobs[i];j.t+=dt;apply(j,j.t);if(j.t>=4){dispose(j);jobs.splice(i,1)}}}
-function clear(){jobs.splice(0).forEach(dispose)}return{start,tick,clear,jobs,apply};})();
+function clear(){jobs.splice(0).forEach(dispose)}
+function claimEnemy(e){if(!e||!e.m||!e.m.root||e.m.root.userData.reclaimed372)return false;const marker=new T.Mesh(new T.BufferGeometry(),new T.MeshBasicMaterial({visible:false}));e.m.root.add(marker);const a={model:e.m,root:e.m.root,marker,reclaim372:false,inter:{label:''}};const r={x:e.x,z:e.z,name:e.name||'Criatura'};try{start(a,r);e.m.root.userData.reclaimed372=true;try{sfx('gong');}catch(_){}try{shake(.35);}catch(_){}return true}catch(err){console.warn('Reclaim372.claimEnemy',err);return false}}
+return{start,tick,clear,jobs,apply,claimEnemy};})();

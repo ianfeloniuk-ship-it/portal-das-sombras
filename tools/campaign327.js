@@ -13,8 +13,8 @@
      ev (evento contado do jogo) · tower (andar da Torre; rel = andares acima do recorde ao começar) · city · caps · diary */
   const ACTS = [
     { id: 'a1', act: 1, title: 'I — O Chamado', steps: [
-      { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 3 },
-        done: 'Edran: — Você caiu do céu e ainda lutou por mim. Vá para a muralha e avise Lyra que a estrada caiu.' },
+      { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 1, kinds: ['slime', 'gosma', 'goblin'] },
+        done: 'Edran: — Procure Lyra e Kael em Aster.' },
       { t: 'city', d: 'Alcance a muralha de {cidade}.', done: 'Uma voz, perto demais: — A muralha. Continue.' },
       { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Transmigradores; em troca, você caça as Fendas.', 'Sem moedas? Ninguém que cai da Fenda tem. Fale com Kael, na loja de equipamentos: ele troca uma arma de treino por escambo.'] },
       { t: 'barter', d: 'Faça o escambo com Kael, na loja de equipamentos, e equipe sua primeira arma.', done: 'Kael: — Está feito. A Fenda reconhece o seu caminho, Viajante.' }] },
@@ -317,9 +317,30 @@
       sfx('arise'); bigText('DESPERTAR', 1800);
     } catch (_) {}
   }
-  /* Personagem novo: nasce na estrada, fora da muralha, no primeiro passo do Ato I. */
+  /* Transição cinematográfica de despertar: tela preta com fade-in suave */
+  function introFade() {
+    try {
+      let el = document.getElementById('pds_intro_fade');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'pds_intro_fade';
+        el.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;pointer-events:none;opacity:1;transition:opacity 2.6s cubic-bezier(0.4,0,0.2,1);';
+        document.body.appendChild(el);
+      } else {
+        el.style.transition = 'none';
+        el.style.opacity = '1';
+      }
+      setTimeout(() => {
+        el.style.transition = 'opacity 2.6s cubic-bezier(0.4,0,0.2,1)';
+        el.style.opacity = '0';
+        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2800);
+      }, 400);
+    } catch (_) {}
+  }
+  /* Personagem novo: tela preta com fade-in, nasce na estrada perto da carroça tombada e Edran. */
   function spawnAwakening() {
     try {
+      introFade();
       const m = ACTS[0], c = nearestCity(player.x, player.z).c, wall = wallOf(c); let P = null;
       for (let k = 0; k < 80 && !P; k++) { const a = rnd(0, TAU), d = wall + rnd(16, 26), x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d; if (freeAt(x, z, 1.6) && freeAt(x - 4, z - 3, 1.4) && freeAt(x, z + 4.5, 1)) P = [x, z]; }
       if (!P) P = [c.x + wall + 18, c.z];
@@ -327,14 +348,37 @@
       const px = P[0], pz = P[1] + 4.5;
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
       player.face = Math.PI; run.pos = { x: px, z: pz }; awakenFx(px, pz);
-      setTimeout(() => { try { toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha. Ajude Edran, ao lado da carroça, e siga para {cidade}.'.replace('{cidade}', c.name || 'Aster'), 8000); logNews('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 'important'); } catch (_) {} }, 1300);
+      try { buildWorldFor(m); } catch (_) {}
+      const w = W.get(m.id);
+      if (w && !w.foes.length && !s.fightDone) {
+        try {
+          const k = KINDS['slime'] ? 'slime' : (KINDS['gosma'] ? 'gosma' : 'goblin');
+          const fx = P[0] - 2.6, fz = P[1] - 1.2;
+          const e = spawnKind(k, fx, fz, 0, { wild: true });
+          e.name = 'Criatura da Fenda';
+          e.hp = e.maxhp = 30;
+          e.dmg = 3;
+          e.isIntroTutorial = true;
+          e.camp327 = m.id;
+          e.aggro = true;
+          w.foes.push(e);
+          fxRing(fx, fz, 0xff8a4a, 1.5);
+        } catch (_) {}
+      }
+      setTimeout(() => {
+        try {
+          toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 7000);
+          bigText('A MURALHA… VÁ PARA A MURALHA', 2200);
+          logNews('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 'important');
+        } catch (_) {}
+      }, 1200);
       return true;
     } catch (e) { console.warn('spawnAwakening', e); return false; }
   }
   function foesLeft(m) { const w = W.get(m.id); return w ? w.foes.filter(e => !e.dead && enemies.includes(e)).length : 0; }
   function useMarker(m, i) {
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
-    if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote os inimigos por perto primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restantes).', 3500); return; }
+    if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
     s.hit.push(i);
     const w = W.get(m.id);
@@ -355,7 +399,15 @@
       for (let k = 0; k < 20; k++) { const a = rnd(0, TAU), d = rnd(5, 10); x = p[0] + Math.cos(a) * d; z = p[1] + Math.sin(a) * d; if (freeAt(x, z, .6)) break; }
       const pool = sp.fight.kinds ? sp.fight.kinds.filter(k => KINDS[k]) : null;
       const k = pool && pool.length ? pick(pool) : wpick(kindsFor(gr)).k;
-      try { const e = spawnKind(k, x, z, gr, { wild: true }); e.aggro = true; if (i < elites) makeElite(e); e.camp327 = m.id; w.foes.push(e); fxRing(x, z, 0xff8a4a, 1.5); } catch (_) {}
+      try {
+        const e = spawnKind(k, x, z, gr, { wild: true });
+        e.aggro = true;
+        if (m.id === 'a1' && s.s === 0) { e.isIntroTutorial = true; e.hp = e.maxhp = 30; e.dmg = 3; }
+        else if (i < elites) makeElite(e);
+        e.camp327 = m.id;
+        w.foes.push(e);
+        fxRing(x, z, 0xff8a4a, 1.5);
+      } catch (_) {}
     }
     toast('<b>[HISTÓRIA]</b> Inimigos à vista!', 2500);
   }
