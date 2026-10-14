@@ -1,3 +1,8 @@
+## v385 — Andar sem tocar em nada, 14/10/2026
+- Relato de Ian: personagem anda sozinho. Causa encontrada: no gelo (rios/lagos congelados da neve) o deslize depois de soltar as teclas levava ~14 s para parar, devagar. Agora para em ~1 s (1,6 m de deslize a partir da corrida). tools/climb383.js.
+- Reforço: soltar tecla é registrado na fase de captura (nenhum outro código consegue engolir o keyup); teclas soltas ao sair da janela sem foco.
+- Se acontecer fora do gelo, Ian vai avisar onde (cidade, estrada, montanha).
+
 ## v384 — Relógio no minimapa e save por arquivo, 14/10/2026
 - Pedido de Ian: relógio do dia perto do minimapa; lugar/perigo/noite saem da ficha do personagem e vão para a caixa em cima do minimapa (linha 1: relógio e noite; linha 2: lugar/bioma e perigo; depois portal e cidade mais próximos). A ficha mostra só "NV n" no mundo aberto (masmorras continuam como antes).
 - Relógio: noite (18h–6h) segue o ciclo real de 14 min de dia + 10 min de noite; ☀ de dia, ☾ de noite.

@@ -72,4 +72,11 @@
   }
   CL.panel_toggle=panel;
   addEventListener('keydown',e=>{if(e.code==='F9'&&!e.repeat){e.preventDefault();panel()}});
+
+  /* v385 (Ian: "ando sem tocar em nada"): no gelo, ao soltar as teclas o deslize levava ~14 s para parar.
+     Agora para em ~1,5 s. E soltar uma tecla é registrado na fase de captura, antes de qualquer outro código. */
+  const ice0=iceMove240;
+  iceMove240=function(P,vx,vz,dt){const r=ice0(P,vx,vz,dt);if(r&&!vx&&!vz&&P.iv240){const k=Math.exp(-3*dt);P.iv240.x*=k;P.iv240.z*=k;if(Math.hypot(P.iv240.x,P.iv240.z)<.3)P.iv240.x=P.iv240.z=0}return r};
+  addEventListener('keyup',e=>{try{keys[e.code]=false}catch(_){}},true);
+  document.addEventListener('mouseleave',()=>{try{if(!document.hasFocus())for(const k in keys)keys[k]=false}catch(_){}});
 })();
