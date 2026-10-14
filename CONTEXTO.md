@@ -1,3 +1,8 @@
+## v380 — Projétil indo para o céu, 14/10/2026
+- Relato de Ian (print): magia subia ao infinito. Com a câmera baixa da v377, cursor fora do corpo do monstro apontava para o céu.
+- Correção (tools/witcher377.js, aimPoint): sem acertar monstro com o cursor, mira o monstro na direção do cursor (até 32 m, cone estreito); sem monstro, o tiro sai reto na altura do peito (máx. +0,6 m), até 40 m. Travar alvo continua mirando no alvo.
+- Testado: cursor no céu com monstro à frente → mira no monstro; sem monstro → tiro reto. Sem erros.
+
 ## v379 — Correção urgente: andar sem parar / câmera girando, 14/10/2026
 - Relato de Ian: às vezes o personagem anda sem parar e a câmera buga. Causa provável: soltar Alt (esquiva) manda o foco para o menu do navegador no Windows e o jogo perde o keyup do W; com a câmera que segue o movimento (v377) ela girava junto.
 - Correção (tools/witcher377.js): Alt sem ação padrão na descida e na subida; todas as teclas são soltas quando a página perde o foco (blur, focusout, hasFocus falso, tecla Windows, pagehide).

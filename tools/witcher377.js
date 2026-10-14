@@ -38,7 +38,14 @@
 
   /* com o alvo travado, ataques e magias miram nele */
   const aim0=aimPoint;
-  aimPoint=function(){const e=W377.target;if(alive(e)&&!player.dead){const b=projectileBody253(e);aimV.set(e.x,b.y,e.z);aimV.enemy253=e;return aimV}return aim0.apply(this,arguments)};
+  aimPoint=function(){const e=W377.target;if(alive(e)&&!player.dead){const b=projectileBody253(e);aimV.set(e.x,b.y,e.z);aimV.enemy253=e;return aimV}
+    const ap=aim0.apply(this,arguments);if(!ap||ap.enemy253||!player)return ap;
+    /* v380 (Ian): com a câmera baixa, cursor fora do monstro mandava o tiro para o céu. Agora: monstro na direção do cursor recebe o tiro; senão o tiro sai reto, na altura do peito. */
+    const dx=ap.x-player.x,dz=ap.z-player.z,dir=Math.atan2(dx,dz);let best=null,bs=1e9;
+    for(const m of enemies){if(m.dead||m.gone||m.sleep)continue;const ex=m.x-player.x,ez=m.z-player.z,d=Math.hypot(ex,ez);if(d>32)continue;const da=Math.abs(angDiff(Math.atan2(ex,ez),dir));const lim=Math.min(.45,.18+(m.r||.5)/Math.max(1,d));if(da<lim&&da*d<bs){bs=da*d;best=m}}
+    if(best){const b=projectileBody253(best);aimV.set(best.x,b.y,best.z);aimV.enemy253=best;return aimV}
+    const gy=terrH(player.x,player.z)+(player.jy||0)+1.1;if(ap.y>gy+.6){const d=Math.max(6,Math.hypot(dx,dz));const k=Math.min(d,40)/d;aimV.set(player.x+dx*k,Math.min(ap.y,gy+.6),player.z+dz*k);aimV.enemy253=null;return aimV}
+    return ap};
   const face0=faceTarget;
   faceTarget=function(max){const e=W377.target;if(alive(e)&&Math.hypot(e.x-player.x,e.z-player.z)<=(max||7)+e.r+1){player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}return face0.apply(this,arguments)};
 
