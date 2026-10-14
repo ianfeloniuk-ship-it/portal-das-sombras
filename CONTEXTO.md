@@ -1,3 +1,6 @@
+## Regra para IAs (14/10/2026)
+- Pedido de Ian: toda IA (ChatGPT/Codex, Claude) é obrigada a ler `AGENTS.md` e seguir a skill `docs/skills/primeva-codigo.md` antes de mexer no jogo.
+
 ## v388 — Código dividido em partes, 14/10/2026
 - Pedido de Ian: dividir o código para um pedido não mexer em outra coisa e trazer bug novo.
 - O script principal (7,8 MB, um bloco só) agora mora em 68 partes em `src/core/` (util, dados, jogador, colisão, mundo, masmorra, combate, IA, loop, HUD, janelas, controles, telas...). Mapa e regras: `src/LEIA-ME.md`.
