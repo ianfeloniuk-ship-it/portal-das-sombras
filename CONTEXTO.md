@@ -1,3 +1,10 @@
+## v383 — Montanhas por ruído, escalada e painel de ajustes, 14/10/2026
+- Pedido de Ian (vídeo do André Elias): técnicas de Perlin noise e escalada estilo Zelda.
+- Terreno (tools/terrain245.js): cordilheiras com cristas (ruído suave "ridged" em 3 camadas), até ~40 m, em ~1/3 do mundo; mesma fórmula no CPU e no shader. Cidades, estradas e rios continuam planos/cavados por cima.
+- Escalada (tools/climb383.js): encosta mais íngreme que ~45° vira escalada — metade da velocidade, gasta 14 de Estamina/s, corpo inclina para a parede; ao chegar na borda dá um impulso para subir no topo. Sem Estamina escorrega encosta abaixo até recuperar 20.
+- Painel F9 com controles deslizantes: altura e tamanho das montanhas, inclinação que vira escalada, velocidade, custo de Estamina e inclinação do corpo (salvo no navegador; "Voltar ao padrão").
+- Testado: subida de 16 m a 39 m com impulso no topo, sem Estamina desce até a base, no plano não escala, sem erros. Pés que se ajustam ao chão (IK) ficam para depois.
+
 ## v382 — Monstros param de seguir, 14/10/2026
 - Relato de Ian (print): monstros seguiam infinitamente, inclusive com ele na carroça. Na v381 a proteção da carona só bloqueava dano; a função de alvo dos monstros não era trocada porque o witcher377 tinha uma função local chamada pickTarget (renomeada para pickLock377).
 - Agora (tools/witcher377.js): pickTarget é reembrulhado sempre que outro módulo o troca; na carona os monstros não miram o jogador (param); a pé, monstros comuns desistem além de 35 m (chefes, hordas, emboscada de carroça e duelo seguem as regras antigas).
