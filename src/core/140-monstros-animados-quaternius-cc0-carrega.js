@@ -34,7 +34,7 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   passaro:{h:1.1,a:{Idle:'Idle',Running_A:'Flight',Death_A:'Death',ATK:'Dive',Hit:'HitRecieve',Flight:'Flight',Takeoff:'Takeoff',Dive:'Dive',Recover:'Recover',Land:'Land',Glide:'Glide'}},
   espinhosa:{h:1.2,a:{Idle:'Idle',Sense:'Sense',Running_A:'Walk',Death_A:'Death',ATK:'Fire',Hit:'HitRecieve',Windup:'Windup',Fire:'Fire',Regrow:'Regrow',HitRecieve:'HitRecieve'}},
   cactinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
-  magote:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
+  magote:{h:0.457,a:{Idle:'Idle',Running_A:'Walk',Walk:'Walk',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve',HitRecieve:'HitRecieve',Alert:'Alert',Windup:'Prep',Prep:'Prep',Attack:'Attack',Recover:'Recover'}},
   orcinho:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   ninjinha:{h:1.1,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   visitante:{h:1.2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
@@ -93,16 +93,17 @@ MON_DEF.espinhosa_f={h:1.2,a:{...MON_DEF.espinhosa.a}};
 MON_DEF.espinhosa_a={h:1.2,a:{...MON_DEF.espinhosa.a}};
 MON_DEF.passaro_f={h:1.1,a:{...MON_DEF.passaro.a}};
 MON_DEF.passaro_a={h:1.1,a:{...MON_DEF.passaro.a}};
+MON_DEF.magote_f={h:0.418,a:{...MON_DEF.magote.a}};MON_DEF.magote_a={h:0.526,a:{...MON_DEF.magote.a}};
 MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Cast',Hit:'Hit'}};
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('magote')?'?v=394':k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k.startsWith('cactinho')||k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if((k.startsWith('guardiao')||k.startsWith('cactinho'))&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k.startsWith('magote')||k.startsWith('cactinho')||k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if((k.startsWith('guardiao')||k.startsWith('cactinho')||k.startsWith('magote'))&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
   return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
@@ -117,9 +118,11 @@ function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
   m.body.position.y=0;m.body.rotation.set(0,0,0);
-  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho)/.test(m.mon||'')?1:1.2)}
+  if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho|magote)/.test(m.mon||'')?1:1.2)}
+  else if(st.wind>0&&m.mon&&m.mon.startsWith('magote')){if(m.cur!=='Windup'||st.wind<m.lw)gPlay(m,'Windup',true,1);m.lw=st.wind}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
+  else if(m.mon&&m.mon.startsWith('magote')&&m.cur===m.atkClip){gPlay(m,'Recover',true,1);m.la=0;m.lw=0}
   else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.stop();a.reset();m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);

@@ -15,7 +15,7 @@ window.Loot353=(()=>{
  function clear(){window.Reclaim372?.clear();if(dirty){saveRun();dirty=false}for(const a of active.values()){a.inter.hidden=true;if(L?.inter)L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction()}active.clear();region=null;elapsed=0}
  function attach(r,e){if(active.has(r.id))return;
   let model=r.reclaimed372?null:e?.m;
-  if(!model&&!r.reclaimed372){const K=KINDS[r.kind];if(K){model=makeChibi({...K,tint:K.gtint,atkClip:K.clip});model.root.position.set(r.x,0,r.z);animChibi(model,{move:0,atk:0,dead:1,wind:0},1);model.mixer?.update(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho)/.test(model.mon||'')?(gAct(model,'Death_A')?.getClip().duration||2)+.1:2)}}
+  if(!model&&!r.reclaimed372){const K=KINDS[r.kind];if(K){model=makeChibi({...K,tint:K.gtint,atkClip:K.clip});model.root.position.set(r.x,0,r.z);animChibi(model,{move:0,atk:0,dead:1,wind:0},1);model.mixer?.update(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho|magote)/.test(model.mon||'')?(gAct(model,'Death_A')?.getClip().duration||2)+.1:2)}}
   const root=model?.root||new THREE.Group();root.position.set(r.x,0,r.z);root.userData.terrainRoot245=true;scene.add(root);
   // A small, unlit marker makes the fallen body readable without adding lights.
   const marker=new THREE.Mesh(geo('corpse353',()=>new THREE.OctahedronGeometry(.16)),glowS(0xffd08a,.6));marker.position.y=r.reclaimed372?.25:1.2;root.add(marker);
