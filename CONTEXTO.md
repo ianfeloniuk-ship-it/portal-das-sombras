@@ -1,3 +1,9 @@
+## v391 — Rios e lagos fundos + nado, 14/10/2026
+- Relato de Ian (print): o rio parecia uma linha reta sem profundidade (água 6 cm acima do fundo). Agora (tools/terrain245.js, CPU e GLSL juntos): leito em U de 2,2 m nos rios, bacia de 2,5 m nos lagos, margens mais íngremes (7 m em vez de 16). Água do rio mais escura no meio e transparente na margem; água do lago sobe junto com a bacia (580-bloco-b).
+- Nado (tools/water391.js): água com mais de 1,3 m → o herói boia com a cabeça para fora, nada a 60% e deita o corpo. Atravessa rio e lago sem ponte (paredes invisíveis da água removidas). Gelo: anda em cima, na altura da margem. Leito seco (deserto/vulcão): anda no fundo. Monstros comuns não entram na água funda.
+- Testado: travessia de rio de 13 m (sobe para boiar no meio, sai do outro lado), print nadando, sem erros.
+- Pendente (Ian): bioma marinho, mergulho para o fundo com coisas lá embaixo, portais aquáticos, mais barcos.
+
 ## v390 — Habilidades e passivas em qualquer lugar, 14/10/2026
 - Pedido de Ian (áudio): coisas do próprio personagem (sem comprar/vender itens) não podem exigir cidade/acampamento.
 - `canRedistribute()` agora vale em qualquer lugar (só não morto). Liberados fora da cidade: equipar/trocar habilidades, combinar técnicas, talentos de rank (escolher e redistribuir), redistribuir atributos, preparar formas, aprender despertar e afinidade. Partes: 450-oraculos, 160-jogador, tools/combo261.js, tools/kit111-runtime.js, 660-runtime111-cont.

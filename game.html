@@ -246,7 +246,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/wagon369.js?v=369"></script>
-<script src="tools/terrain245.js?v=383"></script>
+<script src="tools/terrain245.js?v=391"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=373"></script>
@@ -7600,8 +7600,9 @@ function lakeAt239(cx,cz){if(rh(cx,cz,21)%100>=4)return null;const x=cx*CH+(rh(c
 function waterMat239(){if(CRY230.wr)return CRY230.wr;const t=Water154.mesh(1);const m=t.material;CRY230.wr=m;return m}
 function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH,z0=ch.cz*CH;
  const lk=lakeAt239(ch.cx,ch.cz);if(lk){const fz=['neve','cristal'].includes(biomeAt(lk.x,lk.z));let w;if(fz){const cg=new THREE.CircleGeometry(lk.r,40);cg.setAttribute('aFD',new THREE.Float32BufferAttribute(new Float32Array(cg.attributes.position.count*2).map((v,i)=>i%2?0:1),2));const mt=riverMat240();w=new THREE.Mesh(cg,mt);w.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000}}else w=Water154.mesh(lk.r);w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);w.userData.terrainRoot245=true;g.add(w);
-  const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,40),toonS(0x5b4a33));bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);bank.userData.terrainRoot245=true;g.add(bank);
-  if(!fz)addCol({x:lk.x,z:lk.z,r:lk.r-1.2});L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
+  /* v391: o centro do lago agora é uma bacia de 2,5 m (terrain245); a água sobe junto enquanto a bacia está ativa. */{const ob=w.onBeforeRender,T=window.TER245;w.onBeforeRender=function(...a){const on=!!T&&T.D.value.some(v=>v.w<0&&Math.abs(v.x-lk.x)<.01&&Math.abs(v.y-lk.z)<.01),y=.06+(on?2.5:0);if(w.position.y!==y){w.position.y=y;w.updateMatrixWorld()}if(ob)ob.apply(this,a)}}
+  const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,40),toonS(0x5b4a33));bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);bank.userData.terrainRoot245=true;g.add(bank);{const T=window.TER245;bank.onBeforeRender=function(){const on=!!T&&T.D.value.some(v=>v.w<0&&Math.abs(v.x-lk.x)<.01&&Math.abs(v.y-lk.z)<.01),y=.04+(on?2.5:0);if(bank.position.y!==y){bank.position.y=y;bank.updateMatrixWorld()}}}
+  /* v391 (Ian): dá para nadar no lago; monstros continuam fora (tools/water391.js) */L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
  const rv=riverNear239(x0,z0);if(rv.d>CH)return;if(nearestCity(x0,z0).d<220)return;
  /* v240 (Ian): neve/cristal = gelo (dá para andar); deserto/vulcão = seco; estrada passa por cima do rio (mureta de pedra), água some sob a estrada. */
  const RS=roadSegs(x0,z0,1),cross=[];for(const [x1,z1,x2,z2] of RS){if(z1!==z2||Math.abs(z1-z0)>CH/2+6)continue;const bx=riverCenter239(rv.b,z1);if(bx<Math.min(x1,x2)||bx>Math.max(x1,x2))continue;cross.push({x:bx,z:z1})}
@@ -7612,16 +7613,17 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
   const mt=riverMat240(),m=new THREE.Mesh(gm,mt);m.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000};g.add(m);seg=[]};
   for(const p of pts){if(p.road){flushS();continue}seg.push(p)}flushS()}
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(riverWidth351(rv.b,c.z)+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
- for(const p of pts){if(p.k===1&&!p.road)addCol({x:p.x,z:p.z,r:riverWidth351(rv.b,p.z)/2-.6})}}
+ /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
 function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight};
  m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
  m.fragmentShader=base.fragmentShader.replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+  /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
   float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
   float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
   vec3 Li=normalize(vec3(-.4,.8,.45));ice+=pow(max(0.,dot(reflect(-Li,vec3(0.,1.,0.)),normalize(vec3(.1,.85,.5)))),20.)*.25+pow(n(p*24.+floor(t*1.5)),30.)*1.6;
   col=mix(col,ice,smoothstep(.2,.8,fz));
-  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y);gl_FragColor=vec4(col,a);');
+  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(.5,.95,smoothstep(.95,.35,r));a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y);gl_FragColor=vec4(col,a);');
  return CRY230.rv=m}
 function onIce240(P){if(L.mode!=='world')return false;const rv=riverNear239(P.x,P.z);if(rv.d<riverWidth351(rv.b,P.z)/2+.5&&snowB(P.x,P.z)<.29)return true;const lk=lakeAt239(Math.round(P.x/CH),Math.round(P.z/CH));return !!(lk&&['neve','cristal'].includes(biomeAt(lk.x,lk.z))&&Math.hypot(P.x-lk.x,P.z-lk.z)<lk.r)}
 function iceMove240(P,vx,vz,dt){const on=onIce240(P);P.iv240=P.iv240||{x:0,z:0};if(!on){P.iv240.x=P.iv240.z=0;return false}
@@ -8915,3 +8917,4 @@ requestAnimationFrame(frame);
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=386"></script>
 <script src="tools/rain387.js?v=387"></script>
+<script src="tools/water391.js?v=391"></script>
