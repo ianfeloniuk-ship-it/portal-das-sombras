@@ -8,7 +8,7 @@ const NEW=[
  {id:'wear',n:'Desgaste',d:'Cada golpe no mesmo alvo tira 1 ponto da defesa dele, até 20 pontos. Some após 5s sem golpear.'},
  {id:'mark_hunter',n:'Caçador de Marcas',d:'Matar um inimigo marcado passa a Marca para os 2 inimigos mais próximos (até 10m).'},
  {id:'combat_read',n:'Leitura de Combate',d:'+1% de dano contra uma espécie a cada 50 abates dela no Bestiário, até +10% (500 abates).'},
- {id:'cold_blood',n:'Sangue-Frio',d:'Abaixo de 30% de vida, habilidades gastam metade de Mana, Fúria ou Vigor.'},
+ {id:'cold_blood',n:'Sangue-Frio',d:'Abaixo de 30% de vida, habilidades gastam metade de Mana, Fúria ou Estamina.'},
  {id:'counterflow',n:'Contra-Fluxo',d:'Esquiva perfeita deixa o próximo golpe em até 1,5s crítico garantido.'},
  {id:'last_breath',n:'Último Fôlego',d:'Uma vez por portal (ou a cada 3 min fora dele), o golpe que te mataria deixa você com 1 de vida e 2s invulnerável.'}
 ];

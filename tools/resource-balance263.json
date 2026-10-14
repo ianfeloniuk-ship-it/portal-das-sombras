@@ -56,7 +56,7 @@
     {
       "id": "vigor_saver",
       "n": "Movimento econômico",
-      "d": "Técnicas gastam 10% menos Vigor."
+      "d": "Técnicas gastam 10% menos Estamina."
     },
     {
       "id": "mana_saver",
@@ -71,12 +71,12 @@
     {
       "id": "vigor_flow",
       "n": "Fôlego duradouro",
-      "d": "Vigor se recupera 15% mais rápido."
+      "d": "Estamina se recupera 15% mais rápido."
     },
     {
       "id": "vigor_focus",
       "n": "Retomar o fôlego",
-      "d": "Vigor começa a recuperar após 1s sem gastar."
+      "d": "Estamina começa a recuperar após 1s sem gastar."
     },
     {
       "id": "mana_flow",

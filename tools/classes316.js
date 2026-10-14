@@ -5,7 +5,7 @@ const defs={
 21:[
  ['Palma dos Ecos','echo',9,16,1.2,'Marca por 8s. Após 3 ataques básicos, explode em 3 m com 180% do dano da técnica.'],
  ['Passo em Oito','eight',7,12,1.4,'Avança 3 m para o lado, golpeando o caminho. Alterna esquerda e direita.'],
- ['Respiração Inversa','breath',14,0,0,'Troca até 30 de Vigor pelo dobro em Fúria.'],
+ ['Respiração Inversa','breath',14,0,0,'Troca até 30 de Estamina pelo dobro em Fúria.'],
  ['Quebra de Cadência','cadence',10,18,1.6,'Atinge um alvo. Durante a preparação do ataque dele, causa dano dobrado e interrompe inimigos comuns.'],
  ['Balança dos Punhos','balance',12,22,1.3,'Atinge os 2 inimigos mais próximos. A diferença de vida em % entre eles aumenta o dano, até o dobro.'],
  ['Selo dos Cinco Pontos','five',16,20,0.8,'Marca por 10s. Os próximos 5 ataques básicos ganham de +8% a +40% de dano.'],
@@ -49,7 +49,7 @@ function segment(e,a,b,width){const dx=b.x-a.x,dz=b.z-a.z,l=dx*dx+dz*dz,t=l?Math
 function check(s){const ts=targets(({wheel:6,share:6,shatter:5,challenge:7})[s.mode316]||10),r=martialState260();
  if(['balance','stitch','dyad'].includes(s.mode316)&&ts.length<2)return 'São necessários dois inimigos visíveis.';
  if(!['breath','reserve','blood','scar','eight'].includes(s.mode316)&&!ts.length)return 'Nenhum inimigo visível no alcance.';
- if(s.mode316==='breath'&&(r.vigor<1||r.fury>=furyMaxR260()))return 'Precisa de Vigor e espaço na barra de Fúria.';
+ if(s.mode316==='breath'&&(r.vigor<1||r.fury>=furyMaxR260()))return 'Precisa de Estamina e espaço na barra de Fúria.';
  if(s.mode316==='blood'&&(player.hp<=1||r.fury>=furyMaxR260()))return 'Precisa de vida e espaço na barra de Fúria.';
  if(s.mode316==='shatter'&&!(player.shield>0))return 'Precisa de escudo atual para estilhaçar.';
  if(s.mode316==='reserve'&&player.mp<=resourceCost260(s))return 'Precisa de mana além do custo para criar a reserva.';

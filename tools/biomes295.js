@@ -6,10 +6,10 @@ const FX={
  flores:{n:'Campos floridos',d:'Ar perfumado: recupera 0,3% da vida por segundo fora de combate.',regen:.003,good:true},
  floresta:{n:'Floresta',d:'Sombras densas: +5% de chance de crítico.',crit:.05,good:true},
  cristal:{n:'Cavernas de cristal',d:'Mana no ar: +25% de regeneração de mana.',mana:.25,good:true},
- deserto:{n:'Deserto',d:'Calor e areia: o cansaço chega 2× mais rápido e o vigor volta 25% mais devagar.',tired:2,vigor:-.25,item:'cantil'},
+ deserto:{n:'Deserto',d:'Calor e areia: o cansaço chega 2× mais rápido e o estamina volta 25% mais devagar.',tired:2,vigor:-.25,item:'cantil'},
  neve:{n:'Neve',d:'Frio intenso: −12% de velocidade de movimento e −20% de regeneração de mana.',move:-.12,mana:-.2,item:'capa'},
  vulcao:{n:'Vulcão',d:'Ar quente: perde 0,3% da vida por segundo (nunca abaixo de 20%).',burn:.003,item:'unguento'},
- pantano:{n:'Pântano',d:'Lama funda: −10% de velocidade de movimento e o vigor volta 15% mais devagar.',move:-.1,vigor:-.15,item:'botas'}};
+ pantano:{n:'Pântano',d:'Lama funda: −10% de velocidade de movimento e o estamina volta 15% mais devagar.',move:-.1,vigor:-.15,item:'botas'}};
 const ITEMS={cantil:{n:'Cantil de couro',d:'anula o calor do deserto',b:'deserto',p:30},capa:{n:'Capa de pele',d:'anula o frio da neve',b:'neve',p:30},unguento:{n:'Unguento refrescante',d:'anula o ar quente do vulcão',b:'vulcao',p:40},botas:{n:'Botas de lodo',d:'anulam a lama do pântano',b:'pantano',p:30}};
 const DUR=300;
 function gear(){run.bioGear295=run.bioGear295||{};return run.bioGear295}

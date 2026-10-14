@@ -1,3 +1,12 @@
+## v377 — Câmera Witcher, travar alvo, corpo sólido, lampião e ciclo 14/10 min, 14/10/2026
+- Pedido de Ian: câmera como The Witcher 3 (perto, sobre o ombro direito, personagem à esquerda, volta devagar para trás ao andar; não gira ao andar para trás). Botão direito continua girando a câmera.
+- Travar câmera no alvo: botão do meio do mouse ou E (configurável). Ataques/magias miram o alvo travado; solta se morrer ou passar de 34 m. Anel vermelho no alvo.
+- Jogador e monstros têm corpo: ninguém atravessa ninguém (chefes não são empurrados). Código em tools/witcher377.js.
+- Vigor renomeado para Estamina em todos os textos (chaves internas continuam `vigor` para não quebrar saves).
+- Lampião de Viagem na loja de Poções, 5 níveis (300/900/2200/5000/11000 de ouro): acende sozinho ao escurecer; nível 1 ilumina 10 m à frente, nível 5 ilumina quase tudo.
+- Dia 14 min + noite 10 min (DAYLEN 1440).
+- Testado no navegador: movimento WASD, colisão nos dois sentidos, lock e mira, lampião nível 1 e 5, sem erros. Bug do W relatado por Ian não reproduzido.
+
 ## v376 — Coleta completa antes da mão, 14/10/2026
 - Pedido de Ian: recolher corpo após pegar todos os itens ou afastar demais, preservando itens para depois.
 - Pegar tudo coleta o que cabe; coleta individual mantém janela aberta. Mão dispara ao esvaziar ou além de 15 m (distância escolhida na implementação). Vestígios conservam itens e posição, inclusive com bolsa cheia; persistência existente de mundo/masmorra preservada.
