@@ -6,10 +6,11 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML='';
 function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();ensureOrderRep();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
-  $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue ecos':'')+'<br>Mortes: '+(profile.deaths||0)}
+  $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue ecos':'')+'<br>Mortes: '+(profile.deaths||0);if(profile.classless){$('rollc').textContent='VIAJANTE · SEM CLASSE';$('rolls').innerHTML='Chegou sem ouro e sem técnicas. Sua classe desperta com a primeira arma.<br>Mortes: '+(profile.deaths||0)}}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
+  if(!profile&&!/[?&]escolherClasse/.test(location.search)){profile=pickAwaken(0);profile.classless=true;store.set('pds2_profile',profile);showProfile();$('goBtn').textContent='ENTRAR NA CIDADE';beep(880,.3,.06);return}
   if(!profile){const C=CLASSES.map((c,i)=>({c,i})).filter(o=>o.c.w>0);$('rollbox').hidden=false;$('roll').textContent=RANKS[0].id;$('roll').style.color=RANKS[0].c;$('rollc').textContent='ESCOLHA SUA CLASSE';
     /* v301 (Ian): a lista vazava da caixa e o texto ficava minúsculo. Botões curtos em 2 colunas; ao clicar abre o detalhe com passiva e recurso e o botão Escolher. */
     const RN={fury:'Fúria',vigor:'Estamina',mana:'Mana'},info=i=>{const c=CLASSES[i],mag=MAGIC_CLS.includes(i);return {c,rs:RN[resourceType260({sourceClass:i})],at:mag?'Inteligência':c.ranged?'Destreza':'Força',st:c.ranged?'À distância':'Corpo a corpo'}};

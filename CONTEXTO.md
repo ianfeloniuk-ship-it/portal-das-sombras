@@ -1,3 +1,10 @@
+## v396 — Início sem classe e escambo com o Kael, 14/10/2026
+- Pedido de Ian: o Viajante chega sem classe, sem ouro e sem técnicas; Kael troca (escambo) a primeira arma e a classe desperta ao equipar a primeira arma.
+- Novo tools/awaken396.js: novo personagem nasce `profile.classless` (cls 0 é só marcador); barra de habilidades vazia; Kael oferece 1 troca (Espada→Guerreiro, Machado→Tanque, Adaga→Assassino, Arco→Arqueiro, Varinha→Paladino, Tomo→Invocador, Cajado→Mago de Fogo). Qualquer primeira arma equipada (baú, forja, compra) também desperta a classe pelo tipo.
+- Partes ligadas: 640-telas (título sem escolha de classe; `?escolherClasse` volta ao seletor antigo), 630-controles (criação sem escolha de habilidade), 160-jogador (arma livre de estilo enquanto sem classe), 310-itens (equipBagItem desperta), 620-janelas (loja do Kael + ação barter396), 450 (textos do narrador e da missão de primeiro equipamento), game.html, sw.js.
+- Testado: título, criação, loja com escambo, Cajado (Mago de Fogo/Bola de Fogo) e Espada (Guerreiro/Corte Giratório), salvar e recarregar mantém a classe. Sem erros. Não testado: celular, arma achada em baú, combate prolongado.
+- Observação: o Viajante sem classe usa o modelo de Guerreiro como base visual. Saves antigos continuam com a classe que já tinham.
+
 ## v395 — Nado corrigido, 14/10/2026
 - Pedido de Ian: "o jeito que o viajante tá nadando é muito feio e bugado". Problemas achados (tools/water391.js): o corpo deitava de COSTAS com a cabeça para trás e girava pelos pés (ia parar 2 m atrás do ponto real e afundava); a braçada ia e voltava pelo mesmo caminho (parecia abanar); parado, os braços ficavam erguidos acima da cabeça; o anel de rank aparecia torto debaixo d'água; a posição do nado era sobrescrita pelo loop (agora entra no gancho Anim303.root).
 - Agora: de bruços, girando pelo quadril, costas na linha d'água e cabeça para fora; crawl em volta completa (puxa por baixo, volta por cima, cotovelo dobrado na volta, rolagem do tronco); pernas batendo; parado = em pé com ombros fora e braços remando embaixo; anel de rank some na água; entrada/saída com folga de 15 cm para não piscar na margem.
