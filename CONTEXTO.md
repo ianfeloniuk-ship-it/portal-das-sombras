@@ -1,3 +1,10 @@
+## v398 — Vocação por arma: as 14 classes comuns no escambo, 14/10/2026
+- Pedido de Ian: cobrir as 14 classes comuns iniciais no escambo do Kael com escolha da vocação quando a arma serve a mais de uma.
+- tools/awaken396.js: tipos de arma e classes agora vêm direto de `CLASSES` (comuns, não raras/legadas). Espada→Guerreiro; Machado→Tanque ou Berserker; Adaga→Assassino; Arco→Arqueiro; Lança→Lanceiro; Cajado→Mago de Fogo, Gelo, Terra, Raio ou Lâmina Arcana; Varinha→Paladino; Tomo→Invocador; Punhos (sem arma, `wep:'none'`)→Monge. Arma com mais de uma classe abre a janela "Qual caminho sua alma desperta com esta arma?", tanto no escambo quanto ao equipar a primeira arma vinda de baú/forja/compra (se fechar sem escolher, pergunta de novo em 2,5 s).
+- Observação: no código a Lâmina Arcana usa `staff` (Cajado), não Espada; por isso a Espada tem só o Guerreiro. Mudar isso exigiria trocar a arma da classe — decisão de design de Ian.
+- Monge não tem arma: no escambo é a opção "Punhos (sem arma)" e desperta sem item.
+- Testado no navegador: as 14 classes despertam pelo fluxo real (barter → vocação → habilidade 1 na barra), sem erros; arma de baú com 2 classes abre a pergunta. Não testado: celular, aparência da janela de vocação em tela pequena.
+
 ## v397 — Nascer na estrada (Ato I, passo 1), 14/10/2026
 - Pedido de Ian: o personagem novo aparecia parado dentro de Aster. Agora nasce na estrada fora da muralha, ao lado da carroça tombada e de Edran caído, com efeito de despertar no chão e a fala do Narrador ("A muralha… Vá para a muralha").
 - tools/campaign327.js: `spawnAwakening()` (chamada ao terminar a criação de um personagem sem classe) escolhe um ponto livre a 16–26 m além da muralha, move o jogador, começa o Ato I com a luz nesse ponto e dispara o efeito (anéis, coluna de luz, som). Passo 1 agora cita Edran (figura deitada) e cria uma carroça tombada de malhas simples. Novo passo 4 do Ato I (`barter`): fazer o escambo com Kael; conclui sozinho quando a classe desperta. Lyra avisa do escambo na última fala.

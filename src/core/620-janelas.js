@@ -155,6 +155,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;if(window.Econ154)Econ154.notePurchase(pp);for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[NARRADOR]</b> Comprado: '+p.n)}
   if(a==='barter396'){if(window.Awaken396)Awaken396.barter(v)}
+  if(a==='vocation396'){if(window.Awaken396)Awaken396.choose(v)}
   if(a==='buyi'){const [st,k]=String(v).split(':');buyEquipment(st[0],+st.slice(1),k)}
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
   if(a==='travel217'){travelGo217(v);return 'close'}if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
