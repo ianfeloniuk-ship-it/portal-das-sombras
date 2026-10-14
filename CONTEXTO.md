@@ -1,3 +1,10 @@
+## v397 — Nascer na estrada (Ato I, passo 1), 14/10/2026
+- Pedido de Ian: o personagem novo aparecia parado dentro de Aster. Agora nasce na estrada fora da muralha, ao lado da carroça tombada e de Edran caído, com efeito de despertar no chão e a fala do Narrador ("A muralha… Vá para a muralha").
+- tools/campaign327.js: `spawnAwakening()` (chamada ao terminar a criação de um personagem sem classe) escolhe um ponto livre a 16–26 m além da muralha, move o jogador, começa o Ato I com a luz nesse ponto e dispara o efeito (anéis, coluna de luz, som). Passo 1 agora cita Edran (figura deitada) e cria uma carroça tombada de malhas simples. Novo passo 4 do Ato I (`barter`): fazer o escambo com Kael; conclui sozinho quando a classe desperta. Lyra avisa do escambo na última fala.
+- Partes ligadas: 630-controles (finishCreation chama spawnAwakening), texto do passo 1 e 3 do Ato I, sw.js, game.html.
+- Testado: criação, nascimento a 108 m do centro (muralha 82 m), luz dourada a 5 m, Edran deitado + carroça, narrador no histórico, avançar passos até o escambo e despertar do Arqueiro, sem erros. Não testado: celular, caminhar de verdade até Lyra/Kael, aparência da carroça de perto (só vista de longe).
+- Saves antigos: nada muda (só personagem novo nasce na estrada).
+
 ## v396 — Início sem classe e escambo com o Kael, 14/10/2026
 - Pedido de Ian: o Viajante chega sem classe, sem ouro e sem técnicas; Kael troca (escambo) a primeira arma e a classe desperta ao equipar a primeira arma.
 - Novo tools/awaken396.js: novo personagem nasce `profile.classless` (cls 0 é só marcador); barra de habilidades vazia; Kael oferece 1 troca (Espada→Guerreiro, Machado→Tanque, Adaga→Assassino, Arco→Arqueiro, Varinha→Paladino, Tomo→Invocador, Cajado→Mago de Fogo). Qualquer primeira arma equipada (baú, forja, compra) também desperta a classe pelo tipo.

@@ -13,10 +13,11 @@
      ev (evento contado do jogo) · tower (andar da Torre; rel = andares acima do recorde ao começar) · city · caps · diary */
   const ACTS = [
     { id: 'a1', act: 1, title: 'I — O Chamado', steps: [
-      { t: 'go', d: 'Ajude o guarda ferido na estrada perto de {cidade}.', verb: 'AJUDAR O GUARDA', fig: { look: GUARD, name: 'Guarda ferido' }, fight: { n: 3 },
-        done: 'Guarda ferido: — Você caiu do céu e ainda lutou por mim. Vá para a muralha e avise Lyra que a estrada caiu.' },
+      { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 3 },
+        done: 'Edran: — Você caiu do céu e ainda lutou por mim. Vá para a muralha e avise Lyra que a estrada caiu.' },
       { t: 'city', d: 'Alcance a muralha de {cidade}.', done: 'Uma voz, perto demais: — A muralha. Continue.' },
-      { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Transmigradores; em troca, você caça as Fendas.'] }] },
+      { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Transmigradores; em troca, você caça as Fendas.', 'Sem moedas? Ninguém que cai da Fenda tem. Fale com Kael, na loja de equipamentos: ele troca uma arma de treino por escambo.'] },
+      { t: 'barter', d: 'Faça o escambo com Kael, na loja de equipamentos, e equipe sua primeira arma.', done: 'Kael: — Está feito. A Fenda reconhece o seu caminho, Viajante.' }] },
     { id: 'a2', act: 2, title: 'II — O Diário de Aldric', steps: [
       { t: 'talk', npc: 'Brann', d: 'Fale com Brann, na Defesa da Vila, sobre a patrulha sumida.', say: ['Uma patrulha minha sumiu na estrada com uma carroça de mantimentos. Aldric ia junto.', 'Vá na frente. Eu seguro a muralha.'] },
       { t: 'go', d: 'Encontre a carroça interrompida pela Fenda.', verb: 'EXAMINAR A CARROÇA', fight: { n: 5, el: 1 },
@@ -267,7 +268,8 @@
         return { friend: e, x: x + 2.2, z };
       } catch (_) { return null; }
     }
-    const m = makeChibi(f.civ ? CIV() : f.look); m.root.position.set(x + 1.8, gy(x + 1.8, z), z); scene.add(m.root);
+    const m = makeChibi(f.civ ? CIV() : f.look); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); scene.add(m.root);
+    if (f.down) m.root.rotation.z = Math.PI / 2;
     return { m, x: x + 1.8, z, name: f.name, t: Math.random() * 5 };
   }
   function clearWorld(id) {
@@ -288,7 +290,46 @@
       const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, use: () => useMarker(m, i) };
       L.inter.push(it); w.inters.push(it);
     });
+    if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); }
     W.set(m.id, w); save();
+  }
+  /* carroça tombada: caixa inclinada, roda solta e caixotes (só malhas simples) */
+  function makeCart(x, z) {
+    const g = new THREE.Group(), wood = new THREE.MeshLambertMaterial({ color: 0x6b4a2a }), dark = new THREE.MeshLambertMaterial({ color: 0x3a2814 });
+    const bed = new THREE.Mesh(new THREE.BoxGeometry(3.4, .3, 1.9), wood); bed.position.set(0, .95, 0); bed.rotation.z = .55; g.add(bed);
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(3.4, .9, .15), wood); wall.position.set(.2, 1.35, .9); wall.rotation.z = .55; g.add(wall);
+    for (const [wx, wz] of [[-1.3, .95], [-1.3, -.95]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(.62, .62, .14, 14), dark); w.rotation.x = Math.PI / 2; w.position.set(wx, .62, wz); g.add(w); }
+    const lost = new THREE.Mesh(new THREE.CylinderGeometry(.6, .6, .14, 14), dark); lost.position.set(2.3, .1, -1.6); lost.rotation.z = .25; g.add(lost);
+    for (const [cx, cz, s] of [[2.0, .9, .7], [2.9, .2, .55], [1.5, -1.7, .6]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), wood); b.position.set(cx, s / 2, cz); b.rotation.y = cx; g.add(b); }
+    g.position.set(x, gy(x, z), z); g.rotation.y = .5; g.userData.mats = []; g.userData.taken = false; return g;
+  }
+  /* despertar no chão: anéis que se expandem + luz que sobe */
+  function awakenFx(x, z) {
+    try {
+      const col = 0xffc457, ring = new THREE.Mesh(new THREE.CircleGeometry(1.9, 48), ringMat(col)); ring.rotation.x = -Math.PI / 2; ring.position.set(x, gy(x, z) + .08, z); ring.renderOrder = 6;
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(.5, 1.2, 14, 20, 1, true), beamMat(col)); beam.position.set(x, gy(x, z) + 7, z); beam.renderOrder = 6;
+      scene.add(ring); scene.add(beam);
+      const t0 = performance.now(), iv = setInterval(() => {
+        const k = (performance.now() - t0) / 2600; if (k >= 1) { clearInterval(iv); scene.remove(ring); scene.remove(beam); return; }
+        ring.material.uniforms.t.value = beam.material.uniforms.t.value = k * 6; ring.scale.setScalar(.4 + k * 2.2); beam.scale.set(1 - k * .6, 1, 1 - k * .6);
+      }, 50);
+      for (let i = 0; i < 3; i++) setTimeout(() => { try { fxRing(x, z, col, 2 + i * 1.6, .8); } catch (_) {} }, i * 450);
+      sfx('arise'); bigText('DESPERTAR', 1800);
+    } catch (_) {}
+  }
+  /* Personagem novo: nasce na estrada, fora da muralha, no primeiro passo do Ato I. */
+  function spawnAwakening() {
+    try {
+      const m = ACTS[0], c = nearestCity(player.x, player.z).c, wall = wallOf(c); let P = null;
+      for (let k = 0; k < 80 && !P; k++) { const a = rnd(0, TAU), d = wall + rnd(16, 26), x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d; if (freeAt(x, z, 1.6) && freeAt(x - 4, z - 3, 1.4) && freeAt(x, z + 4.5, 1)) P = [x, z]; }
+      if (!P) P = [c.x + wall + 18, c.z];
+      begin(m); const s = state(m.id); s.pos = P.slice(); s.extra = []; s.extraStep = 0; save();
+      const px = P[0], pz = P[1] + 4.5;
+      player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
+      player.face = Math.PI; run.pos = { x: px, z: pz }; awakenFx(px, pz);
+      setTimeout(() => { try { toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha. Ajude Edran, ao lado da carroça, e siga para {cidade}.'.replace('{cidade}', c.name || 'Aster'), 8000); logNews('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 'important'); } catch (_) {} }, 1300);
+      return true;
+    } catch (e) { console.warn('spawnAwakening', e); return false; }
   }
   function foesLeft(m) { const w = W.get(m.id); return w ? w.foes.filter(e => !e.dead && enemies.includes(e)).length : 0; }
   function useMarker(m, i) {
@@ -332,6 +373,7 @@
       const s = state(m.id), sp = m.steps[s.s]; if (!sp) continue;
       if (sp.t === 'tower' && (profile.towerBest || 0) >= s.base) { advance(m); continue; }
       if (sp.t === 'caps' && capsVisited() >= sp.n) { advance(m); continue; }
+      if (sp.t === 'barter') { if (!profile.classless) advance(m, sp.done); continue; }
       if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < wallOf(c.c) - 4) { s.city = c.c.name; advance(m, sp.done); continue; } }
       if (sp.t !== 'go') { clearWorld(m.id); continue; }
       let w = W.get(m.id);
@@ -413,6 +455,7 @@
       if (!s.fightDone) where += ' Inimigos: ' + Math.max(0, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + '.';
     }
     if (sp.t === 'talk' && sp.npc !== 'Torvo') where = ' Fale com ' + sp.npc + ' numa cidade.';
+    if (sp.t === 'barter') where = ' Abra a loja de equipamentos do Kael, em ' + cityName(s) + ', e escolha uma arma de treino.';
     return { id: 'camp327:' + m.id, n: (isSide(m) ? m.title + ' · ' + m.npc : 'Ato ' + m.title), d: '', progress: fill(sp.d, s) + where + ' (passo ' + (s.s + 1) + '/' + m.steps.length + (b > 1 ? ' · ' + a + '/' + b : '') + ')', ready: false };
   }
   const joOrig = journeyObjectives;
@@ -448,5 +491,5 @@
     } catch (_) {}
     return h;
   };
-  window.Campaign327 = { ACTS, SIDE, state, active, begin, advance, tick, W };
+  window.Campaign327 = { ACTS, SIDE, state, active, begin, advance, tick, W, spawnAwakening };
 })();
