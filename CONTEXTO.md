@@ -1,3 +1,8 @@
+## v374 — Viajante e câmera, 14/10/2026
+- Caminhada/corrida humanas no modelo original; Shift corre consumindo 16 vigor/s, esgotamento retorna à caminhada; Alt faz esquiva compacta de 0,32 s/2,72 m. Outros 22 clipes preservados.
+- Câmera em terceira pessoa, mouse direto, distância fixa, inclinação contínua céu/chão, colisão e Esc libera cursor. Sem zoom nem botões extras; correção de Ian incorporada. Carroça da v373 preservada.
+- Integração sobre 0571eb1; 23 testes de movimento e 8 de câmera passaram novamente, sintaxe/build conferidos e prévia visual inspecionada. Celular físico não validado. Publicação explicitamente solicitada por Ian nesta sessão.
+
 ## v373 — Mundo vivo e segurança de retorno, 13/10/2026
 
 - Pedido de Ian implementado sobre a v371 (434bae9), conforme confirmação neste chat. Equipamentos continuam sem afixos; tipos de mercadorias recebem peso regional 4× nas três vagas diárias. Arma da classe permanece fixa.

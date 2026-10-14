@@ -2632,7 +2632,7 @@ let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(docum
 const camera=new THREE.PerspectiveCamera(60,1,.08,260);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
-function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?62:48;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
+function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?62:60;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
 if(!touch)document.body.classList.add('pc');
 const gmap=new THREE.DataTexture(new Uint8Array([70,70,70,255,160,160,160,255,255,255,255,255]),3,1,THREE.RGBAFormat);
@@ -6291,13 +6291,13 @@ function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
 addEventListener('contextmenu',e=>{if(!touch)e.preventDefault()});
 function releaseCamera373(){pcCam.active=false;$('c').style.cursor='';if(document.pointerLockElement)document.exitPointerLock();mouseHeld=false}
-$('c').addEventListener('click',e=>{if(e.pointerType==='touch'||!started||paused||modalOpen||pcCam.active)return;pcCam.active=true;$('c').style.cursor='none';document.body.dataset.cameraInput='active';try{$('c').requestPointerLock()?.catch?.(()=>{document.body.dataset.cameraInput='active-window'})}catch(_){document.body.dataset.cameraInput='active-window'}});
+$('c').addEventListener('click',e=>{if(touch||e.pointerType==='touch'||!started||paused||modalOpen||!$('gameMenu95').hidden||pcCam.active)return;pcCam.active=true;$('c').style.cursor='none';document.body.dataset.cameraInput='active';try{$('c').requestPointerLock()?.catch?.(()=>{document.body.dataset.cameraInput='active-window'})}catch(_){document.body.dataset.cameraInput='active-window'}});
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement)document.body.dataset.cameraInput='locked';else releaseCamera373()});
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});
 addEventListener('blur',releaseCamera373);
 addEventListener('mousemove',e=>{if(pcCam.active&&!paused&&!modalOpen)cameraLook373(e.movementX,e.movementY)});
 let cameraTouch372=null;
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||modalOpen||e.clientX<innerWidth*.5)return;cameraTouch372={id:e.pointerId,x:e.clientX,y:e.clientY};$('c').setPointerCapture(e.pointerId)});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!started||paused||modalOpen||!$('gameMenu95').hidden||e.clientX<innerWidth*.5)return;cameraTouch372={id:e.pointerId,x:e.clientX,y:e.clientY};$('c').setPointerCapture(e.pointerId)});
 $('c').addEventListener('pointermove',e=>{const p=cameraTouch372;if(!p||p.id!==e.pointerId)return;cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])$('c').addEventListener(event,e=>{if(cameraTouch372?.id===e.pointerId)cameraTouch372=null});
 function camUpdate(dt){
@@ -8248,7 +8248,7 @@ $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
-  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
+  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
   $('title').hidden=true;
   if(!loadRun())newRun();ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
