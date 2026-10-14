@@ -11,14 +11,16 @@ function projectileBody253(e){const m=e.m;let b=m?.projectileBounds253;
 let aimCache253=null;
 function aimPoint(){if(touch||!mouseAim.ok)return null;
   const key=[time,mouseAim.x,mouseAim.y,camera.position.x,camera.position.y,camera.position.z,camera.quaternion.x,camera.quaternion.y,camera.quaternion.z].join(':');
-  if(aimCache253?.key===key){aimV.copy(aimCache253.point);aimV.enemy253=aimCache253.enemy;return aimV;}
+  if(aimCache253?.key===key){aimV.copy(aimCache253.point);aimV.enemy253=aimCache253.enemy;aimV.ray388=aimCache253.ray388;return aimV;}
   const rc=renderer.domElement.getBoundingClientRect();aimRay.setFromCamera({x:(mouseAim.x-rc.left)/(rc.width||W)*2-1,y:-((mouseAim.y-rc.top)/(rc.height||H))*2+1},camera);
   const ray=aimRay.ray,ground=Projectiles253.aimTerrainRay(ray,terrH,220);let best=null,dist=ground?ground.t*220:220;
   for(const e of enemies){if(e.dead||e.sleep||Math.hypot(e.x-player.x,e.z-player.z)>80)continue;const b=projectileBody253(e),hit=Projectiles253.intersectRayCapsule(ray.origin,ray.direction,b,b.r,b.hitHeight,220);if(hit.hit&&hit.distance<dist){dist=hit.distance;best=e;}}
   if(best){const b=projectileBody253(best);aimV.set(best.x,b.y,best.z);}
   else if(ground)aimV.set(ground.x,ground.y+1.1,ground.z);
   else{const distance=Math.max(35,camera.position.distanceTo(new THREE.Vector3(player.x,terrH(player.x,player.z)+1.1,player.z))+45);aimV.copy(ray.origin).addScaledVector(ray.direction,distance);}
-  aimV.enemy253=best;aimCache253={key,point:aimV.clone(),enemy:best};return aimV;
+  /* v389 (Ian): ponto exato onde a mira do mouse cai (chão ou longe no céu), para o tiro básico livre subir e descer com a mira */
+  const ray388=ground?new THREE.Vector3(ground.x,ground.y,ground.z):ray.origin.clone().addScaledVector(ray.direction,Math.max(35,camera.position.distanceTo(new THREE.Vector3(player.x,terrH(player.x,player.z)+1.1,player.z))+45));
+  aimV.enemy253=best;aimV.ray388=ray388;aimCache253={key,point:aimV.clone(),enemy:best,ray388};return aimV;
 }
 function faceTarget(max=7){
   const ap=aimPoint();
@@ -49,9 +51,9 @@ function autoAim357(a){let best=null,dist=16;for(const e of enemies){if(e.dead)c
 function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const nearCaster=team==='player'&&Math.hypot(x-player.x,z-player.z)<1.8;
   const aim=nearCaster&&o.aim3D!==false&&o.staffCast!==false&&!o.dir3D?(aimPoint()||autoAim357(a)):null,target=aim&&{x:aim.x,y:aim.y,z:aim.z};
-  // Free basic aim follows mouse direction at muzzle height; only a creature sets its vertical target.
-  const levelAim365=!!(o.basicAim365&&target&&!aim.enemy253&&!aim.entity);
-  let pitch=0;if(target){const origin={x,y:terrH(player.x,player.z)+(player.jy||0)+1.1,z};if(levelAim365)target.y=origin.y;pitch=Math.atan2(target.y-origin.y,Math.hypot(target.x-x,target.z-z));player.aimPitch253=pitch;}
+  // v389 (Ian): o tiro básico livre segue a mira também na vertical (mirar para cima sobe, para baixo desce); antes ficava na altura de saída.
+  const freeAim389=!!(o.basicAim365&&target&&!aim.enemy253&&!aim.entity&&aim.ray388);if(freeAim389){target.x=aim.ray388.x;target.y=aim.ray388.y;target.z=aim.ray388.z}
+  let pitch=0;if(target){const origin={x,y:terrH(player.x,player.z)+(player.jy||0)+1.1,z};pitch=Math.atan2(target.y-origin.y,Math.hypot(target.x-x,target.z-z));player.aimPitch253=pitch;}
   if(nearCaster&&type==='tspear')player.spearGone339=time+.3;if(nearCaster&&type==='tspear'&&o.originY==null&&player?.m?.warrior127){const muzzle=Warrior127.handMuzzle(player.m,{face:player.face,combo:player.combo,pitch253:pitch,wep:'spear_throw'});if(muzzle){x=muzzle.x+(x-player.x);z=muzzle.z+(z-player.z);o={...o,originY:muzzle.y,terrainLaunch245:TER245.heightFor(player.m.root)}}}
   // Pose first, then read the actual tip/hand. Logical muzzle height receives its rigid terrain base once.
   if(nearCaster&&o.staffCast!==false&&o.originY==null&&player?.m?.warrior127&&!/^(arrow|sarrow|stone_lance|tdagger|tspear)$/.test(type)&&(o.basicClass==null||MAGIC_CLS.includes(o.basicClass)||basicIsMagic())){
@@ -66,7 +68,7 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
     if(best){const y0=(o.originY??1.1)+(o.terrainLaunch245??terrH(x,z)),ty=projectileBody253(best).y,pitch=Math.atan2(ty-y0,bd);o={...o,dir3D:{x:Math.sin(a)*Math.cos(pitch),y:Math.sin(pitch),z:Math.cos(a)*Math.cos(pitch)}}}}const big=type==='big';if(big)type='orb';const sc=o.sc||(big?2:1);
   const y=o.worldOriginY253??((o.originY??(1.1+(nearCaster?(player.jy||0):0)))+(o.terrainLaunch245??terrH(x,z)));
   let dir=o.dir3D?Projectiles253.unit(o.dir3D):{x:Math.sin(a),y:0,z:Math.cos(a)};
-  if(target){if(levelAim365)target.y=y;dir=Projectiles253.aim3D({x,y,z},target);const da=a-player.face,cs=Math.cos(da),sn=Math.sin(da),dx=dir.x;dir.x=dx*cs+dir.z*sn;dir.z=dir.z*cs-dx*sn;}
+  if(target){dir=Projectiles253.aim3D({x,y,z},target);const da=a-player.face,cs=Math.cos(da),sn=Math.sin(da),dx=dir.x;dir.x=dx*cs+dir.z*sn;dir.z=dir.z*cs-dx*sn;}
   const holder=projModel(type,col,sc,o.vis156??o.basicClass);holder.userData.terrainAbsolute245=true;holder.position.set(x,y,z);holder.rotation.set(-Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),Math.atan2(dir.x,dir.z),0,'YXZ');scene.add(holder);
   projs.push({elem300:o.elem300,dtype281:o.dtype281||(team==='player'?curDType281:null),originY:y,y,vy:dir.y*spd,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:dir.x*spd,vz:dir.z*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }

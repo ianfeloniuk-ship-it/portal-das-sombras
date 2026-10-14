@@ -1,6 +1,13 @@
 ## Regra para IAs (14/10/2026)
 - Pedido de Ian: toda IA (ChatGPT/Codex, Claude) é obrigada a ler `AGENTS.md` e seguir a skill `docs/skills/primeva-codigo.md` antes de mexer no jogo.
 
+## v389 — Tiro básico segue a mira na vertical, 14/10/2026
+- Relato de Ian: depois da câmera nova os projéteis não iam na direção da mira; mirando para cima ou para baixo seguiam reto.
+- Causa: regra da v365 (feita para a câmera de cima) deixava o tiro básico sem criatura na mira na altura de saída. Com a câmera atrás do ombro isso parecia bug.
+- Agora o tiro básico livre mira o ponto exato onde a mira cai (chão) ou um ponto longe no céu: sobe e desce com a mira. Mirando numa criatura continua indo na altura dela. Habilidades não mudaram.
+- Partes: src/core/380-acoes.js (aimPoint guarda ray388; shoot usa freeAim389 no lugar de levelAim365). Sem textos ligados a mudar (nenhum texto do jogo citava a regra).
+- Testado no navegador com arco: mira no céu vy +5,8; mira no chão vy −15,9; meio −0,8. Sem erro novo no console.
+
 ## v388 — Código dividido em partes, 14/10/2026
 - Pedido de Ian: dividir o código para um pedido não mexer em outra coisa e trazer bug novo.
 - O script principal (7,8 MB, um bloco só) agora mora em 68 partes em `src/core/` (util, dados, jogador, colisão, mundo, masmorra, combate, IA, loop, HUD, janelas, controles, telas...). Mapa e regras: `src/LEIA-ME.md`.
