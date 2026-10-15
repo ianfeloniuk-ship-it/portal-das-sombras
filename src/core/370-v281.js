@@ -277,5 +277,5 @@ const XP_CURVE=Object.freeze({base:60,linear:40,power:1.8,scale:4});
 function xpNeed(level=run.level){return RpgBalance.xpNeed(level)}
 function xpProgress(level=run.level,xp=run.xp){const needed=xpNeed(level),current=Math.max(0,Math.floor(xp));return {current,needed,remaining:Math.max(0,needed-current),percent:Math.min(100,current*100/needed),nextLevel:level+1}}
 function xpNumber(value){return Math.floor(value).toLocaleString('pt-BR')}
-function xpProgressText(progress){return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
+function xpProgressText(progress){if(profile.classless)return 'Nível 0 · registre-se com Lyra e desperte sua classe no escambo com Kael.';return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
 

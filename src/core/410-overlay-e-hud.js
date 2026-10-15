@@ -69,13 +69,13 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   return rows.join('');
 }
 let xpHudKey='';
-function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent='Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
+function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: desperte com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
 function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=className().toUpperCase();
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):L.G.th.n+' · '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
-  /* v384 (Ian): lugar, perigo e noite saem da ficha e vão para a caixa do minimapa, com relógio */$('lv').textContent='NV '+run.level+(L.mode==='world'&&!L.special?'':' · '+where2);
+  /* v384 (Ian): lugar, perigo e noite saem da ficha e vão para a caixa do minimapa, com relógio */$('lv').textContent=(profile.name||'Viajante')+' · NV '+run.level+(L.mode==='world'&&!L.special?'':' · '+where2);
   $('sht').title=rareHud103();$('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' ÉGIDE ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp)+(P.venomUntil>time&&P.venomCharges>0?' · VENENO '+P.venomCharges+' ('+Math.ceil(P.venomUntil-time)+'s)':'');
   resourceHud260();
   updateXpHud();$('gold').textContent=fmt(run.gold);

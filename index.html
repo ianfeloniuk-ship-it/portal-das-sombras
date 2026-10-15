@@ -233,7 +233,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">PRIMEVA</h1>
-    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. Se morrer, perde tudo: nível, ouro e itens. Só ficam o seu rank, o despertar e o que estiver no banco ou na casa.</div>
+    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. No prólogo, a morte devolve você ao último ponto seguro. Depois do despertar, perde nível, ouro e itens. Só ficam o seu rank, o despertar e o que estiver no banco ou na casa.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -250,7 +250,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
   </div>
 </div>
 
-<script src="tools/balance-rpg.js?v=401"></script>
+<script src="tools/balance-rpg.js?v=403"></script>
 <script src="tools/monster-balance.js?v=259"></script>
 <script src="tools/mana258.js?v=258"></script>
 <script src="tools/resource-balance263.js?v=320"></script>
@@ -5731,7 +5731,7 @@ const XP_CURVE=Object.freeze({base:60,linear:40,power:1.8,scale:4});
 function xpNeed(level=run.level){return RpgBalance.xpNeed(level)}
 function xpProgress(level=run.level,xp=run.xp){const needed=xpNeed(level),current=Math.max(0,Math.floor(xp));return {current,needed,remaining:Math.max(0,needed-current),percent:Math.min(100,current*100/needed),nextLevel:level+1}}
 function xpNumber(value){return Math.floor(value).toLocaleString('pt-BR')}
-function xpProgressText(progress){return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
+function xpProgressText(progress){if(profile.classless)return 'Nível 0 · registre-se com Lyra e desperte sua classe no escambo com Kael.';return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
 
 /* ================= AÇÕES ================= */
 /* PC: mira pelo mouse. O golpe/habilidade vai para onde o cursor aponta no chão. */
@@ -5954,7 +5954,7 @@ function die(){
 
 /* ================= IA ================= */
 function turnTo(e,a,dt,s=10){let d=a-e.face;d=Math.atan2(Math.sin(d),Math.cos(d));e.face+=d*Math.min(1,dt*s)}
-function pickTarget(e){if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
+function pickTarget(e){if(window.Intro401?.guided()&&!e.isIntroTutorial)return null;if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
   const gt=AR103.trial;if(e.aw103&&gt?.ci===14&&gt.helper&&!gt.helper.dead){const pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<3)return {t:player,d:pd};return {t:gt.helper,d:Math.hypot(gt.helper.x-e.x,gt.helper.z-e.z)}}
   if(e.coreRaider&&L.defense?.started&&!L.defense.failed&&!L.defense.done){const c=L.defense.core,pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<4)return {t:player,d:pd};const ally=allies.find(a=>!a.dead&&Math.hypot(a.x-e.x,a.z-e.z)<3);if(ally)return {t:ally,d:Math.hypot(ally.x-e.x,ally.z-e.z)};return {t:c,d:Math.hypot(c.x-e.x,c.z-e.z)}}
   let best=null,bd=1e9;
@@ -6424,13 +6424,13 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   return rows.join('');
 }
 let xpHudKey='';
-function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent='Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
+function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: desperte com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
 function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=className().toUpperCase();
   const nc=L.mode==='world'?nearestCity(P.x,P.z):null,pd=nc?nc.d:0;
   const where=L.special?L.special.name:L.mode==='world'?(pd<36?nc.c.name:BIO_N[biomeAt(P.x,P.z)]+' · perigo '+GR[danger(P.x,P.z)].id):L.G.th.n+' · '+L.G.id+(L.gate.red?' vermelha':'');const where2=where+(L.mode==='world'&&!L.special&&isNight()?' · noite':'');
-  /* v384 (Ian): lugar, perigo e noite saem da ficha e vão para a caixa do minimapa, com relógio */$('lv').textContent='NV '+run.level+(L.mode==='world'&&!L.special?'':' · '+where2);
+  /* v384 (Ian): lugar, perigo e noite saem da ficha e vão para a caixa do minimapa, com relógio */$('lv').textContent=(profile.name||'Viajante')+' · NV '+run.level+(L.mode==='world'&&!L.special?'':' · '+where2);
   $('sht').title=rareHud103();$('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' ÉGIDE ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp)+(P.venomUntil>time&&P.venomCharges>0?' · VENENO '+P.venomCharges+' ('+Math.ceil(P.venomUntil-time)+'s)':'');
   resourceHud260();
   updateXpHud();$('gold').textContent=fmt(run.gold);
@@ -7023,7 +7023,7 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
   if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER ECO (F) em guardiões e elites.':'Só o Necromante levanta ecos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE ECOS',h)}
-function startFirstEquipment(){if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a primeira arma desperta sua classe. Acompanhe a missão no Diário.',6500)}
+function startFirstEquipment(){if(profile.classless)return;if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a primeira arma desperta sua classe. Acompanhe a missão no Diário.',6500)}
 function firstEquipmentObjective(){const q=profile.firstEquipment92;if(!q||q.done)return null;const found=run.items.some(it=>EQUIP_SLOTS.includes(it.slot));
  return {id:'firstEquipment',n:'Seu primeiro equipamento',d:found?'<div class="guide93"><strong>2. Equipe sua peça</strong><p>Abra a Bolsa e escolha Equipar. No PC, também pode arrastar para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Consiga um equipamento</strong><p>Monstros e baús das masmorras dão equipamentos. A forja também fabrica peças quando for liberada.</p><p>Sem ouro, Kael troca uma arma de treino por escambo (uma vez); a arma escolhida desperta sua classe. Comprar com Kael é uma alternativa cara: botas F a partir de '+equipmentShopPrice('b',0)+' ouro. Nenhuma peça exige rank para usar.</p></div>',progress:found?'Etapa 2 de 2 · equipe uma peça da bolsa':'Etapa 1 de 2 · encontre, fabrique ou compre uma peça',ready:false}}
 function finishFirstEquipment(){const q=profile.firstEquipment92;if(!q||q.done||!Object.values(run.equip).some(it=>it&&EQUIP_SLOTS.includes(it.slot)))return false;q.done=true;addOrderRep(10,'Primeiro equipamento');if(run.trackObj==='firstEquipment')run.trackObj=null;store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Seu primeiro equipamento: concluído. Você conseguiu sua primeira peça e a equipou. O próximo passo é seu.',6500);saveRun();return true}
@@ -7566,7 +7566,7 @@ function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(
 
 /* ================= LIBERAÇÃO GRADUAL ================= */
 const UNLOCK=[['status',1,'Janela de Status: distribua pontos'],['hire',8,'Recrutar caçadores na Ordem'],['fish',10,'Pesca no lago e culinária no Mercado'],['weekly',12,'Chefe semanal'],['forge',12,'Forja no ferreiro'],['sets',14,'Conjuntos de equipamento'],['tower',15,'Torre da Ascensão'],['caravan',16,'Caravanas no Mercado'],['city',18,'Evolução das cidades'],['guild',20,'Guildas'],['ruins',20,'Ruínas e mapas do tesouro'],['living',22,'Armas vivas'],['season',25,'Eventos do fim do mundo'],['dream',26,'Pousada e masmorra do sonho'],['worldboss',28,'Chefes errantes no mundo'],['job',30,'Troca de classe'],['constel',35,'Constelações de passivas'],['clone',40,'Prova do clone sombrio'],['time',45,'Portais do tempo'],['rebirth',100,'Reencarnação']];
-function unl(k){if(k==='domain')return (profile.bossKills||0)>0;if(k==='god')return profile.rank===9;const u=UNLOCK.find(x=>x[0]===k);return !u||run.level>=u[1]||(profile.rebirths||0)>0}
+function unl(k){if(profile.openWorld401)return true;if(k==='domain')return (profile.bossKills||0)>0;if(k==='god')return profile.rank===9;const u=UNLOCK.find(x=>x[0]===k);return !u||run.level>=u[1]||(profile.rebirths||0)>0}
 function unlockCheck(l){for(const u of UNLOCK)if(u[1]===l&&!(profile.rebirths>0))setTimeout(()=>{toast('<b>[NARRADOR]</b> Nova função liberada: <b>'+u[2]+'</b>',6000);sfx('ding')},2500)}
 const lockMsg=k=>{const u=UNLOCK.find(x=>x[0]===k);return 'Liberado no nível '+(u?u[1]:'?')};
 /* ================= BLOCO A: ARMAS VIVAS, CONJUNTOS, CONSTELAÇÕES, REENCARNAÇÃO ================= */
@@ -8080,8 +8080,8 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='enter'){const g=gates.find(x=>x.id==v);if(g&&!g.dead)enterGate(g);return}
   if(a==='gtab')return guildView(v);
   if(a==='buyp'){const p=POTS[+v],pp=Math.round(p.price*priceMul('pot'));if(run.gold<pp)return;run.gold-=pp;if(window.Econ154)Econ154.notePurchase(pp);for(const k in p.give)run[k]+=p.give[k];beep(990,.08,.05);toast('<b>[NARRADOR]</b> Comprado: '+p.n)}
-  if(a==='barter396'){if(window.Awaken396)Awaken396.barter(v)}
-  if(a==='vocation396'){if(window.Awaken396)Awaken396.choose(v)}
+  if(a==='barter396'){if(window.Awaken396)Awaken396.barter(v);saveRun();return}
+  if(a==='vocation396'){if(window.Awaken396)Awaken396.choose(v);saveRun();return}
   if(a==='buyi'){const [st,k]=String(v).split(':');buyEquipment(st[0],+st.slice(1),k)}
   if(a==='equipbest'){for(const sl of EQUIP_SLOTS){const b=bestInBag(sl);if(b&&itemScore(b)>itemScore(run.equip[sl])){run.items.splice(run.items.indexOf(b),1);if(run.equip[sl])run.items.push(run.equip[sl]);run.equip[sl]=b}}finishFirstEquipment();refreshStats();toast('<b>[NARRADOR]</b> Equipamento otimizado.');}
   if(a==='travel217'){travelGo217(v);return 'close'}if(a==='relic'){relicToggle183(v);if(view)view();return}if(a==='relicvault'){if(inCity(player.x,player.z))relicVault190(v);if(view)view();return}if(a==='equip'){equipBagItem(v);/* v194 (Ian): despertar abre ao encaixar a última peça do set */if(Object.keys(SETS153).some(id=>awakenTestReady155(id))){L.awAsked169=null;setTimeout(()=>{closeModal();awakenPopup169(true)},120);return 'close0'}}
@@ -8269,7 +8269,7 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
 $('tbl').innerHTML='';
 function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();ensureOrderRep();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue ecos':'')+'<br>Mortes: '+(profile.deaths||0);if(profile.classless){$('rollc').textContent='VIAJANTE · SEM CLASSE';$('rolls').innerHTML='Chegou sem ouro e sem técnicas. Sua classe desperta com a primeira arma.<br>Mortes: '+(profile.deaths||0)}}
-if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
+if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
   if(!profile&&!/[?&]escolherClasse/.test(location.search)){profile=pickAwaken(0);profile.classless=true;profile.name='Viajante';profile.creationPending91=false;profile.orderPending401=true;store.set('pds2_profile',profile);startGame();return}
@@ -8277,10 +8277,10 @@ $('goBtn').addEventListener('click',()=>{
     /* v301 (Ian): a lista vazava da caixa e o texto ficava minúsculo. Botões curtos em 2 colunas; ao clicar abre o detalhe com passiva e recurso e o botão Escolher. */
     const RN={fury:'Fúria',vigor:'Estamina',mana:'Mana'},info=i=>{const c=CLASSES[i],mag=MAGIC_CLS.includes(i);return {c,rs:RN[resourceType260({sourceClass:i})],at:mag?'Inteligência':c.ranged?'Destreza':'Força',st:c.ranged?'À distância':'Corpo a corpo'}};
     $('rolls').innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;max-height:46vh;overflow-y:auto">'+C.map(o=>{const I=info(o.i);return '<button class="btn" data-cls="'+o.i+'" style="text-align:left;white-space:normal;line-height:1.25;padding:7px 9px"><b style="font-size:14px">'+o.c.n+'</b><br><small style="opacity:.8;font-size:11.5px">'+I.st+' · '+I.rs+'</small></button>'}).join('')+'</div><div id="clsDetail301" style="margin-top:8px;font-size:13px;line-height:1.45;text-align:left;min-height:64px;opacity:.9">Clique numa classe para ver os detalhes.</div>';
-    $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{const ci=+b.dataset.cls,I=info(ci);document.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('clsDetail301').innerHTML='<b style="font-size:15px">'+I.c.n+'</b> · '+I.st+'<br>Recurso: <b>'+I.rs+'</b> · atributo principal: <b>'+I.at+'</b><br>Passiva <b>'+(PASSIVES[ci]?PASSIVES[ci].n:'')+'</b>: '+(PASSIVES[ci]?PASSIVES[ci].d:'')+'<br>Habilidades: '+I.c.sk.map(s=>s.n).join(' · ')+'<br><button class="btn hot" id="clsPick301" style="margin-top:6px">Escolher '+I.c.n+'</button>';$('clsPick301').addEventListener('click',()=>{profile=pickAwaken(ci);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent='ENTRAR NA CIDADE';beep(880,.3,.06);$('reroll').hidden=!DEV})}));return}
+    $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{const ci=+b.dataset.cls,I=info(ci);document.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('clsDetail301').innerHTML='<b style="font-size:15px">'+I.c.n+'</b> · '+I.st+'<br>Recurso: <b>'+I.rs+'</b> · atributo principal: <b>'+I.at+'</b><br>Passiva <b>'+(PASSIVES[ci]?PASSIVES[ci].n:'')+'</b>: '+(PASSIVES[ci]?PASSIVES[ci].d:'')+'<br>Habilidades: '+I.c.sk.map(s=>s.n).join(' · ')+'<br><button class="btn hot" id="clsPick301" style="margin-top:6px">Escolher '+I.c.n+'</button>';$('clsPick301').addEventListener('click',()=>{profile=pickAwaken(ci);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent=(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');beep(880,.3,.06);$('reroll').hidden=!DEV})}));return}
   if(false){let n=0;
     const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES.filter((c,i)=>i<8&&!c.legacy)[Math.floor(Math.random()*7)].n.toUpperCase();beep(300+n*20,.04,.03);
-      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent='ENTRAR NA CIDADE';$('reroll').hidden=!DEV}},80);return}
+      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent=(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}},80);return}
   startGame();
 });
 $('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='DESPERTAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
@@ -8926,7 +8926,7 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
-<script src="tools/campaign327.js?v=401"></script>
+<script src="tools/campaign327.js?v=403"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -8935,7 +8935,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/reclaim372.js?v=399"></script><script src="tools/loot353.js?v=376"></script>
+<script src="tools/reclaim372.js?v=401"></script><script src="tools/loot353.js?v=376"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -8948,13 +8948,15 @@ requestAnimationFrame(frame);
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=387"></script>
 <script src="tools/water391.js?v=395"></script>
-<script src="tools/map393.js?v=401"></script>
+<script src="tools/map393.js?v=403"></script>
 <script src="tools/fall393.js?v=393"></script>
-<script src="tools/awaken396.js?v=401"></script>
+<script src="tools/awaken396.js?v=403"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v401</div>
+<script src="tools/intro401.js?v=403"></script>
+
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v403</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=401;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=403;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

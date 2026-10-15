@@ -8,23 +8,24 @@
   /* classes comuns iniciais (não raras, não legadas, com peso de sorteio) por tipo de arma — direto de CLASSES */
   function kindClasses(){const m={};CLASSES.forEach((c,i)=>{if(c.rare||c.legacy||c.complement103||!(c.w>0)||!c.wep)return;(m[c.wep]=m[c.wep]||[]).push(i)});return m}
   function kindOf(it){let k=it&&it.kind155||'';k=ALIAS[k]||k;const KC=kindClasses();if(!KC[k]){const m=String(it&&it.name||'').match(/^(\S+)/);k=m?NAMEK[m[1]]||'':''}return KC[k]?k:'sword'}
-  function canBarter(){return !!(profile&&profile.classless&&!profile.orderPending401&&!profile.creationPending91&&!profile.kaelBarter396&&!run.equip.w&&!run.items.some(i=>i.slot==='w'))}
+  function canBarter(){return !!(profile&&profile.classless&&!profile.orderPending401&&!profile.creationPending91&&!profile.kaelBarter396)}
   let pending=null,silent=false;
   function awaken(ci){
     if(!profile||!profile.classless||profile.orderPending401||!CLASSES[ci])return false;
     pending=null;rememberClassCooldowns();
     delete profile.classless;run.level=Math.max(1,run.level);run.xp=0;profile.cls=ci;profile.jobs=[ci];AFFC=null;
-    run.elem=CLASSES[ci].elem||null;run.style='nat';run.adv=false;run.classLoadout=[ci+':0'];
+    run.elem=CLASSES[ci].elem||null;run.style=MAGIC_CLS.includes(ci)&&run.equip.w&&!weaponIsMagic173(run.equip.w)?'off':'nat';run.adv=false;run.classLoadout=[ci+':0'];
     store.set('pds2_profile',profile);
     const x=player.x,z=player.z;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);
     player.skills=pSkills();refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;showG();
     try{closeModal()}catch(e){}
     bigText(CLASSES[ci].n.toUpperCase(),1600);sfx('arise');
     toast('<b>[NARRADOR]</b> Sua alma absorveu a mana da Fenda. Caminho de <b>'+CLASSES[ci].n+'</b> desperto! A primeira habilidade da classe já está na barra.',7000);
-    saveRun();return true}
+    window.Campaign327?.tick();saveRun();return true}
   function askVocation(kind,mode){
     const list=kindClasses()[kind]||[];
     pending={kind,mode};
+    view=()=>askVocation(kind,mode);
     let h='<div class="sysline"><b>Qual caminho sua alma desperta com esta arma?</b> ('+LABEL[kind]+')</div>';
     for(const ci of list){const c=CLASSES[ci];h+=row('<b>'+c.n+'</b>',(PASSIVES[ci]?PASSIVES[ci].n+': '+PASSIVES[ci].d+'<br>':'')+c.sk.map(s=>s.n).join(' · '),btn('Despertar','vocation396',ci,true,'hot'))}
     openModal('VOCAÇÃO',h)}
@@ -43,7 +44,7 @@
     if(!canBarter())return false;const list=kindClasses()[kind];if(!list)return false;
     if(ci==null){if(list.length>1){askVocation(kind,'barter');return true}ci=list[0]}
     if(!list.includes(+ci))return false;ci=+ci;
-    if(kind==='none'){profile.kaelBarter396=true;store.set('pds2_profile',profile);
+    if(kind==='none'){if(run.equip.w&&!unequipItem('w'))return false;profile.kaelBarter396=true;store.set('pds2_profile',profile);
       toast('<b>Kael:</b> Sem arma? Há quem aprenda a lutar só com as mãos. O que você carrega na alma vale mais que qualquer aço, Viajante.',7500);
       return awaken(ci)}
     if(!equipmentBagRoom())return false;

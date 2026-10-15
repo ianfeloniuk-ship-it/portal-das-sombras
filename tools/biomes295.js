@@ -14,7 +14,7 @@ const ITEMS={cantil:{n:'Cantil de couro',d:'anula o calor do deserto',b:'deserto
 const DUR=300;
 function gear(){run.bioGear295=run.bioGear295||{};return run.bioGear295}
 function here(){try{return (typeof L!=='undefined'&&L.mode==='world'&&player)?biomeAt(player.x,player.z):null}catch(_){return null}}
-function fx(){const b=here();const f=b&&FX[b];if(!f)return null;if(window.Living372){if(b==='neve'&&Living372.sheltered())return {n:f.n,protegido:true};if(b==='pantano'&&run.clanRespect372&&!gear()[f.item])return {...f,move:-.05};}if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true};return f}
+function fx(){if(window.Intro401?.guided())return null;const b=here();const f=b&&FX[b];if(!f)return null;if(window.Living372){if(b==='neve'&&Living372.sheltered())return {n:f.n,protegido:true};if(b==='pantano'&&run.clanRespect372&&!gear()[f.item])return {...f,move:-.05};}if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true};return f}
 function price(k){const g=(typeof GR!=='undefined'&&GR[Math.min(9,rankOf())])?GR[Math.min(9,rankOf())].gold:1;return Math.round(ITEMS[k].p*g)}
 // ---- efeitos ----
 const ms0=movementSpeed;movementSpeed=function(raw){const f=fx();return ms0(f&&f.move?raw*(1+f.move):raw)};
@@ -24,6 +24,7 @@ const vr0=pVigorRegen281;pVigorRegen281=function(){const f=fx();return (1+vr0())
 let last=null,acc=0,lastT=performance.now();
 function tick(){const now=performance.now(),dt=Math.min(1,(now-lastT)/1000);lastT=now;try{if(typeof started==='undefined'||!started||!run||!player||player.dead||paused)return;
   const G=gear();for(const k in G){G[k]-=dt;if(G[k]<=0){delete G[k];try{toast('<b>[VIAGEM]</b> O efeito de '+ITEMS[k].n+' acabou.',3500)}catch(_){}}}
+  if(window.Intro401?.guided())return;
   const b=here(),f=fx();
   if(b&&b!==last){last=b;const F=FX[b];if(F&&b!=='campos')try{toast('<b>['+F.n.toUpperCase()+']</b> '+(f&&f.protegido?'Você está protegido por '+ITEMS[F.item].n+'.':F.d)+(F.item&&!(f&&f.protegido)?' O Mercado vende '+ITEMS[F.item].n+'.':''),5500)}catch(_){}}
   if(!f)return;
