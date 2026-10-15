@@ -1,3 +1,18 @@
+## v413 — Modelos da v411 no lugar certo, cor original e andar sem tranco, 15/10/2026
+- Pedido de Ian: a v411 ligou os GLBs pelo nome genérico do Tripo (ex.: o "gigante de pedra" era o Arconte da Destruição); andavam "um, dois, para, trava"; cor feia no jogo. Pediu também regra fixa para todo modelo novo (skill `primeva-modelos-novos` no cofre).
+- Identidade conferida com as fichas do Drive (pasta 1GxEPOGf2dKCw3o3D791m6ruRK_n2BjMq) e o Livro, com verificação independente dos 14:
+  gigante-pedra = Arconte da Destruição (ficha 197) → só no chefe; Gigante de Pedra volta ao modelo dele.
+  yeti = Arconte das Feras (200) → chefe ganhou modelo; Yeti volta ao dele.
+  yeti-corrompido = Arconte do Gelo Eterno (198) → só nele; Colosso de Gelo Ymrak volta ao padrão.
+  golem-madeira = Arconte das Pragas (199) → só nele; Golem de Mana volta ao padrão.
+  rei-oco = Lich Ancestral → só nele; O Rei Oco volta ao "monarca" (o Livro o descreve sem corpo).
+  golem-pedra = Guardião Corrompido (desenho da ficha mob- v004) → fora do jogo por enquanto: o Guardião tem modelo próprio animado (Guardian370) e Golem de Pedra/Arconte não são ele.
+  dragao-kaelthys = Dracônico (ficha 060), não o Kaelthys (quadrúpede alado) → Kaelthys volta ao padrão; Dracônico continua com o modelo dedicado draconico318 até Ian decidir trocar.
+  Goblins: goblin-guerreiro = Guerreiro, goblin-arqueiro = Arqueiro, goblin-bruto = Xamã, goblin-xama = Escudeiro, orc = Goblin Bruto (o Orc volta ao modelo dele). Berserker Rubro e Cavaleiro Carmesim estavam certos.
+- Andar: os 14 usam o mesmo rig (18 ossos) e o Run não fechava o ciclo (coxa -31,5° no começo e 0° no fim → estalo de 31° a cada volta) e começava em 1/24 s; o jogo ainda reiniciava a passada no quadro 1 a cada parada curta. core 140: `fixUserRigClips413` (tempos desde 0, sem deslocamento da raiz, Run vai-e-volta com costura de 0,03°), gPlay retoma a passada, 0,25 s de folga antes de parar, velocidade da passada pela velocidade real. Idle vinha parado: respiração leve.
+- Cor: core 140 makeMonster deixa os userRig em PBR + saída linear→sRGB (sem toToon e sem a tinta do chefe); core 130 bioMob não pinta userRig; variants308 `reclone308` mantém a correção nas versões Fendida/Abissal e o flash de dano; warrior-player127 `srgb413` nas espadas novas (sword-r*). 
+- Teste: navegador — 5 goblins com o modelo certo e material original (print com cor igual ao render), Run com costura 0,03°; regressões intro401/402, scenes406, loot402, interface405, ecology124/410 e scripts inline ok. Simulação do agente: salto máximo 4,4°/quadro (antes 31,7°), 0 reinícios na borda do alcance (antes 15). Não testado no jogo: chefes Arcontes/Lich em luta real, espada nova equipada (só código).
+
 ## v412 — Ecologia viva do Bestiário (fuga, rendição, moeda, moral), Histórico fora da tela e painel do Ato, 15/10/2026
 - Feito sobre a v411 (modelos de criaturas e espadas, outra conversa); nada dela foi alterado.
 - Pedido de Ian: as reações descritas no Bestiário / Livro Oficial (Hábitos e perigo + Tática de sobrevivência) viram regra de verdade na IA, para todas as criaturas — não só exemplos.

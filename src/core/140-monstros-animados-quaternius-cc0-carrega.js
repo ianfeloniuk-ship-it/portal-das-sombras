@@ -112,32 +112,49 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){const D=MON_DEF[k];if(D.actor||D.externalLoader314||MON.list[k])continue;const url=(D.file?'models/mobs165/'+D.file+'.glb':'models/m_'+k+'.glb')+(D.file?'?v=410':(k.startsWith('magote')?'?v=394':k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''));ld.load(url,g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){const D=MON_DEF[k];if(D.actor||D.externalLoader314||MON.list[k])continue;const url=(D.file?'models/mobs165/'+D.file+'.glb':'models/m_'+k+'.glb')+(D.file?'?v=410':(k.startsWith('magote')?'?v=394':k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''));ld.load(url,g=>{MON.list[k]=g.scene;MON.clips[k]=D.userRig?fixUserRigClips413(g.animations):g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+/* v413 (Ian: "anda um, dois, para, trava"): os 14 GLBs userRig (PrimevaRig, 18 ossos) trazem o Run quebrado: coxa -31,5° no 1º quadro,
+   +31,5° no 17º e 0° no último, então a cada volta a perna estala 31,5° de volta; e os tempos começam em 1/24 s. Na carga: tempos a partir de 0,
+   raiz/pelve sem deslocamento horizontal, e o Run vira vai-e-volta até o extremo (ciclo fechado, 2 passos). */
+function fixUserRigClips413(clips){
+ for(const c of clips){let t0=Infinity;for(const tr of c.tracks)if(tr.times.length)t0=Math.min(t0,tr.times[0]);
+  if(t0>0&&t0<Infinity)for(const tr of c.tracks)tr.shift(-t0);
+  for(const tr of c.tracks)if(/^(root|pelvis)\.position$/.test(tr.name)){const v=tr.values;for(let i=3;i<v.length;i+=3){v[i]=v[0];v[i+2]=v[2]}}
+  c.resetDuration();if(/(^|\|)(Run|Walk)$/.test(c.name))loopPingPong413(c,30)}
+ return clips}
+function loopPingPong413(clip,fps){let best=0,mid=0;
+ for(const tr of clip.tracks){if(tr.ValueTypeName!=='quaternion')continue;const v=tr.values,n=tr.times.length;
+  for(let k=1;k<n;k++){const d=Math.min(1,Math.abs(v[0]*v[k*4]+v[1]*v[k*4+1]+v[2]*v[k*4+2]+v[3]*v[k*4+3])),a=2*Math.acos(d);if(a>best+1e-4){best=a;mid=tr.times[k]}}}
+ if(!(mid>0)||best<.05)return clip;const steps=Math.max(2,Math.round(mid*fps));
+ clip.tracks=clip.tracks.map(tr=>{const ip=tr.createInterpolant(),sz=tr.getValueSize(),T=new Float32Array(2*steps+1),V=new Float32Array((2*steps+1)*sz);
+  for(let i=0;i<=2*steps;i++){const r=ip.evaluate((i<=steps?i:2*steps-i)/steps*mid);T[i]=i/steps*mid;for(let j=0;j<sz;j++)V[i*sz+j]=r[j]}
+  return new tr.constructor(tr.name,T,V)});
+ clip.resetDuration();clip.optimize();return clip}
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
   const sc=o.scale||1;model.scale.setScalar(D.h/MON.h[k]);body.scale.setScalar(sc);
-  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k.startsWith('magote')||k.startsWith('cactinho')||k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if((k.startsWith('guardiao')||k.startsWith('cactinho')||k.startsWith('magote'))&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
+  const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=!!D.userRig||k.startsWith('magote')||k.startsWith('cactinho')||k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if((D.userRig||k.startsWith('guardiao')||k.startsWith('cactinho')||k.startsWith('magote'))&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null&&!D.userRig)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
-  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,userRig:!!D.userRig,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,userRig:!!D.userRig,gait413:D.userRig?.61*(D.h/MON.h[k])*sc:0,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
 }
 function gAct(m,n){if(m.act[n])return m.act[n];let c;
   if(m.alias){const nm=m.alias[n]||(n==='Hit_A'?m.alias.Hit:null)||m.alias.Idle;c=m.clips.find(a=>a.name===nm||a.name.endsWith('|'+nm))}
   else if(m.customClips)c=m.customClips.find(a=>a.name===n);
   else c=MODELS.anims.find(a=>a.name===n);
   if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
-function gPlay(m,n,once,spd){if(m.mon==='draconico318'&&!m.userRig&&n==='Hit_A'){m.hit318=.35;return}const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
+function gPlay(m,n,once,spd){if(m.mon==='draconico318'&&!m.userRig&&n==='Hit_A'){m.hit318=.35;return}const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];const keep=m.userRig&&n==='Running_A'&&a.time>0;if(keep){a.stopFading();a.paused=false}else a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);if(!keep&&m.userRig&&n==='Running_A')a.time=a.getClip().duration*.25;a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
-  m.body.position.y=0;m.body.rotation.set(0,0,0);
+  m.body.position.y=0;m.body.rotation.set(0,0,0);if(m.userRig){/* v413: Idle do PrimevaRig vem parado; respiração leve */if(!(st.move>.1)&&!(st.dead>0)){const tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));m.body.position.y=(Math.sin(tt*2.1)*.5+.5)*.025*(m.sc||1);m.body.rotation.z=Math.sin(tt*1.3)*.012;m.body.rotation.x=Math.sin(tt*2.1)*.01}m.hold413=st.move>.1?.25:Math.max(0,(m.hold413||0)-ADT);if(st.speed!=null)m.spd413=m.spd413==null?st.speed:m.spd413+(st.speed-m.spd413)*Math.min(1,ADT*6)}
   if(st.dead>0){if(m.cur!=='Death_A')gPlay(m,'Death_A',true,/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho|magote)/.test(m.mon||'')?1:1.2)}
   else if(st.wind>0&&m.mon&&m.mon.startsWith('magote')){if(m.cur!=='Windup'||st.wind<m.lw)gPlay(m,'Windup',true,1);m.lw=st.wind}
   else if(st.wind>0){if(m.cur!==m.atkClip||st.wind<m.lw)gPlay(m,m.atkClip,true,.55);m.lw=st.wind}
   else if(st.atk>0){if(m.cur!==m.atkClip||st.atk<m.la)gPlay(m,m.atkClip,true,1.6);m.la=st.atk;m.lw=0}
   else if(m.mon&&m.mon.startsWith('magote')&&m.cur===m.atkClip){gPlay(m,'Recover',true,1);m.la=0;m.lw=0}
-  else if(st.move>.1&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
+  else if((st.move>.1||m.hold413>0)&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.userRig&&m.gait413&&m.spd413!=null&&st.speed!=null?clamp(m.spd413/m.gait413,.6,2.2):m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.stop();a.reset();m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);
 }

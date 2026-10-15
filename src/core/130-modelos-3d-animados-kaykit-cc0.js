@@ -74,7 +74,7 @@ let ADT=0;
 /* monstros de bioma */
 const BIOM={vulcao:{p:'Ígneo',c:0xff6a3a,hp:1.1,dmg:1.35,spd:1,gold:1.5},cristal:{p:'Cristalino',c:0x9fe8ff,hp:1.45,dmg:1,spd:.95,gold:1.6},floresta:{p:'Sombrio',c:0x3a5a3a,hp:1.2,dmg:1.15,spd:1.1,gold:1.4,suf:true},neve:{p:'Gélido',c:0x9fd8ff,hp:1.3,dmg:1,spd:.85,gold:1.3},deserto:{p:'das Areias',c:0xe0b060,hp:1,dmg:1.25,spd:1.1,gold:1.3,suf:true},pantano:{p:'do Pântano',c:0x6a8a3a,hp:1.15,dmg:1.1,spd:1,gold:1.3,suf:true}};
 function bioMob(e,b){const B=BIOM[b];if(!B||e.isBoss)return;e.hp*=B.hp;e.maxhp*=B.hp;e.dmg*=B.dmg;e.speed=(e.speed||3)*B.spd;e.biomeRewardBalance=1+Math.min(.15,(B.hp*B.dmg-1)*.2);e.name=B.suf?e.name+' '+B.p:e.name+' '+B.p;
-  if(e.mats)for(const m of e.mats)if(m.color)m.color.lerp(new THREE.Color(B.c),.35)}
+  if(e.mats&&!(e.m&&e.m.userRig))for(const m of e.mats)if(m.color)m.color.lerp(new THREE.Color(B.c),.35)}
 /* montaria: Lobo de Mana (modelo Fox, CC0/CC-BY) */
 function foxMount(){const src=MODELS.fox.scene,model=THREE.SkeletonUtils.clone(src),root=new THREE.Group();root.add(model);
   const b=new THREE.Box3().setFromObject(src),h=b.max.y-b.min.y||1;model.scale.setScalar(1.75/h);
