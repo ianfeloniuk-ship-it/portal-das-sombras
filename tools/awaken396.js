@@ -14,17 +14,18 @@
     if(!profile||!profile.classless||!CLASSES[ci])return false;
     pending=null;rememberClassCooldowns();
     delete profile.classless;profile.cls=ci;profile.jobs=[ci];AFFC=null;
-    run.elem=CLASSES[ci].elem||null;run.style='nat';run.adv=false;run.classLoadout=[ci+':0'];
+    run.elem=CLASSES[ci].elem||null;run.style=MAGIC_CLS.includes(ci)&&run.equip.w&&!weaponIsMagic173(run.equip.w)?'off':'nat';run.adv=false;run.classLoadout=[ci+':0'];
     store.set('pds2_profile',profile);
     const x=player.x,z=player.z;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);
     player.skills=pSkills();refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;showG();
     try{closeModal()}catch(e){}
     bigText(CLASSES[ci].n.toUpperCase(),1600);sfx('arise');
     toast('<b>[NARRADOR]</b> Sua alma absorveu a mana da Fenda. Caminho de <b>'+CLASSES[ci].n+'</b> desperto! A primeira habilidade da classe já está na barra.',7000);
-    saveRun();return true}
+    window.Campaign327?.tick();saveRun();return true}
   function askVocation(kind,mode){
     const list=kindClasses()[kind]||[];
     pending={kind,mode};
+    view=()=>askVocation(kind,mode);
     let h='<div class="sysline"><b>Qual caminho sua alma desperta com esta arma?</b> ('+LABEL[kind]+')</div>';
     for(const ci of list){const c=CLASSES[ci];h+=row('<b>'+c.n+'</b>',(PASSIVES[ci]?PASSIVES[ci].n+': '+PASSIVES[ci].d+'<br>':'')+c.sk.map(s=>s.n).join(' · '),btn('Despertar','vocation396',ci,true,'hot'))}
     openModal('VOCAÇÃO',h)}

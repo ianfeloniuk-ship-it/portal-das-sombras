@@ -196,7 +196,7 @@
   }
   function news(m, text) { try { logNews('<b>[' + (isSide(m) ? esc(m.title) : 'ATO ' + esc(m.title)) + ']</b> ' + esc(fill(text, state(m.id))), 'important'); popNews194('<b>[HISTÓRIA]</b> ' + esc(fill(text, state(m.id))), 7000); } catch (_) {} }
   function finish(m) {
-    const s = state(m.id); s.done = true; s.pos = null; save();
+    const s = state(m.id); s.done = true; s.pos = null; if (m.id === 'a1') profile.openWorld401 = true; save();
     const lvl = Math.max(1, run.level || 1), xp = RpgBalance.questReward({ type: 'clear', level: lvl, count: isSide(m) ? 1 : 2 }).xp;
     const got = gainXp(xp, 'quest'), gold = Math.round(questGold283({ t: 'clear', rank: Math.min(9, rankOf()) }) * (isSide(m) ? 2 : 3));
     run.gold += gold; addOrderRep(isSide(m) ? 20 : 40, isSide(m) ? 'Missão de ' + m.npc : 'Ato concluído');
@@ -268,9 +268,16 @@
         return { friend: e, x: x + 2.2, z };
       } catch (_) { return null; }
     }
-    const m = makeChibi(f.civ ? CIV() : f.look); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); scene.add(m.root);
-    if (f.down) m.root.rotation.z = Math.PI / 2;
-    return { m, x: x + 1.8, z, name: f.name, t: Math.random() * 5 };
+    const look = f.civ ? CIV() : f.look;
+    const m = MODELS.list[look.gk] ? makeActor(look) : {root:new THREE.Group(),mats:[]};
+    if (!m.model) MODELS.ready.then(() => {
+      if (!m.root.parent || !MODELS.list[look.gk]) return;
+      const old = m.root, ready = makeActor(look);
+      ready.root.position.copy(old.position); ready.root.rotation.copy(old.rotation);
+      scene.remove(old); Object.assign(m,ready); scene.add(m.root);
+    }); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); scene.add(m.root);
+    if (f.down) { m.root.position.y = gy(x + 1.8, z); m.wounded401 = true; }
+    return { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
   }
   function clearWorld(id) {
     const w = W.get(id); if (!w) return;
@@ -285,7 +292,7 @@
     const w = { step: s.s, grps: [], figs: [], inters: [], foes: [], L };
     pts.forEach((p, i) => {
       if (s.hit.includes(i)) return;
-      const g = makeBeacon(p[0], p[1], side); scene.add(g); w.grps.push(g);
+      const g = makeBeacon(p[0], p[1], side); if (m.id === 'a1') g.visible = false; scene.add(g); w.grps.push(g);
       const fig = figure(sp.fig, p[0], p[1]); w.figs.push(fig);
       const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, use: () => useMarker(m, i) };
       L.inter.push(it); w.inters.push(it);
@@ -293,15 +300,23 @@
     if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); }
     W.set(m.id, w); save();
   }
-  /* carroça tombada: caixa inclinada, roda solta e caixotes (só malhas simples) */
+  /* v401: a mesma carroça GLB da Ordem, tombada sem condutor ou boi. */
   function makeCart(x, z) {
-    const g = new THREE.Group(), wood = new THREE.MeshLambertMaterial({ color: 0x6b4a2a }), dark = new THREE.MeshLambertMaterial({ color: 0x3a2814 });
-    const bed = new THREE.Mesh(new THREE.BoxGeometry(3.4, .3, 1.9), wood); bed.position.set(0, .95, 0); bed.rotation.z = .55; g.add(bed);
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(3.4, .9, .15), wood); wall.position.set(.2, 1.35, .9); wall.rotation.z = .55; g.add(wall);
-    for (const [wx, wz] of [[-1.3, .95], [-1.3, -.95]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(.62, .62, .14, 14), dark); w.rotation.x = Math.PI / 2; w.position.set(wx, .62, wz); g.add(w); }
-    const lost = new THREE.Mesh(new THREE.CylinderGeometry(.6, .6, .14, 14), dark); lost.position.set(2.3, .1, -1.6); lost.rotation.z = .25; g.add(lost);
-    for (const [cx, cz, s] of [[2.0, .9, .7], [2.9, .2, .55], [1.5, -1.7, .6]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), wood); b.position.set(cx, s / 2, cz); b.rotation.y = cx; g.add(b); }
-    g.position.set(x, gy(x, z), z); g.rotation.y = .5; g.userData.mats = []; g.userData.taken = false; return g;
+    const g = new THREE.Group();
+    g.position.set(x, gy(x,z), z); g.rotation.y = .5;
+    g.userData.mats = []; g.userData.taken = false;
+    Wagon369.ready.then(ok => {
+      if (!ok || !g.parent) return;
+      const w = Wagon369.create(); w.mixer.stopAllAction();
+      if (w.driver.root) w.driver.root.visible = false;
+      if (w.ox) w.ox.visible = false;
+      w.g.rotation.z = 1.12;
+      w.g.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(w.g);
+      w.g.position.y -= box.min.y;
+      g.add(w.g); g.userData.asset401 = 'models/wagon369.glb';
+    });
+    return g;
   }
   /* despertar no chão: anéis que se expandem + luz que sobe */
   function awakenFx(x, z) {
@@ -342,29 +357,13 @@
     try {
       introFade();
       const m = ACTS[0], c = nearestCity(player.x, player.z).c, wall = wallOf(c); let P = null;
-      for (let k = 0; k < 80 && !P; k++) { const a = rnd(0, TAU), d = wall + rnd(16, 26), x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d; if (freeAt(x, z, 1.6) && freeAt(x - 4, z - 3, 1.4) && freeAt(x, z + 4.5, 1)) P = [x, z]; }
-      if (!P) P = [c.x + wall + 18, c.z];
-      begin(m); const s = state(m.id); s.pos = P.slice(); s.extra = []; s.extraStep = 0; save();
-      const px = P[0], pz = P[1] + 4.5;
+      // Aster's south gate: the road and wall share the initial camera axis.
+      P = [c.x, c.z + wall + 20];
+      begin(m); const s = state(m.id); s.pos = P.slice(); s.helped401 = false; s.extra = []; s.extraStep = 0; save();
+      const px = P[0] + 1.8, pz = P[1] + 3;
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
-      player.face = Math.PI; run.pos = { x: px, z: pz }; awakenFx(px, pz);
+      player.face = Math.PI; pcCam.yaw = 0; pcCam.pitch = .06; run.pos = { x: px, z: pz }; awakenFx(px, pz);
       try { buildWorldFor(m); } catch (_) {}
-      const w = W.get(m.id);
-      if (w && !w.foes.length && !s.fightDone) {
-        try {
-          const k = KINDS['slime'] ? 'slime' : (KINDS['gosma'] ? 'gosma' : 'goblin');
-          const fx = P[0] - 2.6, fz = P[1] - 1.2;
-          const e = spawnKind(k, fx, fz, 0, { wild: true });
-          e.name = 'Criatura da Fenda';
-          e.hp = e.maxhp = 30;
-          e.dmg = 3;
-          e.isIntroTutorial = true;
-          e.camp327 = m.id;
-          e.aggro = true;
-          w.foes.push(e);
-          fxRing(fx, fz, 0xff8a4a, 1.5);
-        } catch (_) {}
-      }
       setTimeout(() => {
         try {
           toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 7000);
@@ -378,6 +377,10 @@
   function foesLeft(m) { const w = W.get(m.id); return w ? w.foes.filter(e => !e.dead && enemies.includes(e)).length : 0; }
   function useMarker(m, i) {
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
+    if (m.id === 'a1' && s.s === 0 && window.Intro401) {
+      if (!s.helped401 && !s.fightDone && !s.killed) { Intro401.dialog('Edran', ['A carroça… Ela veio da Fenda. Cuidado, está logo ali!'], () => { s.helped401 = true; save(); tick(); }); return; }
+      if (s.fightDone) { Intro401.dialog('Edran', ['Você conseguiu… A Mão levou a criatura, mas deixou aquele cristal.', 'Siga pela estrada até o Portão de Aster. Registre sua chegada com Lyra na Ordem da Fenda.', 'Depois procure Kael. Ele fará o escambo da sua primeira arma.'], () => advance(m, sp.done)); return; }
+    }
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
     s.hit.push(i);
@@ -436,12 +439,12 @@
       if (!world) continue;
       if (!w) { buildWorldFor(m); w = W.get(m.id); }
       for (const g of w.grps) for (const mat of g.userData.mats) mat.uniforms.t.value = T;
-      for (const f of w.figs) if (f && f.m) try { f.t += .3; animChibi(f.m, { move: 0, atk: 0, dead: 0, wind: 0 }, f.t); f.m.root.rotation.y = Math.atan2(player.x - f.x, player.z - f.z); } catch (_) {}
+      for (const f of w.figs) if (f && f.m) try { f.t += .3; if (!f.down) animChibi(f.m, { move: 0, atk: 0, dead: 0, wind: 0 }, f.t); if (!f.down) f.m.root.rotation.y = Math.atan2(player.x - f.x, player.z - f.z); } catch (_) {}
       if (!s.fightDone) {
         for (const e of w.foes) if (e.dead && !e.counted327) { e.counted327 = true; s.killed++; save(); }
         const total = (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1);
         if (s.killed >= total) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
-        else if (!foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
+        else if ((m.id !== 'a1' || s.s !== 0 || s.helped401) && !foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
       }
     }
   }
@@ -465,6 +468,17 @@
   }
   const shopOrig = openShop;
   openShop = function (id) {
+    const npc401 = SHOP_NPC[id];
+    const main401 = active().find(m => !isSide(m) && m.steps[state(m.id).s]?.t === 'talk' && m.steps[state(m.id).s].npc === npc401);
+    if (main401 && window.Intro401) {
+      const s = state(main401.id), sp = main401.steps[s.s];
+      Intro401.dialog(npc401, sp.say.map(x => fill(x,s)), () => advance(main401, npc401 + ': ' + sp.say.at(-1)));
+      return;
+    }
+    if (id === 'wep' && window.Intro401 && state('a1')?.s === 3 && !state('a1').done && !state('a1').kaelIntro401 && profile.classless) {
+      Intro401.dialog('Kael', ['Lyra registrou sua chegada. Escolha sua primeira arma de treino por escambo. Ela despertará o seu caminho.', 'Depois disso, o mundo é seu: explore as regiões, masmorras e sistemas no seu ritmo. A história pode esperar.'], () => { state('a1').kaelIntro401 = true; save(); shopOrig.call(this,id); });
+      return;
+    }
     const r = shopOrig.apply(this, arguments);
     try {
       const npc = SHOP_NPC[id];
@@ -507,7 +521,7 @@
       if (!s.fightDone) where += ' Inimigos: ' + Math.max(0, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + '.';
     }
     if (sp.t === 'talk' && sp.npc !== 'Torvo') where = ' Fale com ' + sp.npc + ' numa cidade.';
-    if (sp.t === 'barter') where = ' Abra a loja de equipamentos do Kael, em ' + cityName(s) + ', e escolha uma arma de treino.';
+    if (sp.t === 'barter') where = ' Fale com Kael [F], em ' + cityName(s) + ', e escolha uma arma de treino.';
     return { id: 'camp327:' + m.id, n: (isSide(m) ? m.title + ' · ' + m.npc : 'Ato ' + m.title), d: '', progress: fill(sp.d, s) + where + ' (passo ' + (s.s + 1) + '/' + m.steps.length + (b > 1 ? ' · ' + a + '/' + b : '') + ')', ready: false };
   }
   const joOrig = journeyObjectives;
