@@ -77,7 +77,7 @@ const KINDS={
  yeti:{mon:'yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
  gigante:{mon:'gigante',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
  raptor:{mon:'raptor',gk:'Skeleton_Rogue',n:'Raptor',hp:70,dmg:14,spd:5.2,ai:'lunge',range:1.8,wind:.3,atkCd:1.3,xp:18,scale:1,body:0x6a8a3a,wep:'none',r:.7},
- dragao:{mon:'draconico318',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
+ dragao:{mon:'user_dragao_kaelthys',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
  rogue:{gk:'Skeleton_Rogue',n:'Esqueleto Ladino',hp:44,dmg:11,spd:3.4,ai:'lunge',range:1.5,wind:.5,atkCd:2.2,xp:12,scale:.95,body:0x3c3c46,wep:'dagger',r:.55}};
 // ranks de portal
 const GR=[

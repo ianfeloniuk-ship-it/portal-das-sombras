@@ -1,3 +1,6 @@
+## v414 — Dracônico com o modelo novo, 15/10/2026
+- Pedido de Ian: trocar o Dracônico pelo GLB que ele mandou (dragao-kaelthys.glb, conferido com a ficha 060). src/core/050: dragao usa user_dragao_kaelthys (cor original, corrida corrigida da v413); Fendido/Abissal herdam. O modelo antigo draconico318 fica no repositório sem uso. Ataques especiais de garra/cauda do draconico318 não valem para o modelo novo (ele usa o golpe comum).
+
 ## v413 — Modelos da v411 no lugar certo, cor original e andar sem tranco, 15/10/2026
 - Pedido de Ian: a v411 ligou os GLBs pelo nome genérico do Tripo (ex.: o "gigante de pedra" era o Arconte da Destruição); andavam "um, dois, para, trava"; cor feia no jogo. Pediu também regra fixa para todo modelo novo (skill `primeva-modelos-novos` no cofre).
 - Identidade conferida com as fichas do Drive (pasta 1GxEPOGf2dKCw3o3D791m6ruRK_n2BjMq) e o Livro, com verificação independente dos 14:
