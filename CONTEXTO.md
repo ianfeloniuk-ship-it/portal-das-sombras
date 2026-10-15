@@ -1,3 +1,8 @@
+## v415 — Arma pelo cabo e bainha do lado certo, sempre, 15/10/2026
+- Pedido de Ian: as armas (espadas novas da v411) eram seguradas pela lâmina e iam viradas para as costas; pediu que isso nunca mais aconteça.
+- tools/warrior-player127.js: `handleDown415` mede o próprio modelo antes de normalizar. Espada/adaga: a guarda é a fatia mais larga e o cabo fica do lado curto. Maça/machado/cajado/lança: a cabeça é o lado mais pesado. A ponta sempre fica em +Y e o cabo em -Y, onde ficam a pegada e a bainha. O `flip` manual da adaga foi aposentado (a medição resolve).
+- Verificado com render das 12 armas normalizadas (adaga, cajado, lança, maça, espada162, sword-r0..r5, r7): todas com o cabo para baixo; as 7 espadas novas e a adaga foram viradas; cajado, lança, maça e espada162 ficaram como estavam.
+
 ## v414 — Dracônico com o modelo novo, 15/10/2026
 - Pedido de Ian: trocar o Dracônico pelo GLB que ele mandou (dragao-kaelthys.glb, conferido com a ficha 060). src/core/050: dragao usa user_dragao_kaelthys (cor original, corrida corrigida da v413); Fendido/Abissal herdam. O modelo antigo draconico318 fica no repositório sem uso. Ataques especiais de garra/cauda do draconico318 não valem para o modelo novo (ele usa o golpe comum).
 
