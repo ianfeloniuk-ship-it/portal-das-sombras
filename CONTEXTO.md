@@ -1,3 +1,8 @@
+## v409 — Arma de ponta-cabeça na mão, 15/10/2026
+- Pedido de Ian: a arma ficava de ponta-cabeça quando segurada.
+- tools/warrior-player127.js: a v407 virava 180° todos os modelos de arma (menos o escudo); só a adaga precisa disso (o GLB dela vem com o cabo do outro lado). Voltou a virar só a adaga. Versão do script subiu para ?v=409 (a v407 não tinha subido, então o cache podia segurar a versão antiga).
+- Teste com print: espada, machado, lança, adaga e cajado sacados com o cabo na mão; machado guardado nas costas.
+
 ## v408 — Mira à distância no Lobo Fendido e equipamentos fora do Status, 15/10/2026
 - Pedido de Ian: tiro de mago/arqueiro no Lobo Fendido ia para o chão; equipamentos apareciam no Status (devem ficar só na Build).
 - src/core/380-acoes.js: `projectileBody253` mede também a largura do modelo (`rw`) e usa como raio da cápsula (bichos baixos e compridos); a mira do mouse tem folga de 0,35 m. Teste: 49/49 pontos do corpo do lobo acertam (plano e morro).

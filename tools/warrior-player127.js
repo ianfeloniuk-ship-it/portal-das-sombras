@@ -106,7 +106,7 @@
     const holder=new T.Group(),inner=new T.Group();inner.add(o);holder.add(inner);if(ax==='x')inner.rotation.z=-Math.PI/2;if(ax==='z')inner.rotation.x=Math.PI/2;
     holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder);inner.scale.multiplyScalar(len/(b2.max.y-b2.min.y));holder.updateMatrixWorld(true);
     const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*grip),-c.z);return holder}
-  function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key!=='shield');for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}
+  function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key==='dagger');for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}
   /* v339 (Ian): a lança arremessada é a mesma da mão (modelo, cor do rank); sem lança na mão usa a comum. Ponta em +Z. */
   API.spearModel=function(m){let w=null,ax=new T.Vector3(0,1,0);const held=m&&m.kind195==='spear'&&m.socket&&m.socket.children[0];
     if(held){w=held.clone(true);const a=sheathAxis195(m.socket);if(a)ax=a.clone()}else{const k=W171.spear;load171(k[0],k[1],k[2],'spear');if(!w171.spear)return null;w=w171.spear.clone(true)}
