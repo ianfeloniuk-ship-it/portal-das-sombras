@@ -5743,8 +5743,8 @@ const mouseAim={x:0,y:0,ok:false},aimRay=new THREE.Raycaster(),aimPlane=new THRE
 if(!touch)addEventListener('mousemove',e=>{mouseAim.x=e.clientX;mouseAim.y=e.clientY;mouseAim.ok=true});
 // Bounds are measured once from the actual model; terrain is added only to its rigid base.
 function projectileBody253(e){const m=e.m;let b=m?.projectileBounds253;
-  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0};}
-  const low=b?.lo??0,high=b?.hi??Math.max(.8,(e.r||.5)*2.5),h=Math.max(.1,high-low),r=Math.max(.1,e.r||.5),lift=(m?.body?.position.y||0)-(b?.bodyY||0);
+  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0,rw:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)/2};}
+  const low=b?.lo??0,high=b?.hi??Math.max(.8,(e.r||.5)*2.5),h=Math.max(.1,high-low),r=Math.max(.1,e.r||.5,Math.min(2.5,(b?.rw||0)*.7)),lift=(m?.body?.position.y||0)-(b?.bodyY||0);
   return {x:e.x,y:terrH(e.x,e.z)+(m?.root?.position.y||0)+lift+(low+high)/2,z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
 }
 let aimCache253=null;
@@ -5753,7 +5753,7 @@ function aimPoint(){if(touch||!mouseAim.ok)return null;
   if(aimCache253?.key===key){aimV.copy(aimCache253.point);aimV.enemy253=aimCache253.enemy;aimV.ray388=aimCache253.ray388;return aimV;}
   const rc=renderer.domElement.getBoundingClientRect();aimRay.setFromCamera({x:(mouseAim.x-rc.left)/(rc.width||W)*2-1,y:-((mouseAim.y-rc.top)/(rc.height||H))*2+1},camera);
   const ray=aimRay.ray,ground=Projectiles253.aimTerrainRay(ray,terrH,220);let best=null,dist=ground?ground.t*220:220;
-  for(const e of enemies){if(e.dead||e.sleep||Math.hypot(e.x-player.x,e.z-player.z)>80)continue;const b=projectileBody253(e),hit=Projectiles253.intersectRayCapsule(ray.origin,ray.direction,b,b.r,b.hitHeight,220);if(hit.hit&&hit.distance<dist){dist=hit.distance;best=e;}}
+  for(const e of enemies){if(e.dead||e.sleep||Math.hypot(e.x-player.x,e.z-player.z)>80)continue;const b=projectileBody253(e),hit=Projectiles253.intersectRayCapsule(ray.origin,ray.direction,b,b.r+.35,b.hitHeight,220);/* v408: folga na mira p/ bichos baixos e largos (Lobo Fendido) */if(hit.hit&&hit.distance<dist){dist=hit.distance;best=e;}}
   if(best){const b=projectileBody253(best);aimV.set(best.x,b.y,best.z);}
   else if(ground)aimV.set(ground.x,ground.y+1.1,ground.z);
   else{const distance=Math.max(35,camera.position.distanceTo(new THREE.Vector3(player.x,terrH(player.x,player.z)+1.1,player.z))+45);aimV.copy(ray.origin).addScaledVector(ray.direction,distance);}
@@ -8979,15 +8979,15 @@ requestAnimationFrame(frame);
 <script src="tools/vocation405.js?v=405"></script>
 <script src="tools/kael405.js?v=405"></script>
 <script src="tools/hud405.js?v=405"></script>
-<script src="tools/character405.js?v=405"></script>
+<script src="tools/character405.js?v=408"></script>
 <link rel="stylesheet" href="tools/primeva405.css?v=405">
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v407</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v408</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=407;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=408;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

@@ -38,7 +38,8 @@ function createViewer(host){const T=THREE;let renderer,clone=null,closed=false,t
  }catch(error){clearInterval(timer);resize?.disconnect();releaseClone(clone);renderer?.dispose();renderer?.forceContextLoss();host.textContent='Modelo indisponível';console.warn('Character405 viewer',error);return null}
 }
 function decorate(kind){const mb=$('mb');if(mb.querySelector('.c405-hero'))return;mb.classList.add('c405-surface');const tabs=mb.querySelector('.tabs');if(tabs)tabs.insertAdjacentHTML('afterend',hero());else mb.insertAdjacentHTML('afterbegin',hero());viewer?.dispose();viewer=createViewer(mb.querySelector('.c405-portrait'));
- const placeholder=mb.querySelector('[data-c405-wardrobe]');if(placeholder)placeholder.outerHTML=wardrobe();else mb.querySelector('.c405-hero').insertAdjacentHTML('afterend',wardrobe());
+ /* v408 (Ian): equipamentos só na Build, nunca no Status. */
+ if(kind==='build'){const placeholder=mb.querySelector('[data-c405-wardrobe]');if(placeholder)placeholder.outerHTML=wardrobe();else mb.querySelector('.c405-hero').insertAdjacentHTML('afterend',wardrobe());}
  if(kind==='status'){const guide=mb.querySelector('.guide93');if(guide){guide.className='c405-points';guide.innerHTML='<b>'+run.pts+' pontos para distribuir</b><span>'+xpProgressText(xpProgress())+'</span>'}const rows=[...mb.querySelectorAll(':scope > .it')].filter(r=>r.querySelector('[data-a="stat"]'));if(rows.length){const grid=document.createElement('div');grid.className='c405-attributes';rows[0].before(grid);rows.forEach(r=>grid.append(r))}}
  showSelection();hydrate(mb);
 }

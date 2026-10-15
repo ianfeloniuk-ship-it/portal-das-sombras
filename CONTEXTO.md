@@ -1,3 +1,9 @@
+## v408 — Mira à distância no Lobo Fendido e equipamentos fora do Status, 15/10/2026
+- Pedido de Ian: tiro de mago/arqueiro no Lobo Fendido ia para o chão; equipamentos apareciam no Status (devem ficar só na Build).
+- src/core/380-acoes.js: `projectileBody253` mede também a largura do modelo (`rw`) e usa como raio da cápsula (bichos baixos e compridos); a mira do mouse tem folga de 0,35 m. Teste: 49/49 pontos do corpo do lobo acertam (plano e morro).
+- tools/character405.js: o guarda-roupa de equipamentos só entra na Build. Status mostra atributos sem os slots.
+- Partes ligadas: a cápsula maior também vale para o acerto dos projéteis (mesma função). Sem textos a mudar.
+
 ## v407 — Correções de combate, pegada e bainha da arma, performance e narrativa do início, 15/10/2026
 - Pedido de Ian: empunhadura e bainha das armas corrigidas (arma não fica de cabeça para baixo e vai para as costas); jogo a 60 FPS (corrigido gargalo de 1.100 passos/frame no raycast de mira); Edran não afunda mais no chão e fica visível na estrada; refugiados civis posicionados junto à carroça desde o início; carroça desvira e comitiva caminha até Aster em vez de sumir; sem glitch de tela preta piscando (câmera com distância mínima segura de 85 cm evitando clipping na capa); sem redundâncias de texto nos comparadores de equipamento ("▲ +X de escudo a mais" sem repetir a unidade duas vezes).
 - tools/warrior-player127.js: `load171` inverte modelos não-escudo para empunhar pelo cabo com a ponta para cima; cajado embainha nas costas e desativa pose em mãos quando guardado.
