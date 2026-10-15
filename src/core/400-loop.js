@@ -197,7 +197,7 @@ function camUpdate(dt){
   for(let i=1;i<=steps;i++){
     q.copy(pivot).addScaledVector(offset,i/steps);
     const blocked=q.y<terrH(q.x,q.z)+.22||(L.grid?!freeAt(q.x,q.z,.23):!worldFree(q.x,q.z,.23,q.y-.22));
-    if(blocked){safe=Math.max(.35,distance*(i-1)/steps);break}
+    if(blocked){safe=Math.max(.85,distance*(i-1)/steps);break}
   }
   pcCam.distance=safe<pcCam.distance?safe:Math.min(safe,pcCam.distance+dt*5);
   camera.position.copy(pivot).addScaledVector(offset,pcCam.distance/distance);

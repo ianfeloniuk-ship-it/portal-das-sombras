@@ -106,7 +106,7 @@
     const holder=new T.Group(),inner=new T.Group();inner.add(o);holder.add(inner);if(ax==='x')inner.rotation.z=-Math.PI/2;if(ax==='z')inner.rotation.x=Math.PI/2;
     holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder);inner.scale.multiplyScalar(len/(b2.max.y-b2.min.y));holder.updateMatrixWorld(true);
     const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*grip),-c.z);return holder}
-  function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key==='dagger');for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}
+  function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key!=='shield');for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}
   /* v339 (Ian): a lança arremessada é a mesma da mão (modelo, cor do rank); sem lança na mão usa a comum. Ponta em +Z. */
   API.spearModel=function(m){let w=null,ax=new T.Vector3(0,1,0);const held=m&&m.kind195==='spear'&&m.socket&&m.socket.children[0];
     if(held){w=held.clone(true);const a=sheathAxis195(m.socket);if(a)ax=a.clone()}else{const k=W171.spear;load171(k[0],k[1],k[2],'spear');if(!w171.spear)return null;w=w171.spear.clone(true)}
@@ -246,7 +246,7 @@
   function sheath195(m,st,dt){
     // Sem arma não há transição de guardar/sacar nem pose de ombro: idle deve permanecer neutro.
     if(!m.staff174&&!m.equipmentState?.weapon){if(m.sh195)m.sh195={s:1,idle:0,wasMove:false};return}
-    if(m.staff174){if(m.sh195)m.sh195.s=0;return}const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
+    const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
     const moving=(st.move||0)>.08&&!busy;let target;
     if(busy||st.dead>0){target=0;S.idle=0}else if(moving){target=1;S.idle=0;S.wasMove=true}
     else{if(S.wasMove){S.wasMove=false;S.idle=0;S.drawn=true}S.idle+=dt||0;target=S.drawn&&S.idle<3?0:1;if(S.idle>=3)S.drawn=false}
@@ -289,7 +289,7 @@
     if(m.bowHolder155&&(/^arco/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||''))){aimPose168(m);const bh2=m.bowHolder155,rq=m.root.getWorldQuaternion(new T.Quaternion()),want=rq.multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWAIM168)));bh2.parent.updateWorldMatrix(true,false);bh2.quaternion.copy(bh2.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want));bh2.position.set(0,0,0);bh2.userData.idle155=false;bh2.userData.aim168=true}
     // v174 (Ian): cajado parado fica em pé na mão (como bastão), não atravessado; no golpe segue a animação de cajado.
     {const sw=visibleStaff251(m);if(sw){const casting=performance.now()<(m.staffCast251||0)||(st.atk>0&&/^cajado/.test(A.state||''));
-      if(casting)aimStaffPose251(m);else if(!st.dead&&!(st.atk>0))carryStaffPose251(m);if(casting&&Number.isFinite(st.aimPitch253||m.aimPitch253)&&Math.abs(st.aimPitch253||m.aimPitch253)>.001)applyAimPitch253(m,Math.max(-1.22,Math.min(1.22,Number(st.aimPitch253??m.aimPitch253)||0)));m.root.updateMatrixWorld(true);const rq=m.root.getWorldQuaternion(new T.Quaternion()),pitch253=Number(st.aimPitch253??m.aimPitch253)||0,dir=casting?new T.Vector3(0,Math.sin(pitch253),Math.cos(pitch253)).applyQuaternion(rq):new T.Vector3(0,1,0),axis=new T.Vector3();axis[sw.userData.staffAxis251||'y']=1;const want=new T.Quaternion().setFromUnitVectors(axis,dir);sw.quaternion.copy(sw.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want))}}
+      if(casting)aimStaffPose251(m);else if(!st.dead&&!(st.atk>0)&&!(m.sh195&&m.sh195.s>.3))carryStaffPose251(m);if(casting&&Number.isFinite(st.aimPitch253||m.aimPitch253)&&Math.abs(st.aimPitch253||m.aimPitch253)>.001)applyAimPitch253(m,Math.max(-1.22,Math.min(1.22,Number(st.aimPitch253??m.aimPitch253)||0)));m.root.updateMatrixWorld(true);const rq=m.root.getWorldQuaternion(new T.Quaternion()),pitch253=Number(st.aimPitch253??m.aimPitch253)||0,dir=casting?new T.Vector3(0,Math.sin(pitch253),Math.cos(pitch253)).applyQuaternion(rq):new T.Vector3(0,1,0),axis=new T.Vector3();axis[sw.userData.staffAxis251||'y']=1;const want=new T.Quaternion().setFromUnitVectors(axis,dir);sw.quaternion.copy(sw.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want))}}
     // Arco fora do tiro: em pé ao lado do corpo, um pouco para fora da mão, sem atravessar braço e perna.
     const bh=m.bowHolder155;if(bh&&bh.parent){const aiming=/^(arco|chuva_com_arco)/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||'');
       if(!aiming){m.root.updateMatrixWorld(true);const hand=bh.parent,mq=m.model.getWorldQuaternion(q4).clone(),want=mq.multiply(q1.setFromEuler(new T.Euler(...BOWIDLE155)));

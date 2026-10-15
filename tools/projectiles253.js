@@ -6,7 +6,7 @@
   function aim3D(muzzle,target){return unit({x:target.x-muzzle.x,y:target.y-muzzle.y,z:target.z-muzzle.z})}
   function step(a,b,t){return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t}}
   function bisectTerrain(a,b,height,lo,hi){for(let i=0;i<16;i++){const m=(lo+hi)/2,p=step(a,b,m);if(p.y<=height(p.x,p.z))hi=m;else lo=m}const p=step(a,b,hi);return{...p,t:hi}}
-  function terrainHit(a,b,height){if(typeof height!=='function')return null;if(a.y<=height(a.x,a.z))return{...a,t:0};const len=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z),n=Math.max(1,Math.ceil(len/.2));let prev=0,pa=a;for(let i=1;i<=n;i++){const t=i/n,p=step(a,b,t);if(p.y<=height(p.x,p.z)){if(prev===0&&a.y<=height(a.x,a.z))return{...a,t:0};return bisectTerrain(a,b,height,prev,t)}prev=t;pa=p}return null}
+  function terrainHit(a,b,height){if(typeof height!=='function')return null;if(a.y<=height(a.x,a.z))return{...a,t:0};const len=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z),n=Math.max(1,Math.min(60,Math.ceil(len/2.0)));let prev=0,pa=a;for(let i=1;i<=n;i++){const t=i/n,p=step(a,b,t);if(p.y<=height(p.x,p.z)){if(prev===0&&a.y<=height(a.x,a.z))return{...a,t:0};return bisectTerrain(a,b,height,prev,t)}prev=t;pa=p}return null}
   function segmentSphere(a,b,c,r){const d={x:b.x-a.x,y:b.y-a.y,z:b.z-a.z},q={x:a.x-c.x,y:a.y-c.y,z:a.z-c.z};const A=d.x*d.x+d.y*d.y+d.z*d.z,B=2*(q.x*d.x+q.y*d.y+q.z*d.z),C=q.x*q.x+q.y*q.y+q.z*q.z-r*r,disc=B*B-4*A*C;if(C<=0)return{hit:true,t:0,p:{...a}};if(A===0||disc<0)return{hit:false,t:Infinity,p:b};const t=(-B-Math.sqrt(disc))/(2*A);if(t<0||t>1)return{hit:false,t:Infinity,p:b};return{hit:true,t,p:step(a,b,t)}}
   function segmentCapsule(a,b,c,r,h){
     const y0=c.y-h/2,y1=c.y+h/2,hits=[];

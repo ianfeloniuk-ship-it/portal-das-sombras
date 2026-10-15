@@ -282,8 +282,52 @@
   function clearWorld(id) {
     const w = W.get(id); if (!w) return;
     window.Scenes406?.dispose(w);
-    for (const g of w.grps) {if(g===w.cart&&state(id)?.cartRescued401&&w.L===L)setTimeout(()=>scene.remove(g),6000);else scene.remove(g);}
-    for (const f of w.figs) { if (!f) continue; if (f.m) { const root = f.m.root; setTimeout(() => scene.remove(root), !f.hidden406 && w.L === L && L.mode === 'world' ? 6000 : 0); } if (f.friend) { f.friend.gone = true; try { scene.remove(f.friend.m.root); } catch (_) {} } }
+    for (const g of w.grps) {
+      if (g === w.cart && state(id)?.cartRescued401 && w.L === L) {
+        /* Convoy follows road towards Aster gate */
+        const city = nearestCity(g.position.x, g.position.z).c;
+        const tx = city ? city.x : g.position.x, tz = city ? city.z : g.position.z;
+        const cartM = g.userData?.wagon?.g;
+        if (cartM) { cartM.rotation.z = 0; }
+        let ct = 0;
+        const iv = setInterval(() => {
+          ct += .5;
+          const dx = tx - g.position.x, dz = tz - g.position.z, d = Math.hypot(dx, dz);
+          if (d < 6 || ct > 35 || !g.parent) { clearInterval(iv); scene.remove(g); return; }
+          const step = Math.min(d, 2.0 * .5);
+          g.position.x += (dx / d) * step;
+          g.position.z += (dz / d) * step;
+          g.position.y = gy(g.position.x, g.position.z);
+          g.rotation.y = Math.atan2(dx, dz);
+        }, 500);
+      } else scene.remove(g);
+    }
+    for (const f of w.figs) {
+      if (!f) continue;
+      if (f.m) {
+        const root = f.m.root;
+        if (state(id)?.cartRescued401 && w.L === L && L.mode === 'world') {
+          const city = nearestCity(root.position.x, root.position.z).c;
+          const tx = city ? city.x : root.position.x, tz = city ? city.z : root.position.z;
+          f.down = false; root.rotation.z = 0;
+          let ft = 0;
+          const iv = setInterval(() => {
+            ft += .5;
+            const dx = tx - root.position.x, dz = tz - root.position.z, d = Math.hypot(dx, dz);
+            if (d < 6 || ft > 35 || !root.parent) { clearInterval(iv); scene.remove(root); return; }
+            const step = Math.min(d, 1.8 * .5);
+            root.position.x += (dx / d) * step;
+            root.position.z += (dz / d) * step;
+            root.position.y = gy(root.position.x, root.position.z);
+            root.rotation.y = Math.atan2(dx, dz);
+            try { animChibi(f.m, { move: 1, atk: 0, dead: 0, wind: 0 }, ft * 3); } catch (_) {}
+          }, 500);
+        } else {
+          setTimeout(() => scene.remove(root), !f.hidden406 && w.L === L && L.mode === 'world' ? 6000 : 0);
+        }
+      }
+      if (f.friend) { f.friend.gone = true; try { scene.remove(f.friend.m.root); } catch (_) {} }
+    }
     for (const it of w.inters) { const i = L.inter.indexOf(it); if (i >= 0) L.inter.splice(i, 1); }
     for (const e of w.foes) if (!e.dead) { e.dead = true; e.deadT = 0; try { scene.remove(e.m.root); } catch (_) {} const i = enemies.indexOf(e); if (i >= 0) enemies.splice(i, 1); }
     W.delete(id);
@@ -298,7 +342,14 @@
       const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, use: () => useMarker(m, i) };
       L.inter.push(it); w.inters.push(it);
     });
-    if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); w.cart=c; }
+    if (sp.cart && pts[0] && !s.hit.includes(0)) {
+      const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); w.cart=c;
+      /* Refugiados civis abrigados junto à carroça desde o início */
+      const s1 = figure({ civ: true, name: 'Sobrevivente', down: true }, pts[0][0] - 4.8, pts[0][1] - 2.8);
+      const s2 = figure({ civ: true, name: 'Sobrevivente', down: true }, pts[0][0] - 2.6, pts[0][1] - 2.8);
+      if (s1) w.figs.push(s1);
+      if (s2) w.figs.push(s2);
+    }
     if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
     window.Scenes406?.build(m,s,w,pts,figure);
     W.set(m.id, w); save();
@@ -326,7 +377,10 @@
     const cx=cart.position.x,cz=cart.position.z;
     player.x=cx;player.z=cz+2.3;player.face=Math.PI;player.m.root.position.set(player.x,gy(player.x,player.z),player.z);player.m.root.rotation.y=Math.PI;
     if(window.Anim303){Anim303.A.empurrar401={d:3.6,k:[{t:0,b:{}},{t:.18,b:{spine:[28,0,0],upperarm_l:[-85,0,-10],upperarm_r:[-85,0,10],thigh_l:[-35,0,0],shin_l:[45,0,0]}},{t:.75,b:{spine:[38,0,0],upperarm_l:[-100,0,-10],upperarm_r:[-100,0,10],thigh_l:[-45,0,0],shin_l:[55,0,0]}},{t:1,b:{}}]};Anim303.play('empurrar401')}
-    const people=[-1,1].map(side=>{const f=figure({civ:true,name:'Sobrevivente'},cx-1.8+side*.5,cz);f.m.root.rotation.z=Math.PI/2;w.figs.push(f);return f});
+    const people = w.figs.filter(f => f?.name === 'Sobrevivente');
+    if (!people.length) {
+      [-1,1].forEach(side => { const f = figure({ civ: true, name: 'Sobrevivente', down: true }, cx - 1.8 + side * .5, cz); w.figs.push(f); people.push(f); });
+    }
     creak();const dustGroup=new THREE.Group();scene.add(dustGroup);const motes=[];let elapsed=0,last=performance.now(),dust=-1;
     function animate(now){
       if(W.get(m.id)!==w||player.dead){scene.remove(dustGroup);paused=modalOpen;return}
@@ -336,7 +390,14 @@
       const model=cart.userData.wagon.g;model.rotation.z=1.12*(1-rise)+Math.sin(u*45)*.045*Math.sin(Math.PI*u);model.position.y=0;model.updateMatrixWorld(true);model.position.y+=gy(cx,cz)-new THREE.Box3().setFromObject(model).min.y;
       if(Math.floor(elapsed*5)!==dust){dust=Math.floor(elapsed*5);for(let j=0;j<3;j++){const d=new THREE.Mesh(new THREE.SphereGeometry(.13,5,4),new THREE.MeshBasicMaterial({color:0xb7a083,transparent:true,opacity:.45,depthWrite:false}));d.position.set(cx+(Math.random()-.5)*3,gy(cx,cz)+.2,cz+(Math.random()-.5)*2);d.userData={age:0,vx:(Math.random()-.5)*1.5,vz:(Math.random()-.5)*1.5};dustGroup.add(d);motes.push(d)}}
       for(const d of motes){d.userData.age+=dt;d.position.x+=d.userData.vx*dt;d.position.z+=d.userData.vz*dt;d.position.y+=dt*.45;d.scale.setScalar(1+d.userData.age*2);d.material.opacity=Math.max(0,.45-d.userData.age*.3)}
-      people.forEach((f,j)=>{const k=Math.max(0,(u-.6)/.4);f.m.root.rotation.z=(1-k)*Math.PI/2;f.m.root.position.x=cx+(j?1:-1)*(.5+k*3);f.m.root.position.z=cz+k*2;});
+      people.forEach((f,j)=>{
+        const k=Math.max(0,(u-.6)/.4);
+        f.m.root.rotation.z=(1-k)*Math.PI/2;
+        f.m.root.position.x=cx+(j?1.2:-1.2)*(1+k*1.2);
+        f.m.root.position.z=cz+k*1.5;
+        f.m.root.position.y=gy(f.m.root.position.x, f.m.root.position.z);
+        if(k>=1){f.down=false;f.m.root.rotation.z=0;}
+      });
       if(u<1){requestAnimationFrame(animate);return}
       scene.remove(dustGroup);for(const d of motes){d.geometry.dispose();d.material.dispose()}w.rescuing=false;s.cartRescued401=true;paused=false;useMarker(m,i);
     }requestAnimationFrame(animate);

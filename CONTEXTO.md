@@ -1,3 +1,14 @@
+## v407 — Correções de combate, pegada e bainha da arma, performance e narrativa do início, 15/10/2026
+- Pedido de Ian: empunhadura e bainha das armas corrigidas (arma não fica de cabeça para baixo e vai para as costas); jogo a 60 FPS (corrigido gargalo de 1.100 passos/frame no raycast de mira); Edran não afunda mais no chão e fica visível na estrada; refugiados civis posicionados junto à carroça desde o início; carroça desvira e comitiva caminha até Aster em vez de sumir; sem glitch de tela preta piscando (câmera com distância mínima segura de 85 cm evitando clipping na capa); sem redundâncias de texto nos comparadores de equipamento ("▲ +X de escudo a mais" sem repetir a unidade duas vezes).
+- tools/warrior-player127.js: `load171` inverte modelos não-escudo para empunhar pelo cabo com a ponta para cima; cajado embainha nas costas e desativa pose em mãos quando guardado.
+- tools/projectiles253.js: `terrainHit` reduz passos de marcha de 1.100 por frame (0,2 m) para amostragem inicial de 2 m (máx. 60 passos) mantendo a busca binária de 16 iterações para precisão milimétrica. Queda de FPS eliminada.
+- src/core/400-loop.js: câmera clampada em 0,85 m no sweep de colisão para nunca penetrar na cabeça/capuz do jogador.
+- tools/intro401.js: elevação do corpo de Edran (`m.body.position.y = 0.05`) para acomodá-lo confortavelmente sentado/apoiado no chão sem afundar na malha de terreno.
+- tools/campaign327.js: 2 refugiados civis posicionados junto à carroça desde o início em `buildWorldFor`; resgate desvira a carroça e comitiva anda em comboio até os portões de Aster em vez de sumir de repente.
+- tools/kael405.js e src/core/620-janelas.js: comparação de peças na loja limpa sem duplicar o sufixo "de escudo".
+- Partes ligadas: `src/core/400-loop.js`, `src/core/620-janelas.js`, `tools/campaign327.js`, `tools/warrior-player127.js`, `tools/projectiles253.js`, `tools/kael405.js`, `tools/intro401.js`, `sw.js`, `game.html`, `index.html`.
+- Testado: sintaxe com `node --check`, `python tools/core_parts.py check` (ok), `python tools/build.py` (ok).
+
 ## v406 — Mundo vibrante e cenas dos Atos II/III, 15/10/2026
 - Pedido de Ian: tornar a direção vibrante oficial na main e encenar fisicamente o Diário de Aldric e a inscrição da Torre. Publicação autorizada; sequência da v405, commit 45a1b8d.
 - Mundo: céu azul vivo, luz diurna clara, verdes nas paletas efetivas do terreno/vegetação, menor peso das texturas oliva. Toon usa rampa compartilhada de três tons, sem segunda quantização nos materiais toon; contorno discreto e grade sem sépia. Dia/noite, clima e contraste violeta da corrupção preservados. Look154 reaplica parâmetros quando a estrutura de iluminação é recriada.
