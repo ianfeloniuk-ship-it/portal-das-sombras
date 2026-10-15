@@ -43,7 +43,7 @@ function startGame(){
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   restoreSummons();
-  for(const id of['stat','obj','mm','tb','pad','btns','history95'])$(id).hidden=false;showG();
+  for(const id of['stat','obj','mm','tb','pad','btns'])$(id).hidden=false;/* v410 (Ian): painel Histórico fora da tela de jogo; continua no MENU → HISTÓRICO */showG();
   if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
   window.Lights348?.warm();
   started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;

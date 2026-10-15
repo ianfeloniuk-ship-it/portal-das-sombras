@@ -6,14 +6,18 @@ API.guided=()=>!!(profile?.classless&&Campaign327.state('a1')&&!Campaign327.stat
 API.reclaiming=()=>window.Reclaim372?.jobs.find(j=>j.intro)||[...(window.Reclaim372?.pending?.values()||[])].find(j=>j.intro);
 const css=document.createElement('style');css.textContent=`
 #quest401{position:fixed;right:22px;top:200px;width:min(300px,35vw);padding:15px 18px;background:linear-gradient(100deg,#111722ed,#192130d9);border-left:2px solid #e7bb68;color:#f8edda;z-index:72;font:14px/1.5 Georgia,serif;box-shadow:0 6px 25px #0005;pointer-events:auto}
-#quest401 small{display:block;color:#e7bb68;letter-spacing:1.5px;font:10px/1.6 sans-serif;margin-bottom:6px}#quest401 p{margin:0}#quest401 button{float:right;background:none;border:0;color:#e7bb68;cursor:pointer}#quest401[hidden],#dialog401[hidden]{display:none}
+#quest401 small{display:block;color:#e7bb68;letter-spacing:1.5px;font:10px/1.6 sans-serif;margin-bottom:6px}#quest401 p{margin:0}#quest401 .q410{float:right;display:flex;gap:2px;margin:-4px -6px 0 6px}#quest401 .q410 button{background:none;border:0;color:#e7bb68;cursor:pointer;font:16px/1 sans-serif;padding:2px 5px}#quest401 .q410 button:hover{color:#fff}#quest401[hidden],#dialog401[hidden]{display:none}
 #dialog401{position:fixed;inset:0;z-index:9000;background:linear-gradient(#0009,transparent 22%,transparent 55%,#000c);display:flex;align-items:flex-end;justify-content:center;padding:0 5vw 5vh;box-sizing:border-box}
 #dialog401 article{width:min(850px,90vw);background:#101722f5;border-top:2px solid #d4ae69;padding:22px 30px;color:#f7efdf;box-shadow:0 8px 40px #0009;font:18px/1.6 Georgia,serif}#dialog401 h2{font:13px sans-serif;letter-spacing:3px;color:#e7bb68;margin:0 0 12px}#dialog401 p{min-height:58px;margin:0 0 16px}#dialog401 button{float:right;background:#332d22;color:#ffe2ab;border:1px solid #8b754f;padding:8px 18px;cursor:pointer}#dialog401 footer{height:36px;font:11px sans-serif;color:#adaca6}
 body.story401 #stat,body.story401 #mission,body.story401 #history95,body.story401 #notice356,body.story401 #btns,body.story401 #quest401,body.story401 #bF,body.story401 #ach294,body.story401 #mm,body.story401 #obj,body.story401 #tb{visibility:hidden}body.guided401 #mission{display:none}
 @media(max-width:640px){#quest401{top:145px;right:10px;width:210px;max-width:55vw;font-size:12px;padding:10px}#dialog401 article{padding:15px;font-size:15px}}
 `;document.head.append(css);
-const hud=document.createElement('aside');hud.id='quest401';hud.hidden=true;hud.innerHTML='<button aria-label="Ocultar ou mostrar objetivo">−</button><small></small><p></p>';document.body.append(hud);
-let collapsed=false;hud.querySelector('button').onclick=()=>{if(profile.openWorld401){collapsed=!collapsed;hud.querySelector('p').hidden=collapsed;hud.querySelector('button').textContent=collapsed?'+':'−'}};
+const hud=document.createElement('aside');hud.id='quest401';hud.hidden=true;hud.innerHTML='<span class="q410"><button data-q="min" aria-label="Minimizar objetivo" title="Minimizar">−</button><button data-q="close" aria-label="Fechar objetivo" title="Fechar (reabrir pelo MENU)">×</button></span><small></small><p></p>';document.body.append(hud);
+/* v410 (Ian): painel do Ato com minimizar (−/+) e fechar (×); reabre pelo MENU → OBJETIVO DO ATO. Estado fica salvo. */
+const qui=()=>{try{return CFG.quest410=CFG.quest410||{min:false,closed:false}}catch(_){return{min:false,closed:false}}},qsave=()=>{try{store.set('pds_cfg',CFG)}catch(_){}};
+let collapsed=false;hud.addEventListener('click',ev=>{const b=ev.target.closest('[data-q]');if(!b)return;const q=qui();if(b.dataset.q==='min')q.min=!q.min;else q.closed=true;qsave();hud.hidden=hud.hidden||q.closed});
+API.showQuest=()=>{const q=qui();q.closed=false;q.min=false;qsave()};
+(function menuBtn(){const ref=document.getElementById('bDiary');if(!ref){setTimeout(menuBtn,500);return}if(document.getElementById('bQuest410'))return;const b=document.createElement('button');b.className='mini';b.id='bQuest410';b.textContent='OBJETIVO DO ATO';b.onclick=()=>{const q=qui();if(q.closed||q.min)API.showQuest();else{q.closed=true;qsave()}};ref.after(b)})();
 const overlay=document.createElement('section');overlay.id='dialog401';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Diálogo da história');overlay.innerHTML='<article><h2></h2><p></p><footer><span>F / Enter · avançar</span><button>Continuar</button></footer></article>';document.body.append(overlay);
 function vendor(name){return npcs.filter(n=>!n.gone&&(n.short===name||n.name===name||({guild:'Lyra',wep:'Kael'})[n.shop]===name)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]}
 function edran(){return Campaign327.W.get('a1')?.figs.find(f=>f?.name==='Edran')}
@@ -48,7 +52,7 @@ let current=null;
 function refresh(){
  if(!started||!player||!run||!profile||profile.creationPending91){hud.hidden=true;arrow.visible=pulse.visible=false;return}
  document.body.classList.toggle('guided401',API.guided());current=targetAndText();hud.hidden=!current; if(!current)return;
- hud.querySelector('small').textContent=current.step?'ATO I · O CHAMADO · '+current.step+'/6':'MUNDO ABERTO · HISTÓRIA OPCIONAL';hud.querySelector('p').textContent=current.text;hud.querySelector('button').hidden=!profile.openWorld401;
+ hud.querySelector('small').textContent=current.step?'ATO I · O CHAMADO · '+current.step+'/6':'MUNDO ABERTO · HISTÓRIA OPCIONAL';hud.querySelector('p').textContent=current.text;{const q=qui();collapsed=q.min;hud.hidden=!!q.closed;hud.querySelector('p').hidden=collapsed;hud.querySelector('[data-q="min"]').textContent=collapsed?'+':'−';hud.querySelector('[data-q="min"]').setAttribute('aria-label',collapsed?'Mostrar objetivo':'Minimizar objetivo')}
 }
 setInterval(refresh,200);
 function pose(f,dt){if(!f?.m?.model||!f.down)return;const m=f.m;

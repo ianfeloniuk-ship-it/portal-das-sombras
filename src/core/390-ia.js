@@ -48,6 +48,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
+  if(window.Eco410&&Eco410.beforeAI(e,dt))return;/* v410: ecologia do Bestiário (fuga, rendição, moeda, moral) */
   if(window.Cogu348&&Cogu348.beforeAI(e,dt))return;
   if(window.Bird349&&Bird349.beforeAI(e,dt))return;
   if(window.Spiky350&&Spiky350.beforeAI(e,dt))return;

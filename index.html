@@ -5309,9 +5309,9 @@ function historyBadge95(){const b=$('historyUnread95');b.hidden=!historyUnread95
 function renderHistory95(initial=false,repeat=false){const body=$('historyBody95'),list=(profile&&profile.news)||[],follow=initial||(!CFG.historyCollapsed95&&historyAtEnd95(body));let top=body.scrollTop;if(initial){body.replaceChildren();for(const x of [...list].reverse())body.appendChild(historyRow95(x))}else if(list.length){if(repeat&&body.lastElementChild)body.lastElementChild.replaceWith(historyRow95(list[0]));else body.appendChild(historyRow95(list[0]));while(body.children.length>list.length){top-=body.firstElementChild.getBoundingClientRect().height;body.firstElementChild.remove()}}if(follow){body.scrollTop=body.scrollHeight;historyUnread95=0}else{body.scrollTop=Math.max(0,top);historyUnread95++}historyBadge95()}
 function sizeHistory95(w,h){const maxW=Math.max(160,Math.min(620,innerWidth-(touch?120:16))),maxH=Math.max(90,Math.min(420,innerHeight*(touch?.25:.45)));return {w:Math.max(Math.min(220,maxW),Math.min(maxW,Number(w)||320)),h:Math.max(Math.min(110,maxH),Math.min(maxH,Number(h)||175))}}
 function applyHistory95(){const box=$('history95'),size=sizeHistory95(CFG.historyW95,CFG.historyH95);box.style.width=size.w+'px';box.style.height=size.h+'px';box.classList.toggle('collapsed',!!CFG.historyCollapsed95);$('historyToggle95').setAttribute('aria-expanded',String(!CFG.historyCollapsed95));$('historyToggle95').textContent='HISTÓRICO '+(CFG.historyCollapsed95?'▸':'▾')}
-function toggleHistory95(){CFG.historyCollapsed95=!CFG.historyCollapsed95;applyHistory95();store.set('pds_cfg',CFG)}
+function toggleHistory95(){/* v410: fechar o histórico tira o painel da tela (sem a barrinha recolhida) */$('history95').hidden=true;CFG.historyCollapsed95=false;store.set('pds_cfg',CFG)}
 function latestHistory95(){CFG.historyCollapsed95=false;applyHistory95();$('historyBody95').scrollTop=$('historyBody95').scrollHeight;historyUnread95=0;historyBadge95();store.set('pds_cfg',CFG)}
-function newsView(){if(!started)return;CFG.historyCollapsed95=false;applyHistory95();store.set('pds_cfg',CFG);$('historyBody95').focus()}
+function newsView(){if(!started)return;const box=$('history95');/* v410: o painel só aparece quando aberto pelo MENU */if(!box.hidden){box.hidden=true;return}box.hidden=false;CFG.historyCollapsed95=false;applyHistory95();store.set('pds_cfg',CFG);$('historyBody95').focus()}
 /* v194 (Ian): aviso aparece em destaque no topo e depois fica nas Notícias. Tempo cresce com o tamanho do texto; no máximo 3 na tela. */
 /* v277 (Ian): avisos um de cada vez, pequenos, no alto — não tampam a luta. Repetidos são ignorados; tudo continua no Histórico. */
 const POPQ277=[];let popBusy277=false;
@@ -6027,6 +6027,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
   if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
+  if(window.Eco410&&Eco410.beforeAI(e,dt))return;/* v410: ecologia do Bestiário (fuga, rendição, moeda, moral) */
   if(window.Cogu348&&Cogu348.beforeAI(e,dt))return;
   if(window.Bird349&&Bird349.beforeAI(e,dt))return;
   if(window.Spiky350&&Spiky350.beforeAI(e,dt))return;
@@ -8331,7 +8332,7 @@ function startGame(){
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   restoreSummons();
-  for(const id of['stat','obj','mm','tb','pad','btns','history95'])$(id).hidden=false;showG();
+  for(const id of['stat','obj','mm','tb','pad','btns'])$(id).hidden=false;/* v410 (Ian): painel Histórico fora da tela de jogo; continua no MENU → HISTÓRICO */showG();
   if(profile.devGate){delete profile.devGate;store.set('pds2_profile',profile);for(const g of gates)g.double=true}refreshKeyLabels();finishTowerStory();
   window.Lights348?.warm();
   started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;
@@ -8960,6 +8961,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=406"></script>
 <script src="tools/campaign327.js?v=406"></script>
+<script src="tools/ecology410.js?v=412"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -8985,7 +8987,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=404"></script>
+<script src="tools/intro401.js?v=412"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -8999,9 +9001,9 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v411</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v412</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=411;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=412;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
