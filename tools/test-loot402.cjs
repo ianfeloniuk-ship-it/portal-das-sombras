@@ -1,0 +1,11 @@
+const fs=require('fs'),vm=require('vm');
+const run={worldLoot353:[],gold:0,items:[],res:{core:[]}};const player={x:0,z:0,dead:false};const L={mode:'world'};
+const GR=Array.from({length:12},()=>({lvl:1,gold:1}));const context={window:{},run,player,L,enemies:[],saveRun(){},sfx(){},los(){return true},document:{head:{appendChild(){}},createElement(){return {textContent:''}}},ResizeObserver:class{observe(){}},buildSteal(){},addEventListener(){},$:()=>({children:[],getBoundingClientRect(){return {top:0}}}),setTimeout,console,GR,RAR:[],fmt:x=>String(x),safeText:x=>x,row:()=>'',btn:()=>'',openModal(){},closeModal(){},mktView(){},bagTier353(){return 0},BAGS353:[{slots:25}],bagCapacity353(){return 25},rankOf(){return 0},inCity(){return false},Reclaim372:{tick(){},clear(){},start(){return null}}};context.window=context;
+vm.runInNewContext(fs.readFileSync('tools/loot353.js','utf8'),context,{filename:'loot353.js'});const Loot=context.Loot353;
+const fail=m=>{throw new Error(m)},ok=(v,m)=>v||fail(m);
+const r={id:'crystal',x:1000,z:1000,name:'Criatura',entries:[{id:'g',type:'gold',n:7}],crystalLife402:10,reclaimed372:true};run.worldLoot353.push(r);
+Loot.tick(0);ok(run.worldLoot353.includes(r),'dt zero does not expire crystal');ok(r.entries.length===1,'loot remains before expiry');
+Loot.tick(9.5);ok(run.worldLoot353.includes(r),'crystal remains before ten seconds');ok(r.entries.length===1,'entries remain before expiry');
+Loot.tick(.5);ok(!run.worldLoot353.includes(r),'record expires at ten seconds');
+const g={id:'gold',x:0,z:0,name:'Criatura',entries:[{id:'gold1',type:'gold',n:12}]};run.worldLoot353.push(g);ok(Loot.take('gold','gold1'),'manual gold take succeeds');ok(run.gold===12,'manual gold is added exactly once');
+console.log('loot402 behavioral regression passed');

@@ -401,7 +401,7 @@
     if (s.hit.includes(i)) return;
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
       const w=W.get(m.id);if(!w)return;
-      if(!s.edranHelp401){s.edranHelp401=true;const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['A criatura caiu. Ajude-me a levantar a carroça. Há gente presa debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Ajude-me a levantar a carroça.',6000);return}
+      if(!s.edranHelp401){s.edranHelp401=true;const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu… A Mão levou a criatura. O cristal que ela deixou guarda os recursos por dez segundos; recolha também o ouro antes que suma.', 'Agora ajude-me a levantar a carroça. Há gente presa debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Ajude-me a levantar a carroça.',6000);return}
       rescueCart(m,i);return;
     }
     s.hit.push(i);
@@ -465,8 +465,8 @@
       if (!s.fightDone) {
         for (const e of w.foes) if (e.dead && !e.counted327) { e.counted327 = true; s.killed++; save(); }
         const total = (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1);
-        if (s.killed >= total) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
-        else if ((m.id!=='a1'||s.s!==0||s.helped401)&&!foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
+        if (s.killed >= total && !(m.id === 'a1' && window.Intro401?.reclaiming())) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
+        else if ((m.id !== 'a1' || s.s !== 0 || s.helped401) && !foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
       }
     }
   }

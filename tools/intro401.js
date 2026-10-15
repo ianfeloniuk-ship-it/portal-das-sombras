@@ -3,6 +3,7 @@
 'use strict';
 const API=window.Intro401={conversation:null};
 API.guided=()=>!!(profile?.classless&&Campaign327.state('a1')&&!Campaign327.state('a1').done);
+API.reclaiming=()=>window.Reclaim372?.jobs.find(j=>j.intro)||[...(window.Reclaim372?.pending?.values()||[])].find(j=>j.intro);
 const css=document.createElement('style');css.textContent=`
 #quest401{position:fixed;right:22px;top:200px;width:min(300px,35vw);padding:15px 18px;background:linear-gradient(100deg,#111722ed,#192130d9);border-left:2px solid #e7bb68;color:#f8edda;z-index:72;font:14px/1.5 Georgia,serif;box-shadow:0 6px 25px #0005;pointer-events:auto}
 #quest401 small{display:block;color:#e7bb68;letter-spacing:1.5px;font:10px/1.6 sans-serif;margin-bottom:6px}#quest401 p{margin:0}#quest401 button{float:right;background:none;border:0;color:#e7bb68;cursor:pointer}#quest401[hidden],#dialog401[hidden]{display:none}
@@ -17,20 +18,21 @@ const overlay=document.createElement('section');overlay.id='dialog401';overlay.h
 function vendor(name){return npcs.filter(n=>!n.gone&&(n.short===name||n.name===name||({guild:'Lyra',wep:'Kael'})[n.shop]===name)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]}
 function edran(){return Campaign327.W.get('a1')?.figs.find(f=>f?.name==='Edran')}
 API.dialog=(name,lines,done)=>{
- if(API.conversation)return;
+ if(API.conversation||API.reclaiming())return;
  const target=name==='Edran'?edran():vendor(name);
  API.conversation={name,lines,done,target,index:0,count:0,elapsed:0,paused,focus:document.activeElement,position:camera.position.clone(),quaternion:camera.quaternion.clone()};
  paused=true;W377.releaseAll();overlay.hidden=false;document.body.classList.add('story401');overlay.querySelector('h2').textContent=name.toUpperCase()+' · '+(name==='Edran'?'GUARDA DA ORDEM':name==='Lyra'?'ORDEM DA FENDA':'FERREIRO');overlay.querySelector('p').textContent='';overlay.querySelector('button').focus();
 };
 function next(){const c=API.conversation;if(!c)return;const text=c.lines[c.index];if(c.count<text.length){c.count=text.length;overlay.querySelector('p').textContent=text;return}if(++c.index<c.lines.length){c.count=0;c.elapsed=0;overlay.querySelector('p').textContent='';return}API.conversation=null;overlay.hidden=true;document.body.classList.remove('story401');paused=c.paused;W377.releaseAll();c.focus?.focus?.();c.done();refresh()}
 overlay.querySelector('button').onclick=next;
-addEventListener('keydown',e=>{if(!API.conversation)return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&['KeyF','Enter','Space'].includes(e.code))next()},true);
-addEventListener('keyup',e=>{if(API.conversation){e.preventDefault();e.stopImmediatePropagation()}},true);
+addEventListener('keydown',e=>{if(!API.conversation&&!API.reclaiming())return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&['KeyF','Enter','Space'].includes(e.code))next()},true);
+addEventListener('keyup',e=>{if(API.conversation||API.reclaiming()){e.preventDefault();e.stopImmediatePropagation()}},true);
 function targetAndText(){
  const s=Campaign327.state('a1');if(!s)return null;
  if(!s.done){
   const w=Campaign327.W.get('a1');
   if(s.s===0){if(!s.helped401&&!s.fightDone&&!s.killed)return {step:1,text:'Ajude o guarda Edran na carroça tombada [F]',target:edran()};
+   if(API.reclaiming())return {step:2,text:'A Mão do Arquiteto está recolhendo a criatura…',target:null};
    if(!s.fightDone)return {step:2,text:'Derrote a criatura da Fenda com os punhos',target:w?.foes.find(e=>!e.dead)};
    return {step:3,text:s.edranHelp401?'Ajude Edran a empurrar a carroça [F]':'Fale com Edran [F]',target:s.edranHelp401?Campaign327.target():edran()};}
   if(s.s===1){const c=nearestCity(player.x,player.z).c;return {step:4,text:'Siga pela estrada até o Portão de Aster',target:GATES341.filter(g=>g.c.name===c.name).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]};}
@@ -59,12 +61,14 @@ function pose(f,dt){if(!f?.m?.model||!f.down)return;const m=f.m;
 }
 const cam0=camUpdate;camUpdate=function(dt){cam0.apply(this,arguments);if(!started||!player)return;
  pose(edran(),dt);
- const c=API.conversation;
+ const c=API.conversation,shot=API.reclaiming();
+ document.body.classList.toggle('story401',!!(c||shot));
+ if(shot){W377.releaseAll();const p=shot.root.position,y=terrH(p.x,p.z),a=Math.atan2(player.x-p.x,player.z-p.z)+.65,dist=Math.max(8.5,shot.sky*1.15);if(!shot.camera402)shot.camera402=camera.position.clone();shot.camera402.lerp(new THREE.Vector3(p.x+Math.sin(a)*dist,y+shot.sky*.48,p.z+Math.cos(a)*dist),1-Math.exp(-dt*5));camera.position.copy(shot.camera402);camera.lookAt(p.x,y+shot.sky*.43,p.z);}
  if(c){c.elapsed+=dt;const text=c.lines[c.index],count=Math.min(text.length,Math.floor(c.elapsed*35));if(count>c.count){c.count=count;overlay.querySelector('p').textContent=text.slice(0,count);if(count%3===0)try{beep(c.name==='Lyra'?240:155,.025,.008,'triangle')}catch(_){}}
   if(c.target){const p=c.target,y=terrH(p.x,p.z),a=Math.atan2(player.x-p.x,player.z-p.z),to=new THREE.Vector3(p.x+Math.sin(a+.35)*3.4,y+1.9,p.z+Math.cos(a+.35)*3.4);c.position.lerp(to,1-Math.exp(-dt*3));camera.position.copy(c.position);camera.lookAt(p.x,y+(c.name==='Edran'?.85:1.5),p.z);if(p.m&&!p.down)p.m.root.rotation.y=a;}
  }
- if(!c)Campaign327.rescueCamera(dt);
- const p=current?.target,show=!!p&&L.mode==='world'&&!collapsed&&!c;arrow.visible=pulse.visible=show;
+ if(!c&&!shot)Campaign327.rescueCamera(dt);
+ const p=current?.target,show=!!p&&L.mode==='world'&&!collapsed&&!c&&!shot;arrow.visible=pulse.visible=show;
  if(show){if(arrow.parent!==scene)scene.add(arrow,pulse);const y=terrH(p.x,p.z),t=performance.now()/1000;arrow.position.set(p.x,y+3.3+Math.sin(t*2.8)*.18,p.z);pulse.position.set(p.x,y+.08,p.z);pulse.scale.setScalar(1+(Math.sin(t*2.8)+1)*.22);}
 };
 API.targetAndText=targetAndText;
