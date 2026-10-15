@@ -5649,7 +5649,7 @@ function enemyRewardBalance(e){
 }
 function trainingXpBalance(e){return Math.round((e.trainingXp262??e.xp??0)/RpgBalance.xpNeed(eLvl(e))*200)}
 function settleEnemyRewardBalance(e){const reward=enemyRewardBalance(e),cc=cons('cac');e.trainingXp262=Math.round(RpgBalance.reward({level:eLvl(e),threat:e.threat184||0,role:reward.role,speciesXp:e.isBoss||e.rival?undefined:e.speciesXpBalance,risk:reward.riskFactor,noExpLoot:e.noExpLoot||e.rewardBlocked||e.ally||e.statue}).xp*(1+.03*cc));e.xp=Math.round(reward.xp*(1+.03*cc));e.gold=Math.round(reward.gold*(1+.03*cc)*(cc>=10&&e.threat184?1.25:1));return reward}
-function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e))return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);try{passiveKill327(e)}catch(_){}if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isIntroTutorial||e.camp327==='a1'||e.architectClaim)try{window.Reclaim372?.claimEnemy(e)}catch(_){}if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
+function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e))return;if(e.noExpLoot||e.ally||e.statue){e.dead=true;e.deadT=0;e.act=null;return}settleEnemyRewardBalance(e);try{passiveKill327(e)}catch(_){}if(e.arch223)setTimeout(()=>archWin223(e),500);if(e.piece250)setTimeout(()=>pieceSeal250(e),300);if(e.isBoss)bossSay218(e,'death');if(!e.ally&&run){if(cons('san')>=10&&player)player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}rememberVestige103(e);if(!e.ally)try{relicKill204()}catch(_){}if(e.threat184&&!e.hunt203&&!e.ally){e.hunt203=1;try{huntCount203(e.threat184)}catch(_){}}if(e.noExpLoot){e.dead=true;e.deadT=0;e.act=null;return}if(e.nemesis)narratorEvent105('nemesis');else if(e.isBoss)narratorEvent105('boss');else if(e.elite&&!e.statue&&!e.rival)narratorEvent105('elite');dropLoot(e);dropDungeonEquipment(e);
   if(hasClassPassive(7)&&player&&!player.dead){player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.05);if(!hasAff('nocure'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.03)}
   e.dead=true;e.deadT=0;e.act=null;gainXp(e.xp,'monster');storyEv('kill');if(hasT('hunter')&&player)player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.05);profile.titleKills=Math.max(profile.titleKills||0,run.kills||0)+1;run.kills++;if(!e.statue){dprog('kill',1);shadowXp(trainingXpBalance(e))}
   bestKill(e.kind);
@@ -5666,6 +5666,7 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   weaponXp(trainingXpBalance(e));if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
   else if(Math.random()<.06)corpseDrop353(e,{type:'potion',n:1});
   finishCorpse353(e);
+  if(e.isIntroTutorial||e.camp327==='a1'||e.architectClaim)try{window.Reclaim372?.claimEnemy(e)}catch(_){}
 }
 function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;if(L.gate?.inv343&&window.Living372)Living372.invasionWon(L.gate);$('boss').hidden=true;
@@ -5978,7 +5979,7 @@ function goo250(){if(GOO250)return GOO250;const m=new THREE.ShaderMaterial({unif
 /* v372: original Tripo geometry and textures; Blender supplies only the rig/animation. */
 function archMat247(src,skin){const m=src.clone();m.skinning=!!skin;m.side=THREE.DoubleSide;m.metalness=Math.min(m.metalness||0,.25);if(renderer.outputEncoding!==THREE.sRGBEncoding){m.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};m.customProgramCacheKey=()=> 'architect372-tripo-linear';}return m;}
 
-const ARCH242={g:null};(function(){if(!THREE.GLTFLoader)return;new THREE.GLTFLoader().load('models/arquiteto246.glb',g=>{ARCH242.g=g},undefined,()=>{})})();
+const ARCH242={g:null,ready:null};ARCH242.ready=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve(false);return}new THREE.GLTFLoader().load('models/arquiteto246.glb',g=>{ARCH242.g=g;resolve(true)},undefined,e=>{console.warn('Modelo do Arquiteto indisponível',e);resolve(false)})});
 function arch242(e){const G=ARCH242.g;if(!G||!THREE.SkeletonUtils)return false;const m=THREE.SkeletonUtils.clone(G.scene);const bb=new THREE.Box3().setFromObject(m),h=bb.max.y-bb.min.y||1;m.scale.setScalar(9/(h*(e.m.root.scale.y||1)));e.m.root.children.forEach(c=>{c.visible=false});e.m.root.add(m);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;o.material=archMat247(o.material,o.isSkinnedMesh)}});try{if(outlineOn210()){outlineAdd210(m);m.traverse(c=>{if(c.userData.ol210c){const u=c.material.userData.u,src=c.onBeforeRender;c.onBeforeRender=function(){src.apply(this,arguments);u.value*=3.2}}})}}catch(_){}const mx=new THREE.AnimationMixer(m),A={};G.animations.forEach(c=>{A[c.name]=mx.clipAction(c)});e.a242={mx,A,cur:null,k:0};arch242play(e,'idle');return true}
 function arch242play(e,n,once){const S=e.a242,a=S&&S.A[n];if(!a||S.cur===n)return;const p=S.cur&&S.A[S.cur];a.reset();if(once){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true}a.play();if(p)a.crossFadeFrom(p,.25,false);S.cur=n}
 function arch242tick(e,mv,atk,dt){const S=e.a242;if(!S)return;if(e.dead||e.hp<=0)arch242play(e,'morte',1);else if(atk>.3){if(!S.at){S.k^=1;S.at=1}arch242play(e,S.k?'golpe1':'golpe2',1)}else{S.at=0;const a=S.A[S.cur];if(!(S.cur&&S.cur.startsWith('golpe')&&a.isRunning()))arch242play(e,mv?'andar':'idle')}S.mx.update(dt)}
@@ -8922,7 +8923,7 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
-<script src="tools/campaign327.js?v=401"></script>
+<script src="tools/campaign327.js?v=402"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -8931,7 +8932,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/reclaim372.js?v=401"></script><script src="tools/loot353.js?v=376"></script>
+<script src="tools/reclaim372.js?v=402"></script><script src="tools/loot353.js?v=402"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -8948,11 +8949,11 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=401"></script>
 
-<script src="tools/intro401.js?v=401"></script>
+<script src="tools/intro401.js?v=402"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v401</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v402</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=401;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=402;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

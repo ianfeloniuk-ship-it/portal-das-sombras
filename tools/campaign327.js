@@ -379,7 +379,7 @@
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
     if (m.id === 'a1' && s.s === 0 && window.Intro401) {
       if (!s.helped401 && !s.fightDone && !s.killed) { Intro401.dialog('Edran', ['A carroça… Ela veio da Fenda. Cuidado, está logo ali!'], () => { s.helped401 = true; save(); tick(); }); return; }
-      if (s.fightDone) { Intro401.dialog('Edran', ['Você conseguiu… A Mão levou a criatura, mas deixou aquele cristal.', 'Siga pela estrada até o Portão de Aster. Registre sua chegada com Lyra na Ordem da Fenda.', 'Depois procure Kael. Ele fará o escambo da sua primeira arma.'], () => advance(m, sp.done)); return; }
+      if (s.fightDone) { Intro401.dialog('Edran', ['Você conseguiu… A Mão levou a criatura. O cristal que ela deixou guarda os recursos por dez segundos; recolha também o ouro antes que suma.', 'Siga pela estrada até o Portão de Aster. Registre sua chegada com Lyra na Ordem da Fenda.', 'Depois procure Kael. Ele fará o escambo da sua primeira arma.'], () => advance(m, sp.done)); return; }
     }
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
@@ -443,7 +443,7 @@
       if (!s.fightDone) {
         for (const e of w.foes) if (e.dead && !e.counted327) { e.counted327 = true; s.killed++; save(); }
         const total = (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1);
-        if (s.killed >= total) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
+        if (s.killed >= total && !(m.id === 'a1' && window.Intro401?.reclaiming())) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
         else if ((m.id !== 'a1' || s.s !== 0 || s.helped401) && !foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
       }
     }
