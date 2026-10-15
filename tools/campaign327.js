@@ -386,8 +386,7 @@
       setTimeout(() => {
         try {
           toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 7000);
-          bigText('A MURALHA… VÁ PARA A MURALHA', 2200);
-          logNews('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 'important');
+          // toast already writes this line to history; do not record it again.
         } catch (_) {}
       }, 1200);
       return true;

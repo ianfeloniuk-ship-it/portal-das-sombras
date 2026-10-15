@@ -64,7 +64,7 @@ window.Civic343=(()=>{
   regionEvent116(c,15,0,'Você defendeu a cidade de um ataque da Fenda. Confiança +15.');bigText('CIDADE DEFENDIDA',1600);sfx('coin');
   toast('<b>['+safeText(c.name)+']</b> A cidade resistiu com a sua ajuda. +15 de confiança'+(paid?' e +'+fmt(paid)+' de ouro pagos pelo tesouro da cidade.':'. O tesouro da cidade está vazio; não houve pagamento em ouro.'),8000);saveRun()}
  const baseRaids=updRaids155;
- updRaids155=function(dt){if(L.mode!=='world'||!player)return baseRaids(dt);
+ updRaids155=function(dt){if(profile?.classless)return;if(L.mode!=='world'||!player)return baseRaids(dt);
   const stash={},pre={},was=new Set(Object.keys(profile.raided155||{}));
   for(const id in RAID155){const c=cityById(id);pre[id]=c;if(!c)continue;
    if(Math.hypot(c.x-player.x,c.z-player.z)<110||enemies.some(e=>!e.dead&&e.raid155&&e.raid155.city===id&&Math.hypot(e.x-player.x,e.z-player.z)<30))help[id]=(help[id]||0)+dt;
@@ -128,7 +128,7 @@ window.Civic343=(()=>{
   for(let i=0;i<n;i++){const a=i/n*TAU+Math.random()*.5,x=w.x+Math.cos(a)*3.6,z=w.z+Math.sin(a)*3.6;try{const e=spawnKind(wpick(worldKinds124(gr,x,z)).k,x,z,gr,{wild:true});e.wagon343=1;e.face=Math.atan2(w.x-x,w.z-z);foes.push(e)}catch(_){}}
   if(foes.length)w.amb={foes,n:foes.length,hitT:0}}
  function wagonRemove(w){w.gone=true;w.n.gone=true;if(w.g.parent)w.g.parent.remove(w.g);const i=wagons.indexOf(w);if(i>=0)wagons.splice(i,1)}
- function wagonTick(dt){const P=player;
+ function wagonTick(dt){if(profile?.classless)return;const P=player;
   wagonT-=dt;if(wagonT<=0){wagonT=35+Math.random()*30;if(wagons.length<2&&!L.siege&&!L.inv)wagonSpawn()}
   for(const w of[...wagons]){w.t+=dt;const pd=Math.hypot(w.x-P.x,w.z-P.z);if(pd>280){wagonRemove(w);continue}
    if(w.wreck){w.wreck-=dt;if(w.wreck<=0)wagonRemove(w);continue}

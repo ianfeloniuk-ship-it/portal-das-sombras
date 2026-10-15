@@ -4594,12 +4594,12 @@ function raidMove155(e,dt,near){const R=e.raid155;if(R.city&&player&&Math.hypot(
   const sp=e.speed*(R.city?.75:.4)*dt;if(near)moveEnt(e,dx/d*sp,dz/d*sp);else{e.x+=dx/d*sp;e.z+=dz/d*sp}e.face=Math.atan2(dx,dz);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return 1}
 /* v215 (Ian): ataque só anda, avisa e derruba cidade se você estiver perto dela (até 500 m). Cidade longe não pune. */
 const RAIDNEAR215=500;/* v216 (Ian): longe, o ataque continua simulado (mais devagar, sem aviso na tela); a cidade pode cair e você reconstrói quando passar lá. */
-function updRaids155(dt){if(L.mode!=='world')return;const per={};
+function updRaids155(dt){if(L.mode!=='world'||profile?.classless)return;const per={};
   for(const e of enemies){if(e.dead||e.gone||!e.raid155?.city)continue;const R=e.raid155,c={x:R.cx,z:R.cz};if(Math.hypot(player.x-c.x,player.z-c.z)>RAIDNEAR215){per[R.city]=(per[R.city]||0)+(e.isBoss?.12:.03);continue}if(Math.hypot(e.x-c.x,e.z-c.z)<36*CITYK)per[R.city]=(per[R.city]||0)+(e.isBoss?.6:.15)}
   for(const id in RAID155){const R=RAID155[id],c=citiesAround(player.x,player.z,6000).find(c=>c.id===id)||null,far216=!c||Math.hypot(c.x-player.x,c.z-player.z)>RAIDNEAR215;const alive=enemies.some(e=>!e.dead&&!e.gone&&e.raid155?.city===id);
     if(!alive){delete RAID155[id];if(c&&!cityFallen(c)&&Math.hypot(c.x-player.x,c.z-player.z)<RAIDNEAR215){toast('<b>[CIDADE]</b> O ataque a '+c.name+' acabou. A cidade resistiu'+(R.hp<100?' com '+Math.round(R.hp)+'% da defesa':'')+'.',5000)}continue}
     if(per[id]){R.hp-=per[id]*dt;if(!R.warned&&R.hp<100&&!far216){R.warned=true;toast('<b>[CIDADE]</b> Monstros dentro das muralhas'+(c?' de '+c.name:'')+'! Defesa caindo.',4000)}}
-    if(R.hp<=0&&c){profile.raided155=profile.raided155||{};profile.raided155[id]=1;if(profile.rebuilt)delete profile.rebuilt[id];store.set('pds2_profile',profile);delete RAID155[id];
+    if(R.hp<=0&&c){if(c.name==='Aster'){R.hp=1;continue}profile.raided155=profile.raided155||{};profile.raided155[id]=1;if(profile.rebuilt)delete profile.rebuilt[id];store.set('pds2_profile',profile);delete RAID155[id];
       for(const e of enemies)if(e.raid155?.city===id){e.raid155.city=null;e.raid155.tx=e.x;e.raid155.tz=e.z}
       const ch=chunks.get(c.cx+','+c.cz);if(ch){unloadChunk(ch);loadChunk(c.cx,c.cz)}if(far216){logNews('<b>[NARRADOR]</b> '+c.name+' caiu para os monstros da Fenda enquanto você estava longe. Passe lá para expulsá-los e reconstruir.');for(const e of enemies)if(e.raid155&&e.raid155.city===null&&Math.hypot(e.x-c.x,e.z-c.z)<200){e.raid155.tx=c.x+rnd(-20,20);e.raid155.tz=c.z+rnd(-20,20);e.x=e.raid155.tx;e.z=e.raid155.tz;if(e.m)e.m.root.position.set(e.x,0,e.z)}}else{bigText(c.name.toUpperCase()+' CAIU',1800);sfx('gong');toast('<b>[NARRADOR]</b> '+c.name+' caiu para os monstros da Fenda. Expulse-os e reconstrua a cidade.',7000)}}}
 }
@@ -6963,7 +6963,7 @@ function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekT
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */
 let evT=240;
-function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updRaids155(dt);updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
+function updEvents(dt){if(L.mode!=='world'||!player||player.dead||profile?.classless)return;updRaids155(dt);updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
   if(profile.nemesis&&Math.random()<.4){spawnNemesis();return}
   if(unl('time')&&Math.random()<.12){const g=newGate();g.rank=clamp(rankOf(),0,9);g.time=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um portal com cor de sépia apareceu. Parece levar a outra época.',6000);bigText('PORTAL DO TEMPO',1200);return}
   if(Math.random()<.22){const g=newGate();g.rank=clamp(rankOf(),0,9);g.inverse=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um PORTAL INVERTIDO apareceu. Do outro lado fica o ninho deles.',6000);bigText('PORTAL INVERTIDO',1200);return}
@@ -7380,10 +7380,10 @@ function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4
   n.use=()=>{const F=festival();speech153(n,F&&Math.random()<.4?F.line:(regionLine116(c)||pick(CLINES)),'Moradora(o) de '+c.name)};npcs.push(n);return n}
 
 /* ===== ATAQUE À CIDADE (chefe de mundo marcado) ===== */
-function startSiege(c){const a=rnd(0,TAU),x=c.x+Math.cos(a)*60,z=c.z+Math.sin(a)*60;const b=spawnBoss(x,z,clamp(rankOf()+1,0,9),{...WBOSS,n:'Dragão Sitiante'});b.wild=true;b.breaker=true;b.world=true;b.siege=c;b.hp*=5;b.maxhp*=5;b.gold*=6;b.bars=5;b.roam={x:c.x,z:c.z};b.aggro=true;
+function startSiege(c){if(profile?.classless)return;const a=rnd(0,TAU),x=c.x+Math.cos(a)*60,z=c.z+Math.sin(a)*60;const b=spawnBoss(x,z,clamp(rankOf()+1,0,9),{...WBOSS,n:'Dragão Sitiante'});b.wild=true;b.breaker=true;b.world=true;b.siege=c;b.hp*=5;b.maxhp*=5;b.gold*=6;b.bars=5;b.roam={x:c.x,z:c.z};b.aggro=true;
   for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
   spawnCityDefenders(c,c.x+Math.cos(a)*38*CITYK,c.z+Math.sin(a)*38*CITYK);L.siege={b,c,t:300};bigText('ATAQUE À CIDADE',1600);sfx('gong');shake(.6);showSys('Um DRAGÃO SITIANTE ataca '+c.name+'! Derrote-o em 5 minutos. Recompensa: ouro, troféu e nova coleta da renda de hoje.')}
-function updSiege(dt){const P=player;run.siegeT=(run.siegeT||0)+dt;
+function updSiege(dt){if(profile?.classless)return;const P=player;run.siegeT=(run.siegeT||0)+dt;
   if(!L.siege&&run.siegeT>1500&&!bossE){const nc=nearestCity(P.x,P.z);if(nc.d<120&&cityL(nc.c)>=5&&!cityFallen(nc.c)){run.siegeT=0;startSiege(nc.c)}}
   const S=L.siege;if(!S)return;S.t-=dt;if(S.b.dead){L.siege=null;return}
   if(S.t<=0){S.b.dead=true;S.b.gone=true;scene.remove(S.b.m.root);if(bossE===S.b){bossE=null;$('boss').hidden=true}L.siege=null;toast('<b>[CIDADE]</b> O dragão cansou e foi embora de '+S.c.name+'.',5000)}}
@@ -7562,7 +7562,7 @@ function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};l
 const cityOf=()=>nearestCity(player.x,player.z).c;
 const cityL=c=>Math.max(c&&c.capital?4:0,(profile.cityLv||{})[c.id]||0)/* v217: capitais já nascem grandes */;
 /* cidades caídas */
-function cityFallen(c){if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=gameDay198()%7;const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
+function cityFallen(c){if(c?.name==='Aster')return false;if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=gameDay198()%7;const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}
 
 /* ================= LIBERAÇÃO GRADUAL ================= */
@@ -7745,7 +7745,7 @@ function regionInvasion116(I,won){if(I.regionalDone116)return;I.regionalDone116=
 // END REGIONS116
 /* escolhas: salvar ou abandonar cidades */
 const karma=()=>clamp(profile.karma||0,-10,10);
-function updInvasion(dt){const I=L.inv;if(!I)return;if(!I.raid348){I.raid348=true;RAID155[I.c.id]=RAID155[I.c.id]||{hp:100,warned:false};for(const e of (I.targets116||enemies.filter(e=>e.inv)))if(!e.dead)e.raid155={city:I.c.id,cx:I.c.x,cz:I.c.z,tx:I.c.x,tz:I.c.z};}I.t-=dt;const alive=(I.targets116||enemies.filter(e=>e.inv)).filter(e=>!e.dead).length;if(alive===0){L.inv=null;regionInvasion116(I,true);bigText('CIDADE SALVA',1300)}else if(I.t<=0){L.inv=null;regionInvasion116(I,false)}}
+function updInvasion(dt){if(profile?.classless)return;const I=L.inv;if(!I)return;if(!I.raid348){I.raid348=true;RAID155[I.c.id]=RAID155[I.c.id]||{hp:100,warned:false};for(const e of (I.targets116||enemies.filter(e=>e.inv)))if(!e.dead)e.raid155={city:I.c.id,cx:I.c.x,cz:I.c.z,tx:I.c.x,tz:I.c.z};}I.t-=dt;const alive=(I.targets116||enemies.filter(e=>e.inv)).filter(e=>!e.dead).length;if(alive===0){L.inv=null;regionInvasion116(I,true);bigText('CIDADE SALVA',1300)}else if(I.t<=0){L.inv=null;regionInvasion116(I,false)}}
 const choiceMul=()=>{const c=nearestCity(player.x,player.z).c,r=regionState116(c);return (1-karma()*.015)*(1-regionDiscount116(r)/100)*(1+r.damage/100)};
 /* reconstruir cidade caída */
 const rebuildCost=()=>({gold:servicePrice265('rebuild'),cry:30});
@@ -7789,7 +7789,7 @@ function joinCine250(x,z){window.CINE231={x,z,t:0,dur:8};const g=new THREE.Group
  fxCustom(new THREE.Group(),5,(o,k)=>{const r=90*(1-k*k);for(const p of parts){p.m.position.set(x+Math.cos(p.a+k*3)*r,6+Math.sin(k*9+p.a)*3+ (1-k)*20,z+Math.sin(p.a+k*3)*r);p.m.scale.setScalar(1+k*1.5)}if(k>.98){scene.remove(g);fxRing(x,z,0x9566ed,40,1.2);shake(1);bigText('O ARQUITETO DESPERTOU',3000)}})}
 function caps223(){return [[5,0],[-5,0],[0,5],[0,-5],[5,5]].map(([a,b])=>regionCity(a,b))}
 function archHud223(){const k=caps223().filter(anchorOpen221).length,A=profile&&profile.arch223;if(A)return ' · O ARQUITETO MARCHA PARA ASTER: '+(Math.hypot(A.x,A.z)/1000).toFixed(1)+' km';return pieceHud250()}
-function archTick223(dt){if(!profile||!run||!player)return;const W=profile.anch223=profile.anch223||{};let k=0;
+function archTick223(dt){if(!profile||!run||!player||profile.classless)return;const W=profile.anch223=profile.anch223||{};let k=0;
  caps223().forEach((c,i)=>{const open=anchorOpen221(c);if(open)k++;if(open&&!W[c.id]){W[c.id]=1;store.set('pds2_profile',profile);const d=(Math.hypot(c.x-player.x,c.z-player.z)/1000).toFixed(1);bigText('ÂNCORA ROMPIDA',2000);sfx('gong');showSys('A Pedra-Âncora de <b>'+c.name+'</b> ('+d+' km) se rompeu. Feche a Fenda e reconstrua a capital.');pieceFlee250(c,i);profile.lastPiece250=c.id}
   else if(!open&&W[c.id]){delete W[c.id];store.set('pds2_profile',profile);toast('<b>[ORDEM]</b> A âncora de '+c.name+' está selada de novo.',5000)}});
  let A=profile.arch223;
@@ -7805,8 +7805,8 @@ function archWin223(b){profile.arch223=null;profile.piece250={};profile.archKill
 function endCycle223(){if(window._wipe)return;window._wipe=1;paused=true;let n=0;try{n=+(localStorage.getItem('pds_cycles')||0)+1;localStorage.setItem('pds_cycles',n)}catch(e){}
  const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffd8d8;text-align:center;padding:24px;font-size:18px';d.innerHTML='<h1 style="color:#ff4d6a;letter-spacing:4px">FIM DO CICLO</h1><p>O Arquiteto chegou a Aster. Este mundo foi recolhido.</p><p>Tudo recomeça do zero: personagem, rank, casa e banco.</p><p style="opacity:.7">Ciclos perdidos: '+n+'</p>';document.body.appendChild(d);
  setTimeout(()=>{store.set=()=>{};store.del('pds2_profile');store.del('pds3_run');try{removeEventListener('pagehide',saveRunPH)}catch(e){}location.reload()},9000)}
-function anchorOpen221(c){return !!(c&&c.capital&&cityFallen(c)&&!(profile.anchorShut221||{})[c.id])}
-function anchorTick221(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z),c=n.c;if(!c||!c.capital||n.d>700)return;const has=gates.find(g=>g.anchor221===c.id&&!g.dead);
+function anchorOpen221(c){return !!(c&&c.capital&&c.name!=='Aster'&&cityFallen(c)&&!(profile.anchorShut221||{})[c.id])}
+function anchorTick221(){if(!player||L.mode!=='world')return;const aster=regionCity(0,0);for(const g of gates)if(!g.dead&&g.anchor221===aster.id){g.dead=true;if(g.mesh?.parent)g.mesh.parent.remove(g.mesh)}if(profile?.classless)return;const n=nearestCity(player.x,player.z),c=n.c;if(!c||!c.capital||n.d>700)return;const has=gates.find(g=>g.anchor221===c.id&&!g.dead);
  if(anchorOpen221(c)&&!has){const rank=clamp(rankOf()+1,2,9);const g={id:++gateSeq,x:c.x,z:c.z+3,rank,piece222:rh(c.cx,c.cz,5)%5,lvl207:Math.max(portalLvl207(rank),run.level)+20,aff:rollAff(Math.max(6,rank)),double:false,red:true,giant:true,life:1e9,max:1e9,seed:(Math.random()*2**31)|0,layout103:null,cleared:false,dead:false,anchor221:c.id};gates.push(g);gateMesh(g);if(g.mesh)g.mesh.scale.setScalar(2.4);
   if(n.d<300){ruptureCine231(c,g);showSys('A Pedra-Âncora de <b>'+c.name+'</b> se rompeu. Uma Fenda vermelha gigante abriu no centro da cidade. Lá dentro pulsa um pedaço do Arquiteto. Ninguém consegue medir o nível dele. Leve aliados.')}}
  else if(has&&!anchorOpen221(c)){has.dead=true;if(has.mesh&&has.mesh.parent)has.mesh.parent.remove(has.mesh)}}
@@ -8927,7 +8927,7 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
-<script src="tools/campaign327.js?v=403"></script>
+<script src="tools/campaign327.js?v=404"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -8936,7 +8936,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/reclaim372.js?v=402"></script><script src="tools/loot353.js?v=402"></script>
+<script src="tools/reclaim372.js?v=404"></script><script src="tools/loot353.js?v=402"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -8953,11 +8953,11 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=403"></script>
 
-<script src="tools/intro401.js?v=403"></script>
+<script src="tools/intro401.js?v=404"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v403</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v404</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=403;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=404;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

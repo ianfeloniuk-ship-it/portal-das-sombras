@@ -228,7 +228,7 @@ function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekT
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */
 let evT=240;
-function updEvents(dt){if(L.mode!=='world'||!player||player.dead)return;updRaids155(dt);updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
+function updEvents(dt){if(L.mode!=='world'||!player||player.dead||profile?.classless)return;updRaids155(dt);updSiege(dt);evT-=dt;if(evT>0)return;evT=rnd(300,480);const P=player,nc=nearestCity(P.x,P.z);if(nc.d<36*CITYK){evT=60;return}
   if(profile.nemesis&&Math.random()<.4){spawnNemesis();return}
   if(unl('time')&&Math.random()<.12){const g=newGate();g.rank=clamp(rankOf(),0,9);g.time=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um portal com cor de sépia apareceu. Parece levar a outra época.',6000);bigText('PORTAL DO TEMPO',1200);return}
   if(Math.random()<.22){const g=newGate();g.rank=clamp(rankOf(),0,9);g.inverse=true;g.red=false;g.life=500;g.x=P.x+rnd(-30,30);g.z=P.z-45;gates.push(g);gateMesh(g);toast('<b>[EVENTO]</b> Um PORTAL INVERTIDO apareceu. Do outro lado fica o ninho deles.',6000);bigText('PORTAL INVERTIDO',1200);return}

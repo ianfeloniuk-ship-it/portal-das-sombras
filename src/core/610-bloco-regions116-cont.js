@@ -1,6 +1,6 @@
 /* escolhas: salvar ou abandonar cidades */
 const karma=()=>clamp(profile.karma||0,-10,10);
-function updInvasion(dt){const I=L.inv;if(!I)return;if(!I.raid348){I.raid348=true;RAID155[I.c.id]=RAID155[I.c.id]||{hp:100,warned:false};for(const e of (I.targets116||enemies.filter(e=>e.inv)))if(!e.dead)e.raid155={city:I.c.id,cx:I.c.x,cz:I.c.z,tx:I.c.x,tz:I.c.z};}I.t-=dt;const alive=(I.targets116||enemies.filter(e=>e.inv)).filter(e=>!e.dead).length;if(alive===0){L.inv=null;regionInvasion116(I,true);bigText('CIDADE SALVA',1300)}else if(I.t<=0){L.inv=null;regionInvasion116(I,false)}}
+function updInvasion(dt){if(profile?.classless)return;const I=L.inv;if(!I)return;if(!I.raid348){I.raid348=true;RAID155[I.c.id]=RAID155[I.c.id]||{hp:100,warned:false};for(const e of (I.targets116||enemies.filter(e=>e.inv)))if(!e.dead)e.raid155={city:I.c.id,cx:I.c.x,cz:I.c.z,tx:I.c.x,tz:I.c.z};}I.t-=dt;const alive=(I.targets116||enemies.filter(e=>e.inv)).filter(e=>!e.dead).length;if(alive===0){L.inv=null;regionInvasion116(I,true);bigText('CIDADE SALVA',1300)}else if(I.t<=0){L.inv=null;regionInvasion116(I,false)}}
 const choiceMul=()=>{const c=nearestCity(player.x,player.z).c,r=regionState116(c);return (1-karma()*.015)*(1-regionDiscount116(r)/100)*(1+r.damage/100)};
 /* reconstruir cidade caída */
 const rebuildCost=()=>({gold:servicePrice265('rebuild'),cry:30});
@@ -44,7 +44,7 @@ function joinCine250(x,z){window.CINE231={x,z,t:0,dur:8};const g=new THREE.Group
  fxCustom(new THREE.Group(),5,(o,k)=>{const r=90*(1-k*k);for(const p of parts){p.m.position.set(x+Math.cos(p.a+k*3)*r,6+Math.sin(k*9+p.a)*3+ (1-k)*20,z+Math.sin(p.a+k*3)*r);p.m.scale.setScalar(1+k*1.5)}if(k>.98){scene.remove(g);fxRing(x,z,0x9566ed,40,1.2);shake(1);bigText('O ARQUITETO DESPERTOU',3000)}})}
 function caps223(){return [[5,0],[-5,0],[0,5],[0,-5],[5,5]].map(([a,b])=>regionCity(a,b))}
 function archHud223(){const k=caps223().filter(anchorOpen221).length,A=profile&&profile.arch223;if(A)return ' · O ARQUITETO MARCHA PARA ASTER: '+(Math.hypot(A.x,A.z)/1000).toFixed(1)+' km';return pieceHud250()}
-function archTick223(dt){if(!profile||!run||!player)return;const W=profile.anch223=profile.anch223||{};let k=0;
+function archTick223(dt){if(!profile||!run||!player||profile.classless)return;const W=profile.anch223=profile.anch223||{};let k=0;
  caps223().forEach((c,i)=>{const open=anchorOpen221(c);if(open)k++;if(open&&!W[c.id]){W[c.id]=1;store.set('pds2_profile',profile);const d=(Math.hypot(c.x-player.x,c.z-player.z)/1000).toFixed(1);bigText('ÂNCORA ROMPIDA',2000);sfx('gong');showSys('A Pedra-Âncora de <b>'+c.name+'</b> ('+d+' km) se rompeu. Feche a Fenda e reconstrua a capital.');pieceFlee250(c,i);profile.lastPiece250=c.id}
   else if(!open&&W[c.id]){delete W[c.id];store.set('pds2_profile',profile);toast('<b>[ORDEM]</b> A âncora de '+c.name+' está selada de novo.',5000)}});
  let A=profile.arch223;
@@ -60,8 +60,8 @@ function archWin223(b){profile.arch223=null;profile.piece250={};profile.archKill
 function endCycle223(){if(window._wipe)return;window._wipe=1;paused=true;let n=0;try{n=+(localStorage.getItem('pds_cycles')||0)+1;localStorage.setItem('pds_cycles',n)}catch(e){}
  const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffd8d8;text-align:center;padding:24px;font-size:18px';d.innerHTML='<h1 style="color:#ff4d6a;letter-spacing:4px">FIM DO CICLO</h1><p>O Arquiteto chegou a Aster. Este mundo foi recolhido.</p><p>Tudo recomeça do zero: personagem, rank, casa e banco.</p><p style="opacity:.7">Ciclos perdidos: '+n+'</p>';document.body.appendChild(d);
  setTimeout(()=>{store.set=()=>{};store.del('pds2_profile');store.del('pds3_run');try{removeEventListener('pagehide',saveRunPH)}catch(e){}location.reload()},9000)}
-function anchorOpen221(c){return !!(c&&c.capital&&cityFallen(c)&&!(profile.anchorShut221||{})[c.id])}
-function anchorTick221(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z),c=n.c;if(!c||!c.capital||n.d>700)return;const has=gates.find(g=>g.anchor221===c.id&&!g.dead);
+function anchorOpen221(c){return !!(c&&c.capital&&c.name!=='Aster'&&cityFallen(c)&&!(profile.anchorShut221||{})[c.id])}
+function anchorTick221(){if(!player||L.mode!=='world')return;const aster=regionCity(0,0);for(const g of gates)if(!g.dead&&g.anchor221===aster.id){g.dead=true;if(g.mesh?.parent)g.mesh.parent.remove(g.mesh)}if(profile?.classless)return;const n=nearestCity(player.x,player.z),c=n.c;if(!c||!c.capital||n.d>700)return;const has=gates.find(g=>g.anchor221===c.id&&!g.dead);
  if(anchorOpen221(c)&&!has){const rank=clamp(rankOf()+1,2,9);const g={id:++gateSeq,x:c.x,z:c.z+3,rank,piece222:rh(c.cx,c.cz,5)%5,lvl207:Math.max(portalLvl207(rank),run.level)+20,aff:rollAff(Math.max(6,rank)),double:false,red:true,giant:true,life:1e9,max:1e9,seed:(Math.random()*2**31)|0,layout103:null,cleared:false,dead:false,anchor221:c.id};gates.push(g);gateMesh(g);if(g.mesh)g.mesh.scale.setScalar(2.4);
   if(n.d<300){ruptureCine231(c,g);showSys('A Pedra-Âncora de <b>'+c.name+'</b> se rompeu. Uma Fenda vermelha gigante abriu no centro da cidade. Lá dentro pulsa um pedaço do Arquiteto. Ninguém consegue medir o nível dele. Leve aliados.')}}
  else if(has&&!anchorOpen221(c)){has.dead=true;if(has.mesh&&has.mesh.parent)has.mesh.parent.remove(has.mesh)}}

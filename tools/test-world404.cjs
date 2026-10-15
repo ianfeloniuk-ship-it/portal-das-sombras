@@ -1,0 +1,26 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),T=require(process.argv[2]||'three');
+const read=p=>fs.readFileSync(__dirname+'/../'+p,'utf8');
+const region=read('src/core/610-bloco-regions116-cont.js');
+const line=(s,name)=>s.split('\n').find(l=>l.startsWith('function '+name+'('));
+const c={profile:{classless:true,raided155:{aster:1,cap:1}},seasonOn:()=>false};
+vm.createContext(c);vm.runInContext(line(read('src/core/550-completos-torre-100-npcs-cidade-fusao-so.js'),'cityFallen')+'\n'+line(region,'anchorOpen221'),c);
+const aster={id:'aster',name:'Aster',capital:true},cap={id:'cap',name:'Outra capital',capital:true};
+assert(!c.cityFallen(aster));assert(!c.anchorOpen221(aster));assert(c.cityFallen(cap));assert(c.anchorOpen221(cap));
+let removed=false;c.player={x:0,z:0};c.L={mode:'world'};c.regionCity=()=>aster;c.gates=[{anchor221:'aster',mesh:{parent:{remove(){removed=true}}}}];
+vm.runInContext(region.slice(region.indexOf('function anchorTick221'),region.indexOf('function cityRank372')),c);c.anchorTick221();assert(c.gates[0].dead&&removed);
+const events=read('src/core/450-oraculos-status-diaria-ecos-guilda-forja.js');c.player.dead=false;
+vm.runInContext(events.slice(events.indexOf('let evT=240;'),events.indexOf('/* montaria */')),c);
+for(let i=0;i<100;i++)c.updEvents(60);assert.strictEqual(vm.runInContext('evT',c),240);
+c.profile.classless=false;c.updRaids155=()=>{c.raids=(c.raids||0)+1};c.updSiege=()=>{};c.updEvents(1);assert.equal(c.raids,1);assert.equal(vm.runInContext('evT',c),239);
+const r={window:{},THREE:T};r.window=r;vm.runInNewContext(read('tools/reclaim372.js').replace('return{start,tick,clear,','return{handRig404,poseHand404,start,tick,clear,'),r);
+const geo=new T.BufferGeometry(),pts=[-.27,-.25,-.1,-.13,-.25,-.1,.01,-.25,-.1,.15,-.25,-.1,.36,.06,0,0,.45,0];
+geo.setAttribute('position',new T.Float32BufferAttribute(pts,3));geo.setAttribute('normal',new T.Float32BufferAttribute(new Array(6).fill([0,0,1]).flat(),3));
+const hand=new T.Group(),mesh=new T.Mesh(geo);hand.add(mesh);r.Reclaim372.handRig404(mesh);r.Reclaim372.poseHand404(hand,0);const open=geo.attributes.position.array.slice();r.Reclaim372.poseHand404(hand,1);const closed=geo.attributes.position.array.slice();
+for(let i=0;i<5;i++)assert(Math.hypot(...[0,1,2].map(j=>open[i*3+j]-closed[i*3+j]))>.02,'finger '+i+' moves');assert.deepEqual([...closed.slice(15)],[...open.slice(15)],'cuff stays fixed');
+r.Reclaim372.poseHand404(hand,0);assert.deepEqual([...geo.attributes.position.array],[...open],'poses do not accumulate distortion');
+const portal={THREE:T};portal.window=portal;vm.runInNewContext(read('tools/rift131.js'),portal);
+for(const scale of [1,1.8,2.4])assert(portal.Rift131.crosses([0,1.05/scale,.5],[0,1.05/scale,-.5]));
+console.log('PASS Aster protected, old anchor removed, five capitals unchanged; prologue events paused and resume after awakening; five digits move, cuff stays fixed, poses reversible; portal contact at three scales.');
+
+const raid=read('src/core/260-v341.js');Object.assign(c,{RAID155:{aster:{hp:.1,warned:true}},enemies:[{raid155:{city:'aster',cx:0,cz:0},x:0,z:0}],CITYK:2,RAIDNEAR215:1000,citiesAround:()=>[aster],store:{set(){throw Error('Aster must not fall')}},toast(){}});aster.x=aster.z=0;c.profile.raided155={};
+vm.runInContext(raid.slice(raid.indexOf('function updRaids155'),raid.indexOf('function raidHud155')),c);c.updRaids155(100);assert.equal(c.RAID155.aster.hp,1);assert(!c.profile.raided155.aster);console.log('PASS ordinary raids cannot destroy Aster or announce its fall.');
