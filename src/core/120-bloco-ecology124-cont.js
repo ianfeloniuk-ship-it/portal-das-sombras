@@ -1,5 +1,5 @@
 function makeChibi(o){
-  if(o.goblin118)return makeGoblin118(o);
+  if(o.goblin118){const userGoblin={warrior:'user_goblin_guerreiro',archer:'user_goblin_arqueiro',shaman:'user_goblin_xama',brute:'user_goblin_bruto'}[o.goblin118];if(userGoblin&&MON.list[userGoblin])return makeMonster({...o,mon:userGoblin});return makeGoblin118(o)}
   if(o.mon==='escaravelho'&&MON.list.escaravelho)return makeMonster(o);
   if((o.mon==='escaravelho'||o.mon==='monarca')&&MODELS.ok&&MODELS.list.Knight)return makeArmoredMonster(o);
   if(o.mon&&MON.list[o.mon])return makeMonster(o);

@@ -249,7 +249,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/terrain245.js?v=391"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=409"></script>
+<script src="tools/warrior-player127.js?v=411"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
@@ -2478,20 +2478,20 @@ for(const [ci,skills] of Object.entries(KIT_DEFS111)){const col=CLASSES[ci].sk[0
 // END CATALOG111
 
 const BOSSES=[
- {n:'Cavaleiro Carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
- {n:'Lich Ancestral',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
- {n:'Berserker Rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
+ {n:'Cavaleiro Carmesim',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
+ {n:'Lich Ancestral',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
+ {n:'Berserker Rubro',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
  {n:'General Esqueleto',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
 const BOSSES_HIGH=[
- {n:'O Rei Oco',mon:'monarca',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
+ {n:'O Rei Oco',mon:'user_rei_oco',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
  {n:'Rei Demônio Vharok',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
- {n:'Dragão do Caos Kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
+ {n:'Dragão do Caos Kaelthys',mon:'user_dragao_kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
  {n:'Rainha Aranha Nhyssa',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
- {n:'Colosso de Gelo Ymrak',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
+ {n:'Colosso de Gelo Ymrak',mon:'user_yeti_corrompido',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
 const SOVEREIGNS=[
- {n:'Arconte da Destruição',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
- {n:'Arconte do Gelo Eterno',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
- {n:'Arconte das Pragas',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
+ {n:'Arconte da Destruição',mon:'user_golem_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
+ {n:'Arconte do Gelo Eterno',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
+ {n:'Arconte das Pragas',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
  {n:'Arconte das Feras',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
 const ALLBOSS=()=>[...BOSSES,...BOSSES_HIGH,...SOVEREIGNS];
 const KINDS={
@@ -2501,7 +2501,7 @@ const KINDS={
  passaro:{mon:'passaro',gk:'Skeleton_Minion',n:'Pássaro Bravo',hp:18,dmg:6,spd:5,ai:'lunge',range:1.5,wind:0.35,atkCd:1.4,xp:6,scale:1,body:0x6fb0ff,wep:'none',r:0.57,rk:0,bio:'flores'},
  espinhosa:{mon:'espinhosa',gk:'Skeleton_Minion',n:'Gosma Espinhosa',hp:40,dmg:9,spd:3,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x4aa04a,wep:'none',r:0.59,rk:1,bio:'pantano'},
  escaravelho:{mon:'escaravelho',gk:'Skeleton_Warrior',n:'Cavaleiro Escaravelho',hp:70,dmg:12,spd:3.4,ai:'melee',range:1.8,wind:0.55,atkCd:1.3,xp:14,scale:1,body:0xc8a050,wep:'none',r:0.7,rk:2,bio:'deserto'},
- guardiao:{mon:'guardiao',gk:'Knight',n:'Guardião Corrompido',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.2,xp:16,scale:1,body:0x3a8a8a,wep:'none',r:0.6,rk:3},
+ guardiao:{mon:'user_golem_pedra',gk:'Knight',n:'Guardião Corrompido',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.2,xp:16,scale:1,body:0x3a8a8a,wep:'none',r:0.6,rk:3},
  cactinho:{mon:'cactinho',gk:'Skeleton_Minion',n:'Cactoro',hp:36,dmg:9,spd:3.2,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:7,scale:1,body:0x5a9a4a,wep:'none',r:0.59,rk:1,bio:'deserto'},
  magote:{mon:'magote',gk:'Skeleton_Minion',n:'Magote',hp:28,dmg:9,spd:3.2,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:6,scale:1,body:0x7a5aff,wep:'none',r:0.59,rk:1},
  orcinho:{mon:'orcinho',gk:'Skeleton_Minion',n:'Orc Pequeno',hp:44,dmg:9,spd:3.6,ai:'melee',range:1.5,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x5a8a3a,wep:'none',r:0.59,rk:1},
@@ -2525,7 +2525,7 @@ const KINDS={
  alpaca:{mon:'alpaca',gk:'Skeleton_Mage',n:'Alpaca Real',hp:110,dmg:16,spd:3.8,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:22,scale:1,body:0xf0d8a0,wep:'none',r:0.71,rk:3,bio:'flores'},
  abelharainha:{mon:'abelharainha',gk:'Skeleton_Mage',n:'Abelha Rainha Blindada',hp:130,dmg:20,spd:4.6,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:26,scale:1,body:0xffb020,wep:'none',r:0.71,rk:4,bio:'flores'},
  glubancio:{mon:'glubancio',gk:'Skeleton_Mage',n:'Glub Ancião',hp:120,dmg:21,spd:3.4,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:24,scale:1,body:0x7a4aff,wep:'none',r:0.73,rk:4},
- golempedra:{mon:'golempedra',gk:'Skeleton_Mage',n:'Golem de Pedra',hp:260,dmg:22,spd:2.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:52,scale:1,body:0x8a8a9a,wep:'none',r:0.87,rk:4,bio:'cristal'},
+ golempedra:{mon:'user_golem_pedra',gk:'Skeleton_Mage',n:'Golem de Pedra',hp:260,dmg:22,spd:2.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:52,scale:1,body:0x8a8a9a,wep:'none',r:0.87,rk:4,bio:'cristal'},
  lula:{mon:'lula',gk:'Skeleton_Mage',n:'Lula do Vazio',hp:140,dmg:21,spd:3.6,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:28,scale:1,body:0x6a3a8a,wep:'none',r:0.73,rk:4},
  invasor:{mon:'invasor',gk:'Skeleton_Warrior',n:'Invasor',hp:160,dmg:22,spd:4,ai:'melee',range:1.9,wind:0.5,atkCd:1.4,xp:32,scale:1,body:0x6fe0a0,wep:'none',r:0.77,rk:4,bio:'cristal'},
  dino:{mon:'dino',gk:'Skeleton_Warrior',n:'Dino',hp:200,dmg:22,spd:4.4,ai:'lunge',range:2,wind:0.35,atkCd:1.4,xp:40,scale:1,body:0x6a9a4a,wep:'none',r:0.83,rk:4,bio:'vulcao'},
@@ -2540,7 +2540,7 @@ const KINDS={
  minion:{gk:'Skeleton_Minion',n:'Esqueleto',hp:26,dmg:6,spd:3.6,ai:'melee',range:1.6,wind:.4,atkCd:1.1,xp:6,scale:.72,body:0xd9d2bf,wep:'none',r:.45},
  mage:{gk:'Skeleton_Mage',n:'Esqueleto Mago',hp:32,dmg:9,spd:2.8,ai:'ranged',range:10,wind:.6,atkCd:2.3,xp:11,scale:.95,body:0x5a3d8a,wep:'staff',r:.55},
  warrior:{gk:'Skeleton_Warrior',clip:'1H_Melee_Attack_Chop',n:'Esqueleto Guarda',hp:85,dmg:13,spd:2.1,ai:'melee',range:2.1,wind:.7,atkCd:1.7,xp:16,scale:1.15,body:0x8a8f99,wep:'axe',shield:true,r:.7},
- golem:{gk:'Skeleton_Warrior',gtint:0x6a82ff,clip:'2H_Melee_Attack_Slice',n:'Golem de Mana',hp:240,dmg:20,spd:1.8,ai:'slam',range:2.6,wind:1,atkCd:2.4,xp:34,scale:1.7,body:0x4a5f7a,skin:0x6a82a0,eye:0xffd08a,wep:'none',r:.95},
+ golem:{mon:'user_golem_madeira',gk:'Skeleton_Warrior',gtint:0x6a82ff,clip:'2H_Melee_Attack_Slice',n:'Golem de Mana',hp:240,dmg:20,spd:1.8,ai:'slam',range:2.6,wind:1,atkCd:2.4,xp:34,scale:1.7,body:0x4a5f7a,skin:0x6a82a0,eye:0xffd08a,wep:'none',r:.95},
  wraith:{gk:'Skeleton_Mage',gtint:0x5a3aa0,n:'Espectro',hp:70,dmg:14,spd:3.4,ai:'wraith',range:11,wind:.6,atkCd:2,xp:26,scale:1,body:0x241a3e,skin:0x3a2c5a,eye:0x9cf0ff,wep:'staff',r:.55},
  demon:{mon:'demonio',gk:'Skeleton_Rogue',gtint:0xd03030,n:'Demônio',hp:120,dmg:18,spd:4.6,ai:'lunge',range:1.7,wind:.35,atkCd:1.3,xp:30,scale:1.1,body:0x8a1a1a,skin:0xb03030,eye:0xffa000,wep:'axe',r:.6},
  goblin:{goblin118:'warrior',n:'Goblin Guerreiro',hp:30,dmg:7,spd:4.2,ai:'melee',range:1.5,wind:.35,atkCd:1,xp:8,scale:1,body:0x4a7a3a,wep:'none',r:.45},
@@ -2551,11 +2551,11 @@ const KINDS={
  lobo:{mon:'lobo',gk:'Skeleton_Rogue',n:'Lobo Sombrio',hp:38,dmg:9,spd:5.4,ai:'lunge',range:1.6,wind:.3,atkCd:1.4,xp:11,scale:1,body:0x3a3a4a,wep:'none',r:.55},
  aranha:{mon:'aranha',gk:'Skeleton_Rogue',n:'Aranha Gigante',hp:46,dmg:10,spd:3.8,ai:'lunge',range:1.6,wind:.4,atkCd:1.6,xp:13,scale:1.1,body:0x2a2a2a,wep:'none',r:.7},
  vespa:{mon:'vespa',gk:'Skeleton_Mage',n:'Vespa Rainha',hp:40,dmg:11,spd:4,ai:'wraith',range:9,wind:.5,atkCd:1.9,xp:15,scale:1,body:0xd0a020,wep:'none',r:.55},
- orc:{mon:'orc',gk:'Skeleton_Warrior',n:'Orc',hp:110,dmg:15,spd:2.6,ai:'melee',range:2,wind:.6,atkCd:1.6,xp:20,scale:1,body:0x4a6a2a,wep:'none',r:.7},
- yeti:{mon:'yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
- gigante:{mon:'gigante',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
+ orc:{mon:'user_orc',gk:'Skeleton_Warrior',n:'Orc',hp:110,dmg:15,spd:2.6,ai:'melee',range:2,wind:.6,atkCd:1.6,xp:20,scale:1,body:0x4a6a2a,wep:'none',r:.7},
+ yeti:{mon:'user_yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
+ gigante:{mon:'user_gigante_pedra',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
  raptor:{mon:'raptor',gk:'Skeleton_Rogue',n:'Raptor',hp:70,dmg:14,spd:5.2,ai:'lunge',range:1.8,wind:.3,atkCd:1.3,xp:18,scale:1,body:0x6a8a3a,wep:'none',r:.7},
- dragao:{mon:'draconico318',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
+ dragao:{mon:'user_dragao_kaelthys',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
  rogue:{gk:'Skeleton_Rogue',n:'Esqueleto Ladino',hp:44,dmg:11,spd:3.4,ai:'lunge',range:1.5,wind:.5,atkCd:2.2,xp:12,scale:.95,body:0x3c3c46,wep:'dagger',r:.55}};
 // ranks de portal
 const GR=[
@@ -3229,7 +3229,7 @@ function habitatProps124(rooms,g,R){
 
 // END ECOLOGY124
 function makeChibi(o){
-  if(o.goblin118)return makeGoblin118(o);
+  if(o.goblin118){const userGoblin={warrior:'user_goblin_guerreiro',archer:'user_goblin_arqueiro',shaman:'user_goblin_xama',brute:'user_goblin_bruto'}[o.goblin118];if(userGoblin&&MON.list[userGoblin])return makeMonster({...o,mon:userGoblin});return makeGoblin118(o)}
   if(o.mon==='escaravelho'&&MON.list.escaravelho)return makeMonster(o);
   if((o.mon==='escaravelho'||o.mon==='monarca')&&MODELS.ok&&MODELS.list.Knight)return makeArmoredMonster(o);
   if(o.mon&&MON.list[o.mon])return makeMonster(o);
@@ -3408,6 +3408,20 @@ const MON_DEF={/* h = altura em metros no jogo; a = nomes das animações (sufix
   galinha:{h:0.6,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}},
   escaravelho:{h:2.1,a:{Idle:'Idle',Running_A:'Walk',Walk:'Walk',Death_A:'Death',ATK:'Charge',Hit:'HitRecieve',HitRecieve:'HitRecieve',Windup:'Windup',Charge:'Charge',Impact:'Impact',Recover:'Recover'}},monarca:{h:2.8,actor:true},guardiao:{h:2,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve',HitRecieve:'HitRecieve',Wake:'Wake',Walk:'Walk',Windup:'Windup',Attack:'Attack',Recover:'Recover'}},
   pombo:{h:0.5,a:{Idle:'Idle',Running_A:'Walk',Death_A:'Death',ATK:'Bite_Front',Hit:'HitRecieve'}}};
+MON_DEF.user_goblin_guerreiro={h:1.55,file:'goblin-guerreiro',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_goblin_arqueiro={h:1.5,file:'goblin-arqueiro',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_goblin_xama={h:1.55,file:'goblin-xama',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_goblin_bruto={h:1.65,file:'goblin-bruto',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_orc={h:2.25,file:'orc',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_yeti={h:2.6,file:'yeti',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_golem_pedra={h:2.6,file:'golem-pedra',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_gigante_pedra={h:3.4,file:'gigante-pedra',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_golem_madeira={h:2.5,file:'golem-madeira',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_yeti_corrompido={h:3.0,file:'yeti-corrompido',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_berserker_rubro={h:2.2,file:'berserker-rubro',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_cavaleiro_carmesim={h:2.2,file:'cavaleiro-carmesim',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_rei_oco={h:2.8,file:'rei-oco',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
+MON_DEF.user_dragao_kaelthys={h:3.4,file:'dragao-kaelthys',userRig:true,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'}};
 MON_DEF.cactinho.a={Idle:'Idle',Rooted:'Rooted',Walk:'Walk',Running_A:'Walk',Windup:'Windup',Fire:'Fire',Recover:'Recover',ATK:'Fire',Hit:'HitRecieve',HitRecieve:'HitRecieve',Death_A:'Death'};
 MON_DEF.cactinho_f={h:1.2,a:{...MON_DEF.cactinho.a}};MON_DEF.cactinho_a={h:1.4/1.15,a:{...MON_DEF.cactinho.a}};
 MON_DEF.guardiao_f={h:2,a:{...MON_DEF.guardiao.a}};MON_DEF.guardiao_a={h:2,a:{...MON_DEF.guardiao.a}};
@@ -3435,7 +3449,7 @@ MON_DEF.draconico318={h:3.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'
 const spiritWolfReady=new Promise(resolve=>{if(!THREE.GLTFLoader){resolve();return}const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);ld.load('models/m_lobo.glb',g=>{MON.list.lobo=g.scene;MON.clips.lobo=g.animations;const b=new THREE.Box3().setFromObject(g.scene);MON.h.lobo=b.max.y-b.min.y||1;resolve()},undefined,()=>resolve())});
 MODELS.ready=Promise.all([MODELS.ready,spiritWolfReady]).then(([ok])=>ok);
 MODELS.ready.then(()=>{if(!THREE.GLTFLoader)return;const ld=new THREE.GLTFLoader();if(window.MeshoptDecoder)ld.setMeshoptDecoder(MeshoptDecoder);
-  for(const k in MON_DEF){if(MON_DEF[k].actor||MON_DEF[k].externalLoader314||MON.list[k])continue;ld.load('models/m_'+k+'.glb'+(k.startsWith('magote')?'?v=394':k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''),g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
+  for(const k in MON_DEF){const D=MON_DEF[k];if(D.actor||D.externalLoader314||MON.list[k])continue;const url=(D.file?'models/mobs165/'+D.file+'.glb':'models/m_'+k+'.glb')+(D.file?'?v=410':(k.startsWith('magote')?'?v=394':k.startsWith('cactinho')?'?v=372':k.startsWith('slime')?'?v=360':k.startsWith('gosma')?'?v=363':k.startsWith('cogu')?'?v=366':k.startsWith('passaro')?'?v=367':k.startsWith('guardiao')?'?v=370':k.startsWith('espinhosa')?'?v=368':k.startsWith('escaravelho')?'?v=359':''));ld.load(url,g=>{MON.list[k]=g.scene;MON.clips[k]=g.animations;const b=monsterBounds132(g.scene);MON.h[k]=(b.max.y-b.min.y)||1},undefined,()=>{})}});
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.add(model);
@@ -3443,14 +3457,14 @@ function makeMonster(o){
   const mats=[];model.traverse(c=>{if(c.isMesh){envCull(c);c.frustumCulled=false;const keepPbr=k.startsWith('magote')||k.startsWith('cactinho')||k==='draconico318'||k.startsWith('slime')||k==='cogu'||k.startsWith('passaro')||k.startsWith('espinhosa')||k.startsWith('guardiao')||k.startsWith('escaravelho')||k.startsWith('gosma');const mm=keepPbr?c.material.clone():toToon(c.material,c.isSkinnedMesh,.16);if(keepPbr)mm.skinning=!!c.isSkinnedMesh;if((k.startsWith('guardiao')||k.startsWith('cactinho')||k.startsWith('magote'))&&renderer.outputEncoding!==THREE.sRGBEncoding){mm.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('#include <encodings_fragment>','#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);')};mm.customProgramCacheKey=()=> 'guardian370-linear';}if(o.tint!=null)mm.color.lerp(new THREE.Color(o.tint),.35);mm.roughness=(k.startsWith('slime')||k.startsWith('gosma'))?.42:k.startsWith('escaravelho')?.52:.8;mm.metalness=k.startsWith('escaravelho')?.35:0;c.material=mm;mats.push(mm)}});
   const dummy=()=>{const g=new THREE.Object3D();body.add(g);return g};
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc*Math.max(1,D.h/1.8));root.add(sh);
-  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
+  return {root,body,model,armL:dummy(),armR:dummy(),legL:dummy(),legR:dummy(),mats,sc,eyeMat:new THREE.MeshBasicMaterial(),glb:true,userRig:!!D.userRig,mixer:new THREE.AnimationMixer(model),act:{},cur:null,atkClip:'ATK',la:0,lw:0,alias:D.a,clips:MON.clips[k],mon:k,st:!!D.st};
 }
 function gAct(m,n){if(m.act[n])return m.act[n];let c;
   if(m.alias){const nm=m.alias[n]||(n==='Hit_A'?m.alias.Hit:null)||m.alias.Idle;c=m.clips.find(a=>a.name===nm||a.name.endsWith('|'+nm))}
   else if(m.customClips)c=m.customClips.find(a=>a.name===n);
   else c=MODELS.anims.find(a=>a.name===n);
   if(!c)return null;return m.act[n]=m.mixer.clipAction(c)}
-function gPlay(m,n,once,spd){if(m.mon==='draconico318'&&n==='Hit_A'){m.hit318=.35;return}const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
+function gPlay(m,n,once,spd){if(m.mon==='draconico318'&&!m.userRig&&n==='Hit_A'){m.hit318=.35;return}const a=gAct(m,n);if(!a)return;const prev=m.cur&&m.act[m.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!once;a.timeScale=spd||1;a.enabled=true;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)prev.crossFadeTo(a,.12,false);m.cur=n}
 function animGlb(m,st){
   if(m.st){const b=m.body,tt=performance.now()/1000+(m.ph||(m.ph=Math.random()*9));if(st.dead>0){b.rotation.x=Math.max(-1.5,b.rotation.x-.06);b.position.y=0;return}
     b.position.y=st.move>.1?Math.abs(Math.sin(tt*8))*.14:Math.sin(tt*2)*.03;b.rotation.z=st.move>.1?Math.sin(tt*8)*.06:0;b.rotation.x=st.wind>0?-.3:st.atk>0?Math.sin(Math.min(1,st.atk)*Math.PI)*.55:st.move>.1?.1:0;return}
@@ -3484,7 +3498,7 @@ function animChibi(m,st,t){
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
   if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
-  if(m.mon==='draconico318'){animDraconico318(m,st,t);return}
+  if(m.mon==='draconico318'&&!m.userRig){animDraconico318(m,st,t);return}
   if(m.glb){animGlb(m,st);return}
   const sw=Math.sin(t*11)*.7*st.move;
   m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;

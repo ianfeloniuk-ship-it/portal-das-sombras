@@ -1,4 +1,8 @@
-## v409 — Arma de ponta-cabeça na mão, 15/10/2026
+## v411 — Modelos de criaturas e espadas no jogo, 15/10/2026
+- Pedido: integrar os modelos fornecidos e publicar; esclarecimento de Ian: `fantasy sword 3d model (1).glb` = Primeva (raridade 7), `fantasy sword 3d model (4).glb` = Lendária (raridade 3).
+- Criaturas: adicionados modelos rigados em `models/mobs165/` e associações em `src/core/050-bloco-catalog111-cont.js`, `120-bloco-ecology124-cont.js` e `140-monstros-animados-quaternius-cc0-carrega.js`.
+- Espadas: slots próprios para raridades 0–5 e 7; raridade 6 conserva a espada padrão. Hashes SHA256 confirmam `(4)` no slot r3 e `(1)` no r7. Modelo anterior do r3 foi movido ao r5 para manter a espada Divina.
+- Código: `tools/warrior-player127.js`, cache v411. Build e `core_parts.py check` passaram; `node --check` nos JS alterados passou. Teste interativo antes da publicação ficou indisponível nesta sessão.## v409 — Arma de ponta-cabeça na mão, 15/10/2026
 - Pedido de Ian: a arma ficava de ponta-cabeça quando segurada.
 - tools/warrior-player127.js: a v407 virava 180° todos os modelos de arma (menos o escudo); só a adaga precisa disso (o GLB dela vem com o cabo do outro lado). Voltou a virar só a adaga. Versão do script subiu para ?v=409 (a v407 não tinha subido, então o cache podia segurar a versão antiga).
 - Teste com print: espada, machado, lança, adaga e cajado sacados com o cabo na mão; machado guardado nas costas.

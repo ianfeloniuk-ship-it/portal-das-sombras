@@ -87,6 +87,11 @@
     const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*.075),-c.z);
     holder.traverse(x=>{if(x.isMesh){x.castShadow=true;if(x.material)x.material.metalness=Math.min(x.material.metalness??0,.6)}});sword163=holder;
     for(const m of waiting163){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}waiting163.clear()},undefined,()=>{})})();
+  // Raridades 0–5 e 7 têm modelos próprios; Primordial (6) mantém o modelo padrão.
+  const userSwords=Array(8).fill(null),userSwordLoading=Array(8).fill(false),waitingUserSword=new Set();let activeGearActor=null;
+  function userSwordIndex(item){const r=Number(item&&item.rar);return Number.isInteger(r)&&r>=0&&r<8&&r!==6?r:-1}
+  function loadUserSword(i,m){if(m)waitingUserSword.add(m);if(userSwords[i]||userSwordLoading[i]||!T.GLTFLoader)return;userSwordLoading[i]=true;
+    new T.GLTFLoader().load('models/armas155/sword-r'+i+'.glb?v=411',g=>{userSwords[i]=norm171(g.scene,.68,.12,false);userSwords[i].userData.userSwordRarity=i;for(const x of waitingUserSword){x.gearSignature=null;if(x.lastGear163)API.gear(x,...x.lastGear163)}waitingUserSword.clear()},undefined,()=>{userSwordLoading[i]=false;waitingUserSword.clear()})}
   /* v171 (Ian: "cajado, escudo etc" das classes normais): armas comuns do Tripo em metal neutro, pintadas com a cor do rank.
      [arquivo, comprimento, ponto de pegada (fração a partir da base)]. Tanque e Paladino levam escudo na outra mão. */
   const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],spear:['comum-lanca',1.35,.4],axe:['comum-maca',.6,.14],wand:['comum-maca',.6,.14]};
@@ -114,7 +119,7 @@
     const g=new T.Group();g.add(w);g.quaternion.setFromUnitVectors(ax.normalize(),new T.Vector3(0,0,1));return g};
   API.daggerModel=function(){const k=W171.dagger;load171(k[0],k[1],k[2],'dagger');const src=w171.dagger;if(!src)return null;const w=src.clone(true);w.traverse(x=>{if(x.isMesh&&x.material){x.material=x.material.clone();x.castShadow=false}});return w};
   function make171(key,color){const src=w171[key];if(!src)return null;const w=src.clone(true),mats=[],c=new T.Color(color);w.traverse(x=>{if(x.isMesh){x.castShadow=true;x.material=x.material.clone();x.material.color.copy(c).lerp(new T.Color(1,1,1),.35);mats.push(x.material)}});w.userData.materials=mats;return w}
-  function tripoSword163(item){const w=sword163.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;return w}
+  function tripoSword163(item){const i=userSwordIndex(item);if(i>=0){if(!userSwords[i])loadUserSword(i,activeGearActor);const src=userSwords[i]||sword163;if(!src)return null;const w=src.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;w.userData.userSwordRarity=i;return w}if(!sword163)return null;const w=sword163.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.material=x.material.clone();mats.push(x.material)}});w.userData.materials=mats;w.userData.shape=item.visual.shape;w.userData.color=item.visual.color;w.userData.rank=item.tier||0;return w}
   // v323: first reference-fitted equipment pilot, F/Common sword only.
   let sword323=null,loading323=false;const wait323=new Set();
   const isSword323=it=>it&&it.kind155==='sword'&&(it.tier||0)===0&&(it.rar||0)===0&&!it.set153;
@@ -125,10 +130,10 @@
       for(const x of wait323){x.gearSignature=null;if(x.lastGear163)API.gear(x,...x.lastGear163)}wait323.clear();
     },undefined,()=>{wait323.clear();loading323=false});
   }
-  function referenceSword323(item){const w=sword323.clone(true),mats=[];w.traverse(o=>{if(o.isMesh){o.geometry=o.geometry.clone();o.material=o.material.clone();o.castShadow=true;mats.push(o.material)}});
+  function referenceSword323(item){if(userSwordIndex(item)>=0)return tripoSword163(item);const w=sword323.clone(true),mats=[];w.traverse(o=>{if(o.isMesh){o.geometry=o.geometry.clone();o.material=o.material.clone();o.castShadow=true;mats.push(o.material)}});
     w.userData={materials:mats,shape:'sword',color:item.visual.color,rank:0,equipment323:'sword-F-common'};return w;
   }
-  API.gear=function(m,equip,options){m.lastGear163=[equip,options];
+  API.gear=function(m,equip,options){m.lastGear163=[equip,options];activeGearActor=m;
     options=options||{};const colors=options.tierColors||[0x9a9aa0,0xd0d8e0,0x7fd8ff,0xb18cff,0xff6a3a,0x3a3048,0xd02040,0xffd070,0xffda9f,0xf4f0ff];
     const signature=JSON.stringify(['w','a','h','g','b'].map(k=>{const i=equip[k];return i?[k,i.uid,i.tier,i.rar,i.visual,i.visualWeapon]:[k,null]}));
     if(signature===m.gearSignature)return;m.gearSignature=signature;

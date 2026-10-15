@@ -1,19 +1,19 @@
 
 const BOSSES=[
- {n:'Cavaleiro Carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
- {n:'Lich Ancestral',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
- {n:'Berserker Rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
+ {n:'Cavaleiro Carmesim',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
+ {n:'Lich Ancestral',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
+ {n:'Berserker Rubro',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
  {n:'General Esqueleto',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
 const BOSSES_HIGH=[
- {n:'O Rei Oco',mon:'monarca',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
+ {n:'O Rei Oco',mon:'user_rei_oco',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
  {n:'Rei Demônio Vharok',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
- {n:'Dragão do Caos Kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
+ {n:'Dragão do Caos Kaelthys',mon:'user_dragao_kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
  {n:'Rainha Aranha Nhyssa',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
- {n:'Colosso de Gelo Ymrak',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
+ {n:'Colosso de Gelo Ymrak',mon:'user_yeti_corrompido',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
 const SOVEREIGNS=[
- {n:'Arconte da Destruição',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
- {n:'Arconte do Gelo Eterno',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
- {n:'Arconte das Pragas',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
+ {n:'Arconte da Destruição',mon:'user_golem_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
+ {n:'Arconte do Gelo Eterno',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
+ {n:'Arconte das Pragas',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
  {n:'Arconte das Feras',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
 const ALLBOSS=()=>[...BOSSES,...BOSSES_HIGH,...SOVEREIGNS];
 const KINDS={
@@ -23,7 +23,7 @@ const KINDS={
  passaro:{mon:'passaro',gk:'Skeleton_Minion',n:'Pássaro Bravo',hp:18,dmg:6,spd:5,ai:'lunge',range:1.5,wind:0.35,atkCd:1.4,xp:6,scale:1,body:0x6fb0ff,wep:'none',r:0.57,rk:0,bio:'flores'},
  espinhosa:{mon:'espinhosa',gk:'Skeleton_Minion',n:'Gosma Espinhosa',hp:40,dmg:9,spd:3,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x4aa04a,wep:'none',r:0.59,rk:1,bio:'pantano'},
  escaravelho:{mon:'escaravelho',gk:'Skeleton_Warrior',n:'Cavaleiro Escaravelho',hp:70,dmg:12,spd:3.4,ai:'melee',range:1.8,wind:0.55,atkCd:1.3,xp:14,scale:1,body:0xc8a050,wep:'none',r:0.7,rk:2,bio:'deserto'},
- guardiao:{mon:'guardiao',gk:'Knight',n:'Guardião Corrompido',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.2,xp:16,scale:1,body:0x3a8a8a,wep:'none',r:0.6,rk:3},
+ guardiao:{mon:'user_golem_pedra',gk:'Knight',n:'Guardião Corrompido',hp:80,dmg:13,spd:3.6,ai:'melee',range:1.8,wind:0.5,atkCd:1.2,xp:16,scale:1,body:0x3a8a8a,wep:'none',r:0.6,rk:3},
  cactinho:{mon:'cactinho',gk:'Skeleton_Minion',n:'Cactoro',hp:36,dmg:9,spd:3.2,ai:'melee',range:1.4,wind:0.5,atkCd:1.4,xp:7,scale:1,body:0x5a9a4a,wep:'none',r:0.59,rk:1,bio:'deserto'},
  magote:{mon:'magote',gk:'Skeleton_Minion',n:'Magote',hp:28,dmg:9,spd:3.2,ai:'wraith',range:9,wind:0.5,atkCd:1.9,xp:6,scale:1,body:0x7a5aff,wep:'none',r:0.59,rk:1},
  orcinho:{mon:'orcinho',gk:'Skeleton_Minion',n:'Orc Pequeno',hp:44,dmg:9,spd:3.6,ai:'melee',range:1.5,wind:0.5,atkCd:1.4,xp:8,scale:1,body:0x5a8a3a,wep:'none',r:0.59,rk:1},
@@ -47,7 +47,7 @@ const KINDS={
  alpaca:{mon:'alpaca',gk:'Skeleton_Mage',n:'Alpaca Real',hp:110,dmg:16,spd:3.8,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:22,scale:1,body:0xf0d8a0,wep:'none',r:0.71,rk:3,bio:'flores'},
  abelharainha:{mon:'abelharainha',gk:'Skeleton_Mage',n:'Abelha Rainha Blindada',hp:130,dmg:20,spd:4.6,ai:'lunge',range:1.8,wind:0.35,atkCd:1.4,xp:26,scale:1,body:0xffb020,wep:'none',r:0.71,rk:4,bio:'flores'},
  glubancio:{mon:'glubancio',gk:'Skeleton_Mage',n:'Glub Ancião',hp:120,dmg:21,spd:3.4,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:24,scale:1,body:0x7a4aff,wep:'none',r:0.73,rk:4},
- golempedra:{mon:'golempedra',gk:'Skeleton_Mage',n:'Golem de Pedra',hp:260,dmg:22,spd:2.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:52,scale:1,body:0x8a8a9a,wep:'none',r:0.87,rk:4,bio:'cristal'},
+ golempedra:{mon:'user_golem_pedra',gk:'Skeleton_Mage',n:'Golem de Pedra',hp:260,dmg:22,spd:2.2,ai:'melee',range:2.2,wind:0.5,atkCd:1.4,xp:52,scale:1,body:0x8a8a9a,wep:'none',r:0.87,rk:4,bio:'cristal'},
  lula:{mon:'lula',gk:'Skeleton_Mage',n:'Lula do Vazio',hp:140,dmg:21,spd:3.6,ai:'wraith',range:10,wind:0.5,atkCd:1.9,xp:28,scale:1,body:0x6a3a8a,wep:'none',r:0.73,rk:4},
  invasor:{mon:'invasor',gk:'Skeleton_Warrior',n:'Invasor',hp:160,dmg:22,spd:4,ai:'melee',range:1.9,wind:0.5,atkCd:1.4,xp:32,scale:1,body:0x6fe0a0,wep:'none',r:0.77,rk:4,bio:'cristal'},
  dino:{mon:'dino',gk:'Skeleton_Warrior',n:'Dino',hp:200,dmg:22,spd:4.4,ai:'lunge',range:2,wind:0.35,atkCd:1.4,xp:40,scale:1,body:0x6a9a4a,wep:'none',r:0.83,rk:4,bio:'vulcao'},
@@ -62,7 +62,7 @@ const KINDS={
  minion:{gk:'Skeleton_Minion',n:'Esqueleto',hp:26,dmg:6,spd:3.6,ai:'melee',range:1.6,wind:.4,atkCd:1.1,xp:6,scale:.72,body:0xd9d2bf,wep:'none',r:.45},
  mage:{gk:'Skeleton_Mage',n:'Esqueleto Mago',hp:32,dmg:9,spd:2.8,ai:'ranged',range:10,wind:.6,atkCd:2.3,xp:11,scale:.95,body:0x5a3d8a,wep:'staff',r:.55},
  warrior:{gk:'Skeleton_Warrior',clip:'1H_Melee_Attack_Chop',n:'Esqueleto Guarda',hp:85,dmg:13,spd:2.1,ai:'melee',range:2.1,wind:.7,atkCd:1.7,xp:16,scale:1.15,body:0x8a8f99,wep:'axe',shield:true,r:.7},
- golem:{gk:'Skeleton_Warrior',gtint:0x6a82ff,clip:'2H_Melee_Attack_Slice',n:'Golem de Mana',hp:240,dmg:20,spd:1.8,ai:'slam',range:2.6,wind:1,atkCd:2.4,xp:34,scale:1.7,body:0x4a5f7a,skin:0x6a82a0,eye:0xffd08a,wep:'none',r:.95},
+ golem:{mon:'user_golem_madeira',gk:'Skeleton_Warrior',gtint:0x6a82ff,clip:'2H_Melee_Attack_Slice',n:'Golem de Mana',hp:240,dmg:20,spd:1.8,ai:'slam',range:2.6,wind:1,atkCd:2.4,xp:34,scale:1.7,body:0x4a5f7a,skin:0x6a82a0,eye:0xffd08a,wep:'none',r:.95},
  wraith:{gk:'Skeleton_Mage',gtint:0x5a3aa0,n:'Espectro',hp:70,dmg:14,spd:3.4,ai:'wraith',range:11,wind:.6,atkCd:2,xp:26,scale:1,body:0x241a3e,skin:0x3a2c5a,eye:0x9cf0ff,wep:'staff',r:.55},
  demon:{mon:'demonio',gk:'Skeleton_Rogue',gtint:0xd03030,n:'Demônio',hp:120,dmg:18,spd:4.6,ai:'lunge',range:1.7,wind:.35,atkCd:1.3,xp:30,scale:1.1,body:0x8a1a1a,skin:0xb03030,eye:0xffa000,wep:'axe',r:.6},
  goblin:{goblin118:'warrior',n:'Goblin Guerreiro',hp:30,dmg:7,spd:4.2,ai:'melee',range:1.5,wind:.35,atkCd:1,xp:8,scale:1,body:0x4a7a3a,wep:'none',r:.45},
@@ -73,11 +73,11 @@ const KINDS={
  lobo:{mon:'lobo',gk:'Skeleton_Rogue',n:'Lobo Sombrio',hp:38,dmg:9,spd:5.4,ai:'lunge',range:1.6,wind:.3,atkCd:1.4,xp:11,scale:1,body:0x3a3a4a,wep:'none',r:.55},
  aranha:{mon:'aranha',gk:'Skeleton_Rogue',n:'Aranha Gigante',hp:46,dmg:10,spd:3.8,ai:'lunge',range:1.6,wind:.4,atkCd:1.6,xp:13,scale:1.1,body:0x2a2a2a,wep:'none',r:.7},
  vespa:{mon:'vespa',gk:'Skeleton_Mage',n:'Vespa Rainha',hp:40,dmg:11,spd:4,ai:'wraith',range:9,wind:.5,atkCd:1.9,xp:15,scale:1,body:0xd0a020,wep:'none',r:.55},
- orc:{mon:'orc',gk:'Skeleton_Warrior',n:'Orc',hp:110,dmg:15,spd:2.6,ai:'melee',range:2,wind:.6,atkCd:1.6,xp:20,scale:1,body:0x4a6a2a,wep:'none',r:.7},
- yeti:{mon:'yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
- gigante:{mon:'gigante',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
+ orc:{mon:'user_orc',gk:'Skeleton_Warrior',n:'Orc',hp:110,dmg:15,spd:2.6,ai:'melee',range:2,wind:.6,atkCd:1.6,xp:20,scale:1,body:0x4a6a2a,wep:'none',r:.7},
+ yeti:{mon:'user_yeti',gk:'Skeleton_Warrior',n:'Yeti',hp:200,dmg:19,spd:2.2,ai:'slam',range:2.5,wind:.9,atkCd:2.2,xp:30,scale:1,body:0xe0f0ff,wep:'none',r:.9},
+ gigante:{mon:'user_gigante_pedra',gk:'Skeleton_Warrior',n:'Gigante de Pedra',hp:340,dmg:26,spd:1.7,ai:'slam',range:3,wind:1.1,atkCd:2.6,xp:45,scale:1,body:0x8a7a6a,wep:'none',r:1.1},
  raptor:{mon:'raptor',gk:'Skeleton_Rogue',n:'Raptor',hp:70,dmg:14,spd:5.2,ai:'lunge',range:1.8,wind:.3,atkCd:1.3,xp:18,scale:1,body:0x6a8a3a,wep:'none',r:.7},
- dragao:{mon:'draconico318',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
+ dragao:{mon:'user_dragao_kaelthys',gk:'Skeleton_Mage',n:'Dracônico',hp:260,dmg:22,spd:3,ai:'wraith',range:12,wind:.7,atkCd:2,xp:50,scale:1,body:0x8a2a2a,wep:'none',r:1.1},
  rogue:{gk:'Skeleton_Rogue',n:'Esqueleto Ladino',hp:44,dmg:11,spd:3.4,ai:'lunge',range:1.5,wind:.5,atkCd:2.2,xp:12,scale:.95,body:0x3c3c46,wep:'dagger',r:.55}};
 // ranks de portal
 const GR=[
