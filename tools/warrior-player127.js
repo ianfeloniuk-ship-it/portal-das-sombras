@@ -116,7 +116,7 @@
     if(!A)return false;if(kind==='blade'){let k=0;for(let i=1;i<10;i++)if(bins[i]>bins[k])k=i;return k>=5}return S/A<.5}
   function norm171(o,len,grip,mode){o.updateMatrixWorld(true);const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),ax=sz.x>sz.y&&sz.x>sz.z?'x':sz.z>sz.y?'z':'y';const kind=mode==='shield'?null:(mode===false||mode===true||mode==='dagger'||mode==='sword')?'blade':'head';
     const holder=new T.Group(),inner=new T.Group();inner.add(o);holder.add(inner);if(ax==='x')inner.rotation.z=-Math.PI/2;if(ax==='z')inner.rotation.x=Math.PI/2;
-    if(kind&&handleDown415(holder,kind)){const f=new T.Group();holder.remove(inner);f.add(inner);f.rotation.x=Math.PI;holder.add(f)}
+    if(kind&&handleDown415(holder,kind))inner.quaternion.premultiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),Math.PI));/* gira o próprio inner: a pegada (inner.position) continua no espaço do holder */
     holder.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(holder);inner.scale.multiplyScalar(len/(b2.max.y-b2.min.y));holder.updateMatrixWorld(true);
     const b3=new T.Box3().setFromObject(holder),c=b3.getCenter(new T.Vector3());inner.position.set(-c.x,-(b3.min.y+(b3.max.y-b3.min.y)*grip),-c.z);return holder}
   function load171(file,len,grip,key){if(w171[key]!==undefined||!T.GLTFLoader)return;w171[key]=null;new T.GLTFLoader().load('models/armas155/'+file+'.glb',g=>{w171[key]=norm171(g.scene,len,grip,key);for(const m of wait171){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}wait171.clear()},undefined,()=>{})}

@@ -1,3 +1,9 @@
+## v417 — Espada na mão de verdade e jogo mais leve, 15/10/2026
+- Pedido de Ian (print): a espada aparecia solta no chão; tela com engasgos, ~20 fps.
+- tools/warrior-player127.js: a virada da v415 era feita num grupo por fora e deslocava a pegada (~60 cm). Agora gira o próprio `inner` e a pegada fica no lugar. Testado no jogo: espada nas costas com o cabo no ombro, e na mão pelo cabo ao atacar.
+- src/core/250 `propCull415`: enfeites instanciados (árvores/pedras do Tripo, até 812 cópias de 2,1 mil triângulos) com nível de detalhe por pedaço de terreno: até ~70 m tudo, até ~128 m 35%, além disso escondidos. Medido: 3,0 → 1,8 mi de triângulos fora da cidade. No centro de Aster ainda ficam ~2,2 mi: o peso real são os próprios modelos de enfeite (precisam de versão mais leve).
+- Não medido: fps na máquina do Ian (o navegador de teste não mede a GPU dele).
+
 ## v416 — Armaduras Estrela por raridade (Comum..Primordial) separadas e rigadas no Viajante, 15/10/2026
 - Pedido de Ian: 7 GLBs das armaduras (a 8ª, Primeva, está em outra conversa) separadas em peças, coladas nos ossos do Viajante e colocadas na raridade certa.
 - Identificação pela referência do Drive (armadura-estrela-primeva-0N, pasta 1ED4rlDFpSde6uBP7G3ugqnTcqiY4s-Qd), por gema/saiote/elmo: `fantasy knight armor 3d model (1)` = 01 Comum; `fantasy armor 3d model (2)` = 02 Raro; `ornate armor` = 03 Épico; `fantasy armor 3d model (1)` = 04 Lendário; `full suit of armor` = 05 Mítico; `fantasy knight armor 3d model` = 06 Divino; `fantasy armor 3d model` = 07 Primordial.

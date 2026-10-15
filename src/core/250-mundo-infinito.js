@@ -54,9 +54,14 @@ function loadChunk(cx,cz){
 }
 function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene.remove(e.m.root);const ix=FRIENDS217.indexOf(e);if(ix>=0)FRIENDS217.splice(ix,1)}L.inter=L.inter.filter(i=>i.chunk!==ch);L.group.remove(ch.group);for(const c of ch.cols)hrem(c);ch.group.traverse(o=>{if(o.isInstancedMesh&&o.dispose)o.dispose();else if(o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material.map){o.material.map.dispose();o.material.dispose()}});ch.group.children[0].geometry.dispose();
   if(ch.city){for(const n of npcs)if(n.home===ch.city){n.gone=true;scene.remove(n.m.root)}L.inter=L.inter.filter(i=>i.city!==ch.city)}chunks.delete(ch.key)}
+/* v415 (Ian: "jogo travado em 20 fps"): árvores/pedras instanciadas de até 49 pedaços eram desenhadas (≈2,9 mi de triângulos), mesmo na neblina.
+   Enfeites instanciados só aparecem nos pedaços a até ~115 m do jogador; o chão e as colisões continuam carregados. */
+function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()){if(!ch.group)continue;let n=0;ch.group.traverse(()=>n++);if(!ch.props415||ch.n415!==n){ch.n415=n;ch.props415=[];ch.lod415=null;ch.group.traverse(o=>{if(o.isInstancedMesh){o.userData.count415=o.userData.count415??o.count;ch.props415.push(o)}})}
+ const d=Math.hypot(ch.cx*CH-P.x,ch.cz*CH-P.z),lod=d<CH*1.1?2:d<CH*2?1:0;if(ch.lod415===lod)continue;ch.lod415=lod;
+ for(const m of ch.props415){const full=m.userData.count415;m.visible=lod>0;m.count=lod===2?full:Math.ceil(full*.35)}}}
 function updChunks(force){
   const P=player||{x:0,z:0},pcx=Math.round(P.x/CH),pcz=Math.round(P.z/CH);let n=0;const want=[];
   for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)want.push([pcx+i,pcz+j,i*i+j*j]);want.sort((a,b)=>a[2]-b[2]);
   for(const [x,z] of want){if(chunks.has(x+','+z))continue;loadChunk(x,z);if(!force&&++n>=(ENV.ok?1:2))break}
-  for(const ch of[...chunks.values()])if(Math.abs(ch.cx-pcx)>3||Math.abs(ch.cz-pcz)>3)unloadChunk(ch);
+  for(const ch of[...chunks.values()])if(Math.abs(ch.cx-pcx)>3||Math.abs(ch.cz-pcz)>3)unloadChunk(ch);try{propCull415()}catch(_){}
 }
