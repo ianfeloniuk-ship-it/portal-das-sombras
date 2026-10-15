@@ -10,14 +10,14 @@ function arrowModel(col,glowy){if(window.Proj155&&Proj155.ready&&Proj155.models.
   if(glowy){const t=new THREE.Mesh(geo('atrail',()=>new THREE.CylinderGeometry(.09,.01,1.2,6)),glowS(col,.55));t.rotation.x=Math.PI/2;t.position.z=-.3;g.add(t)}
   return g;
 }
-function projModel(type,col,sc=1,cls=null){if(type==='bullet372')return Firearms372.bullet();if(/^thorn372(?:_[fa])?$/.test(type))return Cactoro372.projectile(type);if(/^crystal350(?:_[fa])?$/.test(type))return Spiky350.projectile('espinhosa'+type.slice(10));
-  if(type==='tspear'){const same339=window.Warrior127?.spearModel?.(typeof player!=='undefined'&&player?player.m:null);if(same339){/* v339 (Ian): a mesma lança que está na mão */const g=new THREE.Group();g.name='Lança arremessada';g.add(same339);g.scale.setScalar(sc*1.6);return g}const g=new THREE.Group();g.name='Lança arremessada';const shaft=mesh(geo('spearShaft326',()=>new THREE.CylinderGeometry(.035,.035,1.45,8)),toonS(0x694424));shaft.rotation.x=Math.PI/2;shaft.position.z=-.15;g.add(shaft);const tip=mesh(geo('spearTip326',()=>new THREE.ConeGeometry(.105,.42,4)),toonS(0xd8dce3));tip.rotation.x=Math.PI/2;tip.position.z=.76;g.add(tip);g.scale.setScalar(sc);return g}
+function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==='bullet372')return Firearms372.bullet();if(/^thorn372(?:_[fa])?$/.test(type))return Cactoro372.projectile(type);if(/^crystal350(?:_[fa])?$/.test(type))return Spiky350.projectile('espinhosa'+type.slice(10));
+  if(type==='tspear'){const same339=window.Warrior127?.spearModel?.(actor405?actor405.m:null);if(same339){/* v339 (Ian): a mesma lança que está na mão */const g=new THREE.Group();g.name='Lança arremessada';g.add(same339);g.scale.setScalar(sc*1.6);return g}const g=new THREE.Group();g.name='Lança arremessada';const shaft=mesh(geo('spearShaft326',()=>new THREE.CylinderGeometry(.035,.035,1.45,8)),toonS(0x694424));shaft.rotation.x=Math.PI/2;shaft.position.z=-.15;g.add(shaft);const tip=mesh(geo('spearTip326',()=>new THREE.ConeGeometry(.105,.42,4)),toonS(0xd8dce3));tip.rotation.x=Math.PI/2;tip.position.z=.76;g.add(tip);g.scale.setScalar(sc);return g}
 
   // v156: modelos do Tripo (Proj155) antes das bolhas de luz.
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
   const p156=window.Proj155&&Proj155.ready&&Proj155.pick(type,cls);if(p156){const g=Proj155.make(p156,sc);
   // Pedido do Ian: energia tem que parecer energia — chama no fogo, eletricidade no Condutor, vazio no Devorador. O fluido do Combat139 envolve o modelo.
-  Proj155.addFx(g,p156,col);return g}
+  if(ctx405)ctx405.isolate(g);Proj155.addFx(g,p156,col);return g}
   const fluid139=window.Combat139&&Combat139.projectile(type,col,sc,cls);if(fluid139)return fluid139;
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
@@ -36,13 +36,16 @@ function trailFx(p){ // partícula atrás do projétil
   scene.add(o);fxs.push({o,t:0,dur:.3,kind:'p',v:{x:0,y:p.ptype==='fire'?2:0,z:0}});
 }
 // v156: habilidades de chuva mostram o que cai de verdade (flechas do Tripo, meteoros), não só um anel de luz.
-function pulseFx156(z){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col)}}
-function fallFx(x,z,dur,kind,col){
+function pulseFx156(z,ctx405=null){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col,ctx405)}}
+function fallFx(x,z,dur,kind,col,ctx405=null){
+  const camera405=ctx405?ctx405.camera:camera;
+  const add405=(o,d,fn)=>ctx405?ctx405.vfx302.add(o,d,(k)=>fn(o,k)):fxCustom(o,d,fn);
   const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);/* v342 (Ian): o meteoro que dá o dano usa os shaders de fogo (antes havia um segundo, só de enfeite) */const S342=window.Shaders312;g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.9,2),S342?S342.fireball(null,.9):gl(0xff6a1e,.55)));const t=new THREE.Mesh(new THREE.ConeGeometry(.75,4.5,10,6,true),S342?S342.fire(1):gl(0xffa040,.45));t.position.y=2.4;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
+  if(ctx405)ctx405.isolate(o);
   if(kind==='arrow'){o.rotation.x=Math.PI/2;o.scale.setScalar(o.userData.proj155?1.15:1.7)}
   // v153: the PC camera sits ~12 m up; anything spawned at 16 m fell from behind the lens and was never seen.
-  const sx=x+(kind==='meteor'?-6:0),sy=kind==='meteor'?16:Math.min(16,Math.max(5,(camera?camera.position.y:16)-4)),sz=z+(kind==='meteor'?-6:0);o.position.set(sx,sy,sz);
-  fxCustom(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow'){dustPuff178(x,z);try{window.VFX328&&VFX328.stuck&&VFX328.stuck(x,z,col)}catch(_){}}else if(kind==='meteor')try{window.VFX302&&VFX302.flames&&VFX302.flames(x,z,{n:5,r:.9,h:2,dur:.8})}catch(_){}}});
+  const sx=x+(kind==='meteor'?-6:0),sy=kind==='meteor'?16:Math.min(16,Math.max(5,(camera405?camera405.position.y:16)-4)),sz=z+(kind==='meteor'?-6:0);o.position.set(sx,sy,sz);
+  add405(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(!ctx405&&kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow'){if(ctx405)ctx405.vfx302.dust(x,z,0x9a8a70,5);else dustPuff178(x,z);try{ctx405?ctx405.vfx328.stuck(x,z,col):window.VFX328&&VFX328.stuck&&VFX328.stuck(x,z,col)}catch(_){}}else if(kind==='meteor')try{ctx405?ctx405.vfx302.flames(x,z,{n:5,r:.9,h:2,dur:.8}):window.VFX302&&VFX302.flames&&VFX302.flames(x,z,{n:5,r:.9,h:2,dur:.8})}catch(_){}}});
 }
 function spikes(x,z,n,r0,r1,col,h=2.2,dark=false){
   const g=new THREE.Group();g.position.set(x,0,z);

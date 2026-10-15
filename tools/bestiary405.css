@@ -1,0 +1,43 @@
+/* Primeva bestiary: brass folio, deep ink and a clear specimen view. */
+#mbox:has(#dex405),#mbox:has(.dex324-grid){width:min(1180px,94vw)}
+#mb:has(#dex405){overflow-x:hidden;padding-right:3px}
+#mbox:has(#dex405) #modalNotice95{display:none!important}
+.dex405-nav{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 18px}
+.dex405-nav>span{color:var(--pv-dim,#a4b1ad);font-size:11px;letter-spacing:.4px}
+.dex405-nav>div{display:flex;gap:6px}
+.dex405-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:28px;align-items:start}
+.dex405-exhibit{min-width:0;position:sticky;top:0}
+.dex405-stage{height:clamp(300px,44dvh,470px);width:100%;box-sizing:border-box;position:relative;overflow:hidden;border:1px solid #9b976647;border-radius:3px;background:radial-gradient(ellipse at 50% 72%,#608b6b38,transparent 58%),radial-gradient(ellipse at 50% 0,#25474b77,transparent 75%),#08151a;touch-action:none;cursor:grab;isolation:isolate}
+.dex405-stage:before{content:'';position:absolute;inset:12px;border:1px solid #b0a16b18;pointer-events:none;z-index:1}
+.dex405-stage:after{content:'';position:absolute;left:18%;right:18%;bottom:13%;height:16%;border:1px solid #9cb6a217;border-radius:50%;transform:perspective(200px) rotateX(35deg);pointer-events:none;z-index:-1}
+.dex405-stage.dragging{cursor:grabbing}
+.dex405-stage:focus-visible{outline:2px solid #8fd6c4;outline-offset:3px}
+.dex405-stage canvas{width:100%;height:100%;display:block}
+.dex405-loading{position:absolute;inset:auto 20px 42%;text-align:center;color:var(--pv-dim,#a4b1ad);font-size:12px;pointer-events:none}
+.dex405-stage[data-ready=unavailable] .dex405-loading{bottom:18%;background:#08151ad9;padding:8px}
+.dex405-fallback{display:block;width:100%;height:100%;object-fit:contain}
+.dex405-retry{position:absolute;bottom:8%;left:50%;transform:translateX(-50%)}
+.dex405-controls{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px}
+.dex405-controls>div{display:flex;gap:5px}
+#mbox .dex405-controls .btn{padding:7px 10px;min-height:38px;font-size:11px}
+#mbox .dex405-controls .btn[aria-pressed=true]{border-color:#bda068;color:#f0d49d;background:#aa8d4e2a}
+.dex405-hint{text-align:center;color:#8ca29b;font-size:10px;margin:10px 0 0}
+.dex405-facts{min-width:0;overflow-wrap:anywhere;padding-top:4px}
+#mbox .dex405-facts details{margin:12px 0 0;border-color:#b8aa7740}
+#mbox .dex405-facts summary{font:18px Georgia,serif;color:var(--pv-paper,#e9dfc9);padding:13px 0}
+.dex405-facts .sysline{padding:0 0 14px}
+.dex405-facts .sysline>span{display:block;margin:0 0 12px;line-height:1.7}
+.dex405-facts .sysline>br{display:none}
+.dex405-mastery{display:grid;grid-template-columns:1fr auto;gap:7px 12px;border-bottom:1px solid #a98b5050;padding:0 0 17px}
+.dex405-mastery>b{font:20px Georgia,serif;color:var(--pv-paper,#e9dfc9)}
+.dex405-mastery>span{font-size:12px;color:#b4c8aa;align-self:center}
+.dex405-mastery>small{grid-column:1/-1;color:var(--pv-dim,#a4b1ad);font-size:11px}
+#dexSearch324{border-color:#8c795259;background:#0c1b20;color:var(--pv-paper,#e9dfc9);border-radius:3px;padding:12px}
+.dex324-grid{gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(175px,100%),1fr))}
+#mbox .dex324-card{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-height:125px;padding:16px;border:1px solid #9cac813b;background:radial-gradient(ellipse at 0 0,#657f5d22,transparent 80%),#101e23}
+#mbox .dex324-card b{font:18px Georgia,serif;color:var(--pv-paper,#e9dfc9)}
+#mbox .dex324-card small{font-size:10px;color:var(--pv-dim,#a4b1ad);margin:0}
+#mbox .dex324-card:disabled{opacity:.42;min-height:105px;background:#0c171c}
+.dex324-card img{height:120px;width:100%;object-fit:contain;margin:0 0 5px}
+@media(max-width:760px){.dex405-layout{grid-template-columns:1fr;gap:22px}.dex405-exhibit{position:static}.dex405-stage{height:330px}.dex405-nav{flex-wrap:wrap;gap:10px}.dex405-nav>span{order:3;width:100%;text-align:center}.dex405-facts{padding:0}.dex405-hint{margin-top:9px}}
+@media(max-width:420px){.dex405-stage{height:290px}.dex405-controls{justify-content:center;gap:7px}#mbox .dex405-controls .btn{min-height:42px}.dex324-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#mbox .dex324-card{padding:12px}#mbox .dex324-card b{font-size:16px}.dex405-mastery>b{font-size:18px}}

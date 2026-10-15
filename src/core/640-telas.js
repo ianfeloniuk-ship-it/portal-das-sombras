@@ -28,9 +28,14 @@ function newGame(){if(!confirm('Começar um jogo novo? O save atual será APAGAD
 function saveRunPH(){saveRun()}
 $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
+let playerAssetsReady405=false,playerAssetsPending405=null;
 function startGame(){
+  if(started)return;
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
-  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO VIAJANTE…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
+  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!playerAssetsReady405){
+    $('goBtn').textContent='CARREGANDO VIAJANTE…';$('goBtn').disabled=true;
+    if(!playerAssetsPending405)playerAssetsPending405=Warrior127.prepare().then(()=>window.Proj155?Proj155.load('models/proj155/'):0)
+      .then(()=>{playerAssetsReady405=true;$('goBtn').disabled=false;startGame()});return}
   $('title').hidden=true;
   if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
   if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();

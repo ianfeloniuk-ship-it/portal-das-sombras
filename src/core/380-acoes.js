@@ -139,11 +139,13 @@ function magicEvolution(sk,dmg){const P=player,col=sk.col;
 }
 // v155: habilidades com animação própria no Viajante (Chuva de Flechas: com arco mira para o alto; sem arco joga um punhado de flechas para cima).
 /* v303 (Ian): cada habilidade tem a sua animação de lançamento (antes só a Chuva de Flechas tinha). Usa as animações do modelo do Viajante. */
-function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),src=sk.sourceClass??profile.cls,mag=MAGIC_CLS.includes(src),wk=weaponKind272(run.equip.w)||'',staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null,d=.75;
- if(/Chuva de Flechas/.test(n))k=!hasBow259()?'chuva_sem_arco':'chuva_com_arco';
+/* Shared animation choice: gameplay and the isolated class gallery use the same clips. */
+function skillAnimationPlan405(sk,src,wk,bow){if(!sk)return {clip:null,overlay:null,duration:.75};const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),mag=MAGIC_CLS.includes(src),staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null;
+
+ if(/Chuva de Flechas/.test(n))k=!bow?'chuva_sem_arco':'chuva_com_arco';
  else if(/terremoto|tremor|sísm|abalo|erup|impacto|golpe brutal|golpe pesado|quebra|rompante|pisão|esmag/i.test(n))k='pesado2';
  else if(/girat|redemoinho|varredura|meia-lua|garras em arco|rodopio/i.test(n))k='golpe3';
- else if(/flecha|disparo|tiro|leque/i.test(n))k=hasBow259()?'arco2':'arremesso_flecha';
+ else if(/flecha|disparo|tiro|leque/i.test(n))k=bow?'arco2':'arremesso_flecha';
  else if(/punho|soco|chute|palma/i.test(n)||src===21)k='soco';
  else if(/estocada|lança|lanca|salto do dragão/i.test(n)||src===23)k='lanca1';
  else if(/guard|ward|block|parry|barrier|anchorward|interpose|form/.test(t))k='guarda';
@@ -151,8 +153,13 @@ function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit1
  else if(src===1||/adaga|faca|lâmina envenenada|cortes/i.test(n))k='adaga2';
  else if(/cone|target|execute|line/.test(t)&&!mag)k=wk==='axe'||src===2||src===24?'pesado1':'golpe2';
  else if(mag||/heal|healzone|summon|buff|rally260|allybuff|speed|order|cleanse|pulses|area|nova|bolt|chain|slow|slowzone|root|weaken/.test(t))k=staff?'cajado2':'magia_mao';
- if(k)player.skillAnim155={k,until:time+d};
- /* v304: animações novas por cima */try{const M330=window.Anim303&&Anim303.map&&Anim303.map[n];if(M330){/* v331: animação própria da habilidade no lugar do clipe genérico */player.skillAnim155=null;Anim303.play(M330);return}const C=/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null;if(C&&window.Anim303)Anim303.play(C)}catch(_){}}
+
+ const mapped=window.Anim303?.map?.[n];
+ const overlay=mapped||(/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null);
+ return {clip:mapped?null:k,overlay,duration:.75};
+}
+function skillAnim155(sk){if(!sk||!player)return;const plan=skillAnimationPlan405(sk,sk.sourceClass??profile.cls,weaponKind272(run.equip.w)||'',hasBow259());if(plan.clip)player.skillAnim155={k:plan.clip,until:time+plan.duration};if(window.Anim303?.map?.[sk.n])player.skillAnim155=null;if(plan.overlay)try{Anim303.play(plan.overlay)}catch(_){}}
+
 function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);
   if(sk.rare103){rareSkillRun103(sk);return}

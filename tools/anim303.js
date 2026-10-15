@@ -127,18 +127,18 @@ const qa=new T.Quaternion(),qb=new T.Quaternion(),qc=new T.Quaternion(),e=new T.
 const UP={spine:[-8,0,0],thigh_l:[-38,0,0],thigh_r:[-22,0,0],shin_l:[58,0,0],shin_r:[40,0,0],upperarm_l:[-35,0,22],upperarm_r:[-20,0,-25]},DOWN={spine:[8,0,0],thigh_l:[-14,0,0],thigh_r:[-8,0,0],shin_l:[22,0,0],shin_r:[14,0,0],upperarm_l:[-75,0,40],upperarm_r:[-30,0,-40]};
 function air(P,vy){if(P?.dodgeT>0)return;if(cur||!P||!P.m||!P.m.bones||!P.m.root)return;const u=Math.max(0,Math.min(1,.5-vy/14)),m=P.m,root=m.root;root.updateMatrixWorld(true);const charQ=root.getWorldQuaternion(new T.Quaternion()),armed=!!(run&&run.equip&&run.equip.w);
  for(const n of ORDER){const a=UP[n],b2=DOWN[n];if(!a)continue;let r=[lerp(a[0],b2[0],u),lerp(a[1],b2[1],u),lerp(a[2],b2[2],u)];if(armed&&n==='upperarm_r')r=[r[0],r[1],Math.min(r[2],-25)];const b=m.bones[n];if(!b||!b.parent)continue;e.set(r[0]*D,r[1]*D,r[2]*D,'XYZ');const dLocal=new T.Quaternion().setFromEuler(e),dWorld=charQ.clone().multiply(dLocal).multiply(charQ.clone().invert()),bw=b.getWorldQuaternion(new T.Quaternion()),pw=b.parent.getWorldQuaternion(new T.Quaternion());b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}}
-function post(P){if(P?.dodgeT>0)return;if(!cur||!P||!P.m||!P.m.bones)return;const an=A[cur.name],t=(performance.now()/1000-cur.t0)/(an.d*(cur.slow||1));if(t>=1){cur=null;rootNow=null;return}
- const s=sample(an,t),m=P.m,root=m.root;rootNow=s.root;
+/* Same sampled pose for live combat and isolated previews; no global animation state is changed. */
+function applyPose405(m,name,seconds,armed){const an=A[name];if(!an||!m?.bones||seconds<0||seconds>=an.d)return null;const s=sample(an,seconds/an.d),root=m.root;
  if(s.root.spin)root.rotation.y+=s.root.spin*D;
- const charQ=root.getWorldQuaternion(qa.clone());
- if(s.root.y)root.position.y+=s.root.y;
- root.updateMatrixWorld(true);
- const armed=!!(run&&run.equip&&run.equip.w);
+ const charQ=root.getWorldQuaternion(qa.clone());if(s.root.y)root.position.y+=s.root.y;root.updateMatrixWorld(true);
  for(const n of ORDER){let r=s.b[n];if(!r)continue;/* v305 (Ian): com arma na mão direita, o braço direito nunca cruza o peito (a espada atravessava o corpo) */if(armed&&n==='upperarm_r')r=[r[0],r[1],Math.min(r[2],-25)];if(armed&&n==='forearm_r')r=[r[0],r[1],r[2]];const b=m.bones[n];if(!b||!b.parent)continue;
   e.set(r[0]*D,r[1]*D,r[2]*D,'XYZ');const dLocal=new T.Quaternion().setFromEuler(e);
   const dWorld=charQ.clone().multiply(dLocal).multiply(charQ.clone().invert());
   const bw=b.getWorldQuaternion(new T.Quaternion()),pw=b.parent.getWorldQuaternion(new T.Quaternion());
-  b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}}
+  b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}
+ return s.root;
+}
+function post(P){if(P?.dodgeT>0)return;if(!cur||!P?.m?.bones)return;const an=A[cur.name],seconds=(performance.now()/1000-cur.t0)/(cur.slow||1);if(seconds>=an.d){cur=null;rootNow=null;return}rootNow=applyPose405(P.m,cur.name,seconds,!!run?.equip?.w)}
 /* v305 (Ian): chefes, elites e rivais também se movem ao usar ataques, com efeito visual no momento do impacto. */
 function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)return;const A=e.act,root=e.m.root,sc=e.isBoss?1.3:1;
  const body=e.m.body||root.children.find(c=>c.isObject3D&&!c.isLight)||null;if(body&&body.userData.y305==null)body.userData.y305=body.position.y;const lift=v=>{if(body)body.position.y=body.userData.y305+v/(root.scale.y||1)};
@@ -151,5 +151,5 @@ function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)retur
  else if(A.type==='shoot'){root.rotation.x=after<0?-.12*w:0}}
 /* v331: o jogo reposiciona a raiz depois do post; o giro e a altura são reaplicados aqui */
 function rootFix(P){if(P?.dodgeT>0)return;if(!cur||!rootNow||!P||!P.m||!P.m.root)return;const r=P.m.root;if(rootNow.spin)r.rotation.y+=rootNow.spin*D;if(rootNow.y)r.position.y+=rootNow.y}
-window.Anim303={play,post,air,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
+window.Anim303={applyPose:applyPose405,play,post,air,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
 })();

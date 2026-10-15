@@ -1,7 +1,7 @@
 /* ================= ITENS ================= */
 const WEAPON_LOOT_KINDS=['sword','dagger','axe','staff','bow','wand','tome','bonestaff','spear'];
 function makeItem(slot,tier,rar,kindOverride){
-  const R=RAR[rar];const kind=slot==='w'?(kindOverride||WEAPON_LOOT_KINDS[Math.floor(Math.random()*WEAPON_LOOT_KINDS.length)]):null;const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso',spear:'Lança',firearm:'Pistola da Escama'}[kind]||'Arma';
+  const R=RAR[rar];const kind=slot==='w'?(kindOverride||WEAPON_LOOT_KINDS[Math.floor(Math.random()*WEAPON_LOOT_KINDS.length)]):null;const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Maça Sacra',tome:'Grimório',bonestaff:'Cajado de Osso',spear:'Lança',firearm:'Pistola da Escama'}[kind]||'Arma';
   const visual=slot==='w'&&window.Warrior127&&Warrior127.visualWeapon?Warrior127.visualWeapon(tier,kind):undefined;
   return {slot,tier,rar,...(slot==='w'?{kind155:kind}:{}),name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:equipmentBaseValueBalance(tier,slot,rar),uid:Math.random().toString(36).slice(2,9),aff:[],...(visual?{visual}: {})};
 }

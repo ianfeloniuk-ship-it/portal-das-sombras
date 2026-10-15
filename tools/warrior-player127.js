@@ -1,6 +1,6 @@
 (function(global){
   'use strict';
-  const T=global.THREE,API={ok:false,settled:false},SCALE=2.05/1.014584;
+  const T=global.THREE,API={ok:false,settled:false,animsSettled:false,bowSettled:false,readySettled:false},SCALE=2.05/1.014584;
   let asset=null,pending=null;
   const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
   API.load=function(url){
@@ -89,7 +89,7 @@
     for(const m of waiting163){m.gearSignature=null;if(m.lastGear163)API.gear(m,...m.lastGear163)}waiting163.clear()},undefined,()=>{})})();
   /* v171 (Ian: "cajado, escudo etc" das classes normais): armas comuns do Tripo em metal neutro, pintadas com a cor do rank.
      [arquivo, comprimento, ponto de pegada (fração a partir da base)]. Tanque e Paladino levam escudo na outra mão. */
-  const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],spear:['comum-lanca',1.35,.4],axe:['comum-maca',.6,.14],wand:['comum-lanca',1.35,.4]};
+  const W171={staff:['comum-cajado',1.15,.33],tome:['comum-cajado',1.15,.33],bonestaff:['comum-cajado',1.15,.33],dagger:['comum-adaga',.36,.16],spear:['comum-lanca',1.35,.4],axe:['comum-maca',.6,.14],wand:['comum-maca',.6,.14]};
   const SHIELD171={axe:1,wand:1},w171={},wait171=new Set();
   const isStaff251=kind=>/^(staff|bonestaff|tome)$/.test(kind||'');
   function staffTip251(w,axis='y'){
@@ -195,12 +195,21 @@
   const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],spear_throw:['arremesso_flecha','arremesso_flecha','arremesso_flecha'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
   let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;const BOWIDLE155=[0,0,0],BOWIDLEPOS155=[.11,0,.04];let BOWPALM155=.08;API.setPalm155=v=>BOWPALM155=v;API.BOWIDLE155=BOWIDLE155;API.BOWIDLEPOS155=BOWIDLEPOS155;API.BOWPOS155=BOWPOS155;
   // v155: arco do Arqueiro (Tripo, referência aprovada) na mão esquerda.
-  let bow155=null;API.loadBow=function(url){const L=new T.GLTFLoader();return new Promise(res=>L.load(url,g=>{bow155=g.scene;res(true)},undefined,()=>res(false)))};
+  let bow155=null,bowPending405=null,animPending405=null,readyPending405=null;
+  API.loadBow=function(url){if(bowPending405)return bowPending405;const L=new T.GLTFLoader();
+    bowPending405=new Promise(res=>L.load(url,g=>{bow155=g.scene;res(true)},undefined,()=>res(false))).then(ok=>{API.bowSettled=true;return ok});return bowPending405};
   API.loadAnims=function(url){
-    if(/semAnim155/.test(location.search))return Promise.resolve(false);
+    if(animPending405)return animPending405;
+    if(/semAnim155/.test(location.search)){API.animsSettled=true;return animPending405=Promise.resolve(false)}
     const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);
-    return new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
-      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações KayKit não carregaram; usando animação por código.',e);res(false)}));
+    animPending405=new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
+      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações do Viajante não carregaram; usando animação por código.',e);res(false)})).then(ok=>{API.animsSettled=true;return ok});return animPending405;
+  };
+  // v405: a prévia pode carregar o modelo antes de iniciar. Modelo pronto não significa clipes/arco prontos.
+  API.prepare=function(){if(readyPending405)return readyPending405;const q=new URLSearchParams(location.search);
+    readyPending405=Promise.all([API.load(q.has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb'),
+      API.loadAnims(q.has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'),API.loadBow('models/armas155/arco-arqueiro.glb')])
+      .then(([ok])=>{API.readySettled=true;return ok});return readyPending405;
   };
   const v1=new T.Vector3(),v2=new T.Vector3(),q4=new T.Quaternion(),m4=new T.Matrix4();
   function modelQ(o,inv,out){return out.copy(inv).multiply(o.getWorldQuaternion(q4))}

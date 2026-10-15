@@ -266,7 +266,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/terrain245.js?v=391"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=373"></script>
+<script src="tools/warrior-player127.js?v=405"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
@@ -3622,8 +3622,8 @@ function hitHooks183(e,amt,o){if(!o.fromPlayer||!player)return;if(o.basicClass!=
   if(o.third&&uniqueHas183('echo')&&time>(player.echo183||0)){player.echo183=time+.3;fxRing(e.x,e.z,0xffb36b,3,.3);for(const x of enemies)if(x!==e&&!x.dead&&Math.hypot(x.x-e.x,x.z-e.z)<3+(x.r||.5))hurtEnemy(x,amt*.6*relicM204('echo'),e.x,e.z,{fromPlayer:false,kb:1.5})}
   if(e.dead&&uniqueHas183('soul'))player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.04*relicM204('soul'))}
 function hurtHooks183(amt){const at=curAtk;if(at&&at.vamp183&&!at.dead)at.hp=Math.min(at.maxhp,at.hp+amt*.2);if(uniqueHas183('thorns')&&at&&!at.dead&&Math.hypot(at.x-player.x,at.z-player.z)<7)hurtEnemy(at,amt*.3*relicM204('thorns'),player.x,player.z,{fromPlayer:false,kb:.5})}
-function weaponKind272(it){if(!it)return null;const k=it.kind155||it.visual?.shape||it.visualWeapon?.shape||'';if(k)return k;const n=it.name||'';return /^Arco/.test(n)?'bow':/^Adaga/.test(n)?'dagger':/^Espada/.test(n)?'sword':/^Machado/.test(n)?'axe':/^Ma[çc]a/.test(n)?'mace':/^Lan[çc]a/.test(n)?'spear':/^(Cajado|Varinha|Orbe|Tomo)/.test(n)?'staff':null}
-function weaponIsMagic173(it){if(!it)return false;const k=it.kind155||'';return /^(staff|bonestaff|wand|orb|tome)$/.test(k)||(!k&&/^(Cajado|Varinha|Orbe|Tomo)/.test(it.name||''))}
+function weaponKind272(it){if(!it)return null;const k=it.kind155||it.visual?.shape||it.visualWeapon?.shape||'';if(k)return k;const n=it.name||'';return /^Ma[çc]a (Sacra|da Aurora)/.test(n)?'wand':/^Arco/.test(n)?'bow':/^Adaga/.test(n)?'dagger':/^Espada/.test(n)?'sword':/^Machado/.test(n)?'axe':/^Ma[çc]a/.test(n)?'mace':/^Lan[çc]a/.test(n)?'spear':/^(Cajado|Varinha|Orbe|Tomo)/.test(n)?'staff':null}
+function weaponIsMagic173(it){if(!it)return false;const k=it.kind155||'';return /^(staff|bonestaff|wand|orb|tome)$/.test(k)||(!k&&/^(Cajado|Varinha|Cetro|Ma[çc]a Sacra|Ma[çc]a da Aurora|Orbe|Tomo)/.test(it.name||''))}
 function hasBow259(){const w=run.equip.w;return !!w&&(w.kind155==='bow'||w.visual?.shape==='bow'||w.visualWeapon?.shape==='bow');}
 function weaponFitsStyle259(w,magic=basicIsMagic()){return !w||profile.classless||weaponIsMagic173(w)===magic;}
 function basicWeaponReady259(){const w=run.equip.w;if(!w||!weaponFitsStyle259(w))return false;if(!basicIsMagic()&&basicAttackClass().wep==='bow'&&!MAGIC_CLS.includes(basicAttackId()))return hasBow259()||w.kind155==='firearm';return true;}
@@ -5179,7 +5179,7 @@ function makeHunterAlly(p,x,z,guest){
 /* ================= ITENS ================= */
 const WEAPON_LOOT_KINDS=['sword','dagger','axe','staff','bow','wand','tome','bonestaff','spear'];
 function makeItem(slot,tier,rar,kindOverride){
-  const R=RAR[rar];const kind=slot==='w'?(kindOverride||WEAPON_LOOT_KINDS[Math.floor(Math.random()*WEAPON_LOOT_KINDS.length)]):null;const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Varinha',tome:'Grimório',bonestaff:'Cajado de Osso',spear:'Lança',firearm:'Pistola da Escama'}[kind]||'Arma';
+  const R=RAR[rar];const kind=slot==='w'?(kindOverride||WEAPON_LOOT_KINDS[Math.floor(Math.random()*WEAPON_LOOT_KINDS.length)]):null;const wn={sword:'Espada',dagger:'Adagas',axe:'Machado',staff:'Cajado',bow:'Arco',wand:'Maça Sacra',tome:'Grimório',bonestaff:'Cajado de Osso',spear:'Lança',firearm:'Pistola da Escama'}[kind]||'Arma';
   const visual=slot==='w'&&window.Warrior127&&Warrior127.visualWeapon?Warrior127.visualWeapon(tier,kind):undefined;
   return {slot,tier,rar,...(slot==='w'?{kind155:kind}:{}),name:(slot==='w'?wn:EQUIP_LABEL[slot])+' '+TIERN[tier],v2:1,value:equipmentBaseValueBalance(tier,slot,rar),uid:Math.random().toString(36).slice(2,9),aff:[],...(visual?{visual}: {})};
 }
@@ -5321,14 +5321,14 @@ function arrowModel(col,glowy){if(window.Proj155&&Proj155.ready&&Proj155.models.
   if(glowy){const t=new THREE.Mesh(geo('atrail',()=>new THREE.CylinderGeometry(.09,.01,1.2,6)),glowS(col,.55));t.rotation.x=Math.PI/2;t.position.z=-.3;g.add(t)}
   return g;
 }
-function projModel(type,col,sc=1,cls=null){if(type==='bullet372')return Firearms372.bullet();if(/^thorn372(?:_[fa])?$/.test(type))return Cactoro372.projectile(type);if(/^crystal350(?:_[fa])?$/.test(type))return Spiky350.projectile('espinhosa'+type.slice(10));
-  if(type==='tspear'){const same339=window.Warrior127?.spearModel?.(typeof player!=='undefined'&&player?player.m:null);if(same339){/* v339 (Ian): a mesma lança que está na mão */const g=new THREE.Group();g.name='Lança arremessada';g.add(same339);g.scale.setScalar(sc*1.6);return g}const g=new THREE.Group();g.name='Lança arremessada';const shaft=mesh(geo('spearShaft326',()=>new THREE.CylinderGeometry(.035,.035,1.45,8)),toonS(0x694424));shaft.rotation.x=Math.PI/2;shaft.position.z=-.15;g.add(shaft);const tip=mesh(geo('spearTip326',()=>new THREE.ConeGeometry(.105,.42,4)),toonS(0xd8dce3));tip.rotation.x=Math.PI/2;tip.position.z=.76;g.add(tip);g.scale.setScalar(sc);return g}
+function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==='bullet372')return Firearms372.bullet();if(/^thorn372(?:_[fa])?$/.test(type))return Cactoro372.projectile(type);if(/^crystal350(?:_[fa])?$/.test(type))return Spiky350.projectile('espinhosa'+type.slice(10));
+  if(type==='tspear'){const same339=window.Warrior127?.spearModel?.(actor405?actor405.m:null);if(same339){/* v339 (Ian): a mesma lança que está na mão */const g=new THREE.Group();g.name='Lança arremessada';g.add(same339);g.scale.setScalar(sc*1.6);return g}const g=new THREE.Group();g.name='Lança arremessada';const shaft=mesh(geo('spearShaft326',()=>new THREE.CylinderGeometry(.035,.035,1.45,8)),toonS(0x694424));shaft.rotation.x=Math.PI/2;shaft.position.z=-.15;g.add(shaft);const tip=mesh(geo('spearTip326',()=>new THREE.ConeGeometry(.105,.42,4)),toonS(0xd8dce3));tip.rotation.x=Math.PI/2;tip.position.z=.76;g.add(tip);g.scale.setScalar(sc);return g}
 
   // v156: modelos do Tripo (Proj155) antes das bolhas de luz.
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
   const p156=window.Proj155&&Proj155.ready&&Proj155.pick(type,cls);if(p156){const g=Proj155.make(p156,sc);
   // Pedido do Ian: energia tem que parecer energia — chama no fogo, eletricidade no Condutor, vazio no Devorador. O fluido do Combat139 envolve o modelo.
-  Proj155.addFx(g,p156,col);return g}
+  if(ctx405)ctx405.isolate(g);Proj155.addFx(g,p156,col);return g}
   const fluid139=window.Combat139&&Combat139.projectile(type,col,sc,cls);if(fluid139)return fluid139;
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
@@ -5347,13 +5347,16 @@ function trailFx(p){ // partícula atrás do projétil
   scene.add(o);fxs.push({o,t:0,dur:.3,kind:'p',v:{x:0,y:p.ptype==='fire'?2:0,z:0}});
 }
 // v156: habilidades de chuva mostram o que cai de verdade (flechas do Tripo, meteoros), não só um anel de luz.
-function pulseFx156(z){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col)}}
-function fallFx(x,z,dur,kind,col){
+function pulseFx156(z,ctx405=null){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col,ctx405)}}
+function fallFx(x,z,dur,kind,col,ctx405=null){
+  const camera405=ctx405?ctx405.camera:camera;
+  const add405=(o,d,fn)=>ctx405?ctx405.vfx302.add(o,d,(k)=>fn(o,k)):fxCustom(o,d,fn);
   const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);/* v342 (Ian): o meteoro que dá o dano usa os shaders de fogo (antes havia um segundo, só de enfeite) */const S342=window.Shaders312;g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.9,2),S342?S342.fireball(null,.9):gl(0xff6a1e,.55)));const t=new THREE.Mesh(new THREE.ConeGeometry(.75,4.5,10,6,true),S342?S342.fire(1):gl(0xffa040,.45));t.position.y=2.4;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
+  if(ctx405)ctx405.isolate(o);
   if(kind==='arrow'){o.rotation.x=Math.PI/2;o.scale.setScalar(o.userData.proj155?1.15:1.7)}
   // v153: the PC camera sits ~12 m up; anything spawned at 16 m fell from behind the lens and was never seen.
-  const sx=x+(kind==='meteor'?-6:0),sy=kind==='meteor'?16:Math.min(16,Math.max(5,(camera?camera.position.y:16)-4)),sz=z+(kind==='meteor'?-6:0);o.position.set(sx,sy,sz);
-  fxCustom(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow'){dustPuff178(x,z);try{window.VFX328&&VFX328.stuck&&VFX328.stuck(x,z,col)}catch(_){}}else if(kind==='meteor')try{window.VFX302&&VFX302.flames&&VFX302.flames(x,z,{n:5,r:.9,h:2,dur:.8})}catch(_){}}});
+  const sx=x+(kind==='meteor'?-6:0),sy=kind==='meteor'?16:Math.min(16,Math.max(5,(camera405?camera405.position.y:16)-4)),sz=z+(kind==='meteor'?-6:0);o.position.set(sx,sy,sz);
+  add405(o,dur,(f,k)=>{const e=k*k;o.position.set(sx+(x-sx)*e,sy+(0-sy)*e,sz+(z-sz)*e);if(!ctx405&&kind==='meteor'&&Math.random()<.6)trailFx({x:o.position.x,z:o.position.z,ptype:'fire',col}) ;if(k>.97&&o.visible){o.visible=false;if(kind==='arrow'){if(ctx405)ctx405.vfx302.dust(x,z,0x9a8a70,5);else dustPuff178(x,z);try{ctx405?ctx405.vfx328.stuck(x,z,col):window.VFX328&&VFX328.stuck&&VFX328.stuck(x,z,col)}catch(_){}}else if(kind==='meteor')try{ctx405?ctx405.vfx302.flames(x,z,{n:5,r:.9,h:2,dur:.8}):window.VFX302&&VFX302.flames&&VFX302.flames(x,z,{n:5,r:.9,h:2,dur:.8})}catch(_){}}});
 }
 function spikes(x,z,n,r0,r1,col,h=2.2,dark=false){
   const g=new THREE.Group();g.position.set(x,0,z);
@@ -5875,11 +5878,13 @@ function magicEvolution(sk,dmg){const P=player,col=sk.col;
 }
 // v155: habilidades com animação própria no Viajante (Chuva de Flechas: com arco mira para o alto; sem arco joga um punhado de flechas para cima).
 /* v303 (Ian): cada habilidade tem a sua animação de lançamento (antes só a Chuva de Flechas tinha). Usa as animações do modelo do Viajante. */
-function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),src=sk.sourceClass??profile.cls,mag=MAGIC_CLS.includes(src),wk=weaponKind272(run.equip.w)||'',staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null,d=.75;
- if(/Chuva de Flechas/.test(n))k=!hasBow259()?'chuva_sem_arco':'chuva_com_arco';
+/* Shared animation choice: gameplay and the isolated class gallery use the same clips. */
+function skillAnimationPlan405(sk,src,wk,bow){if(!sk)return {clip:null,overlay:null,duration:.75};const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),mag=MAGIC_CLS.includes(src),staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null;
+
+ if(/Chuva de Flechas/.test(n))k=!bow?'chuva_sem_arco':'chuva_com_arco';
  else if(/terremoto|tremor|sísm|abalo|erup|impacto|golpe brutal|golpe pesado|quebra|rompante|pisão|esmag/i.test(n))k='pesado2';
  else if(/girat|redemoinho|varredura|meia-lua|garras em arco|rodopio/i.test(n))k='golpe3';
- else if(/flecha|disparo|tiro|leque/i.test(n))k=hasBow259()?'arco2':'arremesso_flecha';
+ else if(/flecha|disparo|tiro|leque/i.test(n))k=bow?'arco2':'arremesso_flecha';
  else if(/punho|soco|chute|palma/i.test(n)||src===21)k='soco';
  else if(/estocada|lança|lanca|salto do dragão/i.test(n)||src===23)k='lanca1';
  else if(/guard|ward|block|parry|barrier|anchorward|interpose|form/.test(t))k='guarda';
@@ -5887,8 +5892,13 @@ function skillAnim155(sk){if(!sk||!player)return;const n=sk.n||'',t=sk.t==='kit1
  else if(src===1||/adaga|faca|lâmina envenenada|cortes/i.test(n))k='adaga2';
  else if(/cone|target|execute|line/.test(t)&&!mag)k=wk==='axe'||src===2||src===24?'pesado1':'golpe2';
  else if(mag||/heal|healzone|summon|buff|rally260|allybuff|speed|order|cleanse|pulses|area|nova|bolt|chain|slow|slowzone|root|weaken/.test(t))k=staff?'cajado2':'magia_mao';
- if(k)player.skillAnim155={k,until:time+d};
- /* v304: animações novas por cima */try{const M330=window.Anim303&&Anim303.map&&Anim303.map[n];if(M330){/* v331: animação própria da habilidade no lugar do clipe genérico */player.skillAnim155=null;Anim303.play(M330);return}const C=/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null;if(C&&window.Anim303)Anim303.play(C)}catch(_){}}
+
+ const mapped=window.Anim303?.map?.[n];
+ const overlay=mapped||(/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null);
+ return {clip:mapped?null:k,overlay,duration:.75};
+}
+function skillAnim155(sk){if(!sk||!player)return;const plan=skillAnimationPlan405(sk,sk.sourceClass??profile.cls,weaponKind272(run.equip.w)||'',hasBow259());if(plan.clip)player.skillAnim155={k:plan.clip,until:time+plan.duration};if(window.Anim303?.map?.[sk.n])player.skillAnim155=null;if(plan.overlay)try{Anim303.play(plan.overlay)}catch(_){}}
+
 function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);
   if(sk.rare103){rareSkillRun103(sk);return}
@@ -7965,15 +7975,16 @@ function mktView(){
 function openShop(id){
   if(id==='defense')return defenseView();if(id==='guild')return guildView('quests');if(id==='mkt')return mktView();if(id==='bank')return bankView();
   view=()=>openShop(id);const S=SHOPS.find(s=>s.id===(id==='arm'?'wep':id));const pr=rankOf();
+  if(id==='wep'&&window.Kael405&&Awaken396?.canBarter?.()){openModal('PRIMEIRA ARMA · KAEL',Kael405.barter());return}
   let h='<div class="sysline">'+S.vendor+': '+(id==='pot'?'Poção boa salva vida lá dentro.':id==='wep'?'Equipamento custa caro. Nas masmorras, você conquista o seu. Nenhuma peça exige rank.':'Armadura pesada, dano leve.')+' · Seu ouro: <b class="gold">'+fmt(run.gold)+'</b></div>';
   if(id==='wep'||id==='arm')h='<div class="tabs">'+btn('Armas','equipshop','wep',true,id==='wep'?'on':'')+btn('Armaduras','equipshop','arm',true,id==='arm'?'on':'')+'</div>'+h;
   if(id==='pot')h+=row('Pergaminho de Ressurgimento','Revive automaticamente sem perder itens ou progresso. Quantidade: '+(run.rez187||0)+' (máx. 3).',btn(fmt(resurrectionPrice265())+' ouro','buyrez',0,run.gold>=resurrectionPrice265()&&(run.rez187||0)<3));if(id==='pot'&&(cityL(cityOf())>=2||(window.Civic343&&Civic343.grade()>=2)))ELIX.forEach((p,i)=>{h+=row(p.n+' <span style="color:#6fe39a">'+(cityL(cityOf())>=2?'(cidade nv 2)':'(estoque reservado · Conhecido)')+'</span>',p.d,btn(fmt(elixirPrice265())+' ouro','buyelix',i,run.gold>=elixirPrice265()))});
   if(id==='pot')POTS.forEach((p,i)=>{const pp=Math.round(p.price*priceMul('pot'));h+=row(p.n,p.give.pots?(p.give.pots>1?'Cada poção: ':'')+potionDescription():p.d,btn(fmt(pp)+' ouro','buyp',i,run.gold>=pp))});
   else{const sl=id==='wep'?'w':(EQUIP_SLOTS.includes(L.armorSlot)&&L.armorSlot!=='w'?L.armorSlot:'a');if(id==='arm')h+='<div class="tabs">'+EQUIP_SLOTS.filter(k=>k!=='w').map(k=>btn(EQUIP_LABEL[k],'armorpart',k,true,sl===k?'on':'')).join('')+'</div>';const eq=run.equip[sl];
-    if(eq){const up=eq.up||0,q=equipmentUpgradeCost(eq),gc=q.gold,cc=q.cry,have=cryUp(eq.tier);h+='<div class="sec">APRIMORAR</div><div class="sysline" style="font-size:12px">Melhora o item que você está <b>usando agora</b>: cada nível dá +8% no número base (ataque da arma ou escudo da armadura). Gasta ouro e cristais do rank do item (cristais caem nas masmorras).</div>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% no bônus · custa '+fmt(gc)+' ouro e '+cc+' cristais '+GR[eq.tier].id+' ou maiores (você tem '+have+')'+(up>=10?' · pode falhar: '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado':' · sucesso garantido'),btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'<div class="sec">COMPRAR</div>'}
-    if(sl==='w'&&window.Awaken396)h+=Awaken396.shopRows();
+    if(eq){const up=eq.up||0,q=equipmentUpgradeCost(eq),gc=q.gold,cc=q.cry,have=cryUp(eq.tier),risk=up>=10?' · <b style="color:#ff8a9a">falha '+Math.round(Math.min(.6,.2+(up-10)*.04)*100)+'%; materiais perdidos, item preservado</b>':' · sucesso garantido';h+='<details class="kael405-upgrade"><summary>Aprimorar '+eq.name+'</summary>'+row('<b style="color:'+RAR[eq.rar].c+'">'+eq.name+'</b> → +'+(up+1),'+8% · '+fmt(gc)+' ouro · '+cc+' cristais '+GR[eq.tier].id+'+ (você tem '+have+')'+risk,btn('Aprimorar','upg',sl,run.gold>=gc&&have>=cc))+'</details>'}
+    if(window.Kael405){if(!Awaken396?.canBarter?.())h+=Kael405.stock(sl);if(window.Civic343)h+=Civic343.reservedRows(sl)} else { if(sl==='w'&&window.Awaken396)h+=Awaken396.shopRows();
     if(sl==='w')h+='<div class="sysline" style="font-size:12px">A arma da sua classe está sempre à venda; as outras mudam a cada dia do jogo.</div>';for(let t=0;t<(secretRankKnown292()?10:9);t++)for(const wk of (sl==='w'?shopKinds290(t):[undefined])){const it=makeItem(sl,t,0,wk);const eq=run.equip[sl];h+=row('<span class="rl" style="color:'+RANKS[t].c+'">'+RANKS[t].id+'</span> · '+it.name,statTxt(it)+' · uso livre'+(()=>{const w=sl==='w',u=w?wDelta278(it).u:' de escudo',d=w?wDelta278(it).d:itemSh(it)-itemSh(eq);return eq?(d>0?' · <b style="color:#6fe39a">▲ +'+fmt(d)+u+'</b> a mais que a sua '+eq.name:d<0?' · <b style="color:#ff8a9a">▼ '+fmt(d)+u+'</b> — a sua '+eq.name+' é melhor':' · igual à sua'):' · <b style="color:#6fe39a">você não tem '+EQUIP_LABEL[sl].toLowerCase()+' nesta posição</b>'})(),btn(fmt(equipmentShopPrice(sl,t))+' ouro','buyi',sl+t+(wk?':'+wk:''),run.gold>=equipmentShopPrice(sl,t)))}if(window.Civic343)h+=Civic343.reservedRows(sl)}
-  if((id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':(L.armorSlot||'a')))+forgeRows(id==='wep'?'w':(L.armorSlot||'a'),pr);
+    }if(!Awaken396?.canBarter?.()&&(id==='wep'||id==='arm')&&unl('forge'))h+=row('Forja de espólios','Use partes de monstros ou relíquias de chefes para fabricar e aprimorar.',btn('Trabalhar espólios','lootforge',id==='wep'?'w':(L.armorSlot||'a')))+forgeRows(id==='wep'?'w':(L.armorSlot||'a'),pr);
   h+=regionSummary116(nearestCity(player.x,player.z).c)+affRow(S.vendor);
   h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Para vender itens, abra a BOLSA dentro da cidade.</div>';
   openModal(S.n,h);
@@ -8291,9 +8302,14 @@ function newGame(){if(!confirm('Começar um jogo novo? O save atual será APAGAD
 function saveRunPH(){saveRun()}
 $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
+let playerAssetsReady405=false,playerAssetsPending405=null;
 function startGame(){
+  if(started)return;
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
-  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO VIAJANTE…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
+  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!playerAssetsReady405){
+    $('goBtn').textContent='CARREGANDO VIAJANTE…';$('goBtn').disabled=true;
+    if(!playerAssetsPending405)playerAssetsPending405=Warrior127.prepare().then(()=>window.Proj155?Proj155.load('models/proj155/'):0)
+      .then(()=>{playerAssetsReady405=true;$('goBtn').disabled=false;startGame()});return}
   $('title').hidden=true;
   if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
   if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
@@ -8902,10 +8918,10 @@ requestAnimationFrame(frame);
 <script src="tools/rare298.js?v=324"></script>
 <script src="tools/corrupt299.js?v=320"></script>
 <script src="tools/elem300.js?v=351"></script>
-<script src="tools/vfx302.js?v=334"></script>
+<script src="tools/vfx302.js?v=405"></script>
 <script src="tools/shaders312.js?v=399"></script>
 <script src="tools/crystal310.js?v=310"></script>
-<script src="tools/anim303.js?v=373"></script>
+<script src="tools/anim303.js?v=405"></script>
 <script src="tools/fendidos307.js?v=310"></script>
 <script src="tools/variants308.js?v=372"></script>
 <script src="tools/gosma347.js?v=363"></script>
@@ -8913,7 +8929,7 @@ requestAnimationFrame(frame);
 <script src="tools/bird349.js?v=367"></script><script src="tools/spiky350.js?v=368"></script><script src="tools/beetle352.js?v=358"></script>
 <script src="tools/slime360.js?v=360"></script>
 <script src="tools/ineditas309.js?v=315"></script>
-<script src="tools/vfx328.js?v=345"></script>
+<script src="tools/vfx328.js?v=405"></script>
 <script src="tools/dome154.js?v=343"></script>
 <script src="tools/look154.js"></script>
 <script src="tools/civic343.js?v=381"></script>
@@ -8951,13 +8967,25 @@ requestAnimationFrame(frame);
 <script src="tools/water391.js?v=395"></script>
 <script src="tools/map393.js?v=403"></script>
 <script src="tools/fall393.js?v=393"></script>
-<script src="tools/awaken396.js?v=403"></script>
+<script src="tools/awaken396.js?v=405"></script>
 
 <script src="tools/intro401.js?v=404"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v404</div>
+<script src="tools/item-art405.js?v=405"></script>
+<script src="tools/exhibit405.js?v=405"></script>
+<script src="tools/exhibit-fx405.js?v=405"></script>
+<script src="tools/vocation405.js?v=405"></script>
+<script src="tools/kael405.js?v=405"></script>
+<script src="tools/hud405.js?v=405"></script>
+<script src="tools/character405.js?v=405"></script>
+<link rel="stylesheet" href="tools/primeva405.css?v=405">
+<link rel="stylesheet" href="tools/wardrobe405.css?v=405">
+<link rel="stylesheet" href="tools/bestiary405.css?v=405">
+<script src="tools/bestiary405.js?v=405"></script>
+
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v405</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=404;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=405;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
