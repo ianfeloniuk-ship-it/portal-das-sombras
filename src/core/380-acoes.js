@@ -202,6 +202,7 @@ function interact(){if(player.dead||paused)return;const c=ctxTarget();if(!c)retu
 function clearMissionsOnDeath332(){run.quests=null;run.demand=null;delete run.extractMission117;delete run.daily;if(run.trackObj&&!String(run.trackObj).startsWith('camp327:'))run.trackObj=null}
 function die(){
   if(player.dead)return;
+  if(window.Campaign327?.respawnRoad())return;
   /* v187 (Ian): Pergaminho de Ressurgimento levanta você no lugar, sem perder nada. */
   if((run.rez187||0)>0){run.rez187--;player.dead=false;player.hp=player.maxhp;player.mp=player.maxmp;player.iT=3;player.bleedT=0;player.bleedD=0;player.slowT=0;player.stun=0;player.sleep348=0;bigText('RESSURGIDO',1400);sfx('arise');fxRing(player.x,player.z,0xfff0a0,5,.6);toast('<b>[NARRADOR]</b> O pergaminho queimou e você voltou. Restam '+run.rez187+'.',5000);saveRun();return}
   /* v187 (Ian): morte verdadeira. Perde nível, XP, ouro, itens, status e habilidades: recomeça do zero.

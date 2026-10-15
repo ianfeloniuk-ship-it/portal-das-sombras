@@ -1,6 +1,6 @@
 /* ===== TRABALHOS (estilo "jobs"): troque de classe na cidade; cada trabalho tem seus próprios atributos. Vagas = 1 + rank. ===== */
 function jobSlots(){return CLASSES.filter(c=>!c.legacy&&!c.rare).length}
-function jobsOf(){const ids=[...new Set([...(Array.isArray(profile.jobs)?profile.jobs:[]),profile.cls,...(Number.isInteger(profile.rareClass)?[profile.rareClass]:[])])].filter(i=>Number.isInteger(i)&&CLASSES[i]);profile.jobs=ids;return ids}
+function jobsOf(){if(profile.classless){profile.jobs=[];return []}const ids=[...new Set([...(Array.isArray(profile.jobs)?profile.jobs:[]),profile.cls,...(Number.isInteger(profile.rareClass)?[profile.rareClass]:[])])].filter(i=>Number.isInteger(i)&&CLASSES[i]);profile.jobs=ids;return ids}
 function ownsRare(ci){return jobsOf().includes(ci)&&!!CLASSES[ci]?.rare}
 function canLearnClass(ci){const c=CLASSES[ci];return !!c&&!c.legacy&&!jobsOf().includes(ci)&&!c.rare}
 function learnClass(ci){if(!canLearnClass(ci)||!classTrainingReady())return false;if(!spendService265(classTraining().gold))return false;if(CLASSES[ci].rare)profile.rareClass=ci;profile.jobs.push(ci);styleTutorial();store.set('pds2_profile',profile);saveRun();return true}

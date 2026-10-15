@@ -90,7 +90,7 @@
     ctx.clearRect=function(x,y,w,h){cr.call(this,x,y,w,h);if(x===0&&y===0&&w===S){try{skip=drawTerrain(ctx,S,full)}catch(e){skip=false}}};
     ctx.fillRect=function(x,y,w,h){if(skip&&x===0&&y===0&&w===S&&h===S){skip=false;return}return fr.call(this,x,y,w,h)};
     try{d0(ctx,S,full)}finally{ctx.fillRect=fr;ctx.clearRect=cr}
-    try{icons(ctx,S,full);frame(ctx,S,full)}catch(_){}
+    try{icons(ctx,S,full);frame(ctx,S,full);window.Campaign327?.map(ctx,S,full)}catch(_){}
   };
   window.Map393={cache,raster};
 })();

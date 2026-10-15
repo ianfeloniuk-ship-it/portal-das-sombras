@@ -226,13 +226,11 @@
   }
   const gy = (x, z) => { try { return typeof terrH === 'function' ? terrH(x, z) : 0; } catch (_) { return 0; } };
   function makeBeacon(x, z, side) {
-    beamGeo = beamGeo || new THREE.CylinderGeometry(.55, .9, 16, 20, 1, true);
-    ringGeo = ringGeo || new THREE.CircleGeometry(1.9, 48);
-    const col = side ? 0x7fe8ff : 0xffc457, g = new THREE.Group();
-    const b = new THREE.Mesh(beamGeo, beamMat(col)); b.position.y = 8; g.add(b);
-    const r = new THREE.Mesh(ringGeo, ringMat(col)); r.rotation.x = -Math.PI / 2; r.position.y = .07; g.add(r);
-    g.position.set(x, gy(x, z), z); g.userData.mats = [b.material, r.material]; g.renderOrder = 5; return g;
+    const g = new THREE.Group();
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(.16,12,8),new THREE.MeshBasicMaterial({color:side?0x7fe8ff:0xffd778}));
+    dot.position.y=3.1;g.add(dot);g.position.set(x,gy(x,z),z);g.userData.mats=[];g.userData.objective401=true;return g;
   }
+
   function place(s, sp, i) {
     if (i > 0 && s.pos) { // pontos extras ficam ao redor do primeiro
       for (let k = 0; k < 30; k++) { const a = rnd(0, TAU), d = rnd(7, 13), x = s.pos[0] + Math.cos(a) * d, z = s.pos[1] + Math.sin(a) * d; if (freeAt(x, z, 1.2)) return [x, z]; }
@@ -285,23 +283,50 @@
     const w = { step: s.s, grps: [], figs: [], inters: [], foes: [], L };
     pts.forEach((p, i) => {
       if (s.hit.includes(i)) return;
-      const g = makeBeacon(p[0], p[1], side); scene.add(g); w.grps.push(g);
+      const g = makeBeacon(p[0] + (sp.fig?1.8:0), p[1], side); scene.add(g); w.grps.push(g);
       const fig = figure(sp.fig, p[0], p[1]); w.figs.push(fig);
       const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, use: () => useMarker(m, i) };
       L.inter.push(it); w.inters.push(it);
     });
-    if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); }
+    if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); w.cart=c; }
+    if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
     W.set(m.id, w); save();
   }
-  /* carroça tombada: caixa inclinada, roda solta e caixotes (só malhas simples) */
-  function makeCart(x, z) {
-    const g = new THREE.Group(), wood = new THREE.MeshLambertMaterial({ color: 0x6b4a2a }), dark = new THREE.MeshLambertMaterial({ color: 0x3a2814 });
-    const bed = new THREE.Mesh(new THREE.BoxGeometry(3.4, .3, 1.9), wood); bed.position.set(0, .95, 0); bed.rotation.z = .55; g.add(bed);
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(3.4, .9, .15), wood); wall.position.set(.2, 1.35, .9); wall.rotation.z = .55; g.add(wall);
-    for (const [wx, wz] of [[-1.3, .95], [-1.3, -.95]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(.62, .62, .14, 14), dark); w.rotation.x = Math.PI / 2; w.position.set(wx, .62, wz); g.add(w); }
-    const lost = new THREE.Mesh(new THREE.CylinderGeometry(.6, .6, .14, 14), dark); lost.position.set(2.3, .1, -1.6); lost.rotation.z = .25; g.add(lost);
-    for (const [cx, cz, s] of [[2.0, .9, .7], [2.9, .2, .55], [1.5, -1.7, .6]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), wood); b.position.set(cx, s / 2, cz); b.rotation.y = cx; g.add(b); }
-    g.position.set(x, gy(x, z), z); g.rotation.y = .5; g.userData.mats = []; g.userData.taken = false; return g;
+  /* Modelo real da carroça, sem boi e condutor durante o resgate. */
+  function makeCart(x,z){
+    const g=new THREE.Group();g.position.set(x,gy(x,z),z);g.rotation.y=.5;g.userData.mats=[];
+    g.userData.loading=true;
+    Wagon369.ready.then(ok=>{g.userData.loading=false;if(!ok)return;
+      const w=Wagon369.create();w.mixer.stopAllAction();if(w.ox)w.ox.visible=false;if(w.driver.root)w.driver.root.visible=false;
+      w.g.rotation.z=1.12;g.add(w.g);g.userData.wagon=w;
+    });return g;
+  }
+  function creak(){
+    if(!AU.ctx||!AU.on)return;const c=AU.ctx,t=c.currentTime;
+    const src=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();src.buffer=AU.noise;src.loop=true;
+    filter.type='bandpass';filter.Q.value=8;filter.frequency.setValueAtTime(180,t);filter.frequency.exponentialRampToValueAtTime(470,t+1.6);filter.frequency.exponentialRampToValueAtTime(110,t+3);
+    gain.gain.setValueAtTime(.001,t);gain.gain.linearRampToValueAtTime(.23,t+.4);gain.gain.linearRampToValueAtTime(.001,t+3.2);
+    src.connect(filter);filter.connect(gain);gain.connect(AU.fx);src.start(t);src.stop(t+3.3);src.onended=()=>{src.disconnect();filter.disconnect();gain.disconnect()};
+  }
+  function rescueCart(m,i){
+    const s=state(m.id),w=W.get(m.id);if(!w||w.rescuing)return;
+    const cart=w.cart;if(!cart?.userData.wagon){toast('A carroça está carregando. Tente novamente em instantes.');return}
+    w.rescuing=true;paused=true;player.iT=5;
+    const cx=cart.position.x,cz=cart.position.z;
+    player.x=cx;player.z=cz+2.3;player.face=Math.PI;player.m.root.position.set(player.x,gy(player.x,player.z),player.z);player.m.root.rotation.y=Math.PI;
+    if(window.Anim303){Anim303.A.empurrar401={d:3.6,k:[{t:0,b:{}},{t:.18,b:{spine:[28,0,0],upperarm_l:[-85,0,-10],upperarm_r:[-85,0,10],thigh_l:[-35,0,0],shin_l:[45,0,0]}},{t:.75,b:{spine:[38,0,0],upperarm_l:[-100,0,-10],upperarm_r:[-100,0,10],thigh_l:[-45,0,0],shin_l:[55,0,0]}},{t:1,b:{}}]};Anim303.play('empurrar401')}
+    const people=[-1,1].map(side=>{const f=figure({civ:true,name:'Sobrevivente'},cx-1.8+side*.5,cz);f.m.root.rotation.z=Math.PI/2;w.figs.push(f);return f});
+    creak();let elapsed=0,last=performance.now(),dust=-1;
+    function animate(now){
+      if(W.get(m.id)!==w||player.dead){paused=modalOpen;return}
+      const dt=Math.min(.05,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;
+      const u=Math.min(1,elapsed/3.6),rise=Math.max(0,Math.min(1,(u-.15)/.62));
+      cart.userData.wagon.g.rotation.z=1.12*(1-rise)+Math.sin(u*45)*.045*Math.sin(Math.PI*u);
+      if(Math.floor(elapsed*5)!==dust){dust=Math.floor(elapsed*5);fxBurst(cx,.35,cz,0xb7a083,5,1.5)}
+      people.forEach((f,j)=>{const k=Math.max(0,(u-.6)/.4);f.m.root.rotation.z=(1-k)*Math.PI/2;f.m.root.position.x=cx+(j?1:-1)*(.5+k*3);f.m.root.position.z=cz+k*2;});
+      if(u<1){requestAnimationFrame(animate);return}
+      w.rescuing=false;s.cartRescued401=true;paused=false;useMarker(m,i);
+    }requestAnimationFrame(animate);
   }
   /* despertar no chão: anéis que se expandem + luz que sobe */
   function awakenFx(x, z) {
@@ -347,7 +372,7 @@
       begin(m); const s = state(m.id); s.pos = P.slice(); s.extra = []; s.extraStep = 0; save();
       const px = P[0], pz = P[1] + 4.5;
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
-      player.face = Math.PI; run.pos = { x: px, z: pz }; awakenFx(px, pz);
+      player.face = Math.PI; run.pos = { x: px, z: pz }; s.roadSpawn401={x:px,z:pz}; save();
       try { buildWorldFor(m); } catch (_) {}
       const w = W.get(m.id);
       if (w && !w.foes.length && !s.fightDone) {
@@ -380,6 +405,11 @@
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
+    if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
+      const w=W.get(m.id);if(!w)return;
+      if(!s.edranHelp401){s.edranHelp401=true;const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();toast('<b>Edran:</b> — Ajude-me a levantar a carroça. Há gente presa debaixo dela.',6000);return}
+      rescueCart(m,i);return;
+    }
     s.hit.push(i);
     const w = W.get(m.id);
     if (w) { const it = w.inters.find(x => x.idx === i); if (it) { const k = L.inter.indexOf(it); if (k >= 0) L.inter.splice(k, 1); }
@@ -416,7 +446,9 @@
   let T = 0;
   function tick() {
     if (typeof started === 'undefined' || !started || typeof player === 'undefined' || !player || !profile || profile.creationPending91 || !run) return;
+    if(player.dead||paused)return;
     T += .3;
+    updatePointer();
     const S = st();
     { const next = ACTS.find(m => !S.m[m.id]?.done); if (next && !S.m[next.id] && actOpen(next.act)) begin(next); }
     for (const m of SIDE) if (m.npc === 'Torvo' && !S.m[m.id] && sideOpen(m)) begin(m);
@@ -426,7 +458,7 @@
       if (sp.t === 'tower' && (profile.towerBest || 0) >= s.base) { advance(m); continue; }
       if (sp.t === 'caps' && capsVisited() >= sp.n) { advance(m); continue; }
       if (sp.t === 'barter') { if (!profile.classless) advance(m, sp.done); continue; }
-      if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < wallOf(c.c) - 4) { s.city = c.c.name; advance(m, sp.done); continue; } }
+      if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < wallOf(c.c) - 4) { s.city = c.c.name; if(m.id==='a1'){s.cityCheckpoint401=true;save()} advance(m, sp.done); continue; } }
       if (sp.t !== 'go') { clearWorld(m.id); continue; }
       let w = W.get(m.id);
       if (w && (w.L !== L || w.step !== s.s || w.grps.some(g => !g.parent && !g.userData.taken))) { // mundo foi refeito: recria
@@ -465,6 +497,8 @@
   }
   const shopOrig = openShop;
   openShop = function (id) {
+    const intro=state('a1');
+    if(id==='guild'&&intro&&!intro.done&&intro.s===2&&profile.orderPending401){profile.creationPending91=true;creationView();return}
     const r = shopOrig.apply(this, arguments);
     try {
       const npc = SHOP_NPC[id];
@@ -503,8 +537,8 @@
     if (sp.t === 'go' && s.pos && L.mode === 'world') {
       const pts = pointsOf(m).filter((_, i) => !s.hit.includes(i)), p = pts[0] || s.pos, dx = p[0] - player.x, dz = p[1] - player.z, d = Math.round(Math.hypot(dx, dz));
       const dir = ['leste', 'sudeste', 'sul', 'sudoeste', 'oeste', 'noroeste', 'norte', 'nordeste'][(Math.round(Math.atan2(dz, dx) / (Math.PI / 4)) + 8) % 8];
-      where = ' Luz ' + (isSide(m) ? 'azul' : 'dourada') + ' a ' + d + ' m, ' + dir + '.';
-      if (!s.fightDone) where += ' Inimigos: ' + Math.max(0, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + '.';
+      where = ' Marcador ' + (isSide(m) ? 'azul' : 'dourada') + ' a ' + d + ' m, ' + dir + '.';
+      if (sp.fight&&!s.fightDone) where += ' Inimigos: ' + Math.max(0, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + '.';
     }
     if (sp.t === 'talk' && sp.npc !== 'Torvo') where = ' Fale com ' + sp.npc + ' numa cidade.';
     if (sp.t === 'barter') where = ' Abra a loja de equipamentos do Kael, em ' + cityName(s) + ', e escolha uma arma de treino.';
@@ -543,5 +577,43 @@
     } catch (_) {}
     return h;
   };
-  window.Campaign327 = { ACTS, SIDE, state, active, begin, advance, tick, W, spawnAwakening };
+
+  function registered(){const s=state('a1');if(s&&!s.done&&s.s===2)advance(ACTS[0],'Lyra: — Seu nome está registrado. Procure Kael para o escambo da primeira arma.');saveRun()}
+  function roadCheckpoint(){const s=state('a1');return !!(s&&!s.done&&s.s<2&&!s.cityCheckpoint401)}
+  function respawnRoad(){
+    if(!roadCheckpoint())return false;
+    const s=state('a1'),p=s.roadSpawn401||(s.s===0?s.pos:s.saved?.[0]);if(!p)return false;
+    const x=p.x??p[0],z=p.z??p[1]+4.5;
+    player.dead=true;paused=true;introFade();toast('<b>[NARRADOR]</b> — Ainda não. Levante-se, Viajante.',4500);
+    setTimeout(()=>{
+      if(L.mode!=='world'){if(L.special)leaveDungeon(false);else leaveDungeon(true)}
+      player.x=x;player.z=z;cam.x=x;cam.z=z;player.hp=player.maxhp;player.mp=player.maxmp;player.shield=player.maxsh;player.iT=4;
+      for(const k of ['bleedT','bleedD','slowT','stun','sleep348','healShield','healShieldUntil','venomCharges','venomUntil'])player[k]=0;
+      player.dead=false;player.m.root.position.set(x,gy(x,z),z);run.pos={x,z};updChunks(true);paused=false;saveRun();
+    },450);return true;
+  }
+  function target(){
+    if(!player||L.mode!=='world')return null;
+    const m=active().find(m=>'camp327:'+m.id===run.trackObj)||active().find(m=>!isSide(m));if(!m)return null;
+    const s=state(m.id),sp=m.steps[s.s];
+    if(sp.t==='go'){
+      const w=W.get(m.id),it=w?.inters.find(it=>!s.hit.includes(it.idx));if(it)return {x:it.x,z:it.z};
+      if(s.pos)return {x:s.pos[0],z:s.pos[1]};
+    }
+    if(sp.t==='city')return GATES341.filter(g=>g.c.name===cityName(s)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]||null;
+    const shop=sp.t==='barter'?'wep':Object.keys(SHOP_NPC).find(k=>SHOP_NPC[k]===sp.npc);
+    return shop?npcs.find(n=>n.shop===shop&&n.home?.name===cityName(s)):null;
+  }
+  let pointer=null;
+  function updatePointer(){
+    const p=target();if(!p){if(pointer)pointer.visible=false;return}
+    if(!pointer){pointer=makeBeacon(p.x,p.z,false);pointer.name='CampaignObjective401'}
+    if(!pointer.parent)scene.add(pointer);pointer.visible=true;pointer.position.set(p.x,gy(p.x,p.z)+Math.sin(performance.now()/450)*.12,p.z);
+    for(const w of W.values())for(const g of w.grps)if(g.userData.objective401)g.visible=false;
+  }
+  function map(ctx,S,full){const p=target();if(!p)return;const k=full?S/560:2.2,dx=(p.x-player.x)*k,dz=(p.z-player.z)*k,lim=S/2-12,scale=Math.min(1,lim/Math.max(Math.abs(dx),Math.abs(dz),1));
+    ctx.save();ctx.translate(S/2+dx*scale,S/2+dz*scale);ctx.fillStyle='#ffda68';ctx.strokeStyle='#3b2505';ctx.lineWidth=2;ctx.shadowColor='#ffd05b';ctx.shadowBlur=7;ctx.beginPath();
+    if(scale<1){ctx.rotate(Math.atan2(dz,dx));ctx.moveTo(7,0);ctx.lineTo(-5,-5);ctx.lineTo(-3,0);ctx.lineTo(-5,5);ctx.closePath()}else ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+  }
+  window.Campaign327 = { registered, roadCheckpoint, respawnRoad, target, map, ACTS, SIDE, state, active, begin, advance, tick, W, spawnAwakening };
 })();

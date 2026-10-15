@@ -10,7 +10,7 @@ function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set(
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':'ENTRAR NA CIDADE';$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
-  if(!profile&&!/[?&]escolherClasse/.test(location.search)){profile=pickAwaken(0);profile.classless=true;store.set('pds2_profile',profile);showProfile();$('goBtn').textContent='ENTRAR NA CIDADE';beep(880,.3,.06);return}
+  if(!profile&&!/[?&]escolherClasse/.test(location.search)){profile=pickAwaken(0);profile.classless=true;profile.name='Viajante';profile.creationPending91=false;profile.orderPending401=true;store.set('pds2_profile',profile);startGame();return}
   if(!profile){const C=CLASSES.map((c,i)=>({c,i})).filter(o=>o.c.w>0);$('rollbox').hidden=false;$('roll').textContent=RANKS[0].id;$('roll').style.color=RANKS[0].c;$('rollc').textContent='ESCOLHA SUA CLASSE';
     /* v301 (Ian): a lista vazava da caixa e o texto ficava minúsculo. Botões curtos em 2 colunas; ao clicar abre o detalhe com passiva e recurso e o botão Escolher. */
     const RN={fury:'Fúria',vigor:'Estamina',mana:'Mana'},info=i=>{const c=CLASSES[i],mag=MAGIC_CLS.includes(i);return {c,rs:RN[resourceType260({sourceClass:i})],at:mag?'Inteligência':c.ranged?'Destreza':'Força',st:c.ranged?'À distância':'Corpo a corpo'}};
@@ -30,9 +30,10 @@ $('newSave').addEventListener('click',newGame);
 $('expSave').addEventListener('click',()=>{if(!profile){toast('Desperte primeiro.');return}saveCodeView(false)});$('impSave').addEventListener('click',()=>saveCodeView(true));
 function startGame(){
   if(!MODELS.done){$('goBtn').textContent='CARREGANDO PERSONAGENS…';$('goBtn').disabled=true;MODELS.ready.then(()=>{MODELS.done=true;$('goBtn').disabled=false;startGame()});return}
-  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO GUERREIRO…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
+  if(window.WARRIOR127_ENABLE&&profile&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&!Warrior127.settled){$('goBtn').textContent='CARREGANDO VIAJANTE…';$('goBtn').disabled=true;Warrior127.load(new URLSearchParams(location.search).has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb').then(()=>Warrior127.loadAnims?Warrior127.loadAnims(new URLSearchParams(location.search).has('animKay')?'models/anims.glb':'models/anim-viajante155.glb?v=374'):0).then(()=>Warrior127.loadBow?Warrior127.loadBow('models/armas155/arco-arqueiro.glb'):0).then(()=>window.Proj155?Proj155.load('models/proj155/'):0).then(()=>startGame());return}
   $('title').hidden=true;
-  if(!loadRun())newRun();ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
+  if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
+  if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
@@ -49,6 +50,7 @@ function startGame(){
   unlockLore('start');if(!profile.creationPending91)tutorial();setTimeout(styleTutorial,1200);setInterval(()=>{if(started&&run&&!player.dead)checkTitles()},3000);
   if(unl('season')&&seasonOn()&&profile.season!==weekId())setTimeout(()=>{toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. Veja a Ordem.',7000);bigText('FIM DO MUNDO',1500)},6000);
   try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}
+  if(profile.classless&&!profile.camp327?.m?.a1&&window.Campaign327)Campaign327.spawnAwakening();
   saveRun();if(profile.creationPending91)creationView();
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in keys)keys[k]=false;input.x=input.z=0;saveRun()}});

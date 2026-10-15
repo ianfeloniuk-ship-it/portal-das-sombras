@@ -47,6 +47,7 @@
   function threatOf(value) { var n = Number(value); return Number.isInteger(n) && THREAT_INDEX[n] != null ? n : 0; }
   function xpNeed(level) { var l = levelOf(level); return Math.round(60 + l * 40 + 4 * Math.pow(l, 1.8)); }
   function growthFor(classID) {
+    if(classID==='none')return Object.freeze({id:'none',hp:{base:120,perLevel:0},mp:{base:28,perLevel:0},physical:{base:12,perLevel:0},magic:{base:2.5,perLevel:0}});
     var i = Number.isInteger(classID) ? classID : GROWTH.findIndex(function (x) { return x.id === classID; });
     var raw = GROWTH[Math.max(0, Math.min(GROWTH.length - 1, i < 0 ? 0 : i))], out = { id: raw.id };
     ['hp', 'mp', 'physical', 'magic'].forEach(function (key) { out[key] = Object.freeze({base: raw[key][0], perLevel: raw[key][1]}); });

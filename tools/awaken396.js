@@ -8,12 +8,12 @@
   /* classes comuns iniciais (não raras, não legadas, com peso de sorteio) por tipo de arma — direto de CLASSES */
   function kindClasses(){const m={};CLASSES.forEach((c,i)=>{if(c.rare||c.legacy||c.complement103||!(c.w>0)||!c.wep)return;(m[c.wep]=m[c.wep]||[]).push(i)});return m}
   function kindOf(it){let k=it&&it.kind155||'';k=ALIAS[k]||k;const KC=kindClasses();if(!KC[k]){const m=String(it&&it.name||'').match(/^(\S+)/);k=m?NAMEK[m[1]]||'':''}return KC[k]?k:'sword'}
-  function canBarter(){return !!(profile&&profile.classless&&!profile.kaelBarter396&&!run.equip.w&&!run.items.some(i=>i.slot==='w'))}
+  function canBarter(){return !!(profile&&profile.classless&&!profile.orderPending401&&!profile.creationPending91&&!profile.kaelBarter396&&!run.equip.w&&!run.items.some(i=>i.slot==='w'))}
   let pending=null,silent=false;
   function awaken(ci){
-    if(!profile||!profile.classless||!CLASSES[ci])return false;
+    if(!profile||!profile.classless||profile.orderPending401||!CLASSES[ci])return false;
     pending=null;rememberClassCooldowns();
-    delete profile.classless;profile.cls=ci;profile.jobs=[ci];AFFC=null;
+    delete profile.classless;run.level=Math.max(1,run.level);run.xp=0;profile.cls=ci;profile.jobs=[ci];AFFC=null;
     run.elem=CLASSES[ci].elem||null;run.style='nat';run.adv=false;run.classLoadout=[ci+':0'];
     store.set('pds2_profile',profile);
     const x=player.x,z=player.z;scene.remove(player.m.root);makePlayer();player.x=x;player.z=z;player.m.root.position.set(x,0,z);
@@ -35,7 +35,7 @@
     if(p.mode==='barter')return barter(p.kind,ci);
     return awaken(ci)}
   function byWeapon(it){
-    if(silent||!profile||!profile.classless||!it||it.slot!=='w')return false;
+    if(silent||!profile||!profile.classless||profile.orderPending401||!profile.kaelBarter396||!it||it.slot!=='w')return false;
     const k=kindOf(it),list=kindClasses()[k]||[];
     if(list.length>1){askVocation(k,'equip');return true}
     return awaken(list[0]!=null?list[0]:0)}
@@ -55,10 +55,10 @@
   function shopRows(){
     if(!canBarter())return '';
     const KC=kindClasses();
-    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael entrega sua primeira arma de treino por escambo inicial. <b>Só uma vez.</b> A arma que escolher desperta a sua classe; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
+    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael entrega sua primeira arma de treino por escambo inicial. <b>Só uma vez.</b> A arma que escolher desperta a sua classe no nível 1; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
     for(const k of ORDER){const l=KC[k];if(!l)continue;h+=row(k==='none'?LABEL[k]:LABEL[k]+' de treino',(l.length>1?'Caminhos: ':'Caminho: ')+'<b>'+l.map(i=>CLASSES[i].n).join(', ')+'</b>.',btn(l.length>1?'Escolher':'Trocar','barter396',k,true,'hot'))}
     return h}
   /* se a janela de vocação for fechada sem escolher, pergunta de novo */
-  setInterval(()=>{try{if(started&&run&&player&&profile&&profile.classless&&run.equip.w&&!profile.creationPending91&&!modalOpen){const k=kindOf(run.equip.w);if((kindClasses()[k]||[]).length>1)askVocation(k,'equip');else byWeapon(run.equip.w)}}catch(e){}},2500);
+  setInterval(()=>{try{if(started&&run&&player&&profile&&profile.classless&&!profile.orderPending401&&profile.kaelBarter396&&run.equip.w&&!profile.creationPending91&&!modalOpen){const k=kindOf(run.equip.w);if((kindClasses()[k]||[]).length>1)askVocation(k,'equip');else byWeapon(run.equip.w)}}catch(e){}},2500);
   window.Awaken396={byWeapon,barter,choose,awaken,shopRows,canBarter,kindClasses,LABEL};
 })();

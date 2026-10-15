@@ -121,7 +121,7 @@ function finishTemple(){unlockLore('temple');
 /* PROVAÇÃO DA CLASSE: depois da evolução (nível 30), a cada 100 níveis a classe pode evoluir de novo. */
 const TIER_N=['','Mestre','Grão-Mestre','Lendário','Mítico','Divino','Primordial'];
 const tierOf=()=>run.tier||0,tierNeed=()=>100*(tierOf()+1),tierB=()=>1+.15*tierOf();
-function className(){const A=ADV[profile.cls],t=tierOf();return run.adv?(t?TIER_N[Math.min(t,TIER_N.length-1)]+' ':'')+A.n:CLASSES[profile.cls].n}
+function className(){if(profile.classless)return 'Viajante (Sem Classe)';const A=ADV[profile.cls],t=tierOf();return run.adv?(t?TIER_N[Math.min(t,TIER_N.length-1)]+' ':'')+A.n:CLASSES[profile.cls].n}
 function canArise(){return !!CLASSES[profile.cls].arise||ownsRare(7)||profile.rank===9}
 function completeTier(){narratorEvent105('tier');run.tier=tierOf()+1;run.spts=(run.spts||0)+3;refreshStats();player.hp=player.maxhp;const n=className();
   bigText(n.toUpperCase(),2200);sfx('level');toast('<b>[NARRADOR]</b> Provação da Classe concluída: <b>'+n+'</b>. Dano e vida +15% no bônus somado (total +'+Math.round((tierB()-1)*100)+'%) e +3 pontos de habilidade.',7000);saveRun()}

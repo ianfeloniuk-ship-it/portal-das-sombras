@@ -88,7 +88,7 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
   // v154 (Irror): a explicação fica sempre visível, sem abrir/fechar, e diz de onde vem cada número.
   line=(n,v,d)=>'<div'+(d?' data-tip154="'+tipAttr154(d)+'" style="cursor:help;':' style="')+'display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,179,71,.12)"><span>'+n+'</span><b style="white-space:nowrap">'+v+'</b></div>',
-  pct=v=>(Math.round(v*10)/10).toString().replace('.',',')+'%',clsName=(run.adv?ADV[profile.cls].n:CLASSES[profile.cls].n),Lv=run.level,k=atkPer(Lv),growth=RpgBalance.growthFor(profile.cls),base=classBaseStats();
+  pct=v=>(Math.round(v*10)/10).toString().replace('.',',')+'%',clsName=className(),Lv=run.level,k=atkPer(Lv),growth=RpgBalance.growthFor(profile.classless?'none':profile.cls),base=classBaseStats();
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div style="font-size:13px">';
   h+=line('Ataque físico',fmt(atkOf('phy')),'Aumenta o dano dos golpes físicos.');
   h+=line('Ataque mágico',fmt(atkOf('mag')),'Aumenta o dano das magias.');
