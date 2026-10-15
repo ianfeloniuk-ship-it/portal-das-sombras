@@ -1,7 +1,7 @@
 // BEGIN ENVIRONMENT128
 /* Original local environmental meshes. Shared templates; no network or generation service. */
 const Environment128=(()=>{
- const cache=new Map(),pal={campos:[0x536747,0x414b32],floresta:[0x304e47,0x213e38],flores:[0x697954,0x526749],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
+ const cache=new Map(),pal={campos:[0x64b94d,0x398547],floresta:[0x369a5c,0x236b49],flores:[0x86c65c,0x54a34d],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
  function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
  function tree(bio='floresta',season=1,variant=0,dead=false){
   const key=[bio,season,variant,dead].join(':');if(cache.has(key))return cache.get(key);
@@ -91,10 +91,10 @@ EH=function(batch,key,x,y,z,ry,height,tint){
 const environmentGroundColors128=envGroundColors;
 envGroundColors=function(pg,near){
  environmentGroundColors128(pg,near);const pos=pg.attributes.position,col=pg.attributes.color,season=seasonI();
- const palette={campos:0x56664a,floresta:0x35493e,flores:0x627350,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
+ const palette={campos:0x58a94b,floresta:0x39854c,flores:0x83bf55,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
  const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),biomes=new Float32Array(pos.count),snows=new Float32Array(pos.count),mixes=new Float32Array(pos.count*3),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=onRoad(segs,x,z)||near.some(city=>(Math.abs(x-city.x)<4.5||Math.abs(z-city.z)<4.5)&&Math.hypot(x-city.x,z-city.z)<40);
-  color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x587452),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
+  color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x70bc58),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
   color.multiplyScalar(.85+WN(x*.065,z*.065)*.25);
   if(road)color.setHex(season===3&&!['deserto','vulcao'].includes(bio)?0xa2aaa8:0x827866);
   if(d<31)color.lerp(other.setHex(0x8c897d),clamp((31-d)/3,0,1));

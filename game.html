@@ -257,9 +257,9 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/chest-placement253.js?v=253"></script>
 <script src="tools/boss160.js?v=170"></script>
 <script src="tools/aster-materials130.js"></script>
-<script src="tools/terrain153.js"></script>
+<script src="tools/terrain153.js?v=406"></script>
 <script src="tools/water154.js"></script>
-<script src="tools/biome-materials132.js"></script>
+<script src="tools/biome-materials132.js?v=406"></script>
 <script src="tools/citizens133.js"></script>
 <script src="tools/rift131.js?v=221"></script>
 <script src="tools/set-visual153.js?v=340"></script>
@@ -2625,7 +2625,7 @@ TER245.bindRenderer(renderer);
 renderer.setPixelRatio(GFX267.ratio());
 /* PC: modo ULTRA (resolução cheia + tonemap filmico). Só no PC, nunca no celular. */
 const ULTRA=!(matchMedia('(hover:none)').matches||('ontouchstart' in window))&&(()=>{try{return localStorage.getItem('pds_gfx')!=='leve'}catch(e){return true}})();
-if(ULTRA){renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15}
+if(ULTRA){renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08}
 const scene=new THREE.Scene();
 const riftLight131=window.RIFT131_ENABLE?new THREE.PointLight(0x9566ed,0,13,2):null;if(riftLight131)scene.add(riftLight131);
 let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(document.hidden&&riftSound131)riftSound131.silence()});addEventListener('pagehide',()=>{if(riftSound131)riftSound131.dispose()});
@@ -2635,8 +2635,8 @@ let W=1,H=1,portrait=false;
 function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?62:60;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
 if(!touch)document.body.classList.add('pc');
-const gmap=new THREE.DataTexture(new Uint8Array([70,70,70,255,160,160,160,255,255,255,255,255]),3,1,THREE.RGBAFormat);
-gmap.minFilter=gmap.magFilter=THREE.NearestFilter;gmap.needsUpdate=true;
+const gmap=new THREE.DataTexture(new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]),3,1,THREE.RGBAFormat);
+gmap.minFilter=gmap.magFilter=THREE.NearestFilter;gmap.generateMipmaps=false;gmap.needsUpdate=true;
 const GROUNDMAT=new THREE.MeshToonMaterial({vertexColors:true,gradientMap:gmap});
 const TC={},GLC={},GC={};
 const toonS=c=>{if(!TC[c]){TC[c]=new THREE.MeshToonMaterial({color:c,gradientMap:gmap});TC[c].userData.shared=true}return TC[c]};
@@ -2646,13 +2646,13 @@ const glow=(c,o=.8)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opaci
 /* v172: algumas peças pediam a forma pelo nome sem saber criá-la (()=>0). Se ninguém criou antes, usa a forma padrão daquele nome — senão a tela quebra (torre travava ao limpar o andar). */
 const GEO_DEF172={gring:()=>new THREE.TorusGeometry(2.3,.22,8,40),stall:()=>new THREE.BoxGeometry(3,1.1,1.4),awn:()=>new THREE.BoxGeometry(3.4,.15,2),leaf:()=>new THREE.ConeGeometry(2.2,4.2,7),pil:()=>new THREE.CylinderGeometry(1,1,24,12,1,true)};
 const geo=(k,f)=>GC[k]||(GC[k]=f()||(GEO_DEF172[k]||(()=>new THREE.BoxGeometry(.01,.01,.01)))());
-const OUT=new THREE.MeshBasicMaterial({color:0x000000,side:THREE.BackSide});
-function mesh(g,mat,outline=true,os=1.08){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
+const OUT=new THREE.MeshBasicMaterial({color:0x293446,side:THREE.BackSide});
+function mesh(g,mat,outline=true,os=1.025){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
 /* v212 (Ian): sombra em faixas em TUDO que recebe luz (cenário, prédios, personagens com textura). A textura fica intacta; só a luz direta vira 3 degraus.
    Feito no trecho comum dos shaders; desligar em Configurações vale depois de recarregar. */
 (function(){let on=true;try{on=localStorage.getItem('pds_cel211')!=='0'}catch(e){}if(!on||!THREE.ShaderChunk.aomap_fragment)return;
- THREE.ShaderChunk.aomap_fragment='{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;float b212=r212<.04?r212*1.5:r212<.3?.58:r212<.7?.84:1.04;reflectedLight.directDiffuse=r212>.0005?dd212*(b212/r212):dd212;reflectedLight.directSpecular*=.5;}\n'+THREE.ShaderChunk.aomap_fragment})();
-const hemi=new THREE.HemisphereLight(0xbfdcff,0x101830,.75);scene.add(hemi);
+ THREE.ShaderChunk.aomap_fragment='#ifndef TOON\n{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;float b212=r212<.04?r212*1.5:r212<.3?.58:r212<.7?.84:1.04;reflectedLight.directDiffuse=r212>.0005?dd212*(b212/r212):dd212;reflectedLight.directSpecular*=.35;}\n#endif\n'+THREE.ShaderChunk.aomap_fragment})();
+const hemi=new THREE.HemisphereLight(0xd9f1ff,0x587a52,.85);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(-20,40,15);scene.add(sun);
 const bossLight=new THREE.PointLight(0xffd070,0,40,1.6);scene.add(bossLight);
 const pLight=new THREE.PointLight(0xffffff,0,22,1.4);scene.add(pLight);
@@ -2662,7 +2662,7 @@ function inst(g,mat,list,outline,parent){parent=parent||L.group;
   const mk=(gg,m)=>{const im=new THREE.InstancedMesh(gg,m,list.length);im.frustumCulled=false;
     list.forEach((o,i)=>{_e.set(o.rx||0,o.ry||0,o.rz||0);_q.setFromEuler(_e);_p.set(o.x,o.y||0,o.z);_s.set(o.sx??o.s??1,o.sy??o.s??1,o.sz??o.s??1);_m4.compose(_p,_q,_s);im.setMatrixAt(i,_m4);if(o.c!==undefined&&m!==OUT){_c.setHex(o.c);im.setColorAt(i,_c)}});
     im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;parent.add(im);return im};
-  mk(g,mat);if(outline){const og=g.clone();og.scale(1.07,1.07,1.07);mk(og,OUT)}
+  mk(g,mat);if(outline){const og=g.clone();og.scale(1.025,1.025,1.025);mk(og,OUT)}
 }
 function makeCitySign(){return new THREE.Group()}
 function makeSign(text,col,scale=1){
@@ -3858,7 +3858,7 @@ function envOwn(parent,m){if(m){m.userData.own=1;if(m.userData.terrainBatch245)p
 function envDispose(root){root.traverse(o=>{if(o.userData&&o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material&&o.material.map){o.material.map.dispose();o.material.dispose()}})}
 let GMAT2=null;let envGroundMat=()=>GMAT2||(GMAT2=new THREE.MeshLambertMaterial({vertexColors:true,map:envGroundTex()}));
 const BGC=new THREE.Color();
-const SEAC=[[new THREE.Color(0x2f6a4a),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
+const SEAC=[[new THREE.Color(0x51a35c),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
 const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed','tree_pineDefaultA','tree_cone'],
   leaf:['tree_default','tree_oak','tree_detailed','tree_fat','tree_tall','tree_simple','tree_thin','tree_plateau','tree_default_dark','tree_oak_dark'],
   fall:['tree_default_fall','tree_oak_fall','tree_default_fall','tree_thin','tree_oak','tree_default'],
@@ -3872,12 +3872,12 @@ function bare154(x,z){const B=biomeAt(x,z),m=biomeMix154(x,z);return B==='desert
 function snowB(x,z){return biomeSample317(x,z).b}
 function biomeAt(x,z){const {w,b,b2}=biomeSample317(x,z);x=w[0];z=w[1];if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.0022+17,z*.0022+29)>.74?'flores':'campos'}
 const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens',vulcao:'Terras Vulcânicas',cristal:'Geleira de Cristal',floresta:'Floresta Sombria',flores:'Campos Floridos'};
-const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x10261a,.45],flores:[0x3a7a3a,.25]};
+const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x267c47,.32],flores:[0x64b94d,.25]};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
   const pos=pg.attributes.position,cols=new Float32Array(pos.count*3),t=new THREE.Color(),u=new THREE.Color();
-  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
+  const G1=new THREE.Color(0x58a94b),G2=new THREE.Color(0x83bf55),DRY=new THREE.Color(0xa4a65d),FOR=new THREE.Color(0x39854c),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let d=1e9,road=0;
     for(const c of near){const dx=x-c.x,dz=z-c.z,dd=Math.hypot(dx,dz);if(dd<d)d=dd;if(dd<125){const m=Math.min(Math.abs(dx),Math.abs(dz));road=Math.max(road,clamp((4.9-m)/1.8,0,1)*clamp((125-dd)/12,0,1))}}
     t.copy(G1).lerp(G2,WN(x*.02+40,z*.02+40));
@@ -3887,12 +3887,12 @@ function envGroundColors(pg,near){
     const fo=WN(x*.035,z*.035);if(fo>.48)t.lerp(FOR,Math.min(.7,(fo-.48)*3.5));
     if(road>0)t.lerp(u.copy(DIRT).multiplyScalar(.9+WN(x*.3,z*.3)*.2),road*.95);
     if(d<CITYR-3){t.lerp(COB,clamp((CITYR-3-d)/2.5,0,1));if(d<15)t.lerp(PLZ,clamp((15-d)/2,0,1))}
-    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.42);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
+    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.18);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
   pg.setAttribute('color',new THREE.BufferAttribute(cols,3))}
 // BEGIN ENVIRONMENT128
 /* Original local environmental meshes. Shared templates; no network or generation service. */
 const Environment128=(()=>{
- const cache=new Map(),pal={campos:[0x536747,0x414b32],floresta:[0x304e47,0x213e38],flores:[0x697954,0x526749],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
+ const cache=new Map(),pal={campos:[0x64b94d,0x398547],floresta:[0x369a5c,0x236b49],flores:[0x86c65c,0x54a34d],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
  function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
  function tree(bio='floresta',season=1,variant=0,dead=false){
   const key=[bio,season,variant,dead].join(':');if(cache.has(key))return cache.get(key);
@@ -3982,10 +3982,10 @@ EH=function(batch,key,x,y,z,ry,height,tint){
 const environmentGroundColors128=envGroundColors;
 envGroundColors=function(pg,near){
  environmentGroundColors128(pg,near);const pos=pg.attributes.position,col=pg.attributes.color,season=seasonI();
- const palette={campos:0x56664a,floresta:0x35493e,flores:0x627350,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
+ const palette={campos:0x58a94b,floresta:0x39854c,flores:0x83bf55,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
  const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),biomes=new Float32Array(pos.count),snows=new Float32Array(pos.count),mixes=new Float32Array(pos.count*3),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=onRoad(segs,x,z)||near.some(city=>(Math.abs(x-city.x)<4.5||Math.abs(z-city.z)<4.5)&&Math.hypot(x-city.x,z-city.z)<40);
-  color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x587452),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
+  color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x70bc58),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
   color.multiplyScalar(.85+WN(x*.065,z*.065)*.25);
   if(road)color.setHex(season===3&&!['deserto','vulcao'].includes(bio)?0xa2aaa8:0x827866);
   if(d<31)color.lerp(other.setHex(0x8c897d),clamp((31-d)/3,0,1));
@@ -6947,11 +6947,11 @@ function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.W
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
-  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
+  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x48a8ef),sn:new THREE.Color(0x101c3d),fd:new THREE.Color(0xa5d8ed),fn:new THREE.Color(0x1d3152),hd:new THREE.Color(0xd9f1ff),hn:new THREE.Color(0x7899ce),gd:new THREE.Color(0x587a52),gn:new THREE.Color(0x2e4557),ud:new THREE.Color(0xfff5df),un:new THREE.Color(0xb6c9ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
-    hemi.intensity=(.64-.3*n)*(1-D.w*.18);sun.intensity=(.68-.4*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
-  else{const day=new THREE.Color(0x3a6aa8),night=new THREE.Color(0x040a18);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0x4a78b0)).lerp(new THREE.Color(0x06112a),n);
+    hemi.intensity=(.85-.35*n)*(1-D.w*.18);sun.intensity=(.90-.52*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
+  else{const day=new THREE.Color(0x48a8ef),night=new THREE.Color(0x101c3d);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0xa5d8ed)).lerp(new THREE.Color(0x1d3152),n);
   hemi.intensity=1-.45*n;sun.intensity=1.05-.6*n}if(L.moon)L.moon.visible=n>.3;
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */
@@ -8184,20 +8184,20 @@ function improveTransmigrator(){const lv=transmigratorLevel253();if(lv>=10||(run
 function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Transmigrador · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
 
 
-/* v208 (Ian): TESTE do visual cartunesco estilo Fable: cores mais vivas e quentes, contraste maior. Liga/desliga em Configurações → Tela. */
-function toon208(){let on=true;try{on=localStorage.getItem('pds_toon208')!=='0'}catch(e){}const c=renderer&&renderer.domElement;if(c)c.style.filter=on?'saturate(1.42) contrast(1.1) brightness(1.01) sepia(.1) hue-rotate(-6deg)':'';return on}/* v209: aprovado pelo Ian, ligado por padrão */
-/* v210 (Ian): TESTE de contorno de desenho animado nos personagens e monstros (casca invertida, escura). */
+/* v406: visual oficial vibrante; uma grade compartilhada com Look154. */
+function toon208(){let on=true;try{on=localStorage.getItem('pds_toon208')!=='0'}catch(e){}const c=renderer&&renderer.domElement;if(window.Look154)Look154.grade();else if(c)c.style.filter=on?'saturate(1.12) contrast(1.03)':'';return on}/* v209: aprovado pelo Ian, ligado por padrão */
+/* Contorno sutil em personagens e monstros; preserva o rig e equipamento. */
 function outlineOn210(){try{return localStorage.getItem('pds_outline210')!=='0'}catch(e){return true}}/* v211: aprovado, ligado por padrão */
-function outlineMat210(mesh){const m=new THREE.MeshBasicMaterial({color:0x1b1220,side:THREE.BackSide,skinning:!!mesh.isSkinnedMesh});const u={value:.004};
+function outlineMat210(mesh){const m=new THREE.MeshBasicMaterial({color:0x293446,side:THREE.BackSide,skinning:!!mesh.isSkinnedMesh});const u={value:.0032};
  m.onBeforeCompile=sh=>{sh.uniforms.uOW=u;if(mesh.isSkinnedMesh){/* MeshBasic sem envmap não expõe skinMatrix; recompõe a matriz dos ossos depois do skinning. */sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <skinning_vertex>','#include <skinning_vertex>\nmat4 outlineSkin210=skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW;\noutlineSkin210=bindMatrixInverse*outlineSkin210*bindMatrix;\nvec3 outlineNormal210=(outlineSkin210*vec4(normal,0.0)).xyz;\nif(length(outlineNormal210)>0.0)transformed+=normalize(outlineNormal210)*uOW;')}else{sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=normal*uOW;')}};/* v212: empurra depois da pele (ossos com escala grande inchavam a casca) */
  m.customProgramCacheKey=()=>'ol210'+(mesh.isSkinnedMesh?1:0);m.userData.u=u;return m}
 function outlineAdd210(root){if(!root||root.userData.ol210)return;root.userData.ol210=1;const list=[];root.traverse(o=>{if((o.isMesh||o.isSkinnedMesh)&&!o.userData.ol210c&&o.geometry&&o.geometry.attributes.normal&&o.visible&&!(o.material&&(o.material.transparent||o.material.blending===THREE.AdditiveBlending)))list.push(o)});
  for(const o of list){const mat=outlineMat210(o);let c;if(o.isSkinnedMesh){c=new THREE.SkinnedMesh(o.geometry,mat);c.bind(o.skeleton,o.bindMatrix)}else c=new THREE.Mesh(o.geometry,mat);c.userData.ol210c=1;c.frustumCulled=false;c.castShadow=false;
-  c.onBeforeRender=()=>{const e=o.matrixWorld.elements,s=Math.hypot(e[0],e[1],e[2])||1;/* 4 mm no corpo e equipamento; 28 mm cobria a pele e engrossava os cabos. */mat.userData.u.value=.004/s;c.visible=o.visible};
+  c.onBeforeRender=()=>{const e=o.matrixWorld.elements,s=Math.hypot(e[0],e[1],e[2])||1;/* 3,2 mm constantes no mundo, inclusive em modelos com escala. */mat.userData.u.value=.0032/s;c.visible=o.visible};
   if(o.isSkinnedMesh){o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale)}else o.add(c)}}
 function outlineRemove210(root){if(!root||!root.userData.ol210)return;root.userData.ol210=0;const rm=[];root.traverse(o=>{if(o.userData.ol210c)rm.push(o)});for(const o of rm){o.material.dispose();o.parent&&o.parent.remove(o)}}
 /* v211 (Ian): sombra em faixas (cel shading), etapa 1: personagens e monstros. O material vira toon com 3 tons; cor, brilho de dano e transparência continuam vindo do material original. */
-let GRAD211=null;function grad211(){if(GRAD211)return GRAD211;const d=new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]);GRAD211=new THREE.DataTexture(d,3,1,THREE.RGBAFormat);GRAD211.minFilter=GRAD211.magFilter=THREE.NearestFilter;GRAD211.generateMipmaps=false;GRAD211.needsUpdate=true;return GRAD211}
+function grad211(){return gmap}
 const CEL211=new WeakMap();
 function celMat211(m,skin){if(!m||m.map||m.emissiveMap||(m.onBeforeCompile&&m.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile)||m.isMeshToonMaterial||m.isMeshBasicMaterial||m.isShaderMaterial||m.transparent&&m.opacity<.99||m.blending===THREE.AdditiveBlending)return m;let t=CEL211.get(m);if(t)return t;
  t=new THREE.MeshToonMaterial({color:m.color?m.color.clone():0xffffff,map:m.map||null,emissive:m.emissive?m.emissive.clone():0,emissiveMap:m.emissiveMap||null,normalMap:m.normalMap||null,alphaTest:m.alphaTest||0,transparent:m.transparent,opacity:m.opacity,vertexColors:m.vertexColors,skinning:skin||m.skinning,side:m.side,gradientMap:grad211()});t.userData.src211=m;CEL211.set(m,t);return t}
@@ -8207,7 +8207,7 @@ function celRemove211(root){if(!root||!root.userData.cel211)return;root.userData
 function celOn211(){try{return localStorage.getItem('pds_cel211')!=='0'}catch(e){return true}}
 setInterval(()=>{try{if(!started||!player)return;const on=celOn211(),roots=[player.m&&player.m.root,...enemies.filter(e=>!e.dead).map(e=>e.m&&e.m.root),...(typeof allies!=='undefined'?allies:[]).map(a=>a.m&&a.m.root)];for(const r of roots)if(r)on?celAdd211(r):celRemove211(r)}catch(e){}},700);
 setInterval(()=>{try{if(!started||!player)return;const on=outlineOn210(),roots=[player.m&&player.m.root,...enemies.filter(e=>!e.dead).map(e=>e.m&&e.m.root),...(typeof allies!=='undefined'?allies:[]).map(a=>a.m&&a.m.root)];for(const r of roots)if(r)on?outlineAdd210(r):outlineRemove210(r)}catch(e){}},700);
-function cfgView(){view=cfgView;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-tip154="Sombra em faixas, como desenho animado. Vale depois de recarregar o jogo." onclick="try{localStorage.setItem(\'pds_cel211\',localStorage.getItem(\'pds_cel211\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Sombra em faixas: '+(celOn211()?'LIGADA':'DESLIGADA')+'</button><button class="btn" data-tip154="Teste: contorno escuro de desenho animado em personagens e monstros." onclick="try{localStorage.setItem(\'pds_outline210\',localStorage.getItem(\'pds_outline210\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Contorno: '+(outlineOn210()?'LIGADO':'DESLIGADO')+'</button><button class="btn" data-tip154="Teste: cores mais vivas e quentes, como um conto de fadas." onclick="try{localStorage.setItem(\'pds_toon208\',localStorage.getItem(\'pds_toon208\')===\'0\'?\'1\':\'0\')}catch(e){}toon208();cfgView()">Visual cartunesco: '+(toon208()?'LIGADO':'DESLIGADO')+'</button><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
+function cfgView(){view=cfgView;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-tip154="Sombra em faixas, como desenho animado. Vale depois de recarregar o jogo." onclick="try{localStorage.setItem(\'pds_cel211\',localStorage.getItem(\'pds_cel211\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Sombra em faixas: '+(celOn211()?'LIGADA':'DESLIGADA')+'</button><button class="btn" data-tip154="Contorno sutil do visual oficial em personagens e monstros." onclick="try{localStorage.setItem(\'pds_outline210\',localStorage.getItem(\'pds_outline210\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Contorno: '+(outlineOn210()?'LIGADO':'DESLIGADO')+'</button><button class="btn" data-tip154="Visual oficial: céu azul, verdes vivos e luz clara." onclick="try{localStorage.setItem(\'pds_toon208\',localStorage.getItem(\'pds_toon208\')===\'0\'?\'1\':\'0\')}catch(e){}toon208();cfgView()">Visual vibrante: '+(toon208()?'LIGADO':'DESLIGADO')+'</button><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
   narratorSettings105()+movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input aria-label="Tamanho dos botões" type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   ''+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
@@ -8914,7 +8914,7 @@ requestAnimationFrame(frame);
 <script src="tools/ineditas309.js?v=315"></script>
 <script src="tools/vfx328.js?v=405"></script>
 <script src="tools/dome154.js?v=343"></script>
-<script src="tools/look154.js"></script>
+<script src="tools/look154.js?v=406"></script>
 <script src="tools/civic343.js?v=381"></script>
 <script src="tools/guardian370.js?v=370"></script><script src="tools/cactoro372.js?v=372"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
@@ -8926,7 +8926,9 @@ requestAnimationFrame(frame);
 <!-- NARRATIVE_V4_SCRIPTS: historia e Diario, sem cinemáticas. -->
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
-<script src="tools/campaign327.js?v=404"></script>
+<link rel="stylesheet" href="tools/scenes406.css?v=406">
+<script src="tools/scenes406.js?v=406"></script>
+<script src="tools/campaign327.js?v=406"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 

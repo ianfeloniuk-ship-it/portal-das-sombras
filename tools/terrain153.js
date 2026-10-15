@@ -26,7 +26,8 @@ window.Terrain153=(()=>{
     earth153=mix(earth153,vec3(.78,.84,.84),ice153*.94);
     vec3 paving153=tile153(terrainWorld128.xz*.16,vec2(.5,.5));
     vec3 albedo153=mix(earth153,paving153,smoothstep(.15,.85,road128));
-    diffuseColor.rgb=mix(diffuseColor.rgb,albedo153,.68);
+    // Preserve biome vertex colors; atlas contributes gentle painted detail.
+    diffuseColor.rgb=mix(diffuseColor.rgb,albedo153,.22);
    `);
   };material.customProgramCacheKey=()=>key+'-terrain153';material.needsUpdate=true;return material;
  }

@@ -1,17 +1,18 @@
-/* v154 look (Ian's approved reference "Proposta de direção visual"): painted, saturated, warm amber light,
-   deep greens, petrol shadows, violet only for the rift. Applied as light palette + screen grade + vignette. */
+/* v406: official bright toon direction; blue sky, clear greens and light shadows.
+   Keep violet rift/corruption materials and the existing day/night timing. */
 window.Look154=(()=>{
  const C=h=>new THREE.Color(h);
- // Warmer key light, petrol fill and fog instead of grey-blue haze.
- const palette={sd:0x7ea6c4,sn:0x060b18,fd:0x6f8f8c,fn:0x0b1a24,hd:0xd9e6dc,hn:0x3f5a86,gd:0x4f5a34,gn:0x101a22,ud:0xffd7a0,un:0x9ab0ff};
- let patched=false;
- function patch(){if(patched||!L||!L.dn)return;for(const k in palette)if(L.dn[k])L.dn[k].copy(C(palette[k]));patched=true}
+ // Same palette as the core, including when the environment becomes ready later.
+ const palette={sd:0x48a8ef,sn:0x101c3d,fd:0xa5d8ed,fn:0x1d3152,hd:0xd9f1ff,hn:0x7899ce,gd:0x587a52,gn:0x2e4557,ud:0xfff5df,un:0xb6c9ff};
+ let patched=null;
+ function patch(){if(!L||!L.dn||patched===L.dn)return;for(const k in palette)if(L.dn[k])L.dn[k].copy(C(palette[k]));patched=L.dn}
  const baseDay=updDayNight;updDayNight=function(dt){patch();baseDay(dt);if(ENV.ok&&scene&&scene.fog&&L.mode==='world')scene.fog.density*=.72};
- // Screen grade on the 3D canvas only (UI untouched) + painted vignette.
+ // One shared grade; no amber cast or heavy dark border on the canvas.
  function grade(){const cv=renderer&&renderer.domElement;if(!cv)return setTimeout(grade,500);
-  cv.style.filter='saturate(1.32) contrast(1.12) brightness(1.03) sepia(.07)';
+  let on=true;try{on=localStorage.getItem('pds_toon208')!=='0'}catch(e){}
+  cv.style.filter=on?'saturate(1.12) contrast(1.03)':'';
   if(!document.getElementById('vignette154')){const v=document.createElement('div');v.id='vignette154';
-   v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(8,10,18,.38) 82%,rgba(5,6,12,.62) 100%)';
+   v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 70%,rgba(18,30,48,.04) 88%,rgba(18,30,48,.12) 100%)';
    cv.parentNode.insertBefore(v,cv.nextSibling)}}
  grade();
  // Warm amber light pools on the ground under lanterns and tower windows (strong at night, faint by day).

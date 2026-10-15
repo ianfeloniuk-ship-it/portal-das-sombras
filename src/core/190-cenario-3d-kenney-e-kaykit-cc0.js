@@ -72,7 +72,7 @@ function envOwn(parent,m){if(m){m.userData.own=1;if(m.userData.terrainBatch245)p
 function envDispose(root){root.traverse(o=>{if(o.userData&&o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material&&o.material.map){o.material.map.dispose();o.material.dispose()}})}
 let GMAT2=null;let envGroundMat=()=>GMAT2||(GMAT2=new THREE.MeshLambertMaterial({vertexColors:true,map:envGroundTex()}));
 const BGC=new THREE.Color();
-const SEAC=[[new THREE.Color(0x2f6a4a),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
+const SEAC=[[new THREE.Color(0x51a35c),.14],null,[new THREE.Color(0x6a4a22),.2],[new THREE.Color(0xdde8f2),.55]];
 const TREES={pine:['tree_pineRoundA','tree_pineRoundC','tree_pineTallA_detailed','tree_pineDefaultA','tree_cone'],
   leaf:['tree_default','tree_oak','tree_detailed','tree_fat','tree_tall','tree_simple','tree_thin','tree_plateau','tree_default_dark','tree_oak_dark'],
   fall:['tree_default_fall','tree_oak_fall','tree_default_fall','tree_thin','tree_oak','tree_default'],
@@ -86,12 +86,12 @@ function bare154(x,z){const B=biomeAt(x,z),m=biomeMix154(x,z);return B==='desert
 function snowB(x,z){return biomeSample317(x,z).b}
 function biomeAt(x,z){const {w,b,b2}=biomeSample317(x,z);x=w[0];z=w[1];if(b<.3)return b2>.62?'cristal':'neve';if(b>.7)return b2>.55?'vulcao':'deserto';if(b2>.68)return'pantano';if(b2<.3)return'floresta';return WN(x*.0022+17,z*.0022+29)>.74?'flores':'campos'}
 const BIO_N={neve:'Tundra gelada',deserto:'Deserto',pantano:'Pântano',campos:'Terras selvagens',vulcao:'Terras Vulcânicas',cristal:'Geleira de Cristal',floresta:'Floresta Sombria',flores:'Campos Floridos'};
-const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x10261a,.45],flores:[0x3a7a3a,.25]};
+const BIO_G={neve:[0xdde8f2,.45],deserto:[0xc8a060,.4],pantano:[0x3a4a2a,.35],vulcao:[0x5a1a10,.5],cristal:[0x7fd8ff,.35],floresta:[0x267c47,.32],flores:[0x64b94d,.25]};
 const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB','flower_redB','flower_yellowB'];
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
   const pos=pg.attributes.position,cols=new Float32Array(pos.count*3),t=new THREE.Color(),u=new THREE.Color();
-  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
+  const G1=new THREE.Color(0x58a94b),G2=new THREE.Color(0x83bf55),DRY=new THREE.Color(0xa4a65d),FOR=new THREE.Color(0x39854c),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let d=1e9,road=0;
     for(const c of near){const dx=x-c.x,dz=z-c.z,dd=Math.hypot(dx,dz);if(dd<d)d=dd;if(dd<125){const m=Math.min(Math.abs(dx),Math.abs(dz));road=Math.max(road,clamp((4.9-m)/1.8,0,1)*clamp((125-dd)/12,0,1))}}
     t.copy(G1).lerp(G2,WN(x*.02+40,z*.02+40));
@@ -101,5 +101,5 @@ function envGroundColors(pg,near){
     const fo=WN(x*.035,z*.035);if(fo>.48)t.lerp(FOR,Math.min(.7,(fo-.48)*3.5));
     if(road>0)t.lerp(u.copy(DIRT).multiplyScalar(.9+WN(x*.3,z*.3)*.2),road*.95);
     if(d<CITYR-3){t.lerp(COB,clamp((CITYR-3-d)/2.5,0,1));if(d<15)t.lerp(PLZ,clamp((15-d)/2,0,1))}
-    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.42);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
+    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.18);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
   pg.setAttribute('color',new THREE.BufferAttribute(cols,3))}

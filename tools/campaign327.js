@@ -251,6 +251,8 @@
   function entryRadius(c){const gates=GATES341.filter(g=>g.c.name===c.name);return gates.length?Math.min(...gates.map(g=>Math.hypot(g.x-c.x,g.z-c.z))):wallOf(c)}
   function pointsOf(m) {
     const s = state(m.id), sp = m.steps[s.s], n = sp.pts || 1;
+    // The people seen hiding during the ambush stay at those same coordinates.
+    if(m.id==='a2'&&s.s===2&&s.survivors406?.length===2){s.pos=s.survivors406[0].slice();s.extra=[s.survivors406[1].slice()];s.extraStep=s.s;return [s.pos,...s.extra]}
     if (!s.pos) s.pos = place(s, sp, 0);
     s.extra = s.extra && s.extra.length === n - 1 && s.extraStep === s.s ? s.extra : Array.from({ length: n - 1 }, (_, i) => place(s, sp, i + 1));
     s.extraStep = s.s;
@@ -279,8 +281,9 @@
   }
   function clearWorld(id) {
     const w = W.get(id); if (!w) return;
+    window.Scenes406?.dispose(w);
     for (const g of w.grps) {if(g===w.cart&&state(id)?.cartRescued401&&w.L===L)setTimeout(()=>scene.remove(g),6000);else scene.remove(g);}
-    for (const f of w.figs) { if (!f) continue; if (f.m) { const root = f.m.root; setTimeout(() => scene.remove(root), w.L === L && L.mode === 'world' ? 6000 : 0); } if (f.friend) { f.friend.gone = true; try { scene.remove(f.friend.m.root); } catch (_) {} } }
+    for (const f of w.figs) { if (!f) continue; if (f.m) { const root = f.m.root; setTimeout(() => scene.remove(root), !f.hidden406 && w.L === L && L.mode === 'world' ? 6000 : 0); } if (f.friend) { f.friend.gone = true; try { scene.remove(f.friend.m.root); } catch (_) {} } }
     for (const it of w.inters) { const i = L.inter.indexOf(it); if (i >= 0) L.inter.splice(i, 1); }
     for (const e of w.foes) if (!e.dead) { e.dead = true; e.deadT = 0; try { scene.remove(e.m.root); } catch (_) {} const i = enemies.indexOf(e); if (i >= 0) enemies.splice(i, 1); }
     W.delete(id);
@@ -297,6 +300,7 @@
     });
     if (sp.cart && pts[0] && !s.hit.includes(0)) { const c = makeCart(pts[0][0] - 3.6, pts[0][1] - 2.8); scene.add(c); w.grps.push(c); w.cart=c; }
     if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
+    window.Scenes406?.build(m,s,w,pts,figure);
     W.set(m.id, w); save();
   }
   /* Modelo real da carroça, sem boi e condutor durante o resgate. */
@@ -393,11 +397,12 @@
     } catch (e) { console.warn('spawnAwakening', e); return false; }
   }
   function foesLeft(m) { const w = W.get(m.id); return w ? w.foes.filter(e => !e.dead && enemies.includes(e)).length : 0; }
-  function useMarker(m, i) {
+  function useMarker(m, i, read406 = false) {
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
     if(m.id==='a1'&&s.s===0&&!s.helped401&&!s.fightDone&&!s.killed&&window.Intro401){Intro401.dialog('Edran',['A carroça… Ela veio da Fenda. Cuidado, está logo ali!'],()=>{s.helped401=true;save();tick()});return}
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
+    if(!read406&&window.Scenes406){const w=W.get(m.id),step=s.s;if(Scenes406.read(m,s,w,()=>{if(W.get(m.id)===w&&state(m.id)===s&&s.s===step&&!s.done)useMarker(m,i,true)}))return}
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
       const w=W.get(m.id);if(!w)return;
       if(!s.edranHelp401){s.edranHelp401=true;const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu… A Mão levou a criatura. O cristal que ela deixou guarda os recursos por dez segundos; recolha também o ouro antes que suma.', 'Agora ajude-me a levantar a carroça. Há gente presa debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Ajude-me a levantar a carroça.',6000);return}
@@ -467,6 +472,7 @@
         if (s.killed >= total && !(m.id === 'a1' && window.Intro401?.reclaiming())) { s.fightDone = true; save(); toast('<b>[HISTÓRIA]</b> Área segura. ' + (sp.verb ? 'Aproxime-se e use F: ' + sp.verb.toLowerCase() + '.' : ''), 4000); }
         else if ((m.id !== 'a1' || s.s !== 0 || s.helped401) && !foesLeft(m) && pointsOf(m).some(p => Math.hypot(player.x - p[0], player.z - p[1]) < 22)) { w.foes = w.foes.filter(e => !e.dead && enemies.includes(e)); spawnFight(m); }
       }
+      window.Scenes406?.update(m,s,w,T);
     }
   }
   setInterval(() => { try { tick(); } catch (e) { if (!window.__camp327err) { window.__camp327err = 1; console.warn('campaign327', e); } } }, 300);

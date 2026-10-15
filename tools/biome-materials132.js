@@ -14,7 +14,7 @@ window.BiomeMaterials132=(()=>{
  vec3 painted132=tri132(surfaceP132*vec3(.67,.35,.67),surfaceN132,vec2(0.,.5));
  vec3 leaves132=tri132(surfaceP132*.58,surfaceN132,vec2(.5,.5));
  vec3 tint132=mix(leaves132/max(vec3(.25,.30,.17),vec3(.01)),painted132/vec3(.36,.25,.16),bark132);
- diffuseColor.rgb*=mix(vec3(1.),clamp(tint132,vec3(.32),vec3(2.15)),.88*(1.-snow132));
+ diffuseColor.rgb*=mix(vec3(1.),clamp(tint132,vec3(.32),vec3(2.15)),.36*(1.-snow132));
  `);
  }else{
  s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -22,7 +22,7 @@ window.BiomeMaterials132=(()=>{
  vec3 soil132=tile132(terrainWorld128.xz*.24,vec2(0.,0.));vec3 sandtex132=tile132(terrainWorld128.xz*.22,vec2(.5,0.));
  vec3 detail132=mix(soil132/vec3(.29,.25,.15),sandtex132/vec3(.66,.49,.29),sand132);
  float mono132=dot(detail132,vec3(.299,.587,.114));detail132=mix(detail132,vec3(mono132),max(snow132,ash132));
- diffuseColor.rgb*=mix(vec3(1.),clamp(detail132,vec3(.38),vec3(1.85)),(1.-road132)*mix(.55+.28*noise128(terrainWorld128.xz*.11),.20,snow132));
+ diffuseColor.rgb*=mix(vec3(1.),clamp(detail132,vec3(.38),vec3(1.85)),(1.-road132)*mix(.22+.12*noise128(terrainWorld128.xz*.11),.14,snow132));
  `);
  }
  };m.customProgramCacheKey=()=>oldKey+'-painted132-'+kind;m.needsUpdate=true;return m;}

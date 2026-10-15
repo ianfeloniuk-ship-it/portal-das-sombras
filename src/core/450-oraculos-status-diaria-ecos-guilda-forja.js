@@ -219,11 +219,11 @@ function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.W
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
-  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
+  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x48a8ef),sn:new THREE.Color(0x101c3d),fd:new THREE.Color(0xa5d8ed),fn:new THREE.Color(0x1d3152),hd:new THREE.Color(0xd9f1ff),hn:new THREE.Color(0x7899ce),gd:new THREE.Color(0x587a52),gn:new THREE.Color(0x2e4557),ud:new THREE.Color(0xfff5df),un:new THREE.Color(0xb6c9ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
-    hemi.intensity=(.64-.3*n)*(1-D.w*.18);sun.intensity=(.68-.4*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
-  else{const day=new THREE.Color(0x3a6aa8),night=new THREE.Color(0x040a18);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0x4a78b0)).lerp(new THREE.Color(0x06112a),n);
+    hemi.intensity=(.85-.35*n)*(1-D.w*.18);sun.intensity=(.90-.52*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
+  else{const day=new THREE.Color(0x48a8ef),night=new THREE.Color(0x101c3d);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0xa5d8ed)).lerp(new THREE.Color(0x1d3152),n);
   hemi.intensity=1-.45*n;sun.intensity=1.05-.6*n}if(L.moon)L.moon.visible=n>.3;
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */

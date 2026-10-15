@@ -1,6 +1,6 @@
 /* Original local environmental meshes. Shared templates; no network or generation service. */
 const Environment128=(()=>{
- const cache=new Map(),pal={campos:[0x536747,0x414b32],floresta:[0x304e47,0x213e38],flores:[0x697954,0x526749],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
+ const cache=new Map(),pal={campos:[0x64b94d,0x398547],floresta:[0x369a5c,0x236b49],flores:[0x86c65c,0x54a34d],pantano:[0x536355,0x344c42],neve:[0x345851,0x24433d],cristal:[0x3e6970,0x31535d],deserto:[0x787354,0x5c6143],vulcao:[0x393739,0x272c2e]};
  function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
  function tree(bio='floresta',season=1,variant=0,dead=false){
   const key=[bio,season,variant,dead].join(':');if(cache.has(key))return cache.get(key);
