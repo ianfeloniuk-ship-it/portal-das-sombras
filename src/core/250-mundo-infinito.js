@@ -7,9 +7,10 @@ const CN_C=['',' Alta',' do Norte',' Nova',' Velha',' do Sul',' dos Ventos',' da
 function cityNameGen(R){return CN_A[Math.floor(R()*CN_A.length)]+CN_B[Math.floor(R()*CN_B.length)]+CN_C[Math.floor(R()*CN_C.length)]}
 const CITY_NAMES=['Valkor','Nymeria','Seoran','Drakemoor','Lumen','Kaldera','Veyra','Orion','Tessar','Mirath','Gwyn','Solace','Ardent','Kirin','Hollow','Zephyr','Obsidia','Marrow','Eldran','Sylvar','Brisa','Corvo','Thalos','Umbra'];
 function rh(a,b,c=0){return (Math.imul(a|0,73856093)^Math.imul(b|0,19349663)^Math.imul(c|0,83492791)^WSEED)>>>0}
+const CANON_CAPITALS={'0,0':'Aster','0,-5':'Ymiria','5,0':'Zahar','-5,0':'Thalor','0,5':'Urdan','5,5':'Verden'};
 function regionCity(rx,rz){const k=rx+','+rz;let c=cityCache.get(k);if(c)return c;const R=mulberry32(rh(rx,rz,7));
   const H217=REG>>1,o=(rx===0&&rz===0)?{x:H217,z:H217}:{x:Math.round(H217+(R()-.5)*REG*.4),z:Math.round(H217+(R()-.5)*REG*.4)};const cx=rx*REG+o.x-H217,cz=rz*REG+o.z-H217;/* v217: cidade perto do centro da região: no mínimo ~1,1 km entre cidades */
-  const cap217=((rx%5)+5)%5===0&&((rz%5)+5)%5===0;c={id:k,cx,cz,x:cx*CH,z:cz*CH,capital:cap217,name:(rx===0&&rz===0)?'Aster':cityNameGen(R)};if(cap217&&c.name!=='Aster')c.name='Capital '+c.name;cityCache.set(k,c);return c}
+  const cap217=((rx%5)+5)%5===0&&((rz%5)+5)%5===0;const cName=CANON_CAPITALS[k]||(cap217?'Capital '+cityNameGen(R):cityNameGen(R));c={id:k,cx,cz,x:cx*CH,z:cz*CH,capital:cap217,name:cName};cityCache.set(k,c);return c}
 function nearestCity(x,z){const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG);let best=null,bd=1e12;
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(rx+i,rz+j),d=Math.hypot(x-c.x,z-c.z);if(d<bd){bd=d;best=c}}return{c:best,d:bd}}
 function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG),n=Math.ceil(rad/(CH*REG))+1;

@@ -44,18 +44,18 @@
     if(ci==null){if(list.length>1){askVocation(kind,'barter');return true}ci=list[0]}
     if(!list.includes(+ci))return false;ci=+ci;
     if(kind==='none'){profile.kaelBarter396=true;store.set('pds2_profile',profile);
-      toast('<b>Kael:</b> Sem arma? Há quem aprenda a lutar só com as mãos. Fique com o fragmento, Viajante; o que você carrega vale mais.',7500);
+      toast('<b>Kael:</b> Sem arma? Há quem aprenda a lutar só com as mãos. O que você carrega na alma vale mais que qualquer aço, Viajante.',7500);
       return awaken(ci)}
     if(!equipmentBagRoom())return false;
     const it=makeItem('w',0,0,kind);profile.kaelBarter396=true;store.set('pds2_profile',profile);addItem(it);
-    toast('<b>Kael:</b> Você não tem moedas de Aster, Viajante. Ninguém que cai da Fenda tem. Deixe o fragmento de metal dos escombros comigo; sua primeira ferramenta de treino sai da forja agora.',7500);
+    toast('<b>Kael:</b> Você não tem moedas de Aster, Viajante. Ninguém que cai da Fenda tem. Deixe isso comigo: sua primeira arma de treino sai da forja agora.',7500);
     silent=true;try{equipBagItem(it.uid)}finally{silent=false}
     awaken(ci);
     return true}
   function shopRows(){
     if(!canBarter())return '';
     const KC=kindClasses();
-    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael troca o fragmento de metal que você trouxe da estrada por uma arma de treino. <b>Só uma vez.</b> A arma que escolher desperta a sua classe; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
+    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael entrega sua primeira arma de treino por escambo inicial. <b>Só uma vez.</b> A arma que escolher desperta a sua classe; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
     for(const k of ORDER){const l=KC[k];if(!l)continue;h+=row(k==='none'?LABEL[k]:LABEL[k]+' de treino',(l.length>1?'Caminhos: ':'Caminho: ')+'<b>'+l.map(i=>CLASSES[i].n).join(', ')+'</b>.',btn(l.length>1?'Escolher':'Trocar','barter396',k,true,'hot'))}
     return h}
   /* se a janela de vocação for fechada sem escolher, pergunta de novo */

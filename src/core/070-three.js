@@ -32,18 +32,14 @@ const glow=(c,o=.8)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opaci
 /* v172: algumas peças pediam a forma pelo nome sem saber criá-la (()=>0). Se ninguém criou antes, usa a forma padrão daquele nome — senão a tela quebra (torre travava ao limpar o andar). */
 const GEO_DEF172={gring:()=>new THREE.TorusGeometry(2.3,.22,8,40),stall:()=>new THREE.BoxGeometry(3,1.1,1.4),awn:()=>new THREE.BoxGeometry(3.4,.15,2),leaf:()=>new THREE.ConeGeometry(2.2,4.2,7),pil:()=>new THREE.CylinderGeometry(1,1,24,12,1,true)};
 const geo=(k,f)=>GC[k]||(GC[k]=f()||(GEO_DEF172[k]||(()=>new THREE.BoxGeometry(.01,.01,.01)))());
-const OUT=new THREE.MeshBasicMaterial({color:0x241d30,side:THREE.BackSide});
-function mesh(g,mat,outline=true,os=1.04){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
-/* v399 (Ian): Direção de Arte Toon Shading / Cel Shading vibrante estilo Zelda: Breath of the Wild e Genshin Impact.
-   Sombras suaves com tom lavanda/céu, rampa em degraus límpidos e iluminação ensolarada. */
+const OUT=new THREE.MeshBasicMaterial({color:0x000000,side:THREE.BackSide});
+function mesh(g,mat,outline=true,os=1.08){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
+/* v212 (Ian): sombra em faixas em TUDO que recebe luz (cenário, prédios, personagens com textura). A textura fica intacta; só a luz direta vira 3 degraus.
+   Feito no trecho comum dos shaders; desligar em Configurações vale depois de recarregar. */
 (function(){let on=true;try{on=localStorage.getItem('pds_cel211')!=='0'}catch(e){}if(!on||!THREE.ShaderChunk.aomap_fragment)return;
- THREE.ShaderChunk.aomap_fragment='{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;\n'+
- 'float b212=r212<.25?0.72:r212<.65?0.90:1.08;\n'+
- 'vec3 toonShadow=mix(dd212*(b212/max(r212,.001)),diffuseColor.rgb*vec3(.72,.76,.86)*b212,.32);\n'+
- 'reflectedLight.directDiffuse=r212>.0005?toonShadow:diffuseColor.rgb*vec3(.70,.74,.82)*.72;\n'+
- 'reflectedLight.directSpecular=step(.45,reflectedLight.directSpecular)*reflectedLight.directSpecular*1.15;}\n'+THREE.ShaderChunk.aomap_fragment})();
-const hemi=new THREE.HemisphereLight(0x52b0ff,0x7eb356,0.95);scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xfff8e7,1.05);sun.position.set(-20,40,15);scene.add(sun);
+ THREE.ShaderChunk.aomap_fragment='{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;float b212=r212<.04?r212*1.5:r212<.3?.58:r212<.7?.84:1.04;reflectedLight.directDiffuse=r212>.0005?dd212*(b212/r212):dd212;reflectedLight.directSpecular*=.5;}\n'+THREE.ShaderChunk.aomap_fragment})();
+const hemi=new THREE.HemisphereLight(0xbfdcff,0x101830,.75);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(-20,40,15);scene.add(sun);
 const bossLight=new THREE.PointLight(0xffd070,0,40,1.6);scene.add(bossLight);
 const pLight=new THREE.PointLight(0xffffff,0,22,1.4);scene.add(pLight);
 const _m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_e=new THREE.Euler(),_s=new THREE.Vector3(),_p=new THREE.Vector3(),_c=new THREE.Color();

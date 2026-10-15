@@ -149,7 +149,7 @@
     const act = story.acts[index];
     let action = 'Continue as provas e as missões da Ordem para investigar os próximos registros.';
     if (index === 6) action = hasLore('towerEnd') ? 'Procure os caçadores do Clã Ferrugem nas estradas.' : 'Alcance o andar 100 da Torre.';
-    if (index === 7) action = 'Visite uma das cinco capitais e investigue suas Âncoras.';
+    if (index === 7) action = 'Visite uma das cinco capitais (Ymiria, Zahar, Thalor, Urdan ou Verden) e investigue suas Âncoras.';
     if (index === 8) action = 'Fortaleça as cidades e prepare-se para enfrentar um guardião de ameaça divina.';
     if (index === 9) action = 'Investigue e feche o Portal Primordial durante o Fim do Mundo.';
     if (index === 10) action = 'Conquiste o rank Arconte e investigue a memória da voz que acompanha você.';

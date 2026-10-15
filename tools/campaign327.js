@@ -61,7 +61,7 @@
       { t: 'go', d: 'Volte a Torvo e ouça o testemunho dele.', verb: 'OUVIR TORVO', same: 0, fig: { torvo: true },
         done: 'Torvo: — Atravessamos há cem anos. Nosso mundo foi esvaziado. Ele não destrói mundos: ele os recolhe.' }] },
     { id: 'a9', act: 9, title: 'IX — As Capitais', steps: [
-      { t: 'talk', npc: 'Lyra', d: 'Compare com Lyra os registros das capitais.', say: ['Os ataques seguem as cinco capitais. Cada uma guarda uma Âncora.', 'Vá ver com os próprios olhos onde a pressão é real.'] },
+      { t: 'talk', npc: 'Lyra', d: 'Compare com Lyra os registros das capitais.', say: ['Os ataques seguem as cinco capitais: Ymiria, Zahar, Thalor, Urdan e Verden. Cada uma guarda uma Âncora.', 'Vá ver com os próprios olhos onde a pressão é real.'] },
       { t: 'caps', n: 3, d: 'Visite 3 capitais e veja a pressão sobre as Âncoras.' },
       { t: 'ev', ev: 'elite', n: 6, d: 'Contenha as ameaças: derrote 6 elites.' },
       { t: 'talk', npc: 'Brann', d: 'Conte a Brann onde reforçar as defesas.', say: ['Reforçamos onde a pressão era real, não onde o medo mandava. Bom trabalho.'] }] },

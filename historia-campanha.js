@@ -147,7 +147,7 @@ window.SOLO_RPG_STORY = {
         "Localizar os sinais de pressão em cada Âncora.",
         "Reforçar as defesas e conter ameaças onde realmente surgirem."
       ],
-      "evidence": "Depois do resgate antigo, sobreviventes e Transmigradores usaram as técnicas da Torre para separar o corpo do Arquiteto em cinco partes, cada uma presa numa capital. Aster estabiliza a rede; não contém uma sexta parte.",
+      "evidence": "Depois do resgate antigo, sobreviventes e Transmigradores usaram as técnicas da Torre para separar o corpo do Arquiteto em cinco partes, cada uma presa numa capital (Ymiria, Zahar, Thalor, Urdan e Verden). Aster estabiliza a rede; não contém uma sexta parte.",
       "consequence": "Preservar as Âncoras passa a ter um motivo claro. Nenhuma capital é destruída automaticamente pelo roteiro.",
       "diary": "Os registros das capitais explicam como a resistência formou as cinco prisões depois da primeira abertura. As Pedras-Âncora são antigas, mas seu uso para prender o corpo é posterior ao resgate. Fechar uma Fenda não recaptura uma peça fugitiva.",
       "prerequisites": [
@@ -625,11 +625,11 @@ window.SOLO_RPG_STORY = {
         "id": "act_09",
         "title": "IX — As Capitais",
         "paragraphs": [
-          "As cinco marcas vistas na Torre pertenciam a cinco capitais. Cada uma guardava uma Pedra-Âncora. Aster ficava separada, no vínculo central da rede.",
+          "As cinco marcas vistas na Torre pertenciam às cinco capitais: Ymiria, Zahar, Thalor, Urdan e Verden. Cada uma guardava uma Pedra-Âncora. Aster ficava separada, no vínculo central da rede.",
           "Nas câmaras das capitais, os registros guardavam uma parte da história que o Narrador nunca contara.",
           "Depois da primeira grande abertura, o Arquiteto tentara fixar seu corpo naquele mundo. Sobreviventes do resgate antigo, Transmigradores e a resistência que daria origem à Ordem trabalharam juntos para detê-lo. Conhecimentos da Torre permitiram separar sua manifestação em cinco partes. As Pedras-Âncora, antes usadas para conter passagens, tornaram-se prisões ligadas entre si.",
           "Os registros posteriores à abertura preservavam nomes diferentes em suas cópias. As marcas do trabalho eram as mesmas. A Ordem atual herdara a defesa; não a inventara do nada. Aquela reconstrução não dependia de o Narrador ter testemunhado cada etapa.",
-          "Aster estabilizava a rede de passagens. As cinco capitais mantinham suas próprias prisões físicas; o nexo central não guardava uma sexta parte. Por isso o Arquiteto atacava rotas específicas: libertar o corpo sem alcançar Aster ainda o deixaria dependente deste mundo.",
+          "Aster estabilizava a rede de passagens. As cinco capitais (Ymiria nas neves, Zahar no deserto, Thalor nas águas, Urdan nas cavernas de pedra e Verden nos pântanos) mantinham suas próprias prisões físicas; o nexo central não guardava uma sexta parte. Por isso o Arquiteto atacava rotas específicas: libertar o corpo sem alcançar Aster ainda o deixaria dependente deste mundo.",
           "O primeiro aviso chegou de uma capital cuja defesa havia cedido. A Fenda da Âncora estava aberta. Sua parte prisioneira escapara.",
           "{nome} e a patrulha fecharam a passagem. A pressão sobre a cidade diminuiu, mas os sinais da peça fugitiva continuaram na estrada.",
           "— Ela não voltou — disse Brann, ouvindo o relatório.",

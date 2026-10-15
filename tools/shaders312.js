@@ -124,30 +124,6 @@ function slash(col,a0,spread,r0,r1,op=1){const m=make(FS_SLASH,{uCol:{value:new 
 function swirl(col=0xb48cff,op=1){const m=make(FS_SWIRL,{uCol:{value:new T.Color(col)}},PM);m.opacity=op;return m}
 function water(col=0x3aa0ff,op=1){const m=make(FS_WATER,{uCol:{value:new T.Color(col)},uAmp:{value:.25},...seed()},PM,VS2);m.opacity=op;return m}
 function voidm(col=0x7a3cff,op=1){const m=make(FS_VOID,{uCol:{value:new T.Color(col)},uAmp:{value:.12},...seed()},PM,VS2);m.opacity=op;return m}
-function toonize(root){
-  if(!root)return;
-  root.traverse(o=>{
-    if(!o.isMesh&&!o.isSkinnedMesh)return;
-    const m=o.material;if(!m)return;
-    const list=Array.isArray(m)?m:[m];
-    const converted=list.map(mat=>{
-      if(!mat||mat.isMeshToonMaterial||mat.isMeshBasicMaterial||mat.isShaderMaterial)return mat;
-      const t=new T.MeshToonMaterial({
-        color:mat.color?mat.color.clone():0xffffff,
-        map:mat.map||null,
-        emissive:mat.emissive?mat.emissive.clone():0,
-        emissiveMap:mat.emissiveMap||null,
-        normalMap:mat.normalMap||null,
-        transparent:mat.transparent,
-        opacity:mat.opacity,
-        skinning:!!o.isSkinnedMesh,
-        side:mat.side
-      });
-      return t;
-    });
-    o.material=Array.isArray(m)?converted:converted[0];
-  });
-}
 let last=performance.now();(function tick(){requestAnimationFrame(tick);const n=performance.now();U.uTime.value+=(n-last)/1000;last=n})();
-window.Shaders312={energy,fire,lava,metal,fireball,smoke,electric,ray,shield,magic,slash,swirl,water,voidm,U,toonize};
+window.Shaders312={energy,fire,lava,metal,fireball,smoke,electric,ray,shield,magic,slash,swirl,water,voidm,U};
 })();

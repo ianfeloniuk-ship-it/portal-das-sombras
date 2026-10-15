@@ -2663,18 +2663,14 @@ const glow=(c,o=.8)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opaci
 /* v172: algumas peças pediam a forma pelo nome sem saber criá-la (()=>0). Se ninguém criou antes, usa a forma padrão daquele nome — senão a tela quebra (torre travava ao limpar o andar). */
 const GEO_DEF172={gring:()=>new THREE.TorusGeometry(2.3,.22,8,40),stall:()=>new THREE.BoxGeometry(3,1.1,1.4),awn:()=>new THREE.BoxGeometry(3.4,.15,2),leaf:()=>new THREE.ConeGeometry(2.2,4.2,7),pil:()=>new THREE.CylinderGeometry(1,1,24,12,1,true)};
 const geo=(k,f)=>GC[k]||(GC[k]=f()||(GEO_DEF172[k]||(()=>new THREE.BoxGeometry(.01,.01,.01)))());
-const OUT=new THREE.MeshBasicMaterial({color:0x241d30,side:THREE.BackSide});
-function mesh(g,mat,outline=true,os=1.04){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
-/* v399 (Ian): Direção de Arte Toon Shading / Cel Shading vibrante estilo Zelda: Breath of the Wild e Genshin Impact.
-   Sombras suaves com tom lavanda/céu, rampa em degraus límpidos e iluminação ensolarada. */
+const OUT=new THREE.MeshBasicMaterial({color:0x000000,side:THREE.BackSide});
+function mesh(g,mat,outline=true,os=1.08){const m=new THREE.Mesh(g,mat);if(outline){const o=new THREE.Mesh(g,OUT);o.scale.setScalar(os);m.add(o)}return m}
+/* v212 (Ian): sombra em faixas em TUDO que recebe luz (cenário, prédios, personagens com textura). A textura fica intacta; só a luz direta vira 3 degraus.
+   Feito no trecho comum dos shaders; desligar em Configurações vale depois de recarregar. */
 (function(){let on=true;try{on=localStorage.getItem('pds_cel211')!=='0'}catch(e){}if(!on||!THREE.ShaderChunk.aomap_fragment)return;
- THREE.ShaderChunk.aomap_fragment='{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;\n'+
- 'float b212=r212<.25?0.72:r212<.65?0.90:1.08;\n'+
- 'vec3 toonShadow=mix(dd212*(b212/max(r212,.001)),diffuseColor.rgb*vec3(.72,.76,.86)*b212,.32);\n'+
- 'reflectedLight.directDiffuse=r212>.0005?toonShadow:diffuseColor.rgb*vec3(.70,.74,.82)*.72;\n'+
- 'reflectedLight.directSpecular=step(.45,reflectedLight.directSpecular)*reflectedLight.directSpecular*1.15;}\n'+THREE.ShaderChunk.aomap_fragment})();
-const hemi=new THREE.HemisphereLight(0x52b0ff,0x7eb356,0.95);scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xfff8e7,1.05);sun.position.set(-20,40,15);scene.add(sun);
+ THREE.ShaderChunk.aomap_fragment='{vec3 dd212=reflectedLight.directDiffuse;float a212=max(dot(diffuseColor.rgb,vec3(.3333)),.03);float r212=dot(dd212,vec3(.3333))/a212;float b212=r212<.04?r212*1.5:r212<.3?.58:r212<.7?.84:1.04;reflectedLight.directDiffuse=r212>.0005?dd212*(b212/r212):dd212;reflectedLight.directSpecular*=.5;}\n'+THREE.ShaderChunk.aomap_fragment})();
+const hemi=new THREE.HemisphereLight(0xbfdcff,0x101830,.75);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(-20,40,15);scene.add(sun);
 const bossLight=new THREE.PointLight(0xffd070,0,40,1.6);scene.add(bossLight);
 const pLight=new THREE.PointLight(0xffffff,0,22,1.4);scene.add(pLight);
 const _m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_e=new THREE.Euler(),_s=new THREE.Vector3(),_p=new THREE.Vector3(),_c=new THREE.Color();
@@ -3856,7 +3852,7 @@ function envBlades(){const P=[],N=[],C=[],I=[];const R=mulberry32(77);
   for(let b=0;b<7;b++){const a=R()*Math.PI,r=R()*.22,ox=Math.cos(a*2)*r,oz=Math.sin(a*2)*r,w=.055+R()*.04,h=.42+R()*.5,lean=(R()-.5)*.35,dx=Math.cos(a),dz=Math.sin(a);
     const tipx=ox+Math.cos(a+1.57)*lean,tipz=oz+Math.sin(a+1.57)*lean,base=P.length/3;
     P.push(ox-dx*w,0,oz-dz*w,ox+dx*w,0,oz+dz*w,tipx,h,tipz);
-    const k=.85+R()*.3;C.push(.28*k,.68*k,.18*k,.28*k,.68*k,.18*k,.55*k,.88*k,.32*k);
+    const k=.75+R()*.35;C.push(.16*k,.33*k,.1*k,.16*k,.33*k,.1*k,.46*k,.7*k,.25*k);
     for(let q=0;q<3;q++)N.push(0,1,0);I.push(base,base+1,base+2,base,base+2,base+1)}
   const n=P.length/3;ENV.m.blades={p:new Float32Array(P),n:new Float32Array(N),c:new Float32Array(C),i:new Uint16Array(I),nv:n,min:[-.3,0,-.3],max:[.3,1,.3],h:.9,w:.6}}
 /* textura de detalhe do chão (ruído de grama, bem sutil) */
@@ -3898,7 +3894,7 @@ const FLOWERS=['flower_purpleA','flower_redA','flower_yellowA','flower_purpleB',
 /* cores do chão: grama, terra batida nas estradas, pedra na cidade, terra escura no perigo */
 function envGroundColors(pg,near){
   const pos=pg.attributes.position,cols=new Float32Array(pos.count*3),t=new THREE.Color(),u=new THREE.Color();
-  const G1=new THREE.Color(0x56be32),G2=new THREE.Color(0x72d43e),DRY=new THREE.Color(0x9cb85c),FOR=new THREE.Color(0x3ea030),DIRT=new THREE.Color(0xd2b57d),COB=new THREE.Color(0x9fa19c),PLZ=new THREE.Color(0xc0b8a8),BAD=new THREE.Color(0x4a3632),SNOW=new THREE.Color(0xf6f9fd),SAND=new THREE.Color(0xd9c288),SWMP=new THREE.Color(0x486438);
+  const G1=new THREE.Color(0x4a6d2e),G2=new THREE.Color(0x628a3b),DRY=new THREE.Color(0x87864c),FOR=new THREE.Color(0x3a5828),DIRT=new THREE.Color(0x8a7454),COB=new THREE.Color(0x837b6f),PLZ=new THREE.Color(0x989084),BAD=new THREE.Color(0x3a2b28),SNOW=new THREE.Color(0xf4f7fb),SAND=new THREE.Color(0xc9ae76),SWMP=new THREE.Color(0x344428);
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let d=1e9,road=0;
     for(const c of near){const dx=x-c.x,dz=z-c.z,dd=Math.hypot(dx,dz);if(dd<d)d=dd;if(dd<125){const m=Math.min(Math.abs(dx),Math.abs(dz));road=Math.max(road,clamp((4.9-m)/1.8,0,1)*clamp((125-dd)/12,0,1))}}
     t.copy(G1).lerp(G2,WN(x*.02+40,z*.02+40));
@@ -3908,7 +3904,7 @@ function envGroundColors(pg,near){
     const fo=WN(x*.035,z*.035);if(fo>.48)t.lerp(FOR,Math.min(.7,(fo-.48)*3.5));
     if(road>0)t.lerp(u.copy(DIRT).multiplyScalar(.9+WN(x*.3,z*.3)*.2),road*.95);
     if(d<CITYR-3){t.lerp(COB,clamp((CITYR-3-d)/2.5,0,1));if(d<15)t.lerp(PLZ,clamp((15-d)/2,0,1))}
-    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.28);t.multiplyScalar(1.08);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
+    t.lerp(BAD,clamp((d-CITYR-12)/160,0,1)*.42);t.multiplyScalar(1.05);cols[i*3]=t.r;cols[i*3+1]=t.g;cols[i*3+2]=t.b}
   pg.setAttribute('color',new THREE.BufferAttribute(cols,3))}
 // BEGIN ENVIRONMENT128
 /* Original local environmental meshes. Shared templates; no network or generation service. */
@@ -4378,9 +4374,10 @@ const CN_C=['',' Alta',' do Norte',' Nova',' Velha',' do Sul',' dos Ventos',' da
 function cityNameGen(R){return CN_A[Math.floor(R()*CN_A.length)]+CN_B[Math.floor(R()*CN_B.length)]+CN_C[Math.floor(R()*CN_C.length)]}
 const CITY_NAMES=['Valkor','Nymeria','Seoran','Drakemoor','Lumen','Kaldera','Veyra','Orion','Tessar','Mirath','Gwyn','Solace','Ardent','Kirin','Hollow','Zephyr','Obsidia','Marrow','Eldran','Sylvar','Brisa','Corvo','Thalos','Umbra'];
 function rh(a,b,c=0){return (Math.imul(a|0,73856093)^Math.imul(b|0,19349663)^Math.imul(c|0,83492791)^WSEED)>>>0}
+const CANON_CAPITALS={'0,0':'Aster','0,-5':'Ymiria','5,0':'Zahar','-5,0':'Thalor','0,5':'Urdan','5,5':'Verden'};
 function regionCity(rx,rz){const k=rx+','+rz;let c=cityCache.get(k);if(c)return c;const R=mulberry32(rh(rx,rz,7));
   const H217=REG>>1,o=(rx===0&&rz===0)?{x:H217,z:H217}:{x:Math.round(H217+(R()-.5)*REG*.4),z:Math.round(H217+(R()-.5)*REG*.4)};const cx=rx*REG+o.x-H217,cz=rz*REG+o.z-H217;/* v217: cidade perto do centro da região: no mínimo ~1,1 km entre cidades */
-  const cap217=((rx%5)+5)%5===0&&((rz%5)+5)%5===0;c={id:k,cx,cz,x:cx*CH,z:cz*CH,capital:cap217,name:(rx===0&&rz===0)?'Aster':cityNameGen(R)};if(cap217&&c.name!=='Aster')c.name='Capital '+c.name;cityCache.set(k,c);return c}
+  const cap217=((rx%5)+5)%5===0&&((rz%5)+5)%5===0;const cName=CANON_CAPITALS[k]||(cap217?'Capital '+cityNameGen(R):cityNameGen(R));c={id:k,cx,cz,x:cx*CH,z:cz*CH,capital:cap217,name:cName};cityCache.set(k,c);return c}
 function nearestCity(x,z){const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG);let best=null,bd=1e12;
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(rx+i,rz+j),d=Math.hypot(x-c.x,z-c.z);if(d<bd){bd=d;best=c}}return{c:best,d:bd}}
 function citiesAround(x,z,rad){const out=[];const rx=Math.floor(Math.round(x/CH)/REG),rz=Math.floor(Math.round(z/CH)/REG),n=Math.ceil(rad/(CH*REG))+1;
@@ -6868,7 +6865,7 @@ const MAGIC_CLS=[3,5,6,7,8,9,10,11,12,13,16,18,19,20];
 const MELEE_MAGIC297=[22];
 CLASSES.push(
  {n:'Monge',w:10,ranged:false,body:0xc9862e,hair:0x2a1a10,wep:'none',sk:[S('Rajada de Punhos','cone',3,8,1.7,0xffc86a),S('Chute Giratório','nova',6,14,2,0xffa040),S('Postura da Montanha','guard',14,16,.3,0xd9b25a)].map(k=>({...k,resource260:'fury'}))},
- {n:'Lâmina Arcana',w:10,ranged:false,body:0x3a4fb0,hair:0xe8e8ff,wep:'staff',sk:[S('Corte Arcano','cone',3,10,1.9,0x8fa0ff),S('Lâmina Flamejante','buff_dmg',16,20,1.5,0xff7a3a),S('Salto Rúnico','dash_strike',6,14,2.3,0xb48cff)].map(k=>({...k,resource260:'mana'}))},
+ {n:'Lâmina Arcana',w:10,ranged:false,body:0x3a4fb0,hair:0xe8e8ff,wep:'sword',sk:[S('Corte Arcano','cone',3,10,1.9,0x8fa0ff),S('Lâmina Flamejante','buff_dmg',16,20,1.5,0xff7a3a),S('Salto Rúnico','dash_strike',6,14,2.3,0xb48cff)].map(k=>({...k,resource260:'mana'}))},
  {n:'Lanceiro',w:10,ranged:false,/* v339 (Ian): sem lança bate de perto; só arremessa a lança que está na mão */body:0x7a5a2a,hair:0x3b2a20,wep:'spear',sk:[S('Estocada Longa','cone',4,10,2.1,0xe0d0a0),S('Varredura de Lança','nova',5,12,1.8,0xffe0a0),S('Salto do Dragão','dash_strike',7,16,2.6,0xff8040)].map(k=>({...k,resource260:'vigor'}))},
  {n:'Berserker',w:10,ranged:false,body:0x8a1f1f,hair:0x5a2a12,wep:'axe',sk:[S('Golpe Brutal','cone',4,12,2.3,0xff4a2a),S('Redemoinho de Aço','nova',6,16,2.1,0xff6a3a),S('Sede de Sangue','buff_dmg',16,20,1.6,0xc81e1e)].map(k=>({...k,resource260:'fury'}))});
 MAGIC_CLS.push(22);
@@ -6954,12 +6951,12 @@ function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.W
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
-  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x4ea8ff),sn:new THREE.Color(0x0a142c),fd:new THREE.Color(0x8ed5ff),fn:new THREE.Color(0x102042),hd:new THREE.Color(0xebf5ff),hn:new THREE.Color(0x5674b8),gd:new THREE.Color(0x6ea848),gn:new THREE.Color(0x162238),ud:new THREE.Color(0xfff7e8),un:new THREE.Color(0xaec2ff),gray:new THREE.Color(0x9eb0c2),w:0};
+  if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x87b6e2),sn:new THREE.Color(0x040a18),fd:new THREE.Color(0xa3c4e2),fn:new THREE.Color(0x07122c),hd:new THREE.Color(0xdcecff),hn:new THREE.Color(0x4a66a8),gd:new THREE.Color(0x5c6242),gn:new THREE.Color(0x0e1628),ud:new THREE.Color(0xfff0d6),un:new THREE.Color(0x9ab4ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
-    hemi.intensity=(.92-.35*n)*(1-D.w*.15);sun.intensity=(1.05-.5*n)*(1-D.w*.35);scene.fog.density=.0045+D.w*.004}
-  else{const day=new THREE.Color(0x4ea8ff),night=new THREE.Color(0x0a142c);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0x8ed5ff)).lerp(new THREE.Color(0x102042),n);
-  hemi.intensity=1.1-.4*n;sun.intensity=1.15-.5*n}if(L.moon)L.moon.visible=n>.3;
+    hemi.intensity=(.64-.3*n)*(1-D.w*.18);sun.intensity=(.68-.4*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
+  else{const day=new THREE.Color(0x3a6aa8),night=new THREE.Color(0x040a18);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0x4a78b0)).lerp(new THREE.Color(0x06112a),n);
+  hemi.intensity=1-.45*n;sun.intensity=1.05-.6*n}if(L.moon)L.moon.visible=n>.3;
   if(n>.99&&!L.nightNote){L.nightNote=true;narratorEvent105('night');toast('<b>[NARRADOR]</b> A noite caiu. Monstros mais fortes nas terras selvagens.')}if(n<.01){if(L.nightNote)narratorEvent105('dawn');L.nightNote=false}}
 /* eventos do mundo */
 let evT=240;
@@ -8190,22 +8187,22 @@ function improveTransmigrator(){const lv=transmigratorLevel253();if(lv>=10||(run
 function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Transmigrador · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
 
 
-/* v399 (Ian): Visual estilizado vibrante inspirado em Zelda: Breath of the Wild e Genshin Impact. Liga/desliga em Configurações → Tela. */
-function toon208(){let on=true;try{on=localStorage.getItem('pds_toon208')!=='0'}catch(e){}const c=renderer&&renderer.domElement;if(c)c.style.filter=on?'saturate(1.32) contrast(1.05) brightness(1.05)':'';return on}
-/* v210/v399: contorno sutil estilizado nos personagens e monstros. */
-function outlineOn210(){try{return localStorage.getItem('pds_outline210')!=='0'}catch(e){return true}}
-function outlineMat210(mesh){const m=new THREE.MeshBasicMaterial({color:0x241d30,side:THREE.BackSide,skinning:!!mesh.isSkinnedMesh});const u={value:.0032};
- m.onBeforeCompile=sh=>{sh.uniforms.uOW=u;if(mesh.isSkinnedMesh){sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <skinning_vertex>','#include <skinning_vertex>\nmat4 outlineSkin210=skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW;\noutlineSkin210=bindMatrixInverse*outlineSkin210*bindMatrix;\nvec3 outlineNormal210=(outlineSkin210*vec4(normal,0.0)).xyz;\nif(length(outlineNormal210)>0.0)transformed+=normalize(outlineNormal210)*uOW;')}else{sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=normal*uOW;')}};
+/* v208 (Ian): TESTE do visual cartunesco estilo Fable: cores mais vivas e quentes, contraste maior. Liga/desliga em Configurações → Tela. */
+function toon208(){let on=true;try{on=localStorage.getItem('pds_toon208')!=='0'}catch(e){}const c=renderer&&renderer.domElement;if(c)c.style.filter=on?'saturate(1.42) contrast(1.1) brightness(1.01) sepia(.1) hue-rotate(-6deg)':'';return on}/* v209: aprovado pelo Ian, ligado por padrão */
+/* v210 (Ian): TESTE de contorno de desenho animado nos personagens e monstros (casca invertida, escura). */
+function outlineOn210(){try{return localStorage.getItem('pds_outline210')!=='0'}catch(e){return true}}/* v211: aprovado, ligado por padrão */
+function outlineMat210(mesh){const m=new THREE.MeshBasicMaterial({color:0x1b1220,side:THREE.BackSide,skinning:!!mesh.isSkinnedMesh});const u={value:.004};
+ m.onBeforeCompile=sh=>{sh.uniforms.uOW=u;if(mesh.isSkinnedMesh){/* MeshBasic sem envmap não expõe skinMatrix; recompõe a matriz dos ossos depois do skinning. */sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <skinning_vertex>','#include <skinning_vertex>\nmat4 outlineSkin210=skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW;\noutlineSkin210=bindMatrixInverse*outlineSkin210*bindMatrix;\nvec3 outlineNormal210=(outlineSkin210*vec4(normal,0.0)).xyz;\nif(length(outlineNormal210)>0.0)transformed+=normalize(outlineNormal210)*uOW;')}else{sh.vertexShader='uniform float uOW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=normal*uOW;')}};/* v212: empurra depois da pele (ossos com escala grande inchavam a casca) */
  m.customProgramCacheKey=()=>'ol210'+(mesh.isSkinnedMesh?1:0);m.userData.u=u;return m}
 function outlineAdd210(root){if(!root||root.userData.ol210)return;root.userData.ol210=1;const list=[];root.traverse(o=>{if((o.isMesh||o.isSkinnedMesh)&&!o.userData.ol210c&&o.geometry&&o.geometry.attributes.normal&&o.visible&&!(o.material&&(o.material.transparent||o.material.blending===THREE.AdditiveBlending)))list.push(o)});
  for(const o of list){const mat=outlineMat210(o);let c;if(o.isSkinnedMesh){c=new THREE.SkinnedMesh(o.geometry,mat);c.bind(o.skeleton,o.bindMatrix)}else c=new THREE.Mesh(o.geometry,mat);c.userData.ol210c=1;c.frustumCulled=false;c.castShadow=false;
-  c.onBeforeRender=()=>{const e=o.matrixWorld.elements,s=Math.hypot(e[0],e[1],e[2])||1;mat.userData.u.value=.0032/s;c.visible=o.visible};
+  c.onBeforeRender=()=>{const e=o.matrixWorld.elements,s=Math.hypot(e[0],e[1],e[2])||1;/* 4 mm no corpo e equipamento; 28 mm cobria a pele e engrossava os cabos. */mat.userData.u.value=.004/s;c.visible=o.visible};
   if(o.isSkinnedMesh){o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale)}else o.add(c)}}
 function outlineRemove210(root){if(!root||!root.userData.ol210)return;root.userData.ol210=0;const rm=[];root.traverse(o=>{if(o.userData.ol210c)rm.push(o)});for(const o of rm){o.material.dispose();o.parent&&o.parent.remove(o)}}
-/* v211/v399: sombra em faixas Toon Shading (Zelda / Genshin) com 3 tons claros e suaves em personagens e monstros. */
-let GRAD211=null;function grad211(){if(GRAD211)return GRAD211;const d=new Uint8Array([185,188,198,255, 225,228,235,255, 255,255,255,255]);GRAD211=new THREE.DataTexture(d,3,1,THREE.RGBAFormat);GRAD211.minFilter=GRAD211.magFilter=THREE.NearestFilter;GRAD211.generateMipmaps=false;GRAD211.needsUpdate=true;return GRAD211}
+/* v211 (Ian): sombra em faixas (cel shading), etapa 1: personagens e monstros. O material vira toon com 3 tons; cor, brilho de dano e transparência continuam vindo do material original. */
+let GRAD211=null;function grad211(){if(GRAD211)return GRAD211;const d=new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]);GRAD211=new THREE.DataTexture(d,3,1,THREE.RGBAFormat);GRAD211.minFilter=GRAD211.magFilter=THREE.NearestFilter;GRAD211.generateMipmaps=false;GRAD211.needsUpdate=true;return GRAD211}
 const CEL211=new WeakMap();
-function celMat211(m,skin){if(!m||(m.onBeforeCompile&&m.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile)||m.isMeshToonMaterial||m.isMeshBasicMaterial||m.isShaderMaterial||m.transparent&&m.opacity<.99||m.blending===THREE.AdditiveBlending)return m;let t=CEL211.get(m);if(t)return t;
+function celMat211(m,skin){if(!m||m.map||m.emissiveMap||(m.onBeforeCompile&&m.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile)||m.isMeshToonMaterial||m.isMeshBasicMaterial||m.isShaderMaterial||m.transparent&&m.opacity<.99||m.blending===THREE.AdditiveBlending)return m;let t=CEL211.get(m);if(t)return t;
  t=new THREE.MeshToonMaterial({color:m.color?m.color.clone():0xffffff,map:m.map||null,emissive:m.emissive?m.emissive.clone():0,emissiveMap:m.emissiveMap||null,normalMap:m.normalMap||null,alphaTest:m.alphaTest||0,transparent:m.transparent,opacity:m.opacity,vertexColors:m.vertexColors,skinning:skin||m.skinning,side:m.side,gradientMap:grad211()});t.userData.src211=m;CEL211.set(m,t);return t}
 function celSync211(mesh){const a=Array.isArray(mesh.material)?mesh.material:[mesh.material];for(const t of a){const o=t&&t.userData.src211;if(!o)continue;if(o.color)t.color.copy(o.color);if(o.emissive)t.emissive.copy(o.emissive);t.opacity=o.opacity;t.transparent=o.transparent;t.visible=o.visible}}
 function celAdd211(root){if(!root||root.userData.cel211)return;root.userData.cel211=1;root.traverse(o=>{if(!(o.isMesh||o.isSkinnedMesh)||o.userData.ol210c||o.userData.cel211m)return;const sk=!!o.isSkinnedMesh;const before=o.material;o.material=Array.isArray(before)?before.map(m=>celMat211(m,sk)):celMat211(before,sk);if(o.material===before)return;o.userData.cel211m=before;const ob=o.onBeforeRender;o.onBeforeRender=function(...a){celSync211(o);if(ob)ob.apply(this,a)}})}
@@ -8213,7 +8210,7 @@ function celRemove211(root){if(!root||!root.userData.cel211)return;root.userData
 function celOn211(){try{return localStorage.getItem('pds_cel211')!=='0'}catch(e){return true}}
 setInterval(()=>{try{if(!started||!player)return;const on=celOn211(),roots=[player.m&&player.m.root,...enemies.filter(e=>!e.dead).map(e=>e.m&&e.m.root),...(typeof allies!=='undefined'?allies:[]).map(a=>a.m&&a.m.root)];for(const r of roots)if(r)on?celAdd211(r):celRemove211(r)}catch(e){}},700);
 setInterval(()=>{try{if(!started||!player)return;const on=outlineOn210(),roots=[player.m&&player.m.root,...enemies.filter(e=>!e.dead).map(e=>e.m&&e.m.root),...(typeof allies!=='undefined'?allies:[]).map(a=>a.m&&a.m.root)];for(const r of roots)if(r)on?outlineAdd210(r):outlineRemove210(r)}catch(e){}},700);
-function cfgView(){view=cfgView;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-tip154="Sombra em faixas, estilo anime (Zelda / Genshin). Vale depois de recarregar o jogo." onclick="try{localStorage.setItem(\'pds_cel211\',localStorage.getItem(\'pds_cel211\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Sombra em faixas: '+(celOn211()?'LIGADA':'DESLIGADA')+'</button><button class="btn" data-tip154="Contorno sutil estilizado em personagens e monstros." onclick="try{localStorage.setItem(\'pds_outline210\',localStorage.getItem(\'pds_outline210\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Contorno: '+(outlineOn210()?'LIGADO':'DESLIGADO')+'</button><button class="btn" data-tip154="Cores vivas e céu vibrante estilo Zelda / Genshin." onclick="try{localStorage.setItem(\'pds_toon208\',localStorage.getItem(\'pds_toon208\')===\'0\'?\'1\':\'0\')}catch(e){}toon208();cfgView()">Visual estilizado: '+(toon208()?'LIGADO':'DESLIGADO')+'</button><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
+function cfgView(){view=cfgView;openModal('CONFIGURAÇÕES','<div class="sec">SAVE</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveRun();saveCodeView(false)">Exportar save</button><button class="btn red" onclick="newGame()">Começar jogo novo</button></div><div class="sec">TELA</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-tip154="Sombra em faixas, como desenho animado. Vale depois de recarregar o jogo." onclick="try{localStorage.setItem(\'pds_cel211\',localStorage.getItem(\'pds_cel211\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Sombra em faixas: '+(celOn211()?'LIGADA':'DESLIGADA')+'</button><button class="btn" data-tip154="Teste: contorno escuro de desenho animado em personagens e monstros." onclick="try{localStorage.setItem(\'pds_outline210\',localStorage.getItem(\'pds_outline210\')===\'0\'?\'1\':\'0\')}catch(e){}cfgView()">Contorno: '+(outlineOn210()?'LIGADO':'DESLIGADO')+'</button><button class="btn" data-tip154="Teste: cores mais vivas e quentes, como um conto de fadas." onclick="try{localStorage.setItem(\'pds_toon208\',localStorage.getItem(\'pds_toon208\')===\'0\'?\'1\':\'0\')}catch(e){}toon208();cfgView()">Visual cartunesco: '+(toon208()?'LIGADO':'DESLIGADO')+'</button><button class="btn" onclick="try{localStorage.setItem(\'pds_hidemis\',localStorage.getItem(\'pds_hidemis\')===\'1\'?\'0\':\'1\')}catch(e){}cfgView()">Linha de objetivos: '+((()=>{try{return localStorage.getItem('pds_hidemis')==='1'}catch(e){return false}})()?'ESCONDIDA':'VISÍVEL')+'</button><button class="btn" onclick="controlsView()">Ver atalhos do teclado</button></div><div class="sec">SOM E GRÁFICOS</div><div style="display:flex;gap:8px"><button class="btn" onclick="$(\'bSnd\').click();cfgView()">'+(AU.on?'Som: LIGADO':'Som: MUDO')+'</button><button class="btn" onclick="$(\'bGfx\').click();cfgView()">'+(ENV.lite?'Gráficos: LEVES':'Gráficos: HD')+'</button></div>'+audioSettings()+readySoundSettings()+
   narratorSettings105()+movementSettings()+'<div class="sec">TAMANHO DOS BOTÕES</div><input aria-label="Tamanho dos botões" type="range" min=".75" max="1.35" step=".05" value="'+CFG.btn+'" oninput="CFG.btn=+this.value;applyCfg()" style="width:100%">'+
   
   ''+(touch?'':'<div class="sec">TECLADO (PC)</div><button class="mini" onclick="keysView()">Configurar teclas</button>')+'')}
@@ -8305,7 +8302,8 @@ function startGame(){
   window.Lights348?.warm();
   started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;
   const rk=RANKS[rankOf()];
-  logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
+  if(profile.classless)logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · Sem Classe. A queda da Fenda deixou marcas na estrada.',4000);
+  else logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
   logNews('<b>[NARRADOR]</b> Portais abertos nas planícies. Veja no MAPA.');
 
   unlockLore('start');if(!profile.creationPending91)tutorial();setTimeout(styleTutorial,1200);setInterval(()=>{if(started&&run&&!player.dead)checkTitles()},3000);
@@ -8950,9 +8948,9 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=398"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v399</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v400</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=399;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=400;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

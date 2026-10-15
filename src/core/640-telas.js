@@ -42,7 +42,8 @@ function startGame(){
   window.Lights348?.warm();
   started=true;paused=false;applyHistory95();renderHistory95(true);cam.x=player.x;cam.z=player.z;
   const rk=RANKS[rankOf()];
-  logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
+  if(profile.classless)logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · Sem Classe. A queda da Fenda deixou marcas na estrada.',4000);
+  else logNews('<b>[NARRADOR]</b> Viajante rank <b style="color:'+rk.c+'">'+rk.id+'</b> · '+CLASSES[profile.cls].n+'. Bem-vindo à Cidade de Aster.',4000);
   logNews('<b>[NARRADOR]</b> Portais abertos nas planícies. Veja no MAPA.');
 
   unlockLore('start');if(!profile.creationPending91)tutorial();setTimeout(styleTutorial,1200);setInterval(()=>{if(started&&run&&!player.dead)checkTitles()},3000);
