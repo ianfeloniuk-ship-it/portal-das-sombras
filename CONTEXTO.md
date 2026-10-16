@@ -1,3 +1,9 @@
+## v432 — Ombreira e saiote acompanham o corpo em todas as armaduras GLB, 16/10/2026
+- Pedido de Ian: "faz isso tbm pra todas as armaduras com glb que tem no jogo" (ombreira presa no peito, braço atravessando; saiote inteiro mexendo).
+- Refeitos com o fit.py novo (v430): Estrela r0..r6, Ferro r1..r7, Aço r0..r7, a partir dos GLBs originais (casados por render e cor, sem mapa salvo). Estrela Primeva (r7) ficou a antiga: o GLB original não estava no PC.
+- Pasta nova models/equipment431/ (cache); EST416 aponta para ela. set-visual153.js ?v=432.
+- Teste: folhas do Blender (frente e ataque) das 22 e as peças no herói no navegador.
+
 ## v431 — Sem auras feias: auréola na cabeça; adaga SS retirada, 16/10/2026
 - Pedido de Ian: tirar as auras em volta (armas e mobs) e trocar por uma auréola de cor em cima da cabeça; armas sem aura nenhuma (forma e cor do modelo identificam o rank); adaga SS não ficou boa, voltar a padrão até ele refazer.
 - tools/warrior-player127.js (?v=431): `aura162` desligada (nenhuma arma tem aura). `DAG428[7]=0`: rank SS volta à adaga comum pintada; `models/armas155/adaga-rank7.glb` fica no repositório, sem uso.
