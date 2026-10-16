@@ -79,7 +79,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     const s=EW(b,fallen?'building_destroyed':k,sx,0,sz,ry,W,fallen?.8:1);ENV.cast.push({x:sx+.9,z:sz-.7,r:W*.72,k:.5});shopH[sp.id]=cityDim253(k,W).h;
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
     if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
-      const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1)}}
+      const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1);addCol({x:p3.x,z:p3.z,r:sp.id==='guild'?.65:.55})/* v429: não se atravessa mais */}}
   const fs=0;/* v236: fonte própria do selo (seal231) */if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}
   EW(b,'stall-red',X+5,0,Z+10.5,0,3.4,dark);if(!fallen&&TripoEnvironment153.models.bankhall){const bank=layout.bank;b.add(bank.key,X+bank.x,0,Z+bank.z,bank.ry,1);cityCollider253(addCol,X+bank.x,Z+bank.z,bank.ry,cityDim253(bank.key,bank.width))}else EW(b,'stall-green',X-5,0,Z+10.5,0,3.4,dark);addCol({x:X+5,z:Z+10.3,r:1.3});if(!TripoEnvironment153.models.bankhall)addCol({x:X-5,z:Z+10.3,r:1.3});
@@ -88,7 +88,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   for(let i=0;i<9;i++){const a=i/9*TAU,x=X-7+Math.cos(a)*2.55,z=Z-6+Math.sin(a)*2.55;EW(b,pk(R,['rock_smallA','rock_smallC','stone_smallA']),x,-.04,z,R()*TAU,.8+R()*.3)}
   EW(b,'lily_large',X-7.6,.07,Z-6.4,R()*TAU,.9);EW(b,'lily_small',X-6.2,.07,Z-5.3,R()*TAU,.6);EH(fl,'grass_large',X-9.3,0,Z-6.8,0,.7);EH(fl,'grass',X-4.8,0,Z-7.4,1,.6);
   if(cLv>=2&&!fallen){EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8)}
-  if(cLv>=3&&!fallen)for(const s of[-1,1])EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);
+  if(cLv>=3&&!fallen)for(const s of[-1,1]){EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);addCol({x:X+s*9.4,z:Z+11.2,r:.85})}/* v429: coluna sólida */
   /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
   if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.26;
     if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
@@ -96,7 +96,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,26,34,42]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
     if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
     if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}
-  if(!fallen&&festival())for(let i=0;i<12;i++){const a=i/12*TAU+.13;EH(b,i%2?'banner_red':'banner_green',X+Math.cos(a)*15,0,Z+Math.sin(a)*15,-a,2.4)}
+  if(!fallen&&festival())for(let i=0;i<12;i++){const a=i/12*TAU+.13;EH(b,i%2?'banner_red':'banner_green',X+Math.cos(a)*15,0,Z+Math.sin(a)*15,-a,2.4);addCol({x:X+Math.cos(a)*15,z:Z+Math.sin(a)*15,r:.3})}
   if(fallen){for(let i=0;i<14;i++){const a=R()*TAU,d=6+R()*24;EH(b,pk(R,['bone_A','skull','ribcage','rubble_half']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,.8)}}
   envOwn(g,b.mesh(BLDMAT));envOwn(g,tr.mesh(TREEMAT));envOwn(g,fl.mesh(FLORAMAT));
   inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0xffd08a,1),glowL.filter(o=>!o.s&&!o.w),false,g);

@@ -44,6 +44,7 @@ function spawn(p){
  const fire=new THREE.Mesh(new THREE.ConeGeometry(.45,1.2,7),glowS(0xff8433,.8));fire.position.y=.65;g.add(fire);c.fire=fire;
  const tent=new THREE.Mesh(new THREE.ConeGeometry(2,2.8,4),toonS(c.clan.id==='manto'?0xddd8cb:0x947653));tent.position.set(-5,1.4,-4);tent.rotation.y=Math.PI/4;g.add(tent);const opening=new THREE.Mesh(new THREE.ConeGeometry(.7,1.8,3),toonS(0x30271e));opening.position.set(-5,.9,-2.57);opening.scale.z=.06;g.add(opening);
  if(c.clan.totem){const post=new THREE.Mesh(new THREE.CylinderGeometry(.24,.35,3,7),toonS(0x72513b));post.position.set(-1,1.5,-1);g.add(post);const mask=new THREE.Mesh(new THREE.DodecahedronGeometry(.6),toonS(0xd5ba7a));mask.position.set(-1,2.6,-1);g.add(mask)}
+ /* v429 (Ian): barraca, fogueira e totem do acampamento têm colisão */if(window.Solid429)Solid429.prop(g,[{x:-5,z:-4,r:1.85},{x:0,z:0,r:.85},...(c.clan.totem?[{x:-1,z:-1,r:.45}]:[])]);
  const sign=makeCitySign(c.clan.n,'#e5c796',.5);ground(sign,p.x,p.z,3.7);scene.add(sign);c.props.push(sign);
  for(const [i,q] of points.entries()){
   let e;
@@ -116,11 +117,46 @@ const oldSpeech=speech153;speech153=function(e,...args){if(corrupt(e))return;ret
 function provoke(c){if(c.hostile)return;c.hostile=true;const st=state();st.hostile=st.hostile||{};st.hostile[c.id]=1;for(const e of c.npcs){e.friendly217=false;e.aggro=true;if(!enemies.includes(e))enemies.push(e)}for(const it of c.inter)it.hidden=true;saveRun();toast('Os Yetis defendem os filhotes. O abrigo foi perdido.')}
 const oldEnemy=updEnemy;updEnemy=function(e,dt){if(corrupt(e)&&!e.dead&&distance(e,player)<(e.range||10)+16&&los(e.x,e.z,player.x,player.z))e.aggro=true;const r=oldEnemy(e,dt);if(e.clan372&&!e.gone)ground(e.m.root,e.x,e.z);return r};
 /* Ride is transient, never serialized; the regular save contains the last road position. */
+/* v429 (Ian): embarcar e desembarcar viram uma cena curta — câmera de lado, o Viajante anda até a traseira e senta (ou levanta, desce e se afasta) e a carroça espera parada.
+   Chegando à cidade de destino a carroça entra pelo portão, para na rua principal (Civic343) e o desembarque toca sozinho; ninguém cai mais da carroça no portão. */
+const SEAT429=3.15,STEP429=4.35;let cut=null;
 function riding(){return !!ride}
-function board(w){if(world!==L)tick(0);if(ride||duel||w.gone||w.wreck||w.amb||distance(w,player)>5)return;setMount(false);if(!w.seat372){const seat=new THREE.Mesh(geo('ride-seat372',()=>new THREE.BoxGeometry(1.6,.14,.6)),toonS(0x68452e));seat.position.set(0,1.3,-3.05);w.g.add(seat);w.seat372=seat;}ride=w;rest=0;player.dodgeT=0;player.atkT=0;player.jy=0;player.air344=false;toast('Carona: F ou Espaço para desembarcar. +1% de vida/mana a cada 3 s.');closeModal()}
-function dismount(){if(!ride)return false;const w=ride;ride=null;for(const a of [Math.PI/2,-Math.PI/2,Math.PI]){const x=w.x+Math.sin(w.face+a)*3,z=w.z+Math.cos(w.face+a)*3;if(worldFree(x,z,player.r||.5)){player.x=x;player.z=z;break}}player.jy=0;player.air344=false;player.m.root.position.set(player.x,0,player.z);saveRun();return true}
-const oldCtx=ctxTarget;ctxTarget=function(){if(ride)return {label:'F · DESEMBARCAR',use:dismount};const c=oldCtx();if(c)return c;if(L.mode==='world'&&player&&!player.dead){const w=Civic343.wagons.find(w=>!w.gone&&!w.wreck&&!w.amb&&distance(w,player)<5);if(w)return {label:'F · PEGAR CARONA',use:()=>board(w)}}return null};
-const oldJump=jump343;jump343=function(){if(ride){dismount();return}return oldJump()};
+function rideWagon(){return ride}
+function cutscene(){return cut}
+function behind(w,d,side=0){const s=Math.sin(w.face),c=Math.cos(w.face);return {x:w.x-s*d+c*side,z:w.z-c*d-s*side}}
+function sitPose(k){const b=player.m&&player.m.bones;if(!b||!(k>0))return;k=Math.min(1,k);for(const n of ['thigh_l','thigh_r'])if(b[n])b[n].rotation.x+=(-Math.PI/2-b[n].rotation.x)*k;for(const n of ['shin_l','shin_r'])if(b[n])b[n].rotation.x+=(Math.PI/2-b[n].rotation.x)*k}
+function seat(w,k=1,p=behind(w,SEAT429)){player.x=p.x;player.z=p.z;player.face=w.face+Math.PI;player.jy=0;player.air344=false;player.m.root.position.set(p.x,.65*k,p.z);player.m.root.rotation.y=player.face;sitPose(k)}
+function freeSpot(w){for(const [d,sd] of [[5.9,0],[4.8,2.6],[4.8,-2.6],[3,3],[3,-3]]){const q=behind(w,d,sd);if(worldFree(q.x,q.z,(player.r||.5)+.15))return q}return behind(w,5.9)}
+function board(w){if(world!==L)tick(0);if(ride||cut||duel||w.gone||w.wreck||w.amb||w.arr429||distance(w,player)>5)return;setMount(false);if(!w.seat372){const seat=new THREE.Mesh(geo('ride-seat372',()=>new THREE.BoxGeometry(1.6,.14,.6)),toonS(0x68452e));seat.position.set(0,1.3,-3.05);w.g.add(seat);w.seat372=seat;}ride=w;rest=0;player.dodgeT=0;player.atkT=0;player.jy=0;player.air344=false;
+ const step=behind(w,STEP429),walk=Math.hypot(step.x-player.x,step.z-player.z),side=Math.sign((player.x-w.x)*Math.cos(w.face)-(player.z-w.z)*Math.sin(w.face))||1;
+ cut={kind:'board',w,t:0,from:{x:player.x,z:player.z},step,walkT:Math.min(1.6,Math.max(.3,walk/2.3)),side};cut.dur=cut.walkT+1.2;w.wait=Math.max(w.wait||0,cut.dur+.3);
+ toast('Carona: F ou Espaço para desembarcar. +1% de vida/mana a cada 3 s.');closeModal()}
+function dismount(now){if(!ride)return false;if(cut&&now!==true)return true;const w=ride;
+ if(now===true||w.gone||w.wreck||L.mode!=='world'||player.dead){cut=null;ride=null;const q=freeSpot(w);player.x=q.x;player.z=q.z;player.jy=0;player.air344=false;player.m.root.position.set(player.x,0,player.z);saveRun();return true}
+ cut={kind:'leave',w,t:0,delay:0,step:behind(w,STEP429),out:freeSpot(w),side:1};cut.dur=1.75;w.wait=Math.max(w.wait||0,cut.dur+.4);return true}
+/* chamada pela Civic343 quando a carroça estaciona dentro da cidade */
+function arrive429(w,c){if(ride!==w||cut||player.dead)return;cut={kind:'leave',w,t:0,delay:.7,step:behind(w,STEP429),out:freeSpot(w),side:1,arrive:c};cut.dur=cut.delay+1.75;try{speech153(w.n,pick(['Chegamos a '+c.name+'! Pode descer com calma.','Pronto, '+c.name+'. Boa estadia!','Chegamos. Cuidado ao descer.']),'Mercador')}catch(_){}}
+function cutTick(dt){const w=ride,C=cut;C.t+=dt;const t=C.t,ease=u=>{u=Math.max(0,Math.min(1,u));return u*u*(3-2*u)};C.walk=false;
+ if(C.kind==='board'){
+  if(t<C.walkT){const u=t/C.walkT,x=C.from.x+(C.step.x-C.from.x)*u,z=C.from.z+(C.step.z-C.from.z)*u;turnTo(player,Math.atan2(C.step.x-C.from.x,C.step.z-C.from.z),dt,10);player.x=x;player.z=z;player.m.root.position.set(x,0,z);player.m.root.rotation.y=player.face;C.walk=true}
+  else if(t<C.walkT+.3){player.x=C.step.x;player.z=C.step.z;turnTo(player,w.face+Math.PI,dt,12);player.m.root.position.set(player.x,0,player.z);player.m.root.rotation.y=player.face}
+  else if(t<C.dur){const u=ease((t-C.walkT-.3)/.9),p=behind(w,STEP429+(SEAT429-STEP429)*u);seat(w,u,p);player.m.root.position.y+=Math.sin(Math.PI*u)*.22}
+  else{cut=null;seat(w,1)}
+  return}
+ const t0=C.delay||0;
+ if(t<t0)seat(w,1);
+ else if(t<t0+.8){const u=ease((t-t0)/.8),p=behind(w,SEAT429+(STEP429-SEAT429)*u);seat(w,1-u,p);player.m.root.position.y+=Math.sin(Math.PI*u)*.18}
+ else if(t<t0+1.5){const u=ease((t-t0-.8)/.7),x=C.step.x+(C.out.x-C.step.x)*u,z=C.step.z+(C.out.z-C.step.z)*u;if(Math.hypot(C.out.x-C.step.x,C.out.z-C.step.z)>.2)turnTo(player,Math.atan2(C.out.x-C.step.x,C.out.z-C.step.z),dt,10);player.x=x;player.z=z;player.m.root.position.set(x,0,z);player.m.root.rotation.y=player.face;C.walk=true}
+ else if(t<C.dur){player.x=C.out.x;player.z=C.out.z;player.m.root.position.set(player.x,0,player.z);player.m.root.rotation.y=player.face}
+ else{cut=null;ride=null;player.x=C.out.x;player.z=C.out.z;player.jy=0;player.air344=false;player.m.root.position.set(player.x,0,player.z);saveRun();if(C.arrive)toast('<b>[CARROÇA]</b> Você chegou a <b>'+safeText(C.arrive.name)+'</b>. A carroça fica parada na rua principal por um tempo.',5000)}}
+/* câmera de lado durante a cena; entra e sai suave por cima da câmera normal */
+const cineCam429=new THREE.PerspectiveCamera(),camA429=new THREE.Vector3(),camB429=new THREE.Vector3();
+const oldCam429=camUpdate;camUpdate=function(dt){oldCam429(dt);if(!cut||!ride||window.CINE231||L.mode!=='world')return;const w=cut.w,k=Math.min(1,cut.t/.45,(cut.dur-cut.t)/.45);if(!(k>0))return;const e=k*k*(3-2*k),T=behind(w,SEAT429+.5),s=Math.sin(w.face),c=Math.cos(w.face),sd=cut.side||1,hy=terrH(T.x,T.z);
+ camA429.set(T.x+c*5.4*sd-s*3.8,hy+2.6,T.z-s*5.4*sd-c*3.8);camB429.set(T.x-s*.5,hy+1.05,T.z-c*.5);camera.position.lerp(camA429,e);cineCam429.position.copy(camA429);cineCam429.lookAt(camB429);camera.quaternion.slerp(cineCam429.quaternion,e)};
+/* durante os passos da cena o Viajante usa a animação de andar de verdade */
+if(window.Warrior127&&Warrior127.animate){const baseAnim429=Warrior127.animate;Warrior127.animate=function(m,st,t,dt){if(cut&&cut.walk&&player&&m===player.m)st=Object.assign({},st,{move:1,speed:2.3,sprint:false,atk:0,dodge:false,skill:null,hit:false});return baseAnim429.call(this,m,st,t,dt)}}
+const oldCtx=ctxTarget;ctxTarget=function(){if(ride)return cut?null:{label:'F · DESEMBARCAR',use:()=>dismount()};const c=oldCtx();if(c)return c;if(L.mode==='world'&&player&&!player.dead){const w=Civic343.wagons.find(w=>!w.gone&&!w.wreck&&!w.amb&&!w.arr429&&distance(w,player)<5);if(w)return {label:'F · PEGAR CARONA',use:()=>board(w)}}return null};
+const oldJump=jump343;jump343=function(){if(ride){if(!cut)dismount();return}return oldJump()};
 // Neutral cubs still receive a real player-projectile hit before the family joins combat.
 const oldProjectiles=updateProjectiles253;updateProjectiles253=function(dt){for(const p of projs){if(p.team!=='player'||p.life<=0)continue;const a={x:p.x,y:p.y??p.originY??1.1,z:p.z},b={x:p.x+p.vx*dt,y:(p.y??p.originY??1.1)+(p.vy||0)*dt,z:p.z+p.vz*dt},ground=Projectiles253.terrainHit(a,b,terrH);for(const c of camps.values()){if(c.hostile||c.clan.id!=='manto')continue;for(const e of c.npcs){if(e.kind!=='yetinho')continue;const body=projectileBody253(e),hit=Projectiles253.segmentCapsule(a,b,body,body.r+p.r,body.hitHeight);if(hit.hit&&hit.t<(ground?.t??1)&&worldFree(hit.p.x,hit.p.z,.1,hit.p.y)){provoke(c);break}}}}return oldProjectiles(dt)};
 const oldAttack=attack;attack=function(){if(ride)return;if(!paused&&!player.dead&&player.atkCd<=0){for(const c of camps.values()){if(c.clan.id!=='manto'||c.hostile)continue;const cub=c.npcs.find(e=>e.kind==='yetinho'&&distance(e,player)<3&&Math.abs(Math.atan2(Math.sin(Math.atan2(e.x-player.x,e.z-player.z)-player.face),Math.cos(Math.atan2(e.x-player.x,e.z-player.z)-player.face)))<.8);if(cub)provoke(c);}}return oldAttack()};
@@ -128,15 +164,15 @@ const oldDodge=dodge;dodge=function(){if(!ride)return oldDodge()};
 const oldSkill=useSkill;useSkill=function(...args){if(!ride)return oldSkill(...args)};
 function tick(dt){
  if(!run||!player)return;if(L.mode==='dungeon'&&L.bossDead&&L.gate?.inv343&&!L.gate.closed372)invasionWon(L.gate);
- if(world!==L){for(const c of [...camps.values()])remove(c);world=L;scan=0;if(ride)dismount()}
+ if(world!==L){for(const c of [...camps.values()])remove(c);world=L;scan=0;if(ride)dismount(true)}
  if(L.mode!=='world'||player.dead)return;
  const st=state();if(st.attack>0){st.attack=Math.max(0,st.attack-dt);if(!st.attack)refreshStats()}st.bless=Math.max(0,st.bless-dt);
  scan-=dt;if(scan<=0){scan=1;for(const c of [...camps.values()])if(distance(c,player)>360)remove(c);const cx=Math.round(player.x/160),cz=Math.round(player.z/160);for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=site(cx+i,cz+j);if(p&&distance(p,player)<235&&camps.size<8)spawn(p)}}
  for(const c of camps.values()){c.talk-=dt;if(c.clan.patrol){c.guard372=(c.guard372||0)-dt;const foe=c.guard372<=0&&enemies.find(e=>!e.dead&&!e.duel372&&!e.clan372&&e.aggro&&distance(e,c)<14);if(foe){c.guard372=2;const guard=c.npcs[0];guard.attack372=.4;fxLine([{x:guard.x,z:guard.z},{x:foe.x,z:foe.z}],0xffd080);hurtEnemy(foe,Math.max(5,foe.maxhp*.04),guard.x,guard.z,{guard343:true,kb:0});}}c.fire.scale.y=1+Math.sin(time*7)*.1;for(const [i,e] of c.npcs.entries()){if(e.duel372||c.hostile)continue;e.t+=dt;e.attack372=Math.max(0,(e.attack372||0)-dt);let move=0;if((c.clan.patrol||c.clan.train)&&i>0){const t=e.t*.3,x=e.home372.x+Math.sin(t)*1.5,z=e.home372.z+Math.cos(t)*1.5;if(worldFree(x,z,e.r)){e.face=Math.atan2(x-e.x,z-e.z);e.x=x;e.z=z;move=.35}}else e.face=Math.atan2(player.x-e.x,player.z-e.z);animChibi(e.m,{move,atk:e.attack372>0?.5:c.clan.train&&i>0?Math.max(0,Math.sin(e.t*2)):0,dead:0,wind:0},time);ground(e.m.root,e.x,e.z);e.m.root.rotation.y=e.face;c.inter[i].x=e.x;c.inter[i].z=e.z;}if(c.talk<=0&&distance(c,player)<10&&!duel&&player.atkT<=0&&player.atkCd<=0)say(c,c.npcs[0]);}
  if(duel&&(distance(duel.c,player)>25||!enemies.includes(duel.e)))finishDuel(false);
- if(ride){if(ride.gone||ride.wreck||ride.amb){dismount();return}const w=ride;player.x=w.x-Math.sin(w.face)*3.15;player.z=w.z-Math.cos(w.face)*3.15;player.face=w.face+Math.PI;player.jy=0;player.m.root.position.set(player.x,.65,player.z);player.m.root.rotation.y=player.face;const b=player.m.bones;if(b){for(const k of ['thigh_l','thigh_r'])if(b[k])b[k].rotation.x=-Math.PI/2;for(const k of ['shin_l','shin_r'])if(b[k])b[k].rotation.x=Math.PI/2;}rest+=dt;while(rest>=3){rest-=3;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.01);player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.01)}}
+ if(ride){if(ride.gone||ride.wreck||ride.amb){dismount(true);return}const w=ride;if(cut&&cut.w!==w)cut=null;if(cut)cutTick(dt);else seat(w,1);rest+=dt;while(rest>=3){rest-=3;player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.01);player.mp=Math.min(player.maxmp,player.mp+player.maxmp*.01)}}
 }
 const oldUpdate=update;update=function(dt){oldUpdate(dt);tick(dt)};
 function invasionWon(g){if(!g.inv343||g.closed372)return;if(run.invReturn372)run.invReturn372.open=false;saveRun();if(store.get('pds3_run')?.invReturn372?.open!==false||store.get('pds3_run')?.invReturn372?.token!==run.invReturn372?.token){if(run.invReturn372)run.invReturn372.open=true;return;}Civic343.riftClosed(g);saveRun();}
-return {clans,camps,site,nearbySites,spawn,tick,clue,weapon,sheltered,riding,invasionWon,beginDuel,finishDuel,board,dismount,stock,goods,corrupt,show,provoke};
+return {clans,camps,site,nearbySites,spawn,tick,clue,weapon,sheltered,riding,rideWagon,cutscene,arrive429,invasionWon,beginDuel,finishDuel,board,dismount,stock,goods,corrupt,show,provoke};
 })();

@@ -16,8 +16,9 @@ function envSolid357(addCol,key,x,y,z,ry,scale){
  for(let i=0;i<count;i++){const offset=count===1?0:(i/(count-1)-.5)*(len-2*r),lx=(min[0]+max[0])*.5*scale+(longX?offset:0),lz=(min[2]+max[2])*.5*scale+(longX?0:offset);addCol({x:x+c*lx+sn*lz,z:z-sn*lx+c*lz,r,h:Math.max(.1,max[1]*scale+y),anchorX357:x,anchorZ357:z,prop357:key})}
 }
 function floor344(x,z,ceiling=Infinity){if(L.mode!=='world'||L.grid)return 0;let f=0;const base=terrH(x,z);hnear(HASH,x,z,c=>{const top=c.h==null?0:terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-base;if(top>f&&top<=ceiling+.001&&Math.hypot(x-c.x,z-c.z)<c.r)f=top});return f}
-function worldFree(x,z,r,worldY=terrH(x,z)+COLY344){let ok=true;hnear(HASH,x,z,c=>{if(c.h!=null&&worldY>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;if(Math.hypot(x-c.x,z-c.z)<c.r+r)ok=false});return ok}
-function pushOut(e){const r=e.r||.5,y344=e.worldY357??(terrH(e.x,e.z)+(e===player?(player.jy||0):0));hnear(HASH,e.x,e.z,c=>{if(c.h!=null&&y344>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;const dx=e.x-c.x,dz=e.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m){const a=d>1e-6?Math.atan2(dz,dx):0;e.x=c.x+Math.cos(a)*m;e.z=c.z+Math.sin(a)*m}})}
+/* v429 (Ian): pessoas (NPCs, figurantes) entram no HASH com pl429 — só barram o jogador (pushOut dele); não contam para lugar livre, câmera nem IA */
+function worldFree(x,z,r,worldY=terrH(x,z)+COLY344){let ok=true;hnear(HASH,x,z,c=>{if(c.pl429)return;if(c.h!=null&&worldY>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;if(Math.hypot(x-c.x,z-c.z)<c.r+r)ok=false});return ok}
+function pushOut(e){const r=e.r||.5,y344=e.worldY357??(terrH(e.x,e.z)+(e===player?(player.jy||0):0));hnear(HASH,e.x,e.z,c=>{if(c.pl429&&e!==player)return;if(c.h!=null&&y344>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;const dx=e.x-c.x,dz=e.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m){const a=d>1e-6?Math.atan2(dz,dx):0;e.x=c.x+Math.cos(a)*m;e.z=c.z+Math.sin(a)*m}})}
 function cellIdx(x,z){const G=L.grid;const cx=Math.floor((x-G.ox)/G.CS),cz=Math.floor((z-G.oz)/G.CS);if(cx<0||cz<0||cx>=G.W||cz>=G.H)return -1;return cz*G.W+cx}
 function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
 function freeAt(x,z,r){if(!crystalFree126(x,z,r))return false;if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}

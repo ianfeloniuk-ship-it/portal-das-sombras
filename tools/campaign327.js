@@ -277,7 +277,8 @@
       scene.remove(old); Object.assign(m,ready); scene.add(m.root);
     }); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); scene.add(m.root);
     if (f.down) { m.root.position.y = gy(x + 1.8, z); m.wounded401 = true; }
-    return { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
+    const fig = { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
+    return window.Solid429 ? Solid429.figure(fig) : fig; /* v429: figurante tem colisão */
   }
   function clearWorld(id) {
     const w = W.get(id); if (!w) return;
@@ -357,7 +358,7 @@
   /* Modelo real da carroça, sem boi e condutor durante o resgate. */
   function makeCart(x,z){
     const g=new THREE.Group();g.position.set(x,gy(x,z),z);g.rotation.y=.5;g.userData.mats=[];
-    g.userData.loading=true;
+    g.userData.loading=true;window.Solid429?.prop(g,[{x:0,z:-1.5,r:1.25},{x:0,z:0,r:1.3},{x:0,z:1.5,r:1.25}]);/* v429: carroça tombada tem colisão */
     Wagon369.ready.then(ok=>{g.userData.loading=false;if(!ok)return;
       const w=Wagon369.create();w.mixer.stopAllAction();if(w.ox)w.ox.visible=false;if(w.driver.root)w.driver.root.visible=false;
       w.g.rotation.z=1.12;w.g.updateMatrixWorld(true);w.g.position.y-=new THREE.Box3().setFromObject(w.g).min.y;g.add(w.g);g.userData.wagon=w;g.userData.asset401='models/wagon369.glb';

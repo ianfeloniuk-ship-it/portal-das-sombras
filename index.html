@@ -3796,8 +3796,9 @@ function envSolid357(addCol,key,x,y,z,ry,scale){
  for(let i=0;i<count;i++){const offset=count===1?0:(i/(count-1)-.5)*(len-2*r),lx=(min[0]+max[0])*.5*scale+(longX?offset:0),lz=(min[2]+max[2])*.5*scale+(longX?0:offset);addCol({x:x+c*lx+sn*lz,z:z-sn*lx+c*lz,r,h:Math.max(.1,max[1]*scale+y),anchorX357:x,anchorZ357:z,prop357:key})}
 }
 function floor344(x,z,ceiling=Infinity){if(L.mode!=='world'||L.grid)return 0;let f=0;const base=terrH(x,z);hnear(HASH,x,z,c=>{const top=c.h==null?0:terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-base;if(top>f&&top<=ceiling+.001&&Math.hypot(x-c.x,z-c.z)<c.r)f=top});return f}
-function worldFree(x,z,r,worldY=terrH(x,z)+COLY344){let ok=true;hnear(HASH,x,z,c=>{if(c.h!=null&&worldY>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;if(Math.hypot(x-c.x,z-c.z)<c.r+r)ok=false});return ok}
-function pushOut(e){const r=e.r||.5,y344=e.worldY357??(terrH(e.x,e.z)+(e===player?(player.jy||0):0));hnear(HASH,e.x,e.z,c=>{if(c.h!=null&&y344>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;const dx=e.x-c.x,dz=e.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m){const a=d>1e-6?Math.atan2(dz,dx):0;e.x=c.x+Math.cos(a)*m;e.z=c.z+Math.sin(a)*m}})}
+/* v429 (Ian): pessoas (NPCs, figurantes) entram no HASH com pl429 — só barram o jogador (pushOut dele); não contam para lugar livre, câmera nem IA */
+function worldFree(x,z,r,worldY=terrH(x,z)+COLY344){let ok=true;hnear(HASH,x,z,c=>{if(c.pl429)return;if(c.h!=null&&worldY>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;if(Math.hypot(x-c.x,z-c.z)<c.r+r)ok=false});return ok}
+function pushOut(e){const r=e.r||.5,y344=e.worldY357??(terrH(e.x,e.z)+(e===player?(player.jy||0):0));hnear(HASH,e.x,e.z,c=>{if(c.pl429&&e!==player)return;if(c.h!=null&&y344>=terrH(c.anchorX357??c.x,c.anchorZ357??c.z)+c.h-.01)return;const dx=e.x-c.x,dz=e.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m){const a=d>1e-6?Math.atan2(dz,dx):0;e.x=c.x+Math.cos(a)*m;e.z=c.z+Math.sin(a)*m}})}
 function cellIdx(x,z){const G=L.grid;const cx=Math.floor((x-G.ox)/G.CS),cz=Math.floor((z-G.oz)/G.CS);if(cx<0||cz<0||cx>=G.W||cz>=G.H)return -1;return cz*G.W+cx}
 function gfree(x,z){const i=cellIdx(x,z);return i>=0&&L.grid.cells[i]===1}
 function freeAt(x,z,r){if(!crystalFree126(x,z,r))return false;if(L.grid)return gfree(x-r,z-r)&&gfree(x+r,z-r)&&gfree(x-r,z+r)&&gfree(x+r,z+r);return worldFree(x,z,r)}
@@ -4190,7 +4191,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     const s=EW(b,fallen?'building_destroyed':k,sx,0,sz,ry,W,fallen?.8:1);ENV.cast.push({x:sx+.9,z:sz-.7,r:W*.72,k:.5});shopH[sp.id]=cityDim253(k,W).h;
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
     if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
-      const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1)}}
+      const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1);addCol({x:p3.x,z:p3.z,r:sp.id==='guild'?.65:.55})/* v429: não se atravessa mais */}}
   const fs=0;/* v236: fonte própria do selo (seal231) */if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}
   EW(b,'stall-red',X+5,0,Z+10.5,0,3.4,dark);if(!fallen&&TripoEnvironment153.models.bankhall){const bank=layout.bank;b.add(bank.key,X+bank.x,0,Z+bank.z,bank.ry,1);cityCollider253(addCol,X+bank.x,Z+bank.z,bank.ry,cityDim253(bank.key,bank.width))}else EW(b,'stall-green',X-5,0,Z+10.5,0,3.4,dark);addCol({x:X+5,z:Z+10.3,r:1.3});if(!TripoEnvironment153.models.bankhall)addCol({x:X-5,z:Z+10.3,r:1.3});
@@ -4199,7 +4200,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   for(let i=0;i<9;i++){const a=i/9*TAU,x=X-7+Math.cos(a)*2.55,z=Z-6+Math.sin(a)*2.55;EW(b,pk(R,['rock_smallA','rock_smallC','stone_smallA']),x,-.04,z,R()*TAU,.8+R()*.3)}
   EW(b,'lily_large',X-7.6,.07,Z-6.4,R()*TAU,.9);EW(b,'lily_small',X-6.2,.07,Z-5.3,R()*TAU,.6);EH(fl,'grass_large',X-9.3,0,Z-6.8,0,.7);EH(fl,'grass',X-4.8,0,Z-7.4,1,.6);
   if(cLv>=2&&!fallen){EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8)}
-  if(cLv>=3&&!fallen)for(const s of[-1,1])EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);
+  if(cLv>=3&&!fallen)for(const s of[-1,1]){EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);addCol({x:X+s*9.4,z:Z+11.2,r:.85})}/* v429: coluna sólida */
   /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
   if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.26;
     if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
@@ -4207,7 +4208,7 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,26,34,42]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
     if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
     if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}
-  if(!fallen&&festival())for(let i=0;i<12;i++){const a=i/12*TAU+.13;EH(b,i%2?'banner_red':'banner_green',X+Math.cos(a)*15,0,Z+Math.sin(a)*15,-a,2.4)}
+  if(!fallen&&festival())for(let i=0;i<12;i++){const a=i/12*TAU+.13;EH(b,i%2?'banner_red':'banner_green',X+Math.cos(a)*15,0,Z+Math.sin(a)*15,-a,2.4);addCol({x:X+Math.cos(a)*15,z:Z+Math.sin(a)*15,r:.3})}
   if(fallen){for(let i=0;i<14;i++){const a=R()*TAU,d=6+R()*24;EH(b,pk(R,['bone_A','skull','ribcage','rubble_half']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,.8)}}
   envOwn(g,b.mesh(BLDMAT));envOwn(g,tr.mesh(TREEMAT));envOwn(g,fl.mesh(FLORAMAT));
   inst(geo('tflame',()=>new THREE.SphereGeometry(.4,8,6)),glowS(fallen?0xff4d6a:0xffd08a,1),glowL.filter(o=>!o.s&&!o.w),false,g);
@@ -4484,7 +4485,7 @@ function cityGates341(c,g,fallen,ring,half,h){const wood=new THREE.MeshToonMater
    G.add(pv);leaves.push({pv,sd})}
   g.add(G);const gt={c,g:G,leaves,x:G.position.x,z:G.position.z,open:fallen?1:0,fallen,half};if(fallen){leaves[0].pv.rotation.y=1.9;leaves[1].pv.rotation.y=-1.25;leaves[1].pv.rotation.z=.12}GATES341.push(gt)}}
 function updGates341(dt){for(let i=GATES341.length-1;i>=0;i--){const gt=GATES341[i];let o=gt.g,ok=false;while(o){if(o===scene){ok=true;break}o=o.parent}if(!ok){GATES341.splice(i,1);continue}if(gt.fallen)continue;
-  const pd=Math.hypot(player.x-gt.x,player.z-gt.z);if(pd>150)continue;let want=!player.dead&&pd<gt.half+6?1:0;if(!want&&npcs.some(n=>!n.gone&&Math.hypot(n.x-gt.x,n.z-gt.z)<gt.half+5))want=1;if(!want)for(const e of enemies)if(!e.dead&&cityRaider341(e)&&Math.hypot(e.x-gt.x,e.z-gt.z)<gt.half+8){want=1;break}
+  const pd=Math.hypot(player.x-gt.x,player.z-gt.z),cart429=window.Civic343&&Civic343.wagons.some(w=>!w.gone&&!w.wreck&&Math.hypot(w.x-gt.x,w.z-gt.z)<gt.half+10);if(pd>150&&!cart429)continue;let want=!player.dead&&pd<gt.half+6||cart429?1:0;/* v429 (Ian): o portão abre para a carroça passar */if(!want&&npcs.some(n=>!n.gone&&Math.hypot(n.x-gt.x,n.z-gt.z)<gt.half+5))want=1;if(!want)for(const e of enemies)if(!e.dead&&cityRaider341(e)&&Math.hypot(e.x-gt.x,e.z-gt.z)<gt.half+8){want=1;break}
   if(want!==gt.want){if(gt.want!==undefined&&pd<45)try{sfx('block')}catch(_){}gt.want=want}gt.open+=(want-gt.open)*Math.min(1,dt*2.6);if(Math.abs(want-gt.open)<.002)gt.open=want;for(const l of gt.leaves)l.pv.rotation.y=l.sd*gt.open*1.75}}
 function buildCity(c,g,addCol,R){
   const X=c.x,Z=c.z,E=ENV.ok;const fallen=cityFallen(c),cLv=cityL(c);let shopH={};
@@ -4514,7 +4515,7 @@ function buildCity(c,g,addCol,R){
     addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=window.Water154?Water154.mesh(2.25):new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
     L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+10.15,2.4,Z+18);g.add(sg217);if(window.Wagon369){Wagon369.station(g,X+8,Z+18);for(const dz of [-1.9,-.5,1,3.1])addCol({x:X+8,z:Z+18+dz,r:dz===3.1?.7:1.18})}L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · TEREN · CARROÇA DA ORDEM',use:travelView217})}}
-  buildHouse(c,g,E);
+  buildHouse(c,g,E,addCol);
   if(!cityFallen(c)){const lx=X-16,lz=Z-9;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5),e=c.layout253?.inn;
     const door=e?cityFront253(X+e.x,Z+e.z,e.ry,e.dim.d/2+1.3):{x:X+7,z:Z-4.6};
@@ -7414,10 +7415,10 @@ function houseAct(a,v){const H=profile.house;
   if(a==='haltar'){if(H.altar===todayKey())return;H.altar=todayKey();run.pots+=3;store.set('pds2_profile',profile);sfx('coin');toast('<b>[CASA]</b> +3 poções do Altar de Mana.');return true}
   if(a==='hput'){const B=H.chest=H.chest||[];if(B.length>=20)return;const i=run.items.findIndex(x=>x.uid===v);if(i<0)return;B.push(run.items.splice(i,1)[0]);store.set('pds2_profile',profile);saveRun();return true}
   if(a==='hget'){const B=H.chest||[],it=B[+v];if(!it||run.items.length>=bagCapacity353())return;B.splice(+v,1);run.items.push(it);store.set('pds2_profile',profile);saveRun();return true}}
-function buildHouse(c,g,E){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
-  if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT))}
+function buildHouse(c,g,E,addCol){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFallen(c))return;
+  if(profile.house&&profile.house.city===c.id){if(E){const hb=new EnvBatch();EW(hb,'building_home_A_red',hx,0,hz,-Math.PI/2,6.5);let k=0;for(const F of FURN)if(hasF(F.k)){EW(hb,F.m,hx-4.6,0,hz-3.2+k*1.6,-Math.PI/2,F.m==='statue_column'?1.4:F.m==='bed'?1.6:1);k++}EH(hb,'flag_blue',hx+2.5,5.5,hz,0,1.6);envOwn(g,hb.mesh(BLDMAT));/* v429 (Ian): a casa tem paredes */if(addCol)cityCollider253(addCol,hx,hz,-Math.PI/2,cityDim253('building_home_A_red',6.5))}
     const sg=makeCitySign('SUA CASA','#ffd070',.5);sg.position.set(hx-3.4,5.6,hz);g.add(sg);L.inter.push({type:'house',city:c,x:hx-4.2,z:hz+3.6,r:2.6,label:'F · SUA CASA',use:houseView})}
-  else{const sg=makeCitySign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT))}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
+  else{const sg=makeCitySign('CASA À VENDA','#9fb0c4',.45);sg.position.set(hx,2.4,hz);g.add(sg);if(E){const hb=new EnvBatch();EW(hb,'building_scaffolding',hx,0,hz,-Math.PI/2,4.5);envOwn(g,hb.mesh(BLDMAT));if(addCol)addCol({x:hx,z:hz,r:1.9})}L.inter.push({type:'house',city:c,x:hx-3,z:hz,r:2.6,label:'F · CASA À VENDA',use:houseView})}}
 
 /* ===== MORADORES E FESTIVAIS ===== */
 const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu um eco andando sozinha.'];
@@ -7728,7 +7729,7 @@ function outpostPoint361(cx,cz){if(OUTPOST361.raw.size>12000){OUTPOST361.raw.cle
 function outpostAt217(cx,cz){return !!outpostPoint361(cx,cz)}
 function buildOutpost217(ch,g,addCol){const point=outpostPoint361(ch.cx,ch.cz);if(!point)return;const x0=point.x,z0=point.z,R=mulberry32(rh(ch.cx,ch.cz,10));
  if(ENV.ok){const b=new EnvBatch();EH(b,'campfire_stones',x0,0,z0,0,.7);EH(b,'tent_detailedOpen',x0+4,0,z0-3,R()*TAU,2.6);EW(b,'stall',x0-4,0,z0+2,Math.PI/2,3.2);EW(b,'cart',x0+1,0,z0+5,R()*TAU,2.6);EH(b,'lantern_standing',x0-2,0,z0-3,0,2.4);EW(b,'crates_stacked',x0-5.5,0,z0-1,R()*TAU,1.4);envSolidEW357(addCol,b,'barrel',x0+5.5,0,z0+1,0,.8);envOwn(g,b.mesh(ENVMAT))}
- const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4]])addCol({x,z,r});
+ const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4],[x0-5.5,z0-1,.8],[x0-2,z0-3,.3]])addCol({x,z,r});/* v429: caixotes e lampião também */
  const nm='Posto '+['do Viajante','da Encruzilhada','do Lampião','da Carroça','das Brasas','do Corvo'][rh(ch.cx,ch.cz,11)%6];
  L.inter.push({type:'outpost',chunk:ch,x:x0+1.5,z:z0+1.5,r:2.6,label:'F · DESCANSAR NA FOGUEIRA',use:()=>{player.hp=player.maxhp;player.mp=player.maxmp;floater(player.x,player.z,'Descansou','#ffd08a',true);toast('<b>['+nm.toUpperCase()+']</b> Você descansou na fogueira. Vida e mana cheias.',4000);saveRun()}});
  L.inter.push({type:'outpost',chunk:ch,x:x0-4,z:z0+3.5,r:2.4,label:'F · MASCATE',use:()=>openShop('pot')});
@@ -8987,7 +8988,7 @@ requestAnimationFrame(frame);
 <script src="tools/vfx328.js?v=405"></script>
 <script src="tools/dome154.js?v=343"></script>
 <script src="tools/look154.js?v=406"></script>
-<script src="tools/civic343.js?v=381"></script>
+<script src="tools/civic343.js?v=433"></script>
 <script src="tools/guardian370.js?v=370"></script><script src="tools/cactoro372.js?v=372"></script>
 <script>/* v155 (Ian): todo botão mostra que foi apertado, mesmo quando a janela é redesenhada no clique. */document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button,.btn,[data-a]');if(!b||b.disabled)return;const r=document.createElement('div');r.className='press155';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),400)},true);</script>
 <script>/* v155: véu de caverna — só um círculo em volta do herói fica visível dentro da masmorra. */setInterval(()=>{let v=document.getElementById('cave155');if(!v){v=document.createElement('div');v.id='cave155';v.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:1;display:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 34vmax,rgba(1,1,3,.25) 50vmax,rgba(1,1,3,.4) 62vmax)';const cv=typeof renderer!=='undefined'&&renderer.domElement;if(!cv)return;cv.parentNode.insertBefore(v,cv.nextSibling)}v.style.display=typeof L!=='undefined'&&L&&L.cave155&&L.mode==='dungeon'?'block':'none'},250);</script>
@@ -9000,7 +9001,7 @@ requestAnimationFrame(frame);
 <script src="narrativa-campanha.js"></script>
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=406"></script>
-<script src="tools/campaign327.js?v=406"></script>
+<script src="tools/campaign327.js?v=433"></script>
 <script src="tools/ecology410.js?v=412"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9015,7 +9016,7 @@ requestAnimationFrame(frame);
 <script src="tools/hud356.js?v=356"></script>
 
 <!-- pds-v373: mundo vivo, lojas regionais e retorno seguro -->
-<script src="tools/living372.js?v=372"></script>
+<script src="tools/living372.js?v=433"></script><script src="tools/solid429.js?v=433"></script>
 <script src="tools/firearms372.js?v=372"></script>
 <!-- pds-v377: câmera Witcher, lock-on, colisão, lampião de viagem -->
 <script src="tools/witcher377.js?v=382"></script>
@@ -9041,9 +9042,9 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v432</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v433</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=432;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=433;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

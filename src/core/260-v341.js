@@ -14,7 +14,7 @@ function cityGates341(c,g,fallen,ring,half,h){const wood=new THREE.MeshToonMater
    G.add(pv);leaves.push({pv,sd})}
   g.add(G);const gt={c,g:G,leaves,x:G.position.x,z:G.position.z,open:fallen?1:0,fallen,half};if(fallen){leaves[0].pv.rotation.y=1.9;leaves[1].pv.rotation.y=-1.25;leaves[1].pv.rotation.z=.12}GATES341.push(gt)}}
 function updGates341(dt){for(let i=GATES341.length-1;i>=0;i--){const gt=GATES341[i];let o=gt.g,ok=false;while(o){if(o===scene){ok=true;break}o=o.parent}if(!ok){GATES341.splice(i,1);continue}if(gt.fallen)continue;
-  const pd=Math.hypot(player.x-gt.x,player.z-gt.z);if(pd>150)continue;let want=!player.dead&&pd<gt.half+6?1:0;if(!want&&npcs.some(n=>!n.gone&&Math.hypot(n.x-gt.x,n.z-gt.z)<gt.half+5))want=1;if(!want)for(const e of enemies)if(!e.dead&&cityRaider341(e)&&Math.hypot(e.x-gt.x,e.z-gt.z)<gt.half+8){want=1;break}
+  const pd=Math.hypot(player.x-gt.x,player.z-gt.z),cart429=window.Civic343&&Civic343.wagons.some(w=>!w.gone&&!w.wreck&&Math.hypot(w.x-gt.x,w.z-gt.z)<gt.half+10);if(pd>150&&!cart429)continue;let want=!player.dead&&pd<gt.half+6||cart429?1:0;/* v429 (Ian): o portão abre para a carroça passar */if(!want&&npcs.some(n=>!n.gone&&Math.hypot(n.x-gt.x,n.z-gt.z)<gt.half+5))want=1;if(!want)for(const e of enemies)if(!e.dead&&cityRaider341(e)&&Math.hypot(e.x-gt.x,e.z-gt.z)<gt.half+8){want=1;break}
   if(want!==gt.want){if(gt.want!==undefined&&pd<45)try{sfx('block')}catch(_){}gt.want=want}gt.open+=(want-gt.open)*Math.min(1,dt*2.6);if(Math.abs(want-gt.open)<.002)gt.open=want;for(const l of gt.leaves)l.pv.rotation.y=l.sd*gt.open*1.75}}
 function buildCity(c,g,addCol,R){
   const X=c.x,Z=c.z,E=ENV.ok;const fallen=cityFallen(c),cLv=cityL(c);let shopH={};
@@ -44,7 +44,7 @@ function buildCity(c,g,addCol,R){
     addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
   {const pond=window.Water154?Water154.mesh(2.25):new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
     L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+10.15,2.4,Z+18);g.add(sg217);if(window.Wagon369){Wagon369.station(g,X+8,Z+18);for(const dz of [-1.9,-.5,1,3.1])addCol({x:X+8,z:Z+18+dz,r:dz===3.1?.7:1.18})}L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · TEREN · CARROÇA DA ORDEM',use:travelView217})}}
-  buildHouse(c,g,E);
+  buildHouse(c,g,E,addCol);
   if(!cityFallen(c)){const lx=X-16,lz=Z-9;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5),e=c.layout253?.inn;
     const door=e?cityFront253(X+e.x,Z+e.z,e.ry,e.dim.d/2+1.3):{x:X+7,z:Z-4.6};

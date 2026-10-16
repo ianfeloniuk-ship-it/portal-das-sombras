@@ -82,7 +82,7 @@ function outpostPoint361(cx,cz){if(OUTPOST361.raw.size>12000){OUTPOST361.raw.cle
 function outpostAt217(cx,cz){return !!outpostPoint361(cx,cz)}
 function buildOutpost217(ch,g,addCol){const point=outpostPoint361(ch.cx,ch.cz);if(!point)return;const x0=point.x,z0=point.z,R=mulberry32(rh(ch.cx,ch.cz,10));
  if(ENV.ok){const b=new EnvBatch();EH(b,'campfire_stones',x0,0,z0,0,.7);EH(b,'tent_detailedOpen',x0+4,0,z0-3,R()*TAU,2.6);EW(b,'stall',x0-4,0,z0+2,Math.PI/2,3.2);EW(b,'cart',x0+1,0,z0+5,R()*TAU,2.6);EH(b,'lantern_standing',x0-2,0,z0-3,0,2.4);EW(b,'crates_stacked',x0-5.5,0,z0-1,R()*TAU,1.4);envSolidEW357(addCol,b,'barrel',x0+5.5,0,z0+1,0,.8);envOwn(g,b.mesh(ENVMAT))}
- const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4]])addCol({x,z,r});
+ const f=new THREE.PointLight(0xffa04a,1.4,14,1.6);f.position.set(x0,1.2,z0);g.add(f);for(const [x,z,r] of [[x0+4,z0-3,2],[x0-4,z0+2,1.6],[x0+1,z0+5,1.4],[x0-5.5,z0-1,.8],[x0-2,z0-3,.3]])addCol({x,z,r});/* v429: caixotes e lampião também */
  const nm='Posto '+['do Viajante','da Encruzilhada','do Lampião','da Carroça','das Brasas','do Corvo'][rh(ch.cx,ch.cz,11)%6];
  L.inter.push({type:'outpost',chunk:ch,x:x0+1.5,z:z0+1.5,r:2.6,label:'F · DESCANSAR NA FOGUEIRA',use:()=>{player.hp=player.maxhp;player.mp=player.maxmp;floater(player.x,player.z,'Descansou','#ffd08a',true);toast('<b>['+nm.toUpperCase()+']</b> Você descansou na fogueira. Vida e mana cheias.',4000);saveRun()}});
  L.inter.push({type:'outpost',chunk:ch,x:x0-4,z:z0+3.5,r:2.4,label:'F · MASCATE',use:()=>openShop('pot')});
