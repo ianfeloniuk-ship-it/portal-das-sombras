@@ -1,3 +1,9 @@
+## v422 — Piscadas pretas e NPCs furados, 15/10/2026
+- Pedido de Ian (print): tela pisca preto, NPCs (Selene etc.) com partes faltando.
+- src/core/070: a resolução automática trocava a cada 2 s subindo e descendo; cada troca recria a imagem e pisca preto. Agora desce no máximo a cada 8 s (só abaixo de 28 fps), sobe só após 30 s acima de 58 fps, respeita a base do ULTRA e não reaplica o mesmo valor.
+- tools/citizens133.js (?v=422): NPCs detalhados com material dos dois lados (malha Tripo com faces invertidas) e sem corte por caixa nos modelos com ossos.
+- Teste: jogo carrega sem erro novo; Selene criada com DoubleSide. Não visto: as peças marrons flutuando no céu do print (ainda sem causa achada).
+
 ## v421 — Armaduras Ferro (rank F) Raro..Primeva separadas e rigadas no Viajante, 15/10/2026
 - Pedido de Ian: 7 GLBs novos pela skill primeva-armadura-encaixe. Identificados pela referência armadura-F-ferro-02..08: Raro (liso), Épico (roxo), Lendário (crista dourada), Mítico (pano vermelho), Divino (coroa de raios), Primordial (gemas vermelhas), Primeva (prata espinhosa).
 - fit.py: braçais deste conjunto ficam mais perto do corpo (centro |x|≈0,137) — corte de braçal baixado de 0,14 para 0,12. Saída `ferro-rN`.
