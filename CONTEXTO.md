@@ -1,3 +1,8 @@
+## v420 — Armaduras Estrela só no rank ★, 15/10/2026
+- Pedido de Ian: as armaduras Estrela são todas do rank ★ (uma por raridade, Comum..Primeva). A v416 punha a Estrela em qualquer rank quando a peça era rara — errado.
+- tools/set-visual153.js: `est416` agora exige `tier===9` (qualquer raridade 0..7). Nos outros ranks a peça volta ao visual normal do rank. Script ?v=420.
+- Teste: ★/Épico e ★/Comum → Estrela; rank C/Épico e F/Primeva → armadura normal.
+
 ## v419 — Armadura Estrela Primeva (raridade 7), 15/10/2026
 - Pedido de Ian: a armadura inteira do Tripo (knight armor, ranque ★ Estrela Primeva) separada em elmo, peitoral, braçais e grevas, encaixada no Viajante e se mexendo com ele.
 - models/equipment416/estrela-r7.glb gerado pelo fit.py da v416 (mesmo método aprovado: saiote quadril→coxas, rosto sem cabelo sob o elmo). No r7 o corte lateral do rosto é 4,4 cm (sobrava uma mecha no canto do olho).
