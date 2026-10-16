@@ -1,3 +1,9 @@
+## v419 — Armadura Estrela Primeva (raridade 7), 15/10/2026
+- Pedido de Ian: a armadura inteira do Tripo (knight armor, ranque ★ Estrela Primeva) separada em elmo, peitoral, braçais e grevas, encaixada no Viajante e se mexendo com ele.
+- models/equipment416/estrela-r7.glb gerado pelo fit.py da v416 (mesmo método aprovado: saiote quadril→coxas, rosto sem cabelo sob o elmo). No r7 o corte lateral do rosto é 4,4 cm (sobrava uma mecha no canto do olho).
+- tools/set-visual153.js: `est416` aceita raridade 7 (antes parava na 6). Script ?v=419.
+- Teste no navegador: herói com as 4 peças rar 7 andando com a animação real; GLB carregou (200), sem erro novo.
+
 ## v418 — Enfeites mais leves (árvores, pedras, muro, casas, torre), 15/10/2026
 - Pedido de Ian: versões mais leves dos enfeites para o jogo rodar mais rápido.
 - Blender (decimate) nos modelos Tripo do cenário: versões leves conífera 2241→784, salgueiro 3672→1285, carvalho 3169→1109, muro 3767→1506, paliçada 3765→1506, casa 4125→2062 triângulos; completas muro 12578→3773, casa 11797→4718, torre de defesa 12582→4403; rocha com musgo ganhou versão leve (7883→2364, `tripo-rocha-musgo154-lod.glb`). Originais seguem no histórico do git.
