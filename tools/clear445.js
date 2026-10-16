@@ -53,7 +53,8 @@
   }
   function uncol(x, z) { try { const rem = []; hnear(HASH, x, z, c => { if (Math.hypot(c.x - x, c.z - z) < .9 && c.r < 3.5) rem.push(c); }); rem.forEach(c => hrem(c)); } catch (_) {} }
   /* pedras grandes Tripo (instâncias, como as árvores) */
-  const TRIPO_ROCK = new Set(['boulder', 'stones', 'mossrock']);
+  const TRIPO_K = { boulder: 'rocha', mossrock: 'rocha', stones: 'pedra', cacto1: 'cacto', cacto2: 'cacto' }; // v446: cenário Tripo (cactos e pedras novos)
+  const TRIPO_ROCK = new Set(Object.keys(TRIPO_K));
   function tripoRocks() { const out = []; if (!window.CULL180) return out; for (const m of CULL180) if (m.parent && TRIPO_ROCK.has(m.userData.tripo153)) out.push(m); return out; }
   function baseOf(m) { const u = m.userData; if (!u.base423) { u.base423 = m.instanceMatrix.array.slice(); u.n423 = m.instanceMatrix.count; u.col423 = m.instanceColor ? m.instanceColor.array.slice() : null; } return u.base423; }
   const alive = (B, i) => B[i * 16] !== 0 || B[i * 16 + 2] !== 0;
@@ -104,7 +105,7 @@
       for (const it of m.userData.items445) { const d = Math.hypot(it.x - px, it.z - pz); if (d < bd && !cl.some(q => Math.abs(q[0] - it.x) < .02 && Math.abs(q[1] - it.z) < .02)) { bd = d; best = { kind: KIND(it.k), x: it.x, z: it.z, mesh: m, src: 'lote' }; } }
     }
     for (const [key, m] of stumps) { const [x, z] = key.split(',').map(Number), d = Math.hypot(x - px, z - pz); if (d < bd) { bd = d; best = { kind: 'toco', x, z, mesh: m, src: 'toco' }; } }
-    for (const m of tripoRocks()) { const B = baseOf(m), n = m.userData.n423; for (let i = 0; i < n; i++) { if (!alive(B, i)) continue; const x = B[i * 16 + 12], z = B[i * 16 + 14], d = Math.hypot(x - px, z - pz) - 1; if (d < bd) { bd = d; best = { kind: 'rocha', x, z, src: 'tripo' }; } } }
+    for (const m of tripoRocks()) { const B = baseOf(m), n = m.userData.n423; for (let i = 0; i < n; i++) { if (!alive(B, i)) continue; const x = B[i * 16 + 12], z = B[i * 16 + 14], d = Math.hypot(x - px, z - pz) - 1; if (d < bd) { bd = d; best = { kind: TRIPO_K[m.userData.tripo153] || 'rocha', x, z, src: 'tripo' }; } } }
     return best;
   }
   const it = { type: 'clear445', x: 0, z: 0, r: 2.6, label: '', hidden: true, use: () => hit() };
