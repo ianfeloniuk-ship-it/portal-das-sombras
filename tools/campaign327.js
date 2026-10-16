@@ -279,7 +279,7 @@
   }
   const edranCache = new Map();
   function makeEdranActor(){
-    const url = 'models/edran452.glb';
+    const url = 'models/edran452.glb?v=454';
     const root = new THREE.Group(), body = new THREE.Group();
     root.add(body);
     const mats = [];

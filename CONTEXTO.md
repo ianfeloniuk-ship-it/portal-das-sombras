@@ -1,3 +1,29 @@
+## v454 — Reconstrução profissional no Blender do Guarda Edran (Ordem da Fenda) com malha poligonal completa, armadura de placas, elmo forjado, curativo de combate e rigging esquelético orgânico, 16/10/2026
+- Pedido de Ian: "Pega todas as referências do meu projeto Primeva, abstrai elas para ti, coloca no teu cerne, entende, e pesquisa em todas as referências de como ser um profissional de Blender, como criar criaturas, como criar movimento, como criar tudo. Cria ossos, pele, textura, cada detalhe por polígonos ou quadriláteros da forma que melhor for exercida para fazer isso e reconstrói esse guarda que tu botou aí."
+- Diagnóstico da imagem enviada pelo usuário:
+  - O guarda Edran anteriormente carregado exibia formas primitivas geométricas (esfera como cabeça, cubo cinza com disco no tórax, cilindros como braços e pernas) que se assemelhavam a um manequim de madeira ou boneco de testes, em forte contraste com a qualidade do protagonista e dos demais personagens de Primeva.
+- Reconstrução Artística & Técnica Profissional no Blender 5.2 (tools/build_edran_professional.py):
+  - Malha Humanoide e Feições Anatômicas: Cabeça esculpida em alta densidade com feições de guerreiro veterano, cabelos escuros estilizados, mãos articuladas com luvas de combate e dedos modelados, culote e calças acolchoadas de gambeson militar, botas reforçadas com cinto de couro, fivelas e bolsas de suprimentos.
+  - Armadura de Placas da Guarda da Ordem:
+    - Peitoral de aço com o Brasão Solar dourado da Ordem da Fenda moldado em relevo no tórax.
+    - Ombreiras segmentadas com rebites e braçais de placas protegendo os membros superiores.
+    - Grevas de aço com joelheiras polidas protegendo as pernas e canelas.
+    - Elmo forjado de combate de ferro e aço (Ferro_Elmo) com crista cônica central e reforços laterais.
+  - Curativo de Combate 3D (Ferimento de Fenda): Faixa helicoidal de linho acolchoado com espessura real e manchas de combate ao redor do ombro e braço esquerdo ferido pela criatura.
+  - Rigging & Deformação de Pele ("Ossos e Pele"):
+    - Esqueleto profissional com 17 ossos (hips, spine, chest, neck, head, upperarm_l/r, forearm_l/r, hand_l/r, thigh_l/r, shin_l/r, foot_l/r).
+    - Mapeamento de pesos de vértices orgânico: cotovelos, joelhos, quadris e ombros deformam com transição suave, eliminando qualquer separação de peças rígidas.
+  - Shaders e Materiais PBR ("Textura"):
+    - Aço polido com reflexão metálica PBR calibrada (metallic 0.88, roughness 0.28).
+    - Ouro do brasão e fivelas (metallic 0.95, roughness 0.20).
+    - Tecido de gambeson e couro natural nos arreios.
+    - Linho texturizado no curativo ferido.
+- Sincronização e Posição no Solo (tools/intro401.js & tools/campaign327.js):
+  - pose(edran(), dt) calibrada para a cinemática de pernas flexionadas (thigh_l: -1.25, shin_l: 1.6, thigh_r: -1.1, shin_r: 1.4) assentando a bacia exatamente na grama da estrada (m.body.position.y = -0.22) com o braço esquerdo apoiado no joelho ferido e o braço direito gesticulando no diálogo.
+  - tools/campaign327.js e sw.js atualizados com URL cache-busted models/edran452.glb?v=454.
+- Cache-Busting v454: game.html, index.html e sw.js sincronizados para ?v=454 em todos os 9 módulos essenciais.
+- Testes: python tools/build.py (passagens com src/core: igual), python tools/core_parts.py check (ok).
+
 ## v453 — Sincronização completa de cache busting (?v=453) em todas as tags e Service Worker, e shaders sRGB em Edran, 16/10/2026
 - Pedido de Ian: "Pode colocar no jogo, porque eu acabei de abrir o jogo e não parece muito que..."
 - Diagnóstico: tags <script src="tools/..."> em game.html e index.html estavam apontando para query strings legadas de versões anteriores (?v=441 em campaign327.js, ?v=443 em survival437.js, ?v=434 em intro401.js, ?v=170 em boss160.js, ?v=405 em anim303.js), o que fazia o navegador puxar scripts antigos do cache HTTP de disco em vez dos arquivos atualizados das versões 451 e 452.
