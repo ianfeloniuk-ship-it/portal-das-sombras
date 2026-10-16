@@ -277,6 +277,38 @@
     s.extraStep = s.s;
     return [s.pos, ...s.extra];
   }
+  const edranCache = new Map();
+  function makeEdranActor(){
+    const url = 'models/edran452.glb';
+    const root = new THREE.Group(), body = new THREE.Group();
+    root.add(body);
+    const mats = [];
+    const m = { root, body, model: null, mats, edran452: true, glb: true, sc: 1.0, bones: {} };
+    if(!edranCache.has(url)){
+      edranCache.set(url, new Promise(res => {
+        const ld = new THREE.GLTFLoader();
+        if(window.MeshoptDecoder) ld.setMeshoptDecoder(MeshoptDecoder);
+        ld.load(url, g => res(g), undefined, () => res(null));
+      }));
+    }
+    edranCache.get(url).then(g => {
+      if(!g || !root.parent) return;
+      const model = THREE.SkeletonUtils.clone(g.scene);
+      model.traverse(o => {
+        if(o.isMesh){
+          o.castShadow = true;
+          o.receiveShadow = true;
+          o.frustumCulled = false;
+          if(o.material) mats.push(o.material);
+        }
+        if(o.isBone) m.bones[o.name] = o;
+      });
+      body.add(model);
+      m.model = model;
+      m.mixer = new THREE.AnimationMixer(model);
+    });
+    return m;
+  }
   function figure(f, x, z) {
     if (!f) return null;
     if (f.torvo) {
@@ -286,6 +318,31 @@
         FRIENDS217.push(e); e.friendly217 = true; e.hp = e.maxhp = 1e9; e.name = 'Torvo, caçador do Clã Ferrugem'; e.short = 'Torvo'; e.noExpLoot = true;
         return { friend: e, x: x + 2.2, z };
       } catch (_) { return null; }
+    }
+    if (f.name === 'Edran') {
+      const m = makeEdranActor();
+      m.root.position.set(x + 1.8, gy(x + 1.8, z), z);
+      m.root.userData.terrainAbsolute245 = true;
+      scene.add(m.root);
+      if (f.down) { m.root.position.y = gy(x + 1.8, z); m.wounded401 = true; }
+      const fig = { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
+      return window.Solid429 ? Solid429.figure(fig) : fig;
+    }
+    if (f.name === 'Sobrevivente' && window.Citizens133) {
+      const cit = (Math.abs(Math.round(x * 10)) % 2 === 0) ? 'Dorian' : 'Selene';
+      const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+      const m = { root, body, mats: [], citizen133: true, glb: true, sc: 0.92, name: cit };
+      Citizens133.load(cit).then(() => {
+        if (!root.parent) return;
+        const created = Citizens133.create(cit);
+        if (created && created.model) { body.add(created.model); if (created.mats) m.mats = created.mats; }
+      });
+      m.root.position.set(x + 1.8, gy(x + 1.8, z), z);
+      m.root.userData.terrainAbsolute245 = true;
+      if (f.down) { m.root.rotation.z = Math.PI / 2 * 0.85; m.wounded401 = true; }
+      scene.add(m.root);
+      const fig = { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
+      return window.Solid429 ? Solid429.figure(fig) : fig;
     }
     const look = f.civ ? CIV() : f.look;
     const m = MODELS.list[look.gk] ? makeActor(look) : {root:new THREE.Group(),mats:[]};

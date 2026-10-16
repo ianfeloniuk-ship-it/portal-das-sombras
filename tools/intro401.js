@@ -82,7 +82,7 @@ function refresh(){
 setInterval(refresh,200);
 function pose(f,dt){if(!f?.m?.model||!f.down)return;const m=f.m;
  if(!m.pose401){m.mixer?.stopAllAction();m.pose401={};m.model.traverse(o=>{if(o.isBone)m.pose401[o.name]={bone:o,q:o.quaternion.clone()}});m.model.traverse(o=>{if(o.isMesh&&/arm|body|chest/i.test(o.name)){o.material=o.material.clone();o.material.color.multiplyScalar(.72);if(/arm/i.test(o.name))o.material.color.lerp(new THREE.Color(0x631f23),.3)}})}
- const t=performance.now()/1000,b=m.pose401;const set=(n,x,y=0,z=0)=>{const names={thigh_l:'upperleg.l',thigh_r:'upperleg.r',shin_l:'lowerleg.l',shin_r:'lowerleg.r',upperarm_l:'upperarm.l',upperarm_r:'upperarm.r',forearm_l:'lowerarm.l'};const v=b[names[n]||n];if(v)v.bone.quaternion.copy(v.q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z)))};
+ const t=performance.now()/1000,b=m.pose401;const set=(n,x,y=0,z=0)=>{const names={thigh_l:'upperleg.l',thigh_r:'upperleg.r',shin_l:'lowerleg.l',shin_r:'lowerleg.r',upperarm_l:'upperarm.l',upperarm_r:'upperarm.r',forearm_l:'lowerarm.l'};const v=b[n]||b[names[n]];if(v)v.bone.quaternion.copy(v.q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z)))};
  const near=Math.hypot(player.x-f.x,player.z-f.z)<12,want=near?Math.atan2(player.x-f.x,player.z-f.z):-2.1;
  m.root.rotation.y+=Math.atan2(Math.sin(want-m.root.rotation.y),Math.cos(want-m.root.rotation.y))*Math.min(1,dt*2);
  m.body.position.y=.05+Math.sin(t*3)*.017;

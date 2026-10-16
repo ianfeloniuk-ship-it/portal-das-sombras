@@ -3462,15 +3462,31 @@ function fixUserRigClips413(clips){
  for(const c of clips){let t0=Infinity;for(const tr of c.tracks)if(tr.times.length)t0=Math.min(t0,tr.times[0]);
   if(t0>0&&t0<Infinity)for(const tr of c.tracks)tr.shift(-t0);
   for(const tr of c.tracks)if(/^(root|pelvis)\.position$/.test(tr.name)){const v=tr.values;for(let i=3;i<v.length;i+=3){v[i]=v[0];v[i+2]=v[2]}}
-  c.resetDuration();if(/(^|\|)(Run|Walk)$/.test(c.name))loopPingPong413(c,30)}
+  c.resetDuration();if(/(^|\|)(Run|Walk)$/.test(c.name))smoothLoop452(c)}
  return clips}
-function loopPingPong413(clip,fps){let best=0,mid=0;
- for(const tr of clip.tracks){if(tr.ValueTypeName!=='quaternion')continue;const v=tr.values,n=tr.times.length;
-  for(let k=1;k<n;k++){const d=Math.min(1,Math.abs(v[0]*v[k*4]+v[1]*v[k*4+1]+v[2]*v[k*4+2]+v[3]*v[k*4+3])),a=2*Math.acos(d);if(a>best+1e-4){best=a;mid=tr.times[k]}}}
- if(!(mid>0)||best<.05)return clip;const steps=Math.max(2,Math.round(mid*fps));
- clip.tracks=clip.tracks.map(tr=>{const ip=tr.createInterpolant(),sz=tr.getValueSize(),T=new Float32Array(2*steps+1),V=new Float32Array((2*steps+1)*sz);
-  for(let i=0;i<=2*steps;i++){const r=ip.evaluate((i<=steps?i:2*steps-i)/steps*mid);T[i]=i/steps*mid;for(let j=0;j<sz;j++)V[i*sz+j]=r[j]}
-  return new tr.constructor(tr.name,T,V)});
+function smoothLoop452(clip){
+ const dur=clip.duration;if(!dur||dur<=0)return clip;
+ for(const tr of clip.tracks){
+  const sz=tr.getValueSize(),n=tr.times.length;if(n<2)continue;
+  const isQ=tr.ValueTypeName==='quaternion',v0=tr.values.slice(0,sz);
+  const blendStart=dur*0.75;
+  for(let i=0;i<n;i++){
+   const t=tr.times[i];
+   if(t>=blendStart){
+    const u=(t-blendStart)/(dur-blendStart);
+    const idx=i*sz;
+    if(isQ){
+     const dot=tr.values[idx]*v0[0]+tr.values[idx+1]*v0[1]+tr.values[idx+2]*v0[2]+tr.values[idx+3]*v0[3];
+     const flip=dot<0?-1:1;
+     for(let j=0;j<4;j++)tr.values[idx+j]=(1-u)*tr.values[idx+j]+u*v0[j]*flip;
+     const len=Math.hypot(tr.values[idx],tr.values[idx+1],tr.values[idx+2],tr.values[idx+3])||1;
+     for(let j=0;j<4;j++)tr.values[idx+j]/=len;
+    }else{
+     for(let j=0;j<sz;j++)tr.values[idx+j]=(1-u)*tr.values[idx+j]+u*v0[j];
+    }
+   }
+  }
+ }
  clip.resetDuration();clip.optimize();return clip}
 function makeMonster(o){
   const k=o.mon,src=MON.list[k],D=MON_DEF[k];const model=THREE.SkeletonUtils.clone(src);
@@ -3517,6 +3533,18 @@ function animDraconico318(m,st,t){
 }
 function animChibi(m,st,t){
   if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
+  if(m.edran452&&m.bones){
+    const b=m.bones,sw=Math.sin(t*9)*.5*st.move;
+    if(b.thigh_l)b.thigh_l.rotation.x=-sw;
+    if(b.thigh_r)b.thigh_r.rotation.x=sw;
+    if(b.shin_l)b.shin_l.rotation.x=Math.max(0,sw)*.45;
+    if(b.shin_r)b.shin_r.rotation.x=Math.max(0,-sw)*.45;
+    if(b.upperarm_l)b.upperarm_l.rotation.x=sw*.5;
+    if(b.upperarm_r)b.upperarm_r.rotation.x=-sw*.5;
+    if(b.spine)b.spine.rotation.x=Math.sin(t*2)*.02;
+    m.body.position.y=Math.abs(Math.sin(t*9))*.03*st.move;
+    return;
+  }
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
   if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}

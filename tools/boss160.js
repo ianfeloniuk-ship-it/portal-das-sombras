@@ -36,7 +36,25 @@
       model.scale.setScalar(s);model.position.y=-box.min.y*s;
       e.m.root.traverse(o=>{if(o.isMesh||o.isSkinnedMesh)o.visible=false});e.m.root.add(holder);
       const names=new Set();model.traverse(o=>{if(o.isBone)names.add(o.name)});
-      const C=clips(a,names),mixer=new T.AnimationMixer(model),act={};for(const n in C)act[n]=mixer.clipAction(C[n]);
+      const mixer=new T.AnimationMixer(model),act={};
+      if(g.animations&&g.animations.length){
+        for(const cl of g.animations){
+          const n=cl.name.toLowerCase(),action=mixer.clipAction(cl);
+          if(/run|walk/.test(n))act.correr=action;
+          if(/idle/.test(n))act.idle=action;
+          if(/death|die/.test(n))act.morte=action;
+          if(/attack|atk|golpe/.test(n)){
+            act.golpe1=act.golpe1||action;
+            act.golpe2=act.golpe2||action;
+            for(const mv of moves)act[mv]=act[mv]||action;
+          }
+          if(/hit/.test(n))act.dano=action;
+        }
+      }
+      if(!act.idle&&a){
+        const C=clips(a,names);
+        for(const n in C)act[n]=mixer.clipAction(C[n]);
+      }
       const B={model,mixer,act,cur:null,last:performance.now(),px:e.x,pz:e.z,atk:0};e.boss160=B;
       const play=(n,once,dur)=>{const x=act[n]||act.idle;if(!x)return null;if(B.cur===x)return x;if(B.cur)B.cur.fadeOut(.15);x.reset();x.setLoop(once?T.LoopOnce:T.LoopRepeat);x.clampWhenFinished=!!once;x.timeScale=dur?x.getClip().duration/dur:1;x.fadeIn(.15).play();B.cur=x;return x};
       const tick=()=>{if(e.gone||!e.m.root.parent)return;
