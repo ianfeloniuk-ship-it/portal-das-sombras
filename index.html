@@ -8783,7 +8783,7 @@ const rareStatus103=document.createElement('div');rareStatus103.id='rare-status1
 /* Textured Tripo scenery. Shared geometry/materials, instanced per streamed chunk. */
 const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
-  const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',boulder:'tripo-rochedo154.glb',stones:'tripo-pedras154.glb',mossrock:'tripo-rocha-musgo154.glb',palisade:'tripo-palicada154.glb'};
+  const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',boulder:'tripo-rochedo154.glb',stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
   const HEIGHT={guild:12,defense:13,forge:7,inn:10,church:13,potion:8,mill:12,well:3.2,bank:3.4,market:3.4,bankhall:10},KEYHEIGHT={building_tower_A_blue:11,building_tower_B_blue:11};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
@@ -9044,10 +9044,13 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 <script src="tools/mechanics434.js?v=434"></script>
+<script src="tools/survival437.js?v=437"></script>
+<script src="tools/cart437.js?v=437"></script>
+<script src="tools/build437.js?v=437"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v436</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v437</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=436;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=437;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
