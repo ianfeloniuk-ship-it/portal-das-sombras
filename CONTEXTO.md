@@ -1,3 +1,9 @@
+## v423 — Muralha e casas não somem de longe, 15/10/2026
+- Pedido de Ian: a muralha inteira sumia de longe e sobravam pedaços soltos no céu.
+- Causa: CULL180 escondia tudo além de 100 m, e propCull415 (v417/418) cortava 50–80% das cópias de muro/casa por distância.
+- 680: lista NAT422 (árvores e pedras). Só elas somem além de 100 m; construções ficam na versão leve até o pedaço do mapa descarregar. 250: propCull415 só afina árvores/pedras/grama.
+- Teste: carrega sem erro novo. Não medido: fps na máquina do Ian (agora tem mais muro desenhado de longe, só que na versão leve).
+
 ## v422 — Piscadas pretas e NPCs furados, 15/10/2026
 - Pedido de Ian (print): tela pisca preto, NPCs (Selene etc.) com partes faltando.
 - src/core/070: a resolução automática trocava a cada 2 s subindo e descendo; cada troca recria a imagem e pisca preto. Agora desce no máximo a cada 8 s (só abaixo de 28 fps), sobe só após 30 s acima de 58 fps, respeita a base do ULTRA e não reaplica o mesmo valor.
