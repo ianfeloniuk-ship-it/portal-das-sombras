@@ -270,7 +270,7 @@ function gainXp(x,source){
   if(run.level>level0)sfx('levelup357');
   {const nx=profile.rank+1;if(profile.rk2&&rankTrialReady(nx)&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ORDEM]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[NARRADOR]</b> Missão de troca de classe disponível. Fale com a Ordem em qualquer cidade.',5000),800)}
-  const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[NARRADOR]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c)}
+  const r1=rankOf();if(r1>r0){refreshStats();toast('<b>[NARRADOR]</b> RANK SUBIU: <b style="color:'+RANKS[r1].c+'">'+RANKS[r1].id+'</b>',4000);bigText('RANK '+RANKS[r1].id,1400);player.aura.material.color.set(RANKS[r1].c);try{rebuildLook()}catch(_){}/* v431: auréola com a cor do rank novo */}
   return awarded;
 }
 /* Custos compatíveis com os saves; recompensas normalizadas por nível do monstro. */

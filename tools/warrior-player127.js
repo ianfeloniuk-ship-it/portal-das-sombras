@@ -53,7 +53,7 @@
   };
   function disposePart(part){part.traverse(o=>{if(o.isMesh){o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});part.removeFromParent?part.removeFromParent():part.parent&&part.parent.remove(part);}
   /* v162 (Ian): aura da arma pela cor do rank — espada, cajado e arco. Rank F/E sem aura; cresce e pulsa mais nos ranks altos. */
-  function aura162(w,color,tier,len,bow,cy){if(tier<1)return;const k=Math.min(1,tier/9),g=new T.Group();g.name='aura162';
+  function aura162(w,color,tier,len,bow,cy){/* v431 (Ian): armas sem aura; forma e cor do próprio modelo identificam o rank */return;if(tier<1)return;const k=Math.min(1,tier/9),g=new T.Group();g.name='aura162';
     const mat=new T.MeshBasicMaterial({color,transparent:true,opacity:.18+.3*k,blending:T.AdditiveBlending,depthWrite:false});
     const core=new T.Mesh(new T.CylinderGeometry(.018+.02*k,.035+.03*k,len,10,1,true),mat);core.position.y=cy??(bow?.49:.07+len/2);g.add(core);
     const halo=new T.Mesh(new T.CylinderGeometry(.04+.05*k,.07+.06*k,len*1.05,10,1,true),mat.clone());halo.material.opacity*=.45;halo.position.copy(core.position);g.add(halo);
@@ -127,7 +127,7 @@
     const g=new T.Group();g.add(w);g.quaternion.setFromUnitVectors(ax.normalize(),new T.Vector3(0,0,1));return g};
   API.daggerModel=function(){const k=W171.dagger;load171(k[0],k[1],k[2],'dagger');const src=w171.dagger;if(!src)return null;const w=src.clone(true);w.traverse(x=>{if(x.isMesh&&x.material){x.material=x.material.clone();x.castShadow=false}});return w};
   /* v428 (Ian): adaga própria por rank (por ora a Comum de cada rank vale para todas as raridades do rank). Cor original do GLB (srgb413), sem tinta. SS entrou na v429. */
-  const DAG428=[1,1,1,1,1,1,1,1,1,1];
+  const DAG428=[1,1,1,1,1,1,1,0,1,1];/* v431: SS retirada (Ian não gostou), volta a padrão até ele refazer */
   function dagKey428(it){const t=Math.max(0,Math.min(9,it.tier||0));return it.kind155==='dagger'&&DAG428[t]?'dagger428-'+t:null}
   function make428(key){const src=w171[key];if(!src)return null;const w=src.clone(true),mats=[];w.traverse(x=>{if(x.isMesh){x.castShadow=true;x.material=x.material.clone();srgb413(x.material);mats.push(x.material)}});w.userData.materials=mats;return w}
   function make171(key,color){const src=w171[key];if(!src)return null;const w=src.clone(true),mats=[],c=new T.Color(color);w.traverse(x=>{if(x.isMesh){x.castShadow=true;x.material=x.material.clone();x.material.color.copy(c).lerp(new T.Color(1,1,1),.35);mats.push(x.material)}});w.userData.materials=mats;return w}

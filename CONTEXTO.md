@@ -1,3 +1,11 @@
+## v431 — Sem auras feias: auréola na cabeça; adaga SS retirada, 16/10/2026
+- Pedido de Ian: tirar as auras em volta (armas e mobs) e trocar por uma auréola de cor em cima da cabeça; armas sem aura nenhuma (forma e cor do modelo identificam o rank); adaga SS não ficou boa, voltar a padrão até ele refazer.
+- tools/warrior-player127.js (?v=431): `aura162` desligada (nenhuma arma tem aura). `DAG428[7]=0`: rank SS volta à adaga comum pintada; `models/armas155/adaga-rank7.glb` fica no repositório, sem uso.
+- 300-entidades: monstro com ameaça (`threatApply184`) ganha `halo431` (anel da cor da ameaça, 25 cm acima do topo do modelo) em vez da coluna `auraMesh184` (função mantida, sem uso). Nome [Ameaça] e números não mudaram.
+- 160-jogador: anel de rank no chão escondido; auréola na cabeça sempre (cor do rank; com título equipado, cor do título). 370/440: ao subir de rank refaz o visual para a auréola pegar a cor nova.
+- Não mexido: efeitos de habilidade (V.aura do vfx328), anel dourado dos NPCs.
+- Teste: 3 monstros com ameaça Legião/Babel/Apocalipse com auréola e sem coluna; herói sem anel no chão, com auréola, adaga SS padrão, sem aura na arma; sem erro no loop.
+
 ## v430 — Armaduras Mithril (rank D) Comum..Primeva; ombreira segue o braço, 16/10/2026
 - Pedido de Ian: 8 GLBs pela skill primeva-armadura-encaixe. Identificados pela referência armadura-raridade-01..07 (base Mithril D) e armadura-D-mithril-08: Comum (gema azul), Raro (âmbar pequeno), Épico (roxo), Lendário (âmbar e dourado), Mítico (vermelho), Divino (azul com coroa), Primordial (laranja-vermelho), Primeva (prata espinhosa).
 - Ian (andando no jogo): a ombreira ficava presa no peito e o braço atravessava; o saiote tem que mexer inteiro. fit.py: parte do ombro do peitoral segue upperarm (misturado com o peito), ombreira solta 85% braço; barra do saiote 100% coxa.
