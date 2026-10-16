@@ -85,7 +85,8 @@ function pose(f,dt){if(!f?.m?.model||!f.down)return;const m=f.m;
  const t=performance.now()/1000,b=m.pose401;const set=(n,x,y=0,z=0)=>{const names={thigh_l:'upperleg.l',thigh_r:'upperleg.r',shin_l:'lowerleg.l',shin_r:'lowerleg.r',upperarm_l:'upperarm.l',upperarm_r:'upperarm.r',forearm_l:'lowerarm.l'};const v=b[n]||b[names[n]];if(v)v.bone.quaternion.copy(v.q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z)))};
  const near=Math.hypot(player.x-f.x,player.z-f.z)<12,want=near?Math.atan2(player.x-f.x,player.z-f.z):-2.1;
  m.root.rotation.y+=Math.atan2(Math.sin(want-m.root.rotation.y),Math.cos(want-m.root.rotation.y))*Math.min(1,dt*2);
- m.body.position.y=.05+Math.sin(t*3)*.017;
+ m.body.position.y=(m.edran452?-0.48:0.05)+Math.sin(t*3)*.017;
+ if(m.edran452)m.body.rotation.z=-0.12;
  set('thigh_l',-1.25);set('thigh_r',-1.1);set('shin_l',1.6);set('shin_r',1.4);set('spine',.22+Math.sin(t*3)*.035);set('chest',.12);set('head',-.12,near?.12:0);set('upperarm_l',-.35,0,-.24);set('forearm_l',-.9);set('upperarm_r',API.conversation?.name==='Edran'?-.85+Math.sin(t*2)*.08:.2,0,.2);
 }
 const cam0=camUpdate;camUpdate=function(dt){cam0.apply(this,arguments);if(!started||!player)return;

@@ -292,13 +292,21 @@
       }));
     }
     edranCache.get(url).then(g => {
-      if(!g || !root.parent) return;
+      if(!g) return;
       const model = THREE.SkeletonUtils.clone(g.scene);
       model.traverse(o => {
         if(o.isMesh){
           o.castShadow = true;
           o.receiveShadow = true;
           o.frustumCulled = false;
+          const list = Array.isArray(o.material) ? o.material : [o.material];
+          for(const mat of list){
+            mat.side = THREE.DoubleSide;
+            mat.onBeforeCompile = s => {
+              s.fragmentShader = s.fragmentShader.replace('#include <encodings_fragment>', '#include <encodings_fragment>\ngl_FragColor=LinearTosRGB(gl_FragColor);');
+            };
+            mat.customProgramCacheKey = () => 'edran452-linear';
+          }
           if(o.material) mats.push(o.material);
         }
         if(o.isBone) m.bones[o.name] = o;

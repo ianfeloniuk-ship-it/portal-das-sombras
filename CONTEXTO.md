@@ -1,3 +1,14 @@
+## v453 — Sincronização completa de cache busting (?v=453) em todas as tags e Service Worker, e shaders sRGB em Edran, 16/10/2026
+- Pedido de Ian: "Pode colocar no jogo, porque eu acabei de abrir o jogo e não parece muito que..."
+- Diagnóstico: tags <script src="tools/..."> em game.html e index.html estavam apontando para query strings legadas de versões anteriores (?v=441 em campaign327.js, ?v=443 em survival437.js, ?v=434 em intro401.js, ?v=170 em boss160.js, ?v=405 em anim303.js), o que fazia o navegador puxar scripts antigos do cache HTTP de disco em vez dos arquivos atualizados das versões 451 e 452.
+- Correção de Cache Busting Geral:
+  - Todas as 9 tags em game.html e index.html foram sincronizadas para ?v=453 (warrior-player127, boss160, citizens133, set-visual153, anim303, campaign327, intro401, mechanics434, survival437).
+  - sw.js (v453) atualizado com a lista exata CORE refletindo ?v=453 para todas as dependências, forçando o Service Worker a descartar caches anteriores e baixar os scripts renovados.
+- Shader sRGB e Pose de Edran:
+  - tools/campaign327.js: Adicionado patch de shader LinearTosRGB e DoubleSide aos materiais de models/edran452.glb, assegurando cores vibrantes na iluminação sem estourar contraste.
+  - tools/intro401.js: Ajustado o offset vertical de Edran ferido para m.body.position.y = -0.48 com leve rotação lateral, assentando sua bacia e coxas com firmeza na grama ao lado da carroça em vez de flutuar.
+- Testes: python tools/build.py (duas passagens com src/core: igual), python tools/core_parts.py check (ok).
+
 ## v452 — Correção de estiramento de armaduras, animações e pele de monstros/chefes, e modelo 3D articulado de Edran e Sobreviventes, 16/10/2026
 - Pedido de Ian: "algumas cinemáticas que ainda estão feio os bonequinhos ali do início uh, o Adrian, não sei o nome dele, da carroça e tal, não são NPCs de verdade, a gente precisa ainda gerar NPCs com rigs de animação e tudo" e "algumas animações de monstros, chefes que a gente botou que eles estão meio bugados, a pele não se move junto com como ele anda ou a armadura do personagem também fica meio bugada, meio que estica e volta".
 - Correção de estiramento de armaduras ("estica e volta"):
