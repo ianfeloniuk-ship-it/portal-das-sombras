@@ -1,3 +1,10 @@
+## v428 — Adagas próprias por rank (Comum de F a ★), 16/10/2026
+- Pedido de Ian: 9 GLBs de adaga, cada um no seu rank; por ora a Comum de cada rank vale para todas as raridades daquele rank, até ele fazer as outras.
+- Identificação pelas fichas `assets/equipment405/dagger-N-0.webp`: F = medieval dagger; E = ornate dagger; D = fantasy dagger; C = dark fantasy dagger (runas roxas); B = fantasy (1) (vermelho-cobre); A = fantasy (2) (roxo); S = fantasy (3) (preto/vermelho); SS+ = ornate (1) (pérola); ★ = fantasy (4) (estrela). **SS sem modelo** (ficha dourada com gema âmbar) — continua a adaga comum pintada.
+- Modelos reduzidos no Blender (16 mil triângulos, textura 1024 JPEG, ~0,7 MB): `models/armas155/adaga-rank0..6,8,9.glb`.
+- tools/warrior-player127.js (?v=428): `DAG428`/`make428` — adaga do rank com a cor original (srgb413, sem tinta); `load171` aceita modo separado (handleDown415 'dagger'). Adaga arremessada (`daggerModel`) não mudou.
+- Teste no navegador: as 10 adagas montadas pelo `gear` com cabo para baixo e cor original. Não testado: luta real com o Assassino, bainha na cintura.
+
 ## v427 — Aço (rank E): sapato saindo pela greva, 15/10/2026
 - Pedido de Ian (print): botas com sapato saindo / ângulo errado; ao tirar a bota do corpo-base as pernas sumiram.
 - Causa: a greva de Aço é aberta atrás e a canela/pé marrom do corpo-base (base169_b) aparecia por ela. O ângulo da greva já bate com o pé do esqueleto (~20° para fora nos dois).
