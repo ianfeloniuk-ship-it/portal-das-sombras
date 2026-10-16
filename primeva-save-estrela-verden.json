@@ -1,0 +1,359 @@
+{
+  "p": {
+    "rank": 9,
+    "official": 9,
+    "cls": 0,
+    "journey92": true,
+    "creationPending91": false,
+    "progress80": 1,
+    "rankSchema": 78,
+    "deaths": 0,
+    "best": 100,
+    "seed": 0,
+    "maxLevel111": 100,
+    "orderRep": 50000,
+    "orderPending401": false,
+    "raided155": {
+      "5,5": 1
+    },
+    "inv343": {
+      "5,5": 1
+    },
+    "visited": {
+      "5,5": {
+        "id": "5,5",
+        "n": "Verden",
+        "x": 9216,
+        "z": 9216,
+        "cap": true
+      }
+    },
+    "visited217": {
+      "5,5": {
+        "n": "Verden",
+        "cap": true,
+        "t": 1792143053599
+      }
+    },
+    "lore": [
+      "act1",
+      "act2",
+      "act3",
+      "act4",
+      "act5",
+      "act6",
+      "act7",
+      "act8",
+      "act9",
+      "act10"
+    ],
+    "awakening103": {
+      "unlocked": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "points": {},
+      "energy": 100,
+      "total": 3,
+      "essences": []
+    },
+    "m423": {
+      "anchors": {
+        "Verden": {
+          "sealed441": false
+        }
+      },
+      "marks": [],
+      "astral": false
+    },
+    "bank": 0,
+    "jobs": [
+      0
+    ],
+    "closedPortalsByRank": {
+      "0": 10,
+      "1": 10,
+      "2": 10,
+      "3": 10,
+      "4": 10,
+      "5": 10,
+      "6": 10,
+      "7": 10,
+      "8": 10,
+      "9": 10
+    },
+    "rebirths": 0,
+    "titles": [
+      "sov",
+      "champion"
+    ],
+    "title": "sov"
+  },
+  "r": {
+    "v71": 1,
+    "attr281": 1,
+    "rankSchema": 78,
+    "level": 100,
+    "xp": 0,
+    "gold": 1000000,
+    "pots": 99,
+    "scrolls": 20,
+    "rez187": 10,
+    "kills": 999,
+    "clears": 50,
+    "rank": 9,
+    "official": 9,
+    "stats": {
+      "for": 160,
+      "vit": 120,
+      "agi": 80,
+      "int": 20
+    },
+    "pts": 0,
+    "pos": {
+      "x": 9216,
+      "z": 9238
+    },
+    "res": {
+      "core": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "cry": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ]
+    },
+    "equip": {
+      "w": {
+        "slot": "w",
+        "tier": 9,
+        "rar": 7,
+        "kind155": "sword",
+        "name": "Espada Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 500000,
+        "uid": "god_sword_primeva",
+        "visual": {
+          "shape": "long"
+        },
+        "aff": [
+          {
+            "k": "dmg",
+            "v": 65
+          },
+          {
+            "k": "crit",
+            "v": 50
+          },
+          {
+            "k": "ls",
+            "v": 25
+          }
+        ]
+      },
+      "h": {
+        "slot": "h",
+        "tier": 9,
+        "rar": 7,
+        "name": "Elmo Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 250000,
+        "uid": "god_helm_primeva",
+        "aff": [
+          {
+            "k": "hp",
+            "v": 60
+          },
+          {
+            "k": "dmg",
+            "v": 35
+          }
+        ]
+      },
+      "a": {
+        "slot": "a",
+        "tier": 9,
+        "rar": 7,
+        "name": "Peitoral Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 350000,
+        "uid": "god_armor_primeva",
+        "aff": [
+          {
+            "k": "hp",
+            "v": 80
+          },
+          {
+            "k": "dmg",
+            "v": 45
+          }
+        ]
+      },
+      "g": {
+        "slot": "g",
+        "tier": 9,
+        "rar": 7,
+        "name": "Braçais Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 200000,
+        "uid": "god_gloves_primeva",
+        "aff": [
+          {
+            "k": "crit",
+            "v": 40
+          },
+          {
+            "k": "spd",
+            "v": 30
+          }
+        ]
+      },
+      "b": {
+        "slot": "b",
+        "tier": 9,
+        "rar": 7,
+        "name": "Grevas Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 220000,
+        "uid": "god_boots_primeva",
+        "aff": [
+          {
+            "k": "hp",
+            "v": 50
+          },
+          {
+            "k": "spd",
+            "v": 35
+          }
+        ]
+      }
+    },
+    "items": [
+      {
+        "slot": "w",
+        "tier": 0,
+        "rar": 7,
+        "kind155": "sword",
+        "name": "Espada de Ferro",
+        "v2": 1,
+        "up": 10,
+        "value": 120000,
+        "uid": "god_sword_ferro",
+        "visual": {
+          "shape": "sword"
+        },
+        "aff": [
+          {
+            "k": "dmg",
+            "v": 40
+          },
+          {
+            "k": "crit",
+            "v": 35
+          }
+        ]
+      },
+      {
+        "slot": "w",
+        "tier": 9,
+        "rar": 7,
+        "kind155": "axe",
+        "name": "Machado Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 500000,
+        "uid": "god_axe_primeva",
+        "visual": {
+          "shape": "axe"
+        },
+        "aff": [
+          {
+            "k": "dmg",
+            "v": 70
+          },
+          {
+            "k": "crit",
+            "v": 40
+          }
+        ]
+      },
+      {
+        "slot": "w",
+        "tier": 9,
+        "rar": 7,
+        "kind155": "spear",
+        "name": "Lança Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 500000,
+        "uid": "god_spear_primeva",
+        "visual": {
+          "shape": "spear"
+        },
+        "aff": [
+          {
+            "k": "dmg",
+            "v": 65
+          },
+          {
+            "k": "spd",
+            "v": 30
+          }
+        ]
+      },
+      {
+        "slot": "w",
+        "tier": 9,
+        "rar": 7,
+        "kind155": "dagger",
+        "name": "Adagas Primeva",
+        "v2": 1,
+        "up": 10,
+        "value": 500000,
+        "uid": "god_dagger_primeva",
+        "visual": {
+          "shape": "dagger"
+        },
+        "aff": [
+          {
+            "k": "crit",
+            "v": 55
+          },
+          {
+            "k": "spd",
+            "v": 40
+          }
+        ]
+      }
+    ],
+    "stolen": [],
+    "shadows": [],
+    "party": []
+  },
+  "v": 442,
+  "at": 1792143053599
+}

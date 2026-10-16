@@ -101,7 +101,18 @@ function riftContact131(){
  const now=[player.x,1.05,player.z],old=riftPrevious131||now;riftPrevious131=now;
  if(performance.now()<riftArrival131||Math.hypot(now[0]-old[0],now[2]-old[2])>8)return false;
  const entries=L.mode==='world'?gates.filter(g=>!g.dead&&!g.closing131&&!g.coreFailed103&&g.mesh?.userData.rift131).map(g=>({root:g.mesh,g,x:g.x,z:g.z})):L.mode==='dungeon'?(L.exits||[]).filter(it=>it.type==='exit'&&it.grp?.userData.rift131).map(it=>({root:it.grp,it,x:it.x,z:it.z})):[];
- for(const e of entries){if(Math.hypot(e.x-player.x,e.z-player.z)>6)continue;e.root.updateMatrixWorld(true);const a=e.root.worldToLocal(new THREE.Vector3(...old)),b=e.root.worldToLocal(new THREE.Vector3(...now));if(!Rift131.crosses(a.toArray(),b.toArray()))continue;if(e.g)return riftEnter131(e.g);const before=L;if(!e.it.locked||performance.now()>(e.it.riftNotice131||0)){e.it.riftNotice131=performance.now()+2500;tryExit(e.it);}return L!==before;}
+ for(const e of entries){
+  const maxDist=(e.g?.giant?14:7);
+  const d=Math.hypot(e.x-player.x,e.z-player.z);
+  if(d>maxDist)continue;
+  e.root.updateMatrixWorld(true);
+  const a=e.root.worldToLocal(new THREE.Vector3(...old)),b=e.root.worldToLocal(new THREE.Vector3(...now));
+  const sc=e.root.scale?.x||1;
+  const directTouch=d<(e.g?.giant?3.8:1.8);
+  if(!directTouch&&!Rift131.crosses(a.toArray(),b.toArray(),0.35*sc))continue;
+  if(e.g)return riftEnter131(e.g);
+  const before=L;if(!e.it.locked||performance.now()>(e.it.riftNotice131||0)){e.it.riftNotice131=performance.now()+2500;tryExit(e.it);}return L!==before;
+ }
  return false;
 }
 function riftExitVisual131(it){
@@ -116,6 +127,9 @@ function gateMesh(g){retireExtraction117(g);
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
     grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
+    const rPrompt=(g.giant?8.5:4.5);
+    const lbl=g.anchor221?'F · ENTRAR NA FENDA DA ÂNCORA':(g.secret?'F · ENTRAR NO PORTAL ???':'F · ENTRAR NO PORTAL '+(GR[g.rank]?.id||''));
+    L.inter.push({type:'gate',g,x:g.x,z:g.z,r:rPrompt,label:lbl,use:()=>enterGate(g)});
     return;
   }
   const col=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();

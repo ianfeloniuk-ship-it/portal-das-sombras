@@ -18,6 +18,7 @@
  body.ui405 #mission{display:none!important}
  body.ui405 #mm{width:126px!important;height:126px!important;right:22px;bottom:18px;border-color:#b9955755;opacity:.9}
  body.ui405 #obj{width:154px!important;right:22px!important;background:#10151dcf;font-size:10px}
+ body.ui405 #rare-status103{bottom:168px!important}
  body.ui405 #btns .b[data-state="empty"]{display:none!important}
  body.ui405.classless405 #bQ,body.ui405.classless405 #bR,body.ui405.classless405 #bT,body.ui405.classless405 #bG,body.ui405.classless405 #bY,body.ui405.classless405 #bU,body.ui405.classless405 #b5{display:none!important}
  body.ui405 #notice356{background:#10151df5;border-color:#b9955755}
