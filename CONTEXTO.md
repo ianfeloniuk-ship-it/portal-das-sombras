@@ -1,3 +1,9 @@
+## v436 (16/10/2026) — Registro visível, F pega, aviso e acompanhamento dos Atos
+- Pedido de Ian: (1) não aparecia nenhum livro de registro para pegar; (2) F não pegava nada; (3) ao terminar um ato não avisava que dava para jogar livre e continuar depois, e o ato seguinte não entrava no acompanhamento.
+- Causa: a missão "Os nomes que chegaram" (lyra_names) usava marcador vazio (makeBeacon sem nada) — ponto invisível, F só a 3 m de um lugar que não se via.
+- Correção (tools/campaign327.js): livro de couro com fecho brilhando, flutuando de leve, em cada um dos 3 pontos (flag book:true); alcance do F 3,6 m. Ao concluir um ato principal: aviso "Agora o mundo é seu… o Ato X abre assim: …" (ou "já está liberado"). Quando o próximo ato libera, entra sozinho no Acompanhar (a menos que outra missão da campanha esteja acompanhada) com toast "Novo ato liberado… Acompanhando no mapa".
+- Teste: 3 livros aparecem, F recolhe os 3 e a missão passa para "Leve os registros a Lyra"; Ato I concluído → aviso; rank D → Ato II começa e fica acompanhado.
+
 ## v435 (16/10/2026) — Aster não é atacada por monstros
 - Pedido de Ian (print: 'ASTER SOB ATAQUE: DEFESA 0%/1%' piscando). Causa: o evento de Invasão (updEvents) mirava a cidade mais próxima, inclusive Aster; a trava antiga segurava a defesa em 1% e ela piscava 1/0.
 - Regra: Aster é o último refúgio — só o Arquiteto a ameaça. Invasão não escolhe Aster; ataque já ativo em Aster é cancelado e os monstros soltos (save antigo). Removida a trava de 1%. Rompimento de portal e Horda já excluíam Aster.

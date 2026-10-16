@@ -87,7 +87,7 @@
   ];
   const SIDE = [
     { id: 'lyra_names', npc: 'Lyra', after: 'a1', steps: [
-      { t: 'go', d: 'Recupere 3 registros de viajantes perdidos perto de {cidade}.', verb: 'RECOLHER O REGISTRO', pts: 3, fight: { n: 2 },
+      { t: 'go', d: 'Recupere 3 registros de viajantes perdidos perto de {cidade}.', verb: 'RECOLHER O REGISTRO', pts: 3, book: true, fight: { n: 2 },
         done: 'Um nome, um mundo de origem e uma data. Mais alguém chegou como você.' },
       { t: 'talk', npc: 'Lyra', d: 'Leve os registros a Lyra.', say: ['Três nomes, três pessoas que chegaram como você. Uma delas ainda está viva e procura a família.'] }] },
     { id: 'mira_route', npc: 'Mira', after: 'a2', steps: [
@@ -205,7 +205,9 @@
     bigText(isSide(m) ? 'MISSÃO CONCLUÍDA' : 'ATO ' + m.title.split(' — ')[0] + ' CONCLUÍDO', 1800); try { sfx('arise'); } catch (_) {}
     toast('<b>[' + (isSide(m) ? m.npc.toUpperCase() : 'HISTÓRIA') + ']</b> ' + esc(isSide(m) ? m.title : 'Ato ' + m.title) + ' concluído: +' + xpNumber(got) + ' XP · +' + fmt(gold) + ' ouro.', 8000);
     for (const o of SIDE) if (o.after === m.id) toast('<b>[' + o.npc.toUpperCase() + ']</b> Nova missão: <b>' + esc(o.title) + '</b>. Fale com ' + o.npc + (o.npc === 'Torvo' ? ' na estrada.' : '.'), 8000);
-    if (run.trackObj === 'camp327:' + m.id) run.trackObj = null;
+    if (run.trackObj === 'camp327:' + m.id) { run.trackObj = null; if (!isSide(m)) st().follow436 = true; }
+    if (!isSide(m)) { const nx = ACTS.find(o => !st().m[o.id]?.done); if (nx) { st().follow436 = st().follow436 !== false; save();
+      setTimeout(() => { try { toast('<b>[HISTÓRIA]</b> Agora o mundo é seu: jogue no seu ritmo. Quando quiser continuar a história, o <b>Ato ' + esc(nx.title) + '</b> ' + (actOpen(nx.act) ? 'já está liberado no Diário › Atos.' : 'abre assim: ' + esc(nx.act <= 7 ? 'passe na prova para o rank ' + RANKS[nx.act].id + '.' : ACT_HINT[nx.act])), 11000); } catch (_) {} }, 2500); } }
     saveRun();
   }
 
@@ -225,9 +227,21 @@
       fragmentShader: 'uniform float t;uniform vec3 c;varying vec2 vP;void main(){float r=length(vP);float a=atan(vP.y,vP.x);float rune=step(.55,fract(a*4.77+t*.4))*smoothstep(1.45,1.3,r)*smoothstep(1.05,1.2,r);float ring=smoothstep(.06,0.,abs(r-1.6+.05*sin(t*2.)))+smoothstep(.05,0.,abs(r-.9));float glow=smoothstep(1.8,0.,r)*.18*(.6+.4*sin(t*3.));gl_FragColor=vec4(c*1.4,clamp(rune*.8+ring+glow,0.,1.));}' });
   }
   const gy = (x, z) => { try { return typeof terrH === 'function' ? terrH(x, z) : 0; } catch (_) { return 0; } };
-  function makeBeacon(x, z, side) {
+  function makeBeacon(x, z, side, book) {
     const g = new THREE.Group();
-    g.position.set(x,gy(x,z),z);g.userData.mats=[];g.userData.terrainAbsolute245=true;return g;
+    g.position.set(x,gy(x,z),z);g.userData.mats=[];g.userData.terrainAbsolute245=true;
+    if (book) g.add(bookProp());
+    return g;
+  }
+  /* v436 (Ian): o registro de viajante perdido é um livro de verdade no chão, com fecho que brilha, para dar para achar e pegar. */
+  function bookProp() {
+    const b = new THREE.Group(); b.name = 'Registro436'; b.rotation.y = Math.random() * TAU;
+    const M = (c, e = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: .9, metalness: .05, emissive: e, emissiveIntensity: e ? .9 : 0 });
+    const add = (w, h, d, y, mat, x = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, 0); m.castShadow = true; b.add(m); return m; };
+    const leather = M(0x4a2f22), paper = M(0xe0cf9f), clasp = M(0xc89b4f, 0xffb340);
+    add(.78, .07, .58, .05, leather); add(.72, .08, .52, .12, paper); add(.79, .05, .59, .18, leather);
+    add(.07, .02, .59, .215, clasp, .26); add(.3, .015, .04, .215, clasp, -.05);
+    b.userData.book436 = clasp; b.scale.setScalar(1.25); return b;
   }
 
   function place(s, sp, i) {
@@ -338,9 +352,9 @@
     const w = { step: s.s, grps: [], figs: [], inters: [], foes: [], L };
     pts.forEach((p, i) => {
       if (s.hit.includes(i)) return;
-      const g = makeBeacon(p[0] + (sp.fig?1.8:0), p[1], side); scene.add(g); w.grps.push(g);
+      const g = makeBeacon(p[0] + (sp.fig?1.8:0), p[1], side, sp.book); scene.add(g); w.grps.push(g);
       const fig = figure(sp.fig, p[0], p[1]); w.figs.push(fig);
-      const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, use: () => useMarker(m, i) };
+      const it = { type: 'camp327', x: fig ? fig.x : p[0], z: fig ? fig.z : p[1], r: 3, label: 'F · ' + sp.verb, camp327: m.id, idx: i, r: sp.book ? 3.6 : 3, use: () => useMarker(m, i) };
       L.inter.push(it); w.inters.push(it);
     });
     if (sp.cart && pts[0] && !s.hit.includes(0)) {
@@ -509,7 +523,7 @@
     if(player.dead||paused)return;
     T += .3;
     const S = st();
-    { const next = ACTS.find(m => !S.m[m.id]?.done); if (next && !S.m[next.id] && actOpen(next.act)) begin(next); }
+    { const next = ACTS.find(m => !S.m[m.id]?.done); if (next && !S.m[next.id] && actOpen(next.act)) { begin(next); if (S.follow436 !== false && (!run.trackObj || !String(run.trackObj).startsWith('camp327:'))) { run.trackObj = 'camp327:' + next.id; saveRun(); toast('<b>[HISTÓRIA]</b> Novo ato liberado: <b>Ato ' + esc(next.title) + '</b>. Acompanhando no mapa.', 8000); } } }
     for (const m of SIDE) if (m.npc === 'Torvo' && !S.m[m.id] && sideOpen(m)) begin(m);
     const world = L.mode === 'world';
     for (const m of active()) {
@@ -526,7 +540,7 @@
       }
       if (!world) continue;
       if (!w) { buildWorldFor(m); w = W.get(m.id); }
-      for (const g of w.grps) for (const mat of g.userData.mats) mat.uniforms.t.value = T;
+      for (const g of w.grps) { for (const mat of g.userData.mats) mat.uniforms.t.value = T; const bk = g.getObjectByName && g.getObjectByName('Registro436'); if (bk) { bk.position.y = .08 + Math.sin(T * 2 + g.position.x) * .05; bk.userData.book436.emissiveIntensity = .5 + .4 * Math.sin(T * 2.6); } }
       for (const f of w.figs) if (f && f.m) try { f.t += .3; if(!f.down)animChibi(f.m, { move: 0, atk: 0, dead: 0, wind: 0 }, f.t); if(!f.down)f.m.root.rotation.y = Math.atan2(player.x - f.x, player.z - f.z); } catch (_) {}
       if (!s.fightDone) {
         for (const e of w.foes) if (e.dead && !e.counted327) { e.counted327 = true; s.killed++; save(); }
