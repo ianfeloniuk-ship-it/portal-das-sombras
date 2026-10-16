@@ -354,9 +354,9 @@
 
   /* ================= 3) CAPITAIS E PEDRAS-ÂNCORA ================= */
   // A Pedra-Âncora fica no lugar do selo do centro (a "fonte" com a esfera presa): src/core/260 chama Anchor434.seal().
-  // Ymiria: o modelo Tripo da base já tem o cristal; nas outras, cristal Tripo próprio da cor da capital (o de Verden saía torto e foi tirado da base).
+  // Cada capital: base Tripo + cristal Tripo próprio da cor da capital flutuando e girando (o de Verden saía torto e foi tirado da base).
   const CAPS = {
-    Ymiria: { el: 'Neve', col: 0x8fe0ff, w: 'snow', own: true },
+    Ymiria: { el: 'Neve', col: 0x8fe0ff, w: 'snow', cry: 'cristal-ancora-gelo', base: 'anchor-ymiria-base' }, // v438 (Ian): o cristal de gelo foi tirado da base no Blender e agora flutua como nas outras
     Zahar: { el: 'Deserto', col: 0xffb347, w: 'sand', cry: 'cristal-ancora-ambar' },
     Thalor: { el: 'Águas e rocha flutuante', col: 0x3fe0c8, w: 'mist', cry: 'cristal-ancora-turquesa' },
     Urdan: { el: 'Caverna de cristal', col: 0xc77dff, w: 'motes', cry: 'cristal-ancora-violeta' },
@@ -369,7 +369,7 @@
       const g = new T.Group(); g.name = 'Anchor434_' + c.name; g.userData.c = c;
       try { if (addColFn) addColFn({ x: c.x, z: c.z, r: 3.7 }); } catch (_) {} // base com até 7,2 m de largura
       g.userData.it = { type: 'anchor423', x: c.x, z: c.z, r: 6, label: 'F · SINTONIZAR A PEDRA-ÂNCORA DE ' + c.name.toUpperCase(), use: () => attune(c) };
-      Promise.all([glb('anchor-' + c.name.toLowerCase()), D.cry ? glb(D.cry) : null, tripoReady()]).then(([base, cry]) => {
+      Promise.all([glb(D.base || 'anchor-' + c.name.toLowerCase()), D.cry ? glb(D.cry) : null, tripoReady()]).then(([base, cry]) => {
         let top = 2.6;
         if (base) { const b = fit(base, D.own ? 5.6 : 3.4, 7.2); top = b.userData.h; g.add(b); }
         if (cry) { const cr = fit(cry, 4.2, 4); cr.position.y = top - .6; cr.userData.y0 = cr.position.y; g.add(cr); g.userData.cr = cr; }
