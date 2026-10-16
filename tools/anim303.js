@@ -109,7 +109,13 @@ const A={
  explodir:{d:.8,k:[{t:0,root:{y:0},b:{}},
   {t:.3,root:{y:-.3},b:{spine:[30,0,0],head:[20,0,0],upperarm_l:[-60,0,-30],upperarm_r:[-60,0,-25],forearm_l:[-90,0,0],forearm_r:[-90,0,0],thigh_l:[-45,0,0],thigh_r:[-45,0,0],shin_l:[70,0,0],shin_r:[70,0,0]}},
   {t:.45,root:{y:.2},b:ABRE},{t:.8,root:{y:0},b:ABRE},{t:1,root:{y:0},b:{}}]},
- erguer:{d:.9,k:[{t:0,b:{}},{t:.3,b:ERGUE},{t:.75,b:ERGUE},{t:1,b:{}}]}});
+ erguer:{d:.9,k:[{t:0,b:{}},{t:.3,b:ERGUE},{t:.75,b:ERGUE},{t:1,b:{}}]},
+  machadada:{d:.62,k:[
+   {t:0,b:{}},
+   {t:.22,b:{spine:[-16,0,0],chest:[-12,-26,0],upperarm_r:[-158,0,-28],forearm_r:[-42,0,0],upperarm_l:[-88,0,22],forearm_l:[-62,0,0],thigh_r:[-14,0,0]}},
+   {t:.48,b:{spine:[26,0,0],chest:[16,32,0],upperarm_r:[-44,0,-16],forearm_r:[-8,0,0],upperarm_l:[-38,0,14],thigh_l:[-32,0,0],shin_l:[32,0,0]}},
+   {t:.74,b:{spine:[20,0,0],chest:[12,24,0],upperarm_r:[-44,0,-16],forearm_r:[-8,0,0],upperarm_l:[-38,0,14]}},
+   {t:1,b:{}}]}});
 })();
 const MAP={};
 [['socos','Rajada de Punhos'],['chute','Chute Giratório'],['palma','Palma dos Ecos|Selo dos Cinco Pontos'],['respirar','Respiração Inversa'],['direto','Quebra de Cadência'],['duplo','Balança dos Punhos'],['roda','Roda dos Meridianos'],

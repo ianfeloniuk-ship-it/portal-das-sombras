@@ -242,9 +242,20 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
+function isCinematic451(){
+  if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
+  if(typeof FX2!=='undefined'&&FX2.cine>0)return true;
+  if(window.CINE231)return true;
+  if(document.getElementById('pds_intro_fade'))return true;
+  if(window.Intro401?.conversation)return true;
+  if(window.Intro401?.reclaiming?.())return true;
+  if(document.body&&document.body.classList&&(document.body.classList.contains('story401')||document.body.classList.contains('reading406')))return true;
+  if(typeof modalOpen!=='undefined'&&modalOpen)return true;
+  return false;
+}
 function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;try{passiveDodge327()}catch(_){}bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
-  if(player.dead)return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
+  if(player.dead||isCinematic451())return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(0,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))-Math.max(0,pDefVal296(inDType281)-(curAtk?.att281?.penV||0))));if(amt<=0){if(time>=(player.def296At||0)){floater(player.x,player.z,'BLOQUEADO','#8bdcff');player.def296At=time+.5}return}
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}

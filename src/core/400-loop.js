@@ -139,8 +139,11 @@ function updWorld(dt){updEcon(dt);
    if(AU.ctx&&AU.on&&window.RiftAudio131&&!document.hidden&&!P.dead){if(!riftSound131)riftSound131=RiftAudio131.create(AU.ctx,AU.fx);if(nearest){const dx=nearest.x-P.x,dz=nearest.z-P.z,pan=(dx*camera.matrixWorld.elements[0]+dz*camera.matrixWorld.elements[2])/12;riftSound131.update(nearest.mesh.userData.rift131.time,Math.pow(clamp((22-dist)/17,0,1),1.6),pan);}else riftSound131.silence();}else if(riftSound131)riftSound131.silence();
   }
   L.spawnT-=dt;
-  if(L.spawnT<=0){L.spawnT=2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
-    if(wild<10&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
+  if(L.spawnT<=0){
+    const inAto1=window.Intro401?.guided?.()||(profile?.classless&&!Campaign327?.state?.('a1')?.done);
+    L.spawnT=inAto1?7.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
+    const safeBuffer=(nc.c&&nc.c.name==='Aster'&&inAto1&&nc.d<170);
+    if(!safeBuffer&&wild<(inAto1?3:10)&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
       const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
   // v155 (Ian): monstros que escaparam de um portal ficam no mundo mesmo longe de você (só não são desenhados); no máximo 80, saem os mais distantes.

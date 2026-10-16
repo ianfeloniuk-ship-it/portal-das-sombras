@@ -1,6 +1,6 @@
 /* ================= IA ================= */
 function turnTo(e,a,dt,s=10){let d=a-e.face;d=Math.atan2(Math.sin(d),Math.cos(d));e.face+=d*Math.min(1,dt*s)}
-function pickTarget(e){if(window.Intro401?.guided()&&!e.isIntroTutorial)return null;if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
+function pickTarget(e){if(typeof isCinematic451==='function'&&isCinematic451()&&!e.isIntroTutorial)return null;if(window.Intro401?.guided()&&!e.isIntroTutorial)return null;if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
   const gt=AR103.trial;if(e.aw103&&gt?.ci===14&&gt.helper&&!gt.helper.dead){const pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<3)return {t:player,d:pd};return {t:gt.helper,d:Math.hypot(gt.helper.x-e.x,gt.helper.z-e.z)}}
   if(e.coreRaider&&L.defense?.started&&!L.defense.failed&&!L.defense.done){const c=L.defense.core,pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<4)return {t:player,d:pd};const ally=allies.find(a=>!a.dead&&Math.hypot(a.x-e.x,a.z-e.z)<3);if(ally)return {t:ally,d:Math.hypot(ally.x-e.x,ally.z-e.z)};return {t:c,d:Math.hypot(c.x-e.x,c.z-e.z)}}
   let best=null,bd=1e9;

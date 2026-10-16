@@ -378,7 +378,40 @@
     levelTerrain441(player.x, player.z, 13, 0, b === 'deserto' ? '<b>[TERRAPLENAGEM]</b> Duna de areia nivelada com a Pá/Enxada! Passagem plana para o Carrinho.' : '<b>[TERRAPLENAGEM]</b> Encosta nivelada com a Pá/Enxada!');
   } };
   const treeIt = { type: 'tree437', x: 0, z: 0, r: 2.6, label: '', hidden: true, use: () => chop() };
-  let chopping = null;
+  let chopping = null, toolAxeMesh = null, toolTimeout = null;
+  function showCraftedAxe() {
+    if (!player || !player.m) return;
+    const socket = player.m.socket || player.m.bones?.hand_r;
+    if (!socket) return;
+    if (player.m.socket) {
+      for (const ch of player.m.socket.children) {
+        if (ch !== toolAxeMesh) ch.visible = false;
+      }
+    }
+    if (!toolAxeMesh) {
+      glb('machado-pedra').then(m => {
+        if (!m || toolAxeMesh || !player?.m) return;
+        const o = m.clone();
+        o.scale.setScalar(0.75);
+        o.rotation.set(0, Math.PI / 2, 0);
+        o.position.set(-0.02, 0.05, 0.02);
+        toolAxeMesh = o;
+        (player.m.socket || player.m.bones?.hand_r)?.add(toolAxeMesh);
+        toolAxeMesh.visible = true;
+      });
+    } else {
+      toolAxeMesh.visible = true;
+    }
+    clearTimeout(toolTimeout);
+    toolTimeout = setTimeout(() => {
+      if (toolAxeMesh) toolAxeMesh.visible = false;
+      if (player?.m?.socket) {
+        for (const ch of player.m.socket.children) {
+          if (ch !== toolAxeMesh) ch.visible = true;
+        }
+      }
+    }, 2400);
+  }
   function chop() {
     const t = treeIt.tree; if (!t) return;
     if (!hasAxe()) { // sem machado: só resina
@@ -393,7 +426,17 @@
     if (!chopping || chopping.x !== t.x || chopping.z !== t.z) chopping = { x: t.x, z: t.z, id: t.id, hits: 0, need: HITS[t.id] || 5 };
     chopping.hits++;
     player.face = Math.atan2(t.x - player.x, t.z - player.z);
-    try { Anim303?.play('corte', 1); sfx('hit'); } catch (_) {}
+    showCraftedAxe();
+    try {
+      if (Anim303?.play) Anim303.play('machadada', 1);
+      else Anim303?.play('corte', 1);
+      if (typeof sfx === 'function') sfx('chop'); else sfx('hit');
+    } catch (_) {}
+    const iy = (t.y || 0) + 1.2;
+    try {
+      fxBurst(t.x, iy, t.z, 0xd2a679, 12, 3.2);
+      fxBurst(t.x, iy, t.z, 0x4a2e18, 6, 2.0);
+    } catch (_) {}
     floater(t.x, t.z, 'TOC ' + chopping.hits + '/' + chopping.need, '#f0d9a0');
     if (chopping.hits >= chopping.need) { fell(t); chopping = null; }
   }
@@ -410,14 +453,22 @@
     }
     const dir = Math.atan2(t.x - player.x, t.z - player.z);
     g.position.set(t.x, 0, t.z); g.rotation.y = dir; g.add(pivot); scene.add(g);
+    try { if (typeof sfx === 'function') sfx('tree_fall'); } catch (_) {}
     const t0 = performance.now();
     (function fall() {
       const k = Math.min(1, (performance.now() - t0) / 1600); pivot.rotation.x = (k * k) * Math.PI / 2 * .97;
       if (k < 1) { setTimeout(fall, 16); return; }
-      setTimeout(() => { scene.remove(g); dropLogs(t.x, t.z, dir, t.id === 'oak' ? 3 : 2); }, 500);
+      const impactD = 6.2, impactX = t.x + Math.sin(dir) * impactD, impactZ = t.z + Math.cos(dir) * impactD;
+      try {
+        if (typeof shake === 'function') shake(0.35);
+        if (typeof sfx === 'function') sfx('crash');
+        fxBurst(impactX, 0.3, impactZ, 0x56be32, 22, 4.2);
+        fxBurst(impactX, 0.2, impactZ, 0x7a5a3a, 14, 3.5);
+        if (typeof fxRing === 'function') fxRing(impactX, impactZ, 0xd2b57d, 3.2, 0.4);
+      } catch (_) {}
+      setTimeout(() => { scene.remove(g); dropLogs(t.x, t.z, dir, t.id === 'oak' ? 3 : 2); }, 350);
     })();
     toast('<b>[MADEIRA]</b> Árvore derrubada! As <b>Toras Brutas</b> ficaram no chão: F para cortar ou carregar.', 4500);
-    try { sfx('crash'); } catch (_) {}
     if (Math.random() < .5) add('resina', 1, true);
     save();
   }

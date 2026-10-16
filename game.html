@@ -5744,9 +5744,20 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
+function isCinematic451(){
+  if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
+  if(typeof FX2!=='undefined'&&FX2.cine>0)return true;
+  if(window.CINE231)return true;
+  if(document.getElementById('pds_intro_fade'))return true;
+  if(window.Intro401?.conversation)return true;
+  if(window.Intro401?.reclaiming?.())return true;
+  if(document.body&&document.body.classList&&(document.body.classList.contains('story401')||document.body.classList.contains('reading406')))return true;
+  if(typeof modalOpen!=='undefined'&&modalOpen)return true;
+  return false;
+}
 function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.perfCd=2.5;FX2.slow=.9;FX2.counter=true;try{passiveDodge327()}catch(_){}bigText('ESQUIVA PERFEITA',900);fxRing(player.x,player.z,0x7fd8ff,3,.5);sfx('dodge');floater(player.x,player.z,'CONTRA-ATAQUE!','#7fd8ff',true,2.8)}
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
-  if(player.dead)return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
+  if(player.dead||isCinematic451())return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(0,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))-Math.max(0,pDefVal296(inDType281)-(curAtk?.att281?.penV||0))));if(amt<=0){if(time>=(player.def296At||0)){floater(player.x,player.z,'BLOQUEADO','#8bdcff');player.def296At=time+.5}return}
   if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}
@@ -6010,7 +6021,7 @@ function die(){
 
 /* ================= IA ================= */
 function turnTo(e,a,dt,s=10){let d=a-e.face;d=Math.atan2(Math.sin(d),Math.cos(d));e.face+=d*Math.min(1,dt*s)}
-function pickTarget(e){if(window.Intro401?.guided()&&!e.isIntroTutorial)return null;if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
+function pickTarget(e){if(typeof isCinematic451==='function'&&isCinematic451()&&!e.isIntroTutorial)return null;if(window.Intro401?.guided()&&!e.isIntroTutorial)return null;if(!e.isBoss&&e.kitTaunt111>time&&!player.dead&&Math.hypot(e.x-player.x,e.z-player.z)<20&&los(e.x,e.z,player.x,player.z))return {t:player,d:Math.hypot(e.x-player.x,e.z-player.z)};
   const gt=AR103.trial;if(e.aw103&&gt?.ci===14&&gt.helper&&!gt.helper.dead){const pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<3)return {t:player,d:pd};return {t:gt.helper,d:Math.hypot(gt.helper.x-e.x,gt.helper.z-e.z)}}
   if(e.coreRaider&&L.defense?.started&&!L.defense.failed&&!L.defense.done){const c=L.defense.core,pd=Math.hypot(player.x-e.x,player.z-e.z);if(!player.dead&&player.stealth<=0&&pd<4)return {t:player,d:pd};const ally=allies.find(a=>!a.dead&&Math.hypot(a.x-e.x,a.z-e.z)<3);if(ally)return {t:ally,d:Math.hypot(ally.x-e.x,ally.z-e.z)};return {t:c,d:Math.hypot(c.x-e.x,c.z-e.z)}}
   let best=null,bd=1e9;
@@ -6342,8 +6353,11 @@ function updWorld(dt){updEcon(dt);
    if(AU.ctx&&AU.on&&window.RiftAudio131&&!document.hidden&&!P.dead){if(!riftSound131)riftSound131=RiftAudio131.create(AU.ctx,AU.fx);if(nearest){const dx=nearest.x-P.x,dz=nearest.z-P.z,pan=(dx*camera.matrixWorld.elements[0]+dz*camera.matrixWorld.elements[2])/12;riftSound131.update(nearest.mesh.userData.rift131.time,Math.pow(clamp((22-dist)/17,0,1),1.6),pan);}else riftSound131.silence();}else if(riftSound131)riftSound131.silence();
   }
   L.spawnT-=dt;
-  if(L.spawnT<=0){L.spawnT=2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
-    if(wild<10&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
+  if(L.spawnT<=0){
+    const inAto1=window.Intro401?.guided?.()||(profile?.classless&&!Campaign327?.state?.('a1')?.done);
+    L.spawnT=inAto1?7.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
+    const safeBuffer=(nc.c&&nc.c.name==='Aster'&&inAto1&&nc.d<170);
+    if(!safeBuffer&&wild<(inAto1?3:10)&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
       const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
   // v155 (Ian): monstros que escaparam de um portal ficam no mundo mesmo longe de você (só não são desenhados); no máximo 80, saem os mais distantes.
@@ -6559,7 +6573,9 @@ const SFX={
   dodge(){const t=anow();noiz(t,.18,{v:.11,f:800,sweep:2600})},
   arise(){const t=anow();[55,82.5,110].forEach(f=>tone(f,t,2,{type:'sawtooth',v:.1,filt:700,rev:.8}));tone(440,t+.3,1.6,{v:.05,rev:.9,slide:220})},
   laser(){const t=anow();tone(1800,t,.35,{type:'sawtooth',v:.08,slide:200,filt:3000,rev:.3});noiz(t,.3,{v:.2,f:3000,sweep:500})},
-  gong(){const t=anow();[98,147,196,293].forEach((f,i)=>tone(f,t,3,{type:'sine',v:.12/(i+1),rev:.9}))}
+  gong(){const t=anow();[98,147,196,293].forEach((f,i)=>tone(f,t,3,{type:'sine',v:.12/(i+1),rev:.9}))},
+  chop(){const t=anow();noiz(t,.09,{v:.38,f:900,q:2,sweep:250});tone(110,t,.12,{v:.28,slide:45,type:'triangle'})},
+  tree_fall(){const t=anow();tone(80,t,1.4,{v:.22,slide:35,type:'sawtooth'});noiz(t,1.2,{v:.18,f:450,sweep:120})}
 };
 function sfx(n,a){if(AU.ctx&&AU.on)try{SFX[n](a)}catch(e){}}
 function beep(f,d,v=.04,type='sine'){if(!AU.ctx||!AU.on)return;try{tone(f,anow(),d,{type,v:v*1.4,rev:.2})}catch(e){}}

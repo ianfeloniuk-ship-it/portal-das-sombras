@@ -1,3 +1,28 @@
+## v451 — Imunidade em cinemáticas, zona segura da estrada e corte de árvore com Machado de Pedra visível, 16/10/2026
+- Pedido de Ian: "Durante algumas meio que eu posso ser atacado por mobs. E isso não deveria acontecer, porque daí eu posso morrer e eu não posso fazer nada, porque tá, é uma cinemática", "tem muito monstro ainda pelo mundo e é fácil eu morrer, eu morro muito rápido, eu não consigo avançar assim no jogo", e "o que eu quero é, pô, tô cortando madeira, eu fiz o machado. Ao invés de ser o machado que eu uso para matar mob, é um machado que eu fiz e tal, e eu começo a bater, eu quero essas animações, bater nas árvores, fazer ela cair, sabe?".
+- Cinemáticas sem mortes injustas:
+  - src/core/370-v281.js: Criada função isCinematic451() com verificação completa de estados de cinemática/diálogo (_cinematicGrace451, FX2.cine, window.CINE231, pds_intro_fade, Intro401.conversation, Intro401.reclaiming(), story401, reading406, e modalOpen). hurtPlayer(amt) retorna imediatamente sem dano enquanto o jogador estiver em cutscene/diálogo/fade ou durante a carência.
+  - src/core/390-ia.js: pickTarget(e) ignora o jogador como alvo durante cinemáticas/diálogos, impedindo que monstros se aproximem ou iniciem agressão contra o jogador indefeso.
+  - tools/intro401.js: Inserido buffer de carência de 2,5 segundos (_cinematicGrace451 e player.iT) após sair de diálogos e conversas, permitindo ao jogador se posicionar e puxar a arma antes de receber qualquer dano.
+- Estrada de Aster protegida e recuperação no Ato I:
+  - src/core/400-loop.js: No Ato I (ou enquanto sem classe), os spawns de monstros selvagens a menos de 170 metros dos portões de Aster são bloqueados (safeBuffer), o intervalo de spawn na região é desacelerado para 7,5s e o limite de monstros simultâneos é limitado a 3, evitando o acúmulo letal de monstros logo no início da jornada.
+  - tools/campaign327.js: O diálogo de socorro a Edran no Ato I agora restaura 100% da vida do jogador (player.hp = player.mhp, floater('VIDA RESTAURADA')) e concede 3 segundos de invulnerabilidade (player.iT = 3.0), garantindo que o novato não morra logo após ajudar a carroça.
+- Novo Machado de Pedra artesanal e animação de corte de árvore com queda física:
+  - models/m437/machado-pedra.glb: Modelo 3D exclusivo modelado no Blender (haste de madeira rústica, empunhadura reforçada com fibras trançadas, cabeça de pedra lascada afiada e amarrações cruzadas em X).
+  - tools/anim303.js: Nova animação de corte machadada com movimento vertical em dois tempos (elevação do tronco e golpe firme de duas mãos para baixo).
+  - src/core/420-audio-musica-e-efeitos.js: Adicionados novos efeitos sonoros procedurais SFX.chop() (impacto rústico de machado na madeira viva) e SFX.tree_fall() (rangido de tronco quebrando e estalo vegetal).
+  - tools/survival437.js: Ao cortar árvore, o personagem esconde temporariamente a arma de combate, equipa visualmente o machado-pedra.glb no socket da mão direita, executa a animação machadada, emite faíscas de lascas de madeira no ponto de impacto (fxBurst), aplica screen shake (shake(0.35)), faz a árvore balançar e tombar ao chão com áudio tree_fall e chuva de folhas antes de se converter em toras de madeira e toco.
+- Testes: node --check em todos os módulos alterados, python tools/build.py (duas passagens com src/core: igual), python tools/core_parts.py check (ok).
+
+## v450 — Cutscene da âncora rompendo usa a pedra da própria capital, que treme e explode em estilhaços da cor dela, 16/10/2026
+- Ajuste na cinemática de quebra da âncora com a pedra visual específica de cada capital e explosão de fragmentos procedurais.
+
+## v449 — Peça do Arquiteto sem corpo de chefe genérico temporário, 16/10/2026
+- Prevenção do fallback para mesh genérico de chefe enquanto o modelo 3D das peças do Arquiteto (Pernas, Braços) carrega.
+
+## v448 — Força atualização de cache para correção de fenda e HUD, 16/10/2026
+- Atualização de cache para propagação imediata da correção de sobreposição de elementos na interface e interação com a Fenda.
+
 ## v447 — Fundo do mar: pressão, algas e Chá de Algas, ostras com pérola, veios do recife, monstros de fundo e correntes abissais, 16/10/2026
 - Pedido de Ian (Sobrevivência parte 4, o que faltava do mar; a v441 já tinha caverna com ar, naufrágio, corais e a Masmorra Abissal de Thalor).
 - tools/deep447.js (novo): PRESSÃO — mergulhando além do limite (8 m) a barra de pressão (no painel de Vida, só mergulhando) passa do limite, a pressão sobe e tira vida; limite +12 m com o Elmo de Mergulho (bolsa), +10 m e Fôlego +50% com o Chá de Algas, +15 m com a Poção de Pressão (Mira vende na Loja de Poções; aparece no fim da janela dela). Fundo do mar em células de 34 m: ALGAS no raso, OSTRAS GIGANTES (pérola 55%, sempre 1 carne) no recife e alto-mar, VEIOS (cristal Tripo do jogo) nas fossas (Minério + 1 Cristal); só pega mergulhando perto do fundo; voltam em 1 dia de jogo. MONSTROS DE FUNDO (lula, arraia, homem-peixe) aparecem nas fossas abaixo de 9 m (até 3). CORRENTES ABISSAIS (a Fenda do jogo) raras nas fossas: F leva ao Mar de Thalor Norte/Sul ou ao Arquipélago das Ilhas-Cidade (travessia entre mares). Bolsa: BEBER chá/poção e VENDER PÉROLAS (perto de cidade). Manual (seção MAR): Chá de Algas (2 Algas + 1 gole de água limpa, perto de fogueira acesa) e Elmo de Mergulho (4 Minério, 2 Couro, 2 Resina, perto da bancada).

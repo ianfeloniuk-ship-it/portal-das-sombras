@@ -41,7 +41,9 @@ const SFX={
   dodge(){const t=anow();noiz(t,.18,{v:.11,f:800,sweep:2600})},
   arise(){const t=anow();[55,82.5,110].forEach(f=>tone(f,t,2,{type:'sawtooth',v:.1,filt:700,rev:.8}));tone(440,t+.3,1.6,{v:.05,rev:.9,slide:220})},
   laser(){const t=anow();tone(1800,t,.35,{type:'sawtooth',v:.08,slide:200,filt:3000,rev:.3});noiz(t,.3,{v:.2,f:3000,sweep:500})},
-  gong(){const t=anow();[98,147,196,293].forEach((f,i)=>tone(f,t,3,{type:'sine',v:.12/(i+1),rev:.9}))}
+  gong(){const t=anow();[98,147,196,293].forEach((f,i)=>tone(f,t,3,{type:'sine',v:.12/(i+1),rev:.9}))},
+  chop(){const t=anow();noiz(t,.09,{v:.38,f:900,q:2,sweep:250});tone(110,t,.12,{v:.28,slide:45,type:'triangle'})},
+  tree_fall(){const t=anow();tone(80,t,1.4,{v:.22,slide:35,type:'sawtooth'});noiz(t,1.2,{v:.18,f:450,sweep:120})}
 };
 function sfx(n,a){if(AU.ctx&&AU.on)try{SFX[n](a)}catch(e){}}
 function beep(f,d,v=.04,type='sine'){if(!AU.ctx||!AU.on)return;try{tone(f,anow(),d,{type,v:v*1.4,rev:.2})}catch(e){}}
