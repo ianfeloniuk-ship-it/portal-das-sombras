@@ -124,6 +124,9 @@ window.SetVisual153=(()=>{
  /* v425 (Ian): conjunto Aço (rank E) Comum..Primeva pelo mesmo encaixe */
  const EST416=(r,t)=>t===0?'models/equipment421/ferro-r'+r+'.glb':t===1?'models/equipment423/aco-r'+r+'.glb':'models/equipment416/estrela-r'+r+'.glb',HIDE416={a:['tripo_part_1','tripo_part_2','tripo_part_9','tripo_part_11'],g:['tripo_part_7','tripo_part_8'],b:['tripo_part_4','tripo_part_5','tripo_part_10'],h:['tripo_part_6']};
  const est416=item=>['h','a','g','b'].includes(item.slot)&&!item.set153&&!item.tint292&&!item._skip416&&(item.rar||0)<=7&&((item.tier||0)===9||(item.tier||0)===1||((item.tier||0)===0&&(item.rar||0)>=1));/* v420 (Ian): Estrela é só do rank ★; em outros ranks a peça segue o visual normal do rank, qualquer raridade */
+ const CUT426=new WeakMap();function cutShin426(g){if(CUT426.has(g))return CUT426.get(g);const p=g.attributes.position;let lo=1e9,hi=-1e9;for(let i=0;i<p.count;i++){const y=p.getY(i);if(y<lo)lo=y;if(y>hi)hi=y}
+  const cut=lo+(hi-lo)*.558,src=g.index?g.index.array:[...Array(p.count).keys()],keep=[];for(let i=0;i<src.length;i+=3){const a=src[i],b=src[i+1],c=src[i+2];if(p.getY(a)<cut&&p.getY(b)<cut&&p.getY(c)<cut)continue;keep.push(a,b,c)}
+  const n=g.clone();n.setIndex(keep);CUT426.set(g,n);return n}
  function estrela416(root,item){const slot=item.slot,r=item.rar||0;
   Promise.all([load(EST416(r,item.tier||0)),load(RIG169.guardiao)]).then(([src,rig])=>{
    if(!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
@@ -133,7 +136,8 @@ window.SetVisual153=(()=>{
     const mats=(Array.isArray(sm.material)?sm.material:[sm.material]).map(x=>{if(kind==='face'&&head)return head.material;const m=x.clone();m.skinning=true;m.side=T.DoubleSide;
      if(kind==='base'){if(m.color)m.color.multiplyScalar(1.45);return m}
      m.normalMap=null;m.vertexColors=false;m.metalness=0;m.roughness=.8;if(m.color)m.color.setScalar(GAIN332);if(m.map){m.map=m.map.clone();m.map.encoding=T.LinearEncoding;m.map.needsUpdate=true}return m});
-    const mesh=new T.SkinnedMesh(sm.geometry,Array.isArray(sm.material)?mats:mats[0]);mesh.name=name;mesh.castShadow=slot!=='h';if(kind==='face')mesh.receiveShadow=false;mesh.frustumCulled=false;
+    let geo=sm.geometry;if(kind==='base'&&name==='set153_base416_b'&&(item.tier||0)===1)geo=cutShin426(geo);/* v426 (Ian): greva de Aço é aberta atrás — corta a canela/pé do corpo-base (sapato saindo), mantém a coxa */
+    const mesh=new T.SkinnedMesh(geo,Array.isArray(sm.material)?mats:mats[0]);mesh.name=name;mesh.castShadow=slot!=='h';if(kind==='face')mesh.receiveShadow=false;mesh.frustumCulled=false;
     mesh.position.copy(sm.position);mesh.quaternion.copy(sm.quaternion);mesh.scale.copy(sm.scale);body.parent.add(mesh);mesh.updateMatrixWorld(true);
     mesh.bind(new T.Skeleton(bones,sm.skeleton.boneInverses.map(x=>x.clone())),sm.bindMatrix.clone())};
    src.traverse(sm=>{if(!sm.isSkinnedMesh)return;

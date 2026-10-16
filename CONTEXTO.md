@@ -1,3 +1,9 @@
+## v427 — Aço (rank E): sapato saindo pela greva, 15/10/2026
+- Pedido de Ian (print): botas com sapato saindo / ângulo errado; ao tirar a bota do corpo-base as pernas sumiram.
+- Causa: a greva de Aço é aberta atrás e a canela/pé marrom do corpo-base (base169_b) aparecia por ela. O ângulo da greva já bate com o pé do esqueleto (~20° para fora nos dois).
+- tools/set-visual153.js (?v=427): no rank E o corpo-base da perna perde só a parte abaixo de 30 cm (cutShin426); coxa fica.
+- Teste: as 8 no herói, coxas visíveis, sem sapato aparecendo.
+
 ## v425 — Armaduras Aço (rank E) Comum..Primeva separadas e rigadas no Viajante, 15/10/2026
 - Pedido de Ian: 8 GLBs novos pela skill primeva-armadura-encaixe. Identificados pela referência armadura-E-aco-01..08: Comum (liso), Raro (gema dourada), Épico (roxo), Lendário (dourado/laranja), Mítico (pano vermelho), Divino (coroa de raios, viseira fechada), Primordial (gemas vermelhas), Primeva (prata espinhosa).
 - fit.py: saída `aco-rN`; elmo do Mítico subido 2 cm (`'aco-r4': .02`) porque tapava os olhos.
