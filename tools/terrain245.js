@@ -121,7 +121,7 @@ W245=instanceMatrix*W245;
 #endif
 W245=modelMatrix*W245;gl_Position+=projectionMatrix*viewMatrix*vec4(0.,terrainLift245(W245.xyz),0.,0.);}
 `+v.slice(i)}
-  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));}\n'+v.slice(k)} /* v444: trilha e calcamento usam o visual de estrada */
+  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));float th446=terrH245(pw444.xz),sm446=step(-60.,seaD439(pw444.xz));sea446=sm446*(clamp(-.9-th446,0.,1.)+clamp((-.9-th446)*.04,0.,1.));}\n'+v.slice(k);v='varying float sea446;\n'+v} /* v444: trilha e calcamento usam o visual de estrada */
   sh.vertexShader=(ground?'#define TER_GROUND245\n':'')+GL+lift+v;
  };
  const DEF=function(sh){add.call(this,sh)};DEF.toString=()=>'terrain252';

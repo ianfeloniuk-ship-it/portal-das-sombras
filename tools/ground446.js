@@ -33,6 +33,7 @@ float ridge446(vec2 p){return 1.-abs(noise128(p)*2.-1.);}
  soilC=mix(soilC,vec3(.62,.6,.56),peb);
  diffuseColor.rgb*=mix(vec3(1.),mix(vec3(.88,1.,.86),vec3(1.06,1.02,.9),fbm446(q446*.07)),soilK*nat446*(1.-soilM));
  diffuseColor.rgb=mix(diffuseColor.rgb,soilC,soilM*.75);}
+ {/* leito do mar (v447): areia molhada, mais escura e azulada no fundo */ vec2 q2=terrainWorld128.xz;vec3 bed=mix(vec3(.78,.72,.56),vec3(.32,.42,.48),clamp(sea446-1.,0.,1.))*(.85+.25*fbm446(q2*.08))*(.92+.1*sin(q2.x*1.7+fbm446(q2*.1)*8.));diffuseColor.rgb=mix(diffuseColor.rgb,bed,min(sea446,1.)*(1.-smoothstep(.15,.8,road128)));}
 `;
   const ROUGH = `
 roughnessFactor=mix(roughnessFactor,.16,ice446);
@@ -46,7 +47,7 @@ roughnessFactor=mix(roughnessFactor,.16,ice446);
     r.onBeforeCompile = function (s, rr) {
       ob.call(this, s, rr);
       if (!s.fragmentShader.includes('terrainWorld128') || !s.fragmentShader.includes('#include <roughnessmap_fragment>')) return;
-      s.fragmentShader = s.fragmentShader.replace('void main() {', FN + 'void main() {\nfloat ice446=0.;')
+      s.fragmentShader = (s.vertexShader.includes('varying float sea446') ? 'varying float sea446;\n' : 'float sea446=0.;\n') + s.fragmentShader.replace('void main() {', FN + 'void main() {\nfloat ice446=0.;')
         .replace('#include <roughnessmap_fragment>', COLOR + '#include <roughnessmap_fragment>' + ROUGH);
     };
     r.customProgramCacheKey = () => key + '-ground446';
