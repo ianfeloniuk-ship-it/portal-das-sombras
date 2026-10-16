@@ -129,7 +129,7 @@ const TripoEnvironment153 = (() => {
     if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}
       /* v180: versão leve (Blender, ~3 mil triângulos) para árvores longe da câmera */
-      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb'})[id];
+      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
       if(lod&&models[id])loader.load('models/'+lod,g2=>{const full=models[id];try{prepare(g2,id);full.liteParts=models[id].parts}catch(e){}models[id]=full;resolve()},undefined,()=>resolve());else resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
   })));
   function tree(key,x,z){

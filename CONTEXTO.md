@@ -1,3 +1,9 @@
+## v418 — Enfeites mais leves (árvores, pedras, muro, casas, torre), 15/10/2026
+- Pedido de Ian: versões mais leves dos enfeites para o jogo rodar mais rápido.
+- Blender (decimate) nos modelos Tripo do cenário: versões leves conífera 2241→784, salgueiro 3672→1285, carvalho 3169→1109, muro 3767→1506, paliçada 3765→1506, casa 4125→2062 triângulos; completas muro 12578→3773, casa 11797→4718, torre de defesa 12582→4403; rocha com musgo ganhou versão leve (7883→2364, `tripo-rocha-musgo154-lod.glb`). Originais seguem no histórico do git.
+- src/core/250 `propCull415` agora só afina a quantidade por distância (100% / 50% / 20%); quem liga e desliga perto/leve/longe continua sendo o CULL180 (antes os dois brigavam).
+- Medido (triângulos por quadro): fora da cidade 3,0 → 1,0 mi; centro de Aster 2,2 → 1,2 mi. Print da praça de Aster sem perda visível. Não medido: fps na máquina do Ian.
+
 ## v417 — Espada na mão de verdade e jogo mais leve, 15/10/2026
 - Pedido de Ian (print): a espada aparecia solta no chão; tela com engasgos, ~20 fps.
 - tools/warrior-player127.js: a virada da v415 era feita num grupo por fora e deslocava a pegada (~60 cm). Agora gira o próprio `inner` e a pegada fica no lugar. Testado no jogo: espada nas costas com o cabo no ombro, e na mão pelo cabo ao atacar.
