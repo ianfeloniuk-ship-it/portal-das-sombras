@@ -1,3 +1,9 @@
+## v425 — Armaduras Aço (rank E) Comum..Primeva separadas e rigadas no Viajante, 15/10/2026
+- Pedido de Ian: 8 GLBs novos pela skill primeva-armadura-encaixe. Identificados pela referência armadura-E-aco-01..08: Comum (liso), Raro (gema dourada), Épico (roxo), Lendário (dourado/laranja), Mítico (pano vermelho), Divino (coroa de raios, viseira fechada), Primordial (gemas vermelhas), Primeva (prata espinhosa).
+- fit.py: saída `aco-rN`; elmo do Mítico subido 2 cm (`'aco-r4': .02`) porque tapava os olhos.
+- Jogo: `models/equipment423/aco-r0..r7.glb`; `EST416` usa a pasta Aço no rank E (tier 1), todas as raridades. Script ?v=424.
+- Teste no navegador: as 8 equipadas no herói (rank E) em cena isolada, frente e 3/4. Rosto e corrida conferidos nas poses do Blender.
+
 ## v424 — Jogo mais leve: detalhe por árvore/construção, 15/10/2026
 - Pedido de Ian: jogo liso no navegador.
 - Medido: perto de bosque o pedaço inteiro virava completo (carvalho de 12 mil triângulos): 4,7 mi de triângulos e 700 chamadas de desenho.
