@@ -59,7 +59,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
   if(e.isBoss&&!e.expBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
-  if(e.aggro&&!pt&&L.mode==='world')e.aggro=false;
+  if(e.aggro&&!pt&&L.mode==='world')e.aggro=false;/* v455 (Ian): monstro comum desiste se você fugir para mais de 30 m (chefes, invasores e chefes de mundo continuam) */if(e.aggro&&pt&&pt.t===player&&L.mode==='world'&&!e.isBoss&&!e.breaker&&!e.world&&!e.rival&&pt.d>30){e.aggro=false;if(e.group)for(const x of enemies)if(x.group===e.group&&Math.hypot(x.x-player.x,x.z-player.z)>30)x.aggro=false}
   let mv=0,atk=0,wind=0;
   if(!e.aggro||!pt||e.stun>0){animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   const T=pt.t,dx=T.x-e.x,dz=T.z-e.z,d=Math.hypot(dx,dz)||1,ang=Math.atan2(dx,dz);

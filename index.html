@@ -6125,7 +6125,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const pt=pickTarget(e);
   if(pt&&!e.aggro){const ar=e.isBoss?12:e.rival?13:(L.mode==='world'?12:9);if(pt.d<ar&&los(e.x,e.z,pt.t.x,pt.t.z)){e.aggro=true;if(e.isBoss)bossAggro(e);if(e.group)for(const x of enemies)if(x.group===e.group)x.aggro=true}}
   if(e.isBoss&&!e.expBoss&&e.aggro&&pt&&pt.d>40){e.aggro=false;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.2)}
-  if(e.aggro&&!pt&&L.mode==='world')e.aggro=false;
+  if(e.aggro&&!pt&&L.mode==='world')e.aggro=false;/* v455 (Ian): monstro comum desiste se você fugir para mais de 30 m (chefes, invasores e chefes de mundo continuam) */if(e.aggro&&pt&&pt.t===player&&L.mode==='world'&&!e.isBoss&&!e.breaker&&!e.world&&!e.rival&&pt.d>30){e.aggro=false;if(e.group)for(const x of enemies)if(x.group===e.group&&Math.hypot(x.x-player.x,x.z-player.z)>30)x.aggro=false}
   let mv=0,atk=0,wind=0;
   if(!e.aggro||!pt||e.stun>0){animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   const T=pt.t,dx=T.x-e.x,dz=T.z-e.z,d=Math.hypot(dx,dz)||1,ang=Math.atan2(dx,dz);
@@ -6343,7 +6343,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     P.atkCd-=dt;P.comboT-=dt;try{passiveTick327(dt)}catch(_){}P.dodgeCd-=dt;P.iT-=dt;P.buff-=dt;P.guard-=dt;
     if(P.stealth>0){P.stealth-=dt;if(P.stealth<=0)setStealth(false)}
     resourceTick260(dt);recoveryTick258(dt);tick281(dt);const regen=naturalRegen(P);P.mp=Math.max(0,Math.min(P.maxmp,P.mp+dt*regen.mp));
-    if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0){P.bleedT-=dt;P.hp-=guardianDamage108(P,absorbHealingShield(P,P.bleedD*dt));if(P.hp<=0&&!P.dead)die()}
+    if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0&&!(typeof isCinematic451==='function'&&isCinematic451())){P.bleedT-=dt;P.hp-=guardianDamage108(P,absorbHealingShield(P,P.bleedD*dt));if(P.hp<=0&&!P.dead)die()}
     if(P.shT>0)P.shT-=dt;else if(P.shield<P.maxsh)P.shield=Math.min(P.maxsh,P.shield+regen.shield*dt);
     if(regen.hp>0&&P.hp<P.maxhp&&!P.dead)P.hp=Math.min(P.maxhp,P.hp+regen.hp*dt);
     {const wasT=tired287();run.awake287=(run.awake287||0)+dt;if(!wasT&&tired287()){refreshStats();toast('<b>[CANSAÇO]</b> Você está há 2 dias sem dormir: −10% de dano e −10% de XP até descansar numa pousada ou em casa.',7000)}}if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
@@ -6397,13 +6397,13 @@ function updWorld(dt){updEcon(dt);
   if(riftLight131){let nearest=null,dist=22;for(const g of gates){const d=Math.hypot(g.x-P.x,g.z-P.z);if(g.mesh?.userData.rift131&&d<dist){nearest=g;dist=d}}riftLight131.intensity=nearest?(4.2+Math.sin(time*1.4)*.65)*clamp((22-dist)/12,0,1):0;if(nearest){riftLight131.position.set(nearest.x,2.4,nearest.z+.8);riftLight131.color.copy(nearest.mesh.userData.rift131.color)}
    if(AU.ctx&&AU.on&&window.RiftAudio131&&!document.hidden&&!P.dead){if(!riftSound131)riftSound131=RiftAudio131.create(AU.ctx,AU.fx);if(nearest){const dx=nearest.x-P.x,dz=nearest.z-P.z,pan=(dx*camera.matrixWorld.elements[0]+dz*camera.matrixWorld.elements[2])/12;riftSound131.update(nearest.mesh.userData.rift131.time,Math.pow(clamp((22-dist)/17,0,1),1.6),pan);}else riftSound131.silence();}else if(riftSound131)riftSound131.silence();
   }
-  L.spawnT-=dt;
+  L.spawnT-=dt;if(typeof isCinematic451==='function'&&isCinematic451())L.spawnT=Math.max(L.spawnT,1);/* v455: não nasce monstro durante cena/diálogo */
   if(L.spawnT<=0){
     const inAto1=window.Intro401?.guided?.()||(profile?.classless&&!Campaign327?.state?.('a1')?.done);
-    L.spawnT=inAto1?7.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;
+    const lv455=run.level||1;L.spawnT=inAto1?7.5:lv455<=12?3.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;/* v455 (Ian: muito monstro): menos selvagens juntos até o nível 12 */const cap455=inAto1?3:lv455<=5?5:lv455<=12?7:10;
     const safeBuffer=(nc.c&&nc.c.name==='Aster'&&inAto1&&nc.d<170);
-    if(!safeBuffer&&wild<(inAto1?3:10)&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
-      const gr=clamp(Math.max(danger(x,z),rankOf()-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
+    if(!safeBuffer&&wild<cap455&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
+      const rk455=rankOf(),dg455=danger(x,z);/* v455 (Ian: morro rápido): selvagem aleatório nasce no máximo no rank do jogador (25% de chance de rank +1); região mais perigosa segue perigosa pelos portais, elites, chefes e masmorras */const gr=clamp(Math.max(Math.min(dg455,rk455+(Math.random()<.25?1:0)),rk455-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
   // v155 (Ian): monstros que escaparam de um portal ficam no mundo mesmo longe de você (só não são desenhados); no máximo 80, saem os mais distantes.
   {const br=[];for(const e of enemies)if(e.wild&&!e.dead){const d=Math.hypot(e.x-P.x,e.z-P.z);if(e.breaker){e.m.root.visible=d<=220;br.push([d,e])}else if(d>90){scene.remove(e.m.root);e.gone=true}}
@@ -6467,7 +6467,7 @@ function camUpdate(dt){
   camera.position.x+=rnd(-s,s);camera.position.y+=rnd(-s,s);
   const [vx,vz]=camRot(0,-Math.cos(pcCam.pitch));
   camera.lookAt(camera.position.clone().add(new THREE.Vector3(vx,-Math.sin(pcCam.pitch),vz)));
-  {const C=window.CINE231;if(C){C.t+=1/60;const a=C.t*.35;const ch245=terrH(C.x,C.z);camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+ch245+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4+ch245,C.z);if(C.t>C.dur)window.CINE231=null}}
+  {const C=window.CINE231;if(C){C.t+=Math.min(.05,Math.max(0,dt||0));const a=C.t*.35;const ch245=terrH(C.x,C.z);camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+ch245+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4+ch245,C.z);if(C.t>C.dur){window.CINE231=null;/* v455 (Ian): ao fim da âncora/junção, 3 s sem dano nem aggro para se posicionar */window._cinematicGrace451=performance.now()+3000;if(player&&!player.dead)player.iT=Math.max(player.iT||0,3)}}}
 }
 
 /* ================= OVERLAY E HUD ================= */
@@ -9120,9 +9120,9 @@ requestAnimationFrame(frame);
 <script src="tools/grass446.js?v=446"></script>
 <script src="tools/deep447.js?v=447"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v454</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v455</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=454;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=455;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
