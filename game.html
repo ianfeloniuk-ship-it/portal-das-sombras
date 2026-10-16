@@ -7826,6 +7826,7 @@ function pieceMesh250(i){const G=ARCH242.g;if(!G)return null;const sc=G.scene;sc
  const bb=new THREE.Box3().setFromObject(sc),k=9/((bb.max.y-bb.min.y)||1),inner=new THREE.Group();inner.add(mesh);inner.scale.setScalar(k);inner.updateMatrixWorld(true);
  const pb=new THREE.Box3().setFromObject(inner),c=pb.getCenter(new THREE.Vector3());inner.position.sub(c);const g2=new THREE.Group();g2.add(inner);
  const goo=new THREE.Mesh(new THREE.SphereGeometry(Math.max(.6,pb.getSize(new THREE.Vector3()).length()*.09),24,18),goo250());g2.add(goo);g2.userData.size=pb.getSize(new THREE.Vector3());return g2}
+function pieceAttach250(nb,i){const f=pieceMesh250(i);if(!f)return false;nb.m.root.children.forEach(c=>c.visible=false);f.traverse(o=>o.frustumCulled=false);nb.m.root.add(f);nb.frag250=f;const s=nb.m.root.scale.y||1;f.scale.setScalar(1/s);return true}
 function pieceDir250(dx,dz){const a=(Math.atan2(dx,-dz)*180/Math.PI+360)%360;return ['N','NE','L','SE','S','SO','O','NO'][Math.round(a/45)%8]}
 function pieceHud250(){const P=profile&&profile.piece250;if(!P)return '';const ks=Object.keys(P);if(!ks.length||!player)return '';let best=null,bd=1e12;for(const k of ks){const p=P[k],d=Math.hypot(p.x-player.x,p.z-player.z);if(d<bd){bd=d;best=p}}
  return ' · PEÇAS SOLTAS '+ks.length+'/5 · '+PIECES222[best.i]+' '+(bd/1000).toFixed(1)+' km '+pieceDir250(best.x-player.x,best.z-player.z)}
@@ -7833,10 +7834,10 @@ function pieceFlee250(c,i){const P=profile.piece250=profile.piece250||{};if(P[c.
  showSys('O <b>'+PIECES222[i]+'</b> do Arquiteto fugiu de '+c.name+' e se escondeu a '+(d/1000).toFixed(1)+' km dali. Fechar a Fenda não o prende. Ache e tranque a peça antes que as cinco se soltem.')}
 function pieceTick250(dt){const P=profile&&profile.piece250;if(!P||!player||L.mode!=='world')return;
  for(const id in P){const p=P[id];const e=enemies.find(x=>x.piece250===id&&!x.dead);const d=Math.hypot(p.x-player.x,p.z-player.z);
-  if(e){p.x=e.x;p.z=e.z;if(e.frag250){const f=e.frag250;f.rotation.y+=dt*.4;f.position.y=(f.userData.size.y*.5+1.2)+Math.sin(time*1.3)*.4}continue}
+  if(e){p.x=e.x;p.z=e.z;if(!e.frag250)pieceAttach250(e,p.i);/* v449 (Ian): se o modelo do Arquiteto ainda não tinha carregado, a peça nascia com o corpo de chefe genérico; tenta de novo */if(e.frag250){e.m.root.children.forEach(c=>{if(c!==e.frag250)c.visible=false});const f=e.frag250;f.rotation.y+=dt*.4;f.position.y=(f.userData.size.y*.5+1.2)+Math.sin(time*1.3)*.4}continue}
   if(d<170){const nb=spawnBoss(p.x,p.z,9,{n:PIECES222[p.i],types:['seismic','soulrain'],body:0x3a2a55,scale:2.6,skill:S('Eco do Arquiteto','rain',7,40,3,0xb68cff)});
    nb.piece250=id;nb.wild=true;nb.world=true;nb.bars=3;nb.hp*=5;nb.maxhp*=5;nb.dmg*=1.25;threatApply184(nb,11);nb.name='[Supremo] '+PIECES222[p.i]+' do Arquiteto';nb.roam={x:p.x,z:p.z};
-   const f=pieceMesh250(p.i);if(f){nb.m.root.children.forEach(c=>c.visible=false);f.traverse(o=>o.frustumCulled=false);nb.m.root.add(f);nb.frag250=f;const s=nb.m.root.scale.y||1;f.scale.setScalar(1/s)}
+   pieceAttach250(nb,p.i);
    if(!p.seen){p.seen=1;toast('<b>[ORDEM]</b> Você achou o '+PIECES222[p.i]+' do Arquiteto. Derrote-o para trancá-lo de volta.',6000)}}}}
 function pieceSeal250(e){const P=profile.piece250||{},p=P[e.piece250];if(!p)return;delete P[e.piece250];profile.pieceSealed250=(profile.pieceSealed250||0)+1;run.gold+=150000;store.set('pds2_profile',profile);
  bigText('PEÇA TRANCADA',2200);sfx('gong');toast('<b>[ORDEM]</b> O '+PIECES222[p.i]+' voltou para a âncora. +150.000 de ouro.',6000)}
