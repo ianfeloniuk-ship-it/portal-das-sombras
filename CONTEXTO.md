@@ -1,3 +1,9 @@
+## v421 — Armaduras Ferro (rank F) Raro..Primeva separadas e rigadas no Viajante, 15/10/2026
+- Pedido de Ian: 7 GLBs novos pela skill primeva-armadura-encaixe. Identificados pela referência armadura-F-ferro-02..08: Raro (liso), Épico (roxo), Lendário (crista dourada), Mítico (pano vermelho), Divino (coroa de raios), Primordial (gemas vermelhas), Primeva (prata espinhosa).
+- fit.py: braçais deste conjunto ficam mais perto do corpo (centro |x|≈0,137) — corte de braçal baixado de 0,14 para 0,12. Saída `ferro-rN`.
+- Jogo: `models/equipment421/ferro-r1..r7.glb`; `est416` agora também pega rank F (tier 0) com raridade 1–7; F Comum continua no Ferro comum aprovado. Script ?v=421.
+- Teste no navegador: as 7 equipadas no herói (elmo+rosto, peitoral, braçais, grevas, corpo-base) com a cor do jogo. Corrida conferida nas poses do Blender.
+
 ## v420 — Armaduras Estrela só no rank ★, 15/10/2026
 - Pedido de Ian: as armaduras Estrela são todas do rank ★ (uma por raridade, Comum..Primeva). A v416 punha a Estrela em qualquer rank quando a peça era rara — errado.
 - tools/set-visual153.js: `est416` agora exige `tier===9` (qualquer raridade 0..7). Nos outros ranks a peça volta ao visual normal do rank. Script ?v=420.

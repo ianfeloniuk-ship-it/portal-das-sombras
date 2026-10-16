@@ -120,10 +120,11 @@ window.SetVisual153=(()=>{
   });
  }
  /* v419 (Ian): + Estrela Primeva (raridade 7, estrela-r7.glb). v416 (Ian): armaduras Estrela por raridade (Comum..Primordial). Cada GLB foi separado no Blender em elmo, peitoral(+ombreiras), braçais e grevas, encaixado e pesado no esqueleto do Viajante: saiote dividido entre quadril e coxas (acompanha as pernas), braçal no antebraço/mão, greva na canela/pé, elmo na cabeça com o rosto visível (eq414_hface = rosto sem o cabelo, com o material da cabeça do herói). */
- const EST416=r=>'models/equipment416/estrela-r'+r+'.glb',HIDE416={a:['tripo_part_1','tripo_part_2','tripo_part_9','tripo_part_11'],g:['tripo_part_7','tripo_part_8'],b:['tripo_part_4','tripo_part_5','tripo_part_10'],h:['tripo_part_6']};
- const est416=item=>['h','a','g','b'].includes(item.slot)&&!item.set153&&!item.tint292&&!item._skip416&&(item.rar||0)<=7&&(item.tier||0)===9;/* v420 (Ian): Estrela é só do rank ★; em outros ranks a peça segue o visual normal do rank, qualquer raridade */
+ /* v421 (Ian): conjunto Ferro (rank F) Raro..Primeva pelo mesmo encaixe; Comum F segue o Ferro comum aprovado */
+ const EST416=(r,t)=>t===0?'models/equipment421/ferro-r'+r+'.glb':'models/equipment416/estrela-r'+r+'.glb',HIDE416={a:['tripo_part_1','tripo_part_2','tripo_part_9','tripo_part_11'],g:['tripo_part_7','tripo_part_8'],b:['tripo_part_4','tripo_part_5','tripo_part_10'],h:['tripo_part_6']};
+ const est416=item=>['h','a','g','b'].includes(item.slot)&&!item.set153&&!item.tint292&&!item._skip416&&(item.rar||0)<=7&&((item.tier||0)===9||((item.tier||0)===0&&(item.rar||0)>=1));/* v420 (Ian): Estrela é só do rank ★; em outros ranks a peça segue o visual normal do rank, qualquer raridade */
  function estrela416(root,item){const slot=item.slot,r=item.rar||0;
-  Promise.all([load(EST416(r)),load(RIG169.guardiao)]).then(([src,rig])=>{
+  Promise.all([load(EST416(r,item.tier||0)),load(RIG169.guardiao)]).then(([src,rig])=>{
    if(!(root.userData.set153Tokens||new Set()).has(token323(item)))return;
    if(!src){attach(root,{...item,_skip416:true});return}
    let body=null,head=null;root.traverse(o=>{if(!body&&o.isSkinnedMesh&&/^tripo_part_/.test(o.name))body=o;if(!head&&o.name==='tripo_part_6'&&!o.userData.ol210c)head=o});if(!body)return;
