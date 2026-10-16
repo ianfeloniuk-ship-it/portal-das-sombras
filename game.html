@@ -4444,7 +4444,7 @@ function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene
    Enfeites instanciados só aparecem nos pedaços a até ~115 m do jogador; o chão e as colisões continuam carregados. */
 function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()){if(!ch.group)continue;let n=0;ch.group.traverse(()=>n++);if(!ch.props415||ch.n415!==n){ch.n415=n;ch.props415=[];ch.lod415=null;ch.group.traverse(o=>{if(o.isInstancedMesh&&(!window.NAT422||!o.userData.tripo153||NAT422.has(o.userData.tripo153))){/* v422: muralha/casas não afinam (sobravam pedaços soltos) */o.userData.count415=o.userData.count415??o.count;ch.props415.push(o)}})}
  const d=Math.hypot(ch.cx*CH-P.x,ch.cz*CH-P.z),lod=d<CH*1.1?2:d<CH*2?1:0;if(ch.lod415===lod)continue;ch.lod415=lod;
- for(const m of ch.props415){const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
+ for(const m of ch.props415){if(m.userData.lite180||m.userData.isLite423){m.userData.thin423=lod===2?1:lod===1?.5:.2;continue}/* v424: árvore/construção com versão leve: o CULL180 separa por distância */const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
 function updChunks(force){
   const P=player||{x:0,z:0},pcx=Math.round(P.x/CH),pcz=Math.round(P.z/CH);let n=0;const want=[];
   for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)want.push([pcx+i,pcz+j,i*i+j*j]);want.sort((a,b)=>a[2]-b[2]);
@@ -8918,7 +8918,17 @@ const TripoEnvironment153 = (() => {
     return group;
   };
   const NAT422=window.NAT422=new Set(['oak','willow','fir','boulder','stones','mossrock']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
-  setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}const P=typeof player!=='undefined'&&player?player:camera.position,tr=['oak','willow','fir'].includes(m.userData.tripo153),d=Math.max(0,Math.hypot(m.userData.bs180.center.x-P.x,m.userData.bs180.center.z-P.z)-m.userData.bs180.radius*(tr?.2:.5)),near=tr?16:40;/* v201: árvores só ficam completas bem perto (grupos grandes entravam inteiros) */m.visible=inV&&d<near;lt.visible=inV&&d>=near&&(d<100||!NAT422.has(m.userData.tripo153))/* v422 (Ian): muralha/casas sumiam de longe; construção nunca some, só árvore/pedra */}},100);
+  setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}if(!inV){m.visible=lt.visible=false;continue}const P=typeof player!=='undefined'&&player?player:camera.position,nat=NAT422.has(m.userData.tripo153);split423(m,lt,P,nat?10:40,nat?90:1e9,nat?(m.userData.thin423??1):1)}},100);
+  /* v424 (Ian: jogo liso no navegador): antes o pedaço inteiro virava completo quando o jogador chegava perto do grupo
+     (até 2,7 mi de triângulos só de carvalho, 12 mil cada). Agora é por árvore/construção: as mais perto ficam completas,
+     o resto na versão leve (árvore completa só até 10 m), e árvore/pedra além de 90 m some. A ordem é refeita só quando o jogador anda 1,5 m. */
+  function split423(m,lt,P,near,far,thin){const u=m.userData;lt.userData.isLite423=true;if(!u.base423){u.base423=m.instanceMatrix.array.slice();u.n423=m.instanceMatrix.count;u.col423=m.instanceColor?m.instanceColor.array.slice():null}
+    const key=Math.round(P.x/1.5)+','+Math.round(P.z/1.5)+','+thin;if(u.key423===key){m.visible=m.count>0;lt.visible=lt.count>0;return}u.key423=key;
+    const B=u.base423,C=u.col423,idx=[];for(let i=0;i<u.n423;i++){const dx=B[i*16+12]-P.x,dz=B[i*16+14]-P.z;idx.push([dx*dx+dz*dz,i])}idx.sort((x,y)=>x[0]-y[0]);
+    const nm=m.instanceMatrix.array,lm=lt.instanceMatrix.array;let a=0,b=0;
+    for(const [d2,i] of idx){if(d2<near*near){nm.set(B.subarray(i*16,i*16+16),a*16);if(C)m.instanceColor.array.set(C.subarray(i*3,i*3+3),a*3);a++}
+      else if(d2<far*far){if(thin<1&&((Math.imul(i+1,2654435761)>>>0)%1000)/1000>=thin)continue;lm.set(B.subarray(i*16,i*16+16),b*16);if(C&&lt.instanceColor)lt.instanceColor.array.set(C.subarray(i*3,i*3+3),b*3);b++}}
+    m.count=a;lt.count=b;m.instanceMatrix.needsUpdate=lt.instanceMatrix.needsUpdate=true;if(C){m.instanceColor.needsUpdate=true;if(lt.instanceColor)lt.instanceColor.needsUpdate=true}m.visible=a>0;lt.visible=b>0}
   // Streamed instances share resources; release only the instance GPU buffer when a chunk unloads.
   const oldDispose=envDispose;
   envDispose=function(root){root.traverse(o=>{if(o.isInstancedMesh&&o.userData.tripo153&&o.dispose)o.dispose()});oldDispose(root)};

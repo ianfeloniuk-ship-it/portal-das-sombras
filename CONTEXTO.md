@@ -1,3 +1,9 @@
+## v424 — Jogo mais leve: detalhe por árvore/construção, 15/10/2026
+- Pedido de Ian: jogo liso no navegador.
+- Medido: perto de bosque o pedaço inteiro virava completo (carvalho de 12 mil triângulos): 4,7 mi de triângulos e 700 chamadas de desenho.
+- 680 `split423` (no CULL180): por instância, a cada 1,5 m andados. Árvore/pedra completa só até 10 m, leve até 90 m (afinada por distância do pedaço), além disso some; construção completa até 40 m e leve em qualquer distância. 250 `propCull415` não mexe mais nelas (só passa a fração).
+- Resultado no navegador de teste: bosque 4,7 mi → 0,87 mi triângulos (700 → 173 chamadas); Aster 1,27 mi → 0,51 mi; borda da cidade 0,67 mi. Sem erro novo. Não medido: fps na máquina do Ian.
+
 ## v423 — Muralha e casas não somem de longe, 15/10/2026
 - Pedido de Ian: a muralha inteira sumia de longe e sobravam pedaços soltos no céu.
 - Causa: CULL180 escondia tudo além de 100 m, e propCull415 (v417/418) cortava 50–80% das cópias de muro/casa por distância.

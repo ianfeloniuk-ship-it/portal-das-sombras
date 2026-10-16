@@ -58,7 +58,7 @@ function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene
    Enfeites instanciados só aparecem nos pedaços a até ~115 m do jogador; o chão e as colisões continuam carregados. */
 function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()){if(!ch.group)continue;let n=0;ch.group.traverse(()=>n++);if(!ch.props415||ch.n415!==n){ch.n415=n;ch.props415=[];ch.lod415=null;ch.group.traverse(o=>{if(o.isInstancedMesh&&(!window.NAT422||!o.userData.tripo153||NAT422.has(o.userData.tripo153))){/* v422: muralha/casas não afinam (sobravam pedaços soltos) */o.userData.count415=o.userData.count415??o.count;ch.props415.push(o)}})}
  const d=Math.hypot(ch.cx*CH-P.x,ch.cz*CH-P.z),lod=d<CH*1.1?2:d<CH*2?1:0;if(ch.lod415===lod)continue;ch.lod415=lod;
- for(const m of ch.props415){const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
+ for(const m of ch.props415){if(m.userData.lite180||m.userData.isLite423){m.userData.thin423=lod===2?1:lod===1?.5:.2;continue}/* v424: árvore/construção com versão leve: o CULL180 separa por distância */const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
 function updChunks(force){
   const P=player||{x:0,z:0},pcx=Math.round(P.x/CH),pcz=Math.round(P.z/CH);let n=0;const want=[];
   for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)want.push([pcx+i,pcz+j,i*i+j*j]);want.sort((a,b)=>a[2]-b[2]);
