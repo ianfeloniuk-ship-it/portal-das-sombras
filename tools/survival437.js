@@ -35,21 +35,26 @@
     cogumelo: { n: 'Cogumelos', kg: .2, keep: 1, eat: { f: 7, s: 0, sick: .25 }, d: 'Crus podem fazer mal. Assados ficam seguros.' },
     cogu_assado: { n: 'Cogumelos Assados', kg: .2, keep: 2, eat: { f: 16, s: 0, fed: 240 }, d: 'Dá Bem Alimentado curto.' },
     estragada: { n: 'Comida Estragada', kg: .5, eat: { f: 4, s: 0, sick: .9 }, d: 'Melhor não comer.' },
-    machado: { n: 'Machado de Pedra', kg: 2, d: 'Derruba árvores e corta toras. Feito com Pedra Lascada, Fibras e um galho.' },
-    cantil: { n: 'Cantil de Couro', kg: .6, d: 'Encha na margem de rio ou lago. Água crua: ferva na fogueira.' }
+    polpa_cacto: { n: 'Polpa / Água de Cacto', kg: .4, keep: 3, eat: { f: 14, s: 32 }, d: 'Cortada dos cactos do Deserto de Zahar. Mata a sede (+32%) e a fome (+14%).' },
+    fibra_espinhosa: { n: 'Fibras Espinhosas', kg: .3, d: 'Fibras resistentes dos cactos de Zahar. Servem para cordas, amarras e ferramentas.' },
+    tocha: { n: 'Tocha com Resina', kg: .5, use: 'torch', d: 'Feixe de Lenha com Resina. Acende por 5 min, ilumina e neutraliza o Frio/Congelamento de Ymiria.' },
+    pa: { n: 'Pá / Enxada', kg: 2, d: 'Nivela encostas e dunas para o Carrinho passar e desobstrui passagens bloqueadas (F).' },
+    machado: { n: 'Machado de Pedra', kg: 2, d: 'Derruba árvores, corta cactos e toras. Feito com Pedra Lascada, Fibras e um galho.' },
+    cantil: { n: 'Cantil de Couro', kg: .6, d: 'Encha na margem de rio ou lago. Água crua: ferva na fogueira ou faça Chá Térmico.' }
   };
   const FOOD = Object.keys(IT).filter(k => IT[k].eat);
   window.SurvItems437 = IT;
 
   function S() {
     const s = run.surv437 || (run.surv437 = {});
-    if (s.v !== 1) Object.assign(s, { v: 1, fome: 100, sede: 100, clock: 0, fed: 0, sickT: 0, bag: {}, batches: {}, felled: [], logs: [], picked: {}, canteen: null, carry: null }, Object.assign({}, s));
+    if (s.v !== 1) Object.assign(s, { v: 1, fome: 100, sede: 100, clock: 0, fed: 0, sickT: 0, torchT: 0, chaT: 0, cold441: 0, leveled: [], bag: {}, batches: {}, felled: [], logs: [], picked: {}, canteen: null, carry: null }, Object.assign({}, s));
+    s.leveled = s.leveled || [];
     return s;
   }
   const fmtKg = k => (Math.round(k * 10) / 10).toLocaleString('pt-BR') + ' kg';
   const cap = () => 35 * (S().fed > 0 ? 1.3 : 1);
   const weight = () => { const b = S().bag; let w = 0; for (const k in b) w += (IT[k]?.kg || 0) * b[k]; if (S().canteen) w += .6 + S().canteen.sips * .2; return w; };
-  const has = (k, n = 1) => (S().bag[k] || 0) >= n;
+  const has = (k, n = 1) => (k === 'fibra' ? (S().bag.fibra || 0) + (S().bag.fibra_espinhosa || 0) : (S().bag[k] || 0)) >= n;
   function add(k, n = 1, quiet) {
     if (!IT[k] || n <= 0) return 0;
     const s = S(); let ok = n;
@@ -62,6 +67,13 @@
   }
   function take(k, n = 1) {
     const s = S(); if (!has(k, n)) return false;
+    if (k === 'fibra' && (s.bag.fibra || 0) < n) {
+      const a = s.bag.fibra || 0, rem = n - a;
+      if (a) delete s.bag.fibra;
+      s.bag.fibra_espinhosa = (s.bag.fibra_espinhosa || 0) - rem;
+      if (!s.bag.fibra_espinhosa) delete s.bag.fibra_espinhosa;
+      save(); return true;
+    }
     s.bag[k] -= n; if (!s.bag[k]) delete s.bag[k];
     if (s.batches[k]) { s.batches[k].sort((a, b) => a - b); s.batches[k].splice(0, n); } // gasta primeiro o que estraga antes
     save(); return true;
@@ -81,17 +93,20 @@
   function needsTick(dt) {
     const s = S(); s.clock += dt;
     const b = typeof biomeAt === 'function' ? biomeAt(player.x, player.z) : '';
-    const hot = b === 'deserto' || b === 'vulcao', cold = b === 'neve';
+    const hot = b === 'deserto' || b === 'vulcao', cold = b === 'neve' && !(window.Biomes295?.warmSource441?.());
     // esforço = estamina gasta (correr, golpes, escalar) + carga pesada
     try { const v = martialState260().vigor; if (lastVig != null && v < lastVig) effort += lastVig - v; lastVig = v; } catch (_) {}
     const ef = Math.min(1, effort / 30); effort = Math.max(0, effort - dt * 12);
     const load = (window.Cart437?.pulling() ? Cart437.loadKg() / 400 : 0) + (s.carry ? .6 : 0);
     // fome: 100 → 0 em ~1,6 dia parado; até 2× com esforço e carga; frio gasta mais
     s.fome = Math.max(0, s.fome - dt * 100 / (DAY() * 1.6) * (1 + ef + load * .6 + (cold ? .35 : 0)));
-    // sede: 100 → 0 em ~1 dia; calor 1,8×; esforço até +1×
-    s.sede = Math.max(0, s.sede - dt * 100 / DAY() * (1 + ef + load * .4) * (hot ? 1.8 : 1));
+    // sede: 100 → 0 em ~1 dia; calor árido do deserto 2,35×; esforço até +1×
+    const thirstMul = b === 'deserto' ? (run.bioGear295?.cantil > 0 ? 1.15 : 2.35) : hot ? 1.8 : 1;
+    s.sede = Math.max(0, s.sede - dt * 100 / DAY() * (1 + ef + load * .4) * thirstMul);
     if (s.fed > 0) s.fed = Math.max(0, s.fed - dt);
     if (s.sickT > 0) s.sickT = Math.max(0, s.sickT - dt);
+    if (s.torchT > 0) { s.torchT = Math.max(0, s.torchT - dt); syncTorch(true); if (s.torchT <= 0) { syncTorch(false); toast('<b>[SOBREVIVÊNCIA]</b> A Tocha com Resina apagou.', 3500); } } else syncTorch(false);
+    if (s.chaT > 0) s.chaT = Math.max(0, s.chaT - dt);
     if (s.sede < 15 && run.awake287 != null) run.awake287 += dt; // sede crítica: cansaço 2× mais rápido
     if (s.sede <= 0) { needsTick.hurt = (needsTick.hurt || 0) - dt; if (needsTick.hurt <= 0 && player.hp > player.maxhp * .1) { needsTick.hurt = 3; player.hp = Math.max(player.maxhp * .1, player.hp - player.maxhp * .02); floater(player.x, player.z, 'DESIDRATADO', '#9fd8ff'); } }
     if (s.fome <= 0) { needsTick.hh = (needsTick.hh || 0) - dt; if (needsTick.hh <= 0 && player.hp > player.maxhp * .15) { needsTick.hh = 4; player.hp = Math.max(player.maxhp * .15, player.hp - player.maxhp * .015); floater(player.x, player.z, 'FAMINTO', '#ffb36b'); } }
@@ -106,6 +121,7 @@
     if (s.fome <= 0) { vig -= .5; dmg *= .8; } else if (s.fome < 15) { vig -= .25; dmg *= .9; }
     if (s.sede < 15) vig -= .4;
     if (s.sickT > 0) vig -= .3;
+    if ((s.cold441 || 0) >= 50) vig -= .25;
     if (s.fed > 0) { vig += .2; hp = 1.1; }
     return { vig, dmg, hp }; };
   if (typeof pVigorRegen281 === 'function') { const vr0 = pVigorRegen281; pVigorRegen281 = function () { const m = mods(); return Math.max(-.95, (1 + vr0()) * (1 + m.vig) - 1); }; }
@@ -124,10 +140,30 @@
     toast(msg, 4500); try { sfx('pickup'); } catch (_) {}
     syncFed(); save();
   }
+  function lightTorch() {
+    if (!take('tocha', 1)) return;
+    const s = S(); s.torchT = Math.max(s.torchT || 0, 300); s.cold441 = 0;
+    syncTorch(true); save();
+    try { sfx('pickup'); } catch (_) {}
+    toast('<b>[TOCHA COM RESINA]</b> Acesa por 5 min: ilumina o redor e neutraliza o Frio/Congelamento.', 4500);
+  }
+  let torchG = null;
+  function syncTorch(on) {
+    if (!on || !player?.m?.root) { if (torchG) { torchG.parent?.remove(torchG); torchG = null; } return; }
+    if (torchG && torchG.parent === player.m.root) return;
+    if (torchG) torchG.parent?.remove(torchG);
+    const g = new T.Group();
+    const stick = new T.Mesh(new T.CylinderGeometry(.035, .045, .55, 6), new T.MeshStandardMaterial({ color: 0x5c3d24, roughness: .85 }));
+    const flame = new T.Mesh(new T.SphereGeometry(.09, 8, 8), new T.MeshBasicMaterial({ color: 0xffa838 }));
+    flame.position.y = .3; g.add(stick, flame);
+    try { const pl = new T.PointLight(0xff9f40, 1.35, 11, 2); pl.position.y = .35; g.add(pl); } catch (_) {}
+    g.position.set(-.38, 1.15, .22); g.rotation.x = .35;
+    player.m.root.add(g); torchG = g;
+  }
   function syncFed() { const on = S().fed > 0; if (on !== fedWas) { fedWas = on; try { refreshStats(); } catch (_) {} } }
 
   /* ---------------- água e cantil ---------------- */
-  const WATER_K = { limpa: 'Água limpa', suja: 'Água de rio/lago (crua)', cha: 'Chá de ervas', pantano: 'Água do pântano (crua)', mar: 'Água do mar (salgada)' };
+  const WATER_K = { limpa: 'Água limpa', suja: 'Água de rio/lago (crua)', cha: 'Chá Térmico de ervas', pantano: 'Água do pântano (crua)', mar: 'Água do mar (salgada)' };
   function drink(kind, amt) {
     const s = S();
     if (kind === 'mar') { s.sede = Math.max(0, s.sede - 8); toast('Água do mar: o sal dá <b>mais</b> sede. Destile na fogueira (cantil cheio de água do mar).', 4500); save(); return; } // v439
@@ -135,7 +171,7 @@
     let msg = 'Você bebeu ' + WATER_K[kind].toLowerCase() + '.';
     const risk = kind === 'suja' ? .25 : kind === 'pantano' ? .6 : 0;
     if (Math.random() < risk) { s.sickT = 150; s.fome = Math.max(0, s.fome - 12); msg += ' <b style="color:#ff9b8b">Mal-estar</b>: devia ter fervido.'; }
-    if (kind === 'cha') { s.sickT = 0; msg += ' O chá tira o mal-estar.'; }
+    if (kind === 'cha') { s.sickT = 0; s.chaT = Math.max(s.chaT || 0, 300); s.cold441 = 0; msg += ' <b style="color:#9fe39a">Aquecido por 5 min</b> (neutraliza o frio de Ymiria e tira mal-estar).'; }
     toast(msg, 3500); save();
   }
   function sip() {
@@ -175,7 +211,7 @@
     const p = new Promise(res => {
       if (!T.GLTFLoader) { res(null); return; }
       const l = new T.GLTFLoader(); if (window.MeshoptDecoder) l.setMeshoptDecoder(MeshoptDecoder);
-      l.load('models/m437/' + name + '.glb?v=437', g => {
+      l.load((name.includes('/') ? 'models/' + name : 'models/m437/' + name) + '.glb?v=437', g => {
         const root = g.scene; root.updateMatrixWorld(true);
         root.traverse(o => { if (o.isMesh) { o.material = Array.isArray(o.material) ? o.material.map(sceneryMat) : sceneryMat(o.material); o.castShadow = true; o.receiveShadow = true; o.geometry.userData.shared = true; } });
         const b = new T.Box3().setFromObject(root), sz = b.getSize(new T.Vector3()), wrap = new T.Group();
@@ -208,13 +244,14 @@
   const CELL = 26, nodes = new Map();
   const rnd = s => { s = Math.imul(s ^ (s >>> 15), 2246822507) >>> 0; s = Math.imul(s ^ (s >>> 13), 3266489909) >>> 0; return ((s ^ (s >>> 16)) >>> 0) / 4294967296; };
   function nodeKinds(b) {
-    if (b === 'deserto') return ['pedra', 'pedra', 'ervas'];
+    if (b === 'deserto') return ['cacto', 'cacto', 'pedra', 'ervas'];
     if (b === 'vulcao') return ['pedra', 'pedra'];
     if (b === 'neve') return ['pedra', 'arbusto'];
     if (b === 'pantano') return ['ervas', 'ervas', 'arbusto'];
     return ['pedra', 'arbusto', 'ervas'];
   }
   function loot(kind, b) {
+    if (kind === 'cacto') return [['polpa_cacto', 2 + (Math.random() * 2 | 0)], ['fibra_espinhosa', 2 + (Math.random() * 2 | 0)]];
     if (kind === 'pedra') { const o = [['pedra', 2 + (Math.random() * 2 | 0)]]; if (Math.random() < .4) o.push(['minerio', 1]); if (b === 'deserto' && Math.random() < .6) o.push(['sal', 1 + (Math.random() * 2 | 0)]); return o; }
     if (kind === 'arbusto') { const o = [['fruta', 2 + (Math.random() * 3 | 0)]]; if (Math.random() < .55) o.push(['cipo', 1 + (Math.random() * 2 | 0)]); return o; }
     const o = [['fibra', 2 + (Math.random() * 3 | 0)], ['erva', 1 + (Math.random() * 2 | 0)]];
@@ -222,7 +259,7 @@
     if (Math.random() < .35) o.push(['cipo', 1]);
     return o;
   }
-  const LABEL = { pedra: 'F · COLETAR PEDRAS', arbusto: 'F · COLHER FRUTAS E CIPÓS', ervas: 'F · COLHER FIBRAS E ERVAS' };
+  const LABEL = { pedra: 'F · COLETAR PEDRAS', arbusto: 'F · COLHER FRUTAS E CIPÓS', ervas: 'F · COLHER FIBRAS E ERVAS', cacto: 'F · CORTAR CACTO (Polpa/Água e Fibras Espinhosas)' };
   function buildCell(cx, cz) {
     const key = cx + ',' + cz, out = [];
     for (let i = 0; i < 3; i++) {
@@ -238,18 +275,36 @@
     }
     return out;
   }
+  function makeCactusMesh(s) {
+    const g = new T.Group();
+    if (typeof ENV !== 'undefined' && ENV.m?.cactus_tall && typeof envMesh === 'function') {
+      const m = envMesh('cactus_tall'); m.scale.setScalar(1.9 * s / Math.max(ENV.m.cactus_tall.h || 1, .1)); g.add(m); return g;
+    }
+    const mat = new T.MeshStandardMaterial({ color: 0x3b7a3e, roughness: .82, metalness: 0 });
+    const trunk = new T.Mesh(new T.CylinderGeometry(.18 * s, .22 * s, 1.8 * s, 8), mat); trunk.position.y = .9 * s; trunk.castShadow = true; g.add(trunk);
+    for (const side of [-1, 1]) {
+      const armH = (.55 + (side > 0 ? .15 : 0)) * s;
+      const arm = new T.Mesh(new T.CylinderGeometry(.12 * s, .13 * s, armH, 7), mat);
+      arm.position.set(side * .32 * s, (.85 + (side > 0 ? .18 : 0)) * s + armH * .5, 0); arm.castShadow = true;
+      const joint = new T.Mesh(new T.BoxGeometry(.28 * s, .2 * s, .2 * s), mat);
+      joint.position.set(side * .18 * s, (.85 + (side > 0 ? .18 : 0)) * s, 0);
+      g.add(arm, joint);
+    }
+    return g;
+  }
   function makeNode(n) {
     const g = new T.Group(); g.position.set(n.x, 0, n.z); g.rotation.y = n.ry;
     if (n.kind === 'pedra') { const p = envPiece('stones', .55 * n.s); if (p) g.add(p); }
+    else if (n.kind === 'cacto') { g.add(makeCactusMesh(n.s)); }
     else glb(n.kind).then(t => { if (t && g.parent !== null) g.add(fit(t, (n.kind === 'arbusto' ? 1.1 : .75) * n.s, 1.6 * n.s)); });
     scene.add(g); n.g = g;
-    n.it = { type: 'gather437', x: n.x, z: n.z, r: 2.1, label: LABEL[n.kind], use: () => gather(n) };
+    n.it = { type: 'gather437', x: n.x, z: n.z, r: 2.2, label: LABEL[n.kind], use: () => gather(n) };
     L.inter.push(n.it);
   }
   function dropNode(n) { if (n.g) scene.remove(n.g); const i = L.inter.indexOf(n.it); if (i >= 0) L.inter.splice(i, 1); n.g = null; }
   function gather(n) {
     const s = S(); if (s.picked[n.id] > s.clock) return;
-    try { Anim303?.play(n.kind === 'pedra' ? 'esmagar' : 'ajoelhar', 1.4); } catch (_) {}
+    try { Anim303?.play(n.kind === 'pedra' || n.kind === 'cacto' ? 'corte' : 'ajoelhar', 1.4); sfx('hit'); } catch (_) {}
     const got = []; for (const [k, q] of loot(n.kind, n.b)) { const a = add(k, q, true); if (a) got.push(a + ' ' + IT[k].n); }
     if (!got.length) { toast('<b>[SOBREVIVÊNCIA]</b> Bolsa cheia (' + fmtKg(weight()) + ').'); return; }
     floater(n.x, n.z, got.join(' · '), '#cfe8a0', true);
@@ -303,6 +358,25 @@
     for (const [x, z] of F) if (Math.abs(x - player.x) < 260 && Math.abs(z - player.z) < 260) hideTreeAt(x, z);
   }
   const hasAxe = () => has('machado') || (typeof weaponKind272 === 'function' && weaponKind272(run.equip?.w) === 'axe');
+  const hasShovel = () => has('pa');
+  /* ---------------- Terraplenagem com Pá/Enxada (v441) ---------------- */
+  function levelTerrain441(tx, tz, r = 12, h = 0, msg) {
+    const s = S();
+    s.leveled = s.leveled || [];
+    const ex = s.leveled.find(f => Math.hypot(f.x - tx, f.z - tz) < 5);
+    if (ex) { ex.r = Math.max(ex.r || 12, r); ex.h = h; }
+    else { s.leveled.push({ x: Math.round(tx * 10) / 10, z: Math.round(tz * 10) / 10, r, h }); if (s.leveled.length > 24) s.leveled.shift(); }
+    if (window.TER245) { TER245.lx = null; try { if (typeof ter245tick === 'function') ter245tick(); } catch (_) {} }
+    try { Anim303?.play('esmagar', 1.2); sfx('hit'); fxRing(tx, tz, 0xe3b86a, r * .4, .6); } catch (_) {}
+    floater(tx, tz, 'TERRENO NIVELADO', '#e9dfc0', true);
+    if (msg !== false) toast(msg || '<b>[TERRAPLENAGEM]</b> Terreno nivelado com a Pá/Enxada! O Carrinho passa sem gastar estamina.', 4500);
+    save();
+  }
+  const shovelIt = { type: 'shovel441', x: 0, z: 0, r: 2.8, label: '', hidden: true, use: () => {
+    if (!hasShovel()) { toast('Faça uma <b>Pá / Enxada</b> no Manual de Sobrevivência (2 Pedra Lascada + 1 Feixe de Lenha + 2 Fibras).', 4500); return; }
+    const b = typeof biomeAt === 'function' ? biomeAt(player.x, player.z) : '';
+    levelTerrain441(player.x, player.z, 13, 0, b === 'deserto' ? '<b>[TERRAPLENAGEM]</b> Duna de areia nivelada com a Pá/Enxada! Passagem plana para o Carrinho.' : '<b>[TERRAPLENAGEM]</b> Encosta nivelada com a Pá/Enxada!');
+  } };
   const treeIt = { type: 'tree437', x: 0, z: 0, r: 2.6, label: '', hidden: true, use: () => chop() };
   let chopping = null;
   function chop() {
@@ -420,36 +494,50 @@
     const bar = (v, c) => '<div style="height:8px;background:#0b1612;border:1px solid #b9974f55;border-radius:4px"><div style="height:100%;width:' + Math.max(0, Math.min(100, v)) + '%;background:' + c + ';border-radius:4px"></div></div>';
     const soon = k => { const q = s.batches[k]; if (!q?.length) return ''; const t = Math.min(...q) - s.clock; return ' <small style="opacity:.7">(estraga em ' + (t > DAY() ? (t / DAY()).toFixed(1).replace('.', ',') + ' dia' : Math.max(1, Math.round(t / 60)) + ' min') + ')</small>'; };
     let h = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px"><div>Fome ' + Math.round(s.fome) + '%' + bar(s.fome, '#e3a64a') + '</div><div>Sede ' + Math.round(s.sede) + '%' + bar(s.sede, '#4fb7e8') + '</div></div>';
-    h += '<p style="margin:4px 0">' + (s.fed > 0 ? '<b style="color:#9fe39a">Bem Alimentado</b> por ' + Math.ceil(s.fed / 60) + ' min · ' : '') + (s.sickT > 0 ? '<b style="color:#ff9b8b">Mal-estar</b> · ' : '') + 'Carga ' + fmtKg(weight()) + ' de ' + fmtKg(cap()) + (s.carry ? ' · Tora no ombro' : '') + '</p>';
+    const wSrc = window.Biomes295?.warmSource441?.();
+    h += '<p style="margin:4px 0">' + (s.fed > 0 ? '<b style="color:#9fe39a">Bem Alimentado</b> por ' + Math.ceil(s.fed / 60) + ' min · ' : '') + (s.torchT > 0 ? '<b style="color:#ffb347">Tocha acesa</b> (' + Math.ceil(s.torchT / 60) + ' min) · ' : '') + (s.chaT > 0 ? '<b style="color:#9fe39a">Chá Térmico</b> (' + Math.ceil(s.chaT / 60) + ' min) · ' : '') + (wSrc ? '<b style="color:#9fe39a">Calor: ' + esc(wSrc) + '</b> · ' : (s.cold441 > 5 ? '<b style="color:#9fd8ff">Frio/Congelamento ' + Math.round(s.cold441) + '%</b> · ' : '')) + (s.sickT > 0 ? '<b style="color:#ff9b8b">Mal-estar</b> · ' : '') + 'Carga ' + fmtKg(weight()) + ' de ' + fmtKg(cap()) + (s.carry ? ' · Tora no ombro' : '') + '</p>';
     const c = s.canteen; h += '<p style="margin:4px 0">' + (c ? 'Cantil: ' + (c.sips ? c.sips + '/5 goles de ' + WATER_K[c.kind].toLowerCase() : 'vazio') + (c.sips ? ' <button class="btn" id="b437sip">BEBER</button>' : '') : 'Sem cantil.') + '</p>';
     h += '<table style="width:100%;border-collapse:collapse">';
-    for (const k of rows) h += '<tr style="border-bottom:1px solid #b9974f33"><td style="padding:5px" title="' + esc(IT[k].d) + '"><b>' + IT[k].n + '</b> ×' + b[k] + soon(k) + '<br><small style="opacity:.7">' + esc(IT[k].d) + '</small></td><td style="text-align:right;white-space:nowrap">' + fmtKg(IT[k].kg * b[k]) + (IT[k].eat ? ' <button class="btn" data-eat="' + k + '">COMER</button>' : '') + ' <button class="btn" data-drop="' + k + '" title="Largar 1">−1</button></td></tr>';
-    if (!rows.length) h += '<tr><td style="opacity:.6;padding:8px">Vazia. Colete pedras, arbustos e ervas pelo mundo (F), cace e derrube árvores.</td></tr>';
+    for (const k of rows) h += '<tr style="border-bottom:1px solid #b9974f33"><td style="padding:5px" title="' + esc(IT[k].d) + '"><b>' + IT[k].n + '</b> ×' + b[k] + soon(k) + '<br><small style="opacity:.7">' + esc(IT[k].d) + '</small></td><td style="text-align:right;white-space:nowrap">' + fmtKg(IT[k].kg * b[k]) + (IT[k].eat ? ' <button class="btn" data-eat="' + k + '">COMER</button>' : '') + (IT[k].use === 'torch' ? ' <button class="btn" data-torch="1">ACENDER</button>' : '') + (k === 'pa' && world() ? ' <button class="btn" data-level="1">NIVELAR TERRENO</button>' : '') + ' <button class="btn" data-drop="' + k + '" title="Largar 1">−1</button></td></tr>';
+    if (!rows.length) h += '<tr><td style="opacity:.6;padding:8px">Vazia. Colete pedras, arbustos, cactos e ervas pelo mundo (F), cace e derrube árvores.</td></tr>';
     h += '</table><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="b437man">MANUAL DE SOBREVIVÊNCIA</button></div>';
     openModal('BOLSA DE SOBREVIVÊNCIA', h);
     const box = document.getElementById('modal') || document;
     box.querySelectorAll('[data-eat]').forEach(e => e.onclick = () => { eat(e.dataset.eat); bagView(); });
+    box.querySelectorAll('[data-torch]').forEach(e => e.onclick = () => { lightTorch(); bagView(); });
+    box.querySelectorAll('[data-level]').forEach(e => e.onclick = () => { closeModal(); levelTerrain441(player.x, player.z, 13, 0); });
     box.querySelectorAll('[data-drop]').forEach(e => e.onclick = () => { take(e.dataset.drop, 1); bagView(); });
     const sp = document.getElementById('b437sip'); if (sp) sp.onclick = () => { sip(); bagView(); };
     const mn = document.getElementById('b437man'); if (mn) mn.onclick = () => { if (window.Build437) Build437.manual(); };
   }
 
-  /* ---------------- HUD ---------------- */
+  /* ---------------- HUD ----------------
+     v440 (Ian: "muito perto uma da outra e tampa"): Fome e Sede ficam dentro do painel de Vida/Estamina (#stat),
+     lado a lado, com as mesmas barras (.bar/.lbl) — nada solto no meio da tela. */
   const hud = document.createElement('div'); hud.id = 'hud437';
-  hud.style.cssText = 'position:fixed;left:50%;bottom:148px;transform:translateX(-50%);z-index:40;display:none;gap:10px;align-items:center;font:600 11px system-ui;color:#e9dfc0;text-shadow:0 1px 2px #000;cursor:pointer';
-  const mk = (id, col, tip) => '<div title="' + tip + '" style="display:flex;align-items:center;gap:4px">' + id + '<div style="width:74px;height:7px;border:1px solid #b9974f;border-radius:4px;background:#0b1a16;overflow:hidden"><div id="hb437' + id + '" style="height:100%;width:100%;background:' + col + '"></div></div></div>';
-  hud.innerHTML = mk('Fome', '#e3a64a', 'Fome: cai com o tempo, o esforço e o frio. Comida assada dá Bem Alimentado. Clique para abrir a bolsa.') + mk('Sede', '#4fb7e8', 'Sede: cai mais rápido no calor e no esforço. Beba na margem (F) ou pelo cantil. Clique para abrir a bolsa.') + '<span id="hb437x" style="color:#9fe39a"></span>';
+  hud.style.cssText = 'display:none;cursor:pointer;margin-top:2px';
+  hud.title = 'Fome cai com o tempo, o esforço e o frio; Sede cai mais rápido no calor e no esforço. Clique para abrir a bolsa (tecla 8).';
+  const col = (id, c) => '<div style="flex:1;min-width:0"><div class="bar" style="height:5px"><i id="hb437' + id + '" style="width:100%;background:' + c + '"></i></div><div class="lbl"><span>' + id.toUpperCase() + '</span><span id="hb437' + id + 'T">100</span></div></div>';
+  hud.innerHTML = '<div style="display:flex;gap:8px">' + col('Fome', '#e3a64a') + col('Sede', '#4fb7e8') + '</div><div id="hb437x" style="font-size:10px;color:#9fe39a;min-height:0"></div>';
   hud.onclick = () => { if (ready()) bagView(); };
-  document.body.appendChild(hud);
   function hudTick() {
-    const on = ready() && (typeof modalOpen === 'undefined' || !modalOpen) && L.mode !== 'none';
-    hud.style.display = on ? 'flex' : 'none'; if (!on) return;
+    const st = document.getElementById('stat');
+    if (st && hud.parentElement !== st) { const sec = document.getElementById('secondaryResources260'); if (sec && sec.parentElement === st) sec.after(hud); else st.appendChild(hud); }
+    const on = !!st && ready() && L.mode !== 'none';
+    hud.style.display = on ? 'block' : 'none'; if (!on) return;
     const s = S();
-    document.getElementById('hb437Fome').style.width = s.fome.toFixed(0) + '%';
-    document.getElementById('hb437Sede').style.width = s.sede.toFixed(0) + '%';
-    document.getElementById('hb437Fome').style.background = s.fome < 15 ? '#ff6b5a' : '#e3a64a';
-    document.getElementById('hb437Sede').style.background = s.sede < 15 ? '#ff6b5a' : '#4fb7e8';
-    document.getElementById('hb437x').textContent = (s.fed > 0 ? 'Bem Alimentado ' : '') + (s.sickT > 0 ? 'Mal-estar ' : '') + (s.carry ? 'Tora no ombro' : '');
+    for (const [k, v, c] of [['Fome', s.fome, '#e3a64a'], ['Sede', s.sede, '#4fb7e8']]) { const b = document.getElementById('hb437' + k); b.style.width = v.toFixed(0) + '%'; b.style.background = v < 15 ? '#ff6b5a' : c; document.getElementById('hb437' + k + 'T').textContent = Math.round(v) + '%'; }
+    const wSrc = window.Biomes295?.warmSource441?.(), bio = typeof biomeAt === 'function' && L.mode === 'world' ? biomeAt(player.x, player.z) : '';
+    document.getElementById('hb437x').textContent = [
+      s.fed > 0 ? 'Bem Alimentado' : '',
+      s.torchT > 0 ? 'Tocha (' + Math.ceil(s.torchT / 60) + 'm)' : '',
+      s.chaT > 0 ? 'Chá Térmico (' + Math.ceil(s.chaT / 60) + 'm)' : '',
+      bio === 'neve' ? (wSrc ? 'Aquecido: ' + wSrc : 'Frio ' + Math.round(s.cold441 || 0) + '%') : '',
+      bio === 'deserto' ? 'Calor Árido (Sede ×2,3)' : '',
+      s.sickT > 0 ? 'Mal-estar' : '',
+      s.carry ? 'Tora no ombro' : '',
+      player.sheathed441 ? 'Arma guardada' : ''
+    ].filter(Boolean).join(' · ');
   }
   (function menu() {
     const ref = document.getElementById('bDiary'); if (!ref) { setTimeout(menu, 500); return; }
@@ -474,7 +562,7 @@
     try {
       hudTick();
       if (ready()) {
-        if (run !== lastRun) { lastRun = run; felledVer = -1; S(); shoulder(!!S().carry); fedWas = !(S().fed > 0); syncFed(); }
+        if (run !== lastRun) { lastRun = run; felledVer = -1; S(); shoulder(!!S().carry); fedWas = !(S().fed > 0); syncFed(); if (window.TER245) TER245.lx = null; }
         if (!paused && !player.dead) {
           needsTick(dt);
           slow -= dt; if (slow <= 0) { slow = .3;
@@ -484,7 +572,11 @@
             treeIt.tree = t; treeIt.hidden = !t; if (t) { treeIt.x = t.x; treeIt.z = t.z; treeIt.label = hasAxe() ? 'F · DERRUBAR ÁRVORE' + (chopping && chopping.x === t.x ? ' (' + chopping.hits + '/' + chopping.need + ')' : '') : 'F · COLETAR RESINA'; }
             const wn = w ? waterNear() : null; waterIt.hidden = !wn; if (wn) { waterIt.x = player.x; waterIt.z = player.z; waterIt.label = 'F · BEBER / ENCHER O CANTIL'; }
             carryIt.hidden = !s.carry; carryIt.x = player.x; carryIt.z = player.z;
-            for (const it of [treeIt, waterIt, carryIt]) { const i = L.inter.indexOf(it); if (!it.hidden && i < 0) L.inter.push(it); else if (it.hidden && i >= 0) L.inter.splice(i, 1); }
+            const gh = w && typeof terrH === 'function' ? Math.abs(terrH(player.x, player.z)) : 0;
+            const bio = w && typeof biomeAt === 'function' ? biomeAt(player.x, player.z) : '';
+            const steep = w && hasShovel() && (gh > 1.35 || (bio === 'deserto' && gh > .45)) && !(s.leveled || []).some(f => Math.hypot(f.x - player.x, f.z - player.z) < 8);
+            shovelIt.hidden = !steep; if (steep) { shovelIt.x = player.x; shovelIt.z = player.z; shovelIt.label = bio === 'deserto' ? 'F · NIVELAR DUNA (Pá/Enxada)' : 'F · NIVELAR ENCOSTA (Pá/Enxada)'; }
+            for (const it of [treeIt, waterIt, carryIt, shovelIt]) { const i = L.inter.indexOf(it); if (!it.hidden && i < 0) L.inter.push(it); else if (it.hidden && i >= 0) L.inter.splice(i, 1); }
           }
           slow2 -= dt; if (slow2 <= 0) { slow2 = 1; nodesTick(); logsTick(); if (world()) reapplyFelled(); spoilTick(); syncFed(); }
         }
@@ -495,5 +587,5 @@
   loop();
 
   function clearCarry() { S().carry = null; shoulder(false); save(); }
-  window.Surv437 = { clearCarry, S, IT, add, take, has, eat, drink, sip, weight, cap, glb, fit, envPiece, bagView, hasAxe, nearestTree, hideTreeAt, addLog, dropCarry, save, world, ready, mods, WATER_K };
+  window.Surv437 = { clearCarry, S, IT, add, give: add, take, has, count: has, eat, drink, sip, lightTorch, levelTerrain441, levelTerrain: levelTerrain441, hasShovel, weight, cap, glb, fit, envPiece, bagView, hasAxe, nearestTree, hideTreeAt, addLog, dropCarry, save, world, ready, mods, WATER_K };
 })();

@@ -97,14 +97,20 @@
   /* ---------- HUD ---------- */
   const hud = document.createElement('div');
   hud.id = 'hud423';
-  hud.style.cssText = 'position:fixed;left:50%;bottom:118px;transform:translateX(-50%);z-index:40;display:flex;gap:8px;align-items:center;pointer-events:none;font:600 12px system-ui;color:#e9dfc0';
-  hud.innerHTML = '<button id="sneak423" style="pointer-events:auto;background:#122019d9;border:1px solid #b9974f;color:#e9dfc0;border-radius:6px;padding:4px 10px;font:600 12px system-ui;cursor:pointer;letter-spacing:.3px" title="Passo silencioso (Ctrl): -35% de velocidade, não faz vibração nem som. Criaturas cegas não te percebem; o primeiro golpe furtivo causa dano dobrado.">Passo silencioso</button>' +
-    '<div id="breath423" hidden style="width:170px;height:8px;border:1px solid #b9974f;border-radius:5px;background:#0b1a16;overflow:hidden" title="Fôlego"><div style="height:100%;width:100%;background:linear-gradient(90deg,#4fb7e8,#c8f2ff)"></div></div>';
-  document.body.appendChild(hud);
+  // v440 (Ian: tampava o aviso do F e as barras): dentro do painel de Vida (#stat), só quando o passo silencioso está ativo ou mergulhando
+  hud.style.cssText = 'display:none;gap:8px;align-items:center;margin-top:3px;font:600 10px system-ui;color:#e9dfc0';
+  hud.innerHTML = '<button id="sneak423" style="pointer-events:auto;background:#122019d9;border:1px solid #b9974f;color:#e9dfc0;border-radius:6px;padding:2px 8px;font:600 10px system-ui;cursor:pointer;letter-spacing:.3px" title="Passo silencioso (Ctrl): -35% de velocidade, não faz vibração nem som. Criaturas cegas não te percebem; o primeiro golpe furtivo causa dano dobrado.">Passo silencioso</button>' +
+    '<div id="breath423" hidden style="flex:1;min-width:80px;height:8px;border:1px solid #b9974f;border-radius:5px;background:#0b1a16;overflow:hidden" title="Fôlego"><div style="height:100%;width:100%;background:linear-gradient(90deg,#4fb7e8,#c8f2ff)"></div></div>';
+  document.body.appendChild(hud); // vai para dentro do #stat no hudShow
   const under = document.createElement('div');
   under.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at center,rgba(30,110,140,.18),rgba(4,36,60,.66));opacity:0;transition:opacity .4s';
   document.body.appendChild(under);
-  function hudShow() { hud.style.display = ready() && (typeof modalOpen === 'undefined' || !modalOpen) ? 'flex' : 'none'; }
+  function hudShow() {
+    const st = document.getElementById('stat'); if (st && hud.parentElement !== st) st.appendChild(hud);
+    const br = document.getElementById('breath423'), sn = document.getElementById('sneak423');
+    sn.style.display = API.sneaking ? '' : 'none';
+    hud.style.display = st && ready() && (API.sneaking || (br && !br.hidden)) ? 'flex' : 'none';
+  }
 
   /* ================= 1) PASSO SILENCIOSO ================= */
   function setSneak(on) {
@@ -356,19 +362,37 @@
   // A Pedra-Âncora fica no lugar do selo do centro (a "fonte" com a esfera presa): src/core/260 chama Anchor434.seal().
   // Cada capital: base Tripo + cristal Tripo próprio da cor da capital flutuando e girando (o de Verden saía torto e foi tirado da base).
   const CAPS = {
-    Ymiria: { el: 'Neve', col: 0x8fe0ff, w: 'snow', cry: 'cristal-ancora-gelo', base: 'anchor-ymiria-base' }, // v438 (Ian): o cristal de gelo foi tirado da base no Blender e agora flutua como nas outras
-    Zahar: { el: 'Deserto', col: 0xffb347, w: 'sand', cry: 'cristal-ancora-ambar' },
-    Thalor: { el: 'Águas e rocha flutuante', col: 0x3fe0c8, w: 'mist', cry: 'cristal-ancora-turquesa' },
-    Urdan: { el: 'Caverna de cristal', col: 0xc77dff, w: 'motes', cry: 'cristal-ancora-violeta' },
-    Verden: { el: 'Pântano', col: 0x8fe35a, w: 'swamp', cry: 'cristal-ancora-verde' }
+    Ymiria: { el: 'Neve', col: 0x8fe0ff, w: 'snow', cry: 'cristal-ancora-gelo', base: 'anchor-ymiria-base', pieceIdx: 2, pieceName: 'Pernas do Arquiteto' }, // v438 (Ian): o cristal de gelo foi tirado da base no Blender e agora flutua como nas outras
+    Zahar: { el: 'Deserto', col: 0xffb347, w: 'sand', cry: 'cristal-ancora-ambar', pieceIdx: 1, pieceName: 'Braço Direito do Arquiteto' },
+    Thalor: { el: 'Águas e rocha flutuante', col: 0x3fe0c8, w: 'mist', cry: 'cristal-ancora-turquesa', pieceIdx: 0, pieceName: 'Braço Esquerdo do Arquiteto' },
+    Urdan: { el: 'Caverna de cristal', col: 0xc77dff, w: 'motes', cry: 'cristal-ancora-violeta', pieceIdx: 3, pieceName: 'Tronco do Arquiteto' },
+    Verden: { el: 'Pântano', col: 0x8fe35a, w: 'swamp', cry: 'cristal-ancora-verde', pieceIdx: 4, pieceName: 'Cabeça do Arquiteto' }
   };
   const anchors = new Set(); let wx = null;
+  function makeSealedArm441(pieceIdx, col, yPos = 2.1, sc = .72) {
+    const wrap = new T.Group(); wrap.position.y = yPos;
+    const build = () => {
+      if (typeof pieceMesh250 !== 'function') return false;
+      const pm = pieceMesh250(pieceIdx); if (!pm) return false;
+      pm.scale.setScalar(sc); wrap.add(pm);
+      const chainMat = new T.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .45, metalness: .7, roughness: .25 });
+      for (let i = 0; i < 4; i++) {
+        const a = i / 4 * TAU + .4, ch = new T.Mesh(new T.CylinderGeometry(.07, .07, 4.4, 8), chainMat);
+        ch.position.set(Math.cos(a) * 1.4, 0, Math.sin(a) * 1.4);
+        ch.rotation.z = Math.cos(a) * .55; ch.rotation.x = Math.sin(a) * .55;
+        wrap.add(ch);
+      }
+      return true;
+    };
+    if (!build()) setTimeout(build, 1500);
+    return wrap;
+  }
   window.Anchor434 = {
     seal(c, addColFn) {
       const D = CAPS[c && c.name]; if (!D) return null;
       const g = new T.Group(); g.name = 'Anchor434_' + c.name; g.userData.c = c;
       try { if (addColFn) addColFn({ x: c.x, z: c.z, r: 3.7 }); } catch (_) {} // base com até 7,2 m de largura
-      g.userData.it = { type: 'anchor423', x: c.x, z: c.z, r: 6, label: 'F · SINTONIZAR A PEDRA-ÂNCORA DE ' + c.name.toUpperCase(), use: () => attune(c) };
+      g.userData.it = { type: 'anchor423', x: c.x, z: c.z, r: 6, label: 'F · SINTONIZAR A PEDRA-ÂNCORA DE ' + c.name.toUpperCase(), use: () => attune(c, g) };
       Promise.all([glb(D.base || 'anchor-' + c.name.toLowerCase()), D.cry ? glb(D.cry) : null, tripoReady()]).then(([base, cry]) => {
         let top = 2.6;
         if (base) { const b = fit(base, D.own ? 5.6 : 3.4, 7.2); top = b.userData.h; g.add(b); }
@@ -376,7 +400,10 @@
         const disc = runeDisc(D.col, 7, .45); g.add(disc); g.userData.disc = disc; discs.add(disc);
         const halo = new T.Sprite(new T.SpriteMaterial({ map: soft('halo', [[0, 'rgba(255,255,255,.9)'], [.3, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,0)']]), color: D.col, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
         halo.scale.setScalar(6); halo.position.y = D.own ? top * .8 : top + 2.6; g.add(halo); g.userData.halo = halo;
-        const ring = (n, r0, f) => { for (let i = 0; i < n; i++) { const a = i / n * TAU + .3, r = r0 + (i % 2) * 1.5, o = f(i); if (!o) continue; const h = new T.Group(); h.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); h.rotation.y = a * 2.3; h.add(o); g.add(h); } };
+        if (P423().anchors[c.name]?.sealed441 && D.pieceIdx != null) {
+          const arm = makeSealedArm441(D.pieceIdx, D.col, top + 1.8, .68);
+          g.add(arm); g.userData.sealedArm441 = arm;
+        }
       });
       // Thalor (rocha flutuante): ilhotas de pedra pairando em volta da pedra.
       if (c.name === 'Thalor') glb('rocha-flutuante').then(t => { if (!t) return; for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + .3, r = 8.5 + (i % 2) * 1.5, p = fit(t, 1.6 + (i % 3) * .5, 2.6 + (i % 3)); const h = new T.Group(); h.position.set(Math.cos(a) * r, 6 + (i % 3) * 1.8, Math.sin(a) * r); h.rotation.y = a * 2.3; h.userData.float = i; h.add(p); g.add(h); } });
@@ -384,14 +411,65 @@
     }
   };
   const inScene = o => { while (o) { if (o === scene) return true; o = o.parent; } return false; };
-  function attune(c) {
-    const S = P423(); const first = !S.anchors[c.name]; S.anchors[c.name] = { t: Date.now(), stab: 70 + ((Math.random() * 30) | 0) }; save423();
-    try { fxRing(c.x, c.z, CAPS[c.name].col, 7, .9); sfx('arise'); } catch (_) {}
-    toast('<b>[PEDRA-ÂNCORA]</b> ' + c.name + (first ? ' sintonizada pela primeira vez.' : ' sintonizada de novo.') + ' Veja no MENU → PEDRAS-ÂNCORA.', 6000);
+  const capDefense441 = new Map();
+  function markCapitalVisited441(c) {
+    try {
+      profile.visited217 = profile.visited217 || {};
+      profile.visited217[c.id || c.name] = { n: c.name, cap: true, t: Date.now() };
+      if (!profile.lore.includes('act9')) unlockLore('act9');
+      store.set('pds2_profile', profile);
+    } catch (_) {}
+  }
+  function attune(c, anchorGrp) {
+    const S = P423(), D = CAPS[c.name] || CAPS.Thalor;
+    markCapitalVisited441(c);
+    const activeDef = capDefense441.get(c.name);
+    if (activeDef && activeDef.foes.some(e => !e.dead && enemies.includes(e))) {
+      toast('<b>[PEDRA-ÂNCORA]</b> Derrote os Elites que pressionam a Âncora de <b>' + c.name + '</b> primeiro!', 4500);
+      return;
+    }
+    if (!S.anchors[c.name]?.sealed441 && (c.name === 'Zahar' || c.name === 'Ymiria') && !activeDef) {
+      const gr = Math.min(9, rankOf()), foes = [];
+      if (c.name === 'Zahar') {
+        const kinds = ['escaravelho_f', 'cactogig_f', 'invasor_f', 'escaravelho'].filter(k => KINDS[k]);
+        for (let i = 0; i < 3; i++) {
+          const a = i / 3 * TAU + .4, x = c.x + Math.cos(a) * 11, z = c.z + Math.sin(a) * 11;
+          try { const e = spawnKind(kinds[i % kinds.length] || 'goblin', x, z, gr, { wild: true }); makeElite(e); e.aggro = true; foes.push(e); fxRing(x, z, D.col, 1.8); } catch (_) {}
+        }
+        toast('<b>[PEDRA-ÂNCORA DE ZAHAR]</b> Elites do Deserto atacam o selo do <b>Braço Direito do Arquiteto</b>! Derrote-os para estabilizar a Âncora.', 6500);
+      } else if (c.name === 'Ymiria') {
+        const alphaK = KINDS.yeti_f ? 'yeti_f' : 'yeti';
+        try {
+          const alpha = spawnKind(alphaK, c.x + 10, c.z + 6, gr, { wild: true });
+          makeElite(alpha); alpha.yetiAlpha441 = true; alpha.name = '[Elite] Yeti Alfa Corrompido'; alpha.short = 'Yeti Alfa Corrompido'; alpha.aggro = true; foes.push(alpha);
+          for (let i = 0; i < 2; i++) {
+            const a = i * Math.PI + .6, x = c.x + Math.cos(a) * 12, z = c.z + Math.sin(a) * 12;
+            const y = spawnKind(KINDS.yetinho ? 'yetinho' : 'yeti', x, z, gr, { wild: true });
+            y.yetiPack441 = true; y.aggro = false;
+          }
+          fxRing(c.x + 10, c.z + 6, D.col, 2.2);
+        } catch (_) {}
+        toast('<b>[PEDRA-ÂNCORA DE YMIRIA]</b> O <b>Yeti Alfa Corrompido</b> avança sobre a Âncora! Derrote o Alfa para que os menores fujam e estabilize o selo.', 6500);
+      }
+      if (foes.length) { capDefense441.set(c.name, { c, foes, g: anchorGrp }); return; }
+    }
+    completeAnchorAttune441(c, anchorGrp);
+  }
+  function completeAnchorAttune441(c, anchorGrp) {
+    const S = P423(), D = CAPS[c.name] || CAPS.Thalor, first = !S.anchors[c.name];
+    S.anchors[c.name] = { t: Date.now(), stab: 100, sealed441: true, piece: D.pieceName }; save423();
+    markCapitalVisited441(c);
+    const g = anchorGrp || [...anchors].find(a => a.userData?.c?.name === c.name);
+    if (g && !g.userData.sealedArm441 && D.pieceIdx != null) {
+      const arm = makeSealedArm441(D.pieceIdx, D.col, 4.4, .68);
+      g.add(arm); g.userData.sealedArm441 = arm;
+    }
+    try { fxRing(c.x, c.z, D.col, 7, .9); sfx('arise'); } catch (_) {}
+    toast('<b>[PEDRA-ÂNCORA]</b> ' + c.name + (first ? ' sintonizada e estabilizada!' : ' sintonizada de novo!') + ' Selo revelado: <b>' + (D.pieceName || 'Selo Primordial') + '</b>. Veja em MENU → PEDRAS-ÂNCORA.', 6500);
   }
   function anchorsView() {
-    const S = P423(); let h = '<p>As cinco Pedras-Âncora seguram o mundo contra a Fenda. Visite cada capital e use F na pedra do centro da cidade.</p><table style="width:100%;border-collapse:collapse">';
-    for (const n in CAPS) { const a = S.anchors[n], hex = '#' + CAPS[n].col.toString(16).padStart(6, '0'); h += '<tr style="border-bottom:1px solid #b9974f44"><td style="padding:7px"><b style="color:' + hex + '">◆ ' + n + '</b><br><small style="opacity:.75">' + CAPS[n].el + '</small></td><td style="width:55%">' + (a ? 'Estabilidade ' + a.stab + '%<div style="height:6px;background:#0b1612;border:1px solid #b9974f55;border-radius:3px"><div style="height:100%;width:' + a.stab + '%;background:' + hex + ';border-radius:3px"></div></div>' : '<span style="opacity:.5">Não sintonizada</span>') + '</td></tr>'; }
+    const S = P423(); let h = '<p>As cinco Pedras-Âncora seguram o mundo contra a Fenda e prendem as partes seladas do Arquiteto. Visite cada capital e use F na pedra do centro da cidade ou na câmara abissal.</p><table style="width:100%;border-collapse:collapse">';
+    for (const n in CAPS) { const a = S.anchors[n], hex = '#' + CAPS[n].col.toString(16).padStart(6, '0'); h += '<tr style="border-bottom:1px solid #b9974f44"><td style="padding:7px"><b style="color:' + hex + '">◆ ' + n + '</b><br><small style="opacity:.75">' + CAPS[n].el + ' · ' + (CAPS[n].pieceName || '') + '</small></td><td style="width:55%">' + (a ? 'Estabilidade ' + a.stab + '% ' + (a.sealed441 ? '<b style="color:#7ef5a5">(Selado)</b>' : '') + '<div style="height:6px;background:#0b1612;border:1px solid #b9974f55;border-radius:3px"><div style="height:100%;width:' + a.stab + '%;background:' + hex + ';border-radius:3px"></div></div>' : '<span style="opacity:.5">Não sintonizada</span>') + '</td></tr>'; }
     openModal('PEDRAS-ÂNCORA', h + '</table>');
   }
   function weather(kind, on) {
@@ -405,6 +483,177 @@
     const p = absolute(new T.Points(geo, new T.PointsMaterial({ map, size: S[1], transparent: true, opacity: kind === 'mist' ? .35 : .9, depthWrite: false, blending: S[2] })));
     p.frustumCulled = false; scene.add(p); wx = { p, kind };
   }
+  let capStagingKey441 = '';
+  const capProps441 = [];
+  function clearCapStaging441() {
+    while (capProps441.length) {
+      const o = capProps441.pop();
+      if (o.g) scene.remove(o.g);
+      if (o.it) { const i = L.inter.indexOf(o.it); if (i >= 0) L.inter.splice(i, 1); }
+    }
+    capStagingKey441 = '';
+  }
+  function stageCapitals441(c) {
+    if (!c || !['Thalor', 'Zahar', 'Ymiria'].includes(c.name)) { if (capStagingKey441) clearCapStaging441(); return; }
+    markCapitalVisited441(c);
+    if (capStagingKey441 === c.name) return;
+    clearCapStaging441(); capStagingKey441 = c.name;
+    if (c.name === 'Thalor') {
+      // Veleiro Costeiro de Carga ancorado na costa oeste de Thalor (integrado ao peso do Carrinho)
+      const bx = c.x - 84, bz = c.z;
+      if (window.Boats440 && !(run?.boats440 || []).some(b => Math.hypot(b.x - bx, b.z - bz) < 120)) {
+        run.boats440 = run.boats440 || [];
+        run.boats440.push({ uid: 'thalor_veleiro441', id: 'veleiro', x: bx, z: bz, rot: -Math.PI / 2, hp: 520 });
+      }
+      // Zona de mergulho vertical sob a rocha flutuante de Thalor (-5, 0): corais bioluminescentes, naufrágio, caverna com bolsão de ar e Portal Aquático (Fenda Submersa)
+      const dx = c.x - 132, dz = c.z;
+      const dg = absolute(new T.Group()); dg.position.set(dx, H(dx, dz), dz); scene.add(dg);
+      const bioLight = new T.PointLight(0x3fe0c8, 1.8, 22); bioLight.position.set(0, 2.5, 0); dg.add(bioLight);
+      glb('coral-reef').then(tpl => {
+        if (!tpl || !dg.parent) return;
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * TAU, r = 4.5 + (i % 2) * 2.5, cr = fit(tpl, 1.4 + (i % 3) * .4);
+          cr.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); cr.rotation.y = a; dg.add(cr);
+        }
+      });
+      if (window.Surv437?.glb) {
+        Surv437.glb('naufragio').then(tpl => {
+          if (!tpl || !dg.parent) return;
+          const sh = tpl.clone(true); sh.scale.setScalar(5.5 / (tpl.userData.w || 1)); sh.position.set(-7, 0, -5); sh.rotation.set(.12, .8, -.18); dg.add(sh);
+        });
+        Surv437.glb('m440/caverna').then(tpl => {
+          if (!tpl || !dg.parent) return;
+          const cv = tpl.clone(true); cv.scale.setScalar(4.8 / (tpl.userData.w || 1)); cv.position.set(6.5, 0, -4.5); dg.add(cv);
+        });
+      }
+      Water.airPocket441 = { x: dx + 6.5, z: dz - 4.5, r: 5.5 };
+      if (window.Rift131) {
+        const rift = Rift131.create({ seed: 441, legacyLinearOutput: true }); rift.scale.setScalar(.72);
+        const rg = new T.Group(); rg.position.set(0, .2, 0); rg.add(rift); dg.add(rg);
+        const it = { type: 'aqua423', x: dx, z: dz, r: 5, label: 'F · ENTRAR NO PORTAL AQUÁTICO (DUNGEON ABISSAL DE THALOR)', use: () => enterAbyssalDungeon441(c) };
+        L.inter.push(it); capProps441.push({ g: dg, it, rift });
+      } else capProps441.push({ g: dg });
+    } else if (c.name === 'Zahar') {
+      // Dunas de areia na rota de Zahar que podem ser niveladas com a Pá/Enxada para o Carrinho passar
+      const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
+      for (let i = 0; i < 2; i++) {
+        const dx = c.x - (wall + 18 + i * 16), dz = c.z + (i ? 4 : -3);
+        const dg = absolute(new T.Group()); dg.position.set(dx, H(dx, dz), dz);
+        const duneMat = new T.MeshStandardMaterial({ color: 0xd9b372, roughness: .95, metalness: 0 });
+        const m1 = new T.Mesh(new T.SphereGeometry(3.8, 14, 10), duneMat); m1.scale.set(1.5, .42, 1.1); m1.position.y = .4; dg.add(m1);
+        window.Solid429?.prop(dg, [{ x: 0, z: 0, r: 3.2 }]);
+        scene.add(dg);
+        const it = {
+          type: 'dune441', x: dx, z: dz, r: 4.5,
+          label: 'F · NIVELAR DUNA PARA O CARRINHO (Pá/Enxada)',
+          use: () => {
+            if (window.Surv437 && Surv437.count && !Surv437.count('pa')) Surv437.give('pa', 1, 'Pá / Enxada do Deserto');
+            if (window.Surv437?.levelTerrain) Surv437.levelTerrain(dx, dz, 13, H(c.x, c.z), 'DUNA NIVELADA PARA O CARRINHO!');
+            scene.remove(dg); const idx = L.inter.indexOf(it); if (idx >= 0) L.inter.splice(idx, 1);
+          }
+        };
+        L.inter.push(it); capProps441.push({ g: dg, it });
+      }
+    } else if (c.name === 'Ymiria') {
+      // Povo do Manto Branco: Filhotes de Yeti (#013) neutros se o jogador mantiver a arma guardada (X)
+      const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
+      for (let i = 0; i < 2; i++) {
+        const yx = c.x + (i ? 14 : -14), yz = c.z + wall + 14;
+        if (!enemies.some(e => !e.dead && e.kind === 'yetinho' && Math.hypot(e.x - yx, e.z - yz) < 25)) {
+          try {
+            const y = spawnKind(KINDS.yetinho ? 'yetinho' : 'yeti', yx, yz, Math.min(9, rankOf()), { wild: true });
+            y.yetiPack441 = true; y.aggro = false;
+          } catch (_) {}
+        }
+      }
+    }
+  }
+  function enterAbyssalDungeon441(thalorCity) {
+    const tc = thalorCity || (typeof regionCity === 'function' ? regionCity(-5, 0) : nearestCity(player.x, player.z).c);
+    const ret = { x: tc.x, z: tc.z + 8 };
+    const gr = Math.min(9, rankOf());
+    clearCapStaging441();
+    clearLevel();
+    const N = 22, Wd = N + 4, Hd = N + 4, CS = 2, ox = -Wd * CS / 2, oz = -Hd * CS / 2, cells = new Uint8Array(Wd * Hd);
+    for (let y = 2; y < N + 2; y++) for (let x = 2; x < N + 2; x++) {
+      const a = Math.min(x - 2, N + 1 - x), b = Math.min(y - 2, N + 1 - y);
+      if (a + b >= 4) cells[y * Wd + x] = 1;
+    }
+    const th = { n: 'Dungeon Abissal de Thalor', floor: 0x0b2633, wall: 0x133e4e, trim: 0x3fe0c8, fog: 0x041520, light: 0x6ff5e5 };
+    const R = mulberry32(4410);
+    L = {
+      mode: 'dungeon', group: new T.Group(), inter: [], grid: { cells, W: Wd, H: Hd, CS, ox, oz },
+      rooms: [{ x: 2, y: 2, w: N, h: N }], visited: new Uint8Array(Wd * Hd), seen: new Set([0]), bossRoom: -1,
+      gate: { id: -1, rank: gr, red: false, seed: 441, x: ret.x, z: ret.z, ref: null }, G: GR[gr], bossDead: false, markT: 0, exits: [],
+      special: { kind: 'abyssal441', name: th.n, stage: 0, t: 0, gr, msg: 'Derrote os Elites Abissais para estabilizar o Braço Esquerdo do Arquiteto', thalor: tc, foes: [] }
+    };
+    scene.add(L.group);
+    scene.background = new T.Color(th.fog); scene.fog = new T.FogExp2(th.fog, .025);
+    hemi.color.setHex(th.light); hemi.intensity = .65; sun.color.setHex(th.light); sun.intensity = .45; pLight.color.setHex(th.light); pLight.intensity = 1.4;
+    renderGrid(cells, Wd, Hd, CS, ox, oz, th, R, true);
+    // Base da Pedra-Âncora de Thalor suspensa + Braço Esquerdo do Arquiteto (arquiteto246.glb) acorrentado no centro
+    const centerGrp = new T.Group(); centerGrp.position.set(0, 0, -2); L.group.add(centerGrp);
+    const disc = runeDisc(0x3fe0c8, 7.5, .65); centerGrp.add(disc); discs.add(disc);
+    Promise.all([glb('anchor-thalor'), glb('cristal-ancora-turquesa'), glb('coral-reef')]).then(([base, cry, coral]) => {
+      if (L.special?.kind !== 'abyssal441') return;
+      if (base) { const b = fit(base, 4.4, 8.2); b.position.y = 6.2; b.rotation.x = Math.PI; centerGrp.add(b); }
+      if (cry) { const cr = fit(cry, 3.6, 3.6); cr.position.y = 4.2; centerGrp.add(cr); L.special.cry = cr; }
+      if (coral) {
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * TAU, cMesh = fit(coral, 1.5 + (i % 3) * .4);
+          cMesh.position.set(Math.cos(a) * 11, 0, Math.sin(a) * 11 - 2); cMesh.rotation.y = a; L.group.add(cMesh);
+        }
+      }
+    });
+    const arm = makeSealedArm441(0, 0x3fe0c8, 2.3, .85);
+    centerGrp.add(arm); L.special.arm = arm;
+    // Elites Abissais guardando as correntes
+    const abKinds = ['homempeixe_a', 'lula_a', 'arraia_a', 'homempeixe_f', 'lula'].filter(k => KINDS[k]);
+    for (let i = 0; i < 3; i++) {
+      const a = i / 3 * TAU + .5, ex = Math.cos(a) * 7.5, ez = -2 + Math.sin(a) * 7.5;
+      try {
+        const e = spawnKind(abKinds[i % abKinds.length] || 'goblin', ex, ez, gr, {});
+        makeElite(e); e.aggro = true; L.special.foes.push(e); fxRing(ex, ez, 0x3fe0c8, 1.8);
+      } catch (_) {}
+    }
+    // Elevador Aquático (coluna de água/luz para subir direto à cidade flutuante de Thalor)
+    const elevGrp = new T.Group(); elevGrp.position.set(0, 0, 9); L.group.add(elevGrp);
+    const colMat = new T.MeshBasicMaterial({ color: 0x3fe0c8, transparent: true, opacity: .28, side: T.DoubleSide, depthWrite: false, blending: T.AdditiveBlending });
+    const colMesh = new T.Mesh(new T.CylinderGeometry(2.2, 2.2, 18, 24, 1, true), colMat); colMesh.position.y = 9; elevGrp.add(colMesh);
+    const elevIt = {
+      type: 'elevator441', x: 0, z: 9, r: 3.6,
+      label: 'F · SUBIR PELO ELEVADOR AQUÁTICO ATÉ A CIDADE FLUTUANTE DE THALOR',
+      use: () => {
+        if (!L.bossDead) { toast('<b>[DUNGEON ABISSAL]</b> Derrote os Elites Abissais e estabilize as correntes do Braço Esquerdo primeiro!', 4000); return; }
+        leaveDungeon(true);
+        player.x = tc.x; player.z = tc.z + 7; cam.x = player.x; cam.z = player.z;
+        player.m.root.position.set(player.x, H(player.x, player.z), player.z);
+        try { updChunks(true); fxRing(player.x, player.z, 0x3fe0c8, 6, .9); sfx('portal'); } catch (_) {}
+        bigText('THALOR — ROCHA FLUTUANTE', 2000);
+        toast('<b>[ELEVADOR AQUÁTICO]</b> Você emergiu no coração da capital flutuante de <b>Thalor</b>!', 5500);
+      }
+    };
+    L.inter.push(elevIt); L.special.elevIt = elevIt; L.special.colMat = colMat;
+    player.x = 0; player.z = 14; player.face = Math.PI; cam.x = player.x; cam.z = player.z;
+    placeAllies(); sfx('portal');
+    bigText('DUNGEON ABISSAL DE THALOR', 2200);
+    toast('<b>[DUNGEON ABISSAL]</b> O <b>Braço Esquerdo do Arquiteto</b> está acorrentado sob a Pedra-Âncora de Thalor! Derrote os 3 Elites Abissais para estabilizar as correntes.', 7000);
+  }
+  function tickAbyssal441(dt, now) {
+    const S = L.special; if (!S || S.kind !== 'abyssal441') return;
+    if (S.arm) { S.arm.rotation.y = now * .0006; S.arm.position.y = 2.3 + Math.sin(now * .0018) * .22; }
+    if (S.cry) { S.cry.rotation.y = -now * .0008; }
+    const alive = (S.foes || []).filter(e => !e.dead && enemies.includes(e)).length;
+    if (!L.bossDead && alive === 0) {
+      L.bossDead = true; L.closeT = 120;
+      if (S.colMat) S.colMat.opacity = .62;
+      completeAnchorAttune441(S.thalor);
+      try { storyEv('clear', 1); } catch (_) {}
+      bigText('CORRENTES ESTABILIZADAS', 2200);
+      toast('<b>[DUNGEON ABISSAL]</b> As correntes do <b>Braço Esquerdo do Arquiteto</b> foram estabilizadas! Use o <b>Elevador Aquático</b> ao sul da câmara para subir até Thalor.', 7500);
+    }
+    S.msg = L.bossDead ? 'Correntes estabilizadas · Use o Elevador Aquático (F) para subir a Thalor' : 'Dungeon Abissal · Elites Abissais restantes: ' + alive;
+  }
   function tickCaps() { // a cada meio segundo: o F da pedra entra/sai junto com o pedaço da cidade; clima perto da capital
     const world = L.mode === 'world';
     for (const g of anchors) {
@@ -412,13 +661,22 @@
       if (on && i < 0) L.inter.push(it); else if (!on && i >= 0) L.inter.splice(i, 1);
       if (!on && !g.parent) { anchors.delete(g); if (g.userData.disc) discs.delete(g.userData.disc); }
     }
+    for (const [name, def] of capDefense441) {
+      if (!world) { capDefense441.delete(name); continue; }
+      if (def.foes.every(e => e.dead || !enemies.includes(e))) {
+        capDefense441.delete(name);
+        completeAnchorAttune441(def.c, def.g);
+      }
+    }
     if (!world) { weather(null, false); return; }
     const n = nearestCity(player.x, player.z), D = CAPS[n.c?.name];
     weather(D?.w, !!(D && n.d < 260));
+    if (D && n.d < 220) stageCapitals441(n.c); else if (capStagingKey441) clearCapStaging441();
   }
   function tickAnchors(now) { // animação leve do cristal, do halo e das rochas flutuantes de Thalor
     for (const g of anchors) {
       const cr = g.userData.cr; if (cr) { cr.rotation.y = now * .0004; cr.position.y = cr.userData.y0 + Math.sin(now * .0011) * .25; }
+      if (g.userData.sealedArm441) g.userData.sealedArm441.rotation.y = now * .0005;
       if (g.userData.halo) g.userData.halo.material.opacity = .5 + Math.sin(now * .0016) * .2;
       if (g.name === 'Anchor434_Thalor') g.traverse(o => { if (o.userData.float != null) o.position.y += Math.sin(now * .0009 + o.userData.float) * .004; });
     }
@@ -461,7 +719,7 @@
   }
 
   /* ================= 4) MERGULHO / BIOMA MARINHO ================= */
-  const Water = { dive: 0, breath: 1, hurtT: 0, deco: [], decoKey: '', portal: null, keysDown: {} };
+  const Water = { dive: 0, breath: 1, hurtT: 0, deco: [], decoKey: '', portal: null, keysDown: {}, airPocket441: null };
   Water.swim = () => !!(window.Water391 && Water391.swimming);
   Water.max = () => 12 + .25 * ((run?.stats?.vit) || 0) + .15 * ((run?.stats?.res) || 0);
   Water.frame = function () {
@@ -486,31 +744,33 @@
   function marineDeco() {
     const x = Math.round(player.x / 24) * 24, z = Math.round(player.z / 24) * 24, key = x + ',' + z;
     if (Water.decoKey === key) return; Water.decoKey = key;
-    const thal = nearestCity(player.x, player.z).c?.name === 'Thalor';
-    Promise.all([glb('coral-reef'), glb('ruina-submersa')]).then(([coral, ruin]) => {
+    const nearC = nearestCity(player.x, player.z).c, thal = nearC?.name === 'Thalor';
+    Promise.all([glb('coral-reef'), glb('ruina-submersa'), window.Surv437?.glb ? Surv437.glb('naufragio') : null, window.Surv437?.glb ? Surv437.glb('m440/caverna') : null]).then(([coral, ruin, wreck, cave]) => {
       if (Water.decoKey !== key) return; clearDeco();
       const put = (tpl, h, px, pz) => { if (!tpl) return; const g = new T.Group(); g.position.set(px, 0, pz); g.rotation.y = (px * 7 + pz * 3) % TAU; g.add(fit(tpl, h)); scene.add(g); Water.deco.push(g); };
       let seed = (x * 73856093 ^ z * 19349663) >>> 0; const R = () => ((seed = Math.imul(seed ^ (seed >>> 13), 1274126177) >>> 0) % 10000) / 10000;
       for (let i = 0; i < (thal ? 14 : 7); i++) { const px = x + (R() - .5) * 44, pz = z + (R() - .5) * 44, d = Water391.depthAt(px, pz); if (d > 2) put(coral, .8 + R() * 1.1, px, pz); }
       for (let i = 0; i < (thal ? 2 : 1); i++) { const px = x + (R() - .5) * 36, pz = z + (R() - .5) * 36, d = Water391.depthAt(px, pz); if (d > 3 && (thal || R() < .4)) put(ruin, Math.min(d - .6, 3.6), px, pz); }
+      if (wreck) { const px = x + 6, pz = z - 5; if (Water391.depthAt(px, pz) > 2.2) { const w = wreck.clone(true); w.scale.setScalar(4.5 / (wreck.userData.w || 1)); w.position.set(px, 0, pz); scene.add(w); Water.deco.push(w); } }
+      if (cave) { const px = x - 6, pz = z + 5; if (Water391.depthAt(px, pz) > 2.2) { const cv = cave.clone(true); cv.scale.setScalar(4.2 / (cave.userData.w || 1)); cv.position.set(px, 0, pz); scene.add(cv); Water.deco.push(cv); Water.airPocket441 = { x: px, z: pz, r: 5 }; } }
     });
-    if (!Water.portal && Math.random() < (thal ? .6 : .2) && window.Rift131) {
+    if (!Water.portal && Math.random() < (thal ? .85 : .35) && window.Rift131) {
       let px = 0, pz = 0, bd = 0;
       for (let i = 0; i < 16; i++) { const a = i / 16 * TAU, r = 6 + (i % 3) * 3, qx = player.x + Math.sin(a) * r, qz = player.z + Math.cos(a) * r, d = Water391.depthAt(qx, qz); if (d > bd) { bd = d; px = qx; pz = qz; } }
       if (bd > 1.8) {
         const rift = Rift131.create({ seed: 391, legacyLinearOutput: true }); rift.scale.setScalar(.55);
         const g = new T.Group(); g.position.set(px, 0, pz); g.rotation.y = Math.atan2(player.x - px, player.z - pz); g.add(rift); scene.add(g);
-        const it = { type: 'aqua423', x: px, z: pz, r: 3.5, label: 'F · PORTAL AQUÁTICO DA FENDA', use: () => aquaPortal(it) };
+        const it = { type: 'aqua423', x: px, z: pz, r: 4, label: 'F · ENTRAR NO PORTAL AQUÁTICO (DUNGEON ABISSAL)', use: () => aquaPortal(it) };
         L.inter.push(it); Water.portal = { g, rift, it, foes: [] };
       }
     }
   }
   function aquaPortal(it) {
-    const P = Water.portal; if (!P || P.open) return; P.open = true;
-    const gr = Math.min(9, rankOf()), kinds = ['homempeixe_f', 'lula', 'arraia', 'homempeixe'].filter(k => KINDS[k]);
-    if (!kinds.length) { toast('O portal se fecha sozinho.'); return; }
-    for (let i = 0; i < 4 + Math.min(4, gr); i++) { const a = Math.random() * TAU, x = it.x + Math.cos(a) * 4, z = it.z + Math.sin(a) * 4; try { const e = spawnKind(kinds[i % kinds.length], x, z, gr, { wild: true }); e.aggro = true; e.aqua423 = true; P.foes.push(e); fxRing(x, z, 0x40e0ff, 1.4); } catch (_) {} }
-    toast('<b>[FENDA]</b> Criaturas marinhas saem do Portal Aquático! Derrote-as para fechá-lo.', 5000);
+    const nearC = nearestCity(player.x, player.z).c;
+    if (nearC?.name === 'Thalor' || !Water.portal?.open) {
+      enterAbyssalDungeon441(nearC?.name === 'Thalor' ? nearC : (typeof regionCity === 'function' ? regionCity(-5, 0) : nearC));
+      return;
+    }
   }
   function dropPortal() { const P = Water.portal; if (!P) return; const i = L.inter.indexOf(P.it); if (i >= 0) L.inter.splice(i, 1); Water.portal = null; return P; }
   function killPortal() { const P = dropPortal(); if (P) { scene.remove(P.g); Rift131.dispose(P.rift); } }
@@ -518,11 +778,15 @@
     const sw = Water.swim(), bar = document.getElementById('breath423');
     if (L.mode !== 'world') { // masmorra/instância: nada do mar fica na cena nem no F
       if (Water.deco.length) { clearDeco(); Water.decoKey = ''; } killPortal();
-      under.style.opacity = '0'; bar.hidden = true; Water.breath = 1; Water.dive = 0; return;
+      under.style.opacity = L.special?.kind === 'abyssal441' ? '.45' : '0'; bar.hidden = true; Water.breath = 1; Water.dive = 0; return;
     }
     const sub = sw && Water.dive > .55;
     under.style.opacity = sub ? '1' : '0';
-    if (sub) { Water.breath -= dt / Water.max(); marineDeco(); }
+    const inAirPocket = sub && Water.airPocket441 && Math.hypot(player.x - Water.airPocket441.x, player.z - Water.airPocket441.z) <= (Water.airPocket441.r || 5);
+    if (inAirPocket) {
+      if (Water.breath < .95) try { floater(player.x, player.z, 'BOLSÃO DE AR DA CAVERNA', '#7ef5e5'); } catch (_) {}
+      Water.breath = Math.min(1, Water.breath + dt * .85);
+    } else if (sub) { Water.breath -= dt / Water.max(); marineDeco(); }
     else Water.breath = Math.min(1, Water.breath + dt * .5);
     if (Water.breath <= 0) { Water.breath = 0; Water.hurtT -= dt; if (Water.hurtT <= 0) { Water.hurtT = 1; try { hurtPlayer(Math.max(1, Math.round(player.maxhp * .08)), false); floater(player.x, player.z, 'SEM FÔLEGO', '#9fd8ff'); } catch (_) {} } }
     bar.hidden = !(sw && (sub || Water.breath < 1)); bar.firstChild.style.width = (Water.breath * 100).toFixed(0) + '%';
@@ -552,7 +816,7 @@
       if (ready() && !paused) {
         for (const d of discs) d.userData.rune.uniforms.t.value = now / 1000;
         tickTracks(dt, now); tickAct4(now); tickAct5(dt); tickBreach(dt); tickWater(dt); tickWeather(dt);
-        tickAnchors(now);
+        tickAnchors(now); tickAbyssal441(dt, now);
         slow -= dt; if (slow <= 0) { slow = .5; tickCaps(); tickAct6(); }
         if (run?.mounted && API.sneaking) setSneak(false);
       }
@@ -560,5 +824,5 @@
     setTimeout(loop, 33);
   }
   loop();
-  Object.assign(API, { setSneak, anchorsView, marksView, astralView, Water, Tracks, anchors, auras });
+  Object.assign(API, { setSneak, anchorsView, marksView, astralView, Water, Tracks, anchors, auras, enterAbyssalDungeon441, attune });
 })();

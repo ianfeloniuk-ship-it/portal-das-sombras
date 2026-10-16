@@ -126,7 +126,7 @@
     const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
     try {
       const ok = U() && U().ready() && st();
-      if (!ok || !U().world()) { if (view) { if (st()?.pull) { st().pull = false; } despawn(); } }
+      if (!ok || !U().world() || st()?.onBoat440) { /* v440: no veleiro o carrinho vai no convés (tools/boats440.js) */ if (view) { if (st()?.pull) { st().pull = false; } despawn(); } }
       else if (!paused && !player.dead) {
         const c = st(), d = Math.hypot(c.x - player.x, c.z - player.z);
         if (!view && (c.pull || d < 140)) spawn();

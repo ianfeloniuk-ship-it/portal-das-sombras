@@ -61,7 +61,7 @@
   let warned=false,lastX=0,lastZ=0,tilt=0,lastT=performance.now(),moveT=0;
   function swimFrame(P){
     const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000);lastT=now;
-    const d=P&&!P.dead&&!run?.mounted?depthAt(P.x,P.z):0,sw=d>(P?.swim391?SWIM_DEPTH-.15:SWIM_DEPTH);W.swimming=sw;
+    const d=P&&!P.dead&&!run?.mounted&&!run?.aboard440?depthAt(P.x,P.z):0,sw=d>(P?.swim391?SWIM_DEPTH-.15:SWIM_DEPTH);W.swimming=sw;
     if(!sw){W.body=BODY;W.off=null;if(P&&P.swim391){P.swim391=false;tilt=0;moveT=0;P.m.root.rotation.x=0;aura(P,true)}return}
     const step=Math.hypot(P.x-lastX,P.z-lastZ);lastX=P.x;lastZ=P.z;moveT=step>.002?.15:Math.max(0,moveT-dt);const moved=moveT>0;W.moving=moved;
     if(!P.swim391){tilt=0;aura(P,false)}P.swim391=true;W.body=BODY;

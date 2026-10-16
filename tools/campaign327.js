@@ -52,14 +52,15 @@
       { t: 'tower', n: 100, d: 'Chegue ao andar 100 da Torre da Ascensão.' },
       { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra o que viu no mapa do topo.', say: ['Um mapa de mundos inteiros, em pedaços…', 'Um deles parece com o seu, {nome}. Talvez ainda exista alguém lá.'] }] },
     { id: 'a8', act: 8, title: 'VIII — O Clã Ferrugem', steps: [
-      { t: 'go', d: 'Encontre Torvo, do Clã Ferrugem, na estrada perto de {cidade}.', verb: 'FALAR COM TORVO', fig: { torvo: true },
-        done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio conversar. Tem gente usando o nome do meu clã para saquear.' },
-      { t: 'go', d: 'Derrote os saqueadores que usam o nome do Clã Ferrugem.', verb: 'RECOLHER O ESTANDARTE FALSO', fight: { n: 6, el: 1, kinds: GOB },
-        done: 'O estandarte foi pintado por cima. Não é o vermelho do Clã.' },
-      { t: 'go', d: 'Ajude os refugiados escondidos na estrada.', verb: 'GUIAR O REFUGIADO', pts: 2, near: 1, fig: { civ: true, name: 'Refugiado' },
-        done: 'Refugiado: — O caminho está livre? Então vamos.' },
-      { t: 'go', d: 'Volte a Torvo e ouça o testemunho dele.', verb: 'OUVIR TORVO', same: 0, fig: { torvo: true },
-        done: 'Torvo: — Atravessamos há cem anos. Nosso mundo foi esvaziado. Ele não destrói mundos: ele os recolhe.' }] },
+      { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com F para lutar livre) e limpe a passagem com a Pá/Enxada.', verb: 'NIVELAR E LIMPAR DESFILADEIRO (PÁ/ENXADA)', fight: { n: 6, el: 1, kinds: GOB },
+        done: 'O desfiladeiro está nivelado e livre. O estandarte dos saqueadores foi pintado por cima: não é o vermelho do Clã Ferrugem.' },
+      { t: 'go', d: 'Avance ao vale da fundição velha e ajude Torvo a defender os refugiados cercados.', verb: 'FALAR COM TORVO NO VALE', fight: { n: 5, el: 1 }, fig: { torvo: true },
+        done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio lutar ao nosso lado. Os refugiados estão exaustos de Fome, Sede e Cansaço.' },
+      { t: 'go', d: 'Cure a Fome, Sede e Cansaço dos refugiados no vale da fundição velha: monte/acenda uma Fogueira perto ou entregue Água Fervida / Comida Assada.', verb: 'AQUECER / ENTREGAR ÁGUA FERVIDA OU COMIDA ASSADA', same: 1, fig: { civ: true, name: 'Refugiado' },
+        done: 'Refugiado: — Água fervida, comida quente e fogo… A sede e o cansaço passaram. Obrigado!' },
+      { t: 'go', d: 'Colha o testemunho de Torvo no vale da fundição velha.', verb: 'COLHER TESTEMUNHO DE TORVO', same: 1, fig: { torvo: true },
+        done: 'Torvo: — Atravessamos há cem anos. Nosso mundo foi esvaziado. Ele não destrói mundos: ele os recolhe.' },
+      { t: 'talk', npc: 'Lyra', d: 'Registre o testemunho de Torvo com Lyra, na Ordem.', say: ['Um povo inteiro que atravessou há cem anos porque o mundo deles foi recolhido…', 'Vou registrar o testemunho de Torvo nos arquivos da Ordem, {nome}.'] }] },
     { id: 'a9', act: 9, title: 'IX — As Capitais', steps: [
       { t: 'talk', npc: 'Lyra', d: 'Compare com Lyra os registros das capitais.', say: ['Os ataques seguem as cinco capitais: Ymiria, Zahar, Thalor, Urdan e Verden. Cada uma guarda uma Âncora.', 'Vá ver com os próprios olhos onde a pressão é real.'] },
       { t: 'caps', n: 3, d: 'Visite 3 capitais e veja a pressão sobre as Âncoras.' },
@@ -244,12 +245,16 @@
     b.userData.book436 = clasp; b.scale.setScalar(1.25); return b;
   }
 
-  function place(s, sp, i) {
+  function place(s, sp, i, mId) {
     if (i > 0 && s.pos) { // pontos extras ficam ao redor do primeiro
       for (let k = 0; k < 30; k++) { const a = rnd(0, TAU), d = rnd(7, 13), x = s.pos[0] + Math.cos(a) * d, z = s.pos[1] + Math.sin(a) * d; if (freeAt(x, z, 1.2)) return [x, z]; }
       return [s.pos[0] + 8 * i, s.pos[1]];
     }
     const c = nearestCity(player.x, player.z).c, wall = wallOf(c); s.city = c.name;
+    if (mId === 'a8') {
+      if (s.s === 0) return [c.x - (wall + 28), c.z];
+      if (s.s === 1) return [c.x - (wall + 58), c.z - 8];
+    }
     const [d0, d1] = sp.zone === 'in' ? [wall * .3, wall * .55] : sp.zone === 'edge' ? [wall - 3, wall + 8] : [wall + 14, wall + 40];
     for (let k = 0; k < 60; k++) {
       const a = (Math.floor(rnd(0, 4)) * Math.PI / 2) + rnd(-.12, .12) * (sp.zone === 'in' ? 4 : 1), d = rnd(d0, d1), x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d;
@@ -267,8 +272,8 @@
     const s = state(m.id), sp = m.steps[s.s], n = sp.pts || 1;
     // The people seen hiding during the ambush stay at those same coordinates.
     if(m.id==='a2'&&s.s===2&&s.survivors406?.length===2){s.pos=s.survivors406[0].slice();s.extra=[s.survivors406[1].slice()];s.extraStep=s.s;return [s.pos,...s.extra]}
-    if (!s.pos) s.pos = place(s, sp, 0);
-    s.extra = s.extra && s.extra.length === n - 1 && s.extraStep === s.s ? s.extra : Array.from({ length: n - 1 }, (_, i) => place(s, sp, i + 1));
+    if (!s.pos) s.pos = place(s, sp, 0, m.id);
+    s.extra = s.extra && s.extra.length === n - 1 && s.extraStep === s.s ? s.extra : Array.from({ length: n - 1 }, (_, i) => place(s, sp, i + 1, m.id));
     s.extraStep = s.s;
     return [s.pos, ...s.extra];
   }
@@ -366,6 +371,39 @@
       if (s2) w.figs.push(s2);
     }
     if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
+    if (m.id === 'a8' && pts[0]) {
+      const p0 = pts[0];
+      if (s.s === 0 && !s.gorgeCleared441) {
+        const bg = new THREE.Group(); bg.position.set(p0[0], gy(p0[0], p0[1]), p0[1]); bg.userData.mats = []; bg.userData.terrainAbsolute245 = true;
+        const rockMat = new THREE.MeshStandardMaterial({ color: 0x5c5349, roughness: .92 }), woodMat = new THREE.MeshStandardMaterial({ color: 0x4b3624, roughness: .9 });
+        for (const [ox, oz, r] of [[-2.4, -1.2, 1.35], [0, -1.6, 1.45], [2.4, -1.1, 1.3], [-1.3, 1.4, 1.1], [1.5, 1.3, 1.15]]) {
+          const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 1), rockMat); rk.position.set(ox, r * .55, oz); rk.castShadow = true; bg.add(rk);
+        }
+        for (const [ox, oz] of [[-3.2, .3], [3.1, .2]]) {
+          const stp = new THREE.Mesh(new THREE.CylinderGeometry(.55, .72, 1.1, 8), woodMat); stp.position.set(ox, .55, oz); stp.castShadow = true; bg.add(stp);
+        }
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .08, 3.2, 6), woodMat); pole.position.set(.6, 1.6, 0); bg.add(pole);
+        const cloth = new THREE.Mesh(new THREE.BoxGeometry(.95, 1.1, .05), new THREE.MeshStandardMaterial({ color: 0x7c2d1e, roughness: .85 })); cloth.position.set(1.08, 2.35, 0); bg.add(cloth);
+        window.Solid429?.prop(bg, [{ x: -2.4, z: -1.2, r: 1.3 }, { x: 0, z: -1.6, r: 1.4 }, { x: 2.4, z: -1.1, r: 1.25 }, { x: -1.3, z: 1.4, r: 1.05 }, { x: 1.5, z: 1.3, r: 1.1 }]);
+        scene.add(bg); w.grps.push(bg); w.gorge441 = bg;
+      }
+      if (s.s === 1 || s.s === 2 || s.s === 3) {
+        const fg = new THREE.Group(); fg.position.set(p0[0] - 4.2, gy(p0[0] - 4.2, p0[1] - 2.5), p0[1] - 2.5); fg.userData.mats = []; fg.userData.terrainAbsolute245 = true;
+        const wallM = new THREE.MeshStandardMaterial({ color: 0x4a433d, roughness: .95 }), rustM = new THREE.MeshStandardMaterial({ color: 0x6e3b23, metalness: .45, roughness: .7 });
+        const w1 = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.2, .6), wallM); w1.position.set(0, 1.1, -1.8); fg.add(w1);
+        const anvil = new THREE.Mesh(new THREE.BoxGeometry(1.1, .75, .65), rustM); anvil.position.set(1.2, .38, 0); fg.add(anvil);
+        scene.add(fg); w.grps.push(fg);
+        if (s.s === 1 || s.s === 2) {
+          const r1 = figure({ civ: true, name: 'Refugiado', down: s.s === 2 && !s.refugeeHealed441 }, p0[0] - 3.2, p0[1] + 1.8);
+          const r2 = figure({ civ: true, name: 'Refugiado', down: s.s === 2 && !s.refugeeHealed441 }, p0[0] - 1.4, p0[1] + 2.4);
+          if (r1) w.figs.push(r1); if (r2) w.figs.push(r2);
+        }
+        if (s.s === 2) {
+          const tf = figure({ torvo: true }, p0[0] + 2.5, p0[1] - 1.2);
+          if (tf) w.figs.push(tf);
+        }
+      }
+    }
     window.Scenes406?.build(m,s,w,pts,figure);
     W.set(m.id, w); save();
   }
@@ -478,6 +516,32 @@
     if(m.id==='a1'&&s.s===0&&!s.helped401&&!s.fightDone&&!s.killed&&window.Intro401){Intro401.dialog('Edran',['A carroça… Ela veio da Fenda. Cuidado, está logo ali!'],()=>{s.helped401=true;save();tick()});return}
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
+    if (m.id === 'a8' && s.s === 0 && !s.gorgeCleared441) {
+      const w = W.get(m.id), p0 = pointsOf(m)[0] || [player.x, player.z];
+      if (window.Surv437 && Surv437.count && !Surv437.count('pa')) {
+        Surv437.give('pa', 1, 'Pá / Enxada recuperada no desfiladeiro');
+      }
+      if (window.Surv437?.levelTerrain) Surv437.levelTerrain(p0[0], p0[1], 14, gy(p0[0], p0[1]), 'DESFILADEIRO NIVELADO E DESOBSTRUÍDO!');
+      s.gorgeCleared441 = true;
+      if (w?.gorge441) { scene.remove(w.gorge441); w.gorge441 = null; }
+    }
+    if (m.id === 'a8' && s.s === 2 && !s.refugeeHealed441) {
+      const p0 = pointsOf(m)[0] || [player.x, player.z];
+      const hasFire = (run?.builds437 || []).some(b => (b.id === 'fogueira' || b.id === 'cabana') && b.fuel > 0 && Math.hypot(b.x - p0[0], b.z - p0[1]) < 16);
+      const ctn = run?.surv437?.canteen;
+      const boilCanteen = ctn && (ctn.kind === 'limpa' || ctn.kind === 'cha') && (ctn.sips || 0) > 0 ? ctn : null;
+      const roastFood = ['assada', 'defumada', 'cogu_assado'].find(k => window.Surv437?.count?.(k) > 0);
+      if (!hasFire && !boilCanteen && !roastFood) {
+        toast('<b>[HISTÓRIA]</b> Os refugiados estão com Fome, Sede e Cansaço! Monte/acenda uma <b>Fogueira</b> perto, ferva <b>Água no Cantil</b> ou traga <b>Carne Assada</b>.', 6500);
+        return;
+      }
+      if (boilCanteen && !hasFire) { boilCanteen.sips = Math.max(0, (boilCanteen.sips || 1) - 1); if (!boilCanteen.sips) boilCanteen.kind = null; }
+      else if (roastFood && !hasFire) { window.Surv437?.take?.(roastFood, 1); }
+      s.refugeeHealed441 = true;
+      const w = W.get(m.id);
+      if (w) for (const f of w.figs) if (f && f.name === 'Refugiado' && f.m) { f.down = false; f.m.wounded401 = false; f.m.root.rotation.z = 0; }
+      try { addFloat(p0[0], gy(p0[0], p0[1]) + 2.2, p0[1], 'FOME, SEDE E CANSAÇO CURADOS!', '#7ef5a5'); } catch (_) {}
+    }
     if(!read406&&window.Scenes406){const w=W.get(m.id),step=s.s;if(Scenes406.read(m,s,w,()=>{if(W.get(m.id)===w&&state(m.id)===s&&s.s===step&&!s.done)useMarker(m,i,true)}))return}
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
       const w=W.get(m.id);if(!w)return;

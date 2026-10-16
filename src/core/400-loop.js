@@ -67,6 +67,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 /* v245: relevo — zonas planas perto do jogador (cidades, lagos, estradas) */
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const on=L.mode==='world'&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
+ for(const f of (run&&run.surv437&&run.surv437.leveled||[]))D.push([f.x,f.z,f.r||12,f.h||0]);
  for(const c of citiesAround(P.x,P.z,1800))D.push([c.x,c.z,CITYR+16,0]);
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});

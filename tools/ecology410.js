@@ -168,7 +168,7 @@ function gated(e,P,S,v,pd,dt){
  if(v)return false; // Fendida/Abissal: agressiva com quem carrega mana
  if(P.near)return pd>P.near;
  if(P.dormant)return true;
- if(P.playful)return !S.provoked;
+ if(P.playful){if(S.provoked)return false;if(pd<4.5&&!player?.sheathed441&&player?.atkCd>0){S.provoked=1;e.aggro=true;return false}return true}
  if(P.shy){if(S.provoked)return false;if(pd<11){S.flee=T()+4;return 'flee'}return true}
  if(P.stare){if(S.provoked)return false;const a=Math.atan2(e.x-player.x,e.z-player.z),df=Math.abs(Math.atan2(Math.sin(a-player.face),Math.cos(a-player.face)));if(pd<7&&df<.4){S.stareT=(S.stareT||0)+dt;if(S.stareT>1.2){e.aggro=true;return false}}else S.stareT=Math.max(0,(S.stareT||0)-dt);return true}
  if(P.light){const r=night()?16:7;if(pd<r&&los(e.x,e.z,player.x,player.z)){e.aggro=true;return false}return true}
@@ -201,7 +201,7 @@ function beforeAI(e,dt){
  if(S.flee>T()){fleeStep(e,S,dt);return true}
  if(lureStep(e,P,S,dt))return true;
  if(P.own){if(e.aggro&&!S.tip&&pd<16){S.tip=1;tactic(e,P)}return false}
- if(story(e))return false;
+ if(story(e)&&!e.yetiPack441)return false;
  if(P.carrion&&carrionStep(e,S,dt,pd))return true;S.eating=0;
  // moral: ficou sozinho
  if(P.lone&&v!=='a'){const n=near(e,P.lone,14).length;S.peers0=Math.max(S.peers0,n);if(S.peers0>0&&n===0&&e.aggro&&(!P.loneHp||e.hp<e.maxhp*P.loneHp)&&!S.loneDone){S.loneDone=1;if(panic(e,'PÂNICO!')){win('O '+(P.book?.[0]||e.name)+' ficou sem o bando e fugiu.',P.base,'sozinho');return true}}}
@@ -210,7 +210,10 @@ function beforeAI(e,dt){
  if(g==='flee'){fleeStep(e,S,dt);return true}
  if(g){e.aggro=false;e.act=null;
   if(P.leaderless||P.playful){if(Math.random()<dt*.6)e.face+=(Math.random()-.5)*1.6;const nx=e.x+Math.sin(e.face)*e.speed*.25*dt,nz=e.z+Math.cos(e.face)*e.speed*.25*dt;if(freeAt(nx,nz,e.r||.5))moveEnt(e,nx-e.x,nz-e.z);else e.face+=1.2;pose(e,.4,dt)}else pose(e,0,dt);return true}
- if(!S.awake&&(P.near||P.dormant||P.stare||P.playful||P.light||P.shy)&&e.aggro){S.awake=true}
+ if(!S.awake&&(P.near||P.dormant||P.stare||P.playful||P.light||P.shy)&&e.aggro){
+  if(P.playful&&player?.sheathed441&&!S.provoked){e.aggro=false;e.act=null;pose(e,.3,dt);return true}
+  S.awake=true;
+ }
  if(escape(e,P,S,pd,dt))return true;
  // honra: rendição com pouca vida
  if(P.honor&&v!=='a'&&!S.surrDone&&e.hp>0&&e.hp<=e.maxhp*.15&&pd<14){S.surr={t:0};e.act=null;e.aggro=false;floater(e.x,e.z,'SE RENDEU','#ffd76a',true,2.6);if(once('tip:rendicao'))showTip('<b>'+P.book[0]+'</b> reconheceu sua força e se rendeu. <b>F</b> para aceitar a rendição.',6000);return true}
@@ -221,21 +224,31 @@ function beforeAI(e,dt){
 function onKill(e){
  if(!e||e.ally)return;const b=base(e.kind);if(e.eco410?.accepted)return;
  const followers=Object.keys(P410).filter(k=>P410[k].leader?.includes(b));let n=0;
- for(const k of followers)for(const o of near(e,[k],20))if(panic(o,'PÂNICO!'))n++;
- if(n)win('Sem o '+(BOOK410[b]?.[0]||e.name)+', o bando entrou em pânico e fugiu.',b,'lider');
+ for(const k of followers)for(const o of near(e,[k],24)){o.camp327=null;if(panic(o,'PÂNICO!'))n++}
+ if(b==='yeti'||e.yetiAlpha441){for(const o of near(e,['yetinho','yeti'],26))if(o!==e&&!o.yetiAlpha441){o.camp327=null;if(panic(o,'FUGA DO BANDO!'))n++}}
+ if(n)win('Sem o '+(BOOK410[b]?.[0]||e.name)+', os menores entraram em pânico e fugiram.',b,'lider');
+}
+function toggleSheath(force){
+ if(!player)return false;
+ player.sheathed441=force!=null?!!force:!player.sheathed441;
+ try{if(player.m?.wep)player.m.wep.visible=!player.sheathed441}catch(_){}
+ toast(player.sheathed441?'<b>[POSTURA]</b> Arma guardada: Filhotes de Yeti (#013) e criaturas neutras do Povo do Manto Branco não se sentem ameaçados.':'<b>[POSTURA]</b> Arma empunhada.',3500);
+ return player.sheathed441;
 }
 function used(b){const w=mem().won,l=Object.keys(w).filter(k=>k.startsWith(b+':')).map(k=>w[k]);return l.length?'<br><b>Você já usou:</b> '+l.join(' '):''}
 /* ---------- integração ---------- */
 function install(){
  if(typeof killEnemy==='function'&&!killEnemy.eco410){const k0=killEnemy;killEnemy=function(e){const was=e&&!e.dead;const r=k0.apply(this,arguments);try{if(was&&e.dead)onKill(e)}catch(err){console.warn('eco410',err)}return r};killEnemy.eco410=1}
+ if(typeof attack==='function'&&!attack.sheath441){const a0=attack;attack=function(){try{if(player?.sheathed441){player.sheathed441=false;if(player.m?.wep)player.m.wep.visible=true}}catch(_){}return a0.apply(this,arguments)};attack.sheath441=1}
  if(typeof ctxTarget==='function'&&!ctxTarget.eco410){const c0=ctxTarget;ctxTarget=function(){const b=c0.apply(this,arguments);try{if(!b){const e=surrTarget();if(e)return{label:'F · ACEITAR RENDIÇÃO',use:()=>accept(e)}}}catch(_){}return b};ctxTarget.eco410=1}
  if(typeof KEYACT!=='undefined'&&!KEYACT.some(k=>k[0]==='coin410'))KEYACT.push(['coin410','Jogar moeda brilhante','Digit7']);
- addEventListener('keydown',ev=>{try{if(ev.repeat||!started||typeof keyOf!=='function')return;const tg=ev.target;if(tg&&/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))return;if(ev.code===keyOf('coin410'))throwCoin()}catch(_){}});
+ if(typeof KEYACT!=='undefined'&&!KEYACT.some(k=>k[0]==='sheath441'))KEYACT.push(['sheath441','Guardar / empunhar arma','KeyX']);
+ addEventListener('keydown',ev=>{try{if(ev.repeat||!started||typeof keyOf!=='function')return;const tg=ev.target;if(tg&&/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))return;if(ev.code===keyOf('coin410'))throwCoin();else if(ev.code===(keyOf('sheath441')||'KeyX')&&!(typeof modalOpen!=='undefined'&&modalOpen))toggleSheath()}catch(_){}});
  if(window.Bestiary294&&!Bestiary294.loreHtml.eco410){const l0=Bestiary294.loreHtml;Bestiary294.loreHtml=function(k,n){let h=l0.apply(this,arguments);try{const P=profileOf(k);if(P&&n>0)h+='<br><span class="eco410-lore"><b>Reação:</b> '+P.how+' <i>('+P.f.map(f=>FAM410[f]).join(' · ')+')</i><br><b>Tática de sobrevivência:</b> '+P.book[1]+used(P.base)+'</span>'}catch(_){}return h};Bestiary294.loreHtml.eco410=1}
  let last=performance.now();(function tick(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;try{coinsTick(dt)}catch(_){}setTimeout(tick,16)})();
  const css=document.createElement('style');css.textContent='#eco410tip{position:fixed;left:50%;bottom:118px;transform:translate(-50%,8px);max-width:min(560px,92vw);padding:8px 14px;border-radius:10px;background:rgba(14,26,22,.88);border:1px solid rgba(214,180,104,.55);color:#e8e2cc;font:13px/1.35 system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;z-index:40;text-align:center}#eco410tip.on{opacity:1;transform:translate(-50%,0)}#eco410tip b{color:#ffd76a}#eco410tip b.ok{color:#9fe8a8}#eco410tip small{display:block;opacity:.75;margin-top:3px}.eco410-lore{display:inline-block;margin-top:4px}';document.head.appendChild(css);
 }
-const api={beforeAI,profileOf,bossProfile,coverage,throwCoin,accept,P410,FAM410,BOOK410,BOSSBOOK410,coins,st,panic};
+const api={beforeAI,profileOf,bossProfile,coverage,throwCoin,toggleSheath,accept,P410,FAM410,BOOK410,BOSSBOOK410,coins,st,panic};
 if(typeof window!=='undefined'){window.Eco410=api;if(typeof document!=='undefined'&&typeof KINDS!=='undefined')install()}
 if(typeof module!=='undefined')module.exports=api;
 })();

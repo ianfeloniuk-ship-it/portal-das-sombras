@@ -6254,6 +6254,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 /* v245: relevo — zonas planas perto do jogador (cidades, lagos, estradas) */
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const on=L.mode==='world'&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
+ for(const f of (run&&run.surv437&&run.surv437.leveled||[]))D.push([f.x,f.z,f.r||12,f.h||0]);
  for(const c of citiesAround(P.x,P.z,1800))D.push([c.x,c.z,CITYR+16,0]);
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
@@ -8955,7 +8956,7 @@ requestAnimationFrame(frame);
 <script src="tools/economy154.js?v=343"></script>
 <script src="tools/lux267.js?v=288"></script>
 <script src="tools/bestiary294.js?v=324"></script>
-<script src="tools/biomes295.js?v=372"></script>
+<script src="tools/biomes295.js?v=441"></script>
 <script src="tools/rare298.js?v=324"></script>
 <script src="tools/corrupt299.js?v=320"></script>
 <script src="tools/elem300.js?v=351"></script>
@@ -8986,8 +8987,8 @@ requestAnimationFrame(frame);
 <script src="narrativa-campanha.js"></script>
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=406"></script>
-<script src="tools/campaign327.js?v=436"></script>
-<script src="tools/ecology410.js?v=412"></script>
+<script src="tools/campaign327.js?v=441"></script>
+<script src="tools/ecology410.js?v=441"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -9008,7 +9009,7 @@ requestAnimationFrame(frame);
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=387"></script>
-<script src="tools/water391.js?v=439"></script>
+<script src="tools/water391.js?v=440"></script>
 <script src="tools/map393.js?v=403"></script>
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
@@ -9026,8 +9027,9 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
-<script src="tools/mechanics434.js?v=438"></script>
-<script src="tools/survival437.js?v=439"></script>
-<script src="tools/cart437.js?v=437"></script>
-<script src="tools/build437.js?v=439"></script>
+<script src="tools/mechanics434.js?v=441"></script>
+<script src="tools/survival437.js?v=441"></script>
+<script src="tools/cart437.js?v=440"></script>
+<script src="tools/build437.js?v=441"></script>
 <script src="tools/sea439.js?v=439"></script>
+<script src="tools/boats440.js?v=440"></script>

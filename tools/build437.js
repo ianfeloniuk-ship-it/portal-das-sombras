@@ -30,7 +30,12 @@
     portao: { n: 'Portão', m: 'env:palisade', h: 3, w: 4.4, line: 4.4, gate: true, d: 'Paliçada que abre e fecha (F).', st: [{ n: 'Toras', need: { tora: 3, cipo: 2 } }, { n: 'Dobradiças', need: { tabua: 2, minerio: 1 } }] },
     carrinho: { n: 'Carrinho de mão', m: 'carrinho', h: 1.25, w: 2.9, r: 0, cart: true, d: 'Puxado pelo personagem: carrega 400 kg.', st: [{ n: 'Rodas e eixo', need: { tabua: 2, minerio: 1 } }, { n: 'Caixa e varais', need: { tabua: 4, cipo: 2 } }] }
   };
-  const TOOLS = { machado: { need: { pedra: 2, fibra: 3 } }, cantil: { need: { couro: 2, cipo: 1 }, bench: true } };
+  const TOOLS = {
+    machado: { need: { pedra: 2, fibra: 3 } },
+    pa: { need: { pedra: 2, lenha: 1, fibra: 2 } },
+    tocha: { need: { lenha: 1, resina: 1 } },
+    cantil: { need: { couro: 2, cipo: 1 }, bench: true }
+  };
   const sites = () => (run.build437 = run.build437 || []);
   const total = b => B[b.t].st.reduce((a, s) => a + Object.values(s.need).reduce((x, y) => x + y, 0), 0);
   const doneUnits = b => Object.values(b.got || {}).reduce((x, y) => x + y, 0);
@@ -65,6 +70,7 @@
   function spawnSite(b) {
     if (live.has(b.id)) return;
     const def = B[b.t], g = new T.Group(); g.position.set(b.x, 0, b.z); g.rotation.y = b.ry; scene.add(g);
+    if (def.water) { const w = window.Water391 && Water391.waterAt(b.x, b.z); g.userData.terrainAbsolute245 = true; g.position.y = w ? w.top : (TER245.SEA439?.Y || 0); } /* v440: barco no estaleiro flutua */
     const o = { b, g, cut: { value: 0 }, cols: [], it: null };
     live.set(b.id, o);
     model(def).then(m => {
@@ -75,14 +81,14 @@
       g.add(real, ghost); o.real = real; o.ghost = ghost;
       refresh(o);
     });
-    o.it = { type: 'build437', x: b.x, z: b.z, r: def.line ? 3 : Math.max(2.2, (def.r || .6) + 1.6), label: '', use: () => useSite(o) };
+    o.it = { type: 'build437', x: b.x, z: b.z, r: def.line ? 3 : def.water ? def.w * .5 + 9 : Math.max(2.2, (def.r || .6) + 1.6), label: '', use: () => useSite(o) };
     L.inter.push(o.it);
     refresh(o);
   }
   function dropSite(id) { const o = live.get(id); if (!o) return; scene.remove(o.g); const i = L.inter.indexOf(o.it); if (i >= 0) L.inter.splice(i, 1); o.cols.forEach(c => { try { hrem(c); } catch (_) {} }); if (o.fx) o.fx.light.parent?.remove(o.fx.light); live.delete(id); }
   function refresh(o) {
     const b = o.b, def = B[b.t], done = complete(b);
-    o.cut.value = done ? 1e4 : (o.h || def.h) * (o.g.scale.y || 1) * Math.max(.04, doneUnits(b) / total(b));
+    o.cut.value = done ? 1e4 : o.g.position.y + (o.h || def.h) * (o.g.scale.y || 1) * Math.max(.04, doneUnits(b) / total(b));
     if (o.ghost) o.ghost.visible = !done;
     // colisores só depois da 1ª etapa
     o.cols.forEach(c => { try { hrem(c); } catch (_) {} }); o.cols = [];
@@ -124,6 +130,7 @@
   function finish(o) {
     const b = o.b, def = B[b.t];
     try { fxRing(b.x, b.z, 0xffd38a, 2, .6); sfx('arise'); } catch (_) {}
+    if (def.boat && window.Boats440) { run.build437 = sites().filter(q => q !== b); dropSite(b.id); Boats440.launch(b); return; } /* v440: barco pronto vai para a água */
     if (def.cart) { // carrinho pronto vira o carrinho de verdade
       run.build437 = sites().filter(q => q !== b); dropSite(b.id);
       if (run.cart437) { toast('Você já tem um carrinho: as peças viraram 6 Tábuas.'); U().add('tabua', 6, true); return; }
@@ -151,8 +158,8 @@
     if (S.bag.carne && S.bag.sal) h += btn('f437s', 'SALGAR CARNE (+Sal)', true);
     h += btn('f437b', 'FERVER O CANTIL', lit(b) && c && c.sips > 0 && c.kind !== 'limpa' && c.kind !== 'cha' && c.kind !== 'mar');
     h += btn('f437m', 'DESTILAR ÁGUA DO MAR', lit(b) && c && c.sips > 0 && c.kind === 'mar'); // v439: rende metade e sobra sal
-    h += btn('f437t', 'CHÁ DE ERVAS (cantil + Ervas)', lit(b) && c && c.sips > 0 && U().has('erva'));
-    h += '</div><p style="opacity:.75;margin-top:8px">Perto do fogo aceso, o frio da neve não pesa. Comida assada dá Bem Alimentado.</p>';
+    h += btn('f437t', 'CHÁ TÉRMICO (cantil + Ervas)', lit(b) && c && c.sips > 0 && U().has('erva'));
+    h += '</div><p style="opacity:.75;margin-top:8px">Perto do fogo aceso, o frio da neve não pesa. Comida assada dá Bem Alimentado; Chá Térmico aquece por 5 min.</p>';
     openModal(title || 'FOGUEIRA', h);
     const re = () => fireView(o, title);
     on('f437l', () => { if (!U().take('lenha', 1)) Cart437.take('lenha', 1); b.fuel = (b.fuel || 0) + DAY() / 6; U().save(); re(); });
@@ -160,7 +167,7 @@
     on('f437s', () => { const n = Math.min(S.bag.carne, S.bag.sal); for (let i = 0; i < n; i++) { U().take('carne', 1); U().take('sal', 1); U().add('salgada', 1, true); } toast('Salgou ' + n + ' carne(s).'); re(); });
     on('f437m', () => { c.sips = Math.max(1, Math.ceil(c.sips / 2)); c.kind = 'limpa'; b.fuel = Math.max(0, b.fuel - 30); U().add('sal', 1, true); toast('Água do mar destilada: ' + c.sips + ' gole(s) de água limpa e 1 Sal Grosso.'); U().save(); re(); });
     on('f437b', () => { c.kind = 'limpa'; b.fuel = Math.max(0, b.fuel - 15); toast('Água fervida: agora é segura.'); U().save(); re(); });
-    on('f437t', () => { U().take('erva', 1); c.kind = 'cha'; toast('Chá de ervas pronto no cantil (tira mal-estar).'); U().save(); re(); });
+    on('f437t', () => { U().take('erva', 1); c.kind = 'cha'; toast('Chá Térmico pronto no cantil (aquece no frio de Ymiria e tira mal-estar).'); U().save(); re(); });
   }
   // sono
   function restView(o, kind) {
@@ -203,7 +210,7 @@
     on('st_o', () => { if (room('tora') < 1) { toast('Sem espaço.'); return; } U().clearCarry(); b.store.tora = (b.store.tora || 0) + 1; U().save(); re(); });
   }
   const rackView = o => storeView(o, 'SUPORTE DE TORAS', k => k === 'tora' || k === 'lenha', 12 * 40 + 30 * 6);
-  const chestView = (o, t) => storeView(o, t || 'BAÚ', k => k !== 'tora' && k !== 'machado' && k !== 'cantil', 200);
+  const chestView = (o, t) => storeView(o, t || 'BAÚ', k => k !== 'tora' && k !== 'machado' && k !== 'pa' && k !== 'cantil', 200);
   // varal: defumar
   function rackDryView(o) {
     const b = o.b; b.dry = b.dry || [];
@@ -249,8 +256,10 @@
     if (!U().world()) { toast('Construção só no mundo aberto.'); return; }
     const bench = fromBench || nearBench();
     let h = '<p style="opacity:.8">Escolha o que construir: o molde translúcido aparece no chão à sua frente. Depois leve o material (bolsa, carrinho perto ou tora no ombro) e aperte <b>F</b> no molde para encaixar cada peça.</p>';
-    h += '<div class="sec">FERRAMENTAS</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h += '<div class="sec">FERRAMENTAS E TOCHAS</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
     h += btn('m437t_machado', 'Machado de Pedra · ' + cost(TOOLS.machado.need), canPay(TOOLS.machado.need) && !U().has('machado'));
+    h += btn('m437t_pa', 'Pá / Enxada · ' + cost(TOOLS.pa.need), canPay(TOOLS.pa.need) && !U().has('pa'));
+    h += btn('m437t_tocha', 'Tocha com Resina · ' + cost(TOOLS.tocha.need), canPay(TOOLS.tocha.need));
     h += btn('m437t_cantil', 'Cantil de Couro · ' + cost(TOOLS.cantil.need) + (bench ? '' : ' (na bancada)'), bench && canPay(TOOLS.cantil.need) && !U().S().canteen);
     h += '</div><div class="sec">CONSTRUÇÕES</div><table style="width:100%;border-collapse:collapse">';
     for (const id in B) {
@@ -259,12 +268,14 @@
     }
     openModal('MANUAL DE SOBREVIVÊNCIA', h + '</table>');
     on('m437t_machado', () => { for (const k in TOOLS.machado.need) U().take(k, TOOLS.machado.need[k]); U().add('machado', 1, true); toast('<b>Machado de Pedra</b> pronto: F nas árvores para derrubar.', 4500); manual(fromBench); });
+    on('m437t_pa', () => { for (const k in TOOLS.pa.need) U().take(k, TOOLS.pa.need[k]); U().add('pa', 1, true); toast('<b>Pá / Enxada</b> pronta: F em dunas, encostas ou bloqueios de rochas/tocos para nivelar o terreno.', 4500); manual(fromBench); });
+    on('m437t_tocha', () => { for (const k in TOOLS.tocha.need) U().take(k, TOOLS.tocha.need[k]); U().add('tocha', 1, true); U().lightTorch(); manual(fromBench); });
     on('m437t_cantil', () => { for (const k in TOOLS.cantil.need) U().take(k, TOOLS.cantil.need[k]); U().S().canteen = { sips: 0, kind: null }; U().save(); toast('<b>Cantil de Couro</b> pronto: encha na margem (F).', 4500); manual(fromBench); });
     for (const id in B) on('m437b_' + id, () => { closeModal(); startPlace(id); });
   }
   let place = null;
   const ph = document.createElement('div');
-  ph.style.cssText = 'position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:45;display:none;gap:8px;align-items:center;background:#122019e6;border:1px solid #b9974f;border-radius:8px;padding:6px 10px;font:600 12px system-ui;color:#e9dfc0';
+  ph.style.cssText = 'position:fixed;left:50%;top:150px;transform:translateX(-50%);z-index:45;display:none;gap:8px;align-items:center;background:#122019e6;border:1px solid #b9974f;border-radius:8px;padding:6px 10px;font:600 12px system-ui;color:#e9dfc0';
   ph.innerHTML = '<span id="ph437t"></span><button class="btn" id="ph437ok">COLOCAR (Enter)</button><button class="btn" id="ph437r">GIRAR (R)</button><button class="btn" id="ph437x">CANCELAR (Esc)</button>';
   document.body.appendChild(ph);
   function startPlace(id) {
@@ -274,19 +285,27 @@
     place = { id, g, ry: (player.face || 0) + Math.PI, ok: false, m: null };
     model(def).then(m => { if (!place || place.g !== g || !m) return; place.m = skin(m, ghostMat); g.add(place.m); });
     document.getElementById('ph437t').textContent = def.n + ': ' + def.st.map(s => s.n).join(' → ');
+    { const bot = ['stat', 'quest401'].map(i => document.getElementById(i)).filter(e => e && e.offsetParent).reduce((m, e) => Math.max(m, e.getBoundingClientRect().bottom), 60); ph.style.top = Math.round(bot + 8) + 'px'; } /* v440: abaixo dos painéis do topo, sem cobrir nada */
     ph.style.display = 'flex';
   }
   function cancelPlace() { if (place) scene.remove(place.g); place = null; ph.style.display = 'none'; }
   function placeTick() {
     if (!place) return;
     if (!U().world()) { cancelPlace(); return; }
-    const def = B[place.id], dist = (def.line ? 3 : Math.max(2.2, def.w * .6 + 1.2));
+    const def = B[place.id]; let dist = (def.line ? 3 : Math.max(2.2, def.w * .6 + 1.2));
+    if (def.water && window.Water391) for (let d = dist; d < dist + 14; d += .5) { const qx = player.x + Math.sin(player.face || 0) * d, qz = player.z + Math.cos(player.face || 0) * d, w = Water391.waterAt(qx, qz); if (w && !w.frozen && w.top - terrH(qx, qz) > (def.draft || .8)) { dist = d; break; } } /* v440: barco vai para a 1ª água funda à frente */
     const x = player.x + Math.sin(player.face || 0) * dist, z = player.z + Math.cos(player.face || 0) * dist;
     place.x = x; place.z = z; place.g.position.set(x, 0, z); place.g.rotation.y = place.ry;
     const rad = def.line ? 1 : Math.max(.6, def.r || .6);
-    let ok = typeof freeAt !== 'function' || freeAt(x, z, rad);
+    let ok;
+    if (def.water) { // v440: barco — o molde fica na água funda, na altura da superfície
+      const w = window.Water391 && Water391.waterAt(x, z), dp = w ? w.top - terrH(x, z) : 0;
+      ok = !!w && !w.frozen && dp > (def.draft || .8); place.g.userData.terrainAbsolute245 = true; place.g.position.y = w ? w.top : 0;
+    } else {
+    ok = typeof freeAt !== 'function' || freeAt(x, z, rad);
     if (ok && window.Water391 && Water391.waterAt(x, z)) ok = false;
-    if (ok && typeof nearestCity === 'function' && nearestCity(x, z).d < 70 * (typeof CITYK !== 'undefined' ? CITYK : 1)) ok = false;
+    }
+    if (ok && !def.water && typeof nearestCity === 'function' && nearestCity(x, z).d < 70 * (typeof CITYK !== 'undefined' ? CITYK : 1)) ok = false;
     if (ok && sites().some(q => Math.hypot(q.x - x, q.z - z) < rad + (B[q.t].r || .6) + .3)) ok = false;
     if (place.ok !== ok && place.m) skin(place.m, ok ? ghostMat : badMat);
     place.ok = ok;
@@ -353,5 +372,5 @@
     setTimeout(loop, 33);
   }
   loop();
-  window.Build437 = { B, manual, startPlace, confirmPlace, cancelPlace, sites, live, sleep, placePiece: id => { const o = live.get(id); if (o) placePiece(o); } };
+  window.Build437 = { storeView, B, manual, startPlace, confirmPlace, cancelPlace, sites, live, sleep, placePiece: id => { const o = live.get(id); if (o) placePiece(o); } };
 })();
