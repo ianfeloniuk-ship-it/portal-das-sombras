@@ -31,6 +31,7 @@
     carrinho: { n: 'Carrinho de mão', m: 'carrinho', h: 1.25, w: 2.9, r: 0, cart: true, d: 'Puxado pelo personagem: carrega 400 kg.', st: [{ n: 'Rodas e eixo', need: { tabua: 2, minerio: 1 } }, { n: 'Caixa e varais', need: { tabua: 4, cipo: 2 } }] }
   };
   const TOOLS = {
+    enxada: { need: { pedra: 3, lenha: 1, fibra: 2, minerio: 1 } }, picareta: { need: { pedra: 2, lenha: 1, minerio: 3 } }, // v444: terraplenagem (tools/terra444.js)
     machado: { need: { pedra: 2, fibra: 3 } },
     pa: { need: { pedra: 2, lenha: 1, fibra: 2 } },
     tocha: { need: { lenha: 1, resina: 1 } },
@@ -258,7 +259,9 @@
     let h = '<p style="opacity:.8">Escolha o que construir: o molde translúcido aparece no chão à sua frente. Depois leve o material (bolsa, carrinho perto ou tora no ombro) e aperte <b>F</b> no molde para encaixar cada peça.</p>';
     h += '<div class="sec">FERRAMENTAS E TOCHAS</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
     h += btn('m437t_machado', 'Machado de Pedra · ' + cost(TOOLS.machado.need), canPay(TOOLS.machado.need) && !U().has('machado'));
-    h += btn('m437t_pa', 'Pá / Enxada · ' + cost(TOOLS.pa.need), canPay(TOOLS.pa.need) && !U().has('pa'));
+    h += btn('m437t_pa', 'Pá de Terraplenagem · ' + cost(TOOLS.pa.need), canPay(TOOLS.pa.need) && !U().has('pa'));
+    h += btn('m437t_enxada', 'Enxada Pesada · ' + cost(TOOLS.enxada.need), canPay(TOOLS.enxada.need) && !U().has('enxada'));
+    h += btn('m437t_picareta', 'Picareta · ' + cost(TOOLS.picareta.need), canPay(TOOLS.picareta.need) && !U().has('picareta'));
     h += btn('m437t_tocha', 'Tocha com Resina · ' + cost(TOOLS.tocha.need), canPay(TOOLS.tocha.need));
     h += btn('m437t_cantil', 'Cantil de Couro · ' + cost(TOOLS.cantil.need) + (bench ? '' : ' (na bancada)'), bench && canPay(TOOLS.cantil.need) && !U().S().canteen);
     h += '</div><div class="sec">CONSTRUÇÕES</div><table style="width:100%;border-collapse:collapse">';
@@ -269,6 +272,7 @@
     openModal('MANUAL DE SOBREVIVÊNCIA', h + '</table>');
     on('m437t_machado', () => { for (const k in TOOLS.machado.need) U().take(k, TOOLS.machado.need[k]); U().add('machado', 1, true); toast('<b>Machado de Pedra</b> pronto: F nas árvores para derrubar.', 4500); manual(fromBench); });
     on('m437t_pa', () => { for (const k in TOOLS.pa.need) U().take(k, TOOLS.pa.need[k]); U().add('pa', 1, true); toast('<b>Pá / Enxada</b> pronta: F em dunas, encostas ou bloqueios de rochas/tocos para nivelar o terreno.', 4500); manual(fromBench); });
+    for (const tk of ['enxada', 'picareta']) on('m437t_' + tk, () => { for (const k in TOOLS[tk].need) U().take(k, TOOLS[tk].need[k]); U().add(tk, 1, true); toast('<b>' + U().IT[tk].n + '</b> pronta: tecla 9 abre a terraplenagem.', 4500); manual(fromBench); });
     on('m437t_tocha', () => { for (const k in TOOLS.tocha.need) U().take(k, TOOLS.tocha.need[k]); U().add('tocha', 1, true); U().lightTorch(); manual(fromBench); });
     on('m437t_cantil', () => { for (const k in TOOLS.cantil.need) U().take(k, TOOLS.cantil.need[k]); U().S().canteen = { sips: 0, kind: null }; U().save(); toast('<b>Cantil de Couro</b> pronto: encha na margem (F).', 4500); manual(fromBench); });
     for (const id in B) on('m437b_' + id, () => { closeModal(); startPlace(id); });

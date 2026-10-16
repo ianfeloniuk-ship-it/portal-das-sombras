@@ -101,7 +101,7 @@
     c.ry = Math.atan2(player.x - c.x, player.z - c.z);
     // subida: gasta estamina proporcional à altura vencida e ao peso
     const h = typeof terrH === 'function' ? terrH(c.x, c.z) : 0;
-    if (lastH != null && h > lastH) { const cost = (h - lastH) * (3 + loadKg() / 40); /* morro de 6 m com 200 kg ≈ metade da estamina */ try { const r = martialState260(); r.vigor = Math.max(0, r.vigor - cost); r.vigorWait = Math.max(r.vigorWait || 0, .6); tiredUp = r.vigor <= 1 ? .5 : Math.max(0, tiredUp - dt); } catch (_) {} }
+    if (lastH != null && h > lastH) { const cost = (h - lastH) * (3 + loadKg() / 40); if (window.Terra444 && Terra444.pathAt(c.x, c.z) > .3) { lastH = h; tiredUp = 0; } else /* v444: na trilha não gasta */  /* morro de 6 m com 200 kg ≈ metade da estamina */ try { const r = martialState260(); r.vigor = Math.max(0, r.vigor - cost); r.vigorWait = Math.max(r.vigorWait || 0, .6); tiredUp = r.vigor <= 1 ? .5 : Math.max(0, tiredUp - dt); } catch (_) {} }
     else tiredUp = Math.max(0, tiredUp - dt);
     lastH = h;
     // inclinação no morro (o relevo só sobe pela raiz)
