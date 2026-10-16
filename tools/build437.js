@@ -306,6 +306,7 @@
     if (ok && window.Water391 && Water391.waterAt(x, z)) ok = false;
     }
     if (ok && !def.water && typeof nearestCity === 'function' && nearestCity(x, z).d < 70 * (typeof CITYK !== 'undefined' ? CITYK : 1)) ok = false;
+    if (ok && def.water && window.Boats440 && Boats440.boats().some(q => Math.hypot(q.x - x, q.z - z) < (Boats440.K[q.t].w + def.w) * .45)) ok = false; /* v440: não monta barco em cima de outro */
     if (ok && sites().some(q => Math.hypot(q.x - x, q.z - z) < rad + (B[q.t].r || .6) + .3)) ok = false;
     if (place.ok !== ok && place.m) skin(place.m, ok ? ghostMat : badMat);
     place.ok = ok;

@@ -11,9 +11,9 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // m: modelo; h/w: tamanho; sp: velocidade; deck: altura do convés acima da água; draft: fundo mínimo; rot: giro do modelo (proa para +z)
   const K = {
-    canoa: { n: 'Canoa', m: 'canoa', h: 1, w: 3.8, sp: 1.3, deck: .25, draft: .6, rot: 0 },
-    veleiro: { n: 'Veleiro de pesca e carga', m: 'veleiro', h: 6, w: 7, sp: 1.65, deck: .6, draft: 1.1, rot: 0, cargo: true },
-    navio: { n: 'Navio de expedição', m: 'm440/navio', h: 11, w: 13, sp: 1.4, deck: 1.4, draft: 2, rot: 0, base: true }
+    canoa: { n: 'Canoa', m: 'canoa', h: 1, w: 3.8, sp: 1.3, deck: .3, sink: .3, draft: .6, rot: 0 },
+    veleiro: { n: 'Veleiro de pesca e carga', m: 'veleiro', h: 6, w: 7, sp: 1.65, deck: .85, sink: .7, draft: 1.1, rot: 0, cargo: true },
+    navio: { n: 'Navio de expedição', m: 'm440/navio', h: 11, w: 13, sp: 1.4, deck: 1.15, sink: .5, draft: 2, rot: 0, base: true }
   };
   const water = (x, z) => window.Water391 && Water391.waterAt(x, z);
   const deep = (x, z) => { const w = water(x, z); return w && !w.frozen ? w.top - terrH(x, z) : 0; };
@@ -42,7 +42,7 @@
     if (live.has(b.id)) return;
     const k = K[b.t], g = new T.Group(); g.userData.terrainAbsolute245 = true; scene.add(g);
     const o = { b, g, m: null, it: null, t: Math.random() * 10 };
-    U().glb(k.m).then(t => { if (live.get(b.id) !== o || !t) return; const m = U().fit(t, k.h, k.w); if (m.userData.w && t.userData.sx > t.userData.sz) m.rotation.y = Math.PI / 2; m.rotation.y += k.rot; o.m = m; g.add(m); });
+    U().glb(k.m).then(t => { if (live.get(b.id) !== o || !t) return; const m = U().fit(t, k.h, k.w); if (m.userData.w && t.userData.sx > t.userData.sz) m.rotation.y = Math.PI / 2; m.rotation.y += k.rot; m.position.y = -k.sink; /* casco na linha d'água */ o.m = m; g.add(m); });
     o.it = { type: 'boat440', x: b.x, z: b.z, r: Math.max(2.6, k.w * .45), label: 'F · EMBARCAR: ' + k.n.toUpperCase(), use: () => board(b) };
     L.inter.push(o.it); live.set(b.id, o); place(o);
   }
@@ -55,7 +55,7 @@
 
   function cartOnDeck(o) { // carrinho no convés do veleiro (o carrinho de verdade some do chão enquanto isso)
     const c = run.cart437, on = !!(c && c.onBoat440 === o.b.id);
-    if (on && !o.cartG) { const g = new T.Group(); o.cartG = g; g.position.set(0, K[o.b.t].deck + .05, -K[o.b.t].w * .18); o.g.add(g); U().glb('carrinho').then(t => { if (o.cartG === g && t) { const m = U().fit(t, 1.1, 2.4); m.rotation.y = Math.PI / 2; g.add(m); } }); }
+    if (on && !o.cartG) { const g = new T.Group(); o.cartG = g; g.position.set(0, K[o.b.t].deck, -K[o.b.t].w * .12); o.g.add(g); U().glb('carrinho').then(t => { if (o.cartG === g && t) { const m = U().fit(t, 1.1, 2.4); m.rotation.y = Math.PI / 2; g.add(m); } }); }
     if (!on && o.cartG) { o.g.remove(o.cartG); o.cartG = null; }
   }
   /* ---------- embarcar / desembarcar ---------- */
