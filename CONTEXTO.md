@@ -1,3 +1,9 @@
+## v430 — Armaduras Mithril (rank D) Comum..Primeva; ombreira segue o braço, 16/10/2026
+- Pedido de Ian: 8 GLBs pela skill primeva-armadura-encaixe. Identificados pela referência armadura-raridade-01..07 (base Mithril D) e armadura-D-mithril-08: Comum (gema azul), Raro (âmbar pequeno), Épico (roxo), Lendário (âmbar e dourado), Mítico (vermelho), Divino (azul com coroa), Primordial (laranja-vermelho), Primeva (prata espinhosa).
+- Ian (andando no jogo): a ombreira ficava presa no peito e o braço atravessava; o saiote tem que mexer inteiro. fit.py: parte do ombro do peitoral segue upperarm (misturado com o peito), ombreira solta 85% braço; barra do saiote 100% coxa.
+- Jogo: models/equipment429/mithril-r0..r7.glb; EST416 tier 2; corte da canela do corpo-base também no rank D. set-visual153.js ?v=430.
+- Teste: as 8 no herói no navegador (corpo e botas em 4 ângulos), sem sapato saindo, sem erro no console.
+
 ## v429 — Adaga SS, 16/10/2026
 - Pedido de Ian: GLB `ornate fantasy dagger 3d model` = adaga SS Comum (bate com a ficha dourada de gema âmbar). O arquivo veio com um cubo padrão do Blender (2 m) junto; removido, reduzido (16 mil triângulos, 1024 JPEG): `models/armas155/adaga-rank7.glb`.
 - DAG428 agora cobre os 10 ranks; cada rank usa sua Comum em todas as raridades até Ian fazer as outras. Script ?v=429.
