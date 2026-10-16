@@ -403,6 +403,7 @@
     return wrap;
   }
   window.Anchor434 = {
+    crystal(name) { const D = CAPS[name]; if (!D || !D.cry) return Promise.resolve(null); return glb(D.cry).then(w => w ? { m: w.clone(), col: D.col, h: w.userData.h } : null); }, // v450 (Ian): cutscene da âncora rompendo usa a pedra da própria capital
     seal(c, addColFn) {
       const D = CAPS[c && c.name]; if (!D) return null;
       const g = new T.Group(); g.name = 'Anchor434_' + c.name; g.userData.c = c;
