@@ -227,7 +227,7 @@
   const gy = (x, z) => { try { return typeof terrH === 'function' ? terrH(x, z) : 0; } catch (_) { return 0; } };
   function makeBeacon(x, z, side) {
     const g = new THREE.Group();
-    g.position.set(x,gy(x,z),z);g.userData.mats=[];return g;
+    g.position.set(x,gy(x,z),z);g.userData.mats=[];g.userData.terrainAbsolute245=true;return g;
   }
 
   function place(s, sp, i) {
@@ -273,9 +273,9 @@
     if (!m.model) MODELS.ready.then(() => {
       if (!m.root.parent || !MODELS.list[look.gk]) return;
       const old = m.root, ready = makeActor(look);
-      ready.root.position.copy(old.position); ready.root.rotation.copy(old.rotation);
+      ready.root.position.copy(old.position); ready.root.rotation.copy(old.rotation); ready.root.userData.terrainAbsolute245 = true;
       scene.remove(old); Object.assign(m,ready); scene.add(m.root);
-    }); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); scene.add(m.root);
+    }); m.root.position.set(x + 1.8, gy(x + 1.8, z) + (f.down ? .3 : 0), z); m.root.userData.terrainAbsolute245 = true; /* v428: altura absoluta; sem isso o relevo do shader somava de novo e flutuavam em morro */ scene.add(m.root);
     if (f.down) { m.root.position.y = gy(x + 1.8, z); m.wounded401 = true; }
     const fig = { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
     return window.Solid429 ? Solid429.figure(fig) : fig; /* v429: figurante tem colisão */
@@ -357,7 +357,7 @@
   }
   /* Modelo real da carroça, sem boi e condutor durante o resgate. */
   function makeCart(x,z){
-    const g=new THREE.Group();g.position.set(x,gy(x,z),z);g.rotation.y=.5;g.userData.mats=[];
+    const g=new THREE.Group();g.position.set(x,gy(x,z),z);g.rotation.y=.5;g.userData.mats=[];g.userData.terrainAbsolute245=true;
     g.userData.loading=true;window.Solid429?.prop(g,[{x:0,z:-1.5,r:1.25},{x:0,z:0,r:1.3},{x:0,z:1.5,r:1.25}]);/* v429: carroça tombada tem colisão */
     Wagon369.ready.then(ok=>{g.userData.loading=false;if(!ok)return;
       const w=Wagon369.create();w.mixer.stopAllAction();if(w.ox)w.ox.visible=false;if(w.driver.root)w.driver.root.visible=false;
@@ -382,7 +382,7 @@
     if (!people.length) {
       [-1,1].forEach(side => { const f = figure({ civ: true, name: 'Sobrevivente', down: true }, cx - 1.8 + side * .5, cz); w.figs.push(f); people.push(f); });
     }
-    creak();const dustGroup=new THREE.Group();scene.add(dustGroup);const motes=[];let elapsed=0,last=performance.now(),dust=-1;
+    creak();const dustGroup=new THREE.Group();dustGroup.userData.terrainAbsolute245=true;scene.add(dustGroup);const motes=[];let elapsed=0,last=performance.now(),dust=-1;
     function animate(now){
       if(W.get(m.id)!==w||player.dead){scene.remove(dustGroup);paused=modalOpen;return}
       const dt=Math.min(.05,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;
@@ -408,7 +408,7 @@
     try {
       const col = 0xffc457, ring = new THREE.Mesh(new THREE.CircleGeometry(1.9, 48), ringMat(col)); ring.rotation.x = -Math.PI / 2; ring.position.set(x, gy(x, z) + .08, z); ring.renderOrder = 6;
       const beam = new THREE.Mesh(new THREE.CylinderGeometry(.5, 1.2, 14, 20, 1, true), beamMat(col)); beam.position.set(x, gy(x, z) + 7, z); beam.renderOrder = 6;
-      scene.add(ring); scene.add(beam);
+      ring.userData.terrainAbsolute245 = beam.userData.terrainAbsolute245 = true; scene.add(ring); scene.add(beam);
       const t0 = performance.now(), iv = setInterval(() => {
         const k = (performance.now() - t0) / 2600; if (k >= 1) { clearInterval(iv); scene.remove(ring); scene.remove(beam); return; }
         ring.material.uniforms.t.value = beam.material.uniforms.t.value = k * 6; ring.scale.setScalar(.4 + k * 2.2); beam.scale.set(1 - k * .6, 1, 1 - k * .6);

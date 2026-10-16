@@ -4484,7 +4484,7 @@ function buildCity(c,g,addCol,R){
     const w=new THREE.Mesh(geo('hw',()=>new THREE.PlaneGeometry(.8,.8)),glowS(0xffd9a0,.9));w.position.set(1.2,2,2.27);hg.add(w);g.add(hg);addCol({x,z,r:3.4})}
   }
   const plaza=new THREE.Mesh(geo('plaza',()=>new THREE.RingGeometry(12.6,13.2,48)),toonS(0x8e846a));plaza.rotation.x=-Math.PI/2;plaza.position.set(X,.03,Z);g.add(plaza);
-  const cr=seal231(fallen,c.capital);cr.position.set(X,0,Z);g.add(cr);/* v231 (Ian): coluna de ponta quadrada com a esfera de plasma que sela a prisão; quebrada na cidade caída */
+  const cr=(!fallen&&window.Anchor434&&Anchor434.seal(c,addCol))||seal231(fallen,c.capital);cr.position.set(X,0,Z);g.add(cr);/* v434 (Ian): nas 5 capitais das Pedras-Âncora a pedra fica no lugar do selo (tools/mechanics434.js) *//* v231 (Ian): coluna de ponta quadrada com a esfera de plasma que sela a prisão; quebrada na cidade caída */
   const cl=new THREE.PointLight(0xffd08a,1.2,26,1.5);cl.position.set(X,6,Z);g.add(cl);
   const nm=makeCitySign(fallen?c.name.toUpperCase()+' · CAÍDA':c.name.toUpperCase(),fallen?'#ff4d6a':'#ffd08a',.9);nm.position.set(X,9,Z);g.add(nm);
   /* v232: anel dourado flutuante removido (era da muralha antiga de 34 m e cortava a praça) */
@@ -8984,7 +8984,7 @@ requestAnimationFrame(frame);
 <script src="narrativa-campanha.js"></script>
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=406"></script>
-<script src="tools/campaign327.js?v=433"></script>
+<script src="tools/campaign327.js?v=434"></script>
 <script src="tools/ecology410.js?v=412"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9011,7 +9011,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=412"></script>
+<script src="tools/intro401.js?v=434"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -9024,3 +9024,4 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
+<script src="tools/mechanics434.js?v=434"></script>

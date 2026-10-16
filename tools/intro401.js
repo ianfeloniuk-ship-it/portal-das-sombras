@@ -48,6 +48,8 @@ function targetAndText(){
 const arrow=new THREE.Group(),gold=new THREE.MeshBasicMaterial({color:0xffcf70,depthTest:false});
 const tip=new THREE.Mesh(new THREE.ConeGeometry(.24,.48,4),gold);tip.rotation.z=Math.PI;arrow.add(tip);const stem=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.38,8),gold);stem.position.y=.35;arrow.add(stem);arrow.traverse(o=>o.renderOrder=990);
 const pulse=new THREE.Mesh(new THREE.RingGeometry(.65,.76,40),new THREE.MeshBasicMaterial({color:0xffcf70,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));pulse.rotation.x=-Math.PI/2;
+/* v428: seta e anel ficam na altura absoluta (terrH); sem a marca o relevo do shader somava a altura de novo e flutuavam em morro */
+arrow.userData.terrainAbsolute245=true;pulse.userData.terrainAbsolute245=true;
 let current=null;
 function refresh(){
  if(!started||!player||!run||!profile||profile.creationPending91){hud.hidden=true;arrow.visible=pulse.visible=false;return}
