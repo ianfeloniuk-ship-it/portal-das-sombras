@@ -1,3 +1,8 @@
+## v435 (16/10/2026) — Aster não é atacada por monstros
+- Pedido de Ian (print: 'ASTER SOB ATAQUE: DEFESA 0%/1%' piscando). Causa: o evento de Invasão (updEvents) mirava a cidade mais próxima, inclusive Aster; a trava antiga segurava a defesa em 1% e ela piscava 1/0.
+- Regra: Aster é o último refúgio — só o Arquiteto a ameaça. Invasão não escolhe Aster; ataque já ativo em Aster é cancelado e os monstros soltos (save antigo). Removida a trava de 1%. Rompimento de portal e Horda já excluíam Aster.
+- Partes: 260-v341.js (updRaids155), 450-oraculos (updEvents). Teste: ataque falso em Aster some e HUD limpa; outra cidade segue sendo atacada; Invasão perto de Aster não dispara.
+
 ## v434 — Pedras-Âncora no lugar da fonte, cristais novos do Tripo, Passo Silencioso, rastros, Atos IV–VII e mergulho, 16/10/2026
 - Pedido de Ian (lista de mecânicas v422+), refeito depois de Ian achar a 1ª versão feia ("não bate com o jogo"): nada de forma geométrica solta; modelos do Tripo e do próprio jogo. Arena de Sobrevivência descartada por Ian (não existe).
 - Módulo novo tools/mechanics434.js (depois do bestiary405). Modelos novos em models/m434/ gerados no Tripo por texto (30 créditos cada; 13 modelos = 390 créditos da API) e enxugados no Blender (~9 mil triângulos, textura 1024 JPEG, 0,2–0,5 MB cada): 5 bases de Pedra-Âncora (uma por capital), 4 cristais de âncora (âmbar, turquesa, violeta, verde), 2 cristais de veio (brancos, tingidos pelo rank), coral, ruína submersa, ilhota de rocha flutuante.
