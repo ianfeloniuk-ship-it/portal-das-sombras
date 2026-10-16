@@ -3,17 +3,24 @@
    A lógica do jogo continua em y=0; a câmera, a mira e os rótulos somam terrH(x,z). */
 (function(){const T=THREE;
  const TER=window.TER245={on:{value:0},MT:{value:new T.Vector4(40,1,0,0)},D:{value:Array.from({length:16},()=>new T.Vector4(0,0,-1,0))},R:{value:Array.from({length:24},()=>new T.Vector4(0,0,0,0))}};
- const P=30*64*2,H0=30*64*.5,RW=11;
+ const P=30*64*2,H0=30*64*.5,RW=11;const SEAX=-9750,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
  const GL=`uniform float uTerOn;uniform float uTerHeight245;uniform vec2 uTerAnchor245;uniform float uTerBatch245;uniform float uTerAbsolute245;attribute vec2 terrainAnchor245;uniform vec4 uTerD[16];uniform vec4 uTerR[24];uniform vec4 uMt383;
 float mt383(vec2 p){if(uMt383.x<=0.)return 0.;vec2 q=p*uMt383.y;float m=smoothstep(.12,.55,sin(q.x*.0017+sin(q.y*.0023)*1.9)*sin(q.y*.0014+sin(q.x*.0011)*1.4));if(m<=0.)return 0.;
  float r1=1.-abs(sin(q.x*.012+sin(q.y*.009)*1.6)*sin(q.y*.013-q.x*.004));float r2=1.-abs(sin(q.x*.031+q.y*.008)*sin(q.y*.027-q.x*.011));float r3=1.-abs(sin(q.x*.071-q.y*.02)*sin(q.y*.063+q.x*.017));
  return uMt383.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08);}
+/* v439 (Ian): o mar a oeste de Thalor — praia, recifes, alto-mar e fossas. Igual ao seaD439/seaBed439 do CPU. */
+float seaD439(vec2 p){return ${SEAX.toFixed(1)}+150.*sin(p.y*.0009)+60.*sin(p.y*.0031+1.3)+20.*sin(p.y*.011)-p.x;}
+float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?mix(-3.,-7.,(d-60.)/390.):mix(-7.,-22.,clamp((d-450.)/1200.,0.,1.));
+ b+=2.6*max(0.,sin(p.x*.06+sin(p.y*.05)*2.)*sin(p.y*.055+sin(p.x*.04)*1.5)-.2)*smoothstep(40.,120.,d)*(1.-smoothstep(380.,500.,d));
+ if(d>800.){float t=1.-abs(sin(p.x*.0042+sin(p.y*.0027)*2.1)*sin(p.y*.0036-p.x*.0011));b-=42.*smoothstep(.86,.97,t)*smoothstep(800.,1000.,d);}
+ return b+.6*sin(p.x*.13+p.y*.07)*sin(p.y*.11-p.x*.05);}
 float terrH245(vec2 p){if(uTerOn<.5)return 0.;float m=.62+.38*sin(p.x*.0021+1.)*sin(p.y*.0017+.4);
  float h=(15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)+5.*sin(p.x*.031+p.y*.017)*sin(p.y*.027-p.x*.012)+1.2*sin(p.x*.09+p.y*.05))*m+mt383(p);
  float b=floor((p.x-${H0.toFixed(1)})/${P.toFixed(1)}+.5),c=b*${P.toFixed(1)}+${H0.toFixed(1)}+sin(p.y*.0043+b*1.7)*95.+sin(p.y*.011+b)*28.+sin(p.y*.035+b*2.3)*18.+sin(p.y*.079+b*3.1)*5.;
  float rw=5.5*(1.+.22*sin(p.y*.047+b*1.3)+.12*sin(p.y*.113+b*2.7));float rdx=abs(p.x-c);h=mix(h,-2.4,1.-smoothstep(rw,rw+7.,rdx));if(rdx<rw)h-=2.2*(1.-rdx*rdx/(rw*rw));
+ float sd=seaD439(p);if(sd>-60.)h=mix(h,seaBed439(p,sd),smoothstep(-60.,30.,sd));float rk439=1.-smoothstep(300.,600.,sd);
  for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);h=mix(h,D.w,1.-smoothstep(D.z,D.z+38.,dd));if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
- for(int i=0;i<24;i++){vec4 R=uTerR[i];vec2 q=clamp(p,min(R.xy,R.zw),max(R.xy,R.zw));h=mix(h,0.,1.-smoothstep(5.,22.,length(p-q)));}
+ for(int i=0;i<24;i++){vec4 R=uTerR[i];vec2 q=clamp(p,min(R.xy,R.zw),max(R.xy,R.zw));h=mix(h,0.,(1.-smoothstep(5.,22.,length(p-q)))*rk439);}
  return h;}
 `;
  /* v391 (Ian): rios e lagos têm leito cavado (fundo em U de 2,2 m / bacia de 2,5 m) e margens mais íngremes. */
@@ -22,12 +29,20 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;float m=.62+.38*sin(p.x*.0021+1.)*
   const r1=1-Math.abs(S(qx*.012+S(qz*.009)*1.6)*S(qz*.013-qx*.004)),r2=1-Math.abs(S(qx*.031+qz*.008)*S(qz*.027-qx*.011)),r3=1-Math.abs(S(qx*.071-qz*.02)*S(qz*.063+qx*.017));
   return M.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08)}
  TER.mt383=mt383;
+ function seaD439(x,z){const S=Math.sin;return SEAX+150*S(z*.0009)+60*S(z*.0031+1.3)+20*S(z*.011)-x}
+ function seaBed439(x,z,d){const S=Math.sin,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
+  let b=d<60?mix(1.2,-3,(d+60)/120):d<450?mix(-3,-7,(d-60)/390):mix(-7,-22,Math.min(1,Math.max(0,(d-450)/1200)));
+  b+=2.6*Math.max(0,S(x*.06+S(z*.05)*2)*S(z*.055+S(x*.04)*1.5)-.2)*ss(40,120,d)*(1-ss(380,500,d));
+  if(d>800){const t=1-Math.abs(S(x*.0042+S(z*.0027)*2.1)*S(z*.0036-x*.0011));b-=42*ss(.86,.97,t)*ss(800,1000,d)}
+  return b+.6*S(x*.13+z*.07)*S(z*.11-x*.05)}
+ TER.SEA439={X:SEAX,Y:SEAY,d:seaD439,bed:seaBed439};
  window.terrH=function(x,z){if(!TER.on.value)return 0;const S=Math.sin,m=.62+.38*S(x*.0021+1)*S(z*.0017+.4);
   let h=(15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)+5*S(x*.031+z*.017)*S(z*.027-x*.012)+1.2*S(x*.09+z*.05))*m+mt383(x,z);
   const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   const b=Math.floor((x-H0)/P+.5),c=b*P+H0+S(z*.0043+b*1.7)*95+S(z*.011+b)*28+S(z*.035+b*2.3)*18+S(z*.079+b*3.1)*5;{const rw=(RW*(1+.22*S(z*.047+b*1.3)+.12*S(z*.113+b*2.7)))/2,rdx=Math.abs(x-c);h=mix(h,-2.4,1-ss(rw,rw+7,rdx));if(rdx<rw)h-=2.2*(1-rdx*rdx/(rw*rw))}
+  const sd=seaD439(x,z);if(sd>-60)h=mix(h,seaBed439(x,z,sd),ss(-60,30,sd));const rk439=1-ss(300,600,sd);
   for(const D of TER.D.value){if(D.z<0)continue;const dd=Math.hypot(x-D.x,z-D.y);h=mix(h,D.w,1-ss(D.z,D.z+38,dd));if(D.w<0){const rr=D.z-3;if(dd<rr)h-=2.5*(1-dd*dd/(rr*rr))}}
-  for(const R of TER.R.value){const qx=Math.min(Math.max(x,Math.min(R.x,R.z)),Math.max(R.x,R.z)),qz=Math.min(Math.max(z,Math.min(R.y,R.w)),Math.max(R.y,R.w));h=mix(h,0,1-ss(5,22,Math.hypot(x-qx,z-qz)))}
+  for(const R of TER.R.value){const qx=Math.min(Math.max(x,Math.min(R.x,R.z)),Math.max(R.x,R.z)),qz=Math.min(Math.max(z,Math.min(R.y,R.w)),Math.max(R.y,R.w));h=mix(h,0,(1-ss(5,22,Math.hypot(x-qx,z-qz)))*rk439)}
   return h};
 
  const C=T.ShaderChunk;

@@ -127,9 +127,11 @@
   function syncFed() { const on = S().fed > 0; if (on !== fedWas) { fedWas = on; try { refreshStats(); } catch (_) {} } }
 
   /* ---------------- água e cantil ---------------- */
-  const WATER_K = { limpa: 'Água limpa', suja: 'Água de rio/lago (crua)', cha: 'Chá de ervas', pantano: 'Água do pântano (crua)' };
+  const WATER_K = { limpa: 'Água limpa', suja: 'Água de rio/lago (crua)', cha: 'Chá de ervas', pantano: 'Água do pântano (crua)', mar: 'Água do mar (salgada)' };
   function drink(kind, amt) {
-    const s = S(); s.sede = Math.min(100, s.sede + amt);
+    const s = S();
+    if (kind === 'mar') { s.sede = Math.max(0, s.sede - 8); toast('Água do mar: o sal dá <b>mais</b> sede. Destile na fogueira (cantil cheio de água do mar).', 4500); save(); return; } // v439
+    s.sede = Math.min(100, s.sede + amt);
     let msg = 'Você bebeu ' + WATER_K[kind].toLowerCase() + '.';
     const risk = kind === 'suja' ? .25 : kind === 'pantano' ? .6 : 0;
     if (Math.random() < risk) { s.sickT = 150; s.fome = Math.max(0, s.fome - 12); msg += ' <b style="color:#ff9b8b">Mal-estar</b>: devia ter fervido.'; }
@@ -140,14 +142,18 @@
     const c = S().canteen; if (!c || !c.sips) { toast('O cantil está vazio. Encha na margem de um rio ou lago (F).'); return; }
     c.sips--; drink(c.kind, 22); if (!c.sips) c.kind = null;
   }
-  function waterNear() { // margem a até 2,5 m
+  function waterNear(seaOnly) { // margem a até 2,5 m (seaOnly: só se for o mar, v439)
     if (!window.Water391 || !world()) return null;
-    for (let i = 0; i < 9; i++) { const a = i / 8 * TAU, r = i ? 2.2 : 0, x = player.x + Math.cos(a) * r, z = player.z + Math.sin(a) * r, w = Water391.waterAt(x, z); if (w && !w.frozen) return { x, z }; }
+    for (let i = 0; i < 9; i++) { const a = i / 8 * TAU, r = i ? 2.2 : 0, x = player.x + Math.cos(a) * r, z = player.z + Math.sin(a) * r, w = Water391.waterAt(x, z); if (w && !w.frozen && (!seaOnly || w.sea)) return { x, z }; }
     return null;
   }
   const waterIt = { type: 'water437', x: 0, z: 0, r: 3.2, label: '', hidden: true, use: () => waterMenu() };
   function waterMenu() {
-    const s = S(), sw = typeof biomeAt === 'function' && biomeAt(player.x, player.z) === 'pantano' ? 'pantano' : 'suja';
+    const s = S(), sea = !!(window.Water391 && waterNear(true)), sw = sea ? 'mar' : typeof biomeAt === 'function' && biomeAt(player.x, player.z) === 'pantano' ? 'pantano' : 'suja';
+    if (sea) { const c0 = s.canteen; openModal('MAR', '<p>Água salgada: beber dá mais sede. Encha o cantil e <b>destile</b> na fogueira (vira água limpa e sobra Sal Grosso).</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="w437d">BEBER MESMO ASSIM</button>' + (c0 ? '<button class="btn" id="w437f">ENCHER O CANTIL (' + c0.sips + '/5)</button>' : '<span style="opacity:.7">Sem cantil.</span>') + '</div>');
+      document.getElementById('w437d').onclick = () => { closeModal(); drink('mar', 0); };
+      const f0 = document.getElementById('w437f'); if (f0) f0.onclick = () => { c0.sips = 5; c0.kind = 'mar'; closeModal(); toast('Cantil cheio de água do mar. Destile na fogueira.', 4000); save(); };
+      return; }
     const c = s.canteen;
     const h = '<p>Água de ' + (sw === 'pantano' ? 'pântano' : 'rio ou lago') + ': beber crua tem risco de mal-estar (' + (sw === 'pantano' ? '60' : '25') + '%). Fervida na fogueira (ou em chá de ervas) fica segura.</p>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="w437d">BEBER DIRETO</button>' +

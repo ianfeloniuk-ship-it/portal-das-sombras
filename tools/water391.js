@@ -8,6 +8,7 @@
   const SWIM_DEPTH=1.3,BODY=1.25;
   function waterAt(x,z){ // {top, frozen} ou null
     if(L.mode!=='world'||L.grid)return null;
+    {const SE=window.TER245&&TER245.SEA439;if(SE&&SE.d(x,z)>-60&&terrH(x,z)<SE.Y)return {top:SE.Y,frozen:false,sea:true}} /* v439: mar a oeste de Thalor */
     const rv=riverNear239(x,z),w=riverWidth351(rv.b,z);
     if(rv.d<w/2){const b=snowB(x,z);if(b>.717)return null;if(onRoad(roadSegs(x,z,1),x,z,5))return null;return {top:terrH(rv.x+w/2,z)+.06,frozen:b<.29}}
     const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));

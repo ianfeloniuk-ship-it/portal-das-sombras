@@ -149,7 +149,8 @@
     h += btn('f437l', 'PÔR LENHA (+' + Math.round(DAY() / 6 / 60) + ' min)', U().has('lenha') || (window.Cart437 && Cart437.near(b.x, b.z, 8) && Cart437.has('lenha')));
     for (const [a, r, t] of cookList()) h += btn('f437c_' + a, t + ' (' + (S.bag[a] || 0) + ')', lit(b) && U().has(a));
     if (S.bag.carne && S.bag.sal) h += btn('f437s', 'SALGAR CARNE (+Sal)', true);
-    h += btn('f437b', 'FERVER O CANTIL', lit(b) && c && c.sips > 0 && c.kind !== 'limpa' && c.kind !== 'cha');
+    h += btn('f437b', 'FERVER O CANTIL', lit(b) && c && c.sips > 0 && c.kind !== 'limpa' && c.kind !== 'cha' && c.kind !== 'mar');
+    h += btn('f437m', 'DESTILAR ÁGUA DO MAR', lit(b) && c && c.sips > 0 && c.kind === 'mar'); // v439: rende metade e sobra sal
     h += btn('f437t', 'CHÁ DE ERVAS (cantil + Ervas)', lit(b) && c && c.sips > 0 && U().has('erva'));
     h += '</div><p style="opacity:.75;margin-top:8px">Perto do fogo aceso, o frio da neve não pesa. Comida assada dá Bem Alimentado.</p>';
     openModal(title || 'FOGUEIRA', h);
@@ -157,6 +158,7 @@
     on('f437l', () => { if (!U().take('lenha', 1)) Cart437.take('lenha', 1); b.fuel = (b.fuel || 0) + DAY() / 6; U().save(); re(); });
     for (const [a, r] of cookList()) on('f437c_' + a, () => { const n = S.bag[a]; let k = 0; for (let i = 0; i < n; i++) { U().take(a, 1); U().add(r, 1, true); k++; } b.fuel = Math.max(0, b.fuel - 20 * k); toast('Assou ' + k + ' × ' + IT()[r].n + '.'); try { sfx('pickup'); } catch (_) {} re(); });
     on('f437s', () => { const n = Math.min(S.bag.carne, S.bag.sal); for (let i = 0; i < n; i++) { U().take('carne', 1); U().take('sal', 1); U().add('salgada', 1, true); } toast('Salgou ' + n + ' carne(s).'); re(); });
+    on('f437m', () => { c.sips = Math.max(1, Math.ceil(c.sips / 2)); c.kind = 'limpa'; b.fuel = Math.max(0, b.fuel - 30); U().add('sal', 1, true); toast('Água do mar destilada: ' + c.sips + ' gole(s) de água limpa e 1 Sal Grosso.'); U().save(); re(); });
     on('f437b', () => { c.kind = 'limpa'; b.fuel = Math.max(0, b.fuel - 15); toast('Água fervida: agora é segura.'); U().save(); re(); });
     on('f437t', () => { U().take('erva', 1); c.kind = 'cha'; toast('Chá de ervas pronto no cantil (tira mal-estar).'); U().save(); re(); });
   }
