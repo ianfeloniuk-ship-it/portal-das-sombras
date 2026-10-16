@@ -243,11 +243,26 @@
     return out;
   }
   function marksView() {
-    const M = P423().marks; if (!M.length || typeof openModal !== 'function') return;
-    let h = '<p>As runas dos guardiões têm traços diferentes, mas o mesmo sinal central — um triângulo com um ponto, cercado por cinco marcas. É a <b>Marca do Arquiteto</b>.</p><div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap">';
-    M.forEach(m => { h += '<div style="text-align:center">' + glyph(m.seed, M.length > 1) + '<br>' + esc(m.n) + '</div>'; });
-    if (M.length < 2) h += '<div style="text-align:center;opacity:.55;width:150px;padding-top:60px">Derrote mais um guardião para comparar.</div>';
-    h += '</div>' + (M.length > 1 ? '<p style="color:#ff9b8b">Em vermelho: o sinal que se repete nos dois. Leve a comparação a Lyra.</p>' : '');
+    if (typeof openModal !== 'function') return;
+    const M = P423().marks || [];
+    let h = '<div style="line-height:1.6;font-size:14px;color:#e8e0cc">';
+    h += '<p style="margin-top:0">As <b>Marcas do Arquiteto</b> são glifos rúnicos gravados nas fendas e nos guardiões das Fendas Antigas (a partir do <b>Ato IV</b>). Cada guardião derrotado concede uma runa flutuante para comparação geométrica.</p>';
+    if (!M.length) {
+      h += '<div style="background:rgba(255,255,255,0.05);border:1px dashed rgba(224,192,104,0.35);border-radius:8px;padding:22px;text-align:center;margin:18px 0">';
+      h += '<div style="font-size:32px;margin-bottom:8px">🏛️ ⬡ ⚔️</div>';
+      h += '<b style="color:#e0c068;font-size:15px">NENHUMA MARCA REGISTRADA AINDA</b>';
+      h += '<p style="opacity:0.8;font-size:13px;max-width:440px;margin:8px auto 0">Derrote os Guardiões das Fendas (como no <i>Ato IV · O Chamado do Arquiteto</i> e nas Fendas Maiores) para coletar seus fragmentos de marcas e compará-los aqui com Lyra.</p>';
+      h += '</div>';
+      h += '<p style="opacity:0.65;font-size:12px;text-align:center">Quando duas ou mais marcas forem registradas, o sinal comum em vermelho revelará a geometria central do Arquiteto.</p>';
+    } else {
+      h += '<p>As runas dos guardiões têm traços diferentes, mas o mesmo sinal central — um triângulo com um ponto, cercado por cinco marcas. É a <b>Marca do Arquiteto</b>:</p>';
+      h += '<div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:16px 0">';
+      M.forEach(m => { h += '<div style="text-align:center;background:rgba(0,0,0,0.25);border:1px solid #444;border-radius:6px;padding:10px 14px">' + glyph(m.seed, M.length > 1) + '<br><b style="color:#e0c068">' + esc(m.n) + '</b></div>'; });
+      if (M.length < 2) h += '<div style="text-align:center;opacity:.65;width:150px;padding-top:40px;border:1px dashed #555;border-radius:6px;padding:20px 10px">Derrote mais um guardião para comparar os sinais comuns.</div>';
+      h += '</div>';
+      h += (M.length > 1 ? '<p style="color:#ff9b8b;font-weight:bold;text-align:center">Em vermelho: o sinal que se repete nos dois. Leve a comparação a Lyra.</p>' : '');
+    }
+    h += '</div>';
     openModal('MARCAS DO ARQUITETO', h);
   }
   /* Ato V e Ato VI (brecha): cenas montadas junto com as do scenes406 */
@@ -802,7 +817,7 @@
     const ref = document.getElementById('bDiary'); if (!ref) { setTimeout(menu, 500); return; }
     if (document.getElementById('bAnchor423')) return;
     const a = document.createElement('button'); a.className = 'mini'; a.id = 'bAnchor423'; a.textContent = 'PEDRAS-ÂNCORA'; a.onclick = anchorsView;
-    const m = document.createElement('button'); m.className = 'mini'; m.id = 'bMarks423'; m.textContent = 'MARCAS DO ARQUITETO'; m.onclick = () => P423().marks.length ? marksView() : toast('Nenhuma marca registrada ainda.');
+    const m = document.createElement('button'); m.className = 'mini'; m.id = 'bMarks423'; m.textContent = 'MARCAS DO ARQUITETO'; m.onclick = marksView;
     ref.after(a, m);
   })();
   function save423() { try { if (typeof saveRun === 'function') saveRun(); } catch (_) {} }

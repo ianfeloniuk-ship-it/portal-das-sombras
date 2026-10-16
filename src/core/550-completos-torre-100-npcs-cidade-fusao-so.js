@@ -15,7 +15,7 @@ function npcRows(n){const l=affL(n),q=NPCQ[n],s=(profile.npcq||{})[n]||{got:0};l
   else h+=row('Missão pessoal','Liberada com 3 corações','');return h}
 /* cidade */
 const cityOf=()=>nearestCity(player.x,player.z).c;
-const cityL=c=>Math.max(c&&c.capital?4:0,(profile.cityLv||{})[c.id]||0)/* v217: capitais já nascem grandes */;
+const cityL=c=>c?(profile.cityLv||{})[c.id]||0:0;
 /* cidades caídas */
 function cityFallen(c){if(c?.name==='Aster')return false;if(c&&(profile.raided155||{})[c.id])return true;if(!seasonOn()||profile.season===weekId()||c.name==='Aster'||(profile.rebuilt||{})[c.id]===weekId())return false;const day=gameDay198()%7;const h=(Math.imul(c.cx|0,73856093)^Math.imul(c.cz|0,19349663)^weekId())>>>0;return (h%10)<=day}
 function towerRank(){const R=mulberry32((profile.seed|0)+9);const l=NAMES.slice(0,12).map(n=>({n,f:Math.floor(Math.pow(R(),1.8)*100)+1}));l.push({n:'Você',f:profile.towerBest||0,me:true});return l.sort((a,b)=>b.f-a.f)}

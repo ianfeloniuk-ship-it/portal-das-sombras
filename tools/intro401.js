@@ -32,18 +32,40 @@ overlay.querySelector('button').onclick=next;
 addEventListener('keydown',e=>{if(!API.conversation&&!API.reclaiming())return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&['KeyF','Enter','Space'].includes(e.code))next()},true);
 addEventListener('keyup',e=>{if(API.conversation||API.reclaiming()){e.preventDefault();e.stopImmediatePropagation()}},true);
 function targetAndText(){
- const s=Campaign327.state('a1');if(!s)return null;
- if(!s.done){
+ const s1=Campaign327?.state?.('a1');
+ if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
-  if(s.s===0){if(!s.helped401&&!s.fightDone&&!s.killed)return {step:1,text:'Ajude o guarda Edran na carroça tombada [F]',target:edran()};
-   if(API.reclaiming())return {step:2,text:'A Mão do Arquiteto está recolhendo a criatura…',target:null};
-   if(!s.fightDone)return {step:2,text:'Derrote a criatura da Fenda com os punhos',target:w?.foes.find(e=>!e.dead)};
-   return {step:3,text:s.edranHelp401?'Ajude Edran a empurrar a carroça [F]':'Fale com Edran [F]',target:s.edranHelp401?Campaign327.target():edran()};}
-  if(s.s===1){const c=nearestCity(player.x,player.z).c;return {step:4,text:'Siga pela estrada até o Portão de Aster',target:GATES341.filter(g=>g.c.name===c.name).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]};}
-  if(s.s===2)return {step:5,text:'Registre sua chegada com Lyra na Ordem da Fenda [F]',target:vendor('Lyra')};
-  return {step:6,text:'Faça o escambo da sua primeira arma com Kael para despertar sua Classe [F]',target:vendor('Kael')};
+  if(s1.s===0){if(!s1.helped401&&!s1.fightDone&&!s1.killed)return {actTitle:'ATO I · O CHAMADO',step:1,totalSteps:6,text:'Ajude o guarda Edran na carroça tombada [F]',target:edran()};
+   if(API.reclaiming())return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:'A Mão do Arquiteto está recolhendo a criatura…',target:null};
+   if(!s1.fightDone)return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:'Derrote a criatura da Fenda com os punhos',target:w?.foes.find(e=>!e.dead)};
+   return {actTitle:'ATO I · O CHAMADO',step:3,totalSteps:6,text:s1.edranHelp401?'Ajude Edran a empurrar a carroça [F]':'Fale com Edran [F]',target:s1.edranHelp401?Campaign327.target():edran()};}
+  if(s1.s===1){const c=nearestCity(player.x,player.z).c;return {actTitle:'ATO I · O CHAMADO',step:4,totalSteps:6,text:'Siga pela estrada até o Portão de Aster',target:GATES341.filter(g=>g.c.name===c.name).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]};}
+  if(s1.s===2)return {actTitle:'ATO I · O CHAMADO',step:5,totalSteps:6,text:'Registre sua chegada com Lyra na Ordem da Fenda [F]',target:vendor('Lyra')};
+  return {actTitle:'ATO I · O CHAMADO',step:6,totalSteps:6,text:'Faça o escambo da sua primeira arma com Kael para despertar sua Classe [F]',target:vendor('Kael')};
  }
- const m=Campaign327.active().find(m=>m.act);if(!m)return {text:'Explore livremente. A história continua quando você quiser.'};const st=Campaign327.state(m.id),sp=m.steps[st.s];return {text:sp.d.replace('{cidade}',st.city||'Aster'),target:sp.npc?vendor(sp.npc):st.pos?{x:st.pos[0],z:st.pos[1]}:null};
+ if(!window.Campaign327)return null;
+ const activeMissions=Campaign327.active()||[];
+ let m=null;
+ if(run?.trackObj&&String(run.trackObj).startsWith('camp327:')){
+  const tid=run.trackObj.slice(8);
+  m=activeMissions.find(x=>x.id===tid)||(Campaign327.ACTS||[]).find(x=>x.id===tid)||(Campaign327.SIDE||[]).find(x=>x.id===tid);
+ }
+ if(!m)m=activeMissions.find(x=>x.act)||activeMissions[0];
+ if(!m){
+  const tr=typeof trackedObjective==='function'?trackedObjective():null;
+  if(tr)return {actTitle:'OBJETIVO',step:1,totalSteps:1,text:tr.progress||tr.n||tr.d,target:null};
+  return {actTitle:'MUNDO ABERTO',step:0,totalSteps:0,text:'Explore livremente. A história continua quando você quiser.',target:null};
+ }
+ const st=Campaign327.state(m.id);
+ if(!st||st.done){
+  return {actTitle:m.act?'ATO '+(['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'][m.act-1]||m.act)+' · '+m.title.toUpperCase():'MISSÃO · '+m.title.toUpperCase(),step:m.steps?.length||1,totalSteps:m.steps?.length||1,text:m.consequence||'Missão concluída. Consulte o Diário para os próximos passos.',target:null};
+ }
+ const sp=m.steps[st.s],romans=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'];
+ const title=m.act?('ATO '+(romans[m.act-1]||m.act)+' · '+m.title.toUpperCase()):('MISSÃO · '+m.title.toUpperCase());
+ const stepNum=st.s+1,total=m.steps.length;
+ const desc=sp?sp.d.replace('{cidade}',st.city||'Aster'):'Objetivo em andamento';
+ const tgt=Campaign327.target()||(sp?.npc?vendor(sp.npc):st.pos?{x:st.pos[0],z:st.pos[1]}:null);
+ return {actTitle:title,step:stepNum,totalSteps:total,text:desc,target:tgt};
 }
 const arrow=new THREE.Group(),gold=new THREE.MeshBasicMaterial({color:0xffcf70,depthTest:false});
 const tip=new THREE.Mesh(new THREE.ConeGeometry(.24,.48,4),gold);tip.rotation.z=Math.PI;arrow.add(tip);const stem=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.38,8),gold);stem.position.y=.35;arrow.add(stem);arrow.traverse(o=>o.renderOrder=990);
@@ -54,7 +76,8 @@ let current=null;
 function refresh(){
  if(!started||!player||!run||!profile||profile.creationPending91){hud.hidden=true;arrow.visible=pulse.visible=false;return}
  document.body.classList.toggle('guided401',API.guided());current=targetAndText();hud.hidden=!current; if(!current)return;
- hud.querySelector('small').textContent=current.step?'ATO I · O CHAMADO · '+current.step+'/6':'MUNDO ABERTO · HISTÓRIA OPCIONAL';hud.querySelector('p').textContent=current.text;{const q=qui();collapsed=q.min;hud.hidden=!!q.closed;hud.querySelector('p').hidden=collapsed;hud.querySelector('[data-q="min"]').textContent=collapsed?'+':'−';hud.querySelector('[data-q="min"]').setAttribute('aria-label',collapsed?'Mostrar objetivo':'Minimizar objetivo')}
+ const titleTxt=current.actTitle?(current.actTitle+(current.totalSteps>1?' · '+current.step+'/'+current.totalSteps:'')):(current.step?'ATO I · O CHAMADO · '+current.step+'/6':'MUNDO ABERTO · HISTÓRIA OPCIONAL');
+ hud.querySelector('small').textContent=titleTxt;hud.querySelector('p').textContent=current.text;{const q=qui();collapsed=q.min;hud.hidden=!!q.closed;hud.querySelector('p').hidden=collapsed;hud.querySelector('[data-q="min"]').textContent=collapsed?'+':'−';hud.querySelector('[data-q="min"]').setAttribute('aria-label',collapsed?'Mostrar objetivo':'Minimizar objetivo')}
 }
 setInterval(refresh,200);
 function pose(f,dt){if(!f?.m?.model||!f.down)return;const m=f.m;
