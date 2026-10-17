@@ -5,7 +5,7 @@ let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,
 const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
 let modalRoute118='';
 const MODAL_NAV118={current:null,back:[],returning:false,restore:null,serial:0};
-function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout'))return skillsView;if(modalRoute118==='constel')return passivesView;return null}
+function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout')||modalRoute118==='combo261')return skillsView;if(modalRoute118==='constel')return passivesView;/* v462 (Ian): subpáginas abertas direto também têm ← Voltar */const t=$('mt')?.textContent||'';if(t==='EQUIPAMENTOS')return buildView;if(t==='APARÊNCIA')return statusView;return null}
 function modalBack118(){if(profile?.creationPending91&&started)return;bindWait=null;const prev=MODAL_NAV118.back.pop(),parent=modalParent118();if(!prev&&!parent)return;MODAL_NAV118.returning=true;MODAL_NAV118.restore=prev?prev.scroll:null;try{(prev?prev.render:parent)()}finally{MODAL_NAV118.returning=false;MODAL_NAV118.restore=null}}
 function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:'+route:title+'|'+String(view);if(!modalOpen){nav.current=null;nav.back=[]}const old=nav.current;if(old)old.scroll=$('mb').scrollTop;let scroll=route?CHAR_UI118.scroll[route]||0:0;
  if(old&&old.key===key)scroll=old.scroll;

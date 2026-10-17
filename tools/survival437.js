@@ -6,6 +6,9 @@
   const H = (x, z) => (typeof L !== 'undefined' && L && L.mode === 'dungeon') ? 0 : (typeof terrH === 'function' ? terrH(x, z) : 0);
   const ready = () => typeof started !== 'undefined' && started && typeof player !== 'undefined' && player && typeof run !== 'undefined' && run && typeof L !== 'undefined' && L && (L.mode === 'world' || L.mode === 'dungeon');
   const DAY = () => (typeof DAY_LENGTH !== 'undefined' ? DAY_LENGTH : 1200);
+  /* v462: bônus de sobrevivência dos 9 atributos (tools/attrs462.js) e treino prático */
+  const A = (k) => { try { return (window.Attr462 && Attr462.surv()[k]) || 0; } catch (_) { return 0; } };
+  const TR = (k, n) => { try { if (window.Attr462) Attr462.train(k, n); } catch (_) {} };
 
   /* ---------- Catálogo de Itens, Alimentos, Bolsas de Conservação e Cantis ---------- */
   const ITEMS = {
@@ -158,19 +161,20 @@
   }
   function spoilMult(inCart) {
     const s = S(); if (!s) return 1;
+    const fresh = 1 - A('fresh'); // Inteligência: comida preparada dura mais
     if (inCart) {
       // Caixa de Salmoura no Carrinho de Carga: alimentos guardados nos slots do carrinho estragam 75% mais devagar
-      return 0.25;
+      return 0.25 * fresh;
     }
     const inRift = typeof L !== 'undefined' && L && L.mode === 'dungeon';
     const hasThermal = (s.inv.mochila_termica || 0) > 0;
     const hasSaltBag = (s.inv.alforje_sal || 0) > 0;
     // O Miasma da Fenda faz qualquer comida fora de bolsas térmicas/invólucros de resina apodrecer 2x mais rápido lá dentro
-    const miasma = (inRift && !hasThermal) ? 2.0 : 1.0;
+    const miasma = (inRift && !hasThermal) ? 1 + (1 - A('miasma')) : 1.0; // Espírito enfraquece o Miasma
     let bag = 1.0;
     if (hasThermal) bag = 0.20;      // -80% apodrecimento
     else if (hasSaltBag) bag = 0.50; // -50% apodrecimento
-    return bag * miasma;
+    return bag * miasma * fresh;
   }
 
   /* ---------- Peso e Capacidade ---------- */
@@ -192,13 +196,13 @@
   }
   function totalW() { return equipW() + invW(); }
   function maxW() {
-    const s = S(), str = (run?.stats?.str || 0), bags = (s?.inv?.bolsa || 0) + ((s?.inv?.alforje_sal || 0) > 0 ? 0.5 : 0) + ((s?.inv?.mochila_termica || 0) > 0 ? 1 : 0);
-    return 35 + str * 0.8 + bags * 12;
+    const s = S(), bags = (s?.inv?.bolsa || 0) + ((s?.inv?.alforje_sal || 0) > 0 ? 0.5 : 0) + ((s?.inv?.mochila_termica || 0) > 0 ? 1 : 0);
+    return 35 + A('carryKg') + bags * 12; // Força (antes lia run.stats.str, que não existe)
   }
   function overRatio() { return totalW() / Math.max(1, maxW()); }
   function overMul() {
     const r = overRatio();
-    const cartPull = window.Cart437 && Cart437.st && Cart437.st()?.pulling ? 0.82 : 1;
+    const cartPull = window.Cart437 && Cart437.st && Cart437.st()?.pulling ? 1 - 0.18 * (1 - A('cartRelief')) : 1;
     const coldSlow = (S()?.temp ?? 50) < 18 ? 0.85 : 1;
     const base = r > 1.25 ? 0.38 : r > 1.0 ? 0.68 : r > 0.85 ? 0.88 : 1;
     return base * cartPull * coldSlow;
@@ -246,6 +250,7 @@
   }
   function useTool(id, cost = 1) {
     const s = S(); if (!s || !count(id)) return false;
+    if ((id === 'machado' || id === 'picareta') && Math.random() < A('toolSave')) return true;
     const max = ITEMS[id].dur || 20;
     s.dur[id] = (s.dur[id] ?? max) - cost;
     if (s.dur[id] <= 0) {
@@ -497,6 +502,7 @@
         floater(d.x, d.z, '+3 Pedras · +1 Lasca · +1 Sal/Resina', '#d8cfbf', true);
       }
       try { sfx('mine'); if (window.Anim303) Anim303.play('picareta', 1.1); } catch (_) {}
+      TR('for');
     } else if (d.kind === 'galho') {
       const n = 2 + (Math.random() < 0.5 ? 1 : 0);
       add('galho', n, true);
@@ -525,6 +531,11 @@
       floater(d.x, d.z, '+2 Cogumelos Comestíveis', '#e0c898', true);
       try { sfx('step'); if (window.Anim303) Anim303.play('palma', 1.2); } catch (_) {}
     }
+    // v462 Percepção: coleta extra e achado raro; colher treina Percepção
+    const main = { rocha: 'pedra', galho: 'galho', pedra: 'pedra', arbusto: 'fruta', erva: 'erva', cogu: 'cogu_bom' }[d.kind];
+    if (main && Math.random() < A('gatherExtra')) { add(main, 1, true); floater(d.x, d.z, '+1 ' + ITEMS[main].n + ' (Percepção)', '#ffd76a'); }
+    if (Math.random() < A('gatherRare')) { const rare = d.bio === 'neve' || d.bio === 'cristal' ? 'cristal_frio' : Math.random() < .5 ? 'erva' : 'resina'; add(rare, 1, true); floater(d.x, d.z, 'ACHADO RARO: ' + ITEMS[rare].n, '#ffd76a', true); }
+    TR('per');
     // Coleta orgânica com regeneração natural em 1 dia de jogo
     s.picked[d.id] = s.clock + DAY();
     removeNode(d.id);
@@ -609,6 +620,8 @@
     spawnStumpVisual(tr.key, tr.x, tr.z);
     add('tora', 1, true);
     add('lenha', 2, true);
+    if (Math.random() < A('chopExtra')) { add('lenha', 1, true); floater(tr.x, tr.z, '+1 Lenha (Força)', '#ffd76a'); }
+    TR('for');
     add('galho', 2, true);
     if (Math.random() < 0.65) add('resina', 1, true);
     floater(tr.x, tr.z, '+1 Tora · +2 Lenhas · +2 Galhos (regenera em 1 dia)', '#d8b37a', true);
@@ -670,6 +683,7 @@
     }
     useTool('vara', 1);
     add('peixe_cru', 1, true);
+    TR('des');
     try { sfx('coin'); floater(player.x, player.z, '+1 Peixe Cru', '#7fd8ff', true); } catch (_) {}
     toast('<b>[PESCA]</b> Você pescou 1 <b>Peixe Cru</b>! Asse na Fogueira ou defume no Varal Portátil.');
     save();
@@ -691,6 +705,7 @@
     if (withHerb || asAntidote) {
       if (count('erva') < 1) { toast('Você precisa de 1 <b>Erva Medicinal</b> para ferver Chá Térmico / Antídoto.'); return false; }
       take('erva', 1);
+      TR('int');
       s.canteen.kind = asAntidote ? 'antidoto' : 'cha';
       s.canteen.potency = 100;
       toast(asAntidote
@@ -728,14 +743,14 @@
     if (s.canteen.kind === 'cha' && (s.canteen.potency || 0) > 0) {
       s.thirst = Math.min(100, s.thirst + 48);
       s.temp = Math.min(100, s.temp + 30);
-      s.warmT = 240 * (canteenTier() === 3 ? 1.5 : 1);
+      s.warmT = 240 * (canteenTier() === 3 ? 1.5 : 1) * (1 + A('tea'));
       s.sickT = 0; s.intoxT = 0;
       if (run) run.awake287 = Math.max(0, (run.awake287 || 0) - 360);
       player.hp = Math.min(player.maxhp, player.hp + Math.round(player.maxhp * 0.20));
       toast('<b>[CHÁ TÉRMICO · POTÊNCIA ' + Math.round(s.canteen.potency) + '%]</b> +48 Sede, aquece contra o frio extremo e reduz o Cansaço!');
     } else if (s.canteen.kind === 'antidoto' && (s.canteen.potency || 0) > 0) {
       s.thirst = Math.min(100, s.thirst + 45);
-      s.sickT = 0; s.intoxT = 0; s.antidoteT = 240;
+      s.sickT = 0; s.intoxT = 0; s.antidoteT = 240 * (1 + A('tea'));
       player.bleedT = 0;
       player.hp = Math.min(player.maxhp, player.hp + Math.round(player.maxhp * 0.25));
       toast('<b>[ANTÍDOTO QUENTE · POTÊNCIA ' + Math.round(s.canteen.potency) + '%]</b> Purificou parasitas, intoxicação e veneno!');
@@ -849,6 +864,9 @@
     // Se a receita consome um alimento perecível (ex: carne -> assada), começa com 100% de frescor (spoil = 0)
     for (const [k, n] of Object.entries(r.cost)) take(k, n);
     add(r.id, r.n, false, 0);
+    // v462: cozinhar treina Inteligência; fabricar à mão/na Bancada treina Destreza e pode render 1 a mais
+    if (r.st === 'fogueira') TR('int');
+    else { TR('des'); if (!ITEMS[r.id].tool && !ITEMS[r.id].bagUpgrade && !ITEMS[r.id].cartUpgrade && Math.random() < A('craftExtra')) add(r.id, 1, false, 0); }
     try { sfx('coin'); } catch (_) {}
     return true;
   }
@@ -905,11 +923,12 @@
     // Fome e Sede
     const inC = L.mode === 'world' && typeof inCity === 'function' && inCity(player.x, player.z);
     const rate = inC ? 0.2 : 1;
-    s.hunger = Math.max(0, s.hunger - (100 / (DAY() * 1.35)) * dt * rate);
+    const vitSlow = 1 - A('hungerSlow'); // Vitalidade desacelera Fome e Sede
+    s.hunger = Math.max(0, s.hunger - (100 / (DAY() * 1.35)) * dt * rate * vitSlow);
     let bio = 'campos';
     try { bio = L.mode === 'dungeon' ? (L.otherworld456?.bio || L.gate?.bio124 || 'cristal') : biomeAt(player.x, player.z); } catch (_) {}
     const hotMul = (bio === 'deserto' || bio === 'vulcao') ? 1.55 : 1;
-    s.thirst = Math.max(0, s.thirst - (100 / (DAY() * 0.95)) * dt * rate * hotMul);
+    s.thirst = Math.max(0, s.thirst - (100 / (DAY() * 0.95)) * dt * rate * hotMul * vitSlow);
 
     // Temperatura corporal
     const night = L.mode === 'dungeon' || (typeof isNight === 'function' && isNight());
@@ -919,6 +938,7 @@
     else if (bio === 'deserto') targetTemp = night ? 32 : 82;
     else if (bio === 'vulcao') targetTemp = 88;
     else if (night) targetTemp = 36;
+    if (targetTemp < 40 || targetTemp > 70) targetTemp += (50 - targetTemp) * A('climate'); // Resistência: frio de Ymiria e calor de Zahar
     if (nearFire(7.5)) targetTemp = Math.max(targetTemp, 62);
     if (s.torchOn && count('tocha') > 0) targetTemp = Math.max(targetTemp, 48);
     if (s.warmT > 0) { s.warmT -= dt; targetTemp = Math.max(targetTemp, 55); }
@@ -928,7 +948,7 @@
     // Tocha acesa
     if (s.torchOn) {
       if (!count('tocha')) s.torchOn = false;
-      else useTool('tocha', dt);
+      else useTool('tocha', dt * (1 - A('fuel'))); // Espírito: tocha rende mais
     }
 
     // Repulsão de predadores fotofóbicos
@@ -938,7 +958,7 @@
     const cTier = canteenTier();
     if ((s.canteen.kind === 'cha' || s.canteen.kind === 'antidoto') && (s.canteen.potency || 0) > 0) {
       // Cantil Térmico Isolado (tier 3) triplica a duração da potência dos chás medicinais!
-      const potDur = cTier === 3 ? 1800 : 600;
+      const potDur = (cTier === 3 ? 1800 : 600) * (1 + A('tea')); // Inteligência: chás duram mais
       s.canteen.potency = Math.max(0, s.canteen.potency - (100 / potDur) * dt);
       if (s.canteen.potency <= 0 && s.canteen.sips > 0) {
         s.canteen.kind = 'limpa';
@@ -1022,12 +1042,13 @@
     }
 
     // Penalidades de Parasitas, Intoxicação, Fome 0 e Sede 0
+    const willMul = 1 / Math.max(.2, 1 - A('intox')); // Vontade: parasitas e intoxicação passam mais rápido
     if (s.sickT > 0) {
-      s.sickT -= dt;
+      s.sickT -= dt * willMul;
       if (Math.random() < dt * 0.25) player.hp = Math.max(1, player.hp - Math.max(1, Math.round(player.maxhp * 0.012)));
     }
     if (s.intoxT > 0) {
-      s.intoxT -= dt;
+      s.intoxT -= dt * willMul;
       if (player.sprint372 && typeof player.stamina372 === 'number') {
         player.stamina372 = Math.max(0, player.stamina372 - dt * 4.5);
       }
@@ -1036,7 +1057,7 @@
       s.starveAcc = (s.starveAcc || 0) + dt;
       if (s.starveAcc >= 4) {
         s.starveAcc = 0;
-        const dmg = Math.max(1, Math.round(player.maxhp * (s.thirst <= 0 ? 0.03 : 0.018)));
+        const dmg = Math.max(1, Math.round(player.maxhp * (s.thirst <= 0 ? 0.03 : 0.018) * (1 - A('starve')))); // Vontade
         player.hp = Math.max(1, player.hp - dmg);
         floater(player.x, player.z, s.thirst <= 0 ? 'SEDE EXTREMA' : 'FOME EXTREMA', '#ff5d5d');
       }
@@ -1165,40 +1186,8 @@
   }
 
   /* ---------- HUD & Janela Completa de Sobrevivência (Tecla V) ---------- */
-  function ensureHud() {
-    if (document.getElementById('surv437hud')) return;
-    const bar = document.createElement('div');
-    bar.id = 'surv437hud';
-    bar.style.cssText = 'position:fixed;left:16px;bottom:14px;z-index:26;display:flex;gap:8px;align-items:center;background:rgba(12,16,18,.86);border:1px solid rgba(201,164,92,.45);border-radius:6px;padding:5px 10px;font:600 11px system-ui,sans-serif;color:#ece3d0;cursor:pointer;user-select:none;box-shadow:0 4px 14px rgba(0,0,0,.5)';
-    bar.title = 'Sobrevivência, Frescor, Cantil e Artesanato (Tecla V)';
-    bar.onclick = () => open('inv');
-    document.body.appendChild(bar);
-  }
-  function updateHud() {
-    if (!ready()) return;
-    ensureHud();
-    const el = document.getElementById('surv437hud');
-    if (!el) return;
-    const s = S(), w = totalW(), mw = maxW();
-    const hCol = s.hunger < 25 ? '#ff5d5d' : s.hunger < 55 ? '#ffd54f' : '#7ef5a5';
-    const tCol = s.thirst < 25 ? '#ff5d5d' : s.thirst < 55 ? '#ffd54f' : '#6fd2ff';
-    const wCol = w > mw ? '#ff5d5d' : w > mw * 0.85 ? '#ffd54f' : '#d8cfbf';
-    const tmp = s.temp < 25 ? '❄ Frio' : s.temp > 75 ? '☀ Calor' : '🌡 Normal';
-    const ctn = s.canteen;
-    const potTxt = (ctn.kind === 'cha' || ctn.kind === 'antidoto') && ctn.potency > 0 ? ' · 🔥' + Math.round(ctn.potency) + '%' : ctn.frozen ? ' · 🧊CONGELADO' : '';
-    const miasmaTxt = (typeof L !== 'undefined' && L && L.mode === 'dungeon')
-      ? ((s.inv.mochila_termica > 0) ? ' · <span style="color:#7ef5a5">Mochila Térmica (-80%)</span>' : ' · <span style="color:#ff9b87">Miasma 2×</span>')
-      : '';
-    el.innerHTML =
-      '<span>🍖 <b style="color:' + hCol + '">' + Math.round(s.hunger) + '%</b></span>' +
-      '<span>💧 <b style="color:' + tCol + '">' + Math.round(s.thirst) + '%</b>' + potTxt + '</span>' +
-      '<span>' + tmp + '</span>' +
-      '<span>⚖ <b style="color:' + wCol + '">' + w.toFixed(1) + '/' + Math.round(mw) + ' kg</b></span>' +
-      miasmaTxt +
-      (s.intoxT > 0 ? '<span style="color:#ff8fa3">⚠ Intoxicado</span>' : '') +
-      (s.sickT > 0 ? '<span style="color:#ff8fa3">☣ Parasitas</span>' : '') +
-      '<span style="opacity:.75;margin-left:2px">[V]</span>';
-  }
+  /* v462 (Ian): o widget do canto (🍖 💧) saiu; Fome e Sede ficam na Ficha (tools/attrs462.js). Tecla V abre a mochila. */
+  function updateHud() { const el = document.getElementById('surv437hud'); if (el) el.remove(); }
 
   function freshnessBarHtml(id) {
     const it = ITEMS[id];

@@ -779,7 +779,7 @@
   /* ================= 4) MERGULHO / BIOMA MARINHO ================= */
   const Water = { dive: 0, breath: 1, hurtT: 0, deco: [], decoKey: '', portal: null, keysDown: {}, airPocket441: null };
   Water.swim = () => !!(window.Water391 && Water391.swimming);
-  Water.max = () => 12 + .25 * ((run?.stats?.vit) || 0) + .15 * ((run?.stats?.res) || 0);
+  Water.max = () => window.Attr462 ? 12 + Attr462.surv().breath + Attr462.surv().pressure : 12 + .25 * ((run?.stats?.vit) || 0) + .15 * ((run?.stats?.res) || 0); // v462: com os marcos de 25 pontos
   Water.frame = function () {
     if (!window.Water391) return;
     const W = Water391;

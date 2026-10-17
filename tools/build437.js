@@ -367,7 +367,7 @@
       s.temp = 55; s.sickT = 0; s.intoxT = 0;
       if (run) {
         run.awake287 = 0;
-        run.rested = { t: 900 };
+        run.rested = { t: 900 * (1 + (window.Attr462 ? Attr462.surv().sleep : 0)) }; // v462 Vitalidade: descanso mais longo
         if (typeof refreshStats === 'function') refreshStats();
       }
       if (typeof dayT !== 'undefined') dayT += 300;
@@ -490,7 +490,7 @@
       const sp = spawned.get(b.uid);
 
       if (b.kind === 'fogueira' && (b.fuel || 0) > 0) {
-        b.fuel = Math.max(0, b.fuel - dt / 150);
+        b.fuel = Math.max(0, b.fuel - dt / 150 * (1 - (window.Attr462 ? Attr462.surv().fuel : 0))); // v462 Espírito: lenha rende mais
         if (sp?.fireFx) sp.fireFx.visible = b.fuel > 0;
       }
       if (b.kind === 'varal' && (b.drying || 0) > 0) {

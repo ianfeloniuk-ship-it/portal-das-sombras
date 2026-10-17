@@ -3586,7 +3586,7 @@ let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,
 const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
 let modalRoute118='';
 const MODAL_NAV118={current:null,back:[],returning:false,restore:null,serial:0};
-function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout'))return skillsView;if(modalRoute118==='constel')return passivesView;return null}
+function modalParent118(){if(modalRoute118==='basic'||modalRoute118.startsWith('loadout')||modalRoute118==='combo261')return skillsView;if(modalRoute118==='constel')return passivesView;/* v462 (Ian): subpáginas abertas direto também têm ← Voltar */const t=$('mt')?.textContent||'';if(t==='EQUIPAMENTOS')return buildView;if(t==='APARÊNCIA')return statusView;return null}
 function modalBack118(){if(profile?.creationPending91&&started)return;bindWait=null;const prev=MODAL_NAV118.back.pop(),parent=modalParent118();if(!prev&&!parent)return;MODAL_NAV118.returning=true;MODAL_NAV118.restore=prev?prev.scroll:null;try{(prev?prev.render:parent)()}finally{MODAL_NAV118.returning=false;MODAL_NAV118.restore=null}}
 function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:'+route:title+'|'+String(view);if(!modalOpen){nav.current=null;nav.back=[]}const old=nav.current;if(old)old.scroll=$('mb').scrollTop;let scroll=route?CHAR_UI118.scroll[route]||0:0;
  if(old&&old.key===key)scroll=old.scroll;
@@ -6666,7 +6666,7 @@ function updDungeon(dt){
   if(L.brk){updBreak(dt)}else if(L.bossDead&&L.expedition?.s.type!=='extract'){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[NARRADOR]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
   const G=L.grid,P=player,cx=Math.floor((P.x-G.ox)/G.CS),cz=Math.floor((P.z-G.oz)/G.CS);
-  const vr460=L.ow460?12:6;for(let dy=-vr460;dy<=vr460;dy++)for(let dx=-vr460;dx<=vr460;dx++){if(dx*dx+dy*dy>vr460*vr460)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
+  const vr460=(L.ow460?12:6)+(window.Attr462?Attr462.surv().reveal:0);for(let dy=-vr460;dy<=vr460;dy++)for(let dx=-vr460;dx<=vr460;dx++){if(dx*dx+dy*dy>vr460*vr460)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
   L.rooms.forEach((r,i)=>{if(L.seen.has(i))return;if(cx>=r.x&&cx<r.x+r.w&&cz>=r.y&&cz<r.y+r.h){L.seen.add(i);
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
@@ -7599,11 +7599,11 @@ const RECIPES_X=[{n:'Elixir de Fúria',need:null,d:'+25% de dano por 3 min',b:{d
 const RECIPES=[{n:'Ensopado de Peixe',need:{'Peixe-lua':2},d:'+25% vida por 5 min',b:{hp:.25},t:300},{n:'Sushi de Mana',need:{'Carpa de Mana':1,'Peixe-lua':1},d:'+30% mana por 5 min',b:{mp:.3},t:300},{n:'Espeto Relâmpago',need:{'Enguia Relâmpago':1},d:'+20% dano por 5 min',b:{dmg:.2},t:300},{n:'Banquete Dourado',need:{'Peixe Dourado':1},d:'+20% vida, dano e mana por 10 min',b:{hp:.2,dmg:.2,mp:.2},t:600}];
 const recipe=n=>RECIPES.find(r=>r.n===n)||RECIPES_X.find(r=>r.n===n);
 function foodB(){return run.food&&run.food.t>0?recipe(run.food.n).b:{}}
-function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;const rod=ROD[run.rod||0],f=wpick(fishPool()),zw=Math.max(8,rod.z-f.d*2.5+Math.min(10,profLv('fish')*.5)),spd=2+f.d*.5;let pos=0,dir=1,zone=rnd(10,88-zw),zd=f.d>=2?1:0,tries=rod.t+(hasF('aqua')?1:0),iv=null;
+function fishView(){if(!unl('fish')){toast(lockMsg('fish'));return}view=null;const rod=ROD[run.rod||0],f=wpick(fishPool()),zw=Math.max(8,rod.z-f.d*2.5+Math.min(10,profLv('fish')*.5)+(window.Attr462?Attr462.surv().fishZone:0)),spd=2+f.d*.5;let pos=0,dir=1,zone=rnd(10,88-zw),zd=f.d>=2?1:0,tries=rod.t+(hasF('aqua')?1:0),iv=null;
   const h='<div class="sysline">'+(f.d>=3?'<b style="color:'+f.c+'">Algo GRANDE mordeu a isca!</b> ':'Algo mordeu. ')+'Toque PUXAR quando o marcador estiver na faixa verde'+(zd?' (este peixe se mexe)':'')+'. <span id="ftries">'+tries+'</span> tentativas · '+rod.n+'</div><div style="position:relative;height:26px;background:#0a1830;border:1px solid #ffb347;border-radius:4px;margin:10px 0"><div id="fzone" style="position:absolute;top:0;bottom:0;left:'+zone+'%;width:'+zw+'%;background:rgba(111,227,154,.45)"></div><div id="fmark" style="position:absolute;top:-4px;width:6px;height:34px;background:#ffd54f;left:0"></div></div><div style="display:flex;justify-content:flex-end">'+btn('PUXAR','fishpull',0,true,'hot')+'</div>';
   openModal('PESCA',h);iv=setInterval(()=>{if($('modal').hidden){clearInterval(iv);return}pos+=dir*spd;if(pos>=97||pos<=0)dir*=-1;const m=$('fmark');if(m)m.style.left=pos+'%';if(zd){zone+=zd*.35*f.d;if(zone<=2||zone>=96-zw)zd*=-1;const z=$('fzone');if(z)z.style.left=zone+'%'}},16);
   window._fish={get pos(){return pos},get zone(){return zone},zw,f,iv,get tries(){return tries},dec(){tries--;$('ftries').textContent=tries}}}
-function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F.zone+F.zw){clearInterval(F.iv);const f=F.f,kg=+(f.kg[0]+Math.pow(Math.random(),2)*(f.kg[1]-f.kg[0])).toFixed(1);run.fish=run.fish||{};run.fish[f.n]=(run.fish[f.n]||0)+1;profile.fish=(profile.fish||0)+1;
+function fishPull(){const F=window._fish;if(!F)return;if(F.pos>=F.zone&&F.pos<=F.zone+F.zw){clearInterval(F.iv);if(window.Attr462)Attr462.train('des');const f=F.f,kg=+(f.kg[0]+Math.pow(Math.random(),2)*(f.kg[1]-f.kg[0])).toFixed(1);run.fish=run.fish||{};run.fish[f.n]=(run.fish[f.n]||0)+1;profile.fish=(profile.fish||0)+1;
   profile.aqua=profile.aqua||{};const rec=profile.aqua[f.n],isNew=!rec,isRec=rec&&kg>rec;if(!rec||kg>rec)profile.aqua[f.n]=kg;if(isNew){run.pts=(run.pts||0)+1}
   profXp('fish',10+f.d*10);storyEv('fish');storyEv('species');npcEv('fish');store.set('pds2_profile',profile);closeModal();sfx('coin');toast('<b>[PESCA]</b> <b style="color:'+f.c+'">'+f.n+'</b> · '+String(kg).replace('.',',')+' kg'+(isNew?' · <b>ESPÉCIE NOVA no Aquário: +1 ponto de status</b>':isRec?' · <b>NOVO RECORDE!</b>':''),5000);if(f.d>=4){bigText('LEVIATÃ!',1500);sfx('gong')}saveRun()}
   else{F.dec();sfx('block');if(F.tries<=0){clearInterval(F.iv);closeModal();toast('O peixe escapou.')}}}
@@ -9354,10 +9354,10 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
-<script src="tools/mechanics434.js?v=458"></script>
-<script src="tools/survival437.js?v=458"></script>
+<script src="tools/mechanics434.js?v=462"></script>
+<script src="tools/survival437.js?v=462"></script>
 <script src="tools/cart437.js?v=458"></script>
-<script src="tools/build437.js?v=460"></script>
+<script src="tools/build437.js?v=462"></script>
 <script src="tools/otherworld460.js?v=461"></script>
 <script src="tools/sea439.js?v=439"></script>
 <script src="tools/boats440.js?v=443"></script>
@@ -9367,10 +9367,11 @@ requestAnimationFrame(frame);
 <script src="tools/grass446.js?v=446"></script>
 <script src="tools/deep447.js?v=447"></script>
 <script src="tools/impact459.js?v=459"></script>
+<script src="tools/attrs462.js?v=462"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v461</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v462</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=461;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=462;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
