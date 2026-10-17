@@ -67,7 +67,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 /* v245: relevo — zonas planas perto do jogador (cidades, lagos, estradas) */
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const on=L.mode==='world'&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
- for(const f of (run&&run.surv437&&run.surv437.leveled||[]))D.push([f.x,f.z,f.r||12,f.h||0]);
+ if(run&&run.surv437&&run.surv437.leveled&&run.surv437.leveled.length)run.surv437.leveled=[];
  for(const c of citiesAround(P.x,P.z,1800))D.push([c.x,c.z,CITYR+16,0]);
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
@@ -87,7 +87,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     if(P.slowT>0)P.slowT-=dt;if(P.bleedT>0&&!(typeof isCinematic451==='function'&&isCinematic451())){P.bleedT-=dt;P.hp-=guardianDamage108(P,absorbHealingShield(P,P.bleedD*dt));if(P.hp<=0&&!P.dead)die()}
     if(P.shT>0)P.shT-=dt;else if(P.shield<P.maxsh)P.shield=Math.min(P.maxsh,P.shield+regen.shield*dt);
     if(regen.hp>0&&P.hp<P.maxhp&&!P.dead)P.hp=Math.min(P.maxhp,P.hp+regen.hp*dt);
-    {const wasT=tired287();run.awake287=(run.awake287||0)+dt;if(!wasT&&tired287()){refreshStats();toast('<b>[CANSAÇO]</b> Você está há 2 dias sem dormir: −10% de dano e −10% de XP até descansar numa pousada ou em casa.',7000)}}if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
+    {const wasT=tired287();run.awake287=(run.awake287||0)+dt;if(!wasT&&tired287()){refreshStats();toast('<b>[CANSAÇO]</b> Você está há 2 dias sem dormir: −10% de dano e −10% de XP até descansar numa Pousada ou na Tenda Portátil do Acampamento.',7000)}}if(run.rested&&run.rested.t>0){run.rested.t-=dt;if(run.rested.t<=0){run.rested=null;refreshStats();toast('<b>[POUSADA]</b> O efeito do descanso acabou.')}}
     for(const c of Object.values(run.classCooldowns||{}))c.left=Math.max(0,c.left-dt);for(const s of P.skills)s.cdT=Math.max(0,s.cdT-dt);for(const s of run.stolen)s.cdT-=dt;if(run.fused)run.fused.cdT-=dt;if(run.food&&run.food.t>0){run.food.t-=dt;if(run.food.t<=0){refreshStats();toast('O efeito da comida acabou.')}}
     let mv=0;COLY344=P.jy||0;
     const sprintState372=P.sprint372||(P.sprint372={running:false,exhausted:false});

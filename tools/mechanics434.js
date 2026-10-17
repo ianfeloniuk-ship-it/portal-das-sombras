@@ -444,7 +444,7 @@
       toast('<b>[PEDRA-ÂNCORA]</b> Derrote os Elites que pressionam a Âncora de <b>' + c.name + '</b> primeiro!', 4500);
       return;
     }
-    if (!S.anchors[c.name]?.sealed441 && (c.name === 'Zahar' || c.name === 'Ymiria') && !activeDef) {
+    if (!S.anchors[c.name]?.sealed441 && (c.name === 'Zahar' || c.name === 'Ymiria' || c.name === 'Urdan' || c.name === 'Verden') && !activeDef) {
       const gr = Math.min(9, rankOf()), foes = [];
       if (c.name === 'Zahar') {
         const kinds = ['escaravelho_f', 'cactogig_f', 'invasor_f', 'escaravelho'].filter(k => KINDS[k]);
@@ -466,6 +466,26 @@
           fxRing(c.x + 10, c.z + 6, D.col, 2.2);
         } catch (_) {}
         toast('<b>[PEDRA-ÂNCORA DE YMIRIA]</b> O <b>Yeti Alfa Corrompido</b> avança sobre a Âncora! Derrote o Alfa para que os menores fujam e estabilize o selo.', 6500);
+      } else if (c.name === 'Urdan') {
+        const kinds = ['golcristal_f', 'obsidiana', 'golcristal', 'espectro_f'].filter(k => KINDS[k]);
+        for (let i = 0; i < 3; i++) {
+          const a = i / 3 * TAU + .3, x = c.x + Math.cos(a) * 11, z = c.z + Math.sin(a) * 11;
+          try { const e = spawnKind(kinds[i % kinds.length] || 'goblin', x, z, gr, { wild: true }); makeElite(e); e.aggro = true; foes.push(e); fxRing(x, z, D.col, 1.8); } catch (_) {}
+        }
+        toast('<b>[PEDRA-ÂNCORA DE URDAN]</b> Golens de Cristal e Espectros da Fenda cercam o selo do <b>Tronco do Arquiteto</b>! Derrote-os para estabilizar a Âncora.', 6500);
+      } else if (c.name === 'Verden') {
+        const kingK = KINDS.saporei ? 'saporei' : (KINDS.sapogig ? 'sapogig' : 'sapo');
+        try {
+          const king = spawnKind(kingK, c.x + 10, c.z + 6, gr, { wild: true });
+          makeElite(king); king.honor456 = true; king.saporeiVerden456 = true; king.name = '[Rei do Brejo #020] Sapo Rei de Verden'; king.short = 'Sapo Rei #020'; king.aggro = true; foes.push(king);
+          for (let i = 0; i < 2; i++) {
+            const a = i * Math.PI + .5, x = c.x + Math.cos(a) * 12, z = c.z + Math.sin(a) * 12;
+            const sp = spawnKind(KINDS.sapo ? 'sapo' : 'slime', x, z, gr, { wild: true });
+            sp.aggro = true;
+          }
+          fxRing(c.x + 10, c.z + 6, D.col, 2.2);
+        } catch (_) {}
+        toast('<b>[PEDRA-ÂNCORA DE VERDEN]</b> O <b>Sapo Rei do Brejo (#020)</b> desafia você diante do selo da <b>Cabeça do Arquiteto</b>! Reduza a vida dele até ele se render e pressione <b>F · ACEITAR RENDIÇÃO</b>.', 7000);
       }
       if (foes.length) { capDefense441.set(c.name, { c, foes, g: anchorGrp }); return; }
     }
@@ -510,7 +530,7 @@
     capStagingKey441 = '';
   }
   function stageCapitals441(c) {
-    if (!c || !['Thalor', 'Zahar', 'Ymiria'].includes(c.name)) { if (capStagingKey441) clearCapStaging441(); return; }
+    if (!c || !['Thalor', 'Zahar', 'Ymiria', 'Urdan', 'Verden'].includes(c.name)) { if (capStagingKey441) clearCapStaging441(); return; }
     markCapitalVisited441(c);
     if (capStagingKey441 === c.name) return;
     clearCapStaging441(); capStagingKey441 = c.name;
@@ -550,26 +570,28 @@
         L.inter.push(it); capProps441.push({ g: dg, it, rift });
       } else capProps441.push({ g: dg });
     } else if (c.name === 'Zahar') {
-      // Dunas de areia na rota de Zahar que podem ser niveladas com a Pá/Enxada para o Carrinho passar
+      // Marcos naturais de caravana na rota de Zahar (sem deformar o relevo natural)
       const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
-      for (let i = 0; i < 2; i++) {
-        const dx = c.x - (wall + 18 + i * 16), dz = c.z + (i ? 4 : -3);
-        const dg = absolute(new T.Group()); dg.position.set(dx, H(dx, dz), dz);
-        const duneMat = new T.MeshStandardMaterial({ color: 0xd9b372, roughness: .95, metalness: 0 });
-        const m1 = new T.Mesh(new T.SphereGeometry(3.8, 14, 10), duneMat); m1.scale.set(1.5, .42, 1.1); m1.position.y = .4; dg.add(m1);
-        window.Solid429?.prop(dg, [{ x: 0, z: 0, r: 3.2 }]);
-        scene.add(dg);
-        const it = {
-          type: 'dune441', x: dx, z: dz, r: 4.5,
-          label: 'F · NIVELAR DUNA PARA O CARRINHO (Pá/Enxada)',
-          use: () => {
-            if (window.Surv437 && Surv437.count && !Surv437.count('pa')) Surv437.give('pa', 1, 'Pá / Enxada do Deserto');
-            if (window.Surv437?.levelTerrain) Surv437.levelTerrain(dx, dz, 13, H(c.x, c.z), 'DUNA NIVELADA PARA O CARRINHO!');
-            scene.remove(dg); const idx = L.inter.indexOf(it); if (idx >= 0) L.inter.splice(idx, 1);
+      const dx = c.x - (wall + 22), dz = c.z - 4;
+      const dg = absolute(new T.Group()); dg.position.set(dx, H(dx, dz), dz);
+      tripoReady().then(() => {
+        if (!dg.parent) return;
+        const rk = tripo('stones', 1.2); if (rk) dg.add(rk);
+      });
+      scene.add(dg);
+      const it = {
+        type: 'oasis456', x: dx, z: dz, r: 4.5,
+        label: 'F · REABASTECER ÁGUA FRESCA NO MARCO DO OÁSIS DE ZAHAR',
+        use: () => {
+          if (run?.surv437?.canteen) {
+            run.surv437.canteen.kind = 'limpa';
+            run.surv437.canteen.sips = run.surv437.canteen.max || 3;
+            run.surv437.canteen.frozen = false;
           }
-        };
-        L.inter.push(it); capProps441.push({ g: dg, it });
-      }
+          toast('<b>[OÁSIS DE ZAHAR]</b> Cantil reabastecido com água fresca do oásis subterrâneo.', 4500);
+        }
+      };
+      L.inter.push(it); capProps441.push({ g: dg, it });
     } else if (c.name === 'Ymiria') {
       // Povo do Manto Branco: Filhotes de Yeti (#013) neutros se o jogador mantiver a arma guardada (X)
       const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
@@ -582,6 +604,26 @@
           } catch (_) {}
         }
       }
+    } else if (c.name === 'Urdan') {
+      // Cristais ressonantes na entrada de Urdan
+      const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
+      const ux = c.x, uz = c.z + wall + 18;
+      const ug = absolute(new T.Group()); ug.position.set(ux, H(ux, uz), uz);
+      glb('cristal-veio').then(tpl => {
+        if (!tpl || !ug.parent) return;
+        for (let i = 0; i < 3; i++) {
+          const a = i / 3 * TAU, cr = fit(tpl, 1.8 + (i % 2) * .5);
+          cr.position.set(Math.cos(a) * 3.5, 0, Math.sin(a) * 3.5); cr.rotation.y = a; ug.add(cr);
+        }
+      });
+      scene.add(ug); capProps441.push({ g: ug });
+    } else if (c.name === 'Verden') {
+      // Brejo Real de Verden: território do Sapo Rei (#020)
+      const wall = 36 * (typeof CITYK !== 'undefined' ? CITYK : 1);
+      const vx = c.x + 12, vz = c.z + wall + 16;
+      const vg = absolute(new T.Group()); vg.position.set(vx, H(vx, vz), vz);
+      const glow = new T.PointLight(0x8fe35a, 1.4, 16); glow.position.set(0, 2, 0); vg.add(glow);
+      scene.add(vg); capProps441.push({ g: vg });
     }
   }
   function enterAbyssalDungeon441(thalorCity) {

@@ -91,17 +91,18 @@ function renderHabitat124(cells,W,H,CS,ox,oz,th,R){
  registerChestObstacles253(L.group.children.slice(-2));
  const voidGround=new THREE.Mesh(new THREE.PlaneGeometry(W*CS+80,H*CS+80),habitatMat124(th.fog));voidGround.rotation.x=-Math.PI/2;voidGround.position.set(0,-.3,0);envOwn(L.group,voidGround);
  const bio=th.habitat124,ice=bio==='neve'||bio==='cristal',plants=new EnvBatch(),flora=new EnvBatch();
+ const owTint=L?.otherworld456?.floraTint;
  for(const p of details){
   if(ENV.ok){
-   if(bio==='floresta'||bio==='campos')EH(plants,bio==='floresta'?'tree_oak_dark':'tree_default',p.x,1.5,p.z,p.ry,3.2+R()*1.8);
-   else if(bio==='pantano')EH(plants,'tree_dead_large',p.x,1.2,p.z,p.ry,3.5);
-   else if(bio==='deserto')EH(plants,R()<.5?'cactus_tall':'cactus_short',p.x,1.3,p.z,p.ry,1.4+R()*1.5);
-   else if(bio==='flores')EH(flora,pk(R,FLOWERS),p.x,1.6,p.z,p.ry,.8+R()*.7);
-   else if(bio==='neve')EH(plants,'tree_pineRoundA',p.x,1.4,p.z,p.ry,2.6+R(),0xdce9ee);
-   else if(bio==='vulcao')EH(plants,'tree_dead_large',p.x,1.5,p.z,p.ry,2.4,0x544238);
+   if(bio==='floresta'||bio==='campos')EH(plants,bio==='floresta'?'tree_oak_dark':'tree_default',p.x,1.5,p.z,p.ry,3.2+R()*1.8,owTint);
+   else if(bio==='pantano')EH(plants,'tree_dead_large',p.x,1.2,p.z,p.ry,3.5,owTint);
+   else if(bio==='deserto')EH(plants,R()<.5?'cactus_tall':'cactus_short',p.x,1.3,p.z,p.ry,1.4+R()*1.5,owTint);
+   else if(bio==='flores')EH(flora,pk(R,FLOWERS),p.x,1.6,p.z,p.ry,.8+R()*.7,owTint);
+   else if(bio==='neve')EH(plants,'tree_pineRoundA',p.x,1.4,p.z,p.ry,2.6+R(),owTint||0xdce9ee);
+   else if(bio==='vulcao')EH(plants,'tree_dead_large',p.x,1.5,p.z,p.ry,2.4,owTint||0x544238);
   }
-  if(ice||bio==='vulcao'){
-   const crystal=new THREE.Mesh(geo('habitat-crystal124',()=>new THREE.ConeGeometry(.4,2,5)),habitatMat124(ice?th.trim:0x2d2626));crystal.position.set(p.x,2,p.z);crystal.rotation.set(.12,p.ry,.17);L.group.add(crystal);
+  if(ice||bio==='vulcao'||owTint){
+   const crystal=new THREE.Mesh(geo('habitat-crystal124',()=>new THREE.ConeGeometry(.4,2,5)),habitatMat124(owTint||(ice?th.trim:0x2d2626)));crystal.position.set(p.x,2,p.z);crystal.rotation.set(.12,p.ry,.17);L.group.add(crystal);
   }
  }
  if(ENV.ok){envOwn(L.group,plants.mesh(TREEMAT));envOwn(L.group,flora.mesh(FLORAMAT))}

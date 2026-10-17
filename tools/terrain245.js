@@ -14,9 +14,9 @@ float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?m
  b+=2.6*max(0.,sin(p.x*.06+sin(p.y*.05)*2.)*sin(p.y*.055+sin(p.x*.04)*1.5)-.2)*smoothstep(40.,120.,d)*(1.-smoothstep(380.,500.,d));
  if(d>800.){float t=1.-abs(sin(p.x*.0042+sin(p.y*.0027)*2.1)*sin(p.y*.0036-p.x*.0011));b-=42.*smoothstep(.86,.97,t)*smoothstep(800.,1000.,d);}
  return b+.6*sin(p.x*.13+p.y*.07)*sin(p.y*.11-p.x*.05);}
-/* v444 (Ian): terraplenagem suave — carimbos do jogador (CPU igual em terra444cpu/TER245.path444). z = raio + 100*tipo: 0 soma altura, 1 nivela ate w, 2 trilha de terra batida, 3 calcamento. */
-float terra444(vec2 p,float h){for(int i=0;i<48;i++){if(float(i)>=uTFN444)break;vec4 S=uTF444[i];float ty=floor(S.z/100.),r=S.z-ty*100.,d=length(p-S.xy);if(d>r)continue;if(ty<.5)h+=S.w*(1.-smoothstep(0.,r,d));else h=mix(h,S.w,1.-smoothstep(r*.55,r,d));}return h;}
-float path444(vec2 p){float m=0.;for(int i=0;i<48;i++){if(float(i)>=uTFN444)break;vec4 S=uTF444[i];float ty=floor(S.z/100.);if(ty<1.5)continue;float r=S.z-ty*100.,d=length(p-S.xy);if(d<r)m=max(m,(ty>2.5?1.:.55)*(1.-smoothstep(r*.55,r,d)));}return m;}
+/* v456: terraplenagem desativada — relevo natural de Aster e das 5 Capitais 100% protegido. */
+float terra444(vec2 p,float h){return h;}
+float path444(vec2 p){return 0.;}
 float terrH245(vec2 p){if(uTerOn<.5)return 0.;float m=.62+.38*sin(p.x*.0021+1.)*sin(p.y*.0017+.4);
  float h=(15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)+5.*sin(p.x*.031+p.y*.017)*sin(p.y*.027-p.x*.012)+1.2*sin(p.x*.09+p.y*.05))*m+mt383(p);
  float b=floor((p.x-${H0.toFixed(1)})/${P.toFixed(1)}+.5),c=b*${P.toFixed(1)}+${H0.toFixed(1)}+sin(p.y*.0043+b*1.7)*95.+sin(p.y*.011+b)*28.+sin(p.y*.035+b*2.3)*18.+sin(p.y*.079+b*3.1)*5.;
@@ -24,7 +24,7 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;float m=.62+.38*sin(p.x*.0021+1.)*
  float sd=seaD439(p);if(sd>-60.)h=mix(h,seaBed439(p,sd),smoothstep(-60.,30.,sd));float rk439=1.-smoothstep(300.,600.,sd);
  for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);h=mix(h,D.w,1.-smoothstep(D.z,D.z+38.,dd));if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
  for(int i=0;i<24;i++){vec4 R=uTerR[i];vec2 q=clamp(p,min(R.xy,R.zw),max(R.xy,R.zw));h=mix(h,0.,(1.-smoothstep(5.,22.,length(p-q)))*rk439);}
- return terra444(p,h);}
+ return h;}
 `;
  /* v391 (Ian): rios e lagos têm leito cavado (fundo em U de 2,2 m / bacia de 2,5 m) e margens mais íngremes. */
  /* v383 (vídeo André Elias): cordilheiras por ruído suave com cristas (ridged), iguais no CPU e no shader. */
@@ -32,8 +32,8 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;float m=.62+.38*sin(p.x*.0021+1.)*
   const r1=1-Math.abs(S(qx*.012+S(qz*.009)*1.6)*S(qz*.013-qx*.004)),r2=1-Math.abs(S(qx*.031+qz*.008)*S(qz*.027-qx*.011)),r3=1-Math.abs(S(qx*.071-qz*.02)*S(qz*.063+qx*.017));
   return M.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08)}
  TER.mt383=mt383;
- function terra444cpu(x,z,h){const A=TER.TF.value,n=TER.TFN.value,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};for(let i=0;i<n;i++){const S=A[i],ty=Math.floor(S.z/100),r=S.z-ty*100,d=Math.hypot(x-S.x,z-S.y);if(d>r)continue;if(ty<1)h+=S.w*(1-ss(0,r,d));else h=h+(S.w-h)*(1-ss(r*.55,r,d))}return h}
- TER.path444=function(x,z){const A=TER.TF.value,n=TER.TFN.value,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};let m=0;for(let i=0;i<n;i++){const S=A[i],ty=Math.floor(S.z/100);if(ty<2)continue;const r=S.z-ty*100,d=Math.hypot(x-S.x,z-S.y);if(d<r)m=Math.max(m,(ty>2?1:.55)*(1-ss(r*.55,r,d)))}return m};
+ function terra444cpu(x,z,h){return h}
+ TER.path444=function(){return 0};
  function seaD439(x,z){const S=Math.sin;return SEAX+150*S(z*.0009)+60*S(z*.0031+1.3)+20*S(z*.011)-x}
  function seaBed439(x,z,d){const S=Math.sin,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   let b=d<60?mix(1.2,-3,(d+60)/120):d<450?mix(-3,-7,(d-60)/390):mix(-7,-22,Math.min(1,Math.max(0,(d-450)/1200)));

@@ -120,7 +120,7 @@
     w.monolith406 = slab; w.glow406 = glyph;
   }
   API.build = function (m, s, w, points, figure) {
-    if (!((m.id === 'a2' && [1, 2].includes(s.s)) || (m.id === 'a3' && s.s === 1))) return;
+    if (!((m.id === 'a2' && [1, 2].includes(s.s)) || (m.id === 'a3' && s.s === 1) || (m.id === 'a12' && s.s === 2))) return;
     owned.set(w, new Set());
     if (m.id === 'a2') wreck(m, s, w, points, figure); else inscription(w, points);
     API.update(m, s, w, 0);

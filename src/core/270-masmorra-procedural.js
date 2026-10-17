@@ -18,12 +18,10 @@ function buildDungeon(g){
   rooms.forEach((r,i)=>{if(i===0||i===bi||r.w<9||r.h<9)return;for(const [px,py] of[[r.x+2,r.y+2],[r.x+r.w-3,r.y+2],[r.x+2,r.y+r.h-3],[r.x+r.w-3,r.y+r.h-3]])cells[py*Wd+px]=2});
   }
   const ox=-Wd*CS/2,oz=-Hd*CS/2,br=rooms[bi],cen=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
-  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[]};scene.add(L.group);
-  scene.background=new THREE.Color(th.fog);scene.fog=new THREE.FogExp2(th.fog,.03);
-  hemi.color.setHex(th.light);hemi.intensity=.5;sun.color.setHex(th.light);sun.intensity=.35;pLight.color.setHex(th.light);pLight.intensity=1.3;
-  // v155 (Ian): masmorra é caverna: escuro, só a luz que você carrega mostra o caminho. Não dá para ver o mapa inteiro de cima.
-  // v162 (Ian: "os calabouços não podem ser escuro"): caverna clara, névoa leve, o tema da masmorra dá a cor.
-  scene.background=new THREE.Color(th.fog);scene.fog=new THREE.FogExp2(th.fog,.018);hemi.color.setHex(th.light);hemi.intensity=.85;sun.color.setHex(th.light);sun.intensity=.75;pLight.color.setHex(0xffd9a8);pLight.intensity=1.6;pLight.distance=22;L.cave155=true;
+  const ow456=pickOtherworld456(g,th);
+  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[],otherworld456:ow456,riftDays456:1,riftSignals456:0,riftSignalsMax456:3};scene.add(L.group);
+  scene.background=new THREE.Color(ow456.skyCol);scene.fog=new THREE.FogExp2(ow456.fogCol,.016);
+  hemi.color.setHex(ow456.lightCol);hemi.intensity=.85;sun.color.setHex(ow456.moonCol);sun.intensity=.78;pLight.color.setHex(0xffd9a8);pLight.intensity=1.6;pLight.distance=22;L.cave155=true;
   renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,true,.06);if(ENV.ok&&!th.natural124)envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,g.rank);
   const cellPos=(cx,cy)=>({x:ox+(cx+.5)*CS,z:oz+(cy+.5)*CS});
   const randIn=r=>{for(let t=0;t<40;t++){const cx=r.x+1+Math.floor(R()*(r.w-2)),cy=r.y+1+Math.floor(R()*(r.h-2));if(cells[cy*Wd+cx]===1)return cellPos(cx,cy)}const c=cen(r);return cellPos(c.x,c.y)};
@@ -52,6 +50,7 @@ function buildDungeon(g){
   // saída
   const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
   if(variant==='core')setupCoreDefense();else if(variant==='floors')setupDungeonFloors();else if(variant!=='combat')setupExpedition(g,mids);
+  setupOtherworld456(g,rooms,bi,mids,R,randIn);
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;if(g.extractionCleared117){L.bossDead=true;beginDungeonEscape()}else if(variant==='combat')updateCombat117();
 }
 /* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
@@ -300,3 +299,219 @@ function openChest(x,z,tier,boss,reward=null){
   if(Math.random()<.4){run.pots++;floater(x,z,'+POÇÃO','#ff8fa3',false,3)}
   saveRun();
 }
+
+/* --- v456: AS FENDAS COMO "OUTROS MUNDOS" (EXPEDIÇÕES DE SEMANAS + PASSAGEM DO TEMPO) --- */
+const OTHERWORLDS456=[
+  {id:'erebo',name:'Planeta Érebo · Abismo Violeta',bio:'cristal',skyCol:0x140826,fogCol:0x1e0e38,lightCol:0xc69aff,moonCol:0xa864ff,floraTint:0x9b5de5,gravMul:0.82,weather:'Vento de Miasma Astral'},
+  {id:'esporo',name:'Dimensão Xylo · Esporo-Esmeralda',bio:'pantano',skyCol:0x071f18,fogCol:0x0d2e24,lightCol:0x7cf4c2,moonCol:0x52e59b,floraTint:0x38d399,gravMul:0.90,weather:'Neblina Bioluminescente'},
+  {id:'forja',name:'Mundo Pyra · Crepúsculo Carmesim',bio:'vulcao',skyCol:0x24090d,fogCol:0x331015,lightCol:0xff9478,moonCol:0xff5a36,floraTint:0xd94e34,gravMul:1.12,weather:'Cinzas Eclipsadas'},
+  {id:'crio',name:'Plano Nifl · Éter Crio-Astral',bio:'neve',skyCol:0x081a2b,fogCol:0x10283d,lightCol:0x9ce8ff,moonCol:0x60d2ff,floraTint:0x64dfdf,gravMul:0.78,weather:'Aurora Dimensional Fria'},
+  {id:'ambar',name:'Mundo Kemet · Deserto de Âmbar Temporal',bio:'deserto',skyCol:0x231709,fogCol:0x36230e,lightCol:0xffd280,moonCol:0xffaa33,floraTint:0xe09f3e,gravMul:0.88,weather:'Tempestade de Quartzo Dourado'}
+];
+function pickOtherworld456(g,th){
+  const bio=g?.biome124||th?.habitat124||'campos';
+  const byBio={cristal:0,floresta:1,pantano:1,flores:1,vulcao:2,neve:3,deserto:4,campos:0};
+  const idx=byBio[bio]??Math.abs((g?.seed||1)*17)%OTHERWORLDS456.length;
+  return {...OTHERWORLDS456[idx],zones:['Zona 1 · Fronteira da Fenda','Zona 2 · Ermos do Outro Mundo','Zona 3 · Cidadela do Soberano']};
+}
+function setupOtherworld456(g,rooms,bi,mids,R,randIn){
+  if(!L||L.mode!=='dungeon')return;
+  const ow=L.otherworld456||pickOtherworld456(g,L.G?.th);
+  L.otherworld456=ow;
+  // 1. Domo Celeste Alienígena + Luas Gêmeas + Anéis Planetários + Estrelas Dimensionais
+  const skyGrp=new THREE.Group();skyGrp.name='otherworld-sky456';
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(210,24,16),new THREE.MeshBasicMaterial({color:ow.skyCol,side:THREE.BackSide,depthWrite:false}));
+  skyGrp.add(dome);
+  const moon1=new THREE.Mesh(new THREE.SphereGeometry(14,20,16),new THREE.MeshBasicMaterial({color:ow.moonCol,fog:false}));
+  moon1.position.set(-65,88,-110);skyGrp.add(moon1);
+  const ring1=new THREE.Mesh(new THREE.RingGeometry(18,26,36),new THREE.MeshBasicMaterial({color:ow.lightCol,side:THREE.DoubleSide,transparent:true,opacity:0.55,fog:false}));
+  ring1.position.copy(moon1.position);ring1.rotation.set(1.1,0.4,0.2);skyGrp.add(ring1);
+  const moon2=new THREE.Mesh(new THREE.SphereGeometry(7.5,16,12),new THREE.MeshBasicMaterial({color:ow.lightCol,fog:false}));
+  moon2.position.set(54,72,-95);skyGrp.add(moon2);
+  // Estrelas / Esporos suspensos no céu do Outro Mundo
+  const starGeo=new THREE.BufferGeometry(),starPts=[];
+  for(let i=0;i<160;i++){
+    const a=R()*TAU,el=0.18+R()*1.2,rad=135+R()*40;
+    starPts.push(Math.cos(a)*Math.cos(el)*rad,Math.sin(el)*rad,Math.sin(a)*Math.cos(el)*rad);
+  }
+  starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPts,3));
+  const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:ow.lightCol,size:1.6,transparent:true,opacity:0.85,fog:false}));
+  skyGrp.add(stars);
+  L.group.add(skyGrp);
+
+  // 2. Classifica as salas em 3 Zonas de Profundidade até a Cidadela do Chefe
+  const en=rooms[0],br=rooms[bi];
+  const maxD=Math.max(1,Math.hypot(br.wx-en.wx,br.wz-en.wz));
+  rooms.forEach((r,i)=>{
+    const d=Math.hypot(r.wx-en.wx,r.wz-en.wz)/maxD;
+    r.zone456=i===0?1:i===bi?3:(d<0.45?1:d<0.82?2:3);
+  });
+
+  // 3. Rastros / Sinais de Energia através das Zonas (Caçada ao Chefe)
+  const cand=mids.slice().sort((a,b)=>{
+    const da=Math.hypot(rooms[a].wx-en.wx,rooms[a].wz-en.wz);
+    const db=Math.hypot(rooms[b].wx-en.wx,rooms[b].wz-en.wz);
+    return da-db;
+  });
+  const sigRooms=[];
+  if(cand.length>=3){
+    sigRooms.push(cand[0],cand[Math.floor(cand.length/2)],cand[cand.length-1]);
+  }else{
+    for(let k=0;k<Math.min(3,cand.length);k++)sigRooms.push(cand[k]);
+  }
+  L.riftSignalNodes456=[];
+  L.riftSignalsMax456=Math.max(1,sigRooms.length);
+  sigRooms.forEach((ri,idx)=>{
+    const r=rooms[ri],p=randIn(r);
+    const grp=new THREE.Group();grp.position.set(p.x,0,p.z);
+    const cry=crystalCluster230(g.rank||2,1.35,false);grp.add(cry);
+    const ring=new THREE.Mesh(new THREE.RingGeometry(1.1,1.45,24),glowS(ow.moonCol,0.85));
+    ring.rotation.x=-Math.PI/2;ring.position.y=0.08;grp.add(ring);
+    const sg=makeSign('RASTRO DE ENERGIA '+(idx+1)+'/'+L.riftSignalsMax456,'#d8b4ff',0.46);
+    sg.position.y=3.1;grp.add(sg);
+    L.group.add(grp);
+    const it={
+      type:'riftSignal456',idx,room:ri,x:p.x,z:p.z,r:3.2,grp,tracked:false,
+      label:'F · RASTREAR SINAL DE ENERGIA ('+(idx+1)+'/'+L.riftSignalsMax456+')',
+      use:()=>trackRiftSignal456(it)
+    };
+    L.inter.push(it);
+    L.riftSignalNodes456.push(it);
+  });
+
+  // 4. Recursos Exóticos do Outro Mundo (Lenha Abissal, Fungos/Frutas Astrais e Fenda de Água/Pesca)
+  const resTypes=['lenha_abissal','fungo_astral','poca_abissal'];
+  mids.forEach((ri,k)=>{
+    const r=rooms[ri],p=randIn(r),kind=resTypes[k%resTypes.length];
+    const grp=new THREE.Group();grp.position.set(p.x,0,p.z);
+    let label='';
+    if(kind==='lenha_abissal'){
+      const trunk=mesh(geo('owWood456',()=>new THREE.CylinderGeometry(0.22,0.35,1.5,6)),toonS(0x3a2846));
+      trunk.position.y=0.75;trunk.rotation.z=0.18;grp.add(trunk);
+      const glow=crystalCluster230(g.rank||1,0.65,false);glow.position.y=0.2;grp.add(glow);
+      label='F · CORTAR LENHA E RESINA DO OUTRO MUNDO';
+    }else if(kind==='fungo_astral'){
+      const stem=mesh(geo('owStem456',()=>new THREE.CylinderGeometry(0.12,0.18,0.65,7)),toonS(0xd8c8f0));stem.position.y=0.32;grp.add(stem);
+      const cap=mesh(geo('owCap456',()=>new THREE.SphereGeometry(0.48,12,8,0,TAU,0,Math.PI*0.6)),glowS(ow.moonCol,0.8));cap.position.y=0.62;grp.add(cap);
+      label='F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
+    }else{
+      const pool=new THREE.Mesh(new THREE.CircleGeometry(1.35,20),new THREE.MeshBasicMaterial({color:ow.moonCol,transparent:true,opacity:0.72}));
+      pool.rotation.x=-Math.PI/2;pool.position.y=0.06;grp.add(pool);
+      const rim=new THREE.Mesh(new THREE.RingGeometry(1.3,1.5,20),toonS(0x2d2938));
+      rim.rotation.x=-Math.PI/2;rim.position.y=0.07;grp.add(rim);
+      label='F · ENCHER CANTIL / PESCAR NA FENDA ABISSAL';
+    }
+    L.group.add(grp);
+    const it={
+      type:'riftRes456',kind,x:p.x,z:p.z,r:2.8,grp,charges:2,
+      label,
+      use:()=>gatherOtherworldRes456(it)
+    };
+    L.inter.push(it);
+  });
+}
+
+function trackRiftSignal456(it){
+  if(!it||it.tracked||!L)return false;
+  it.tracked=true;it.hidden=true;
+  if(it.grp)it.grp.visible=false;
+  L.riftSignals456=(L.riftSignals456||0)+1;
+  L.riftDays456=(L.riftDays456||1)+3; // Dias de jornada rastreando através das zonas do Outro Mundo
+  const br=L.rooms[L.bossRoom];
+  const nextNode=(L.riftSignalNodes456||[]).find(n=>!n.tracked);
+  const target=nextNode||br;
+  if(target){
+    const a=Math.atan2(target.x??target.wx-player.x,target.z??target.wz-player.z);
+    for(let s=1;s<=5;s++){
+      fxRing(player.x+Math.sin(a)*s*1.8,player.z+Math.cos(a)*s*1.8,L.otherworld456?.moonCol||0xb070ff,0.9,0.6);
+    }
+  }
+  sfx('portal');
+  gainXp(Math.round(45*GR[L.gate?.rank||0].xp),'explore');
+  if(L.riftSignals456>=L.riftSignalsMax456){
+    bigText('CIDADELA DO CHEFE LOCALIZADA',2200);
+    toast('<b>[RASTRO COMPLETO · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Você triangulou os sinais de energia! A Cidadela do Soberano foi revelada no mapa.',5500);
+    if(br)L.seen.add(L.bossRoom);
+  }else{
+    toast('<b>[SINAL '+L.riftSignals456+'/'+L.riftSignalsMax456+' · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Rastro energético seguido! Monte seu Acampamento Portátil [B] se precisar descansar ou cozinhar antes da próxima zona.',5000);
+  }
+  return true;
+}
+
+function gatherOtherworldRes456(it){
+  if(!it||it.hidden||!window.Surv437)return false;
+  it.charges=(it.charges||1)-1;
+  if(it.kind==='lenha_abissal'){
+    Surv437.add('lenha',2,true);Surv437.add('galho',2,true);Surv437.add('resina',1,true);
+    floater(it.x,it.z,'+2 Lenha · +1 Resina','#d8b4ff',true);
+    toast('<b>[OUTRO MUNDO]</b> Você cortou <b>Lenha Abissal</b> e <b>Resina</b> para manter sua Fogueira e selar Invólucros!');
+  }else if(it.kind==='fungo_astral'){
+    Surv437.add('cogu_bom',2,true,0);Surv437.add('erva',1,true);Surv437.add('fibra',2,true);
+    floater(it.x,it.z,'+2 Fungos Frescos · +Erva','#7cf4c2',true);
+    toast('<b>[OUTRO MUNDO]</b> Você colheu <b>Fungos Comestíveis (100% Frescos)</b>, <b>Erva</b> e <b>Fibras</b>!');
+  }else{
+    const s=Surv437.S();
+    if(s){
+      s.canteen.sips=Surv437.canteenMaxSips();
+      s.canteen.kind='suja';
+      s.canteen.frozen=false;
+    }
+    Surv437.add('peixe_cru',1,true,0);
+    floater(it.x,it.z,'Cantil Cheio + 1 Peixe Abissal','#7fd8ff',true);
+    toast('<b>[FENDA ABISSAL]</b> Você pescou <b>1 Peixe Cru</b> e encheu o Cantil com água condensada (ferva na Fogueira antes de beber!).');
+  }
+  sfx('step');
+  if(it.charges<=0){
+    it.hidden=true;
+    if(it.grp)it.grp.visible=false;
+  }
+  Surv437.save();
+  return true;
+}
+
+function spawnRiftAftermath456(gx,gz,rank,daysPassed){
+  if(!L||L.mode!=='world'||!L.group)return;
+  const grp=new THREE.Group();
+  const y0=typeof terrH==='function'?terrH(gx,gz):0;
+  grp.position.set(gx,y0,gz);
+  grp.userData.terrainAbsolute245=true;
+  // Cratera / Solo Chamuscado do Cerco Contido
+  const scorch=new THREE.Mesh(new THREE.RingGeometry(2.2,9.5,32),new THREE.MeshBasicMaterial({color:0x1a1118,transparent:true,opacity:0.68,side:THREE.DoubleSide,depthWrite:false}));
+  scorch.rotation.x=-Math.PI/2;scorch.position.y=0.06;grp.add(scorch);
+  // Estilhaços de Cristal Selado e Barricadas da Ordem
+  for(let i=0;i<8;i++){
+    const a=(i/8)*TAU+0.2,d=5.2+(i%3)*1.6;
+    const px=Math.cos(a)*d,pz=Math.sin(a)*d;
+    const dy=(typeof terrH==='function'?terrH(gx+px,gz+pz):y0)-y0;
+    const post=mesh(geo('siegePost456',()=>new THREE.CylinderGeometry(0.14,0.18,1.4,6)),toonS(0x4a3525));
+    post.position.set(px,dy+0.6,pz);post.rotation.set((i%2?0.32:-0.28),a,0.18);grp.add(post);
+    if(i%2===0){
+      const cry=crystalCluster230(rank||2,0.85,true);
+      cry.position.set(px*0.75,dy+0.05,pz*0.75);grp.add(cry);
+    }
+  }
+  const sg=makeSign('CERCO CONTIDO · '+daysPassed+' DIAS','#ffb36b',0.48);
+  sg.position.set(0,3.6,0);grp.add(sg);
+  L.group.add(grp);
+  const it={
+    type:'aftermath456',x:gx,z:gz+3.2,r:3.5,
+    label:'F · RELATÓRIO DE PASSAGEM DO TEMPO ('+daysPassed+' DIAS)',
+    use:()=>showRiftTimeReport456(daysPassed,rank)
+  };
+  L.inter.push(it);
+}
+
+function showRiftTimeReport456(daysPassed,rank){
+  const caps=(run&&run.capitalStatus456)||[
+    {n:'Aster',st:'Guarnição reforçada; caravanas mantiveram o abastecimento durante as '+Math.round(daysPassed/7)+' semanas.'},
+    {n:'Solaria',st:'Escudos solares contiveram 3 ondas de fendas secundárias no horizonte.'},
+    {n:'Ymiria',st:'Nevasca severa nas muralhas; patrulhas queimaram estoques extras de lenha.'},
+    {n:'Zahar',st:'Tempestades de areia mudaram as dunas; batedores seguraram o perímetro.'},
+    {n:'Urdan & Verden',st:'Sentidos de vigília dobrados enquanto você esteve no Outro Mundo.'}
+  ];
+  let h='<div class="sysline"><b>'+daysPassed+' dias se passaram em Primeva desde que você entrou na Fenda.</b><br>O fluxo temporal dentro do Outro Mundo corre em escala diferente da superfície. Enquanto você sobreviveu e caçou o Soberano lá dentro, semanas se passaram do lado de fora:</div>';
+  h+=row('Arredores da Fenda Selada','Marcas visíveis de cerco contido, barricadas da Ordem chamuscadas, cristais drenados e clima alterado pela onda de choque dimensional.','');
+  for(const c of caps)h+=row('Capital · '+c.n,c.st,'');
+  openModal('IMPACTO TEMPORAL · '+daysPassed+' DIAS DEPOIS',h);
+}
+

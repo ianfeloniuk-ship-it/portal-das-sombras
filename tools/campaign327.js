@@ -52,8 +52,8 @@
       { t: 'tower', n: 100, d: 'Chegue ao andar 100 da Torre da Ascensão.' },
       { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra o que viu no mapa do topo.', say: ['Um mapa de mundos inteiros, em pedaços…', 'Um deles parece com o seu, {nome}. Talvez ainda exista alguém lá.'] }] },
     { id: 'a8', act: 8, title: 'VIII — O Clã Ferrugem', steps: [
-      { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com F para lutar livre) e limpe a passagem com a Pá/Enxada.', verb: 'NIVELAR E LIMPAR DESFILADEIRO (PÁ/ENXADA)', fight: { n: 6, el: 1, kinds: GOB },
-        done: 'O desfiladeiro está nivelado e livre. O estandarte dos saqueadores foi pintado por cima: não é o vermelho do Clã Ferrugem.' },
+      { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com F para lutar livre) e desobstrua as pedras e troncos da passagem.', verb: 'DESOBSTRUIR PEDRAS E TRONCOS DO DESFILADEIRO', fight: { n: 6, el: 1, kinds: GOB },
+        done: 'O desfiladeiro está desobstruído e livre, mantendo o relevo natural intacto. O estandarte dos saqueadores foi pintado por cima: não é o vermelho do Clã Ferrugem.' },
       { t: 'go', d: 'Avance ao vale da fundição velha e ajude Torvo a defender os refugiados cercados.', verb: 'FALAR COM TORVO NO VALE', fight: { n: 5, el: 1 }, fig: { torvo: true },
         done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio lutar ao nosso lado. Os refugiados estão exaustos de Fome, Sede e Cansaço.' },
       { t: 'go', d: 'Cure a Fome, Sede e Cansaço dos refugiados no vale da fundição velha: monte/acenda uma Fogueira perto ou entregue Água Fervida / Comida Assada.', verb: 'AQUECER / ENTREGAR ÁGUA FERVIDA OU COMIDA ASSADA', same: 1, fig: { civ: true, name: 'Refugiado' },
@@ -67,22 +67,32 @@
       { t: 'ev', ev: 'elite', n: 6, d: 'Contenha as ameaças: derrote 6 elites.' },
       { t: 'talk', npc: 'Brann', d: 'Conte a Brann onde reforçar as defesas.', say: ['Reforçamos onde a pressão era real, não onde o medo mandava. Bom trabalho.'] }] },
     { id: 'a10', act: 10, title: 'X — Pedaços de Deus', steps: [
-      { t: 'talk', npc: 'Lyra', d: 'Leve a Lyra o fragmento do Logos.', say: ['Você derrubou um Logos. Os portais perigosos estão calmos, mas não por muito tempo.'] },
-      { t: 'ev', ev: 'clear', n: 3, d: 'Aproveite a calma: feche 3 portais.' },
-      { t: 'talk', npc: 'Dorian', d: 'Organize a expedição com Dorian, no Mercado.', say: ['Suprimentos para uma expedição? Separo o melhor. Só me traga histórias de volta.'] }] },
+      { t: 'go', d: 'Derrube a manifestação do Logos perto de {cidade} e recolha o fragmento dourado.', verb: 'RECOLHER FRAGMENTO DO LOGOS', logos456: true, fight: { n: 1, el: 1, logos456: true },
+        done: 'Aldric segura o fragmento dourado que caiu do Logos: — Isto é um dedo dele. Cada portal vermelho é o Arquiteto tentando enfiar a mão neste mundo.' },
+      { t: 'talk', npc: 'Lyra', d: 'Leve a Lyra o fragmento do Logos.', say: ['Você derrubou um Logos. Os portais perigosos estão calmos, mas não por muito tempo.', 'Precisamos estabilizar os selos de Urdan e Verden. Organize a expedição com Dorian no Mercado.'] },
+      { t: 'talk', npc: 'Dorian', d: 'Organize a expedição com Dorian, no Mercado.', say: ['Suprimentos para uma expedição às Fendas e às Âncoras de Urdan e Verden? Separo o melhor: Ração de Expedição e Invólucro de Resina. Só me traga histórias de volta.'] },
+      { t: 'go', d: 'Estabilize o selo de Urdan (Tronco do Arquiteto) e vença ou aceite a rendição do Sapo Rei (#020) em Verden (Cabeça do Arquiteto).', verb: 'SINTONIZAR SELOS DE URDAN E VERDEN', pts: 2, urdanVerden456: true, fight: { n: 1, el: 1, saporei456: true },
+        done: 'O Sapo Rei (#020) reconheceu sua força, rendeu-se com honra sem deixar carcaça para a Mão e os selos de Urdan e Verden foram estabilizados.' },
+      { t: 'ev', ev: 'clear', n: 3, d: 'Aproveite a calma: feche 3 portais.' }] },
     { id: 'a11', act: 11, title: 'XI — A Mão do Arquiteto', steps: [
-      { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra sobre a mão do Portal Primordial.', say: ['Uma mão do outro lado… Precisamos dos registros da abertura antiga.'] },
-      { t: 'go', d: 'Recupere os registros da abertura antiga, guardados por criaturas da Fenda.', verb: 'RECUPERAR OS REGISTROS', fight: { n: 8, el: 2 },
+      { t: 'go', d: 'Feche o Portal Primordial perto de {cidade} e faça a Mão do Arquiteto recuar.', verb: 'FECHAR O PORTAL PRIMORDIAL', primordial456: true, fight: { n: 4, el: 2 },
+        done: 'Ao fechar o Portal Primordial, uma imensa mão de pedra e luz (arquiteto246.glb) recua para o outro lado da Fenda.' },
+      { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra sobre a mão do Portal Primordial.', say: ['Uma mão do outro lado… O Fim do Mundo não é um desastre: é um teste. Precisamos dos registros da abertura antiga.'] },
+      { t: 'go', d: 'Recupere os registros da abertura antiga, guardados por criaturas da Fenda.', verb: 'RECUPERAR OS REGISTROS', book: true, fight: { n: 8, el: 2 },
         done: 'Os registros contam a mesma abertura duas vezes, com detalhes diferentes.' },
       { t: 'talk', npc: 'Lyra', d: 'Confronte as divergências com Lyra.', say: ['Dois relatos do mesmo dia que não concordam. Alguém mentiu, ou alguém não sabia de tudo.'] }] },
     { id: 'a12', act: 12, title: 'XII — O Narrador', steps: [
       { t: 'talk', npc: 'Lyra', d: 'Apresente a Lyra as provas da abertura antiga.', say: ['A voz que guia você estava lá na abertura? Então leia o que ela mesma conta.'] },
       { t: 'diary', d: 'Leia a confissão no Diário → História.' },
-      { t: 'go', d: 'Compare a confissão com uma inscrição antiga perto de {cidade}.', verb: 'COMPARAR A INSCRIÇÃO', fight: { n: 6, el: 1 },
+      { t: 'go', d: 'Compare a confissão com uma inscrição antiga perto de {cidade}.', verb: 'COMPARAR A INSCRIÇÃO', monolith456: true, fight: { n: 6, el: 1 },
         done: 'A inscrição e a confissão concordam numa coisa: o Primeiro Guardião era um selo.' },
-      { t: 'talk', npc: 'Lyra', d: 'Decida a defesa com Lyra.', say: ['Então defendemos as Âncoras. Ouvindo a voz, mas conferindo tudo.'] }] },
+      { t: 'talk', npc: 'Lyra', d: 'Decida a defesa com Lyra.', say: ['Então defendemos as Âncoras. Ouvindo a voz, mas conferindo tudo. O Arquiteto despertou na estrada — detenha-o!'] },
+      { t: 'go', d: 'Enfrente o Arquiteto na estrada de {cidade} e feche a Porta Primordial.', verb: 'SELAR OS FRAGMENTOS DO ARQUITETO', architect456: true, fight: { n: 1, el: 1, architectBoss456: true },
+        done: 'O Arquiteto se desfez em pó dourado no meio da estrada para Aster. Os cinco pedaços voltaram a dormir sob as Âncoras.' }] },
     { id: 'a13', act: 13, title: 'XIII — Quem Fechou a Porta', steps: [
       { t: 'talk', npc: 'Brann', d: 'Ajude Brann a começar a reconstrução.', say: ['A estrada ainda tem pó dourado. Vamos reconstruir.'] },
+      { t: 'go', d: 'Ergam o Marco da Reconstrução junto a Brann e aos sobreviventes na muralha de {cidade}.', verb: 'CONCLUIR A RECONSTRUÇÃO COM BRANN', rebuild456: true, zone: 'edge',
+        done: 'Brann: — As muralhas estão de pé e as cinco Capitais respiram aliviadas.' },
       { t: 'talk', npc: 'Mira', d: 'Veja como estão os feridos com Mira.', say: ['Pela primeira vez em muito tempo: só feridos, nenhum desaparecido.'] },
       { t: 'talk', npc: 'Lyra', d: 'Registre o resultado com Lyra.', say: ['Vou escrever seu nome na parede. Ninguém tinha fechado a porta antes de você, {nome}.'] }] }
   ];
@@ -145,11 +155,15 @@
   const cityName = s => (s && s.city) || 'Aster';
   const fill = (t, s) => String(t).replace(/\{nome\}/g, nm()).replace(/\{cidade\}/g, cityName(s));
 
-  /* Quando cada ato abre (mesmas regras que já liberam as páginas do Diário). */
+  /* Quando cada ato abre (mesmas regras que já liberam as páginas do Diário ou conclusão do ato anterior). */
   const ACT_OPEN = {
     1: () => true,
-    8: () => lore().includes('act8'), 9: () => lore().includes('act9'), 10: () => lore().includes('act10'),
-    11: () => lore().includes('act11'), 12: () => lore().includes('act12'), 13: () => lore().includes('act13')
+    8: () => lore().includes('act8') || !!st().m.a7?.done,
+    9: () => lore().includes('act9') || !!st().m.a8?.done,
+    10: () => lore().includes('act10') || !!st().m.a9?.done,
+    11: () => lore().includes('act11') || !!st().m.a10?.done,
+    12: () => lore().includes('act12') || !!st().m.a11?.done,
+    13: () => lore().includes('act13') || !!st().m.a12?.done
   };
   const ACT_HINT = {
     8: 'Converse com um caçador do Clã Ferrugem num posto da estrada.', 9: 'Visite outra capital além de Aster.',
@@ -163,12 +177,14 @@
   function begin(m) {
     const S = st(); if (S.m[m.id]) return;
     S.m[m.id] = { s: 0, got: 0, base: null, pos: null, city: null, killed: 0, fightDone: false, hit: [] };
+    if (m.act >= 8) try { if (!lore().includes('act' + m.act)) unlockLore('act' + m.act); } catch (_) {}
     enterStep(m); save();
     toast('<b>[' + (isSide(m) ? m.npc.toUpperCase() : 'HISTÓRIA') + ']</b> ' + esc(isSide(m) ? m.title : 'Ato ' + m.title) + ': ' + esc(fill(m.steps[0].d, S.m[m.id])), 7000);
   }
   function enterStep(m) {
     const s = state(m.id), sp = m.steps[s.s]; if (!sp) return;
     s.got = 0; s.killed = 0; s.fightDone = !sp.fight; s.hit = [];
+    if (m.act >= 8) try { if (!lore().includes('act' + m.act)) unlockLore('act' + m.act); } catch (_) {}
     if (sp.t === 'tower') s.base = sp.rel ? (profile.towerBest || 0) + sp.rel : sp.n;
     if (sp.t === 'go') { if (sp.same != null && s.saved && s.saved[sp.same]) s.pos = s.saved[sp.same].slice(); else if (!sp.near) s.pos = null; }
     if (!s.city && typeof player !== 'undefined' && player && L.mode === 'world') try { s.city = nearestCity(player.x, player.z).c.name; } catch (_) {}
@@ -469,6 +485,45 @@
         }
       }
     }
+    if (m.id === 'a10' && pts[0]) {
+      if (sp.logos456) {
+        const p0 = pts[0], lg = new THREE.Group(); lg.position.set(p0[0], gy(p0[0], p0[1]), p0[1]); lg.userData.mats = []; lg.userData.terrainAbsolute245 = true;
+        const ring = new THREE.Mesh(new THREE.CircleGeometry(2.8, 48), ringMat(0xffd36b)); ring.rotation.x = -Math.PI / 2; ring.position.y = .08; lg.add(ring); lg.userData.mats.push(ring.material);
+        if (typeof pieceMesh250 === 'function') { const pm = pieceMesh250(0); if (pm) { pm.scale.setScalar(.55); pm.position.y = 1.6; lg.add(pm); } }
+        scene.add(lg); w.grps.push(lg); w.logos456 = lg;
+      }
+      if (sp.urdanVerden456) {
+        pts.forEach((pt, idx) => {
+          if (s.hit.includes(idx)) return;
+          const isVerden = idx === 1, col = isVerden ? 0x8fe35a : 0xc77dff, pIdx = isVerden ? 4 : 3;
+          const sg = new THREE.Group(); sg.position.set(pt[0], gy(pt[0], pt[1]), pt[1]); sg.userData.mats = []; sg.userData.terrainAbsolute245 = true;
+          const ring = new THREE.Mesh(new THREE.CircleGeometry(3.2, 48), ringMat(col)); ring.rotation.x = -Math.PI / 2; ring.position.y = .08; sg.add(ring); sg.userData.mats.push(ring.material);
+          if (typeof pieceMesh250 === 'function') { const pm = pieceMesh250(pIdx); if (pm) { pm.scale.setScalar(.62); pm.position.y = 2.0; sg.add(pm); } }
+          scene.add(sg); w.grps.push(sg);
+          const it = w.inters.find(x => x.idx === idx);
+          if (it) it.label = isVerden ? 'F · SINTONIZAR SELO DE VERDEN (CABEÇA DO ARQUITETO)' : 'F · SINTONIZAR SELO DE URDAN (TRONCO DO ARQUITETO)';
+        });
+      }
+    }
+    if (m.id === 'a11' && sp.primordial456 && pts[0]) {
+      const p0 = pts[0], pg = new THREE.Group(); pg.position.set(p0[0], gy(p0[0], p0[1]), p0[1]); pg.userData.mats = []; pg.userData.terrainAbsolute245 = true;
+      if (window.Rift131) { const rift = Rift131.create({ seed: 456, legacyLinearOutput: true }); rift.scale.setScalar(1.35); pg.add(rift); w.primordialRift456 = rift; }
+      if (typeof pieceMesh250 === 'function') { const hand = pieceMesh250(0); if (hand) { hand.scale.setScalar(1.25); hand.position.set(0, 2.4, .6); pg.add(hand); w.primordialHand456 = hand; } }
+      scene.add(pg); w.grps.push(pg); w.primordial456 = pg;
+    }
+    if (m.id === 'a12' && sp.architect456 && pts[0]) {
+      const p0 = pts[0], ag = new THREE.Group(); ag.position.set(p0[0], gy(p0[0], p0[1]), p0[1]); ag.userData.mats = []; ag.userData.terrainAbsolute245 = true;
+      const ring = new THREE.Mesh(new THREE.CircleGeometry(4.2, 64), ringMat(0xffd070)); ring.rotation.x = -Math.PI / 2; ring.position.y = .08; ag.add(ring); ag.userData.mats.push(ring.material);
+      scene.add(ag); w.grps.push(ag); w.archSeal456 = ag;
+    }
+    if (m.id === 'a13' && sp.rebuild456 && pts[0]) {
+      const p0 = pts[0], rg = new THREE.Group(); rg.position.set(p0[0], gy(p0[0], p0[1]), p0[1]); rg.userData.mats = []; rg.userData.terrainAbsolute245 = true;
+      const goldMat = new THREE.MeshStandardMaterial({ color: 0xe6c365, emissive: 0x8a6418, emissiveIntensity: .45, roughness: .4, metalness: .6 });
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(.42, .58, 3.2, 8), goldMat); pillar.position.y = 1.6; rg.add(pillar);
+      scene.add(rg); w.grps.push(rg); w.rebuild456 = rg;
+      const c1 = figure({ civ: true, name: 'Morador' }, p0[0] - 2.4, p0[1] + 1.6);
+      if (c1) w.figs.push(c1);
+    }
     window.Scenes406?.build(m,s,w,pts,figure);
     W.set(m.id, w); save();
   }
@@ -583,19 +638,20 @@
     if (s.hit.includes(i)) return;
     if (m.id === 'a8' && s.s === 0 && !s.gorgeCleared441) {
       const w = W.get(m.id), p0 = pointsOf(m)[0] || [player.x, player.z];
-      if (window.Surv437 && Surv437.count && !Surv437.count('pa')) {
-        Surv437.give('pa', 1, 'Pá / Enxada recuperada no desfiladeiro');
+      if (window.Surv437?.give) {
+        Surv437.give('galho', 3, 'Galhos recolhidos do desfiladeiro');
+        Surv437.give('pedra', 3, 'Pedras recolhidas do desfiladeiro');
       }
-      if (window.Surv437?.levelTerrain) Surv437.levelTerrain(p0[0], p0[1], 14, gy(p0[0], p0[1]), 'DESFILADEIRO NIVELADO E DESOBSTRUÍDO!');
       s.gorgeCleared441 = true;
       if (w?.gorge441) { scene.remove(w.gorge441); w.gorge441 = null; }
+      try { addFloat(p0[0], gy(p0[0], p0[1]) + 2.2, p0[1], 'DESFILADEIRO DESOBSTRUÍDO!', '#7ef5a5'); } catch (_) {}
     }
     if (m.id === 'a8' && s.s === 2 && !s.refugeeHealed441) {
       const p0 = pointsOf(m)[0] || [player.x, player.z];
-      const hasFire = (run?.builds437 || []).some(b => (b.id === 'fogueira' || b.id === 'cabana') && b.fuel > 0 && Math.hypot(b.x - p0[0], b.z - p0[1]) < 16);
+      const hasFire = !!(window.Surv437?.nearFire?.(16) || (run?.builds437 || []).some(b => (b.id === 'fogueira' || b.id === 'cabana') && b.fuel > 0 && Math.hypot(b.x - p0[0], b.z - p0[1]) < 16));
       const ctn = run?.surv437?.canteen;
       const boilCanteen = ctn && (ctn.kind === 'limpa' || ctn.kind === 'cha') && (ctn.sips || 0) > 0 ? ctn : null;
-      const roastFood = ['assada', 'defumada', 'cogu_assado'].find(k => window.Surv437?.count?.(k) > 0);
+      const roastFood = ['assada', 'defumada', 'cogu_assado', 'racao_expedicao'].find(k => window.Surv437?.count?.(k) > 0);
       if (!hasFire && !boilCanteen && !roastFood) {
         toast('<b>[HISTÓRIA]</b> Os refugiados estão com Fome, Sede e Cansaço! Monte/acenda uma <b>Fogueira</b> perto, ferva <b>Água no Cantil</b> ou traga <b>Carne Assada</b>.', 6500);
         return;
@@ -606,6 +662,40 @@
       const w = W.get(m.id);
       if (w) for (const f of w.figs) if (f && f.name === 'Refugiado' && f.m) { f.down = false; f.m.wounded401 = false; f.m.root.rotation.z = 0; }
       try { addFloat(p0[0], gy(p0[0], p0[1]) + 2.2, p0[1], 'FOME, SEDE E CANSAÇO CURADOS!', '#7ef5a5'); } catch (_) {}
+    }
+    if (m.id === 'a10' && sp.logos456) {
+      profile.godKills192 = (profile.godKills192 || 0) + 1;
+      try { if (!lore().includes('act10')) unlockLore('act10'); bigText('MATADOR DE DEUSES', 2000); } catch (_) {}
+    }
+    if (m.id === 'a10' && sp.urdanVerden456) {
+      profile.m423 = profile.m423 || { anchors: {}, marks: [], astral: false };
+      profile.visited217 = profile.visited217 || {};
+      if (i === 0) {
+        profile.m423.anchors.Urdan = { t: Date.now(), stab: 100, sealed441: true, piece: 'Tronco do Arquiteto' };
+        profile.visited217.c_urdan = { n: 'Urdan', cap: true, t: Date.now() };
+      } else {
+        profile.m423.anchors.Verden = { t: Date.now(), stab: 100, sealed441: true, piece: 'Cabeça do Arquiteto' };
+        profile.visited217.c_verden = { n: 'Verden', cap: true, t: Date.now() };
+      }
+    }
+    if (m.id === 'a11' && sp.primordial456) {
+      const w = W.get(m.id);
+      if (w?.primordialRift456 && window.Rift131) try { Rift131.close(w.primordialRift456, false); } catch (_) {}
+      try { if (!lore().includes('act11')) unlockLore('act11'); bigText('PORTAL PRIMORDIAL FECHADO', 2000); } catch (_) {}
+    }
+    if (m.id === 'a12' && sp.architect456) {
+      s.architectDefeated456 = true;
+      profile.archKills223 = (profile.archKills223 || 0) + 1;
+      try { if (typeof archWin223 === 'function') archWin223(); else { if (!lore().includes('act13')) unlockLore('act13'); bigText('A PORTA FOI FECHADA', 2600); } } catch (_) {}
+    }
+    if (m.id === 'a13' && sp.rebuild456) {
+      s.rebuilt456 = true;
+      profile.raided155 = {};
+      profile.m423 = profile.m423 || { anchors: {}, marks: [], astral: false };
+      for (const [cap, piece] of [['Ymiria', 'Pernas do Arquiteto'], ['Zahar', 'Braço Direito do Arquiteto'], ['Thalor', 'Braço Esquerdo do Arquiteto'], ['Urdan', 'Tronco do Arquiteto'], ['Verden', 'Cabeça do Arquiteto']]) {
+        profile.m423.anchors[cap] = { t: Date.now(), stab: 100, sealed441: true, piece };
+      }
+      try { bigText('MARCO DA RECONSTRUÇÃO ERGUIDO', 2000); } catch (_) {}
     }
     if(!read406&&window.Scenes406){const w=W.get(m.id),step=s.s;if(Scenes406.read(m,s,w,()=>{if(W.get(m.id)===w&&state(m.id)===s&&s.s===step&&!s.done)useMarker(m,i,true)}))return}
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
@@ -628,15 +718,32 @@
     const gr = Math.min(9, rankOf()), elites = Math.max(0, Math.min(left, (sp.fight.el || 0) * (sp.pts || 1) - Math.max(0, s.killed - sp.fight.n * (sp.pts || 1))));
     const pts = pointsOf(m);
     for (let i = 0; i < left; i++) {
-      const p = pts[i % pts.length]; let x = p[0], z = p[1];
+      const ptIdx = i % pts.length, p = pts[ptIdx]; let x = p[0], z = p[1];
       for (let k = 0; k < 20; k++) { const a = rnd(0, TAU), d = rnd(5, 10); x = p[0] + Math.cos(a) * d; z = p[1] + Math.sin(a) * d; if (freeAt(x, z, .6)) break; }
       const pool = sp.fight.kinds ? sp.fight.kinds.filter(k => KINDS[k]) : null;
-      const k = pool && pool.length ? pick(pool) : wpick(kindsFor(gr)).k;
+      let k = pool && pool.length ? pick(pool) : wpick(kindsFor(gr)).k;
+      if (sp.fight.saporei456) {
+        if (ptIdx === 1) k = KINDS.saporei ? 'saporei' : (KINDS.sapogig ? 'sapogig' : (KINDS.sapo ? 'sapo' : k));
+        else k = KINDS.golcristal_f ? 'golcristal_f' : (KINDS.golcristal ? 'golcristal' : k);
+      }
       try {
         const e = spawnKind(k, x, z, gr, { wild: true });
         e.aggro = true;
         if (m.id === 'a1' && s.s === 0) { e.isIntroTutorial = true; e.hp = e.maxhp = 30; e.dmg = 3; }
         else if (i < elites) makeElite(e);
+        if (sp.fight.logos456 && i === 0) {
+          e.logos456 = true; e.threat184 = 9; e.name = '[Logos] Dedo do Arquiteto'; e.short = 'Dedo do Arquiteto';
+        }
+        if (sp.fight.saporei456 && ptIdx === 1 && !w.foes.some(o => o.saporei456)) {
+          e.saporei456 = true; e.honor456 = true; e.name = '[Rei do Brejo #020] Sapo Rei de Verden'; e.short = 'Sapo Rei #020';
+        }
+        if (sp.fight.architectBoss456 && i === 0) {
+          e.arch223 = true; e.architect456 = true; e.isBoss = true; e.name = '[Inefável] O Arquiteto'; e.short = 'O Arquiteto';
+          try {
+            if (typeof arch242 === 'function') arch242(e);
+            else if (typeof pieceMesh250 === 'function') { const pm = pieceMesh250(3); if (pm && e.m?.root) e.m.root.add(pm); }
+          } catch (_) {}
+        }
         e.camp327 = m.id;
         w.foes.push(e);
         fxRing(x, z, 0xff8a4a, 1.5);
@@ -689,10 +796,18 @@
     try { for (const m of active()) { const s = state(m.id), sp = m.steps[s.s]; if (sp && sp.t === 'ev' && sp.ev === t) { s.got += v; if (s.got >= sp.n) advance(m); else save(); } } } catch (_) {}
     return r;
   };
+  function giveDorianSupplies456(m) {
+    if (m.id === 'a10' && window.Surv437?.give) {
+      Surv437.give('racao_expedicao', 2, 'Ração de Expedição (Dorian)');
+      Surv437.give('involucro_resina', 1, 'Invólucro de Resina (Dorian)');
+    }
+  }
   function talked(npc) {
     let hit = null;
     for (const m of active()) { const s = state(m.id), sp = m.steps[s.s]; if (sp && sp.t === 'talk' && sp.npc === npc) { hit = { m, sp, s }; break; } }
     if (!hit) return '';
+    if (npc === 'Dorian') giveDorianSupplies456(hit.m);
+    if (hit.m.id === 'a12' && hit.s.s === 0) try { if (!lore().includes('act12')) unlockLore('act12'); } catch (_) {}
     const lines = hit.sp.say.map(x => '<p style="margin:4px 0">“' + esc(fill(x, hit.s)) + '”</p>').join('');
     const title = isSide(hit.m) ? hit.m.title : 'Ato ' + hit.m.title;
     advance(hit.m, npc + ': ' + hit.sp.say[hit.sp.say.length - 1]);
@@ -704,7 +819,7 @@
     const main401 = active().find(m => !isSide(m) && m.steps[state(m.id).s]?.t === 'talk' && m.steps[state(m.id).s].npc === npc401);
     if (main401 && window.Intro401) {
       const s = state(main401.id), sp = main401.steps[s.s];
-      Intro401.dialog(npc401, sp.say.map(x => fill(x,s)), () => {if(main401.id==='a1'&&s.s===2&&profile.orderPending401){profile.creationPending91=true;creationView()}else advance(main401,npc401+': '+sp.say.at(-1));});
+      Intro401.dialog(npc401, sp.say.map(x => fill(x,s)), () => {if(main401.id==='a1'&&s.s===2&&profile.orderPending401){profile.creationPending91=true;creationView()}else{if(npc401==='Dorian')giveDorianSupplies456(main401);if(main401.id==='a12'&&s.s===0)try{if(!lore().includes('act12'))unlockLore('act12')}catch(_){};advance(main401,npc401+': '+sp.say.at(-1));}});
       return;
     }
     if (id === 'wep' && window.Intro401 && state('a1')?.s === 3 && !state('a1').done && !state('a1').kaelIntro401 && profile.classless) {

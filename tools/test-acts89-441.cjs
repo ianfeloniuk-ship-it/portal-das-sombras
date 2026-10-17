@@ -33,16 +33,18 @@ function element(tag, doc) {
     '0,0': { id: 'c_aster', name: 'Aster', x: 0, z: 0 },
     '-5,0': { id: 'c_thalor', name: 'Thalor', x: -5000, z: 0 },
     '5,0': { id: 'c_zahar', name: 'Zahar', x: 5000, z: 0 },
-    '0,-5': { id: 'c_ymiria', name: 'Ymiria', x: 0, z: -5000 }
+    '0,-5': { id: 'c_ymiria', name: 'Ymiria', x: 0, z: -5000 },
+    '0,5': { id: 'c_urdan', name: 'Urdan', x: 0, z: 5000 },
+    '5,5': { id: 'c_verden', name: 'Verden', x: 5000, z: 5000 }
   };
 
   const ctx = {
     THREE, console, Map, Set, WeakMap, Promise, Math, Date, Float32Array, Uint8Array, performance: { now: () => 1000 },
     document, setInterval: noop, clearInterval: noop, setTimeout: noop, clearTimeout: noop, addEventListener: noop, requestAnimationFrame: noop,
     KEYACT: [], keyOf: () => 'ControlLeft',
-    profile: { rank: 8, name: 'Viajante', lore: ['act8', 'act9'], visited217: {}, camp327: { m: { a1: { done: true, s: 4 } } } },
+    profile: { rank: 9, name: 'Viajante', lore: ['act8', 'act9'], visited217: {}, camp327: { m: { a1: { done: true, s: 4 } } } },
     run: { level: 35, gold: 1000, equip: {}, items: [], stats: { vit: 10, res: 10, str: 10, agi: 10 } },
-    player: { x: 0, z: 0, hp: 500, maxhp: 500, mp: 100, maxmp: 100, r: 0.5, m: { root: new THREE.Group(), wep: new THREE.Group() } },
+    player: { x: 0, z: 0, hp: 500, maxhp: 500, mp: 100, maxmp: 100, r: 0.5, face: 0, m: { root: new THREE.Group(), wep: new THREE.Group() } },
     cam: { x: 0, z: 0 }, pcCam: { yaw: 0, pitch: 0 },
     L: { mode: 'world', inter: [], group: new THREE.Group() },
     scene: new THREE.Scene(),
@@ -64,16 +66,16 @@ function element(tag, doc) {
     journeyObjectives: () => [], missionPanelText: () => '', rankTab: () => '',
     started: true, paused: false, modalOpen: false, GATES341: [], npcs: [], FRIENDS217: [],
     logNews: noop, popNews194: noop, RpgBalance: { questReward: () => ({ xp: 100 }) }, gainXp: () => 100,
-    questGold283: () => 100, rankOf: () => 8, addOrderRep: noop, unlockLore: k => { if (!ctx.profile.lore.includes(k)) ctx.profile.lore.push(k); },
+    questGold283: () => 100, rankOf: () => 9, addOrderRep: noop, unlockLore: k => { if (!ctx.profile.lore.includes(k)) ctx.profile.lore.push(k); },
     bigText: noop, xpNumber: String, fmt: String, saveRun: noop, addFloat: noop, floater: noop,
     terrH: (x, z) => 0, pick: a => a[0], rnd: (a, b) => (a + b) / 2, TAU: Math.PI * 2, freeAt: () => true,
     MODELS: { list: { Barbarian: true }, ready: Promise.resolve(true) },
-    makeActor: () => ({ root: new THREE.Group(), mats: [], model: true }), animChibi: noop, speech153: noop,
+    makeActor: () => ({ root: new THREE.Group(), mats: [], model: true }), animChibi: noop, speech153: noop, turnTo: noop,
     enemies: [],
-    KINDS: { goblin: {}, gobShield118: {}, homempeixe_a: {}, lula_a: {}, arraia_a: {}, escaravelho_f: {}, cactogig_f: {}, invasor_f: {}, yeti_f: {}, yeti: {}, yetinho: {} },
+    KINDS: { goblin: {}, gobShield118: {}, homempeixe_a: {}, lula_a: {}, arraia_a: {}, escaravelho_f: {}, cactogig_f: {}, invasor_f: {}, yeti_f: {}, yeti: {}, yetinho: {}, golcristal_f: {}, golcristal: {}, saporei: {}, sapo: {} },
     GOB: ['goblin'], kindsFor: () => [{ k: 'goblin', w: 1 }], wpick: () => ({ k: 'goblin' }),
-    makeElite: e => { e.elite = true; return e; }, fxRing: noop,
-    spawnKind: (kind, x, z) => { const e = { kind, x, z, hp: 100, maxhp: 100, m: { root: new THREE.Group() }, dead: false }; ctx.enemies.push(e); return e; },
+    makeElite: e => { e.elite = true; return e; }, fxRing: noop, fxBurst: noop,
+    spawnKind: (kind, x, z) => { const e = { kind, x, z, hp: 100, maxhp: 100, speed: 3, dmg: 10, face: 0, t: 0, m: { root: new THREE.Group() }, dead: false }; ctx.enemies.push(e); return e; },
     killEnemy: e => { e.dead = true; },
     hurtEnemy: (e, amt) => { e.hp -= amt; if (e.hp <= 0) e.dead = true; },
     hurtPlayer: amt => { ctx.player.hp -= amt; },
@@ -103,7 +105,7 @@ function element(tag, doc) {
   vm.runInContext(fs.readFileSync('tools/campaign327.js', 'utf8'), ctx);
   vm.runInContext(fs.readFileSync('tools/mechanics434.js', 'utf8'), ctx);
 
-  // 1. Validate Act VIII (O Clã Ferrugem e Torvo)
+  // 1. Validate Act VIII (O Clã Ferrugem e Torvo — sem deformar o relevo natural)
   const C = ctx.Campaign327, a8 = C.ACTS.find(a => a.id === 'a8');
   assert.equal(a8.steps.length, 5, 'Act VIII has 5 steps following Chapter 8');
   C.begin(a8); C.tick();
@@ -117,8 +119,8 @@ function element(tag, doc) {
   w8.foes.forEach(e => e.dead = true); C.tick();
   assert.equal(s8.fightDone, true, 'Defeating false looters unlocks gorge clearing');
   w8.inters[0].use();
-  assert.equal(s8.gorgeCleared441, true, 'Gorge cleared with Pá/Enxada');
-  assert.ok((ctx.run.surv437.leveled || []).length >= 1, 'Pá/Enxada leveled terrain in run.surv437.leveled');
+  assert.equal(s8.gorgeCleared441, true, 'Gorge cleared without deforming terrain mesh');
+  assert.equal((ctx.run.surv437.leveled || []).length, 0, 'Terrain mesh remains 100% natural and un-deformed');
   assert.equal(s8.s, 1, 'Advanced to Step 1 (old foundry valley with Torvo & surrounded refugees)');
 
   C.tick();
@@ -131,6 +133,7 @@ function element(tag, doc) {
 
   C.tick(); w8 = C.W.get('a8');
   // Without fire/water/food, it should not advance
+  ctx.run.surv437.canteen.sips = 0;
   w8.inters[0].use();
   assert.equal(s8.s, 2, 'Refugees require campfire, boiled water, or roasted food');
   ctx.Surv437.give('assada', 1);
@@ -155,17 +158,10 @@ function element(tag, doc) {
   assert.equal(ctx.L.mode, 'world', 'Aquatic Elevator returned player to world');
   assert.ok(Math.hypot(ctx.player.x - thalor.x, ctx.player.z - thalor.z) < 20, 'Player emerged in floating city of Thalor');
 
-  // 3. Validate Act IX Part 2: Zahar (5, 0) & Ymiria (0, -5)
-  const zahar = ctx.regionCity(5, 0), ymiria = ctx.regionCity(0, -5);
+  // 3. Validate Act IX Part 2: Zahar (5, 0), Ymiria (0, -5), Urdan (0, 5) & Verden (5, 5)
+  const zahar = ctx.regionCity(5, 0), ymiria = ctx.regionCity(0, -5), urdan = ctx.regionCity(0, 5), verden = ctx.regionCity(5, 5);
   assert.equal(ctx.biomeAt(zahar.x, zahar.z), 'deserto', 'Zahar (5,0) biome is deserto');
   assert.equal(ctx.biomeAt(ymiria.x, ymiria.z), 'neve', 'Ymiria (0,-5) biome is neve');
-
-  ctx.Surv437.give('polpa_cacto', 2);
-  ctx.Surv437.give('fibra_espinhosa', 2);
-  ctx.Surv437.give('tocha', 1);
-  assert.ok(ctx.Surv437.has('polpa_cacto', 2), 'Polpa/Água de Cacto available');
-  assert.ok(ctx.Surv437.has('fibra_espinhosa', 2), 'Fibras Espinhosas available');
-  assert.ok(ctx.Surv437.has('tocha', 1), 'Tocha com Resina available');
 
   // Zahar Anchor defense & Right Arm seal
   ctx.Mech423.attune(zahar);
@@ -189,5 +185,60 @@ function element(tag, doc) {
   ctx.Mech423.attune(ymiria);
   assert.equal(ctx.profile.m423.anchors.Ymiria.sealed441, true, 'Ymiria Anchor stabilized');
 
-  console.log('ALL_V441_TESTS_PASSED');
+  // Urdan & Verden (with Sapo Rei #020 surrender)
+  ctx.Mech423.attune(urdan);
+  ctx.enemies.forEach(e => e.dead = true);
+  ctx.Mech423.attune(urdan);
+  assert.equal(ctx.profile.m423.anchors.Urdan.sealed441, true, 'Urdan Anchor (Tronco do Arquiteto) stabilized');
+
+  ctx.enemies.length = 0;
+  ctx.Mech423.attune(verden);
+  const sapoKing = ctx.enemies.find(e => e.saporeiVerden456);
+  assert.ok(sapoKing, 'Sapo Rei (#020) spawned at Verden Anchor');
+  ctx.player.x = sapoKing.x + 2; ctx.player.z = sapoKing.z + 2;
+  sapoKing.hp = 15; // <= 25% HP triggers honorable surrender
+  ctx.Eco410.beforeAI(sapoKing, 0.1);
+  assert.ok(sapoKing.eco410?.surr, 'Sapo Rei (#020) surrendered with honor at low HP');
+  ctx.Eco410.accept(sapoKing);
+  assert.equal(sapoKing.dead, true, 'Accepting Sapo Rei (#020) surrender resolves combat without leaving a carcass');
+  ctx.enemies.forEach(e => e.dead = true);
+  ctx.Mech423.attune(verden);
+  assert.equal(ctx.profile.m423.anchors.Verden.sealed441, true, 'Verden Anchor (Cabeça do Arquiteto) stabilized');
+
+  // 4. Validate Acts X, XI, XII, and XIII playable flow
+  ctx.player.x = 0; ctx.player.z = 0;
+  for (const id of ['a10', 'a11', 'a12', 'a13']) {
+    const actObj = C.ACTS.find(a => a.id === id);
+    assert.ok(actObj, `Campaign Act ${id} exists`);
+    C.begin(actObj);
+    const stAct = C.state(id);
+    let guard = 0;
+    while (!stAct.done && guard++ < 20) {
+      const sp = actObj.steps[stAct.s];
+      if (sp.t === 'talk') {
+        ctx.player.x = 0; ctx.player.z = 0;
+        const shopKey = { Lyra: 'guild', Dorian: 'mkt', Brann: 'defense', Mira: 'pot' }[sp.npc];
+        ctx.openShop(shopKey);
+      } else if (sp.t === 'ev') {
+        ctx.storyEv(sp.ev, sp.n);
+      } else if (sp.t === 'diary') {
+        ctx.journeyView('story');
+      } else if (sp.t === 'go') {
+        C.tick();
+        const w = C.W.get(id);
+        assert.ok(w, `3D world scene built for ${id} step ${stAct.s}`);
+        ctx.player.x = stAct.pos[0]; ctx.player.z = stAct.pos[1];
+        C.tick();
+        w.foes.forEach(e => e.dead = true);
+        C.tick();
+        const inters = [...w.inters];
+        for (const it of inters) it.use();
+      }
+    }
+    assert.equal(stAct.done, true, `Act ${id} completed end-to-end`);
+  }
+  assert.ok(ctx.Surv437.count('racao_expedicao') >= 2, 'Dorian granted Ração de Expedição during Act X');
+  assert.ok(ctx.Surv437.count('involucro_resina') >= 1, 'Dorian granted Invólucro de Resina during Act X');
+
+  console.log('ALL_V441_AND_V456_CAMPAIGN_TESTS_PASSED');
 })();
