@@ -1,3 +1,8 @@
+## v463 — Fome/Sede no painel Ficha com o mesmo bloco do Status, 17/10/2026
+- Pedido de Ian (sobre a v462): queria a barra de Fome e Sede "como na segunda versão" = o bloco do Status (caixinha, nome à esquerda, % colorido à direita, barra embaixo). As barrinhas finas do painel Ficha do HUD viraram esse bloco (lado a lado, menor). Clicar abre a mochila [V].
+- Só `tools/attrs462.js` (`hudBars` e CSS), `?v=463`.
+- Teste (navegador, porta 8892): blocos aparecem no painel Ficha antes do XP, cor muda com o valor (62% verde, 21% vermelho), clique abre "SOBREVIVÊNCIA, FRESCOR & EXPEDIÇÃO"; sem erro novo. `build.py` e `core_parts.py check` ok.
+
 ## v462 — Fome/Sede na Ficha, ← Voltar nas subpáginas e os 9 atributos sobem por treino (com marcos de 25 e bônus de sobrevivência), 17/10/2026
 - Pedido de Ian (4 pontos, sem refazer o layout e sem mexer na matemática de combate v281–v283).
 - Novo `tools/attrs462.js` (carregado por último). Combate intacto: os ganchos de luta só CONTAM ações; um ponto de treino entra em `run.stats` igual a um ponto distribuído.

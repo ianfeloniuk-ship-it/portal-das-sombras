@@ -252,17 +252,19 @@
     let box = document.getElementById('a462hud');
     if (!box || box.nextElementSibling !== xp) {
       if (box) box.remove();
-      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" title="Fome e Sede · mochila [V]">' +
-        '<div><div class="bar" style="height:5px"><i id="a462hF"></i></div><div class="lbl"><span>FOME</span><span id="a462hFv"></span></div></div>' +
-        '<div><div class="bar" style="height:5px"><i id="a462hS"></i></div><div class="lbl"><span>SEDE</span><span id="a462hSv"></span></div></div></div>');
+      // v463 (Ian): mesmo bloco do Status (caixinha, nome à esquerda, % colorido à direita, barra embaixo)
+      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" class="a462-grid" title="Fome e Sede · clique para abrir a mochila [V]" style="cursor:pointer;pointer-events:auto">' +
+        '<div class="a462-meter"><div class="a462-l"><span>Fome</span><b id="a462hFv"></b></div><div class="a462-b"><i id="a462hF"></i></div></div>' +
+        '<div class="a462-meter"><div class="a462-l"><span>Sede</span><b id="a462hSv"></b></div><div class="a462-b"><i id="a462hS"></i></div></div></div>');
+      document.getElementById('a462hud').onclick = () => { try { Surv437.open('inv'); } catch (_) {} };
       box = document.getElementById('a462hud');
     }
-    const set = (id, v, c) => { const i = document.getElementById(id); if (i) { i.style.width = Math.max(0, Math.min(100, v)).toFixed(0) + '%'; i.style.background = c; } const t = document.getElementById(id + 'v'); if (t) t.textContent = Math.round(v) + '%'; };
+    const set = (id, v, c) => { const i = document.getElementById(id); if (i) { i.style.width = Math.max(0, Math.min(100, v)).toFixed(0) + '%'; i.style.background = c; } const t = document.getElementById(id + 'v'); if (t) { t.textContent = Math.round(v) + '%'; t.style.color = c; } };
     set('a462hF', s.hunger, col(s.hunger, '#7ef5a5'));
     set('a462hS', s.thirst, col(s.thirst, '#6fd2ff'));
   }
   const css = document.createElement('style');
-  css.textContent = '.a462-surv{margin:10px 0 4px}.a462-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.a462-meter{background:rgba(255,255,255,.03);border:1px solid rgba(201,164,92,.25);border-radius:6px;padding:7px 10px}.a462-l{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.a462-b{height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}.a462-b i{display:block;height:100%}.a462-info{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;opacity:.9;margin-top:7px}.a462-info .btn{margin-left:auto}.a462-train{display:flex;align-items:center;gap:6px;font-size:11px;opacity:.85;margin-top:3px;flex-wrap:wrap}.a462-tb{width:54px;height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;display:inline-block}.a462-tb i{display:block;height:100%;background:#d6b468}#a462hud>div{margin-top:3px}@media (max-width:520px){.a462-grid{grid-template-columns:1fr}}';
+  css.textContent = '.a462-surv{margin:10px 0 4px}.a462-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.a462-meter{background:rgba(255,255,255,.03);border:1px solid rgba(201,164,92,.25);border-radius:6px;padding:7px 10px}.a462-l{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.a462-b{height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}.a462-b i{display:block;height:100%}.a462-info{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;opacity:.9;margin-top:7px}.a462-info .btn{margin-left:auto}.a462-train{display:flex;align-items:center;gap:6px;font-size:11px;opacity:.85;margin-top:3px;flex-wrap:wrap}.a462-tb{width:54px;height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;display:inline-block}.a462-tb i{display:block;height:100%;background:#d6b468}#a462hud{margin:6px 0 4px;gap:6px}#a462hud .a462-meter{padding:5px 8px}#a462hud .a462-l{font-size:11px;margin-bottom:4px}#a462hud .a462-b{height:5px}@media (max-width:520px){.a462-grid{grid-template-columns:1fr}}';
   document.head.appendChild(css);
 
   /* ---------- ← Voltar sempre que houver página anterior, e Backspace ---------- */
