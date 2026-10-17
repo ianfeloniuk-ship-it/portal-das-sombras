@@ -3532,6 +3532,7 @@ function animDraconico318(m,st,t){
  m.mixer.update(0);
 }
 function animChibi(m,st,t){
+  if(m.npc456)return; /* v456: NPC do Tripo anima sozinho (tools/npc456.js) */
   if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
   if(m.edran452&&m.bones){
     const b=m.bones,sw=Math.sin(t*9)*.5*st.move;
@@ -9051,7 +9052,8 @@ requestAnimationFrame(frame);
 <script src="narrativa-campanha.js"></script>
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=406"></script>
-<script src="tools/campaign327.js?v=454"></script>
+<script src="tools/npc456.js?v=456"></script>
+<script src="tools/campaign327.js?v=456"></script>
 <script src="tools/ecology410.js?v=441"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9078,7 +9080,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=454"></script>
+<script src="tools/intro401.js?v=456"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>

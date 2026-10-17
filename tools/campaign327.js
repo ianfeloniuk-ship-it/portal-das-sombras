@@ -278,6 +278,7 @@
     return [s.pos, ...s.extra];
   }
   const edranCache = new Map();
+  let sobrev456 = 0;
   function makeEdranActor(){
     const url = 'models/edran452.glb?v=454';
     const root = new THREE.Group(), body = new THREE.Group();
@@ -327,6 +328,14 @@
         return { friend: e, x: x + 2.2, z };
       } catch (_) { return null; }
     }
+    if (f.name === 'Edran' && window.NPC456) {
+      /* v456: Edran do Tripo com rig e animações (sentado ferido, andando, parado, empurrando) */
+      const m = NPC456.create('edran');
+      m.root.position.set(x + 1.8, gy(x + 1.8, z), z); m.root.userData.terrainAbsolute245 = true; scene.add(m.root);
+      if (f.down) m.wounded401 = true;
+      const fig = NPC456.figure('edran', { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 });
+      return window.Solid429 ? Solid429.figure(fig) : fig;
+    }
     if (f.name === 'Edran') {
       const m = makeEdranActor();
       m.root.position.set(x + 1.8, gy(x + 1.8, z), z);
@@ -334,6 +343,15 @@
       scene.add(m.root);
       if (f.down) { m.root.position.y = gy(x + 1.8, z); m.wounded401 = true; }
       const fig = { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 };
+      return window.Solid429 ? Solid429.figure(fig) : fig;
+    }
+    if ((f.name === 'Sobrevivente' || f.name === 'Refugiado') && window.NPC456) {
+      /* v456: sobreviventes do Tripo (homem e mulher se alternam), caídos de verdade e levantando com animação */
+      const id = (sobrev456++ % 2) ? 'mulher' : 'homem';
+      const m = NPC456.create(id);
+      m.root.position.set(x + 1.8, gy(x + 1.8, z), z); m.root.userData.terrainAbsolute245 = true; scene.add(m.root);
+      if (f.down) m.wounded401 = true;
+      const fig = NPC456.figure(id, { m, x: x + 1.8, z, name: f.name, down: !!f.down, t: Math.random() * 5 });
       return window.Solid429 ? Solid429.figure(fig) : fig;
     }
     if (f.name === 'Sobrevivente' && window.Citizens133) {
@@ -510,7 +528,7 @@
       for(const d of motes){d.userData.age+=dt;d.position.x+=d.userData.vx*dt;d.position.z+=d.userData.vz*dt;d.position.y+=dt*.45;d.scale.setScalar(1+d.userData.age*2);d.material.opacity=Math.max(0,.45-d.userData.age*.3)}
       people.forEach((f,j)=>{
         const k=Math.max(0,(u-.6)/.4);
-        f.m.root.rotation.z=(1-k)*Math.PI/2;
+        if(!f.m.npc456)f.m.root.rotation.z=(1-k)*Math.PI/2;
         f.m.root.position.x=cx+(j?1.2:-1.2)*(1+k*1.2);
         f.m.root.position.z=cz+k*1.5;
         f.m.root.position.y=gy(f.m.root.position.x, f.m.root.position.z);

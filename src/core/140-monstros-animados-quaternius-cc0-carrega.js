@@ -190,6 +190,7 @@ function animDraconico318(m,st,t){
  m.mixer.update(0);
 }
 function animChibi(m,st,t){
+  if(m.npc456)return; /* v456: NPC do Tripo anima sozinho (tools/npc456.js) */
   if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
   if(m.edran452&&m.bones){
     const b=m.bones,sw=Math.sin(t*9)*.5*st.move;
