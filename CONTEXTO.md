@@ -11,7 +11,7 @@
   - Partículas num InstancedMesh só (1 desenho), metade no modo Gráficos leve.
 - src/core/410-overlay-e-hud.js: números de dano nascem maiores e "socam" de volta em 0,12 s (crítico maior).
 - Partes ligadas: nenhum texto do jogo descrevia esses efeitos; o golpe atrasado não muda dano nem tempo de recarga. sw.js pds-v459.
-- Teste (navegador): golpe de espada com quadros medidos (impacto agora em ~30% do golpe, junto da lâmina), crítico, bola de fogo (disparo, explosão, QUEIMA com chamas), morte por fogo (cinzas, corpo carbonizado), ataque básico + 1ª habilidade das 25 classes sem erro do módulo. Não testado: som (Claude não ouve), segurar o botão com o mouse de verdade (a carga só aparece segurando).
+- Teste (navegador): golpe de espada com quadros medidos (impacto agora em ~30% do golpe, junto da lâmina), crítico, bola de fogo (disparo, explosão, QUEIMA com chamas), morte por fogo (cinzas, corpo carbonizado), ataque básico + 1ª habilidade de todas as entradas da lista CLASSES do código (Ian: o jogo tem 24 classes; a lista tem 25 entradas, 0 Guerreiro a 24 Berserker) sem erro do módulo. Não testado: som (Claude não ouve), segurar o botão com o mouse de verdade (a carga só aparece segurando).
 - Aviso: com a v458, tools/deep447.js dá erro no console ao abrir ("Cannot convert undefined or null to object", linha 20: U().IT não existe). Não é desta versão.
 
 ## v458 — Acampamento Portátil, Frescor da Comida (4 Estágios), Bolsas de Conservação, Cantis, Fendas como Outros Mundos (Passagem de Semanas) e Fechamento 200/200 + Atos X–XIII (Zero Créditos Tripo), 16/10/2026
