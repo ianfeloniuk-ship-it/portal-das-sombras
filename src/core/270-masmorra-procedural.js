@@ -3,7 +3,9 @@ function buildDungeon(g){
   retireExtraction117(g);clearLevel();
   const th=dungeonTheme124(g),G={...GR[g.rank],th},R=mulberry32(g.seed);
   const variant=expeditionType(g),CS=2;let Wd,Hd,cells,rooms,bi;
-  if(['core','floors'].includes(variant)){const v=variantLayout103(variant,R);Wd=v.W;Hd=v.H;cells=v.cells;rooms=v.rooms;bi=v.bi}else{
+  /* v460 (Ian): a Fenda comum vira OUTRO MUNDO aberto (tools/otherworld460.js) em vez de salas e corredores */
+  const ow456=pickOtherworld456(g,th),ow460=window.OW460&&OW460.applies(g,variant)?OW460.layout(g,R,variant,ow456.id):null;
+  if(ow460){Wd=ow460.W;Hd=ow460.H;cells=ow460.cells;rooms=ow460.rooms;bi=ow460.bi}else if(['core','floors'].includes(variant)){const v=variantLayout103(variant,R);Wd=v.W;Hd=v.H;cells=v.cells;rooms=v.rooms;bi=v.bi}else{
   Wd=G.size;Hd=G.size;cells=new Uint8Array(Wd*Hd);
   rooms=[];let tries=0;
   while(rooms.length<(g.rooms||G.rooms)&&tries++<1200){const w=6+Math.floor(R()*6),h=6+Math.floor(R()*6),x=2+Math.floor(R()*(Wd-w-4)),y=2+Math.floor(R()*(Hd-h-4));if(rooms.some(r=>x<r.x+r.w+2&&x+w+2>r.x&&y<r.y+r.h+2&&y+h+2>r.y))continue;rooms.push({x,y,w,h})}
@@ -18,11 +20,10 @@ function buildDungeon(g){
   rooms.forEach((r,i)=>{if(i===0||i===bi||r.w<9||r.h<9)return;for(const [px,py] of[[r.x+2,r.y+2],[r.x+r.w-3,r.y+2],[r.x+2,r.y+r.h-3],[r.x+r.w-3,r.y+r.h-3]])cells[py*Wd+px]=2});
   }
   const ox=-Wd*CS/2,oz=-Hd*CS/2,br=rooms[bi],cen=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
-  const ow456=pickOtherworld456(g,th);
-  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[],otherworld456:ow456,riftDays456:1,riftSignals456:0,riftSignalsMax456:3};scene.add(L.group);
+  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[],ow460:ow460?ow460.st:null,otherworld456:ow456,riftDays456:1,riftSignals456:0,riftSignalsMax456:3};scene.add(L.group);
   scene.background=new THREE.Color(ow456.skyCol);scene.fog=new THREE.FogExp2(ow456.fogCol,.016);
   hemi.color.setHex(ow456.lightCol);hemi.intensity=.85;sun.color.setHex(ow456.moonCol);sun.intensity=.78;pLight.color.setHex(0xffd9a8);pLight.intensity=1.6;pLight.distance=22;L.cave155=true;
-  renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,true,.06);if(ENV.ok&&!th.natural124)envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,g.rank);
+  if(L.ow460)OW460.render(g,R,ow456);else{renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,true,.06);if(ENV.ok&&!th.natural124)envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,g.rank)}
   const cellPos=(cx,cy)=>({x:ox+(cx+.5)*CS,z:oz+(cy+.5)*CS});
   const randIn=r=>{for(let t=0;t<40;t++){const cx=r.x+1+Math.floor(R()*(r.w-2)),cy=r.y+1+Math.floor(R()*(r.h-2));if(cells[cy*Wd+cx]===1)return cellPos(cx,cy)}const c=cen(r);return cellPos(c.x,c.y)};
   rooms.forEach((r,i)=>{r.i=i;const c=cellPos(cen(r).x,cen(r).y);r.wx=c.x;r.wz=c.z});
@@ -48,13 +49,13 @@ function buildDungeon(g){
   // afixos
   const af=g.aff||[];if(af.length){for(const e of enemies){if(af.includes('armor')){e.hp*=1.5;e.maxhp*=1.5}if(af.includes('frenzy'))e.speed*=1.3;if(af.includes('expl'))e.expl=true;if(af.includes('vamp'))e.vamp183=true;if(af.includes('elite')&&!e.isBoss&&!e.elite&&Math.random()<.25)makeElite(e);if(af.includes('rage')&&e.isBoss){const nb=(e.bars||3)+1;e.hp*=nb/(nb-1);e.maxhp*=nb/(nb-1);e.bars=nb;e.dmg*=1.3}e.gold*=1+.5*af.length;e.xp*=1+.25*af.length}if(af.includes('dark')){scene.fog.density=.035;if((run.lamps||0)>0){run.lamps--;useLamp()}else setTimeout(()=>toast('<b>[NARRADOR]</b> Masmorra com <b>Escuridão</b>. Um <b>Lampião Mágico</b> (loja de Poções) ilumina o caminho.',6000),1500)}}
   // saída
-  const en=rooms[0];{let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
-  if(variant==='core')setupCoreDefense();else if(variant==='floors')setupDungeonFloors();else if(variant!=='combat')setupExpedition(g,mids);
+  const en=rooms[0];if(!L.ow460){let ez=en.wz-3.5;for(let k=0;k<8&&!freeAt(en.wx,ez,1.2);k++)ez+=.5;exitPortal(en.wx,ez,g.red)}
+  if(variant==='core')setupCoreDefense();else if(variant==='floors'){if(!L.ow460)setupDungeonFloors()}else if(variant!=='combat')setupExpedition(g,mids);
   setupOtherworld456(g,rooms,bi,mids,R,randIn);
-  player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;if(g.extractionCleared117){L.bossDead=true;beginDungeonEscape()}else if(variant==='combat')updateCombat117();
+  player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;if(L.ow460)OW460.arrive();if(g.extractionCleared117){L.bossDead=true;beginDungeonEscape()}else if(variant==='combat')updateCombat117();
 }
 /* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
-const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. Uma única saída, na entrada.'},floors:{n:'Masmorra de Andares',d:'Três andares ligados por escadas. Baús garantidos: Raro no primeiro, Épico no segundo e Lendário no guardião do terceiro (ou melhores). Itens do segundo e terceiro têm +25% e +50% de ataque/escudo. Vença os defensores para avançar. O guardião está no terceiro; a única saída fica no primeiro. Volte antes do transbordo, 60s após vencer.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os corredores e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
+const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. O núcleo fica na Cidadela do Outro Mundo, selada até você seguir os 3 Sinais de Energia; o portal de volta só abre ali.'},floors:{n:'Expedição em Três Zonas',d:'O Outro Mundo tem três zonas até a Cidadela. Baús garantidos: Raro num acampamento da Zona 1, Épico na Zona 2 e Lendário no Soberano da Cidadela (ou melhores). Itens da Zona 2 e da Cidadela têm +25% e +50% de ataque/escudo. Vença os defensores do acampamento para abrir cada tesouro. O portal de volta só abre na Cidadela quando o Soberano cair; o mundo transborda 2 min depois.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os ermos do Outro Mundo e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
 const EXP_MATS={ward:{n:'Essência de Proteção',rune:'ward',v:80},echo:{n:'Essência de Duplicação',rune:'reprise',v:100},storm:{n:'Essência de Assalto',rune:'arcane',v:80},fang:{n:'Presa do Predador',rune:'fang',v:70},stalker:{n:'Glândula do Caçador',rune:'stalker',v:100},ore:{n:'Minério de Ressonância',rune:'shell',v:35,w:1},core:{n:'Núcleo Estável',rune:'vigor',v:70,w:2},heart:{n:'Coração de Cristal',rune:'arcane',v:140,w:3}};
 const EXP_FOCI=[{id:'ward',n:'Proteção',d:'Aliados do foco próximos recebem 40% menos dano. No chefe: escudo de 6% da vida máxima por foco, renovado a cada 16s.',c:0x70ddff},{id:'echo',n:'Duplicação',d:'Cria cópias frágeis na sala. No chefe: duas cópias por ativação, com limite de quatro vivas.',c:0xb98cff},{id:'storm',n:'Assalto',d:'Projeta impactos em linha na sala. No chefe: linhas anunciadas por 1,2s, sem bloquear a arena inteira.',c:0xff8750}];
 function expeditionType(g){if(g?.missionExtract117===true)return 'extract';if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='extract'||g.expState?.type==='extract')return 'combat';if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;if(['core','floors'].includes(g.layout103))return g.layout103;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'combat'}
@@ -155,8 +156,8 @@ function variantLayout103(type,R){
  return {W,H,cells,rooms,bi:rooms.length-1};
 }
 function unlockExitModel131(it){it.locked=false;if(it.grp?.userData.rift131){riftExitVisual131(it);return;}it.ring.material=glowS(0xffb347,1);it.grp.remove(it.sg);if(it.type==='exit'){it.sg=makeSign('SAÍDA','#ffb347',.55);it.sg.position.y=5.5;it.grp.add(it.sg)}}
-function unlockDungeonExit(){for(const it of L.exits)if(it.type==='exit'&&it.locked)unlockExitModel131(it)}
-function beginDungeonEscape(){L.closeT=60;L.warn30=false;unlockDungeonExit()}
+function unlockDungeonExit(){if(L.ow460&&window.OW460)OW460.openReturn();for(const it of L.exits)if(it.type==='exit'&&it.locked)unlockExitModel131(it)}
+function beginDungeonEscape(){L.closeT=L.ow460?120:60;L.warn30=false;unlockDungeonExit()}
 function dungeonFloorAt(z){return L.floors?Math.max(0,Math.min(2,Math.floor(((z-L.grid.oz)/L.grid.CS)/40))):0}
 function floorMapCenter(){return L.floors?L.grid.oz+(L.floors.current*40+18)*L.grid.CS:0}
 function setupDungeonFloors(){
@@ -252,7 +253,7 @@ function hurtDefenseCore(amt){const d=L.defense;if(!d||!d.started||d.failed||d.d
 function coreWave(){const d=L.defense;d.wave++;const n=coreWaveSize111(L.gate.rank,d.wave);for(let i=0;i<n;i++){const x=d.front.x+(i%5-2)*3.2,z=d.front.z-Math.floor(i/5)*2;const e=spawnKind(wpick(activeDungeonPool124(L.gate.rank,{melee:true})).k,x,z,L.gate.rank,{room:L.bossRoom});e.ai='melee';e.range=1.5;e.aggro=true;e.coreRaider=true;e.speed=Math.max(2.5,e.speed);if(L.gate.red){e.hp*=1.3;e.maxhp*=1.3}for(const aff of L.gate.aff||[]){if(aff==='armor'){e.hp*=1.5;e.maxhp*=1.5}if(aff==='frenzy')e.speed*=1.3;if(aff==='expl')e.expl=true;e.gold*=1.5}fxRing(x,z,0xff7b66,1.5,.7)}toast('Onda '+d.wave+' / 4 · '+n+' invasores pela frente. Proteja o núcleo!')}
 function completeCoreDefense(){const d=L.defense;if(!d||d.done||d.failed||!d.started||d.t<d.duration||d.wave<4||enemies.some(e=>e.coreRaider&&!e.dead))return false;d.done=true;coreLabel('NÚCLEO ABERTO');narratorEvent105('core_win');L.bossDead=true;beginDungeonEscape();giveBoon184(10);run.res.core[L.gate.rank]+=3;addChest(d.core.x+4,d.core.z,L.gate.rank,true);addVein(d.core.x-4,d.core.z,L.gate.rank,7,0x78e6ff);bigText('NÚCLEO ABERTO',1500);toast('Defesa concluída: Bênção da Fenda e 3 núcleos. Recolha o tesouro e volte à única saída. Transbordo em 60s.',5500);saveRun();return true}
 function updateCoreDefense(dt){const d=L.defense;if(!d||!d.started||d.failed||d.done||player.dead)return;d.t+=dt;while(d.wave<4&&d.t>=d.wave*15)coreWave();completeCoreDefense()}
-function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruído · fuja pela única saída';if(d.done)return 'Núcleo aberto · transbordo em '+fmtT(Math.max(0,L.closeT))+' · volte à entrada';if(!d.started)return 'Encontre o núcleo e interaja para iniciar a defesa';return 'NÚCLEO '+Math.ceil(100*d.core.hp/d.core.maxhp)+'% · '+Math.ceil(Math.max(0,d.duration-d.t))+'s · onda '+d.wave+'/4 · '+enemies.filter(e=>e.coreRaider&&!e.dead).length+' inimigos restantes'}
+function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruído · fuja pela única saída';if(d.done)return 'Núcleo aberto · transbordo em '+fmtT(Math.max(0,L.closeT))+(L.ow460?' · o portal de volta está na Cidadela':' · volte à entrada');if(!d.started)return 'Encontre o núcleo e interaja para iniciar a defesa';return 'NÚCLEO '+Math.ceil(100*d.core.hp/d.core.maxhp)+'% · '+Math.ceil(Math.max(0,d.duration-d.t))+'s · onda '+d.wave+'/4 · '+enemies.filter(e=>e.coreRaider&&!e.dead).length+' inimigos restantes'}
 
 function exitPortal(x,z,locked){
   const existing=L.exits.find(it=>it.type==='exit');if(existing)return existing;
@@ -289,10 +290,10 @@ function addChest(x,z,tier,boss,reward=null){
   lid=new THREE.Group();lid.position.set(0,.8,-.5);const lm=mesh(geo('cl',()=>new THREE.BoxGeometry(1.45,.35,1.05)),toonS(boss?0xffd070:0x8a5a2a));lm.position.set(0,.17,.5);lid.add(lm);g.add(lid);
   band=new THREE.Mesh(geo('cband',()=>new THREE.BoxGeometry(1.5,.12,1.1)),glowS(0xffd070,.8));band.position.y=.8;g.add(band)}
   g.position.set(x,0,z);g.userData.chest253=true;L.group.add(g);
-  const it={type:'chest',grp:g,x,z,r:2.3,label:boss?'F · BAÚ DO GUARDIÃO':reward?'F · TESOURO DO ANDAR '+(reward.depth+1):'F · ABRIR BAÚ',use:()=>{if(it.opened)return;if(reward&&enemies.some(e=>!e.dead&&e.room===reward.room)){toast('Derrote os defensores desta sala para abrir o tesouro.');return}it.hidden=true;it.opened=true;lid.rotation.x=-1.9;band.visible=false;openChest(x,z,tier,boss,reward)}};L.inter.push(it);return it;
+  const it={type:'chest',grp:g,x,z,r:2.3,label:boss?'F · BAÚ DO GUARDIÃO':reward?(L.ow460?'F · TESOURO DA ZONA ':'F · TESOURO DO ANDAR ')+(reward.depth+1):'F · ABRIR BAÚ',use:()=>{if(it.opened)return;if(reward&&enemies.some(e=>!e.dead&&e.room===reward.room)){toast('Derrote os defensores desta sala para abrir o tesouro.');return}it.hidden=true;it.opened=true;lid.rotation.x=-1.9;band.visible=false;openChest(x,z,tier,boss,reward)}};L.inter.push(it);return it;
 }
 function openChest(x,z,tier,boss,reward=null){
-  const depth=reward?.depth??dungeonFloorAt(z),floorTreasure=!!reward||(boss&&!!L.floors);
+  const zb460=boss&&!!L.ow460&&L.gate?.layout103==='floors',depth=reward?.depth??(zb460?2:dungeonFloorAt(z)),floorTreasure=!!reward||(boss&&(!!L.floors||zb460));
   if(!boss&&!floorTreasure&&!goblinDungeon118(L.gate)&&!L.G?.th?.natural124&&!(L.special&&L.special.kind==='tower')&&Math.random()<.12){const e=mkEnemy({n:'Mímico',hp:150,dmg:16,spd:3.8,ai:'lunge',range:1.6,wind:.35,atkCd:1.4,xp:40,scale:1.2,body:0x6b3f1f,skin:0xffd070,eye:0xff2020,wep:'none',r:.7},x,z,GR[tier].hp,GR[tier].dmg,{gr:tier});makeElite(e);e.name='Mímico';e.gold=300*GR[tier].gold;e.xp*=GR[tier].xp;e.aggro=true;bigText('MÍMICO!',900);sfx('boom');toast('O baú era um monstro!');narratorEvent105('mimic');return}
   narratorEvent105('treasure');const gold=Math.round(rnd(40,70)*GR[tier].gold*(boss?3:1)*(L.gate&&L.gate.red?2:1));run.gold+=gold;floater(x,z,'+'+gold+' ouro','#ffd54f',true);fxBurst(x,1,z,0xffd070,16,5);beep(990,.12,.05);
   if((L.special?.kind!=='tower'||boss)&&(boss||floorTreasure||Math.random()<(hasT('lord')?.85:.75)))addItem(rollItem(tier,boss,depth,floorTreasure?depth+1:0));setDrop153(boss,x,z);if(boss&&(boss.threat184||0)>=9){profile.godKills192=(profile.godKills192||0)+1;profile.godCalm237=gameDay198()+3;storyCh220('act10');bigText('MATADOR DE DEUSES',2200)}if(boss)uniqueDrop183(boss.threat183||0);if(boss&&L.gate&&(L.gate.aff||[]).includes('rage'))addItem(rollItem(tier,true,depth,1));
@@ -318,6 +319,7 @@ function setupOtherworld456(g,rooms,bi,mids,R,randIn){
   if(!L||L.mode!=='dungeon')return;
   const ow=L.otherworld456||pickOtherworld456(g,L.G?.th);
   L.otherworld456=ow;
+  if(L.ow460&&window.OW460){OW460.setupHunt(g,rooms,bi,mids,R);return;} /* v460: sinais e recursos espalhados pelo mundo aberto */
   // 1. Domo Celeste Alienígena + Luas Gêmeas + Anéis Planetários + Estrelas Dimensionais
   const skyGrp=new THREE.Group();skyGrp.name='otherworld-sky456';
   const dome=new THREE.Mesh(new THREE.SphereGeometry(210,24,16),new THREE.MeshBasicMaterial({color:ow.skyCol,side:THREE.BackSide,depthWrite:false}));
@@ -421,17 +423,18 @@ function trackRiftSignal456(it){
   const nextNode=(L.riftSignalNodes456||[]).find(n=>!n.tracked);
   const target=nextNode||br;
   if(target){
-    const a=Math.atan2(target.x??target.wx-player.x,target.z??target.wz-player.z);
+    const a=Math.atan2((target.x??target.wx)-player.x,(target.z??target.wz)-player.z);
     for(let s=1;s<=5;s++){
       fxRing(player.x+Math.sin(a)*s*1.8,player.z+Math.cos(a)*s*1.8,L.otherworld456?.moonCol||0xb070ff,0.9,0.6);
     }
   }
   sfx('portal');
+  if(L.ow460&&window.OW460)OW460.onSignal(it);
   gainXp(Math.round(45*GR[L.gate?.rank||0].xp),'explore');
   if(L.riftSignals456>=L.riftSignalsMax456){
     bigText('CIDADELA DO CHEFE LOCALIZADA',2200);
     toast('<b>[RASTRO COMPLETO · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Você triangulou os sinais de energia! A Cidadela do Soberano foi revelada no mapa.',5500);
-    if(br)L.seen.add(L.bossRoom);
+    if(br&&!L.ow460)L.seen.add(L.bossRoom);
   }else{
     toast('<b>[SINAL '+L.riftSignals456+'/'+L.riftSignalsMax456+' · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Rastro energético seguido! Monte seu Acampamento Portátil [B] se precisar descansar ou cozinhar antes da próxima zona.',5000);
   }
@@ -486,8 +489,7 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
     const post=mesh(geo('siegePost456',()=>new THREE.CylinderGeometry(0.14,0.18,1.4,6)),toonS(0x4a3525));
     post.position.set(px,dy+0.6,pz);post.rotation.set((i%2?0.32:-0.28),a,0.18);grp.add(post);
     if(i%2===0){
-      const cry=crystalCluster230(rank||2,0.85,true);
-      cry.position.set(px*0.75,dy+0.05,pz*0.75);grp.add(cry);
+      if(window.OW460)OW460.shard(grp,px*0.75,dy-0.05,pz*0.75,1.1+(i%3)*.35,0x9a7cff); /* v460: cristal do Tripo, sem o cristal antigo */
     }
   }
   const sg=makeSign('CERCO CONTIDO · '+daysPassed+' DIAS','#ffb36b',0.48);

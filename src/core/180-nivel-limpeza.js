@@ -1,5 +1,5 @@
 /* ================= NÍVEL: LIMPEZA ================= */
-function clearLevel(){if(window.Loot353)Loot353.clear();FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
+function clearLevel(){if(window.TER245&&TER245.OW)TER245.OW.value.x=0;/* v460: relevo do Outro Mundo só vale dentro da Fenda */if(window.Loot353)Loot353.clear();FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
   if(window.Rift131){for(const gate of gates)if(gate.mesh?.userData.rift131)Rift131.dispose(gate.mesh);if(L&&L.exits)for(const it of L.exits)if(it.grp?.userData.rift131)Rift131.dispose(it.grp);}if(riftLight131)riftLight131.intensity=0;if(riftSound131)riftSound131.silence();
   if(player&&player.mountM){scene.remove(player.mountM.root);player.mountM=null;run.mounted=false}
   if(L&&L.group)envDispose(L.group);scene.remove(L.group);chunks.clear();HASH.clear();

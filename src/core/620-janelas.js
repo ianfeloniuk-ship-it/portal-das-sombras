@@ -115,8 +115,8 @@ function bagItems(){
   h+='<div class="sec">CONSUMÍVEIS</div>';
   {const fo=run.foods||{};const ks=Object.keys(fo).filter(k=>fo[k]>0);h+=row('Comida'+(run.food&&run.food.t>0?' · ativo: '+run.food.n+' ('+fmtT(run.food.t)+')':''),ks.length?'':'Cozinhe no Mercado com peixes do lago',ks.map(k=>btn('Comer '+k+' ×'+fo[k],'eat',k)).join(''))}
   h+=row('Pergaminhos de Ressurgimento: '+(run.rez187||0),'Revive automaticamente sem perder itens ou progresso.','');
-  const canScroll=L.mode==='dungeon'&&!(L.gate.red&&!L.bossDead)&&run.scrolls>0;
-  h+=row('Poções de vida: '+run.pots,potionDescription()+' Consome 1 poção. Botão ✚ ou tecla '+keyLabel(keyOf('pot'))+'.','')+row('Pergaminhos de retorno: '+run.scrolls,'Sai da masmorra. Não revive você.',btn('USAR','scroll',0,canScroll));
+  const canScroll=L.mode==='dungeon'&&!((L.gate.red||L.ow460)&&!L.bossDead)&&run.scrolls>0;
+  h+=row('Poções de vida: '+run.pots,potionDescription()+' Consome 1 poção. Botão ✚ ou tecla '+keyLabel(keyOf('pot'))+'.','')+row('Pergaminhos de retorno: '+run.scrolls,(L.ow460?'Só funciona depois que o Soberano deste mundo cair: o Outro Mundo não deixa ninguém sair antes. ':'Sai da masmorra. ')+'Não revive você.',btn('USAR','scroll',0,canScroll));
 
   if(!city)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Venda de itens só dentro de uma cidade.</div>';
   openModal('BOLSA',bagTabs('itens')+h);
@@ -171,7 +171,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='tier'){if(!run.adv||run.level<tierNeed())return;closeModal();L.tierTrial=true;buildSpecial('job');return}
   if(a==='weekly'){if(profile.weekly===weekId())return;closeModal();buildSpecial('weekly');return}
   if(a==='dep'||a==='wd'){const have=a==='dep'?run.gold:(profile.bank||0);const amt=v==='all'?have:Math.min(+v,have);if(!Number.isSafeInteger(amt)||amt<=0)return;if(a==='dep'){run.gold-=amt;profile.bank=(profile.bank||0)+amt;npcEv('bank',amt)}else{profile.bank-=amt;run.gold+=amt}store.set('pds2_profile',profile);sfx('coin')}
-  if(a==='scroll'){if(run.scrolls<=0)return;run.scrolls--;closeModal();leaveDungeon(true);return}
+  if(a==='scroll'){if(run.scrolls<=0)return;if(L.ow460&&!L.bossDead){toast('<b>[OUTRO MUNDO]</b> O pergaminho não atravessa este mundo: o portal de volta só abre quando o Soberano cair.',5000);return}run.scrolls--;closeModal();leaveDungeon(true);return}
   saveRun();rerender();
 });
 $('mx').addEventListener('click',closeModal);

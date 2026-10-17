@@ -23,11 +23,12 @@ function enterGate(g){if(run&&!(run.rez187>0)&&(g.red||g.rank>=Math.max(2,(profi
   closeModal();curGate=g;buildDungeon(g);narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
   cam.x=player.x;cam.z=player.z;
   bigText((L.otherworld456?.name||'OUTRO MUNDO')+' · RANK '+GR[g.rank].id,1800);
-  toast('<b>[OUTRO MUNDO · '+L.G.th.n+']</b> '+(L.otherworld456?L.otherworld456.weather+' · ':'')+'Miasma <b>2× apodrecimento</b> fora de bolsas térmicas/invólucros. Siga os <b>3 Sinais de Energia</b> e monte seu Acampamento Portátil [B] para caçar o Chefe!',5500);
+  if(L.ow460)setTimeout(()=>toast('<b>[MIASMA DA FENDA]</b> A comida fora da Mochila Térmica ou do Invólucro de Resina apodrece <b>2× mais rápido</b> neste mundo. Monte o Acampamento Portátil para dormir e cozinhar.',6000),9000);
+  else toast('<b>[OUTRO MUNDO · '+L.G.th.n+']</b> '+(L.otherworld456?L.otherworld456.weather+' · ':'')+'Miasma <b>2× apodrecimento</b> fora de bolsas térmicas/invólucros. Siga os <b>3 Sinais de Energia</b> e monte seu Acampamento Portátil para caçar o Chefe!',5500);
   if(g.hostile)setTimeout(()=>toast('<b>[NARRADOR]</b> Caçadores hostis detectados nesta masmorra.'),1500);
   if(g.friends)setTimeout(()=>toast('<b>[NARRADOR]</b> Outro grupo de caçadores está lá dentro.'),2600);
 }
-function startBreak(){L.brk={t:0,sp:1};for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
+function startBreak(){L.brk={t:0,sp:1};if(L.ow460&&window.OW460)OW460.openReturn();for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
   bigText('TRANSBORDO DA FENDA',2200);sfx('gong');shake(.8);showSys('A masmorra está quebrando. Os monstros não param de vir. Quanto mais você aguentar, maior o recorde. A saída continua aberta: chegue nela para sair vivo.')}
 function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)>(profile.brkBest||0)){profile.brkBest=Math.floor(B.t);if(profile.brkBest%10===0){store.set('pds2_profile',profile);checkTitles();storyEv('brk')}}
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(9,L.gate.rank);

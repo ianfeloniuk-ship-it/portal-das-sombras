@@ -65,7 +65,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
   pm.instanceColor.needsUpdate=true;if(wet&&Math.random()<.4)fxRing(P.x,P.z,0xbfe4ff,1.6,.5)}
  LF244.pv.forEach((v,i)=>{if(v.l>0){v.l-=dt;v.x+=v.vx*dt;v.z+=v.vz*dt;v.y+=v.vy*dt;if(v.w)v.vy-=9*dt;const k=Math.max(0,v.l/v.L),s=v.w?.7*k+.2:(1.6-k)*.9*k+.15;m.compose(ps.set(v.x,Math.max(.05,v.y),v.z),q.identity(),sc.set(s,s,s))}else m.makeScale(0,0,0);pm.setMatrixAt(i,m)});pm.instanceMatrix.needsUpdate=true}
 /* v245: relevo — zonas planas perto do jogador (cidades, lagos, estradas) */
-function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const on=L.mode==='world'&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player)return;
+function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const ow460=L.mode==='dungeon'&&!!L.ow460;if(T.OW)T.OW.value.x=ow460?1:0;const on=(L.mode==='world'||ow460)&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player||ow460)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
  if(run&&run.surv437&&run.surv437.leveled&&run.surv437.leveled.length)run.surv437.leveled=[];
  for(const c of citiesAround(P.x,P.z,1800))D.push([c.x,c.z,CITYR+16,0]);
@@ -163,7 +163,7 @@ function updDungeon(dt){
   if(L.brk){updBreak(dt)}else if(L.bossDead&&L.expedition?.s.type!=='extract'){L.closeT-=dt;if(L.closeT<=0){startBreak();return}if(Math.floor(L.closeT)===30&&!L.warn30){L.warn30=true;toast('<b>[NARRADOR]</b> 30 segundos para a masmorra QUEBRAR. Saia pelo portal ou fique e sobreviva à invasão.',5000)}}
   L.markT-=dt;if(L.markT>0)return;L.markT=.15;
   const G=L.grid,P=player,cx=Math.floor((P.x-G.ox)/G.CS),cz=Math.floor((P.z-G.oz)/G.CS);
-  for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){if(dx*dx+dy*dy>36)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
+  const vr460=L.ow460?12:6;for(let dy=-vr460;dy<=vr460;dy++)for(let dx=-vr460;dx<=vr460;dx++){if(dx*dx+dy*dy>vr460*vr460)continue;const x=cx+dx,y=cz+dy;if(x>=0&&y>=0&&x<G.W&&y<G.H)L.visited[y*G.W+x]=1}
   L.rooms.forEach((r,i)=>{if(L.seen.has(i))return;if(cx>=r.x&&cx<r.x+r.w&&cz>=r.y&&cz<r.y+r.h){L.seen.add(i);
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});

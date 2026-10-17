@@ -57,7 +57,7 @@ function habitatProps124(rooms,g,R){
  for(const r of rooms){if(r.i===0)continue;let count=0;
   for(let y=r.y+1;y<r.y+r.h-1&&count<6;y++)for(let x=r.x+1;x<r.x+r.w-1&&count<6;x++){
    if(grid.cells[y*grid.W+x]!==1||(x!==r.x+1&&x!==r.x+r.w-2&&y!==r.y+1&&y!==r.y+r.h-2)||R()>.24)continue;
-   const wx=grid.ox+(x+.5)*grid.CS,wz=grid.oz+(y+.5)*grid.CS,key=pk(R,choices);EW(flora,key,wx,0,wz,R()*6.28,.35+R()*.45,bio==='neve'?0xe5eef1:undefined);count++;
+   const wx=grid.ox+(x+.5)*grid.CS,wz=grid.oz+(y+.5)*grid.CS,key=pk(R,choices);EW(flora,key,wx,0,wz,R()*6.28,.35+R()*.45,L.ow460?.W?L.ow460.W.peak:bio==='neve'?0xe5eef1:undefined);count++;/* v460: no Outro Mundo a decoração dos acampamentos usa a pedra do mundo */
   }
  }
  envOwn(L.group,flora.mesh(FLORAMAT));

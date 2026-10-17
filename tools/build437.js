@@ -59,6 +59,19 @@
     }
   };
 
+  let FLAME_MAT = null, FLAME_GEO = null;
+  const flameGeo = () => FLAME_GEO || (FLAME_GEO = new T.PlaneGeometry(0.95, 1.3));
+  function flameMat() {
+    if (FLAME_MAT) return FLAME_MAT;
+    FLAME_MAT = new T.ShaderMaterial({ transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide, uniforms: { uT: { value: 0 } },
+      vertexShader: 'varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+      fragmentShader: 'uniform float uT;varying vec2 vU;float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}' +
+        'void main(){vec2 q=vec2(vU.x*4.,vU.y*3.-uT*2.6);float t=n(q)*.6+n(q*2.1+3.)*.4;float y=vU.y;float w=(1.-y)*.48+.04;float d=abs(vU.x-.5+(t-.5)*.18*y);float m=smoothstep(w,w*.35,d)*smoothstep(1.,.55,y+t*.25)*smoothstep(0.,.08,y);' +
+        'vec3 c=mix(vec3(1.,.95,.6),vec3(1.,.45,.08),smoothstep(.1,.55,y+d));c=mix(c,vec3(.7,.12,.02),smoothstep(.5,.95,y));gl_FragColor=vec4(c*1.25,m);}' });
+    FLAME_MAT.userData.shared = true;
+    const tick = () => { FLAME_MAT.uniforms.uT.value = performance.now() / 1000; setTimeout(tick, 33); }; tick();
+    return FLAME_MAT;
+  }
   const spawned = new Map();
   let lastMode = '';
   let activeModalStruct = null;
@@ -117,10 +130,9 @@
       const light = new T.PointLight(0xff8a30, 1.9, 16, 1.6);
       light.position.set(0, 1.1, 0);
       fireFx.add(light);
-      const flameMat = new T.MeshBasicMaterial({ color: 0xffa033, transparent: true, opacity: 0.85 });
-      const flame = new T.Mesh(new T.ConeGeometry(0.28, 0.68, 7), flameMat);
-      flame.position.set(0, 0.45, 0);
-      fireFx.add(flame);
+      /* v460: chama com shader animado (dois planos cruzados) no lugar do cone laranja chapado */
+      try { for (let k = 0; k < 2; k++) { const flame = new T.Mesh(flameGeo(), flameMat()); flame.position.set(0, 0.62, 0); flame.rotation.y = k * Math.PI / 2; flame.renderOrder = 7; fireFx.add(flame); } }
+      catch (_) { const flame = new T.Mesh(new T.ConeGeometry(0.28, 0.68, 7), new T.MeshBasicMaterial({ color: 0xffa033, transparent: true, opacity: 0.85 })); flame.position.set(0, 0.45, 0); fireFx.add(flame); }
       fireFx.visible = (b.fuel || 0) > 0;
       g.add(fireFx);
     }
@@ -373,6 +385,8 @@
     };
     const bhm = document.getElementById('b437hangMeat');
     if (bhm) bhm.onclick = () => {
+      /* v460: um tipo por vez no varal (antes, carne e peixe juntos saíam todos como o último pendurado) */
+      if (((b.drying || 0) + (b.ready || 0)) > 0 && b.rawKind && b.rawKind !== 'carne') { toast('O varal está curando <b>Peixe</b>. Espere terminar e recolha os curados antes de pendurar Carne.'); return; }
       if (Surv437.take('carne', 1)) {
         b.rawKind = 'carne'; b.readyKind = 'defumada';
         b.drying = (b.drying || 0) + 1;
@@ -381,6 +395,8 @@
     };
     const bhf = document.getElementById('b437hangFish');
     if (bhf) bhf.onclick = () => {
+      /* v460: um tipo por vez no varal (antes, carne e peixe juntos saíam todos como o último pendurado) */
+      if (((b.drying || 0) + (b.ready || 0)) > 0 && b.rawKind && b.rawKind !== 'peixe_cru') { toast('O varal está curando <b>Carne</b>. Espere terminar e recolha os curados antes de pendurar Peixe.'); return; }
       if (Surv437.take('peixe_cru', 1)) {
         b.rawKind = 'peixe_cru'; b.readyKind = 'peixe_defumado';
         b.drying = (b.drying || 0) + 1;
