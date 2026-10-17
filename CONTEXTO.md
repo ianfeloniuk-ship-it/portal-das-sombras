@@ -1,3 +1,19 @@
+## v459 — Peso no golpe e na magia (2 reels de game feel do vasilev.yegor), 16/10/2026
+- Pedido de Ian: "assiste esses 2 vídeos e coloca em prática no Primeva" — reels "How to make a punch juicy" (5 passos) e "How to make a spell juicy" (8 passos). Só visual e som: dano, alcance, alvos e tempo de ataque não mudam. Vale igual para todas as classes e armas.
+- tools/impact459.js (novo, carregado por último; envolve hurtEnemy, killEnemy, attack e projectileImpact253):
+  - Golpe no quadro do impacto: medido no jogo, a espada só cruza o alvo a ~25% do golpe, mas o dano, o congelamento e a tremida saíam no clique (a tela congelava com o personagem parado). Agora os acertos do golpe corpo a corpo esperam esse tempo (no máximo 0,13 s; alvos escolhidos no clique). O monstro fica branco já no quadro do acerto (antes só acendia depois do congelamento).
+  - Clarão no ponto do contato e faíscas saindo na direção do golpe (cor pelo elemento; crítico dourado e maior; bloqueio cinza). Recuo de 0,16 m do jogador no golpe corpo a corpo.
+  - Tiros e magias: clarão + faíscas atravessando o alvo no ponto real do acerto, anel no crítico/projétil grande, e congelamento/tremida curtos (antes só o golpe básico tinha), no máximo um a cada 0,14 s.
+  - Magia: clarão na ponta do cajado/mão no disparo; segurando o ataque, energia puxada para a ponta e um núcleo que cresce até o próximo disparo; rastro em todo projétil do jogador que não tinha (fogo, alma e flecha especial já tinham).
+  - Som sintetizado: golpe seco por arma (lâmina com brilho metálico), baque para flecha/adaga, estrondo por elemento no impacto mágico, sopro no disparo mágico (no lugar do bipe), corda no arco, "pop" na morte, crepitar quando vira cinza. Claude não ouve: Ian precisa julgar.
+  - Depois do acerto: monstro em chamas enquanto queima (QUEIMA/fogo), apagando aos poucos; pingos de sangue enquanto sangra.
+  - Morte: estouro de faíscas, clarão e congelamento curto; morte por fogo = cinzas e brasas e o corpo fica carbonizado (o saque do corpo continua igual).
+  - Partículas num InstancedMesh só (1 desenho), metade no modo Gráficos leve.
+- src/core/410-overlay-e-hud.js: números de dano nascem maiores e "socam" de volta em 0,12 s (crítico maior).
+- Partes ligadas: nenhum texto do jogo descrevia esses efeitos; o golpe atrasado não muda dano nem tempo de recarga. sw.js pds-v459.
+- Teste (navegador): golpe de espada com quadros medidos (impacto agora em ~30% do golpe, junto da lâmina), crítico, bola de fogo (disparo, explosão, QUEIMA com chamas), morte por fogo (cinzas, corpo carbonizado), ataque básico + 1ª habilidade das 25 classes sem erro do módulo. Não testado: som (Claude não ouve), segurar o botão com o mouse de verdade (a carga só aparece segurando).
+- Aviso: com a v458, tools/deep447.js dá erro no console ao abrir ("Cannot convert undefined or null to object", linha 20: U().IT não existe). Não é desta versão.
+
 ## v458 — Acampamento Portátil, Frescor da Comida (4 Estágios), Bolsas de Conservação, Cantis, Fendas como Outros Mundos (Passagem de Semanas) e Fechamento 200/200 + Atos X–XIII (Zero Créditos Tripo), 16/10/2026
 - Regra Nº 1 cumprida: 0 créditos Tripo (nenhum novo `.glb` ou placeholder criado; 100% dos visuais usam os modelos `.glb`, rigs, shaders, materiais Three.js e UI já existentes no repositório).
 - 1) Remoção da Terraplenagem e Casas Fixas → Acampamento Portátil (`tools/terrain245.js`, `src/core/400-loop.js`, `tools/terra444.js`, `tools/clear445.js`, `tools/build437.js`):

@@ -6709,7 +6709,7 @@ function drawOverlay(){
   for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',healingShield(a)>0?(a.name||a.short||'Aliado')+' · escudo '+fmt(Math.ceil(healingShield(a))):(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff')}
   if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a');oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2);drawCombatChips(playerStatusList(P),p.x,p.y+16)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
-  for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;const s=f.big?22:15;oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
+  for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;/* v459 (Ian, reel "spell juicy" passo 8): número pequeno que nasce grande e "soca" de volta; crítico maior */const s=Math.round((f.big?22:15)*(f.t<.12?1+(f.big?.75:.4)*(1-f.t/.12):1));oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
   if(FX2.combo>=3){const k=Math.min(1,FX2.comboT/2.2);oc.globalAlpha=.4+.6*k;oc.font='700 '+(26+Math.min(20,FX2.combo))+'px "Russo One",sans-serif';oc.textAlign='right';oc.lineWidth=4;oc.strokeStyle='rgba(0,0,0,.8)';const t='x'+FX2.combo+' COMBO';oc.strokeText(t,W-24,H*.42);oc.fillStyle=FX2.combo>=30?'#ff5a8a':FX2.combo>=15?'#ffd54f':'#7fd8ff';oc.fillText(t,W-24,H*.42);oc.textAlign='center';oc.globalAlpha=1}
   /* PC: inimigo sob o mouse ganha anel no chão, nome e barra de vida */
   if(!touch&&!P.dead){const ap=aimPoint();if(ap){let best=null,bd=2.2;for(const e of enemies){if(e.dead||e.sleep)continue;const d=Math.hypot(e.x-ap.x,e.z-ap.z)-(e.r||.5);if(d<bd){bd=d;best=e}}
@@ -9343,3 +9343,4 @@ requestAnimationFrame(frame);
 <script src="tools/ground446.js?v=447"></script>
 <script src="tools/grass446.js?v=446"></script>
 <script src="tools/deep447.js?v=447"></script>
+<script src="tools/impact459.js?v=459"></script>
