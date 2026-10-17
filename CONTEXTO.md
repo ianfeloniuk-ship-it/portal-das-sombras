@@ -1,3 +1,10 @@
+## v457 — Sobreviventes presos EMBAIXO da carroça tombada e comboio andando sem trancos, 16/10/2026
+- Pedido de Ian (print da carroça): "as pessoas deitadas têm que estar nessa parte da carroça, porque a carroça está tombada em cima delas… se estão onde a carroça não está, quando eu levantar vou jogar a carroça em cima das pessoas" e "o caminhar das pessoas tá travado, um passo, para, um passo, para".
+- tools/campaign327.js: pinUnderCart457() põe os dois sobreviventes deitados no espaço da própria carroça (debaixo da carroceria e da lona tombadas, medido no jogo), cabeça para o lado aberto. No resgate eles ficam presos até a carroça subir de cima deles (80% da cena), aí se levantam e saem andando para a frente do jogador.
+- Trancos: o comboio (carroça e pessoas) ia até a cidade com setInterval de 0,5 s, pulando 0,9–1 m de cada vez. Agora walk457() move a cada quadro a 1,5 m/s com giro suave; o clipe de andar do Tripo acompanha a velocidade.
+- tools/npc456.js: ângulo do corpo deitado por modelo (lieYaw). game.html/sw.js (npc456 e campaign327 ?v=457, pds-v457).
+- Teste (navegador): de cima e do lado, os dois ficam cobertos pela carroceria; sequência do resgate (presos → carroça sobe → levantam → andam); velocidade medida 1,2–1,9 m/s contínua com o clipe de andar, sem paradas; sem erro novo no console.
+
 ## v456 — Edran e os sobreviventes da carroça viram NPCs do Tripo com rig e animação, 16/10/2026
 - Pedido de Ian: "os bonequinhos ali do início, o Adrian [Edran] da carroça, não são NPCs de verdade… pode gerar no Tripo esses personagens… NPCs com rigs de animação e tudo".
 - Tripo Studio (créditos do Studio): imagem em T-pose no estilo do Viajante (Nano Banana, modelo de T-pose) → modelo H3.1 com textura 2K e ~20 mil triângulos → auto-rig humanoide Mixamo (65 ossos) → animações. Edran: guarda veterano de Aster, peitoral de aço com o sol dourado da Ordem, gibão azul, faixa no braço esquerdo ferido. Sobreviventes: um viajante (capa marrom, colete) e uma camponesa (vestido azul, avental, trança ruiva).

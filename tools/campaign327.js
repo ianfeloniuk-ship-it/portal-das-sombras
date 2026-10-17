@@ -393,16 +393,7 @@
         const cartM = g.userData?.wagon?.g;
         if (cartM) { cartM.rotation.z = 0; }
         let ct = 0;
-        const iv = setInterval(() => {
-          ct += .5;
-          const dx = tx - g.position.x, dz = tz - g.position.z, d = Math.hypot(dx, dz);
-          if (d < 6 || ct > 35 || !g.parent) { clearInterval(iv); scene.remove(g); return; }
-          const step = Math.min(d, 2.0 * .5);
-          g.position.x += (dx / d) * step;
-          g.position.z += (dz / d) * step;
-          g.position.y = gy(g.position.x, g.position.z);
-          g.rotation.y = Math.atan2(dx, dz);
-        }, 500);
+        walk457(g, tx, tz, 1.5, () => scene.remove(g)); /* v457: anda suave a cada quadro (antes pulava 1 m a cada 0,5 s) */
       } else scene.remove(g);
     }
     for (const f of w.figs) {
@@ -414,17 +405,7 @@
           const tx = city ? city.x : root.position.x, tz = city ? city.z : root.position.z;
           f.down = false; root.rotation.z = 0;
           let ft = 0;
-          const iv = setInterval(() => {
-            ft += .5;
-            const dx = tx - root.position.x, dz = tz - root.position.z, d = Math.hypot(dx, dz);
-            if (d < 6 || ft > 35 || !root.parent) { clearInterval(iv); scene.remove(root); return; }
-            const step = Math.min(d, 1.8 * .5);
-            root.position.x += (dx / d) * step;
-            root.position.z += (dz / d) * step;
-            root.position.y = gy(root.position.x, root.position.z);
-            root.rotation.y = Math.atan2(dx, dz);
-            try { animChibi(f.m, { move: 1, atk: 0, dead: 0, wind: 0 }, ft * 3); } catch (_) {}
-          }, 500);
+          walk457(root, tx, tz, 1.5, () => scene.remove(root), dt => { ft += dt; try { animChibi(f.m, { move: 1, atk: 0, dead: 0, wind: 0 }, ft * 6); } catch (_) {} });
         } else {
           setTimeout(() => scene.remove(root), !f.hidden406 && w.L === L && L.mode === 'world' ? 6000 : 0);
         }
@@ -452,6 +433,9 @@
       const s2 = figure({ civ: true, name: 'Sobrevivente', down: true }, pts[0][0] - 2.6, pts[0][1] - 2.8);
       if (s1) w.figs.push(s1);
       if (s2) w.figs.push(s2);
+      /* v457 (Ian): quem está preso fica EMBAIXO da carroceria tombada (lona e tábuas por cima do corpo, só a cabeça para fora);
+         antes ficavam no chão livre ao lado e, ao levantar a carroça, ela cairia em cima deles */
+      [[s1, -1.6, -1.15], [s2, -1.75, -0.3]].forEach(([f, lx, lz]) => pinUnderCart457(c, f, lx, lz));
     }
     if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
     if (m.id === 'a8' && pts[0]) {
@@ -491,6 +475,31 @@
     W.set(m.id, w); save();
   }
   /* Modelo real da carroça, sem boi e condutor durante o resgate. */
+  /* coloca a figura deitada no espaço local da carroça (x local negativo = debaixo da lona), cabeça saindo para +x */
+  /* v457 (Ian: "um passo, para, um passo, para"): leva um objeto até (tx,tz) a velocidade constante, quadro a quadro,
+     girando suave para a direção; para a 6 m do alvo ou depois de 40 s */
+  function walk457(obj, tx, tz, speed, done, each) {
+    let last = performance.now(), t = 0;
+    (function step(now) {
+      const dt = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now; t += dt;
+      const dx = tx - obj.position.x, dz = tz - obj.position.z, d = Math.hypot(dx, dz);
+      if (d < 6 || t > 40 || !obj.parent) { done && done(); return; }
+      if (!paused) {
+        const k = Math.min(d, speed * dt);
+        obj.position.x += dx / d * k; obj.position.z += dz / d * k; obj.position.y = gy(obj.position.x, obj.position.z);
+        const want = Math.atan2(dx, dz), cur = obj.rotation.y; obj.rotation.y = cur + Math.atan2(Math.sin(want - cur), Math.cos(want - cur)) * Math.min(1, dt * 5);
+        each && each(dt);
+      }
+      requestAnimationFrame(step);
+    })(last);
+  }
+  function pinUnderCart457(c, f, lx, lz) {
+    if (!f || !f.m || !f.m.npc456) return;
+    const a = c.rotation.y, x = c.position.x + lx * Math.cos(a) + lz * Math.sin(a), z = c.position.z - lx * Math.sin(a) + lz * Math.cos(a);
+    f.x = x; f.z = z; f.m.root.position.set(x, gy(x, z), z);
+    f.m.root.rotation.y = a + (window.NPC456?.DEFS[f.m.npc456]?.lieYaw || 0);
+    f.pinned457 = true;
+  }
   function makeCart(x,z){
     const g=new THREE.Group();g.position.set(x,gy(x,z),z);g.rotation.y=.5;g.userData.mats=[];g.userData.terrainAbsolute245=true;
     g.userData.loading=true;window.Solid429?.prop(g,[{x:0,z:-1.5,r:1.25},{x:0,z:0,r:1.3},{x:0,z:1.5,r:1.25}]);/* v429: carroça tombada tem colisão */
@@ -528,6 +537,11 @@
       for(const d of motes){d.userData.age+=dt;d.position.x+=d.userData.vx*dt;d.position.z+=d.userData.vz*dt;d.position.y+=dt*.45;d.scale.setScalar(1+d.userData.age*2);d.material.opacity=Math.max(0,.45-d.userData.age*.3)}
       people.forEach((f,j)=>{
         const k=Math.max(0,(u-.6)/.4);
+        if(f.pinned457){ /* v457: só saem depois que a carroça subiu de cima deles */
+          if(u>=.8&&f.down){f.down=false;f.m.root.rotation.y=Math.atan2(player.x-f.m.root.position.x,player.z-f.m.root.position.z)}
+          if(!f.down){const a=cart.rotation.y,tx=cx+(j?1.3:-1.3)*Math.cos(a)+2.2*Math.sin(a),tz=cz-(j?1.3:-1.3)*Math.sin(a)+2.2*Math.cos(a);const p=f.m.root.position;p.x+=(tx-p.x)*Math.min(1,dt*2.5);p.z+=(tz-p.z)*Math.min(1,dt*2.5);f.x=p.x;f.z=p.z}
+          return;
+        }
         if(!f.m.npc456)f.m.root.rotation.z=(1-k)*Math.PI/2;
         f.m.root.position.x=cx+(j?1.2:-1.2)*(1+k*1.2);
         f.m.root.position.z=cz+k*1.5;

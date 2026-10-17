@@ -7,8 +7,8 @@
 const V='456';
 const DEFS={
  edran :{file:'models/npc456/edran456.glb', h:1.84, clips:{idle:'idle',walk:'walk',down:/^A wounded/,push:'lift_heavy'}},
- homem :{file:'models/npc456/sobrevivente-homem456.glb', h:1.76, clips:{idle:'idle',walk:'walk',down:/^A wounded/,scared:'scared_01'}},
- mulher:{file:'models/npc456/sobrevivente-mulher456.glb', h:1.66, clips:{idle:'idle',walk:'walk',down:/^A wounded/,scared:'scared_01'}},
+ homem :{file:'models/npc456/sobrevivente-homem456.glb', h:1.76, lieYaw:-Math.PI/2, clips:{idle:'idle',walk:'walk',down:/^A wounded/,scared:'scared_01'}},
+ mulher:{file:'models/npc456/sobrevivente-mulher456.glb', h:1.66, lieYaw:Math.PI/2, clips:{idle:'idle',walk:'walk',down:/^A wounded/,scared:'scared_01'}},
 };
 const cache=new Map(),live=new Set();
 function load(id){
