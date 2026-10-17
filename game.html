@@ -246,7 +246,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/wagon369.js?v=369"></script>
-<script src="tools/terrain245.js?v=456"></script>
+<script src="tools/terrain245.js?v=458"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=454"></script>
@@ -3533,6 +3533,7 @@ function animDraconico318(m,st,t){
  m.mixer.update(0);
 }
 function animChibi(m,st,t){
+  if(m.npc456)return; /* v456: NPC do Tripo anima sozinho (tools/npc456.js) */
   if(m.citizen133&&window.Citizens133){Citizens133.animate(m,st,t);return}
   if(m.edran452&&m.bones){
     const b=m.bones,sw=Math.sin(t*9)*.5*st.move;
@@ -9289,9 +9290,10 @@ requestAnimationFrame(frame);
 <script src="historia-campanha.js"></script>
 <script src="narrativa-campanha.js"></script>
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
-<script src="tools/scenes406.js?v=456"></script>
-<script src="tools/campaign327.js?v=456"></script>
-<script src="tools/ecology410.js?v=456"></script>
+<script src="tools/scenes406.js?v=458"></script>
+<script src="tools/npc456.js?v=457"></script>
+<script src="tools/campaign327.js?v=458"></script>
+<script src="tools/ecology410.js?v=458"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -9317,7 +9319,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=454"></script>
+<script src="tools/intro401.js?v=456"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -9330,14 +9332,14 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
-<script src="tools/mechanics434.js?v=456"></script>
-<script src="tools/survival437.js?v=456"></script>
-<script src="tools/cart437.js?v=456"></script>
-<script src="tools/build437.js?v=456"></script>
+<script src="tools/mechanics434.js?v=458"></script>
+<script src="tools/survival437.js?v=458"></script>
+<script src="tools/cart437.js?v=458"></script>
+<script src="tools/build437.js?v=458"></script>
 <script src="tools/sea439.js?v=439"></script>
 <script src="tools/boats440.js?v=443"></script>
-<script src="tools/terra444.js?v=456"></script>
-<script src="tools/clear445.js?v=456"></script>
+<script src="tools/terra444.js?v=458"></script>
+<script src="tools/clear445.js?v=458"></script>
 <script src="tools/ground446.js?v=447"></script>
 <script src="tools/grass446.js?v=446"></script>
 <script src="tools/deep447.js?v=447"></script>
