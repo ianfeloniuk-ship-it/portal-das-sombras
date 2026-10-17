@@ -42,7 +42,7 @@ function drawMap(ctx,S,full){
     if(window.Civic343)try{Civic343.map(ctx,tx,tz,full)}catch(_){}
     for(const n of npcs)if(n.kind==='hunter'){ctx.fillStyle='rgba(232,246,255,.7)';ctx.fillRect(tx(n.x)-1.5,tz(n.z)-1.5,3,3)}
   }else{
-    const G=L.grid,k=full?S/(G.W*G.CS):2.6,cx=full?0:P.x,cz=full?floorMapCenter():P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
+    /* v461: no Outro Mundo (infinito) o mapa grande mostra 600 m em volta de você */const G=L.grid,ow461=!!L.ow460,k=full?(ow461?S/600:S/(G.W*G.CS)):2.6,cx=full&&!ow461?0:P.x,cz=full&&!ow461?floorMapCenter():P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
     const half=S/2/k;const x0=Math.max(0,Math.floor((cx-half-G.ox)/G.CS)),x1=Math.min(G.W-1,Math.ceil((cx+half-G.ox)/G.CS)),y0=Math.max(0,Math.floor((cz-half-G.oz)/G.CS)),y1=Math.min(G.H-1,Math.ceil((cz+half-G.oz)/G.CS));
     ctx.fillStyle='rgba(255,208,138,.35)';const cs=G.CS*k+.6;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*G.W+x;if(L.visited[i]&&G.cells[i])ctx.fillRect(tx(G.ox+x*G.CS),tz(G.oz+y*G.CS),cs,cs)}
@@ -53,8 +53,8 @@ function drawMap(ctx,S,full){
     if(bossE&&!bossE.dead&&(L.combat117||L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z))){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
     for(const e of enemies){if(e.dead||(!e.combatTarget117&&!(e.kitRevealed111>time)&&(!e.aggro||!vis(e.x,e.z))))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
   }
-  const tx=full&&L.mode!=='world'?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'?S/2+(P.z-floorMapCenter())*S/(L.grid.W*L.grid.CS):S/2;
-  for(const a of allies){const k=full?(L.mode==='world'?S/560:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}
+  const tx=full&&L.mode!=='world'&&!L.ow460?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'&&!L.ow460?S/2+(P.z-floorMapCenter())*S/(L.grid.W*L.grid.CS):S/2;
+  for(const a of allies){const k=full?(L.mode==='world'?S/560:L.ow460?S/600:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}
   ctx.save();ctx.translate(tx,tz);ctx.rotate(-P.face+Math.PI);ctx.fillStyle='#ffd08a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.restore();
 }
 function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),add=(title,detail)=>rows.push('<div class="objective-row"><strong>'+safe(title)+'</strong><small>'+safe(detail)+'</small></div>');

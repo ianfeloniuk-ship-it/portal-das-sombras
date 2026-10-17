@@ -68,7 +68,7 @@ function kitRun111(s){const P=player,k=kitState111(),d=skillDamage(s),pt=kitPoin
  case 'relocate':{const a=kitDevice111(s);a.x=pt.x;a.z=pt.z;break}
  case 'foresight':k.foresight=time+duration;break;
  case 'reveal':for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=s.range)e.kitRevealed111=time+duration;break;
- case 'survey':if(L.grid){const G=L.grid;for(let y=0;y<G.H;y++)for(let x=0;x<G.W;x++)if(Math.hypot(G.ox+x*G.CS-P.x,G.oz+y*G.CS-P.z)<=s.range)L.visited[y*G.W+x]=1}else{const g=gates.filter(g=>!g.dead).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z))[0];toast(g?'Vestígio de portal rank '+GR[g.rank].id+' a '+Math.round(Math.hypot(g.x-P.x,g.z-P.z))+' m · posição '+Math.round(g.x)+', '+Math.round(g.z)+'.':'Nenhum portal próximo registrado.')}break;
+ case 'survey':if(L.grid){const G=L.grid,sr=Math.ceil(s.range/G.CS)+1,scx=Math.floor((P.x-G.ox)/G.CS),scy=Math.floor((P.z-G.oz)/G.CS);/* v461: só as células no alcance (a grade do Outro Mundo é infinita) */for(let y=Math.max(0,scy-sr);y<=Math.min(G.H-1,scy+sr);y++)for(let x=Math.max(0,scx-sr);x<=Math.min(G.W-1,scx+sr);x++)if(Math.hypot(G.ox+x*G.CS-P.x,G.oz+y*G.CS-P.z)<=s.range)L.visited[y*G.W+x]=1}else{const g=gates.filter(g=>!g.dead).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z))[0];toast(g?'Vestígio de portal rank '+GR[g.rank].id+' a '+Math.round(Math.hypot(g.x-P.x,g.z-P.z))+' m · posição '+Math.round(g.x)+', '+Math.round(g.z)+'.':'Nenhum portal próximo registrado.')}break;
  case 'capture':k.capture=time+duration;break;
  case 'consume':k.captured--;P.mp=Math.min(P.maxmp,P.mp+P.maxmp*.2);break;
  default:throw new Error('Efeito não implementado: '+s.effect);

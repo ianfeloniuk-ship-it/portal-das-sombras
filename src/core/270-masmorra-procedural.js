@@ -20,7 +20,7 @@ function buildDungeon(g){
   rooms.forEach((r,i)=>{if(i===0||i===bi||r.w<9||r.h<9)return;for(const [px,py] of[[r.x+2,r.y+2],[r.x+r.w-3,r.y+2],[r.x+2,r.y+r.h-3],[r.x+r.w-3,r.y+r.h-3]])cells[py*Wd+px]=2});
   }
   const ox=-Wd*CS/2,oz=-Hd*CS/2,br=rooms[bi],cen=r=>({x:Math.floor(r.x+r.w/2),y:Math.floor(r.y+r.h/2)});
-  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:new Uint8Array(Wd*Hd),seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[],ow460:ow460?ow460.st:null,otherworld456:ow456,riftDays456:1,riftSignals456:0,riftSignalsMax456:3};scene.add(L.group);
+  L={mode:'dungeon',group:new THREE.Group(),inter:[],grid:{cells,W:Wd,H:Hd,CS,ox,oz},rooms,visited:ow460?ow460.visited:new Uint8Array(Wd*Hd),/* v461: o Outro Mundo é infinito — grade e mapa explorado virtuais */seen:new Set(),bossRoom:bi,gate:g,G,bossDead:false,markT:0,exits:[],ow460:ow460?ow460.st:null,otherworld456:ow456,riftDays456:1,riftSignals456:0,riftSignalsMax456:3};scene.add(L.group);
   scene.background=new THREE.Color(ow456.skyCol);scene.fog=new THREE.FogExp2(ow456.fogCol,.016);
   hemi.color.setHex(ow456.lightCol);hemi.intensity=.85;sun.color.setHex(ow456.moonCol);sun.intensity=.78;pLight.color.setHex(0xffd9a8);pLight.intensity=1.6;pLight.distance=22;L.cave155=true;
   if(L.ow460)OW460.render(g,R,ow456);else{renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,true,.06);if(ENV.ok&&!th.natural124)envDunProps(rooms,cells,Wd,Hd,CS,ox,oz,th,R,bi,g.rank)}
@@ -119,7 +119,7 @@ function expeditionDamage(e,amt){const ex=L.expedition;if(!ex||ex.s.type!=='rupt
  else if(!e.isBoss&&ex.s.foci.some(f=>f.status==='active'&&f.kind===0&&f.room===e.room))amt*=.6;return amt}
 function expBossReward(){const ex=L.expedition;if(!ex||ex.s.rewarded)return;const s=ex.s;s.rewarded=true;if(s.type==='rupture')for(const f of s.foci)if(f.status==='active')expReward(EXP_FOCI[f.kind].id,6);if(s.type==='hunt'){expReward('fang',3);expReward('stalker',s.baitUsed?3:5)}saveRun()}
 function expAbandon(){const s=L.expedition?.s;if(s?.type==='extract'&&s.cargo.length){s.cargo=[];toast('A carga não enviada ficou no portal. Os materiais já enviados continuam nos espólios.')}}
-function expPath(from,to){const G=L.grid;if(!G)return [];const cell=p=>({x:Math.floor((p.x-G.ox)/G.CS),y:Math.floor((p.z-G.oz)/G.CS)}),a=cell(from),b=cell(to),start=a.y*G.W+a.x,end=b.y*G.W+b.x,prev=new Int32Array(G.W*G.H).fill(-1),q=[start];if(start<0||end<0||start>=prev.length||end>=prev.length)return [];prev[start]=start;for(let i=0;i<q.length&&prev[end]<0;i++){const v=q[i],x=v%G.W,y=Math.floor(v/G.W);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,n=ny*G.W+nx;if(nx<0||ny<0||nx>=G.W||ny>=G.H||prev[n]>=0||G.cells[n]!==1)continue;prev[n]=v;q.push(n)}}if(prev[end]<0)return [];const out=[];for(let n=end;n!==start;n=prev[n])out.push({x:G.ox+(n%G.W+.5)*G.CS,z:G.oz+(Math.floor(n/G.W)+.5)*G.CS});return out.reverse()}
+function expPath(from,to){if(L.ow460&&window.OW460)return OW460.path(from,to);const G=L.grid;if(!G)return [];const cell=p=>({x:Math.floor((p.x-G.ox)/G.CS),y:Math.floor((p.z-G.oz)/G.CS)}),a=cell(from),b=cell(to),start=a.y*G.W+a.x,end=b.y*G.W+b.x,prev=new Int32Array(G.W*G.H).fill(-1),q=[start];if(start<0||end<0||start>=prev.length||end>=prev.length)return [];prev[start]=start;for(let i=0;i<q.length&&prev[end]<0;i++){const v=q[i],x=v%G.W,y=Math.floor(v/G.W);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,n=ny*G.W+nx;if(nx<0||ny<0||nx>=G.W||ny>=G.H||prev[n]>=0||G.cells[n]!==1)continue;prev[n]=v;q.push(n)}}if(prev[end]<0)return [];const out=[];for(let n=end;n!==start;n=prev[n])out.push({x:G.ox+(n%G.W+.5)*G.CS,z:G.oz+(Math.floor(n/G.W)+.5)*G.CS});return out.reverse()}
 function expHuntMove(e,dt){const ex=L.expedition;if(!ex||ex.s.type!=='hunt'||e!==bossE||e.dead)return false;const s=ex.s;
  if(ex.trapHold>0){ex.trapHold-=dt;e.act=null;e.m.root.position.set(e.x,0,e.z);return true}
  for(const n of ex.nodes.filter(n=>n.kind==='trap'))if(s.traps[n.index]&&!s.trapSpent[n.index]&&Math.hypot(e.x-n.x,e.z-n.z)<3){s.trapSpent[n.index]=true;ex.trapHold=3;ex.lure=null;ex.retreat=null;ex.target=null;e.act=null;e.aggro=true;n.grp.rotation.z=1.4;toast('A coluna interrompeu a criatura por 3s. Ataque!');return true}
@@ -432,8 +432,9 @@ function trackRiftSignal456(it){
   if(L.ow460&&window.OW460)OW460.onSignal(it);
   gainXp(Math.round(45*GR[L.gate?.rank||0].xp),'explore');
   if(L.riftSignals456>=L.riftSignalsMax456){
-    bigText('CIDADELA DO CHEFE LOCALIZADA',2200);
-    toast('<b>[RASTRO COMPLETO · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Você triangulou os sinais de energia! A Cidadela do Soberano foi revelada no mapa.',5500);
+    if(L.ow460)toast('<b>[RASTRO COMPLETO · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Os três sinais falaram. Não há mapa para a Cidadela: siga o último rastro e os veios do chão.',6000); /* v461: sem marcação */
+    else{bigText('CIDADELA DO CHEFE LOCALIZADA',2200);
+    toast('<b>[RASTRO COMPLETO · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Você triangulou os sinais de energia! A Cidadela do Soberano foi revelada no mapa.',5500);}
     if(br&&!L.ow460)L.seen.add(L.bossRoom);
   }else{
     toast('<b>[SINAL '+L.riftSignals456+'/'+L.riftSignalsMax456+' · DIA '+L.riftDays456+' NO OUTRO MUNDO]</b> Rastro energético seguido! Monte seu Acampamento Portátil [B] se precisar descansar ou cozinhar antes da próxima zona.',5000);

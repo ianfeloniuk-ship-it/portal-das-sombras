@@ -5,13 +5,13 @@
  const TER=window.TER245={TF:{value:Array.from({length:48},()=>new T.Vector4(0,0,0,0))},TFN:{value:0},on:{value:0},MT:{value:new T.Vector4(40,1,0,0)},D:{value:Array.from({length:16},()=>new T.Vector4(0,0,-1,0))},R:{value:Array.from({length:24},()=>new T.Vector4(0,0,0,0))},OW:{value:new T.Vector4(0,185,7,0)},OWB:{value:new T.Vector4(0,0,0,0)}};
  const P=30*64*2,H0=30*64*.5,RW=11;const SEAX=-9750,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
  const GL=`uniform float uTerOn;uniform float uTerHeight245;uniform vec2 uTerAnchor245;uniform float uTerBatch245;uniform float uTerAbsolute245;attribute vec2 terrainAnchor245;uniform vec4 uTerD[16];uniform vec4 uTerR[24];uniform vec4 uMt383;uniform vec4 uTF444[48];uniform float uTFN444;uniform vec4 uOW460;uniform vec4 uOWB460;
-/* v460 (Ian): relevo do Outro Mundo dentro da Fenda — colinas, cidadela/chegada planas e cordilheira na borda. Igual ao TER.owH460 do CPU. */
-float owH460(vec2 p){float s=uOW460.w,A=uOW460.z,Rw=uOW460.y;
+/* v461 (Ian): relevo do Outro Mundo dentro da Fenda — infinito, sem borda: colinas + cordilheiras em crista; chegada e Cidadela planas. Igual ao TER.owH460 do CPU. */
+float owH460(vec2 p){float s=uOW460.w,A=uOW460.z,M=uOW460.y;
  float h=A*(.62*sin(p.x*.0185+sin(p.y*.0113+s)*1.6)*sin(p.y*.0161+sin(p.x*.0093+s*1.7)*1.3)+.30*sin(p.x*.047+p.y*.029+s*2.3)*sin(p.y*.041-p.x*.023+s)+.08*sin(p.x*.13+p.y*.09)*sin(p.y*.11-p.x*.07));
- h*=smoothstep(6.,22.,length(p-uOWB460.xy))*smoothstep(26.,50.,length(p-uOWB460.zw));
- float d=length(p),a=atan(p.y,p.x),rb=Rw*(1.+.07*sin(3.*a+s)+.045*sin(7.*a+s*2.3)+.025*sin(13.*a+s*.7));
- float k=smoothstep(rb-9.,rb+30.,d),rd=1.-abs(sin(a*9.+s*1.3+d*.021)*sin(a*5.-s+d*.013));
- return h+k*(26.+28.*rd*rd+12.*sin(a*17.+d*.05+s))+smoothstep(rb+40.,rb+170.,d)*46.;}
+ float m=smoothstep(.15,.65,sin(p.x*.0031+sin(p.y*.0023+s)*1.7)*sin(p.y*.0027+sin(p.x*.0019-s)*1.5));
+ float r1=1.-abs(sin(p.x*.011+sin(p.y*.008+s)*1.6)*sin(p.y*.012-p.x*.004)),r2=1.-abs(sin(p.x*.029+p.y*.007)*sin(p.y*.025-p.x*.010+s));
+ h+=M*m*(r1*r1*.7+r2*r2*.3);
+ return h*smoothstep(6.,22.,length(p-uOWB460.xy))*smoothstep(26.,50.,length(p-uOWB460.zw));}
 float mt383(vec2 p){if(uMt383.x<=0.)return 0.;vec2 q=p*uMt383.y;float m=smoothstep(.12,.55,sin(q.x*.0017+sin(q.y*.0023)*1.9)*sin(q.y*.0014+sin(q.x*.0011)*1.4));if(m<=0.)return 0.;
  float r1=1.-abs(sin(q.x*.012+sin(q.y*.009)*1.6)*sin(q.y*.013-q.x*.004));float r2=1.-abs(sin(q.x*.031+q.y*.008)*sin(q.y*.027-q.x*.011));float r3=1.-abs(sin(q.x*.071-q.y*.02)*sin(q.y*.063+q.x*.017));
  return uMt383.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08);}
@@ -48,12 +48,11 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);fl
   if(d>800){const t=1-Math.abs(S(x*.0042+S(z*.0027)*2.1)*S(z*.0036-x*.0011));b-=42*ss(.86,.97,t)*ss(800,1000,d)}
   return b+.6*S(x*.13+z*.07)*S(z*.11-x*.05)}
  TER.SEA439={X:SEAX,Y:SEAY,d:seaD439,bed:seaBed439};
- TER.owH460=function(x,z){const S=Math.sin,O=TER.OW.value,B=TER.OWB.value,s=O.w,A=O.z,Rw=O.y,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};
+ TER.owH460=function(x,z){const S=Math.sin,O=TER.OW.value,B=TER.OWB.value,s=O.w,A=O.z,M=O.y,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};
   let h=A*(.62*S(x*.0185+S(z*.0113+s)*1.6)*S(z*.0161+S(x*.0093+s*1.7)*1.3)+.30*S(x*.047+z*.029+s*2.3)*S(z*.041-x*.023+s)+.08*S(x*.13+z*.09)*S(z*.11-x*.07));
-  h*=ss(6,22,Math.hypot(x-B.x,z-B.y))*ss(26,50,Math.hypot(x-B.z,z-B.w));
-  const d=Math.hypot(x,z),a=Math.atan2(z,x),rb=Rw*(1+.07*S(3*a+s)+.045*S(7*a+s*2.3)+.025*S(13*a+s*.7)),k=ss(rb-9,rb+30,d),rd=1-Math.abs(S(a*9+s*1.3+d*.021)*S(a*5-s+d*.013));
-  return h+k*(26+28*rd*rd+12*S(a*17+d*.05+s))+ss(rb+40,rb+170,d)*46};
- TER.owRim460=function(a){const S=Math.sin,O=TER.OW.value,s=O.w;return O.y*(1+.07*S(3*a+s)+.045*S(7*a+s*2.3)+.025*S(13*a+s*.7))};
+  const m=ss(.15,.65,S(x*.0031+S(z*.0023+s)*1.7)*S(z*.0027+S(x*.0019-s)*1.5)),r1=1-Math.abs(S(x*.011+S(z*.008+s)*1.6)*S(z*.012-x*.004)),r2=1-Math.abs(S(x*.029+z*.007)*S(z*.025-x*.010+s));
+  h+=M*m*(r1*r1*.7+r2*r2*.3);
+  return h*ss(6,22,Math.hypot(x-B.x,z-B.y))*ss(26,50,Math.hypot(x-B.z,z-B.w))};
  window.terrH=function(x,z){if(!TER.on.value)return 0;if(TER.OW.value.x>.5)return TER.owH460(x,z);const S=Math.sin,m=.62+.38*S(x*.0021+1)*S(z*.0017+.4);
   let h=(15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)+5*S(x*.031+z*.017)*S(z*.027-x*.012)+1.2*S(x*.09+z*.05))*m+mt383(x,z);
   const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;

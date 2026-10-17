@@ -1,16 +1,18 @@
 /* v460 (Ian, 16/10/2026): "é pra ser outro mundo. Tu entrou na fenda, o portal some, é outro lugar; não pode sair até matar o chefe."
-   A Fenda deixa de ser masmorra de salas e corredores: vira um planeta aberto (~330 m) com relevo próprio (terrain245 owH460),
-   céu alienígena (planeta gigante, anéis, luas, aurora, estrelas), cordilheira na borda, flora e formações feitas só com os
-   modelos que já existem no repositório (Kenney + Tripo, 0 créditos), acampamentos de monstros espalhados e a Cidadela do
-   Soberano, selada até seguir os 3 Sinais de Energia. O portal de chegada se fecha atrás do jogador; o portal de volta só
-   abre no centro da Cidadela quando o chefe cai. A lógica do jogo continua na grade da masmorra (L.grid), só que aberta. */
+   v461 (Ian, 17/10/2026): "o planeta tem que ser procedural infinito… não quero marcação de onde tá o chefe ou as energias brilhando
+   alto, é pra ser difícil sair de lá."
+   A Fenda comum é um planeta aberto e INFINITO: relevo próprio (terrain245 owH460, sem borda), céu alienígena (planeta gigante,
+   anel, luas, aurora, estrelas), chão que acompanha o jogador e pedaços de 64 m gerados em volta dele (formações, flora,
+   rochas flutuantes, recursos, acampamentos de monstros), tudo com modelos que já existem (Kenney + Tripo, 0 créditos).
+   A colisão é uma grade virtual calculada na hora (L.grid.cells é um Proxy). Nada de feixe no céu nem marca no mapa: os
+   3 Sinais de Energia são cristais baixos que, rastreados, apontam o próximo por um rastro no chão; os veios do chão pulsam
+   a partir da Cidadela. O portal de chegada desmorona atrás do jogador; o de volta só abre na Cidadela com o Soberano morto. */
 (function () {
   'use strict';
   const T = THREE, TAU = Math.PI * 2;
-  const N = 200, CS = 2, OX = -N * CS / 2, OZ = -N * CS / 2;
   const SKIP = ['extract']; /* core vira defesa na Cidadela; floors vira 3 zonas com os mesmos baús */
 
-  /* Um mundo por bioma do portal (mesmos ids da v458 OTHERWORLDS456). Cores do chão, céu, planeta, veios e flora. */
+  /* Um mundo por bioma do portal (mesmos ids da v458 OTHERWORLDS456). */
   const WORLDS = {
     erebo: { zen: 0x07021a, hor: 0x4a2a88, fog: 0x2c1858, fogD: .0072, gr: [0x2e2448, 0x40306a, 0x1f1a36], rock: 0x2f2646, peak: 0x6a5a92, vein: 0xc07bff, sun: 0xe0c4ff, sunI: 1.05, hs: 0xa58aff, hg: 0x281a40, hI: .8, pl: [0x8a5ae6, 0x2c1a66, 0xe6c8ff], moon: [0xd8c8ff, 0x9a7ad8], aur: 0x8a5aff, cry: ['cristal-ancora-violeta', 'cristal-ancora-turquesa'], tint: 0x9b7be5, trees: ['tree_dead_large', 'tree_dead_medium', 'tree_thin'], big: ['spire', 'crystal', 'crystal', 'tree', 'ruin', 'mesa'], small: ['grass_large', 'grass_leafsLarge', 'plant_flatTall', 'flower_purpleA', 'flower_purpleB', 'rock_smallA', 'rock_smallC'], part: 'motes', pc: 0xd8b0ff },
     esporo: { zen: 0x01120c, hor: 0x1f6a50, fog: 0x154a36, fogD: .0078, gr: [0x1f3d2c, 0x2d5f3e, 0x163024], rock: 0x26402f, peak: 0x46705a, vein: 0x5dffb8, sun: 0xc8ffe8, sunI: 1.0, hs: 0x8cf5cc, hg: 0x0f2a1d, hI: .82, pl: [0x46c99a, 0x0f4a3a, 0xc0ffe4], moon: [0xd0ffe8, 0x7ad8b0], aur: 0x3cffb0, cry: ['cristal-ancora-verde', 'cristal-ancora-turquesa'], tint: 0x5ee0a8, trees: ['tree_oak_dark', 'tree_fat', 'tree_plateau'], big: ['shroom', 'shroom', 'tree', 'tree', 'crystal', 'spire'], small: ['grass_large', 'grass_leafsLarge', 'grass_leafs', 'plant_bushSmall', 'mushroom_red', 'mushroom_tanGroup', 'plant_flatShort'], part: 'spores', pc: 0x9dffd0 },
@@ -20,10 +22,7 @@
   };
   const ZONES = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Cidadela do Soberano'];
 
-  const rimR = a => window.TER245.owRim460(a);
-  const owH = (x, z) => window.TER245.owH460(x, z);
   const absolute = o => { o.userData.terrainAbsolute245 = true; return o; };
-  const ss = (a, b, v) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
   /* pedra por altura sem passar pela troca automática da v446 (que põe o pedregulho do Tripo sem a cor do mundo): dentro da Fenda o EW mantém a pedra tingida */
   const EHk = (b, k, x, y, z, ry, H, t) => { const m = ENV.m[k]; return m ? EW(b, k, x, y, z, ry, H * m.w / m.h, t) : 0; };
 
@@ -78,7 +77,7 @@
     });
   }
 
-  /* ---------- Shaders: céu, planeta, anel, lua, feixe, água, partículas, runas ---------- */
+  /* ---------- Shaders: céu, planeta, anel, lua, água, partículas, runas ---------- */
   const NOISE = `float h31(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float n3(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(h31(i),h31(i+vec3(1,0,0)),f.x),mix(h31(i+vec3(0,1,0)),h31(i+vec3(1,1,0)),f.x),f.y),mix(mix(h31(i+vec3(0,0,1)),h31(i+vec3(1,0,1)),f.x),mix(h31(i+vec3(0,1,1)),h31(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;}return s;}
@@ -129,20 +128,10 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
         'void main(){vec3 p=normalize(vP);float cr=fbm(p*6.);float k=.75+.35*cr-.25*smoothstep(.6,.7,n3(p*9.));float l=clamp(dot(normalize(vN),uL)+.12,0.,1.);gl_FragColor=vec4(uC*k*l+uC*.06,1.);}'
     });
   }
-  function beamMat(col, on) {
-    return new T.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide, fog: false,
-      uniforms: { uC: { value: new T.Color(col) }, uT, uOn: { value: on } },
-      vertexShader: 'varying vec2 vU;varying float vY;void main(){vU=uv;vY=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-      fragmentShader: 'uniform vec3 uC;uniform float uT,uOn;varying vec2 vU;varying float vY;\n' + NOISE +
-        'void main(){float n=fbm(vec3(vU.x*8.,vU.y*14.-uT*1.4,uT*.2));float edge=pow(sin(vU.x*3.14159*2.)*.5+.5,1.2);' +
-        'float fade=smoothstep(0.,.04,vU.y)*smoothstep(1.,.55,vU.y);float a=(.25+.75*n)*fade*(.35+.65*edge)*uOn;gl_FragColor=vec4(uC*(1.3+n),a);}'
-    });
-  }
-  function runeMat(col) {
+  function runeMat(col, k = 1) {
     return new T.ShaderMaterial({
       transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide,
-      uniforms: { uC: { value: new T.Color(col) }, uT },
+      uniforms: { uC: { value: new T.Color(col).multiplyScalar(k) }, uT },
       vertexShader: 'varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
       fragmentShader: 'uniform vec3 uC;uniform float uT;varying vec2 vP;void main(){float r=length(vP);float a=atan(vP.y,vP.x);' +
         'float rune=step(.55,fract(a*4.77+uT*.25))*smoothstep(.82,.78,r)*smoothstep(.62,.66,r);float ring=smoothstep(.025,0.,abs(r-.9))+smoothstep(.02,0.,abs(r-.55))+smoothstep(.03,0.,abs(r-.98));' +
@@ -187,176 +176,162 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     const pts = absolute(new T.Points(g, m)); pts.frustumCulled = false; pts.renderOrder = 8; return pts;
   }
 
-  /* ---------- Chão do planeta: relevo real, cores por ruído/encosta e veios de energia que pulsam para a Cidadela ---------- */
+  /* ---------- Chão infinito: malha que acompanha o jogador; altura, cor e veios calculados na placa de vídeo pela posição no mundo ---------- */
   let groundTex = null;
+  const GSIZE = 600, GSEG = 214, GSTEP = GSIZE / GSEG;
   function groundMesh(W, st) {
-    const SIZE = 840, SEG = 280, geo = new T.PlaneGeometry(SIZE, SIZE, SEG, SEG); geo.rotateX(-Math.PI / 2);
-    const P = geo.attributes.position, n = P.count;
-    for (let i = 0; i < n; i++) { const x = P.getX(i), z = P.getZ(i); P.setY(i, owH(x, z)); }
-    geo.computeVertexNormals();
-    const Nn = geo.attributes.normal, C = new Float32Array(n * 3), S = Math.sin;
-    const c0 = new T.Color(W.gr[0]), c1 = new T.Color(W.gr[1]), c2 = new T.Color(W.gr[2]), cr = new T.Color(W.rock), cp = new T.Color(W.peak), tmp = new T.Color();
-    for (let i = 0; i < n; i++) {
-      const x = P.getX(i), y = P.getY(i), z = P.getZ(i), ny = Nn.getY(i);
-      const n1 = .5 + .5 * S(x * .031 + S(z * .023) * 2) * S(z * .027 + S(x * .019) * 1.7), n2 = .5 + .5 * S(x * .11 + z * .07) * S(z * .09 - x * .05), n3v = .5 + .5 * S(x * .37 + S(z * .29)) * S(z * .33 - x * .21);
-      tmp.copy(c0).lerp(c1, n1); tmp.lerp(c2, ss(.55, .9, n2) * .7);
-      tmp.multiplyScalar(.78 + .44 * n3v);
-      tmp.lerp(c2, ss(.62, .95, n1 * n3v) * .55);
-      tmp.lerp(cr, ss(.94, .72, ny));
-      tmp.lerp(cp, ss(14, 46, y) * .85);
-      C[i * 3] = tmp.r; C[i * 3 + 1] = tmp.g; C[i * 3 + 2] = tmp.b;
-    }
-    geo.setAttribute('color', new T.BufferAttribute(C, 3));
-    if (!groundTex && typeof envGroundTex === 'function') { groundTex = envGroundTex(); groundTex.repeat.set(150, 150); }
-    const mat = new T.MeshStandardMaterial({ vertexColors: true, map: groundTex, roughness: .93, metalness: 0 });
-    const U = { uVein: { value: new T.Color(W.vein) }, uBoss: { value: new T.Vector2(st.boss.x, st.boss.z) }, uRw: { value: st.Rw }, uT };
+    const geo = new T.PlaneGeometry(GSIZE, GSIZE, GSEG, GSEG); geo.rotateX(-Math.PI / 2);
+    if (!groundTex && typeof envGroundTex === 'function') { groundTex = envGroundTex(); }
+    const tex = groundTex ? groundTex.clone() : null; if (tex) { tex.needsUpdate = true; tex.repeat.set(GSIZE / 5.6, GSIZE / 5.6); }
+    const mat = new T.MeshStandardMaterial({ map: tex, roughness: .93, metalness: 0 });
+    const U = { uG0: { value: new T.Color(W.gr[0]) }, uG1: { value: new T.Color(W.gr[1]) }, uG2: { value: new T.Color(W.gr[2]) }, uRock: { value: new T.Color(W.rock) }, uPeak: { value: new T.Color(W.peak) },
+      uVein: { value: new T.Color(W.vein) }, uBoss: { value: new T.Vector2(st.boss.x, st.boss.z) }, uT };
     mat.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, U);
-      sh.vertexShader = 'varying vec3 vOw460;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvOw459=(modelMatrix*vec4(transformed,1.)).xyz;');
-      sh.fragmentShader = 'uniform vec3 uVein;uniform vec2 uBoss;uniform float uRw,uT;varying vec3 vOw460;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
-        '#include <emissivemap_fragment>\n{vec2 q=vOw460.xz;float w1=abs(sin(q.x*.19+sin(q.y*.11)*2.3)*sin(q.y*.17+sin(q.x*.13)*1.9));float w2=abs(sin(q.x*.07-q.y*.05+1.3)*sin(q.y*.06+q.x*.04));' +
-        'float db=length(q-uBoss);float near=1.-smoothstep(25.,230.,db);float pulse=.5+.5*sin(uT*1.7-db*.09);' +
+      // TER_NORMAL245: o relevo (terrain245) levanta cada vértice e inclina a normal, como o chão do mundo
+      sh.vertexShader = '#define TER_NORMAL245\nvarying vec3 vOw460;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvOw460=(modelMatrix*vec4(transformed,1.)).xyz;vOw460.y=terrH245(vOw460.xz);');
+      sh.fragmentShader = 'uniform vec3 uG0,uG1,uG2,uRock,uPeak,uVein;uniform vec2 uBoss;uniform float uT;varying vec3 vOw460;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+        '#include <emissivemap_fragment>\n{vec2 q=vOw460.xz;' +
+        'float n1=.5+.5*sin(q.x*.031+sin(q.y*.023)*2.)*sin(q.y*.027+sin(q.x*.019)*1.7),n2=.5+.5*sin(q.x*.11+q.y*.07)*sin(q.y*.09-q.x*.05),n3=.5+.5*sin(q.x*.37+sin(q.y*.29))*sin(q.y*.33-q.x*.21);' +
+        'vec3 c=mix(uG0,uG1,n1);c=mix(c,uG2,smoothstep(.55,.9,n2)*.7);c*=.78+.44*n3;c=mix(c,uG2,smoothstep(.62,.95,n1*n3)*.55);' +
+        'vec3 wn=normalize((vec4(normal,0.)*viewMatrix).xyz);c=mix(c,uRock,smoothstep(.94,.72,wn.y));c=mix(c,uPeak,smoothstep(14.,40.,vOw460.y)*.85);' +
+        'diffuseColor.rgb*=c;' +
+        'float w1=abs(sin(q.x*.19+sin(q.y*.11)*2.3)*sin(q.y*.17+sin(q.x*.13)*1.9)),w2=abs(sin(q.x*.07-q.y*.05+1.3)*sin(q.y*.06+q.x*.04));' +
+        'float db=length(q-uBoss),near=1.-smoothstep(25.,230.,db),pulse=.5+.5*sin(uT*1.7-db*.09);' +
         'float line=smoothstep(.035,.0,w1)*smoothstep(.3,.75,near+.15)+smoothstep(.022,.0,w2)*.8;' +
-        'float inside=1.-smoothstep(uRw*.92,uRw*1.08,length(q));totalEmissiveRadiance+=uVein*line*(.06+.9*near*pulse)*inside;}');
+        'totalEmissiveRadiance+=uVein*line*(.04+.10*pulse+.9*near*pulse);}');
     };
-    mat.customProgramCacheKey = () => 'ow460ground';
-    const m = absolute(new T.Mesh(geo, mat)); m.userData.own = 1; m.name = 'ow460-ground'; m.receiveShadow = true; return m;
+    mat.customProgramCacheKey = () => 'ow461ground';
+    const m = new T.Mesh(geo, mat); m.userData.own = 1; m.name = 'ow460-ground'; m.receiveShadow = true; m.frustumCulled = false; return m;
   }
 
-  /* ---------- Layout: grade aberta, acampamentos, rota, formações e Cidadela ---------- */
+  /* ---------- Grade virtual infinita, pedaços e caminho ---------- */
+  /* ---------- v461 (Ian): planeta procedural INFINITO — grade virtual, pedaços gerados em volta do jogador ---------- */
+  const NV = 1 << 20, CSV = 2, OXV = -NV * CSV / 2;          // ~2.000 km de lado: infinito na prática
+  const CHK = 64, VIEW = 4, KEEP = 6;                            // pedaço de 64 m; desenha 4 pedaços em volta, guarda 6
+  const CAMP_CHK = 160;                                          // um acampamento possível a cada 160 m
+  const hash2 = (a, b, s) => { let h = (Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) + Math.imul((s * 1e4) | 0, 2246822519)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return (h ^ (h >>> 16)) >>> 0; };
+  const cellCenter = i => { const cx = i % NV, cy = (i - cx) / NV; return { x: OXV + (cx + .5) * CSV, z: OXV + (cy + .5) * CSV }; };
+  const cellOf = (x, z) => ({ x: Math.floor((x - OXV) / CSV), y: Math.floor((z - OXV) / CSV) });
+
+  /* formações de um pedaço (determinístico; usado para desenhar E para colidir) */
+  function chunkData(st, cx, cz) {
+    const key = cx + ',' + cz; let d = st.chunkCache.get(key); if (d) return d;
+    const R = mulberry32(hash2(cx, cz, st.seed)), W0 = st.W || WORLDS.erebo, forms = [];
+    const n = R() < .15 ? 0 : R() < .45 ? 1 : R() < .75 ? 2 : 3;
+    for (let k = 0; k < n * 3 && forms.length < n; k++) {
+      const x = (cx + R()) * CHK, z = (cz + R()) * CHK, db = Math.hypot(x - st.boss.x, z - st.boss.z);
+      let type = W0.big[Math.floor(R() * W0.big.length)]; if (db < 160 && R() < .5) type = 'crystal';
+      const H = type === 'spire' ? 9 + R() * 11 : type === 'mesa' ? 5 + R() * 5 : type === 'crystal' ? 7 + R() * 8 : type === 'shroom' ? 5 + R() * 5 : type === 'cactus' ? 5 + R() * 4 : type === 'ruin' ? 4 + R() * 5 : 10 + R() * 7;
+      const r = type === 'spire' ? H * .2 : type === 'mesa' ? H * .7 : type === 'crystal' ? H * .17 : type === 'shroom' ? H * .3 : type === 'cactus' ? 1.1 : type === 'ruin' ? 1.3 : 1.1;
+      if (st.reserved.some(p => Math.hypot(p.x - x, p.z - z) < p.r + r + 4)) continue;
+      if (forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + r + 7)) continue;
+      forms.push({ type, x, z, H, r, ry: R() * TAU, k: Math.floor(R() * 99) });
+    }
+    d = { forms }; st.chunkCache.set(key, d);
+    if (st.chunkCache.size > 3000) { const it = st.chunkCache.keys(); for (let i = 0; i < 1000; i++) st.chunkCache.delete(it.next().value); }
+    return d;
+  }
+  /* colisão: 1 = livre, 0 = bloqueado, 2 = portão selado da Cidadela */
+  function cellAt(st, i) {
+    if (st.over.has(i)) return st.over.get(i);
+    const c = st.cellCache.get(i); if (c !== undefined) return c;
+    const p = cellCenter(i), b = st.boss; let v = 1;
+    const db = Math.hypot(p.x - b.x, p.z - b.z);
+    if (db > 20.4 && db < 24.8) { let da = Math.atan2(p.z - b.z, p.x - b.x) - st.gateA; da = Math.atan2(Math.sin(da), Math.cos(da)); v = Math.abs(da) > .2 ? 0 : (st.open ? 1 : 2); }
+    else if (db < 20.4) { for (const q of st.covers) if (Math.hypot(q.x - p.x, q.z - p.z) <= 1.3) { v = 0; break; } }
+    else {
+      const cx = Math.floor(p.x / CHK), cz = Math.floor(p.z / CHK);
+      outer: for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const f of chunkData(st, cx + dx, cz + dz).forms) if (Math.hypot(f.x - p.x, f.z - p.z) <= f.r * .85) { v = 0; break outer; }
+    }
+    if (st.cellCache.size > 250000) st.cellCache.clear();
+    st.cellCache.set(i, v); return v;
+  }
+  function virtualGrid(st) {
+    const num = k => (typeof k === 'string' && k !== '' && !isNaN(k)) ? +k : null;
+    const cells = new Proxy({}, {
+      get(_, k) { if (k === 'length') return NV * NV; const i = num(k); if (i === null) return undefined; return i < 0 ? 0 : cellAt(st, i); },
+      set(_, k, v) { const i = num(k); if (i !== null) { st.over.set(i, v); st.cellCache.delete(i); } return true; }
+    });
+    const seen = new Set();
+    const visited = new Proxy({}, {
+      get(_, k) { if (k === 'length') return NV * NV; const i = num(k); return i !== null && seen.has(i) ? 1 : 0; },
+      set(_, k, v) { const i = num(k); if (i !== null) { if (v) seen.add(i); else seen.delete(i); } return true; }
+    });
+    return { cells, visited };
+  }
+  /* caminho curto para monstro travado: busca numa janela local; longe demais = vai reto */
+  function path(from, to) {
+    const a = cellOf(from.x, from.z), b = cellOf(to.x, to.z);
+    if (Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) > 90) return [{ x: to.x, z: to.z }];
+    const st = L.ow460, m = 16, x0 = Math.min(a.x, b.x) - m, y0 = Math.min(a.y, b.y) - m, w = Math.abs(a.x - b.x) + 2 * m + 1, h = Math.abs(a.y - b.y) + 2 * m + 1;
+    const prev = new Int32Array(w * h).fill(-1), li = (x, y) => (y - y0) * w + (x - x0), s = li(a.x, a.y), e = li(b.x, b.y), q = [s]; prev[s] = s;
+    for (let k = 0; k < q.length && prev[e] < 0; k++) {
+      const v = q[k], x = v % w + x0, y = Math.floor(v / w) + y0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < x0 || Y < y0 || X >= x0 + w || Y >= y0 + h) continue; const n = li(X, Y); if (prev[n] >= 0 || cellAt(st, Y * NV + X) !== 1) continue; prev[n] = v; q.push(n); }
+    }
+    if (prev[e] < 0) return [];
+    const out = []; for (let n = e; n !== s; n = prev[n]) { const X = n % w + x0, Y = Math.floor(n / w) + y0; out.push({ x: OXV + (X + .5) * CSV, z: OXV + (Y + .5) * CSV }); }
+    return out.reverse();
+  }
+
+  /* ---------- Layout: chegada, Cidadela longe, sinais e acampamentos fixos da rota ---------- */
   function applies(g, variant) {
     if (!window.TER245 || !TER245.owH460 || !g) return false;
     if (g.goblin118 || g.missionExtract117 || g.extractionCleared117 || g.noOw460) return false;
     return !SKIP.includes(variant);
   }
   function layout(g, R, variant, wid) {
-    const TER = window.TER245, s = ((g.seed >>> 0) % 997) * .0063 + .3, Rw = 158 + Math.min(9, g.rank || 0);
-    TER.OW.value.set(1, Rw, 6.5 + R() * 2.5, s);
-    const aE = R() * TAU, rE = rimR(aE) - 26, ex = Math.cos(aE) * rE, ez = Math.sin(aE) * rE;
-    const aB = aE + Math.PI + (R() - .5) * .7, rB = rimR(aB) - 44, bx = Math.cos(aB) * rB, bz = Math.sin(aB) * rB;
+    const TER = window.TER245, s = ((g.seed >>> 0) % 997) * .0063 + .3;
+    TER.OW.value.set(1, 18 + R() * 14, 6.5 + R() * 2.5, s); // x liga, y altura das cordilheiras, z colinas, w semente
+    // chegada perto da origem; a Cidadela fica longe (900–1300 m) numa direção qualquer — sem marca nenhuma
+    const ex = (R() - .5) * 60, ez = (R() - .5) * 60, aB = R() * TAU, dB = 900 + R() * 400 + Math.min(9, g.rank || 0) * 20;
+    const bx = ex + Math.cos(aB) * dB, bz = ez + Math.sin(aB) * dB;
     TER.OWB.value.set(ex, ez, bx, bz); TER.on.value = 1;
-    const cells = new Uint8Array(N * N);
-    const cc = (cx, cy) => ({ x: OX + (cx + .5) * CS, z: OZ + (cy + .5) * CS });
-    const toCell = (x, z) => ({ x: Math.floor((x - OX) / CS), y: Math.floor((z - OZ) / CS) });
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const p = cc(x, y); if (Math.hypot(p.x, p.z) < rimR(Math.atan2(p.z, p.x)) - 7) cells[y * N + x] = 1; }
-    const inside = (x, z, m) => Math.hypot(x, z) < rimR(Math.atan2(z, x)) - m;
-    const room = (x, z, half, kind) => { const c = toCell(x, z); return { x: c.x - half, y: c.y - half, w: half * 2, h: half * 2, ow: kind, px: x, pz: z }; };
-    // rota da chegada até a Cidadela (curva), acampamentos na rota e espalhados
-    const mx = (ex + bx) / 2, mz = (ez + bz) / 2, px = -(bz - ez), pz = bx - ex, pl = Math.hypot(px, pz) || 1, off = (R() - .5) * 150;
-    const kx = mx + px / pl * off, kz = mz + pz / pl * off;
+    const st = { W: WORLDS[wid] || WORLDS.erebo, seed: s, entry: { x: ex, z: ez }, boss: { x: bx, z: bz }, open: variant === 'hunt', hunt: variant === 'hunt',
+      reserved: [], over: new Map(), cellCache: new Map(), chunkCache: new Map(), chunks: new Map(), queue: [], dyn: new Map(), t: 0, zone: 1, zoneSeen: { 1: true }, lastDay: 0, floats: [] };
+    const room = (x, z, half, kind) => { const c = cellOf(x, z); return { x: c.x - half, y: c.y - half, w: half * 2, h: half * 2, ow: kind, px: x, pz: z }; };
+    // rota escondida (curva) da chegada até a Cidadela: acampamentos e sinais ficam perto dela, não em cima
+    const px = -(bz - ez) / dB, pz = (bx - ex) / dB, off = (R() - .5) * 500, kx = (ex + bx) / 2 + px * off, kz = (ez + bz) / 2 + pz * off;
     const bez = t => ({ x: (1 - t) * (1 - t) * ex + 2 * (1 - t) * t * kx + t * t * bx, z: (1 - t) * (1 - t) * ez + 2 * (1 - t) * t * kz + t * t * bz });
-    const route = []; for (let i = 0; i <= 40; i++) route.push(bez(i / 40));
+    st.gateA = (() => { const p = bez(.96); return Math.atan2(p.z - bz, p.x - bx); })();
+    st.covers = []; for (let k = 0; k < 4; k++) { const a = st.gateA + Math.PI / 4 + k * Math.PI / 2; st.covers.push({ x: bx + Math.cos(a) * 12, z: bz + Math.sin(a) * 12 }); }
+    st.signals = [.26, .52, .78].map((t, i) => { const p = bez(t), a = R() * TAU, j = 25 + R() * 45; return { x: p.x + Math.cos(a) * j, z: p.z + Math.sin(a) * j, i }; });
     const camps = [];
-    const free = (x, z, d) => inside(x, z, 18) && Math.hypot(x - ex, z - ez) > 30 && Math.hypot(x - bx, z - bz) > 44 && camps.every(c => Math.hypot(c.px - x, c.pz - z) > d);
-    for (const t of [.16, .31, .46, .6, .74, .86]) {
-      for (let k = 0; k < 14; k++) { const p = bez(t), j = 6 + k * 2.2, a = R() * TAU, x = p.x + Math.cos(a) * j, z = p.z + Math.sin(a) * j; if (free(x, z, 28)) { const r = room(x, z, 4, 'camp'); r.t = t; camps.push(r); break; } }
-    }
-    for (let k = 0; k < 500 && camps.length < 12; k++) { const a = R() * TAU, d = Math.sqrt(R()) * (rimR(a) - 22), x = Math.cos(a) * d, z = Math.sin(a) * d; if (free(x, z, 34)) camps.push(room(x, z, 4, 'camp')); }
-    // Cidadela: muralha de cristais e rochas (raio 21–24 m) com portão virado para a rota; portão selado até os 3 sinais
-    const gp = bez(.9), gateA = Math.atan2(gp.z - bz, gp.x - bx), gateCells = [], CIT_R0 = 21, CIT_R1 = 24.2, GAP = .2;
-    const hunt = variant === 'hunt';
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const p = cc(x, y), d = Math.hypot(p.x - bx, p.z - bz); if (d < CIT_R0 - .6 || d > CIT_R1 + .6) continue;
-      let da = Math.atan2(p.z - bz, p.x - bx) - gateA; da = Math.atan2(Math.sin(da), Math.cos(da));
-      const i = y * N + x; if (Math.abs(da) > GAP) cells[i] = 0; else if (!hunt && cells[i]) { cells[i] = 2; gateCells.push(i); }
-    }
-    // colunas de cobertura dentro da arena
-    const covers = []; for (let k = 0; k < 4; k++) { const a = gateA + Math.PI / 4 + k * Math.PI / 2, x = bx + Math.cos(a) * 12, z = bz + Math.sin(a) * 12; covers.push({ x, z }); }
-    const block = (x, z, r) => { const c = toCell(x, z), rc = Math.ceil(r / CS); for (let dy = -rc; dy <= rc; dy++) for (let dx = -rc; dx <= rc; dx++) { const X = c.x + dx, Y = c.y + dy; if (X < 0 || Y < 0 || X >= N || Y >= N) continue; const q = cc(X, Y); if (Math.hypot(q.x - x, q.z - z) <= r) cells[Y * N + X] = 0; } };
-    for (const c of covers) block(c.x, c.z, 1.3);
-    // formações grandes (bloqueiam): longe dos acampamentos, da chegada, da Cidadela e da rota
-    const W0 = WORLDS[wid] || WORLDS.erebo, forms = [];
-    const nearCamp = (x, z, r) => camps.some(c => Math.abs(x - c.px) < 8 + r && Math.abs(z - c.pz) < 8 + r);
-    const nearRoute = (x, z, r) => route.some(p => Math.hypot(p.x - x, p.z - z) < r + 7);
-    for (let t = 0; t < 1400 && forms.length < 56; t++) {
-      const a = R() * TAU, d = Math.sqrt(R()) * (rimR(a) - 10), x = Math.cos(a) * d, z = Math.sin(a) * d, db = Math.hypot(x - bx, z - bz);
-      let type = W0.big[Math.floor(R() * W0.big.length)]; if (db < 90 && R() < .45) type = 'crystal';
-      const H = type === 'spire' ? 9 + R() * 11 : type === 'mesa' ? 5 + R() * 5 : type === 'crystal' ? 7 + R() * 8 : type === 'shroom' ? 5 + R() * 5 : type === 'cactus' ? 5 + R() * 4 : type === 'ruin' ? 4 + R() * 5 : 10 + R() * 7;
-      const rad = type === 'spire' ? H * .2 : type === 'mesa' ? H * .7 : type === 'crystal' ? H * .17 : type === 'shroom' ? H * .3 : type === 'cactus' ? 1.1 : type === 'ruin' ? 1.3 : 1.1;
-      if (!inside(x, z, rad + 6) || nearCamp(x, z, rad) || nearRoute(x, z, rad) || db < 34 + rad || Math.hypot(x - ex, z - ez) < 18 + rad) continue;
-      if (forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + rad + 7)) continue;
-      forms.push({ type, x, z, H, r: rad, ry: R() * TAU, k: Math.floor(R() * 99) }); block(x, z, rad * .85);
-    }
-    // conectividade: acampamento isolado sai da lista (a rota e a Cidadela ficam sempre abertas)
-    const reach = new Uint8Array(N * N), e0 = toCell(ex, ez), q = [e0.y * N + e0.x]; reach[q[0]] = 1;
-    for (let i = 0; i < q.length; i++) { const v = q[i], x = v % N, y = (v - x) / N; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= N || Y >= N) continue; const k = Y * N + X; if (reach[k] || !cells[k]) continue; reach[k] = 1; q.push(k); } }
-    const okCamps = camps.filter(c => { const k = toCell(c.px, c.pz); return reach[k.y * N + k.x]; });
-    if (variant === 'floors') { /* tesouro garantido da Zona 1 e da Zona 2 (antes: fim do 1º e do 2º andar) */
-      const pickT = t => okCamps.filter(c => c.t != null && !c.floorEnd).sort((a, b) => Math.abs(a.t - t) - Math.abs(b.t - t))[0];
-      const z1 = pickT(.3); if (z1) { z1.floorEnd = true; z1.floor = 0; } const z2 = pickT(.62); if (z2) { z2.floorEnd = true; z2.floor = 1; }
-    }
-    const rooms = [room(ex, ez, 4, 'entry'), ...okCamps, room(bx, bz, 8, 'citadel')], bi = rooms.length - 1;
+    for (const t of [.1, .2, .32, .44, .56, .68, .8, .9]) { const p = bez(t), a = R() * TAU, j = 20 + R() * 60, r = room(p.x + Math.cos(a) * j, p.z + Math.sin(a) * j, 4, 'camp'); r.t = t; camps.push(r); }
+    for (let k = 0; k < 5; k++) { const a = R() * TAU, d = 110 + R() * 190; camps.push(room(ex + Math.cos(a) * d, ez + Math.sin(a) * d, 4, 'camp')); }
+    if (variant === 'floors') { const z1 = camps.find(c => c.t === .32), z2 = camps.find(c => c.t === .68); if (z1) { z1.floorEnd = true; z1.floor = 0; } if (z2) { z2.floorEnd = true; z2.floor = 1; } }
+    st.reserved.push({ x: ex, z: ez, r: 18 }, { x: bx, z: bz, r: 34 }, ...st.signals.map(p => ({ x: p.x, z: p.z, r: 6 })), ...camps.map(c => ({ x: c.px, z: c.pz, r: 11 })));
+    const rooms = [room(ex, ez, 4, 'entry'), ...camps, room(bx, bz, 8, 'citadel')], bi = rooms.length - 1;
     rooms[0].entry = true;
-    // sinais de energia na rota (Zona 1, 2 e 3)
-    const signals = [.27, .52, .77].map((t, i) => { const p = bez(t); for (let k = 0; k < 20; k++) { const a = R() * TAU, j = 5 + k, x = p.x + Math.cos(a) * j, z = p.z + Math.sin(a) * j, c = toCell(x, z); if (cells[c.y * N + c.x] === 1 && !nearCamp(x, z, -3)) return { x, z, i }; } return { x: p.x, z: p.z, i }; });
-    const st = { W: null, Rw, seed: s, entry: { x: ex, z: ez, a: aE }, boss: { x: bx, z: bz }, gateA, gateCells, open: hunt, hunt, forms, covers, signals, route, t: 0, zone: 1, zoneSeen: { 1: true }, lastDay: 0 };
-    return { cells, W: N, H: N, rooms, bi, st };
+    const vg = virtualGrid(st);
+    return { cells: vg.cells, visited: vg.visited, W: NV, H: NV, rooms, bi, st };
   }
 
-  /* ---------- Render: céu, chão, borda, formações, flora, Cidadela, partículas ---------- */
+  /* ---------- Render: céu, chão, Cidadela, partículas; o resto vem dos pedaços ---------- */
   function render(g, R, ow456) {
-    const st = L.ow460, W = WORLDS[ow456?.id] || WORLDS.erebo; st.W = W; st.name = ow456?.name || 'Outro Mundo'; st.weather = ow456?.weather || '';
+    const st = L.ow460, W = WORLDS[ow456?.id] || st.W || WORLDS.erebo; st.W = W; st.name = ow456?.name || 'Outro Mundo'; st.weather = ow456?.weather || '';
     scene.background = new T.Color(W.fog); scene.fog = new T.FogExp2(W.fog, W.fogD);
     hemi.color.setHex(W.hs); hemi.groundColor.setHex(W.hg); hemi.intensity = W.hI; sun.color.setHex(W.sun); sun.intensity = W.sunI; sun.position.set(-60, 70, 80);
     pLight.color.setHex(0xffe2c0); pLight.intensity = 1.1; pLight.distance = 18; L.cave155 = false; /* sem o véu escuro de caverna: é céu aberto */
     const grp = L.group;
-    grp.add(groundMesh(W, st));
-    // céu
+    grp.add(st.ground = groundMesh(W, st));
     const sky = absolute(new T.Group()); sky.name = 'ow460-sky';
     const dome = new T.Mesh(new T.SphereGeometry(236, 48, 24), skyMat(W)); dome.frustumCulled = false; dome.renderOrder = -20; dome.userData.own = 1; sky.add(dome); st.skyU = dome.material.uniforms;
-    const dirP = new T.Vector3(Math.cos(st.entry.a + Math.PI + .5), .34, Math.sin(st.entry.a + Math.PI + .5)).normalize();
+    const aP = R() * TAU, dirP = new T.Vector3(Math.cos(aP), .34, Math.sin(aP)).normalize();
     const planet = new T.Mesh(new T.SphereGeometry(44, 64, 40), planetMat(W)); planet.position.copy(dirP).multiplyScalar(205); planet.rotation.set(.3, .2, .45); planet.frustumCulled = false; planet.renderOrder = -19; planet.userData.own = 1; sky.add(planet);
     const ring = new T.Mesh(new T.RingGeometry(62, 100, 128, 1), ringMat(W)); ring.position.copy(planet.position); ring.lookAt(planet.position.clone().add(new T.Vector3(.35, 1, .2))); ring.frustumCulled = false; ring.renderOrder = -18; ring.userData.own = 1; sky.add(ring);
     [[.55, .52, -.4, 9, W.moon[0]], [-.7, .42, .25, 5.5, W.moon[1]]].forEach(([x, y, z, r, c]) => { const m = new T.Mesh(new T.SphereGeometry(r, 32, 20), moonMat(c)); m.position.set(x, y, z).normalize().multiplyScalar(215); m.frustumCulled = false; m.renderOrder = -19; m.userData.own = 1; sky.add(m); });
     grp.add(sky); st.sky = sky;
-    // borda: cordilheira de rochas grandes acompanhando o relevo
-    if (ENV.ok) {
-      const rimB = new EnvBatch(), bigB = new EnvBatch(), treeB = new EnvBatch(), flora = new EnvBatch();
-      const rocks = ['rock_largeA', 'rock_largeB', 'rock_largeC', 'rock_largeD', 'rock_tallA', 'rock_tallB', 'rock_tallC'];
-      for (let i = 0; i < 190; i++) { const a = i / 190 * TAU + R() * .03, rb = rimR(a), d = rb - 6 + R() * 34, x = Math.cos(a) * d, z = Math.sin(a) * d; EHk(rimB, rocks[Math.floor(R() * rocks.length)], x, -1.2, z, R() * TAU, 6 + R() * 12 + (d - rb) * .25, W.rock); }
-      // formações (as mesmas que bloqueiam a grade)
-      for (const f of st.forms) {
-        if (f.type === 'spire') EHk(bigB, ['rock_tallA', 'rock_tallB', 'rock_tallC'][f.k % 3], f.x, -.4, f.z, f.ry, f.H, W.rock);
-        else if (f.type === 'mesa') EW(bigB, ['rock_largeA', 'rock_largeB', 'rock_largeC', 'rock_largeD'][f.k % 4], f.x, -.6, f.z, f.ry, f.r * 2.3, W.rock);
-        else if (f.type === 'tree') EH(treeB, W.trees[f.k % W.trees.length], f.x, -.2, f.z, f.ry, f.H, W.tint);
-        else if (f.type === 'shroom') EH(treeB, f.k % 2 ? 'mushroom_redGroup' : 'mushroom_tanGroup', f.x, -.1, f.z, f.ry, f.H, W.tint);
-        else if (f.type === 'ruin') { const key = ['statue_obelisk', 'statue_columnDamaged', 'column', 'statue_column', 'pillar_decorated'][f.k % 5]; EH(bigB, key, f.x, -.3, f.z, f.ry, f.H, W.peak); EH(bigB, 'rubble_large', f.x + 1.4, -.2, f.z + .8, f.ry + 1, 1.2, W.peak); }
-        else if (f.type === 'cactus') placeGlb(grp, 'models/tripo-cacto446' + (f.k % 2 ? 'a' : 'b') + '.glb', f.H, f.x, 0, f.z, f.ry, m => rockMat(m, W.tint));
-        else if (f.type === 'crystal') { const n = W.cry[f.k % W.cry.length]; placeGlb(grp, crystalPath(n), f.H, f.x, -.3, f.z, f.ry, m => crystalMat(m, W.vein)); EHk(bigB, 'rock_largeB', f.x, -.6, f.z, f.ry, f.H * .22, W.rock); }
-      }
-      // flora pequena (sem colisão), com vento
-      const forms = st.forms;
-      for (let i = 0; i < 4600; i++) {
-        /* 1 em cada 8 nasce perto da chegada: é a primeira vista do mundo */
-        let x, z; if (i % 8 === 0) { const a = R() * TAU, d = 3 + Math.sqrt(R()) * 28; x = st.entry.x + Math.cos(a) * d; z = st.entry.z + Math.sin(a) * d; } else { const a = R() * TAU, d = Math.sqrt(R()) * (rimR(a) - 6); x = Math.cos(a) * d; z = Math.sin(a) * d; }
-        if (forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + .6)) continue;
-        if (Math.hypot(x - st.boss.x, z - st.boss.z) < 19) continue;
-        const k = W.small[Math.floor(R() * W.small.length)], rocky = k.startsWith('rock') || k === 'bone_A';
-        (rocky ? EHk : EH)(flora, k, x, rocky ? -.05 : 0, z, R() * TAU, rocky ? .25 + R() * .55 : .35 + R() * .7, rocky ? W.peak : W.tint);
-      }
-      // árvores e arbustos médios espalhados (sem colisão, só beleza)
-      for (let i = 0; i < 160; i++) {
-        const a = R() * TAU, d = Math.sqrt(R()) * (rimR(a) - 12), x = Math.cos(a) * d, z = Math.sin(a) * d;
-        if (forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + 2) || Math.hypot(x - st.boss.x, z - st.boss.z) < 27) continue;
-        const k = R() < .55 ? W.trees[Math.floor(R() * W.trees.length)] : (W.part === 'sand' ? 'cactus_short' : 'plant_bushLarge');
-        EH(treeB, k, x, -.1, z, R() * TAU, k.startsWith('tree') ? 2.6 + R() * 2.4 : 1 + R() * 1.4, W.tint);
-      }
-      envOwn(grp, rimB.mesh(ENVMAT)); envOwn(grp, bigB.mesh(BLDMAT)); envOwn(grp, treeB.mesh(TREEMAT)); envOwn(grp, flora.mesh(FLORAMAT));
-    }
-    // rochas flutuantes do Tripo pairando sobre o planeta
-    st.floats = [];
-    for (let i = 0; i < 11; i++) {
-      const a = R() * TAU, d = 30 + R() * (rimR(a) - 40), x = Math.cos(a) * d, z = Math.sin(a) * d, y = 14 + R() * 26, H = 3 + R() * 7, ry = R() * TAU, ph = R() * 9;
-      placeGlb(grp, crystalPath('rocha-flutuante'), H, x, y, z, ry, m => rockMat(m, W.peak, .45)).then(h => { if (h) st.floats.push({ h, y, ph }); });
-    }
     buildCitadel(grp, W, st, R);
     grp.add(st.parts = particles(W));
+    streamChunks(true, st.entry.x, st.entry.z);
   }
 
   function buildCitadel(grp, W, st, R) {
     const { x: bx, z: bz } = st.boss, ga = st.gateA, B = ENV.ok ? new EnvBatch() : null;
     for (let i = 0; i < 22; i++) {
-      const a = ga + (i + .5) / 22 * TAU; let da = Math.atan2(Math.sin(a - ga), Math.cos(a - ga)); if (Math.abs(da) < .3) continue;
+      const a = ga + (i + .5) / 22 * TAU; const da = Math.atan2(Math.sin(a - ga), Math.cos(a - ga)); if (Math.abs(da) < .3) continue;
       const x = bx + Math.cos(a) * 22.6, z = bz + Math.sin(a) * 22.6;
       if (i % 2 === 0) placeGlb(grp, crystalPath(W.cry[i % W.cry.length]), 9 + R() * 5, x, -.4, z, R() * TAU, m => crystalMat(m, W.vein));
       else if (B) EHk(B, ['rock_tallA', 'rock_tallB', 'rock_tallC'][i % 3], x, -.4, z, R() * TAU, 7 + R() * 3, W.rock);
@@ -367,93 +342,165 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       for (const c of st.covers) EH(B, 'statue_columnDamaged', c.x, -.2, c.z, R() * TAU, 5.5, W.peak);
       envOwn(grp, B.mesh(BLDMAT));
     }
-    const disc = new T.Mesh(new T.CircleGeometry(19, 96), runeMat(W.vein)); disc.rotation.x = -Math.PI / 2; disc.position.set(bx, .07, bz); disc.renderOrder = 6; disc.userData.own = 1; grp.add(disc);
-    const beam = new T.Mesh(new T.CylinderGeometry(2.4, 3.6, 170, 28, 1, true), beamMat(W.vein, st.open ? 1 : .22)); beam.position.set(bx, 85, bz); beam.renderOrder = 7; beam.frustumCulled = false; beam.userData.own = 1; grp.add(beam); st.beam = beam;
+    const disc = new T.Mesh(new T.CircleGeometry(19, 96), runeMat(W.vein, .7)); disc.rotation.x = -Math.PI / 2; disc.position.set(bx, .07, bz); disc.renderOrder = 6; disc.userData.own = 1; grp.add(disc);
     if (!st.open) {
       const gx = bx + Math.cos(ga) * 22.6, gz = bz + Math.sin(ga) * 22.6, cur = new T.Mesh(new T.PlaneGeometry(10, 8), curtainMat(W.vein));
       cur.position.set(gx, 4, gz); cur.rotation.y = -ga + Math.PI / 2; cur.renderOrder = 7; cur.userData.own = 1; grp.add(cur); st.curtain = cur;
     }
   }
 
-  /* ---------- Sinais de energia e recursos do Outro Mundo (chamado pela v458 setupOtherworld456) ---------- */
+  /* ---------- Pedaços: formações, flora, rochas flutuantes, recursos e acampamentos novos ---------- */
+  function buildChunk(cx, cz) {
+    const st = L.ow460, W = st.W, grp = new T.Group(), R = mulberry32(hash2(cx * 7 + 3, cz * 13 - 5, st.seed)), d = chunkData(st, cx, cz), inter = [];
+    L.group.add(grp);
+    if (ENV.ok) {
+      const bigB = new EnvBatch(), treeB = new EnvBatch(), flora = new EnvBatch();
+      for (const f of d.forms) {
+        if (f.type === 'spire') EHk(bigB, ['rock_tallA', 'rock_tallB', 'rock_tallC'][f.k % 3], f.x, -.4, f.z, f.ry, f.H, W.rock);
+        else if (f.type === 'mesa') EW(bigB, ['rock_largeA', 'rock_largeB', 'rock_largeC', 'rock_largeD'][f.k % 4], f.x, -.6, f.z, f.ry, f.r * 2.3, W.rock);
+        else if (f.type === 'tree') EH(treeB, W.trees[f.k % W.trees.length], f.x, -.2, f.z, f.ry, f.H, W.tint);
+        else if (f.type === 'shroom') EH(treeB, f.k % 2 ? 'mushroom_redGroup' : 'mushroom_tanGroup', f.x, -.1, f.z, f.ry, f.H, W.tint);
+        else if (f.type === 'ruin') { const key = ['statue_obelisk', 'statue_columnDamaged', 'column', 'statue_column', 'pillar_decorated'][f.k % 5]; EH(bigB, key, f.x, -.3, f.z, f.ry, f.H, W.peak); EH(bigB, 'rubble_large', f.x + 1.4, -.2, f.z + .8, f.ry + 1, 1.2, W.peak); }
+        else if (f.type === 'cactus') placeGlb(grp, 'models/tripo-cacto446' + (f.k % 2 ? 'a' : 'b') + '.glb', f.H, f.x, 0, f.z, f.ry, m => rockMat(m, W.tint));
+        else if (f.type === 'crystal') { placeGlb(grp, crystalPath(W.cry[f.k % W.cry.length]), f.H, f.x, -.3, f.z, f.ry, m => crystalMat(m, W.vein)); EHk(bigB, 'rock_largeB', f.x, -.6, f.z, f.ry, f.H * .22, W.rock); }
+      }
+      const nearB = (x, z) => Math.hypot(x - st.boss.x, z - st.boss.z) < 19;
+      for (let i = 0; i < 130; i++) {
+        const x = (cx + R()) * CHK, z = (cz + R()) * CHK; if (nearB(x, z) || d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + .6)) continue;
+        const k = W.small[Math.floor(R() * W.small.length)], rocky = k.startsWith('rock') || k === 'bone_A';
+        (rocky ? EHk : EH)(flora, k, x, rocky ? -.05 : 0, z, R() * TAU, rocky ? .25 + R() * .55 : .35 + R() * .7, rocky ? W.peak : W.tint);
+      }
+      for (let i = 0; i < 4; i++) {
+        const x = (cx + R()) * CHK, z = (cz + R()) * CHK; if (R() < .35 || Math.hypot(x - st.boss.x, z - st.boss.z) < 27 || d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + 2)) continue;
+        const k = R() < .55 ? W.trees[Math.floor(R() * W.trees.length)] : (W.part === 'sand' ? 'cactus_short' : 'plant_bushLarge');
+        EH(treeB, k, x, -.1, z, R() * TAU, k.startsWith('tree') ? 2.6 + R() * 2.4 : 1 + R() * 1.4, W.tint);
+      }
+      envOwn(grp, bigB.mesh(BLDMAT)); envOwn(grp, treeB.mesh(TREEMAT)); envOwn(grp, flora.mesh(FLORAMAT));
+    }
+    if (R() < .09) { const x = (cx + R()) * CHK, z = (cz + R()) * CHK, y = 14 + R() * 26, ph = R() * 9; placeGlb(grp, crystalPath('rocha-flutuante'), 3 + R() * 7, x, y, z, R() * TAU, m => rockMat(m, W.peak, .45)).then(h => { if (h) st.floats.push({ h, y, ph }); }); }
+    if (R() < .3) {
+      const kinds = ['lenha_abissal', 'fungo_astral', 'poca_abissal'], kind = kinds[Math.floor(R() * 3)], x = (cx + .2 + R() * .6) * CHK, z = (cz + .2 + R() * .6) * CHK;
+      if (!d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + 2) && Math.hypot(x - st.boss.x, z - st.boss.z) > 30) inter.push(...resource(grp, W, kind, x, z, R));
+    }
+    for (const it of inter) L.inter.push(it);
+    return { grp, inter };
+  }
+  function resource(parent, W, kind, x, z, R) {
+    const rg = new T.Group(); rg.position.set(x, 0, z); parent.add(rg); let label; const out = [];
+    const B = ENV.ok ? new EnvBatch() : null;
+    if (kind === 'lenha_abissal') {
+      if (B) { EH(B, 'log_large', 0, 0, 0, R() * TAU, .7, W.tint); EH(B, 'stump_old', 1.1, 0, -.6, R() * TAU, .9, W.tint); }
+      placeGlb(rg, crystalPath('cristal-veio'), .9, .3, 0, .4, R() * TAU, m => crystalMat(m, W.vein));
+      label = 'F · CORTAR LENHA E RESINA DO OUTRO MUNDO';
+    } else if (kind === 'fungo_astral') {
+      if (B) { EH(B, 'mushroom_redGroup', 0, 0, 0, R() * TAU, 1.1, W.tint); EH(B, 'mushroom_tanGroup', .9, 0, .5, R() * TAU, .8, W.vein); }
+      label = 'F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
+    } else {
+      const pool = new T.Mesh(new T.CircleGeometry(2.4, 48), waterMat(W.vein, W.gr[2])); pool.rotation.x = -Math.PI / 2; pool.position.y = .05; pool.renderOrder = 5; pool.userData.own = 1; rg.add(pool);
+      if (B) for (let k = 0; k < 7; k++) { const a = k / 7 * TAU; EHk(B, k % 2 ? 'rock_smallA' : 'rock_smallC', Math.cos(a) * 2.5, -.05, Math.sin(a) * 2.5, a, .45, W.peak); }
+      out.push({ type: 'riftCampWater456', x, z, r: 0, hidden: false, label: '', use() {} });
+      label = 'F · ENCHER CANTIL / PESCAR NA POÇA DO OUTRO MUNDO';
+    }
+    if (B) { const m = B.mesh(FLORAMAT); if (m) { m.userData.own = 1; rg.add(m); } }
+    const it = { type: 'riftRes456', kind, x, z, r: 2.8, grp: rg, charges: 2, label, use: () => gatherOtherworldRes456(it) };
+    out.push(it); return out;
+  }
+  function dropChunk(key) {
+    const c = L.ow460.chunks.get(key); if (!c) return;
+    if (c.grp) { try { envDispose(c.grp); } catch (_) {} L.group.remove(c.grp); const fl = L.ow460.floats; for (let i = fl.length - 1; i >= 0; i--) { let p = fl[i].h; while (p && p !== c.grp) p = p.parent; if (p === c.grp) fl.splice(i, 1); } }
+    for (const it of c.inter) { const i = L.inter.indexOf(it); if (i >= 0) L.inter.splice(i, 1); }
+    L.ow460.chunks.delete(key);
+  }
+  function streamChunks(all, x0 = player.x, z0 = player.z) {
+    const st = L.ow460; if (!st) return;
+    const pcx = Math.floor(x0 / CHK), pcz = Math.floor(z0 / CHK);
+    for (const key of [...st.chunks.keys()]) { const [x, z] = key.split(',').map(Number); if (Math.max(Math.abs(x - pcx), Math.abs(z - pcz)) > KEEP) dropChunk(key); }
+    const want = [];
+    for (let dx = -VIEW; dx <= VIEW; dx++) for (let dz = -VIEW; dz <= VIEW; dz++) { const key = (pcx + dx) + ',' + (pcz + dz); if (!st.chunks.has(key)) want.push([dx * dx + dz * dz, pcx + dx, pcz + dz, key]); }
+    want.sort((a, b) => a[0] - b[0]);
+    const n = all ? want.length : Math.min(2, want.length);
+    for (let i = 0; i < n; i++) { const [, x, z, key] = want[i]; st.chunks.set(key, buildChunk(x, z)); }
+  }
+
+  /* acampamentos novos conforme você anda (o mundo não acaba); longe e sem briga, os monstros somem e voltam quando você volta */
+  function streamCamps() {
+    const st = L.ow460, g = L.gate, ccx = Math.floor(player.x / CAMP_CHK), ccz = Math.floor(player.z / CAMP_CHK);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      const X = ccx + dx, Z = ccz + dz, key = X + ',' + Z; if (st.dyn.has(key)) continue;
+      const R = mulberry32(hash2(X * 31 + 7, Z * 17 + 11, st.seed + 1)); let camp = null;
+      if (R() < .55) {
+        const x = (X + .2 + R() * .6) * CAMP_CHK, z = (Z + .2 + R() * .6) * CAMP_CHK;
+        const free = L.rooms.every(r => Math.hypot((r.px ?? r.wx) - x, (r.pz ?? r.wz) - z) > 70) && Math.hypot(x - st.entry.x, z - st.entry.z) > 110 && Math.hypot(x - st.boss.x, z - st.boss.z) > 70;
+        if (free) camp = { x, z, room: -1, left: null };
+      }
+      st.dyn.set(key, camp);
+    }
+    for (const camp of st.dyn.values()) {
+      if (!camp) continue; const d = Math.hypot(camp.x - player.x, camp.z - player.z);
+      if (camp.room < 0 && d < 170) spawnCamp(camp);
+      else if (camp.room >= 0 && camp.mobs && d > 300) {
+        const alive = camp.mobs.filter(e => !e.dead && !e.gone);
+        if (alive.some(e => e.aggro)) continue;
+        camp.left = alive.length; for (const e of alive) { e.dead = true; e.gone = true; scene.remove(e.m.root); } camp.mobs = null;
+      } else if (camp.room >= 0 && !camp.mobs && camp.left > 0 && d < 170) spawnMobs(camp, camp.left);
+    }
+  }
+  function spawnCamp(camp) {
+    const c = cellOf(camp.x, camp.z), r = { x: c.x - 4, y: c.y - 4, w: 8, h: 8, ow: 'camp', px: camp.x, pz: camp.z, i: L.rooms.length, wx: OXV + (c.x + .5) * CSV, wz: OXV + (c.y + .5) * CSV };
+    L.rooms.push(r); camp.room = r.i;
+    const n = Math.max(3, Math.min(12, Math.round(r.w * r.h / 22 * (L.G.dens || 1) * 1.6)));
+    spawnMobs(camp, n);
+    const R = mulberry32(hash2(c.x, c.y, L.ow460.seed + 2));
+    if (R() < .25) try { addChest(r.wx + (R() < .5 ? 1.5 : -1.5), r.wz, L.gate.rank, false); } catch (_) {}
+  }
+  function spawnMobs(camp, n) {
+    const g = L.gate, r = L.rooms[camp.room], KW = dungeonPool124(g), redM = g.red ? 1.3 : 1, mobs = []; let first = null;
+    for (let k = 0; k < n; k++) {
+      let p = null; for (let t = 0; t < 20 && !p; t++) { const x = r.wx + (Math.random() - .5) * 14, z = r.wz + (Math.random() - .5) * 14; if (freeAt(x, z, .7)) p = { x, z }; }
+      if (!p) continue;
+      const e = spawnKind(wpick(KW).k, p.x, p.z, g.rank, { room: camp.room }); e.hp *= redM; e.maxhp *= redM; mobs.push(e); if (!first) first = e;
+      for (const a of g.aff || []) { if (a === 'armor') { e.hp *= 1.5; e.maxhp *= 1.5; } if (a === 'frenzy') e.speed *= 1.3; if (a === 'expl') e.expl = true; if (a === 'vamp') e.vamp183 = true; }
+    }
+    if (first && Math.random() < .3 + Math.max(0, g.rank - 5) * .25) try { makeElite(first); } catch (_) {}
+    L.seen.delete(camp.room); camp.mobs = mobs;
+  }
+
+  /* ---------- Sinais (sem feixe e sem placa: só o cristal baixo no círculo de runas) e recursos ---------- */
   function setupHunt(g, rooms, bi, mids, R) {
     const st = L.ow460, W = st.W || WORLDS.erebo, grp = L.group;
     L.riftSignalNodes456 = []; L.riftSignalsMax456 = st.signals.length; L.riftSignals456 = 0;
     st.signals.forEach((p, idx) => {
       const sg = new T.Group(); sg.position.set(p.x, 0, p.z); grp.add(sg);
-      placeGlb(sg, crystalPath('cristal-veio-2'), 2.8, 0, -.1, 0, R() * TAU, m => crystalMat(m, W.vein));
-      const disc = new T.Mesh(new T.CircleGeometry(2.4, 64), runeMat(W.vein)); disc.rotation.x = -Math.PI / 2; disc.position.y = .06; disc.renderOrder = 6; disc.userData.own = 1; sg.add(disc);
-      const beam = new T.Mesh(new T.CylinderGeometry(.55, .9, 48, 16, 1, true), beamMat(W.vein, idx === 0 ? 1 : .12)); beam.position.y = 24; beam.renderOrder = 7; beam.frustumCulled = false; beam.userData.own = 1; sg.add(beam);
-      const lab = makeSign('SINAL DE ENERGIA ' + (idx + 1) + '/' + st.signals.length, '#e8d4ff', .46); lab.position.y = 3.6; sg.add(lab);
-      const it = { type: 'riftSignal456', idx, x: p.x, z: p.z, r: 3.4, grp: sg, beam, tracked: false, label: 'F · RASTREAR SINAL DE ENERGIA (' + (idx + 1) + '/' + st.signals.length + ')', use: () => {
+      placeGlb(sg, crystalPath('cristal-veio-2'), 2.4, 0, -.1, 0, R() * TAU, m => crystalMat(m, W.vein));
+      const disc = new T.Mesh(new T.CircleGeometry(2.2, 64), runeMat(W.vein, .55)); disc.rotation.x = -Math.PI / 2; disc.position.y = .06; disc.renderOrder = 6; disc.userData.own = 1; sg.add(disc);
+      const it = { type: 'riftSignal456', idx, x: p.x, z: p.z, r: 3.4, grp: sg, tracked: false, label: 'F · RASTREAR SINAL DE ENERGIA', use: () => {
         const next = L.riftSignalNodes456.find(n => !n.tracked);
-        if (next && next !== it) { toast('<b>[SINAL DE ENERGIA]</b> Este sinal ainda está mudo. Siga primeiro o feixe aceso (sinal ' + (next.idx + 1) + ').', 4200); return false; }
+        if (next && next !== it) { toast('<b>[SINAL DE ENERGIA]</b> Este cristal está mudo. Outro sinal precisa ser rastreado antes dele.', 4200); return false; }
         return trackRiftSignal456(it);
       } };
       L.inter.push(it); L.riftSignalNodes456.push(it);
     });
-    // recursos: um por acampamento + poças e madeira no ermo
-    const kinds = ['lenha_abissal', 'fungo_astral', 'poca_abissal'], spots = [];
-    mids.forEach((ri, k) => { const r = rooms[ri], a = R() * TAU; spots.push({ x: r.wx + Math.cos(a) * 9.5, z: r.wz + Math.sin(a) * 9.5, kind: kinds[k % 3] }); });
-    for (let k = 0; k < 9; k++) { const a = R() * TAU, d = 20 + Math.sqrt(R()) * (rimR(a) - 40); spots.push({ x: Math.cos(a) * d, z: Math.sin(a) * d, kind: kinds[k % 3] }); }
-    const G = L.grid, freeCell = (x, z) => { const cx = Math.floor((x - G.ox) / G.CS), cy = Math.floor((z - G.oz) / G.CS); return cx >= 0 && cy >= 0 && cx < G.W && cy < G.H && G.cells[cy * G.W + cx] === 1; };
-    const B = ENV.ok ? new EnvBatch() : null;
-    for (const sp of spots) {
-      if (!freeCell(sp.x, sp.z) || st.forms.some(f => Math.hypot(f.x - sp.x, f.z - sp.z) < f.r + 2)) continue;
-      const rg = new T.Group(); rg.position.set(sp.x, 0, sp.z); grp.add(rg); let label;
-      if (sp.kind === 'lenha_abissal') {
-        if (B) { EH(B, 'log_large', sp.x, 0, sp.z, R() * TAU, .7, W.tint); EH(B, 'stump_old', sp.x + 1.1, 0, sp.z - .6, R() * TAU, .9, W.tint); }
-        placeGlb(rg, crystalPath('cristal-veio'), .9, .3, 0, .4, R() * TAU, m => crystalMat(m, W.vein));
-        label = 'F · CORTAR LENHA E RESINA DO OUTRO MUNDO';
-      } else if (sp.kind === 'fungo_astral') {
-        if (B) { EH(B, 'mushroom_redGroup', sp.x, 0, sp.z, R() * TAU, 1.1, W.tint); EH(B, 'mushroom_tanGroup', sp.x + .9, 0, sp.z + .5, R() * TAU, .8, W.vein); }
-        const glow = new T.PointLight(W.vein, .9, 7); glow.position.y = 1; rg.add(glow);
-        label = 'F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
-      } else {
-        const pool = new T.Mesh(new T.CircleGeometry(2.4, 48), waterMat(W.vein, W.gr[2])); pool.rotation.x = -Math.PI / 2; pool.position.y = .05; pool.renderOrder = 5; pool.userData.own = 1; rg.add(pool);
-        if (B) for (let k = 0; k < 7; k++) { const a = k / 7 * TAU; EHk(B, k % 2 ? 'rock_smallA' : 'rock_smallC', sp.x + Math.cos(a) * 2.5, -.05, sp.z + Math.sin(a) * 2.5, a, .45, W.peak); }
-        L.inter.push({ type: 'riftCampWater456', x: sp.x, z: sp.z, r: 0, hidden: false, label: '', use() {} });
-        label = 'F · ENCHER CANTIL / PESCAR NA POÇA DO OUTRO MUNDO';
-      }
-      const it = { type: 'riftRes456', kind: sp.kind, x: sp.x, z: sp.z, r: 2.8, grp: rg, charges: 2, label, use: () => gatherOtherworldRes456(it) };
-      L.inter.push(it);
-    }
-    if (B) envOwn(grp, B.mesh(FLORAMAT));
   }
-
-  /* ---------- Chegada: o portal vermelho fecha atrás de você ---------- */
-  function arrive() {
-    const st = L.ow460, e = st.entry, b = st.boss, dx = b.x - e.x, dz = b.z - e.z, l = Math.hypot(dx, dz) || 1, ux = dx / l, uz = dz / l;
-    player.x = e.x + ux * 1.5; player.z = e.z + uz * 1.5; player.face = Math.atan2(ux, uz);
-    pcCam.yaw = Math.atan2(-ux, -uz); pcCam.pitch = .16;
-    if (window.RIFT131_ENABLE && window.Rift131) {
-      const grp = Rift131.create({ seed: (L.gate?.seed || 131) | 0, red: true, legacyLinearOutput: true }); grp.position.set(e.x - ux * 2.4, 0, e.z - uz * 2.4); grp.rotation.y = Math.atan2(ux, uz); grp.scale.setScalar(.9);
-      L.group.add(grp); st.arrival = { t: 0, grp, closed: false };
-    } else st.arrival = { t: 0, grp: null, closed: false };
-    st.cine = { t: 0, ux, uz };
-  }
-
-  /* ---------- Sinais, Cidadela e portal de volta ---------- */
+  const far = d => d < 140 ? 'perto' : d < 320 ? 'a uma boa caminhada' : d < 650 ? 'longe' : 'muito longe';
   function onSignal(it) {
     const st = L.ow460; if (!st) return;
-    if (it.beam) it.beam.material.uniforms.uOn.value = 0;
-    const next = (L.riftSignalNodes456 || []).find(n => !n.tracked);
-    if (next && next.beam) next.beam.material.uniforms.uOn.value = 1;
+    const next = (L.riftSignalNodes456 || []).find(n => !n.tracked), target = next || st.boss;
+    const dx = target.x - player.x, dz = target.z - player.z, d = Math.hypot(dx, dz), a = Math.atan2(dz, dx);
+    // rastro no chão: uma trilha de runas de 40 m na direção certa, por alguns segundos (nada fica marcado)
+    for (let s = 1; s <= 14; s++) setTimeout(() => { if (L.ow460 === st) fxRing(player.x + Math.cos(a) * s * 3, player.z + Math.sin(a) * s * 3, st.W.vein, 1.1, .9); }, s * 90);
+    setTimeout(() => { if (L.ow460 === st) toast('<b>[RASTRO]</b> O ' + (next ? 'próximo sinal' : 'coração deste mundo') + ' está <b>' + far(d) + '</b>, para onde o rastro apontou. Os veios do chão pulsam a partir dele.', 6500); }, 1700);
     if (!next) openCitadel();
   }
   function openCitadel() {
-    const st = L.ow460; if (!st || st.open) return; st.open = true;
-    for (const i of st.gateCells) if (L.grid.cells[i] === 2) L.grid.cells[i] = 1;
+    const st = L.ow460; if (!st || st.open) return; st.open = true; st.cellCache.clear();
     if (st.curtain) { L.group.remove(st.curtain); st.curtain = null; }
-    if (st.beam) st.beam.material.uniforms.uOn.value = 1;
-    bigText('A CIDADELA SE ABRIU', 2200); try { sfx('gong'); shake(.45); } catch (_) {}
-    toast('<b>[OUTRO MUNDO]</b> Os três sinais apontam para o feixe no horizonte: a <b>Cidadela do Soberano</b> abriu o portão. Não há saída deste mundo até ele cair.', 6500);
+    try { sfx('gong'); shake(.45); } catch (_) {}
+    toast('<b>[OUTRO MUNDO]</b> Um estrondo atravessa o planeta: a Cidadela do Soberano abriu o portão. Ninguém sai deste mundo até ele cair.', 6500);
   }
   function openReturn() {
     const st = L.ow460; if (!st || st.returned) return; st.returned = true;
     const it = exitPortal(st.boss.x, st.boss.z, false);
     try { if (it && it.grp && window.Rift131) Rift131.open(it.grp); } catch (_) {}
-    if (st.beam) st.beam.material.uniforms.uC.value.set(0xffd27a);
     setTimeout(() => { if (L.ow460 === st) { bigText('O PORTAL DE VOLTA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> O Soberano caiu. O portal de volta para Primeva se abriu no centro da Cidadela. Em 2 minutos este mundo começa a transbordar.', 7000); } }, 900);
   }
 
@@ -467,19 +514,24 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     let line;
     if (L.brk) line = 'O mundo está transbordando · o portal de volta está aberto na Cidadela';
     else if (L.bossDead) line = 'O portal de volta está aberto no centro da Cidadela · transbordo em ' + fmtT(Math.max(0, L.closeT));
-    else if (!st.open) line = 'Siga o Sinal de Energia ' + Math.min(m, k + 1) + '/' + m + ' (feixe aceso no horizonte) · a Cidadela está selada';
-    else line = L.defense ? 'Cidadela aberta · defenda o Núcleo da Fenda · o portal de volta só abre quando a defesa terminar' : L.combat117 && !L.combat117.spawned ? 'Cidadela aberta · derrote os acampamentos para despertar o Soberano' : 'Cidadela aberta · derrote o Soberano · não há saída até ele cair';
+    else if (!st.open) line = 'Sinais de Energia rastreados: ' + k + '/' + m + ' · procure os cristais que falam · os veios do chão pulsam a partir da Cidadela';
+    else line = L.defense ? 'A Cidadela abriu · encontre-a e defenda o Núcleo da Fenda' : L.combat117 && !L.combat117.spawned ? 'A Cidadela abriu · derrote os acampamentos para despertar o Soberano' : 'A Cidadela abriu · encontre o Soberano · não há saída até ele cair';
     let rest = String(obj || '');
     if (/^(\[[^\]]*\] )?Salas /.test(rest) || /^(\[[^\]]*\] )?Transbordo em /.test(rest) || /^(\[[^\]]*\] )?TRANSBORDO/.test(rest)) rest = '';
     return st.name + ' · Dia ' + day + ' · ' + ZONES[st.zone - 1] + '\n' + line + (rest ? '\n' + rest : '');
   }
-  function map(ctx, tx, tz, full) {
-    const st = L.ow460; if (!st) return;
-    const pulse = .6 + .4 * Math.sin(performance.now() / 260);
-    const next = (L.riftSignalNodes456 || []).find(n => !n.tracked);
-    if (next) { ctx.save(); ctx.translate(tx(next.x), tz(next.z)); ctx.rotate(Math.PI / 4); ctx.fillStyle = 'rgba(216,180,255,' + pulse + ')'; const s = full ? 7 : 5; ctx.fillRect(-s, -s, s * 2, s * 2); ctx.restore(); }
-    ctx.strokeStyle = st.open ? '#ffd27a' : 'rgba(255,210,122,.45)'; ctx.lineWidth = full ? 3 : 2; ctx.beginPath(); ctx.arc(tx(st.boss.x), tz(st.boss.z), full ? 12 : 7, 0, TAU); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,48,64,.7)'; ctx.lineWidth = 2; const X = tx(st.entry.x), Z = tz(st.entry.z), s = full ? 6 : 4; ctx.beginPath(); ctx.moveTo(X - s, Z - s); ctx.lineTo(X + s, Z + s); ctx.moveTo(X + s, Z - s); ctx.lineTo(X - s, Z + s); ctx.stroke();
+  function map() { /* v461 (Ian): sem marcação de chefe, sinais ou portal no mapa — só o que você já explorou */ }
+
+  /* ---------- Chegada: o portal vermelho fecha atrás de você ---------- */
+  function arrive() {
+    const st = L.ow460, e = st.entry, a = Math.random() * TAU, ux = Math.cos(a), uz = Math.sin(a);
+    player.x = e.x + ux * 1.5; player.z = e.z + uz * 1.5; player.face = Math.atan2(ux, uz);
+    pcCam.yaw = Math.atan2(-ux, -uz); pcCam.pitch = .16;
+    if (window.RIFT131_ENABLE && window.Rift131) {
+      const grp = Rift131.create({ seed: (L.gate?.seed || 131) | 0, red: true, legacyLinearOutput: true }); grp.position.set(e.x - ux * 2.4, 0, e.z - uz * 2.4); grp.rotation.y = Math.atan2(ux, uz); grp.scale.setScalar(.9);
+      L.group.add(grp); st.arrival = { t: 0, grp, closed: false };
+    } else st.arrival = { t: 0, grp: null, closed: false };
+    st.cine = { t: 0, ux, uz };
   }
 
   /* ---------- Por quadro ---------- */
@@ -493,15 +545,17 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       if (a.t > 4.6) {
         if (a.grp) { try { Rift131.dispose(a.grp); } catch (_) {} L.group.remove(a.grp); }
         st.arrival = null;
-        toast('<b>[OUTRO MUNDO · ' + st.name + ']</b> O portal se fechou atrás de você. Este mundo só deixa você voltar quando o <b>Soberano</b> dele cair. Siga o feixe dos <b>Sinais de Energia</b> pelas 3 zonas até a Cidadela. ' + (st.weather ? '<i>' + st.weather + '.</i>' : ''), 8000);
+        toast('<b>[OUTRO MUNDO · ' + st.name + ']</b> O portal se fechou atrás de você. Este mundo não tem fim e não tem saída: só o <b>Soberano</b> dele abre o caminho de volta. Ache os cristais que falam (<b>Sinais de Energia</b>) e siga o que eles mostram. ' + (st.weather ? '<i>' + st.weather + '.</i>' : ''), 9000);
       }
     }
-    // dia do Outro Mundo: um ciclo por DAY_LENGTH, céu e luz acompanham
+    // chão acompanha o jogador (em passos da malha, sem tremer)
+    if (st.ground) { const gx = Math.round(player.x / GSTEP) * GSTEP, gz = Math.round(player.z / GSTEP) * GSTEP; if (st.ground.position.x !== gx || st.ground.position.z !== gz) st.ground.position.set(gx, 0, gz); }
+    st.streamT = (st.streamT || 0) - dt; if (st.streamT <= 0) { st.streamT = .2; streamChunks(false); streamCamps(); }
     const DAY = typeof DAY_LENGTH !== 'undefined' ? DAY_LENGTH : 1200, f = (st.t / DAY + .3) % 1, day = .5 + .5 * Math.cos((f - .5) * TAU);
     if (st.skyU) st.skyU.uDay.value = .35 + .65 * day;
     const W = st.W; if (W) { sun.intensity = W.sunI * (.5 + .5 * day); hemi.intensity = W.hI * (.6 + .4 * day); }
     const dn = Math.floor(st.t / DAY); if (dn > st.lastDay) { st.lastDay = dn; L.riftDays456 = (L.riftDays456 || 1) + 1; toast('<b>[OUTRO MUNDO]</b> Amanhece o <b>dia ' + L.riftDays456 + '</b> deste mundo. Lá fora, em Primeva, o tempo corre mais rápido.', 5000); }
-    for (const fl of st.floats || []) { fl.h.position.y = fl.y + Math.sin(st.t * .35 + fl.ph) * 1.1; fl.h.rotation.y += dt * .04; }
+    for (const fl of st.floats) { fl.h.position.y = fl.y + Math.sin(st.t * .35 + fl.ph) * 1.1; fl.h.rotation.y += dt * .04; }
     if (st.parts) st.parts.material.uniforms.uP.value.set(player.x, terrH(player.x, player.z) + 6, player.z);
     st.cullT = (st.cullT || 0) - dt;
     if (st.cullT <= 0) { st.cullT = .25; for (const e of enemies) { if (e.dead || e.gone || !e.m || !e.m.root) continue; const far = !e.isBoss && Math.hypot(e.x - player.x, e.z - player.z) > 85; e.m.root.visible = !far; } }
@@ -516,7 +570,6 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     c.t += Math.min(.05, Math.max(.001, dt || .016));
     const P = player, hy = terrH(P.x, P.z);
     const nPos = camera.position.clone(), dir = new T.Vector3(); camera.getWorldDirection(dir); const nLook = nPos.clone().addScaledVector(dir, 10);
-    // órbita em volta do herói: começa de frente (ângulo da direção do chefe + 0,35) e termina na câmera normal, sem atravessar o corpo
     const a0 = Math.atan2(c.uz, c.ux) + .35, r0 = 6.6, y0 = 2.5;
     const a1 = Math.atan2(nPos.z - P.z, nPos.x - P.x), r1 = Math.max(1.5, Math.hypot(nPos.x - P.x, nPos.z - P.z)), y1 = nPos.y - hy;
     let da = a1 - a0; da = Math.atan2(Math.sin(da), Math.cos(da));
@@ -536,5 +589,5 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   /* cristal pequeno do Tripo para outros sistemas (ex.: marcas do cerco ao sair da Fenda) */
   function shard(parent, x, y, z, H, col) { return placeGlb(parent, crystalPath('cristal-veio'), H, x, y, z, Math.random() * TAU, m => crystalMat(m, col)); }
 
-  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, objective, map, zoneAt, tick };
+  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, objective, map, zoneAt, tick, path, cellAt: i => cellAt(L.ow460, i) };
 })();
