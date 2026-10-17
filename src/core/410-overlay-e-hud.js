@@ -50,8 +50,8 @@ function drawMap(ctx,S,full){
     for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='stairs'||it.type==='core'||it.type==='expedition'){ctx.fillStyle='#7ce6cf';ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?5:3,0,TAU);ctx.fill()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
     if(L.ow460&&window.OW460)OW460.map(ctx,tx,tz,full);
     for(const n of L.expedition?.nodes||[])if(n.kind==='beacon'&&!n.hidden){ctx.fillStyle='#7cf4d2';ctx.font='bold 14px sans-serif';ctx.fillText('E',tx(n.x),tz(n.z))}
-    if(bossE&&!bossE.dead&&(L.combat117||L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z))){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
-    for(const e of enemies){if(e.dead||(!e.combatTarget117&&!(e.kitRevealed111>time)&&(!e.aggro||!vis(e.x,e.z))))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
+    if(bossE&&!bossE.dead&&!L.ow460&&(L.combat117||L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z))){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
+    for(const e of enemies){if(e.dead||(!(e.combatTarget117&&!L.ow460)&&!(e.kitRevealed111>time)&&(!e.aggro||!vis(e.x,e.z))))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
   }
   const tx=full&&L.mode!=='world'&&!L.ow460?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'&&!L.ow460?S/2+(P.z-floorMapCenter())*S/(L.grid.W*L.grid.CS):S/2;
   for(const a of allies){const k=full?(L.mode==='world'?S/560:L.ow460?S/600:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}

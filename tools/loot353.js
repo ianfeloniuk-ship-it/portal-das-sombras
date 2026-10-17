@@ -9,7 +9,7 @@ function finishCorpse353(e){if(!e.loot353?.length)return;Loot353.create(e)}
 window.Loot353=(()=>{
  const active=new Map();let region=null,elapsed=0,dirty=false;
  const reclaimDistance=15;
- function reclaim(r){if(r.reclaimed372)return;if(window.Reclaim372?.start(active.get(r.id),r))dirty=true}
+ function reclaim(r){if(r.reclaimed372||r.archPiece464)return;/* v464 (Ian): peça do Arquiteto não é puxada pela Mão como os monstros */if(window.Reclaim372?.start(active.get(r.id),r))dirty=true}
  const records=()=>L.mode==='world'?(run.worldLoot353||(run.worldLoot353=[])):(L.corpseLoot353||(L.corpseLoot353=[]));
  const nearby=r=>player&&!player.dead&&Math.hypot(r.x-player.x,r.z-player.z)<=3.5&&los(player.x,player.z,r.x,r.z);
  function clear(){window.Reclaim372?.clear();if(dirty){saveRun();dirty=false}for(const a of active.values()){a.inter.hidden=true;if(L?.inter)L.inter=L.inter.filter(it=>it!==a.inter);scene.remove(a.root);a.model?.mixer?.stopAllAction()}active.clear();region=null;elapsed=0}
@@ -22,7 +22,7 @@ window.Loot353=(()=>{
   const inter={type:'corpse353',x:r.x,z:r.z,r:3.5,label:(r.reclaimed372?'F · RECOLHER VESTÍGIOS DE ':'F · VASCULHAR ')+r.name,use:()=>open(r.id)};L.inter.push(inter);
   const a={root,model,marker,inter,original:!!e,boss:!!e?.isBoss};active.set(r.id,a);if(r.reclaimed372&&(r.crystal402||r.introCrystal402))window.Reclaim372?.attachCrystal(a,r);
  }
- function create(e){if(region!==L){clear();region=L}if(e.corpse353)return;const r={id:crypto.randomUUID(),name:e.name||KINDS[e.kind]?.n||'Criatura',kind:e.kind,x:e.x,z:e.z,entries:e.loot353};records().push(r);e.corpse353=r.id;attach(r,e);dirty=true}
+ function create(e){if(region!==L){clear();region=L}if(e.corpse353)return;const r={id:crypto.randomUUID(),name:e.name||KINDS[e.kind]?.n||'Criatura',kind:e.kind,x:e.x,z:e.z,entries:e.loot353,archPiece464:!!(e.piece250||e.piece222||e.arch223)};records().push(r);e.corpse353=r.id;attach(r,e);dirty=true}
  function remove(r){const list=records(),i=list.indexOf(r);if(i>=0)list.splice(i,1);const a=active.get(r.id);if(a){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);a.root.remove(a.marker);if(!a.boss||r.reclaimed372)scene.remove(a.root);active.delete(r.id)}}
  function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.name+' × '+x.n}
  function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}

@@ -2617,7 +2617,7 @@ const SHOPS=[
  {id:'wep',n:'EQUIPAMENTOS DO KAEL',sign:'EQUIPAMENTOS',vendor:'Kael',x:25,z:25,w:9,d:7,h:5.5,col:0x7a4a2a,roof:0x3a2414,sc:'#ffb84d',vb:0x7a4a2a,vh:0xc85a1e,vw:'axe'},
  {id:'arm',n:'DEFESA DA VILA',sign:'DEFESA',vendor:'Brann',x:-25,z:25,w:9,d:7,h:5.5,col:0x5f6f86,roof:0x2b3446,sc:'#c9d3de',vb:0x5f6f86,vh:0x2b2b2b,vw:'sword'}];
 const NAMES=['Voss','Ryuga','Mirae','Taeho','Selin','Kargan','Yuna','Draven','Hyejin','Oren','Aiko','Bastian','Dara','Ekko','Juno','Kenji','Lior','Nayra','Rurik','Soren','Talia','Vega'];
-const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Toda Fenda leva a outro mundo: o portal se fecha quando você entra e só reabre quando o Soberano de lá cair.','Viu um portal vermelho? Lá dentro não tem saída até o guardião cair. Mas paga o dobro.','Se um portal de rank D ou maior fecha sem ninguém limpar, os monstros escapam. Transbordo da fenda.','A Ordem paga bem pelas missões do quadro.','O Kael só vende as armas do seu rank. Suba primeiro.','Morreu lá dentro, perdeu tudo. Eu sempre levo um pergaminho de retorno.','Tem caçador que entra nas masmorras só para caçar outros caçadores.','Contrate um paladino na Ordem. Faz diferença no guardião.','Baú de guardião sempre traz equipamento.','Masmorra rank A? Vi uma vez. O trono lá dentro brilha dourado.','Quanto mais longe da muralha, mais fortes os monstros das planícies.','Guardas de escudo bloqueiam de frente. Pegue pelas costas.'];
+const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Toda Fenda leva a outro mundo: ela some atrás de você e reaparece em algum lugar de lá. Ache-a para voltar, ou mate o Soberano e uma Fenda nova se abre.','Viu um portal vermelho? Lá dentro não tem saída até o guardião cair. Mas paga o dobro.','Se um portal de rank D ou maior fecha sem ninguém limpar, os monstros escapam. Transbordo da fenda.','A Ordem paga bem pelas missões do quadro.','O Kael só vende as armas do seu rank. Suba primeiro.','Morreu lá dentro, perdeu tudo. Eu sempre levo um pergaminho de retorno.','Tem caçador que entra nas masmorras só para caçar outros caçadores.','Contrate um paladino na Ordem. Faz diferença no guardião.','Baú de guardião sempre traz equipamento.','Masmorra rank A? Vi uma vez. O trono lá dentro brilha dourado.','Quanto mais longe da muralha, mais fortes os monstros das planícies.','Guardas de escudo bloqueiam de frente. Pegue pelas costas.'];
 
 /* ================= PERFIL ================= */
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -4785,7 +4785,7 @@ function buildDungeon(g){
   player.x=en.wx;player.z=en.wz+1.5;player.face=Math.PI;if(L.ow460)OW460.arrive();if(g.extractionCleared117){L.bossDead=true;beginDungeonEscape()}else if(variant==='combat')updateCombat117();
 }
 /* Portais de expedição: estado ligado à instância, carga separada da bolsa. */
-const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. O núcleo fica na Cidadela do Outro Mundo, selada até você seguir os 3 Sinais de Energia; o portal de volta só abre ali.'},floors:{n:'Expedição em Três Zonas',d:'O Outro Mundo tem três zonas até a Cidadela. Baús garantidos: Raro num acampamento da Zona 1, Épico na Zona 2 e Lendário no Soberano da Cidadela (ou melhores). Itens da Zona 2 e da Cidadela têm +25% e +50% de ataque/escudo. Vença os defensores do acampamento para abrir cada tesouro. O portal de volta só abre na Cidadela quando o Soberano cair; o mundo transborda 2 min depois.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os ermos do Outro Mundo e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
+const EXP_TYPES={core:{n:'Defesa de Núcleo',d:'Proteja o núcleo ao fundo da arena durante 60s. Quatro ondas crescentes de inimigos chegam pelo lado oposto. Intercepte o avanço pela frente. Elimine os invasores restantes para abrir o tesouro. Se ele for destruído, o portal é perdido e começa o transbordo; fuja sem recompensa de conclusão. O núcleo fica no covil do Outro Mundo: ache-o explorando. Dá para desistir voltando pela Fenda por onde entrou, que reaparece em algum lugar de lá.'},floors:{n:'Expedição em Três Zonas',d:'O Outro Mundo tem três zonas até o covil do Soberano. Baús garantidos: Raro num acampamento da Zona 1, Épico na Zona 2 e Lendário no Soberano (ou melhores). Itens da Zona 2 e do Soberano têm +25% e +50% de ataque/escudo. Vença os defensores do acampamento para abrir cada tesouro. Para voltar: ache a Fenda por onde entrou, ou mate o Soberano e atravesse a Fenda nova que nasce onde ele cair; o mundo transborda 2 min depois.'},rupture:{n:'Ruptura',d:'Três focos fortalecem o guardião. Destrua após enfrentar os defensores, purifique mantendo a posição ou vença o chefe com os focos ativos para obter mais essências.'},hunt:{n:'Caçada',d:'Uma criatura percorre os ermos do Outro Mundo e recua para seus ninhos. Destrua os ninhos, recolha isca e prepare uma coluna para interrompê-la. Preparar a luta mantém a recompensa normal.'},combat:{n:'Combate',d:'Derrote os inimigos para despertar o guardião.'},extract:{n:'Extração',d:'Recolha materiais e envie 6 espaços de carga pela torre.'}};
 const EXP_MATS={ward:{n:'Essência de Proteção',rune:'ward',v:80},echo:{n:'Essência de Duplicação',rune:'reprise',v:100},storm:{n:'Essência de Assalto',rune:'arcane',v:80},fang:{n:'Presa do Predador',rune:'fang',v:70},stalker:{n:'Glândula do Caçador',rune:'stalker',v:100},ore:{n:'Minério de Ressonância',rune:'shell',v:35,w:1},core:{n:'Núcleo Estável',rune:'vigor',v:70,w:2},heart:{n:'Coração de Cristal',rune:'arcane',v:140,w:3}};
 const EXP_FOCI=[{id:'ward',n:'Proteção',d:'Aliados do foco próximos recebem 40% menos dano. No chefe: escudo de 6% da vida máxima por foco, renovado a cada 16s.',c:0x70ddff},{id:'echo',n:'Duplicação',d:'Cria cópias frágeis na sala. No chefe: duas cópias por ativação, com limite de quatro vivas.',c:0xb98cff},{id:'storm',n:'Assalto',d:'Projeta impactos em linha na sala. No chefe: linhas anunciadas por 1,2s, sem bloquear a arena inteira.',c:0xff8750}];
 function expeditionType(g){if(g?.missionExtract117===true)return 'extract';if(!g||g.secret||g.inverse||g.time||g.giant||g.custom||g.double)return null;if(g.expType==='extract'||g.expState?.type==='extract')return 'combat';if(g.expType==='standard')return null;if(EXP_TYPES[g.expType])return g.expType;if(['core','floors'].includes(g.layout103))return g.layout103;const r=mulberry32((g.seed^0x716af)>>>0)();return r<.25?null:r<.5?'rupture':r<.75?'hunt':'combat'}
@@ -4983,7 +4983,7 @@ function hurtDefenseCore(amt){const d=L.defense;if(!d||!d.started||d.failed||d.d
 function coreWave(){const d=L.defense;d.wave++;const n=coreWaveSize111(L.gate.rank,d.wave);for(let i=0;i<n;i++){const x=d.front.x+(i%5-2)*3.2,z=d.front.z-Math.floor(i/5)*2;const e=spawnKind(wpick(activeDungeonPool124(L.gate.rank,{melee:true})).k,x,z,L.gate.rank,{room:L.bossRoom});e.ai='melee';e.range=1.5;e.aggro=true;e.coreRaider=true;e.speed=Math.max(2.5,e.speed);if(L.gate.red){e.hp*=1.3;e.maxhp*=1.3}for(const aff of L.gate.aff||[]){if(aff==='armor'){e.hp*=1.5;e.maxhp*=1.5}if(aff==='frenzy')e.speed*=1.3;if(aff==='expl')e.expl=true;e.gold*=1.5}fxRing(x,z,0xff7b66,1.5,.7)}toast('Onda '+d.wave+' / 4 · '+n+' invasores pela frente. Proteja o núcleo!')}
 function completeCoreDefense(){const d=L.defense;if(!d||d.done||d.failed||!d.started||d.t<d.duration||d.wave<4||enemies.some(e=>e.coreRaider&&!e.dead))return false;d.done=true;coreLabel('NÚCLEO ABERTO');narratorEvent105('core_win');L.bossDead=true;beginDungeonEscape();giveBoon184(10);run.res.core[L.gate.rank]+=3;addChest(d.core.x+4,d.core.z,L.gate.rank,true);addVein(d.core.x-4,d.core.z,L.gate.rank,7,0x78e6ff);bigText('NÚCLEO ABERTO',1500);toast('Defesa concluída: Bênção da Fenda e 3 núcleos. Recolha o tesouro e volte à única saída. Transbordo em 60s.',5500);saveRun();return true}
 function updateCoreDefense(dt){const d=L.defense;if(!d||!d.started||d.failed||d.done||player.dead)return;d.t+=dt;while(d.wave<4&&d.t>=d.wave*15)coreWave();completeCoreDefense()}
-function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruído · fuja pela única saída';if(d.done)return 'Núcleo aberto · transbordo em '+fmtT(Math.max(0,L.closeT))+(L.ow460?' · o portal de volta está na Cidadela':' · volte à entrada');if(!d.started)return 'Encontre o núcleo e interaja para iniciar a defesa';return 'NÚCLEO '+Math.ceil(100*d.core.hp/d.core.maxhp)+'% · '+Math.ceil(Math.max(0,d.duration-d.t))+'s · onda '+d.wave+'/4 · '+enemies.filter(e=>e.coreRaider&&!e.dead).length+' inimigos restantes'}
+function coreObjective(){const d=L.defense;if(d.failed)return 'Núcleo destruído · fuja pela única saída';if(d.done)return 'Núcleo aberto · transbordo em '+fmtT(Math.max(0,L.closeT))+(L.ow460?' · uma Fenda nova abriu no covil':' · volte à entrada');if(!d.started)return 'Encontre o núcleo e interaja para iniciar a defesa';return 'NÚCLEO '+Math.ceil(100*d.core.hp/d.core.maxhp)+'% · '+Math.ceil(Math.max(0,d.duration-d.t))+'s · onda '+d.wave+'/4 · '+enemies.filter(e=>e.coreRaider&&!e.dead).length+' inimigos restantes'}
 
 function exitPortal(x,z,locked){
   const existing=L.exits.find(it=>it.type==='exit');if(existing)return existing;
@@ -5329,7 +5329,7 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
   if(B.sp<=0){B.sp=Math.max(.8,3-B.t/60);const alive=enemies.filter(e=>!e.dead).length,n=Math.min(40-alive,2+Math.floor(B.t/20)),gr=Math.min(9,L.gate.rank);
     for(let i=0;i<n;i++){let x=P.x,z=P.z;for(let t=0;t<25;t++){const a=rnd(0,TAU),d=rnd(9,16);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(freeAt(x,z,.6))break}if(!freeAt(x,z,.6))continue;
       const e=spawnKind(wpick(activeDungeonPool124(gr)).k,x,z,gr,{});const m=1+B.t/120;e.hp*=m;e.maxhp*=m;e.dmg*=1+B.t/240;e.aggro=true;if(Math.random()<Math.min(.4,B.t/600))makeElite(e);fxRing(x,z,0xff2d55,1.4)}}}
-function leaveDungeon(toCity){expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
+function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
   const riftDays=L.riftDays456||2;
@@ -5350,6 +5350,7 @@ function leaveDungeon(toCity){expAbandon();if(run)delete run.inGate269;if(L.brk)
   curGate=null;
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
   buildWorld();
+  if(wasOw464&&!cleared&&window.OW460)OW460.relocateGate(g);/* v464 (Ian): toda Fenda some atrás de você e reaparece em algum lugar */
   if(typeof dayT!=='undefined')dayT=(dayT+daysPassed*320)%1200;
   try{if(window.Weather407&&Weather407.setMood)Weather407.setMood('overcast')}catch(_){}
   if(riftClosure){delete riftClosure.cleared;gateMesh(riftClosure);riftClosure.closing131=true;gates.push(riftClosure);Rift131.close(riftClosure.mesh,riftClosure.storyScar131)}
@@ -6348,7 +6349,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead&&e.m.root.userData.reclaimed372){e.gone=true;return;}if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho|magote)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>6){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:e.raidAttack348>time?.7:0,dead:0,wind:0},e.t);return}}
-  e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
+  e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt')&&!(L.ow460&&e===bossE);/* v464: o Soberano do Outro Mundo anda solto mesmo longe de você */if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;if(e.cactor372){e.cactor372=null;e.cd=Math.max(e.cd,.3);}if(e.guard370){e.guard370=null;e.cd=Math.max(e.cd,.3);}e.bird349=null;if(e.spiky350){e.spiky350=null;e.cd=Math.max(e.cd,.3);}if(e.coguCast348){e.coguCast348=null;e.coguCd348=Math.max(e.coguCd348||0,1);}if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
@@ -6766,8 +6767,8 @@ function drawMap(ctx,S,full){
     for(const it of L.inter){if(it.hidden||!vis(it.x,it.z))continue;if(it.type==='exit'){ctx.strokeStyle=it.locked?'#ff2030':'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?9:6,0,TAU);ctx.stroke()}else if(it.type==='stairs'||it.type==='core'||it.type==='expedition'){ctx.fillStyle='#7ce6cf';ctx.beginPath();ctx.arc(tx(it.x),tz(it.z),full?5:3,0,TAU);ctx.fill()}else if(it.type==='chest'){ctx.fillStyle='#ffd54f';ctx.fillRect(tx(it.x)-4,tz(it.z)-4,8,8)}}
     if(L.ow460&&window.OW460)OW460.map(ctx,tx,tz,full);
     for(const n of L.expedition?.nodes||[])if(n.kind==='beacon'&&!n.hidden){ctx.fillStyle='#7cf4d2';ctx.font='bold 14px sans-serif';ctx.fillText('E',tx(n.x),tz(n.z))}
-    if(bossE&&!bossE.dead&&(L.combat117||L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z))){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
-    for(const e of enemies){if(e.dead||(!e.combatTarget117&&!(e.kitRevealed111>time)&&(!e.aggro||!vis(e.x,e.z))))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
+    if(bossE&&!bossE.dead&&!L.ow460&&(L.combat117||L.seen.has(L.bossRoom)&&vis(bossE.x,bossE.z))){ctx.fillStyle='#ffd070';ctx.beginPath();ctx.arc(tx(bossE.x),tz(bossE.z),full?8:5,0,TAU);ctx.fill()}
+    for(const e of enemies){if(e.dead||(!(e.combatTarget117&&!L.ow460)&&!(e.kitRevealed111>time)&&(!e.aggro||!vis(e.x,e.z))))continue;ctx.fillStyle=e.rival?'#ffb84d':'#ff4d6a';ctx.fillRect(tx(e.x)-1.5,tz(e.z)-1.5,3,3)}
   }
   const tx=full&&L.mode!=='world'&&!L.ow460?S/2+P.x*S/(L.grid.W*L.grid.CS):S/2,tz=full&&L.mode!=='world'&&!L.ow460?S/2+(P.z-floorMapCenter())*S/(L.grid.W*L.grid.CS):S/2;
   for(const a of allies){const k=full?(L.mode==='world'?S/560:L.ow460?S/600:S/(L.grid.W*L.grid.CS)):(L.mode==='world'?2.2:2.6);ctx.fillStyle=a.shadow?'#b18cff':'#6ff4ff';ctx.fillRect(tx+(a.x-P.x)*k-2,tz+(a.z-P.z)*k-2,4,4)}
@@ -8408,7 +8409,7 @@ function bagItems(){
   {const fo=run.foods||{};const ks=Object.keys(fo).filter(k=>fo[k]>0);h+=row('Comida'+(run.food&&run.food.t>0?' · ativo: '+run.food.n+' ('+fmtT(run.food.t)+')':''),ks.length?'':'Cozinhe no Mercado com peixes do lago',ks.map(k=>btn('Comer '+k+' ×'+fo[k],'eat',k)).join(''))}
   h+=row('Pergaminhos de Ressurgimento: '+(run.rez187||0),'Revive automaticamente sem perder itens ou progresso.','');
   const canScroll=L.mode==='dungeon'&&!((L.gate.red||L.ow460)&&!L.bossDead)&&run.scrolls>0;
-  h+=row('Poções de vida: '+run.pots,potionDescription()+' Consome 1 poção. Botão ✚ ou tecla '+keyLabel(keyOf('pot'))+'.','')+row('Pergaminhos de retorno: '+run.scrolls,(L.ow460?'Só funciona depois que o Soberano deste mundo cair: o Outro Mundo não deixa ninguém sair antes. ':'Sai da masmorra. ')+'Não revive você.',btn('USAR','scroll',0,canScroll));
+  h+=row('Poções de vida: '+run.pots,potionDescription()+' Consome 1 poção. Botão ✚ ou tecla '+keyLabel(keyOf('pot'))+'.','')+row('Pergaminhos de retorno: '+run.scrolls,(L.ow460?'No Outro Mundo só funciona depois que o Soberano cair; antes disso, volte pela Fenda por onde entrou. ':'Sai da masmorra. ')+'Não revive você.',btn('USAR','scroll',0,canScroll));
 
   if(!city)h+='<div class="sysline" style="font-size:12px;color:var(--dim)">Venda de itens só dentro de uma cidade.</div>';
   openModal('BOLSA',bagTabs('itens')+h);
@@ -8463,7 +8464,7 @@ $('mb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b|
   if(a==='tier'){if(!run.adv||run.level<tierNeed())return;closeModal();L.tierTrial=true;buildSpecial('job');return}
   if(a==='weekly'){if(profile.weekly===weekId())return;closeModal();buildSpecial('weekly');return}
   if(a==='dep'||a==='wd'){const have=a==='dep'?run.gold:(profile.bank||0);const amt=v==='all'?have:Math.min(+v,have);if(!Number.isSafeInteger(amt)||amt<=0)return;if(a==='dep'){run.gold-=amt;profile.bank=(profile.bank||0)+amt;npcEv('bank',amt)}else{profile.bank-=amt;run.gold+=amt}store.set('pds2_profile',profile);sfx('coin')}
-  if(a==='scroll'){if(run.scrolls<=0)return;if(L.ow460&&!L.bossDead){toast('<b>[OUTRO MUNDO]</b> O pergaminho não atravessa este mundo: o portal de volta só abre quando o Soberano cair.',5000);return}run.scrolls--;closeModal();leaveDungeon(true);return}
+  if(a==='scroll'){if(run.scrolls<=0)return;if(L.ow460&&!L.bossDead){toast('<b>[OUTRO MUNDO]</b> O pergaminho não atravessa este mundo: ache a Fenda por onde entrou ou derrote o Soberano.',5000);return}run.scrolls--;closeModal();leaveDungeon(true);return}
   saveRun();rerender();
 });
 $('mx').addEventListener('click',closeModal);
@@ -9324,7 +9325,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/reclaim372.js?v=404"></script><script src="tools/loot353.js?v=402"></script>
+<script src="tools/reclaim372.js?v=404"></script><script src="tools/loot353.js?v=464"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -9358,7 +9359,7 @@ requestAnimationFrame(frame);
 <script src="tools/survival437.js?v=462"></script>
 <script src="tools/cart437.js?v=458"></script>
 <script src="tools/build437.js?v=462"></script>
-<script src="tools/otherworld460.js?v=461"></script>
+<script src="tools/otherworld460.js?v=464"></script>
 <script src="tools/sea439.js?v=439"></script>
 <script src="tools/boats440.js?v=443"></script>
 <script src="tools/terra444.js?v=458"></script>
@@ -9369,9 +9370,9 @@ requestAnimationFrame(frame);
 <script src="tools/impact459.js?v=459"></script>
 <script src="tools/attrs462.js?v=463"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v463</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v464</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=463;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=464;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

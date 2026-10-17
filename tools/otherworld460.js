@@ -6,7 +6,12 @@
    rochas flutuantes, recursos, acampamentos de monstros), tudo com modelos que já existem (Kenney + Tripo, 0 créditos).
    A colisão é uma grade virtual calculada na hora (L.grid.cells é um Proxy). Nada de feixe no céu nem marca no mapa: os
    3 Sinais de Energia são cristais baixos que, rastreados, apontam o próximo por um rastro no chão; os veios do chão pulsam
-   a partir da Cidadela. O portal de chegada desmorona atrás do jogador; o de volta só abre na Cidadela com o Soberano morto. */
+   a partir da Cidadela. O portal de chegada desmorona atrás do jogador; o de volta só abre na Cidadela com o Soberano morto.
+   v464 (Ian, 17/10/2026): "não deixa o chefe preso numa gaiola, esquece esse negócio de energia, o chefe tem que estar solto…
+   eu posso sair a qualquer momento achando a fenda de onde eu entrei; toda vez que eu entro numa fenda ela some atrás de mim
+   e aparece em algum lugar; matando o chefe surge uma nova fenda." Sem Cidadela, sem sinais: o Soberano anda solto em volta
+   do covil; a Fenda de entrada reaparece em algum lugar deste mundo (sem marca) e leva de volta; a morte do Soberano rasga
+   uma Fenda nova onde ele cair. Portal vermelho: a Fenda de volta fica selada até o Soberano cair (regra antiga). */
 (function () {
   'use strict';
   const T = THREE, TAU = Math.PI * 2;
@@ -20,7 +25,7 @@
     crio: { zen: 0x020818, hor: 0x2a5a8a, fog: 0x1d4266, fogD: .0070, gr: [0xc9dceb, 0xa2bcd0, 0xe8f3fb], rock: 0x5c6e84, peak: 0xf2f8ff, vein: 0x70f4ff, sun: 0xcdeeff, sunI: 1.15, hs: 0xc4ebff, hg: 0x2c3c50, hI: .85, pl: [0x70bcff, 0x1c3c6e, 0xd8f6ff], moon: [0xeaf6ff, 0x9cc8ee], aur: 0x60ffd8, cry: ['cristal-ancora-gelo', 'cristal-ancora-turquesa'], tint: 0xdcefff, trees: ['tree_pineRoundA', 'tree_pineTallA_detailed', 'tree_cone'], big: ['crystal', 'crystal', 'spire', 'tree', 'tree', 'ruin'], small: ['rock_smallA', 'rock_smallC', 'grass', 'plant_flatShort', 'rock_smallFlatA'], part: 'snow', pc: 0xffffff },
     ambar: { zen: 0x170c02, hor: 0x9a6422, fog: 0x74491a, fogD: .0074, gr: [0xb48444, 0xcc9a52, 0x8c6434], rock: 0x6c4c2c, peak: 0x9a7046, vein: 0xffc24a, sun: 0xffd890, sunI: 1.2, hs: 0xffdc98, hg: 0x3c2612, hI: .85, pl: [0xffbc4e, 0x7c4012, 0xfff2c4], moon: [0xfff0d0, 0xd8a060], aur: 0xffb040, cry: ['cristal-ancora-ambar'], tint: 0xe0a860, trees: ['cactus_tall', 'cactus_short', 'tree_dead_small'], big: ['mesa', 'spire', 'cactus', 'ruin', 'crystal', 'mesa'], small: ['rock_smallA', 'rock_smallC', 'rock_smallFlatA', 'plant_flatShort', 'bone_A', 'cactus_short'], part: 'sand', pc: 0xffe0a0 }
   };
-  const ZONES = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Cidadela do Soberano'];
+  const ZONES = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Covil do Soberano'];
 
   const absolute = o => { o.userData.terrainAbsolute245 = true; return o; };
   /* pedra por altura sem passar pela troca automática da v446 (que põe o pedregulho do Tripo sem a cor do mundo): dentro da Fenda o EW mantém a pedra tingida */
@@ -197,9 +202,8 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
         'vec3 wn=normalize((vec4(normal,0.)*viewMatrix).xyz);c=mix(c,uRock,smoothstep(.94,.72,wn.y));c=mix(c,uPeak,smoothstep(14.,40.,vOw460.y)*.85);' +
         'diffuseColor.rgb*=c;' +
         'float w1=abs(sin(q.x*.19+sin(q.y*.11)*2.3)*sin(q.y*.17+sin(q.x*.13)*1.9)),w2=abs(sin(q.x*.07-q.y*.05+1.3)*sin(q.y*.06+q.x*.04));' +
-        'float db=length(q-uBoss),near=1.-smoothstep(25.,230.,db),pulse=.5+.5*sin(uT*1.7-db*.09);' +
-        'float line=smoothstep(.035,.0,w1)*smoothstep(.3,.75,near+.15)+smoothstep(.022,.0,w2)*.8;' +
-        'totalEmissiveRadiance+=uVein*line*(.04+.10*pulse+.9*near*pulse);}');
+        'float pulse=.5+.5*sin(uT*1.3+n2*6.);float line=smoothstep(.022,.0,w2)*.8+smoothstep(.03,.0,w1)*.3;' +
+        'totalEmissiveRadiance+=uVein*line*(.05+.08*pulse);}');
     };
     mat.customProgramCacheKey = () => 'ow461ground';
     const m = new T.Mesh(geo, mat); m.userData.own = 1; m.name = 'ow460-ground'; m.receiveShadow = true; m.frustumCulled = false; return m;
@@ -236,14 +240,9 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   function cellAt(st, i) {
     if (st.over.has(i)) return st.over.get(i);
     const c = st.cellCache.get(i); if (c !== undefined) return c;
-    const p = cellCenter(i), b = st.boss; let v = 1;
-    const db = Math.hypot(p.x - b.x, p.z - b.z);
-    if (db > 20.4 && db < 24.8) { let da = Math.atan2(p.z - b.z, p.x - b.x) - st.gateA; da = Math.atan2(Math.sin(da), Math.cos(da)); v = Math.abs(da) > .2 ? 0 : (st.open ? 1 : 2); }
-    else if (db < 20.4) { for (const q of st.covers) if (Math.hypot(q.x - p.x, q.z - p.z) <= 1.3) { v = 0; break; } }
-    else {
-      const cx = Math.floor(p.x / CHK), cz = Math.floor(p.z / CHK);
-      outer: for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const f of chunkData(st, cx + dx, cz + dz).forms) if (Math.hypot(f.x - p.x, f.z - p.z) <= f.r * .85) { v = 0; break outer; }
-    }
+    const p = cellCenter(i); let v = 1;
+    const cx = Math.floor(p.x / CHK), cz = Math.floor(p.z / CHK);
+    outer: for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const f of chunkData(st, cx + dx, cz + dz).forms) if (Math.hypot(f.x - p.x, f.z - p.z) <= f.r * .85) { v = 0; break outer; }
     if (st.cellCache.size > 250000) st.cellCache.clear();
     st.cellCache.set(i, v); return v;
   }
@@ -288,21 +287,20 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     const ex = (R() - .5) * 60, ez = (R() - .5) * 60, aB = R() * TAU, dB = 900 + R() * 400 + Math.min(9, g.rank || 0) * 20;
     const bx = ex + Math.cos(aB) * dB, bz = ez + Math.sin(aB) * dB;
     TER.OWB.value.set(ex, ez, bx, bz); TER.on.value = 1;
-    const st = { W: WORLDS[wid] || WORLDS.erebo, seed: s, entry: { x: ex, z: ez }, boss: { x: bx, z: bz }, open: variant === 'hunt', hunt: variant === 'hunt',
+    const st = { W: WORLDS[wid] || WORLDS.erebo, seed: s, entry: { x: ex, z: ez }, boss: { x: bx, z: bz }, hunt: variant === 'hunt',
       reserved: [], over: new Map(), cellCache: new Map(), chunkCache: new Map(), chunks: new Map(), queue: [], dyn: new Map(), t: 0, zone: 1, zoneSeen: { 1: true }, lastDay: 0, floats: [] };
     const room = (x, z, half, kind) => { const c = cellOf(x, z); return { x: c.x - half, y: c.y - half, w: half * 2, h: half * 2, ow: kind, px: x, pz: z }; };
     // rota escondida (curva) da chegada até a Cidadela: acampamentos e sinais ficam perto dela, não em cima
     const px = -(bz - ez) / dB, pz = (bx - ex) / dB, off = (R() - .5) * 500, kx = (ex + bx) / 2 + px * off, kz = (ez + bz) / 2 + pz * off;
     const bez = t => ({ x: (1 - t) * (1 - t) * ex + 2 * (1 - t) * t * kx + t * t * bx, z: (1 - t) * (1 - t) * ez + 2 * (1 - t) * t * kz + t * t * bz });
-    st.gateA = (() => { const p = bez(.96); return Math.atan2(p.z - bz, p.x - bx); })();
-    st.covers = []; for (let k = 0; k < 4; k++) { const a = st.gateA + Math.PI / 4 + k * Math.PI / 2; st.covers.push({ x: bx + Math.cos(a) * 12, z: bz + Math.sin(a) * 12 }); }
-    st.signals = [.26, .52, .78].map((t, i) => { const p = bez(t), a = R() * TAU, j = 25 + R() * 45; return { x: p.x + Math.cos(a) * j, z: p.z + Math.sin(a) * j, i }; });
+    // a Fenda por onde você entrou reaparece em algum lugar deste mundo, longe da chegada e do covil (sem marca nenhuma)
+    { let best = null; for (let k = 0; k < 40; k++) { const a = R() * TAU, d = 260 + R() * 360, x = ex + Math.cos(a) * d, z = ez + Math.sin(a) * d; if (Math.hypot(x - bx, z - bz) > 220) { best = { x, z }; break; } } st.rift = best || { x: ex - (bx - ex) * .35, z: ez - (bz - ez) * .35 }; }
     const camps = [];
     for (const t of [.1, .2, .32, .44, .56, .68, .8, .9]) { const p = bez(t), a = R() * TAU, j = 20 + R() * 60, r = room(p.x + Math.cos(a) * j, p.z + Math.sin(a) * j, 4, 'camp'); r.t = t; camps.push(r); }
     for (let k = 0; k < 5; k++) { const a = R() * TAU, d = 110 + R() * 190; camps.push(room(ex + Math.cos(a) * d, ez + Math.sin(a) * d, 4, 'camp')); }
     if (variant === 'floors') { const z1 = camps.find(c => c.t === .32), z2 = camps.find(c => c.t === .68); if (z1) { z1.floorEnd = true; z1.floor = 0; } if (z2) { z2.floorEnd = true; z2.floor = 1; } }
-    st.reserved.push({ x: ex, z: ez, r: 18 }, { x: bx, z: bz, r: 34 }, ...st.signals.map(p => ({ x: p.x, z: p.z, r: 6 })), ...camps.map(c => ({ x: c.px, z: c.pz, r: 11 })));
-    const rooms = [room(ex, ez, 4, 'entry'), ...camps, room(bx, bz, 8, 'citadel')], bi = rooms.length - 1;
+    st.reserved.push({ x: ex, z: ez, r: 18 }, { x: bx, z: bz, r: 30 }, { x: st.rift.x, z: st.rift.z, r: 10 }, ...camps.map(c => ({ x: c.px, z: c.pz, r: 11 })));
+    const rooms = [room(ex, ez, 4, 'entry'), ...camps, room(bx, bz, 8, 'lair')], bi = rooms.length - 1;
     rooms[0].entry = true;
     const vg = virtualGrid(st);
     return { cells: vg.cells, visited: vg.visited, W: NV, H: NV, rooms, bi, st };
@@ -323,30 +321,22 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     const ring = new T.Mesh(new T.RingGeometry(62, 100, 128, 1), ringMat(W)); ring.position.copy(planet.position); ring.lookAt(planet.position.clone().add(new T.Vector3(.35, 1, .2))); ring.frustumCulled = false; ring.renderOrder = -18; ring.userData.own = 1; sky.add(ring);
     [[.55, .52, -.4, 9, W.moon[0]], [-.7, .42, .25, 5.5, W.moon[1]]].forEach(([x, y, z, r, c]) => { const m = new T.Mesh(new T.SphereGeometry(r, 32, 20), moonMat(c)); m.position.set(x, y, z).normalize().multiplyScalar(215); m.frustumCulled = false; m.renderOrder = -19; m.userData.own = 1; sky.add(m); });
     grp.add(sky); st.sky = sky;
-    buildCitadel(grp, W, st, R);
+    buildLair(grp, W, st, R);
     grp.add(st.parts = particles(W));
     streamChunks(true, st.entry.x, st.entry.z);
   }
 
-  function buildCitadel(grp, W, st, R) {
-    const { x: bx, z: bz } = st.boss, ga = st.gateA, B = ENV.ok ? new EnvBatch() : null;
-    for (let i = 0; i < 22; i++) {
-      const a = ga + (i + .5) / 22 * TAU; const da = Math.atan2(Math.sin(a - ga), Math.cos(a - ga)); if (Math.abs(da) < .3) continue;
-      const x = bx + Math.cos(a) * 22.6, z = bz + Math.sin(a) * 22.6;
-      if (i % 2 === 0) placeGlb(grp, crystalPath(W.cry[i % W.cry.length]), 9 + R() * 5, x, -.4, z, R() * TAU, m => crystalMat(m, W.vein));
-      else if (B) EHk(B, ['rock_tallA', 'rock_tallB', 'rock_tallC'][i % 3], x, -.4, z, R() * TAU, 7 + R() * 3, W.rock);
-      if (B) EW(B, ['rock_largeA', 'rock_largeC', 'rock_largeD'][i % 3], bx + Math.cos(a + .14) * 22.8, -.5, bz + Math.sin(a + .14) * 22.8, R() * TAU, 4.6, W.rock);
+  /* covil do Soberano: ruínas e cristais soltos, sem muralha (ele não fica preso) */
+  function buildLair(grp, W, st, R) {
+    const { x: bx, z: bz } = st.boss, B = ENV.ok ? new EnvBatch() : null;
+    for (let i = 0; i < 9; i++) {
+      if (R() < .3) continue; const a = i / 9 * TAU + R() * .4, d = 16 + R() * 10, x = bx + Math.cos(a) * d, z = bz + Math.sin(a) * d;
+      if (i % 3 === 0) placeGlb(grp, crystalPath(W.cry[i % W.cry.length]), 6 + R() * 6, x, -.4, z, R() * TAU, m => crystalMat(m, W.vein));
+      else if (B) EH(B, ['statue_obelisk', 'statue_columnDamaged', 'column'][i % 3], x, -.3, z, R() * TAU, 4 + R() * 4, W.peak);
+      if (B && R() < .6) EH(B, 'rubble_large', x + 1.2, -.2, z + .6, R() * TAU, 1.1, W.peak);
     }
-    if (B) {
-      for (const s of [-1, 1]) { const a = ga + s * .27, x = bx + Math.cos(a) * 23, z = bz + Math.sin(a) * 23; EH(B, 'statue_obelisk', x, -.2, z, a, 10, W.peak); }
-      for (const c of st.covers) EH(B, 'statue_columnDamaged', c.x, -.2, c.z, R() * TAU, 5.5, W.peak);
-      envOwn(grp, B.mesh(BLDMAT));
-    }
-    const disc = new T.Mesh(new T.CircleGeometry(19, 96), runeMat(W.vein, .7)); disc.rotation.x = -Math.PI / 2; disc.position.set(bx, .07, bz); disc.renderOrder = 6; disc.userData.own = 1; grp.add(disc);
-    if (!st.open) {
-      const gx = bx + Math.cos(ga) * 22.6, gz = bz + Math.sin(ga) * 22.6, cur = new T.Mesh(new T.PlaneGeometry(10, 8), curtainMat(W.vein));
-      cur.position.set(gx, 4, gz); cur.rotation.y = -ga + Math.PI / 2; cur.renderOrder = 7; cur.userData.own = 1; grp.add(cur); st.curtain = cur;
-    }
+    if (B) envOwn(grp, B.mesh(BLDMAT));
+    const disc = new T.Mesh(new T.CircleGeometry(14, 96), runeMat(W.vein, .45)); disc.rotation.x = -Math.PI / 2; disc.position.set(bx, .07, bz); disc.renderOrder = 6; disc.userData.own = 1; grp.add(disc);
   }
 
   /* ---------- Pedaços: formações, flora, rochas flutuantes, recursos e acampamentos novos ---------- */
@@ -364,7 +354,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
         else if (f.type === 'cactus') placeGlb(grp, 'models/tripo-cacto446' + (f.k % 2 ? 'a' : 'b') + '.glb', f.H, f.x, 0, f.z, f.ry, m => rockMat(m, W.tint));
         else if (f.type === 'crystal') { placeGlb(grp, crystalPath(W.cry[f.k % W.cry.length]), f.H, f.x, -.3, f.z, f.ry, m => crystalMat(m, W.vein)); EHk(bigB, 'rock_largeB', f.x, -.6, f.z, f.ry, f.H * .22, W.rock); }
       }
-      const nearB = (x, z) => Math.hypot(x - st.boss.x, z - st.boss.z) < 19;
+      const nearB = (x, z) => Math.hypot(x - st.boss.x, z - st.boss.z) < 12;
       for (let i = 0; i < 130; i++) {
         const x = (cx + R()) * CHK, z = (cz + R()) * CHK; if (nearB(x, z) || d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + .6)) continue;
         const k = W.small[Math.floor(R() * W.small.length)], rocky = k.startsWith('rock') || k === 'bone_A';
@@ -465,43 +455,64 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     L.seen.delete(camp.room); camp.mobs = mobs;
   }
 
-  /* ---------- Sinais (sem feixe e sem placa: só o cristal baixo no círculo de runas) e recursos ---------- */
+  /* ---------- Fendas deste mundo: a de entrada (reaparece longe) e a que nasce quando o Soberano cai ---------- */
+  function riftExit(x, z, locked, kind) {
+    const R131 = window.RIFT131_ENABLE && window.Rift131;
+    const grp = R131 ? Rift131.create({ seed: ((L.gate?.seed || 131) + (kind === 'boss' ? 7 : 0)) | 0, red: locked, exit: !locked, secret: !locked, legacyLinearOutput: true }) : new T.Group();
+    grp.position.set(x, 0, z); grp.rotation.y = Math.random() * TAU; grp.scale.setScalar(.86); L.group.add(grp);
+    const it = { type: 'exit', x, z, r: 3.4, ring: new T.Group(), grp, locked, riftLocked131: locked, ow460: kind, label: kind === 'boss' ? 'F · ATRAVESSAR A FENDA NOVA (VOLTAR A PRIMEVA)' : 'F · VOLTAR PELA FENDA POR ONDE ENTROU', use: () => tryExit(it) };
+    L.inter.push(it); L.exits.push(it); return it;
+  }
   function setupHunt(g, rooms, bi, mids, R) {
-    const st = L.ow460, W = st.W || WORLDS.erebo, grp = L.group;
-    L.riftSignalNodes456 = []; L.riftSignalsMax456 = st.signals.length; L.riftSignals456 = 0;
-    st.signals.forEach((p, idx) => {
-      const sg = new T.Group(); sg.position.set(p.x, 0, p.z); grp.add(sg);
-      placeGlb(sg, crystalPath('cristal-veio-2'), 2.4, 0, -.1, 0, R() * TAU, m => crystalMat(m, W.vein));
-      const disc = new T.Mesh(new T.CircleGeometry(2.2, 64), runeMat(W.vein, .55)); disc.rotation.x = -Math.PI / 2; disc.position.y = .06; disc.renderOrder = 6; disc.userData.own = 1; sg.add(disc);
-      const it = { type: 'riftSignal456', idx, x: p.x, z: p.z, r: 3.4, grp: sg, tracked: false, label: 'F · RASTREAR SINAL DE ENERGIA', use: () => {
-        const next = L.riftSignalNodes456.find(n => !n.tracked);
-        if (next && next !== it) { toast('<b>[SINAL DE ENERGIA]</b> Este cristal está mudo. Outro sinal precisa ser rastreado antes dele.', 4200); return false; }
-        return trackRiftSignal456(it);
-      } };
-      L.inter.push(it); L.riftSignalNodes456.push(it);
-    });
+    const st = L.ow460;
+    L.riftSignalNodes456 = []; L.riftSignalsMax456 = 0; L.riftSignals456 = 0;
+    st.exit = riftExit(st.rift.x, st.rift.z, !!g.red, 'entry');
   }
-  const far = d => d < 140 ? 'perto' : d < 320 ? 'a uma boa caminhada' : d < 650 ? 'longe' : 'muito longe';
-  function onSignal(it) {
-    const st = L.ow460; if (!st) return;
-    const next = (L.riftSignalNodes456 || []).find(n => !n.tracked), target = next || st.boss;
-    const dx = target.x - player.x, dz = target.z - player.z, d = Math.hypot(dx, dz), a = Math.atan2(dz, dx);
-    // rastro no chão: uma trilha de runas de 40 m na direção certa, por alguns segundos (nada fica marcado)
-    for (let s = 1; s <= 14; s++) setTimeout(() => { if (L.ow460 === st) fxRing(player.x + Math.cos(a) * s * 3, player.z + Math.sin(a) * s * 3, st.W.vein, 1.1, .9); }, s * 90);
-    setTimeout(() => { if (L.ow460 === st) toast('<b>[RASTRO]</b> O ' + (next ? 'próximo sinal' : 'coração deste mundo') + ' está <b>' + far(d) + '</b>, para onde o rastro apontou. Os veios do chão pulsam a partir dele.', 6500); }, 1700);
-    if (!next) openCitadel();
-  }
-  function openCitadel() {
-    const st = L.ow460; if (!st || st.open) return; st.open = true; st.cellCache.clear();
-    if (st.curtain) { L.group.remove(st.curtain); st.curtain = null; }
-    try { sfx('gong'); shake(.45); } catch (_) {}
-    toast('<b>[OUTRO MUNDO]</b> Um estrondo atravessa o planeta: a Cidadela do Soberano abriu o portão. Ninguém sai deste mundo até ele cair.', 6500);
-  }
+  function onSignal() {}
+  function openCitadel() {}
   function openReturn() {
     const st = L.ow460; if (!st || st.returned) return; st.returned = true;
-    const it = exitPortal(st.boss.x, st.boss.z, false);
-    try { if (it && it.grp && window.Rift131) Rift131.open(it.grp); } catch (_) {}
-    setTimeout(() => { if (L.ow460 === st) { bigText('O PORTAL DE VOLTA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> O Soberano caiu. O portal de volta para Primeva se abriu no centro da Cidadela. Em 2 minutos este mundo começa a transbordar.', 7000); } }, 900);
+    const b = bossE && Math.hypot(bossE.x - st.boss.x, bossE.z - st.boss.z) < 2000 ? { x: bossE.x, z: bossE.z } : st.boss;
+    let p = { x: b.x + 4, z: b.z + 3 }; for (let k = 0; k < 12 && !freeAt(p.x, p.z, 1.2); k++) { const a = k * 1.3; p = { x: b.x + Math.cos(a) * (4 + k), z: b.z + Math.sin(a) * (4 + k) }; }
+    const it = riftExit(p.x, p.z, false, 'boss');
+    try { if (it.grp && window.Rift131) Rift131.open(it.grp); } catch (_) {}
+    setTimeout(() => { if (L.ow460 === st) { bigText('UMA FENDA NOVA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> O Soberano caiu e rasgou uma Fenda nova bem onde morreu: ela leva de volta a Primeva.' + (L.gate?.red ? ' A Fenda por onde você entrou também destrancou.' : ' A Fenda por onde você entrou continua aberta onde estava.') + ' Em 2 minutos este mundo começa a transbordar.', 7500); } }, 900);
+  }
+
+  /* o Soberano anda solto em volta do covil; quando te vê, a IA normal de chefe assume */
+  function roam(e, dt) {
+    const st = L.ow460; if (!st || e !== bossE || e.dead || e.aggro || st.hunt || L.defense) return false;
+    const dp = Math.hypot(player.x - e.x, player.z - e.z);
+    if (!player.dead && dp < 26 && los(e.x, e.z, player.x, player.z)) { e.aggro = true; try { bossAggro(e); } catch (_) {} return false; }
+    const r = st.roam || (st.roam = { wp: null, t: 0, stuck: 0, lx: e.x, lz: e.z });
+    r.t -= dt;
+    if (!r.wp || Math.hypot(r.wp.x - e.x, r.wp.z - e.z) < 2 || r.t <= 0) {
+      for (let k = 0; k < 12; k++) { const a = Math.random() * TAU, d = 40 + Math.random() * 300, x = st.boss.x + Math.cos(a) * d, z = st.boss.z + Math.sin(a) * d; if (freeAt(x, z, 1.2)) { r.wp = { x, z }; break; } }
+      r.t = 25 + Math.random() * 30; r.pause = 2 + Math.random() * 5;
+    }
+    if (r.pause > 0) { r.pause -= dt; animChibi(e.m, { move: 0, atk: 0, dead: 0, wind: 0 }, time); return true; }
+    const dx = r.wp.x - e.x, dz = r.wp.z - e.z, len = Math.hypot(dx, dz) || 1, sp = Math.min(len, 2.6 * dt);
+    e.face = Math.atan2(dx, dz); const x0 = e.x, z0 = e.z; moveEnt(e, dx / len * sp, dz / len * sp);
+    if (Math.hypot(e.x - x0, e.z - z0) < sp * .3) { r.stuck += dt; if (r.stuck > 1.2) { r.wp = null; r.stuck = 0; } } else r.stuck = 0;
+    animChibi(e.m, { move: 1, atk: 0, dead: 0, wind: 0 }, time); e.m.root.position.set(e.x, 0, e.z); e.m.root.rotation.y = e.face;
+    return true;
+  }
+
+  /* saindo pela Fenda de entrada sem matar o Soberano: ela some atrás de você em Primeva e reabre em outro lugar perto */
+  function relocateGate(g) {
+    if (!g || g.dead) return false;
+    let spot = null;
+    for (let t = 0; t < 80 && !spot; t++) {
+      const a = Math.random() * TAU, d = 120 + Math.random() * 160, x = g.x + Math.cos(a) * d, z = g.z + Math.sin(a) * d;
+      try { if (nearestCity(x, z).d < 52 * (typeof CITYK !== 'undefined' ? CITYK : 1)) continue; if (gates.some(o => o !== g && !o.dead && Math.hypot(o.x - x, o.z - z) < 30)) continue; if (!worldFree(x, z, 3.5)) continue; if (typeof onRoad === 'function' && onRoad(roadSegs(x, z, 1), x, z, 10)) continue; } catch (_) { continue; }
+      spot = { x, z };
+    }
+    if (!spot) return false;
+    try { if (window.RIFT131_ENABLE && window.Rift131) { const ghost = { ...g, id: ++gateSeq, mesh: null, ring: null, sw: null, dead: false, life: 120 }; delete ghost.cleared; gateMesh(ghost); ghost.closing131 = true; gates.push(ghost); if (ghost.mesh) Rift131.close(ghost.mesh, false); } } catch (_) {}
+    try { removeGateMesh(g); } catch (_) {}
+    g.x = spot.x; g.z = spot.z;
+    setTimeout(() => toast('<b>[FENDA]</b> A Fenda se fechou atrás de você e reabriu em outro lugar por perto. O Soberano daquele mundo continua vivo.', 6500), 1600);
+    return true;
   }
 
   function zoneAt(x, z) {
@@ -510,12 +521,13 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   }
   function objective(obj) {
     const st = L.ow460; if (!st) return obj;
-    const k = L.riftSignals456 || 0, m = L.riftSignalsMax456 || 3, day = L.riftDays456 || 1;
+    const day = L.riftDays456 || 1;
     let line;
-    if (L.brk) line = 'O mundo está transbordando · o portal de volta está aberto na Cidadela';
-    else if (L.bossDead) line = 'O portal de volta está aberto no centro da Cidadela · transbordo em ' + fmtT(Math.max(0, L.closeT));
-    else if (!st.open) line = 'Sinais de Energia rastreados: ' + k + '/' + m + ' · procure os cristais que falam · os veios do chão pulsam a partir da Cidadela';
-    else line = L.defense ? 'A Cidadela abriu · encontre-a e defenda o Núcleo da Fenda' : L.combat117 && !L.combat117.spawned ? 'A Cidadela abriu · derrote os acampamentos para despertar o Soberano' : 'A Cidadela abriu · encontre o Soberano · não há saída até ele cair';
+    if (L.brk) line = 'O mundo está transbordando · volte por uma Fenda';
+    else if (L.bossDead) line = 'O Soberano caiu · uma Fenda nova abriu onde ele morreu · transbordo em ' + fmtT(Math.max(0, L.closeT));
+    else if (L.defense) line = 'O Núcleo da Fenda fica no covil deste mundo · ache e defenda · ou volte pela Fenda por onde entrou';
+    else if (L.combat117 && !L.combat117.spawned) line = 'Derrote os acampamentos para despertar o Soberano · ou volte pela Fenda por onde entrou';
+    else line = L.gate?.red ? 'O Soberano anda solto · portal vermelho: a Fenda de volta só abre quando ele cair' : 'O Soberano anda solto por este mundo · ache a Fenda por onde entrou para voltar';
     let rest = String(obj || '');
     if (/^(\[[^\]]*\] )?Salas /.test(rest) || /^(\[[^\]]*\] )?Transbordo em /.test(rest) || /^(\[[^\]]*\] )?TRANSBORDO/.test(rest)) rest = '';
     return st.name + ' · Dia ' + day + ' · ' + ZONES[st.zone - 1] + '\n' + line + (rest ? '\n' + rest : '');
@@ -545,7 +557,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       if (a.t > 4.6) {
         if (a.grp) { try { Rift131.dispose(a.grp); } catch (_) {} L.group.remove(a.grp); }
         st.arrival = null;
-        toast('<b>[OUTRO MUNDO · ' + st.name + ']</b> O portal se fechou atrás de você. Este mundo não tem fim e não tem saída: só o <b>Soberano</b> dele abre o caminho de volta. Ache os cristais que falam (<b>Sinais de Energia</b>) e siga o que eles mostram. ' + (st.weather ? '<i>' + st.weather + '.</i>' : ''), 9000);
+        toast('<b>[OUTRO MUNDO · ' + st.name + ']</b> A Fenda sumiu atrás de você e reapareceu em algum lugar deste mundo sem fim. Ache-a para voltar' + (L.gate?.red ? ' (portal vermelho: ela só destranca quando o Soberano cair)' : '') + ', ou cace o <b>Soberano</b>, que anda solto por aqui: a morte dele rasga uma Fenda nova. ' + (st.weather ? '<i>' + st.weather + '.</i>' : ''), 9500);
       }
     }
     // chão acompanha o jogador (em passos da malha, sem tremer)
@@ -584,10 +596,11 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
 
   // Ganchos: a lógica por quadro da masmorra e a câmera.
   const prevUD = updDungeon; updDungeon = function (dt) { prevUD.apply(this, arguments); try { tick(dt); } catch (e) { console.warn('OW460.tick', e); } };
+  const prevHM = expHuntMove; expHuntMove = function (e, dt) { if (prevHM.apply(this, arguments)) return true; try { return roam(e, dt); } catch (err) { console.warn('OW460.roam', err); return false; } };
   const prevCam = camUpdate; camUpdate = function (dt) { prevCam.apply(this, arguments); try { camAfter(dt); } catch (e) { console.warn('OW460.cam', e); } };
 
   /* cristal pequeno do Tripo para outros sistemas (ex.: marcas do cerco ao sair da Fenda) */
   function shard(parent, x, y, z, H, col) { return placeGlb(parent, crystalPath('cristal-veio'), H, x, y, z, Math.random() * TAU, m => crystalMat(m, col)); }
 
-  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, objective, map, zoneAt, tick, path, cellAt: i => cellAt(L.ow460, i) };
+  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, relocateGate, objective, map, zoneAt, tick, path, roam, cellAt: i => cellAt(L.ow460, i) };
 })();

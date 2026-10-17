@@ -38,7 +38,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   const pd=Math.hypot(player.x-e.x,player.z-e.z);
   if(e.dead&&e.m.root.userData.reclaimed372){e.gone=true;return;}if(e.dead){e.deadT+=dt;animChibi(e.m,{move:0,atk:0,dead:Math.min(1,e.deadT*3),wind:0},e.t);if(!e.isBoss&&e.deadT>(/^(escaravelho|slime|gosma|cogu|passaro|espinhosa|guardiao|cactinho|magote)/.test(e.m.mon||'')?((gAct(e.m,'Death_A')?.getClip().duration||1.4)+.15):1.4)){if(!e.corpse353)scene.remove(e.m.root);e.gone=true}return}
   if(e.raid155&&L.mode==='world'){if(pd>55||!pickTarget(e)||pickTarget(e).d>6){const mv=raidMove155(e,dt,pd<=55);if(pd<=55)animChibi(e.m,{move:mv,atk:e.raidAttack348>time?.7:0,dead:0,wind:0},e.t);return}}
-  e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt');if(e.sleep)return;
+  e.sleep=pd>55&&!e.aggro&&!e.gosmaGather347&&!e.gosmaSplit347&&!(e.expBoss&&L.expedition?.s.type==='hunt')&&!(L.ow460&&e===bossE);/* v464: o Soberano do Outro Mundo anda solto mesmo longe de você */if(e.sleep)return;
   if(e.frozen||e.hold){e.act=null;if(e.cactor372){e.cactor372=null;e.cd=Math.max(e.cd,.3);}if(e.guard370){e.guard370=null;e.cd=Math.max(e.cd,.3);}e.bird349=null;if(e.spiky350){e.spiky350=null;e.cd=Math.max(e.cd,.3);}if(e.coguCast348){e.coguCast348=null;e.coguCd348=Math.max(e.coguCd348||0,1);}if(e.slime360){e.slime360=null;e.cd=Math.max(e.cd,.3);}if(e.beetle352){e.beetle352=null;e.cd=Math.max(e.cd,.3);}animChibi(e.m,{move:0,atk:0,dead:0,wind:0},e.t);e.m.root.position.set(e.x,0,e.z);e.m.root.rotation.y=e.face;return}
   e.cd-=dt;e.stun-=dt;e.slow-=dt;
   if(e.flash>0){e.flash-=dt;flashMats(e.m,e.flash>0?1:0)}
