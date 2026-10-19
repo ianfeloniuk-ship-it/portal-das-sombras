@@ -476,6 +476,7 @@ function gatherOtherworldRes456(it){
 
 function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   if(!L||L.mode!=='world'||!L.group)return;
+  if(window.WorldSim479)WorldSim479.simulate(daysPassed,{fromRift:true,rank});
   const grp=new THREE.Group();
   const y0=typeof terrH==='function'?terrH(gx,gz):0;
   grp.position.set(gx,y0,gz);
@@ -504,6 +505,12 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
 }
 
 function showRiftTimeReport456(daysPassed,rank){
+  if(window.WorldSim479){
+    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank);
+    h+='<div style="text-align:center;margin-top:14px"><button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Ver Conselho e Governantes</button></div>';
+    openModal('IMPACTO TEMPORAL · '+daysPassed+' DIAS DEPOIS',h);
+    return;
+  }
   const caps=(run&&run.capitalStatus456)||[
     {n:'Aster',st:'Guarnição reforçada; caravanas mantiveram o abastecimento durante as '+Math.round(daysPassed/7)+' semanas.'},
     {n:'Solaria',st:'Escudos solares contiveram 3 ondas de fendas secundárias no horizonte.'},

@@ -1,3 +1,36 @@
+## v479 — Simulação Autônoma de Mundo Vivo: Capitais, Governantes, Editais, Economia e Caçadores NPCs, 19/10/2026
+- Pedido de Ian:
+  - "Uma coisa que eu quero implementar no jogo, e pode ser agora mesmo depois de terminar tudo o que está fazendo. O mundo tem que acontecer sozinhos. Se eu estou dentro da masmorra e passou 14 dias, as coisas que estão descritas ali que aconteceram depois que eu saí tem que ter acontecido mesmo. Tipo, Astera pode crescer, pode ser melhorada e passar para os próximos níveis sem precisar de mim. Caçadores que chegam ali no jogo, eles mesmos vão aí, botam, tentam ajudar, Astera cresce. Todas as regiões, elas têm que ter uma natureza, uma economia e um sistema próprio que funciona sozinho, sabe, no jogo. Podem ter reis, prefeitos, presidentes, governadores das regiões. Tem que ter esse sistema, sabe? Eu quero um jogo que ele funcione sem eu precisar estar lá, e quando eu estou, eu só agrego. Entende? É um sistema mais ou menos assim."
+- Mudanças técnicas implementadas:
+  - **Módulo de Simulação de Mundo Autônomo (`tools/worldsim479.js`)**:
+    - Criado sistema com as 6 Grandes Capitais e Regiões de Primeva (Aster, Solaria, Ymiria, Zahar, Thalor, Urdan & Verden).
+    - Cada região possui Governantes / Líderes com perfis temáticos:
+      - Aster: Comandante Brann & Chanceler Lyra (Regentes da Ordem dos Caçadores)
+      - Solaria: Grão-Mestre Aurelius (Arquimestre da Cidade do Sol Eterno)
+      - Ymiria: Arquiduquesa Astrid Frostgard (Senhora do Aço Negro e Bastião do Gelo Profundo)
+      - Zahar: Emir Tariq Al-Zahar (Guardião das Areias e Pérola das Dunas Vermelhas)
+      - Thalor: Almirante Varis Onda-Viva (Lorde dos Portos e Mares Bravios)
+      - Urdan & Verden: Arquidruida Eldrin & Conselho das Raízes (Voz da Natureza e Vale dos Ancestrais)
+    - Cada região conta com Editais de Governança com recompensas permanentes (reforço de muralhas, colégios de caçadores, caldeiras geotérmicas, aquedutos, estaleiros navais, santuários ecológicos).
+    - Quadro de Caçadores NPCs autônomos por região (ex.: Aldric das Brumas, Valen Radiante, Torben Machado-de-Gelo, Farid Falcão-das-Dunas, Kaelen Garra-Verde) que patrulham estradas, acumulam triunfos e entregam materiais de construção independentemente da presença do jogador.
+    - Economia e caravanas autônomas que realizam viagens comerciais, reduzem escassez de produtos e selam fendas secundárias no horizonte.
+    - Crescimento e elevação de nível de cidades autônomo: `rState.level` e `profile.cityLv` sobem sozinhos quando os caçadores e artesãos atingem os pontos de construção (`buildPoints >= buildMax`), destravando tiers visuais, torres e descontos sem exigir que o jogador pague todas as doações.
+    - Papel do Jogador ("Quando estou, eu só agrego"): o jogador pode voluntariamente financiar ouro ou doar cristais de mana no Conselho Regional para acelerar as obras públicas e editais em andamento (`WorldSim479.playerContribute`), subindo cidades e colhendo recompensas mais rápido.
+    - Interface interativa do Conselho Regional (`WorldSim479.openCouncilView(rid)`): acessível pela aba de Cidades (`cityTab`), visualizador de regiões (`regionView116`) e após o rescaldo de fendas procedurais. Permite navegar entre todas as capitais, inspecionar o governante, o progresso do edital e o ranking dos caçadores locais.
+  - **Integração com a Passagem do Tempo de Fendas e Dias Reais**:
+    - `src/core/270-masmorra-procedural.js`:
+      - `spawnRiftAftermath456(gx, gz, rank, daysPassed)`: dispara imediatamente a simulação de dias passados (`WorldSim479.simulate(daysPassed, { fromRift: true, rank })`).
+      - `showRiftTimeReport456(daysPassed, rank)`: substitui o texto estático de fenda por eventos reais gerados pela simulação (`WorldSim479.generateRiftReportHtml(daysPassed, rank)`), relatando exatamente quais capitais expandiram de nível, editais concluídos pelos governantes e fendas seladas por NPCs enquanto o jogador esteve fora.
+    - `src/core/450-oraculos-status-diaria-ecos-guilda-forja.js`:
+      - `ensureRun()`: detecta a passagem de dias reais (`todayKey() > S.lastSimDay`) e avança a simulação diária do mundo autônomo mesmo em sessões normais sem entrar em fendas procedurais.
+    - `src/core/460-ideias-afixos-pesca-culinaria-mimic-titu.js` e `src/core/600-bloco-regions116.js`:
+      - Adicionado botão de atalho direto para o Conselho Regional em `cityTab()` e `regionView116()`.
+  - **Montagem, Build e Versão**:
+    - `game.html`: registrado `<script src="tools/worldsim479.js?v=479"></script>`.
+    - `sw.js`: atualizado cache para `pds-v479` e incluído `tools/worldsim479.js?v=479`.
+    - `VERSAO.md`: atualizado para `v479`.
+    - `tools/build.py`: executado com sucesso gerando `index.html`.
+
 ## v478 — Direção de ataque por movimento, feixes de portais, minério na dungeon, debuffs de peso/parasitas, gelo cristalino e limpeza da HUD, 19/10/2026
 - Pedidos de Ian:
   1. "Tá vendo isso aí que tá acontecendo? O ataque não tá indo para o lado que eu tô direcionando. Aparece o fluxo para o lado esquerdo enquanto eu tô apertando para o lado direito. Tá bugado de novo, tem que arrumar também."

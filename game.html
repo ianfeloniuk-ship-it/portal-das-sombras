@@ -5194,6 +5194,7 @@ function gatherOtherworldRes456(it){
 
 function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   if(!L||L.mode!=='world'||!L.group)return;
+  if(window.WorldSim479)WorldSim479.simulate(daysPassed,{fromRift:true,rank});
   const grp=new THREE.Group();
   const y0=typeof terrH==='function'?terrH(gx,gz):0;
   grp.position.set(gx,y0,gz);
@@ -5222,6 +5223,12 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
 }
 
 function showRiftTimeReport456(daysPassed,rank){
+  if(window.WorldSim479){
+    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank);
+    h+='<div style="text-align:center;margin-top:14px"><button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Ver Conselho e Governantes</button></div>';
+    openModal('IMPACTO TEMPORAL · '+daysPassed+' DIAS DEPOIS',h);
+    return;
+  }
   const caps=(run&&run.capitalStatus456)||[
     {n:'Aster',st:'Guarnição reforçada; caravanas mantiveram o abastecimento durante as '+Math.round(daysPassed/7)+' semanas.'},
     {n:'Solaria',st:'Escudos solares contiveram 3 ondas de fendas secundárias no horizonte.'},
@@ -7223,7 +7230,7 @@ function ensureRun(){migratePointPassives253();normalizeStoryProgress262();run.l
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
     if(lv>1)setTimeout(()=>showSys('Atualização do jogo: seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível). Seus equipamentos foram ajustados ao novo sistema. Abra Status para distribuir.'),4500)}
   run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};for(const k of ATTR_NEW281)run.stats[k]=run.stats[k]||0;if(!run.attr281){run.attr281=1}run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;const compensation113=migrateSkillPoints113();if(compensation113)setTimeout(()=>toast('Progressão de habilidades: agora você ganha 1 ponto por nível. +'+compensation113+' pontos retroativos adicionados.',7000),2000);
-  if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p||{}).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),repRank97:Math.min(9,rankOf()),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
+  if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p||{}).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),repRank97:Math.min(9,rankOf()),p:{run:0,atk:0,dodge:0,kill:0},done:false};if(window.WorldSim479){const S=WorldSim479.getSimState();if(S&&S.lastSimDay&&S.lastSimDay<todayKey()){WorldSim479.simulate(Math.min(30,todayKey()-S.lastSimDay));}if(S)S.lastSimDay=todayKey();}}
   questBudget262(run.daily,'daily');run.daily.p=run.daily.p||{};for(const [k,,n] of DAILY)run.daily.p[k]=clamp(Number(run.daily.p[k])||0,0,n);if(typeof run.trackObj!=='string')run.trackObj=null;
   run.shadows=(run.shadows||[]).map(s=>typeof s==='string'?{n:s,lvl:1,xp:0,nick:null,on:true}:s.n?s:{n:s.n,lvl:1,xp:0,on:true});
 }
@@ -7720,9 +7727,15 @@ function defenseView(){view=defenseView;const c=nearestCity(player.x,player.z).c
   h+='<div class="sec">PREPARAÇÃO</div>'+row('Torres',cityL(c)>=5?'Ativas · alcance '+defenseRange(c)+'m':'Liberadas no nível 5 da vila','')+row('Próximo passo',cityL(c)<2?'Evolua a vila até o nível 2 para organizar a defesa.':'Reúna núcleos nas Fendas e invista antes de uma invasão.',btn('Evolução da vila','gtab','city'))+affRow('Brann');openModal('DEFESA DA VILA',h)}
 
 function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l),tot=run.res.cry.reduce((a,b)=>a+b,0),inc=cityIncomeAvailable266(l),got=((profile.cityDay||{})[c.id])===todayKey();
-  return regionSummary116(c)+'<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
+  let h=regionSummary116(c);
+  if(window.WorldSim479){
+    h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');
+  }
+  h+='<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(l>=6?row('Renda da cidade',fmt(inc)+' ouro disponível hoje · limite total de 800 por dia',btn(got?'Coletado hoje':inc?'Coletar':'Limite diário atingido','cityinc',0,!got&&inc>0,'hot')):'')
-   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
+   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''));
+  return h;
+}
 
 /* ===== TRABALHOS (estilo "jobs"): troque de classe na cidade; cada trabalho tem seus próprios atributos. Vagas = 1 + rank. ===== */
 function jobSlots(){return CLASSES.filter(c=>!c.legacy&&!c.rare).length}
@@ -8178,7 +8191,7 @@ function regionSummary116(c){const r=regionState116(c),d=regionDiscount116(r);re
 function regionCost116(){return {gold:servicePrice265('regionalAid'),cry:8}}
 function regionAid116(){if(L.mode!=='world'||player.dead||!inCity(player.x,player.z)||L.inv||L.siege)return false;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116();if(cityFallen(c)||r.damage<=0||run.gold<k.gold||run.res.cry.reduce((a,b)=>a+b,0)<k.cry)return false;if(!spendService265(k.gold))return false;let need=k.cry;for(let i=0;i<run.res.cry.length&&need;i++){const n=Math.min(need,run.res.cry[i]);run.res.cry[i]-=n;need-=n}regionEvent116(c,3,-5,'Você entregou materiais para a recuperação. Confiança +3; acréscimo de abastecimento reduzido em até 5 pontos.');saveRun();return true}
 function regionSupply116(){if(L.mode!=='world'||player.dead||!inCity(player.x,player.z)||L.inv||L.siege)return false;const c=nearestCity(player.x,player.z).c,r=regionState116(c);if(cityFallen(c)||r.trust<50||r.damage||r.supplyDay===todayKey())return false;r.supplyDay=todayKey();run.pots=(run.pots||0)+2;store.set('pds2_profile',profile);saveRun();toast('<b>['+safeText(c.name)+']</b> A guarnição entregou duas poções.');return true}
-function regionView116(){if(L.mode!=='world'){toast('Consulte as regiões ao voltar ao mundo.');return}view=regionView116;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116(),local=inCity(player.x,player.z)&&!cityFallen(c)&&!L.inv&&!L.siege;let h='<div class="guide93"><strong>'+safeText(c.name)+'</strong><p>'+regionStanding116(r)+' · confiança '+r.trust+'/100.</p><p>A confiança vale só nesta cidade.</p></div>';h+=row('Comércio local','Desconto por confiança: '+regionDiscount116(r)+'%.<br>Acréscimo por abastecimento: '+r.damage+'%. Válidos para armas, armaduras e poções comuns.','');h+=row('Apoio da guarnição','Duas poções por dia nesta cidade. Requer 50 de confiança e abastecimento recuperado.',btn(r.supplyDay===todayKey()?'Recebido hoje':'Receber suprimentos','supply116',0,local&&r.trust>=50&&!r.damage&&r.supplyDay!==todayKey()));if(r.damage)h+=row('Ajudar na recuperação',fmt(k.gold)+' ouro e '+k.cry+' cristais de qualquer rank. Reduz o acréscimo em 5 pontos e concede 3 de confiança.',btn('Entregar materiais','aid116',0,local&&run.gold>=k.gold&&run.res.cry.reduce((a,b)=>a+b,0)>=k.cry));if(window.Civic343)h+=Civic343.regionRows(c,local);h+='<div class="sec">MEMÓRIA DA REGIÃO</div>';h+=r.history.length?r.history.slice().reverse().map(x=>row(safeText(x),'','')).join(''):'<div class="sysline">Sua história por aqui ainda está começando.</div>';h+='<div class="sysline" data-tip154="'+tipAttr154('Portais +2 · Defesa ou cerco +15 · Carroças e evolução +5 · Reconstrução +20. Descontos: 5%/10%/15% aos 25/50/75 de confiança.')+'" style="cursor:help">Como ganhar confiança ⓘ</div>';openModal('REGIÃO',h)}
+function regionView116(){if(L.mode!=='world'){toast('Consulte as regiões ao voltar ao mundo.');return}view=regionView116;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116(),local=inCity(player.x,player.z)&&!cityFallen(c)&&!L.inv&&!L.siege;let h='<div class="guide93"><strong>'+safeText(c.name)+'</strong><p>'+regionStanding116(r)+' · confiança '+r.trust+'/100.</p><p>A confiança vale só nesta cidade.</p></div>';if(window.WorldSim479)h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');h+=row('Comércio local','Desconto por confiança: '+regionDiscount116(r)+'%.<br>Acréscimo por abastecimento: '+r.damage+'%. Válidos para armas, armaduras e poções comuns.','');h+=row('Apoio da guarnição','Duas poções por dia nesta cidade. Requer 50 de confiança e abastecimento recuperado.',btn(r.supplyDay===todayKey()?'Recebido hoje':'Receber suprimentos','supply116',0,local&&r.trust>=50&&!r.damage&&r.supplyDay!==todayKey()));if(r.damage)h+=row('Ajudar na recuperação',fmt(k.gold)+' ouro e '+k.cry+' cristais de qualquer rank. Reduz o acréscimo em 5 pontos e concede 3 de confiança.',btn('Entregar materiais','aid116',0,local&&run.gold>=k.gold&&run.res.cry.reduce((a,b)=>a+b,0)>=k.cry));if(window.Civic343)h+=Civic343.regionRows(c,local);h+='<div class="sec">MEMÓRIA DA REGIÃO</div>';h+=r.history.length?r.history.slice().reverse().map(x=>row(safeText(x),'','')).join(''):'<div class="sysline">Sua história por aqui ainda está começando.</div>';h+='<div class="sysline" data-tip154="'+tipAttr154('Portais +2 · Defesa ou cerco +15 · Carroças e evolução +5 · Reconstrução +20. Descontos: 5%/10%/15% aos 25/50/75 de confiança.')+'" style="cursor:help">Como ganhar confiança ⓘ</div>';openModal('REGIÃO',h)}
 function regionInvasion116(I,won){if(I.regionalDone116)return;I.regionalDone116=true;if(won)regionEvent116(I.c,I.helped116?15:0,-20,I.helped116?'Você participou da defesa vitoriosa. Confiança +15; abastecimento recuperado.':'Os defensores venceram a invasão. O abastecimento foi recuperado.');else regionEvent116(I.c,0,20,'A invasão prejudicou o abastecimento. Os preços locais têm acréscimo de até 20% durante a recuperação. Sua confiança não diminuiu.');}
 
 // END REGIONS116
@@ -9455,3 +9468,4 @@ requestAnimationFrame(frame);
 <script src="tools/attrs462.js?v=469"></script>
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=470"></script>
+<script src="tools/worldsim479.js?v=479"></script>

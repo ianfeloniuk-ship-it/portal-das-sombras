@@ -110,7 +110,13 @@ function defenseView(){view=defenseView;const c=nearestCity(player.x,player.z).c
   h+='<div class="sec">PREPARAÇÃO</div>'+row('Torres',cityL(c)>=5?'Ativas · alcance '+defenseRange(c)+'m':'Liberadas no nível 5 da vila','')+row('Próximo passo',cityL(c)<2?'Evolua a vila até o nível 2 para organizar a defesa.':'Reúna núcleos nas Fendas e invista antes de uma invasão.',btn('Evolução da vila','gtab','city'))+affRow('Brann');openModal('DEFESA DA VILA',h)}
 
 function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNeed(l),tot=run.res.cry.reduce((a,b)=>a+b,0),inc=cityIncomeAvailable266(l),got=((profile.cityDay||{})[c.id])===todayKey();
-  return regionSummary116(c)+'<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
+  let h=regionSummary116(c);
+  if(window.WorldSim479){
+    h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');
+  }
+  h+='<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(l>=6?row('Renda da cidade',fmt(inc)+' ouro disponível hoje · limite total de 800 por dia',btn(got?'Coletado hoje':inc?'Coletar':'Limite diário atingido','cityinc',0,!got&&inc>0,'hot')):'')
-   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''))}
+   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''));
+  return h;
+}
 
