@@ -17,7 +17,7 @@
   const START = {
     warrior: { for: 4, vit: 3, res: 2 }, berserker: { for: 4, vit: 3, res: 2 }, lancer: { for: 4, vit: 3, res: 2 }, monk: { for: 4, agi: 3, vit: 2 }, 'rare-sword': { for: 4, vit: 3, res: 2 },
     tank: { res: 4, vit: 3, for: 2 }, guardian: { res: 3, vit: 3, int: 3 }, paladin: { vit: 3, res: 3, int: 3 },
-    assassin: { agi: 4, per: 3, for: 2 }, archer: { des: 4, agi: 3, per: 2 }, shapeshifter: { for: 3, agi: 3, vit: 3 },
+    assassin: { des: 3, for: 3, agi: 3 } /* v467: adaga arremessada usa Destreza; habilidades de perto usam Força */, archer: { des: 4, agi: 3, per: 2 }, shapeshifter: { for: 3, agi: 3, vit: 3 },
     spellblade: { int: 4, for: 3, agi: 2 }, summoner: { int: 4, esp: 3, vit: 2 }, necromancer: { int: 4, esp: 3, vit: 2 }
   };
   function startPts(ci) { const g = growth(ci); if (!g) return null; return START[g.id] || (g.magic.perLevel > g.physical.perLevel ? { int: 4, esp: 3, von: 2 } : { for: 4, vit: 3, res: 2 }); }

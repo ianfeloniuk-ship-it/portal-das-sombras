@@ -91,9 +91,13 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   line=(n,v,d)=>'<div'+(d?' data-tip154="'+tipAttr154(d)+'" style="cursor:help;':' style="')+'display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,179,71,.12)"><span>'+n+'</span><b style="white-space:nowrap">'+v+'</b></div>',
   pct=v=>(Math.round(v*10)/10).toString().replace('.',',')+'%',clsName=className(),Lv=run.level,k=atkPer(Lv),growth=RpgBalance.growthFor(profile.classless?'none':profile.cls),base=classBaseStats();
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div style="font-size:13px">';
-  h+=line('Ataque físico',fmt(atkOf('phy')),'Aumenta o dano dos golpes físicos.');
+  /* v467 (Ian): o ataque à distância (Destreza) aparece separado do corpo a corpo (Força) e o dano por golpe segue a arma equipada */
+  const wk467=weaponKind272(run.equip.w)||'',far467=rangedPhysBasic281(),mag467=!far467&&!/^(sword|axe|mace|spear|hammer)$/.test(wk467)&&(/^(staff|bonestaff|wand|tome|orb)$/.test(wk467)||basicIsMagic()),hit467=player.dmg*basicDmgMul();
+  h+=line('Ataque corpo a corpo (Força)',fmt(atkOf('phy')),'Golpes físicos de perto: espada, machado, maça, lança, martelo e punhos. Sobe com Força.');
+  h+=line('Ataque à distância (Destreza)',fmt(atkRanged281()),'Arco, adaga arremessada e arma de fogo, em qualquer classe (um Guerreiro de arco usa este valor, não a Força), e as habilidades de classes que atiram. Sobe com Destreza.');
+  h+=line('Penetração (Destreza)',fmt(pPenVal296()),'Ignora essa quantidade da defesa do alvo antes do desconto.');
   h+=line('Ataque mágico',fmt(atkOf('mag')),'Aumenta o dano das magias.');
-  h+=line('Dano por golpe ('+(m?'mágico':'físico')+')',fmt(player.dmg),'Dano do ataque básico antes da defesa do inimigo e dos críticos.');
+  h+=line('Dano por golpe ('+(mag467?'mágico':far467?'à distância':'corpo a corpo')+')',fmt(hit467),'Dano do ataque básico com a arma equipada, antes da defesa do inimigo e dos críticos.');
   h+=line('Vida',fmt(player.maxhp),'Quanto dano você suporta antes de morrer.');
   h+=line('Mana',fmt(player.maxmp),'Recurso gasto para lançar magias.');
   h+=line('Escudo',fmt(player.maxsh),'Absorve dano antes da vida. Recupera após 4s sem dano.');h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','Porcentagem de dano bloqueada.');

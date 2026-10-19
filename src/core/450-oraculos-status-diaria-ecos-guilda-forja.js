@@ -179,8 +179,8 @@ function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
 function statDesc(){return {
- for:['Dano corpo a corpo e Fúria.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque corpo a corpo. A cada 20 pontos: +1 de Fúria por golpe.'],
- des:['Dano à distância e penetração.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque à distância e +'+preciseNumber(atkPer(run.level)*.5)+' de penetração.'],
+ for:['Dano corpo a corpo e Fúria (não conta para arco e arremesso).','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque corpo a corpo. A cada 20 pontos: +1 de Fúria por golpe.'],
+ des:['Dano à distância (arco, adaga arremessada, arma de fogo) e penetração.','Vale para qualquer classe que atire: um Guerreiro de arco usa Destreza, não Força. Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque à distância e +'+preciseNumber(atkPer(run.level)*.5)+' de penetração.'],
  agi:['Velocidade de ataque, movimento e esquiva.','Cada ponto ganho no treino: +0,4% de velocidade de ataque e +0,5% de movimento. Reduz a recarga da esquiva.'],
  per:['Chance e dano crítico.','Cada ponto ganho no treino: +0,25% de chance e +0,5% de dano crítico.'],
  int:['Mana e dano mágico.','Cada ponto ganho no treino: +'+mpPer(run.level)+' de mana e +'+atkPer(run.level)+' de ataque mágico.'],
