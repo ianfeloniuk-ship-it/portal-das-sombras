@@ -1,0 +1,3 @@
+Sequencias de efeitos (fogo, explosao, fumaca) da Unity Labs, licenca CC0 1.0 (dominio publico).
+Fonte: https://unity.com/blog/engine-platform/free-vfx-image-sequences-flipbooks
+Baixadas em 19/10/2026 a pedido de Ian; convertidas para WebP.

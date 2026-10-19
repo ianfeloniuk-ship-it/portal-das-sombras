@@ -1,3 +1,9 @@
+## v471 — Efeitos realistas de fogo, explosão, chamas e fumaça, 19/10/2026
+- Pedido de Ian: "algo mais real, mais fluido, mais visceral" nas habilidades e ataques; combinação aprovada: pacotes prontos + Blender. Ian autorizou baixar os pacotes da Unity Labs (CC0).
+- `fx/unity470/` (novo): 5 folhas WebP da Unity Labs, licença CC0 (`LICENCA-CC0.txt`): bola de fogo 8x8, explosão 5x5, chama 16x4, fumaça 8x8, poeira 16x4.
+- `tools/flip470.js` (novo, ?v=471, depois da juice468; envolve `hurtEnemy` e `killEnemy`): acerto de fogo (projétil de fogo/meteoro, queimadura, arma ou classe de fogo) → bola de fogo real (crítico/3º golpe/habilidade → explosão); golpe forte sem fogo → poeira no chão; monstro queimando → chama real acompanhando o corpo enquanto durar; morte → fumaça subindo (morte queimando → explosão + fumaça). Sprites virados para a câmera, uma textura por tipo, limite 60 (24 no modo leve). Só visual: dano e regras não mudam; vale para todas as classes e armas.
+- Teste (navegador): chamas e fumaça aparecem e somem; acerto de fogo e morte geram os efeitos sem erro. Não gravei vídeo dentro do jogo.
+
 ## v470 — Autonomia de Sobrevivência: Alquimia, Frascos Arremessáveis, Forja Rústica e Peixe Frito na Fogueira, 19/10/2026
 - Pedido de Ian (Etapa 2):
   1. Alquimia botânica: matinhos, flores, raízes e fungos variados pelos biomas e Fendas (cura, sangue, veneno, ácido, fogo, gelo, vigor, luminescência); Caldeirão / Bancada de Alquimia no acampamento; poções de beber (cura imediata, regeneração contínua, vida máx, resistência térmica/elemental e vigor); frascos arremessáveis em área com balística 3D (veneno/lentidão, ácido redutor de armadura, fogo líquido, cortina de fumaça e choque paralisante).
