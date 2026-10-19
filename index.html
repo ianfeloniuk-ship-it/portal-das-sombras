@@ -6726,10 +6726,10 @@ function drawOverlay(){
   oc.clearRect(0,0,W,H);if(!started)return;oc.textAlign='center';
   const P=player;
   for(const e of enemies){if(e.dead||e.sleep||e.invuln)continue;const states=combatStatusList(e);if(Math.hypot(e.x-P.x,e.z-P.z)>24)continue;if(!e.isBoss&&!e.aggro&&e.hp>=e.maxhp&&!e.rival&&!e.elite&&!states.length)continue;const p=proj(e.x,2.1*(e.m.sc||1)+.1,e.z);if(!p.ok)continue;
-    if(!e.isBoss){bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0');
+    if(!e.isBoss){bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0',e);
     {const lv=eLvl(e),th=threat(lv);oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.85)';const t='Nv '+lv+(th?' ☠':'');const tx=p.x-(e.rival?23:17)-4;oc.textAlign='right';oc.strokeText(t,tx,p.y+4);oc.fillStyle=th||'#c9d3de';oc.fillText(t,tx,p.y+4);oc.textAlign='center'}}if(states.length)drawCombatChips(states,p.x,p.y-14)}
-  for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',healingShield(a)>0?(a.name||a.short||'Aliado')+' · escudo '+fmt(Math.ceil(healingShield(a))):(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff')}
-  if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a');oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2);drawCombatChips(playerStatusList(P),p.x,p.y+16)}}
+  for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',healingShield(a)>0?(a.name||a.short||'Aliado')+' · escudo '+fmt(Math.ceil(healingShield(a))):(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff',a)}
+  if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a',null,null,P);oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2);drawCombatChips(playerStatusList(P),p.x,p.y+16)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
   for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;/* v459 (Ian, reel "spell juicy" passo 8): número pequeno que nasce grande e "soca" de volta; crítico maior */const s=Math.round((f.big?22:15)*(f.t<.12?1+(f.big?.75:.4)*(1-f.t/.12):1));oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
   if(FX2.combo>=3){const k=Math.min(1,FX2.comboT/2.2);oc.globalAlpha=.4+.6*k;oc.font='700 '+(26+Math.min(20,FX2.combo))+'px "Russo One",sans-serif';oc.textAlign='right';oc.lineWidth=4;oc.strokeStyle='rgba(0,0,0,.8)';const t='x'+FX2.combo+' COMBO';oc.strokeText(t,W-24,H*.42);oc.fillStyle=FX2.combo>=30?'#ff5a8a':FX2.combo>=15?'#ffd54f':'#7fd8ff';oc.fillText(t,W-24,H*.42);oc.textAlign='center';oc.globalAlpha=1}
@@ -6738,7 +6738,7 @@ function drawOverlay(){
     if(best){const pr=proj(best.x,.05,best.z),pt=proj(best.x,2.3*(best.m.sc||1)+.35,best.z);if(pr.ok){oc.strokeStyle='rgba(255,90,110,.9)';oc.lineWidth=2.5;oc.beginPath();oc.ellipse(pr.x,pr.y,22*(best.r||.5)*2,9*(best.r||.5)*2,0,0,TAU);oc.stroke()}
       /* Uma barra só; elites e rivais já têm o nome, então a mira acrescenta apenas a vida. */
       const hasBar=!best.isBoss&&!best.sleep&&!best.invuln&&Math.hypot(best.x-P.x,best.z-P.z)<=24&&(best.aggro||best.hp<best.maxhp||best.rival||best.elite);
-      if(!best.isBoss){const pb=proj(best.x,2.1*(best.m.sc||1)+.1,best.z);if(pb.ok){if(!hasBar)bar(pb.x,pb.y,34,best.hp/best.maxhp,'#ff4d6a');oc.font='700 11px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';const t=((best.rival||best.elite)&&hasBar?'':best.name+' · ')+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp);const ty=pb.y-((best.rival||best.elite)&&hasBar?16:6);oc.strokeText(t,pb.x,ty);oc.fillStyle='#ffe0e6';oc.fillText(t,pb.x,ty)}}}}}
+      if(!best.isBoss){const pb=proj(best.x,2.1*(best.m.sc||1)+.1,best.z);if(pb.ok){if(!hasBar)bar(pb.x,pb.y,34,best.hp/best.maxhp,'#ff4d6a',null,null,best);oc.font='700 11px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';const t=((best.rival||best.elite)&&hasBar?'':best.name+' · ')+fmt(Math.max(0,best.hp))+'/'+fmt(best.maxhp);const ty=pb.y-((best.rival||best.elite)&&hasBar?16:6);oc.strokeText(t,pb.x,ty);oc.fillStyle='#ffe0e6';oc.fillText(t,pb.x,ty)}}}}}
   const c=ctxTarget();if(c&&!c.label)c.label='F · '+(c.kind==='hunter'||c.kind==='citizen'?'FALAR COM '+String(c.short||c.name||'').replace(/\s*\[.*$/,'').toUpperCase():'INTERAGIR');$('bF').hidden=!c||paused;if(c)$('bF').textContent=touch?c.label.replace('F · ',''):c.label.replace(/^F · /,keyLabel(keyOf('use'))+' · ');
 }
 const mmc=$('mm').getContext('2d');
@@ -9371,12 +9371,13 @@ requestAnimationFrame(frame);
 <script src="tools/grass446.js?v=446"></script>
 <script src="tools/deep447.js?v=447"></script>
 <script src="tools/impact459.js?v=459"></script>
+<script src="tools/juice468.js?v=468"></script>
 <script src="tools/attrs462.js?v=465"></script>
 <script src="tools/classgrowth465.js?v=467"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v467</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v468</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=467;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=468;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
