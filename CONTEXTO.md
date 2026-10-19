@@ -1,3 +1,8 @@
+## v474 — Escudo erguido à frente ao defender, 19/10/2026
+- Pedido de Ian: "faz a animação com o escudo erguido à frente".
+- `tools/shield473.js` (?v=474): por cima do clipe "guarda", logo antes de desenhar, o braço esquerdo é mirado em espaço do mundo (cotovelo à frente/esquerda do peito, mão à frente do peito) e o escudo vira com a face para onde o personagem olha; entra e sai em ~0,1 s e devolve a rotação original do escudo. Só com escudo ativo (arma de uma mão).
+- Teste (navegador): espada + escudo, segurando o botão direito → escudo na frente do peito, face para a frente (print). Sem erro no console.
+
 ## v473 — Slot de Escudo, escudo na mão esquerda e pose de defesa, 19/10/2026
 - Pedido de Ian: "faz o slot de escudo com modelo na mão e animação de defesa".
 - `tools/shield473.js` (novo, ?v=473): slot "Escudo" (`sh`) entra em `EQUIP_SLOTS`/`EQUIP_LABEL` → aparece na ficha (linha de baixo), em baús, loja e forja como as outras peças; vale meia armadura (`equipFactor` 0,5). Só conta com arma de uma mão (espada, machado, maça sacra, pistola) ou sem arma; com duas mãos/adagas a ficha avisa "Escudo guardado". Segurando o botão direito, o Viajante faz o clipe "guarda".
