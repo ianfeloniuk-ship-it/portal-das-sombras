@@ -20,6 +20,6 @@ function specialSetup3(kind,S,arg){
 function updSpecial3(S,dt){const alive=enemies.filter(e=>!e.dead).length;
   if(S.kind==='clone'){S.msg='Derrote seu clone';if(S.t>2&&alive===0&&!S.cleared){S.cleared=true;profile.cloneDay=todayKey();store.set('pds2_profile',profile);giveBoon184(30);winSpecial('Você venceu a si mesmo. Bênção da Fenda por 30 min.',false)}}
   else if(S.kind==='dream'){const left=45-S.t;S.msg='Masmorra do sonho · acorde em '+fmtT(left);S.sp-=dt;if(S.sp<=0&&left>0){S.sp=4;for(let i=0;i<3;i++){const a=rnd(0,TAU);let x=Math.cos(a)*15,z=Math.sin(a)*15;if(!freeAt(x,z,.6)){x=0;z=0}const e=spawnKind(pick(S.kinds),x,z,S.gr,{});e.aggro=true;e.m.mats.forEach(m=>{m.emissive.setHex(0x330055);m.userData.e0=0x330055})}}
-    if(left<=0&&!S.cleared){S.cleared=true;for(const e of enemies)if(!e.dead){e.dead=true;e.gone=true;scene.remove(e.m.root)}run.pts+=1;unlockLore('dream');winSpecial('Você acordou. Enfrentar o medo rendeu +1 ponto de status.',true)}}
+    if(left<=0&&!S.cleared){S.cleared=true;for(const e of enemies)if(!e.dead){e.dead=true;e.gone=true;scene.remove(e.m.root)}if(window.Growth465)Growth465.gift('von',1,'');unlockLore('dream');winSpecial('Você acordou. Enfrentar o medo treinou sua Vontade: +1 de Vontade.',true)}}
   else if(S.kind==='past'){S.msg=bossE&&!bossE.dead?'Antes dos portais · '+bossE.name:'Antes dos portais'}
 }

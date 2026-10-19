@@ -73,7 +73,7 @@
   function train(k, n = 1) {
     if (!ready() || !KEYS.includes(k) || player.dead || !(n > 0)) return;
     const t = T();
-    t.c[k] += n;
+    t.c[k] += n * (1 + .1 * ((typeof profile !== 'undefined' && profile && profile.rebirths) || 0)); /* v465: cada reencarnação deixa o treino 10% mais rápido */
     let up = false;
     while (t.c[k] >= goal(t.l[k])) {
       t.c[k] -= goal(t.l[k]); t.l[k]++;
@@ -192,7 +192,7 @@
     statDesc = function () {
       const d = sd0.apply(this, arguments);
       try {
-        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], d[k][1] + ' Sobrevivência e exploração: ' + survText(k) + ' Treino: sobe com ' + TRAIN_TXT[k] + '. Marcos a cada 25 pontos: ' + (tier(k) ? 'patamar ' + tier(k) + ', cada ponto rende ×' + num(tierMul(k)) + ' nesses bônus.' : 'no 25º ponto cada ponto passa a render ×1,2 nesses bônus.')];
+        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], 'Como sobe: treinando com ' + TRAIN_TXT[k] + ' (não existe ponto para distribuir). ' + d[k][1] + ' Sobrevivência e exploração: ' + survText(k) + ' Marcos a cada 25 pontos: ' + (tier(k) ? 'patamar ' + tier(k) + ', cada ponto rende ×' + num(tierMul(k)) + ' nesses bônus.' : 'no 25º ponto cada ponto passa a render ×1,2 nesses bônus.')];
       } catch (_) {}
       return d;
     };
@@ -216,7 +216,7 @@
   function trainLine(k) {
     const t = T(), c = t.c[k], g = goal(t.l[k]), p = pts(k), next = 25 * (tier(k) + 1);
     return '<span class="a462-train"><span class="a462-tb"><i style="width:' + Math.min(100, c / g * 100).toFixed(0) + '%"></i></span>Treino ' + Math.floor(c) + '/' + g +
-      ' · Marco ' + next + (tier(k) ? ' · patamar ' + tier(k) + ' (×' + num(tierMul(k)) + ')' : '') + ' · Total ' + p + (t.g[k] ? ' (' + (p - Math.min(p, t.g[k])) + ' distribuídos + ' + Math.min(p, t.g[k]) + ' de treino)' : '') + '</span>';
+      ' · Marco ' + next + (tier(k) ? ' · patamar ' + tier(k) + ' (×' + num(tierMul(k)) + ')' : '') + ' · Total ' + p + (t.g[k] && p > t.g[k] ? ' (' + (p - t.g[k]) + ' de antes + ' + t.g[k] + ' de treino)' : '') + '</span>';
   }
   function decorateStatus() {
     const mb = document.getElementById('mb'); if (!mb || !run) return;
@@ -225,7 +225,7 @@
       if (anchor) anchor.insertAdjacentHTML('afterend', meters());
     }
     for (const k of KEYS) {
-      const b = mb.querySelector('button[data-a="stat"][data-v="' + k + '"]');
+      const b = mb.querySelector('[data-stat465="' + k + '"]') || mb.querySelector('button[data-a="stat"][data-v="' + k + '"]');
       const row = b && b.closest('.it'), small = row && row.querySelector('.d small');
       if (small && !row.querySelector('.a462-train')) small.insertAdjacentHTML('afterend', trainLine(k));
     }

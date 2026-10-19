@@ -1,7 +1,7 @@
 /* ===== v281 (Ian): 9 atributos — Grimório de Atributos e Bestiário (Entregas/Grimorio-Atributos-2026-10-06).
    Um efeito, um atributo. Defesa física (Resistência), mágica (Espírito) e universal (Vontade) separadas.
    Fórmula com retorno decrescente: pts ÷ (pts + K + nível), com teto — funciona para nível infinito. ===== */
-const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=9;
+const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=0;/* v465 (Ian): sem pontos iniciais — atributos sobem só treinando */
 /* v283 (Ian): nada tem teto. A fórmula sozinha nunca chega a 100%; o resto (pontos) cresce sem limite. */
 function attrRed281(pts,L,k){pts=Math.max(0,+pts||0);return pts>0?pts/(pts+k+Math.max(1,L)):0}
 function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
@@ -277,7 +277,7 @@ function xpAwardAmount262(x,source){if(!Number.isFinite(x)||x<=0)return 0;const 
 function gainXp(x,source){
   if(profile.classless)return 0; // O primeiro nível só desperta no escambo de Kael.
   const awarded=xpAwardAmount262(x,source);if(!awarded)return 0;run.xp+=awarded;let need=xpNeed();const r0=rankOf(),level0=run.level;
-  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);try{passiveUnlockCheck286()}catch(_){}/* v165 (Irror): continua ganhando ponto de constelação com tudo cheio; o botão converte em status quantas vezes quiser. */if(run.level>=35)run.cpts=(run.cpts||0)+1;run.pts=(run.pts||0)+1+(run.level%5===0?(profile.rebirths||0):0);run.spts=(run.spts||0)+1;need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[NARRADOR]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Ordem (Lyra).',5000),1500)}logNews('Nível '+run.level+' · +1 ponto de status e +1 de habilidade.');refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;}
+  while(run.xp>=need){run.xp-=need;run.level++;storyLevel(run.level);unlockCheck(run.level);try{passiveUnlockCheck286()}catch(_){}/* v165 (Irror): continua ganhando ponto de constelação com tudo cheio; o botão converte em status quantas vezes quiser. */if(run.level>=35)run.cpts=(run.cpts||0)+1;run.spts=(run.spts||0)+1;/* v465 (Ian): nível não dá mais ponto de atributo (vem do treino); a classe cresce sozinha (RpgBalance) */need=xpNeed();if(rankOf()>(run.official??profile.rank)&&run.reavalHint!==rankOf()){run.reavalHint=rankOf();setTimeout(()=>toast('<b>[NARRADOR]</b> Sua mana cresceu. <b>Reavaliação</b> disponível na Ordem (Lyra).',5000),1500)}logNews('Nível '+run.level+' · +1 ponto de habilidade e o crescimento da classe (vida, mana e ataque).');refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;}
   if(run.level>level0)sfx('levelup357');
   {const nx=profile.rank+1;if(profile.rk2&&rankTrialReady(nx)&&run.rkNote!==nx){run.rkNote=nx;setTimeout(()=>toast('<b>[ORDEM]</b> Você pode fazer a <b>Prova para o rank '+RANKS[nx].id+'</b>. Fale com a Lyra (aba Prova de Rank).',6000),1200)}}
   if(run.level>=JOB_LVL&&!run.adv&&!run.jobNote){run.jobNote=true;setTimeout(()=>toast('<b>[NARRADOR]</b> Missão de troca de classe disponível. Fale com a Ordem em qualquer cidade.',5000),800)}

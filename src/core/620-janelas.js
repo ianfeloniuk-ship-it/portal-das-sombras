@@ -71,7 +71,7 @@ function guildView(tab){
     h+='<div class="sysline">Lyra: A Ordem só reconhece oficialmente o rank depois da <b>Reavaliação</b>. O cristal mede sua mana e o resultado vai para o registro nacional.</div>'+
       row('Rank oficial','Registrado na Ordem','<b class="rl" style="color:'+RANKS[off].c+'">'+RANKS[off].id+'</b>')+
       row('Mana medida agora','Seu poder atual','<b class="rl" style="color:'+RANKS[cur].c+'">'+RANKS[cur].id+'</b>')+
-      row('Recompensa','Bônus da Ordem por subir de rank: '+fmt(2000*(cur+1))+' ouro e 2 pontos de status','')+
+      row('Recompensa','Bônus da Ordem por subir de rank: '+fmt(2000*(cur+1))+' ouro e +1 de Espírito (conta como treino)','')+
       '<div style="display:flex;justify-content:flex-end">'+(ok?btn('FAZER REAVALIAÇÃO','reaval',0,true,'hot'):'<span class="sysline">Seu rank oficial já está atualizado.</span>')+'</div>'}
   else if(tab==='clone')h+=cloneTab();else if(tab==='god')h+=godTab();
   else if(tab==='tower')h+=towerTab()+towerRankRows202();else if(tab==='season')h+=seasonTab();else if(tab==='domain')h+=domainTab();else if(tab==='city')h+=cityTab();else if(tab==='story')h+=storyTab();else if(tab==='prova')h+=rankTab();else if(tab==='jobs')h+=jobsTab();

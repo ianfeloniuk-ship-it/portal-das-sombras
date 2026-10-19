@@ -51,7 +51,7 @@ function ensureRun(){migratePointPassives253();normalizeStoryProgress262();run.l
   if(!run.v2){run.v2=1;run.v2fix=1;const lv=run.level||1;run.stats={for:0,agi:0,per:0,int:0,vit:0};run.pts=2*(lv-1)+Math.floor(lv/5)*(profile.rebirths||0)+5*(profile.rebirths||0);
     for(const it of[run.equip&&run.equip.w,run.equip&&run.equip.a,...(run.items||[])])v2Item(it);AFFC=null;
     if(lv>1)setTimeout(()=>showSys('Atualização do jogo: seus atributos foram devolvidos: <b>'+run.pts+' pontos</b> para distribuir de novo (agora 1 por nível). Seus equipamentos foram ajustados ao novo sistema. Abra Status para distribuir.'),4500)}
-  run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};for(const k of ATTR_NEW281)run.stats[k]=run.stats[k]||0;if(!run.attr281){run.attr281=1;if(!profile.creationPending91)run.pts=(run.pts||0)+(run.level||1)}run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;const compensation113=migrateSkillPoints113();if(compensation113)setTimeout(()=>toast('Progressão de habilidades: agora você ganha 1 ponto por nível. +'+compensation113+' pontos retroativos adicionados.',7000),2000);
+  run.stats=run.stats||{for:0,agi:0,per:0,int:0,vit:0};for(const k of ATTR_NEW281)run.stats[k]=run.stats[k]||0;if(!run.attr281){run.attr281=1}run.pts=run.pts||0;run.skl=run.skl||{};run.spts=run.spts||0;const compensation113=migrateSkillPoints113();if(compensation113)setTimeout(()=>toast('Progressão de habilidades: agora você ganha 1 ponto por nível. +'+compensation113+' pontos retroativos adicionados.',7000),2000);
   if(!run.daily||run.daily.day!==todayKey()){if(run.daily&&!run.daily.done&&Object.values(run.daily.p||{}).some(v=>v>0))run.penalty=true;run.daily={day:todayKey(),repRank97:Math.min(9,rankOf()),p:{run:0,atk:0,dodge:0,kill:0},done:false}}
   questBudget262(run.daily,'daily');run.daily.p=run.daily.p||{};for(const [k,,n] of DAILY)run.daily.p[k]=clamp(Number(run.daily.p[k])||0,0,n);if(typeof run.trackObj!=='string')run.trackObj=null;
   run.shadows=(run.shadows||[]).map(s=>typeof s==='string'?{n:s,lvl:1,xp:0,nick:null,on:true}:s.n?s:{n:s.n,lvl:1,xp:0,on:true});
@@ -179,15 +179,15 @@ function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
 function statDesc(){return {
- for:['Dano corpo a corpo e Fúria.','Por ponto: +'+atkPer(run.level)+' de ataque. A cada 20 pontos: +1 de Fúria por golpe.'],
- des:['Dano à distância e penetração.','Por ponto: +'+atkPer(run.level)+' de ataque à distância e +'+preciseNumber(atkPer(run.level)*.5)+' de penetração.'],
- agi:['Velocidade de ataque, movimento e esquiva.','Por ponto: +0,4% de velocidade de ataque e +0,5% de movimento. Reduz a recarga da esquiva.'],
- per:['Chance e dano crítico.','Por ponto: +0,25% de chance e +0,5% de dano crítico.'],
- int:['Mana e dano mágico.','Por ponto: +'+mpPer(run.level)+' de mana e +'+atkPer(run.level)+' de ataque mágico.'],
- vit:['Vida e Estamina.','Por ponto: +'+hpPer(run.level)+' de vida e +0,5 de Estamina.'],
- res:['Defesa física e Fúria máxima.','Por ponto: +'+atkPer(run.level)+' de defesa física e +0,5 de Fúria máxima.'],
- esp:['Defesa mágica e regeneração de mana.','Por ponto: +'+atkPer(run.level)+' de defesa mágica. Recupera mana mais rápido.'],
- von:['Defesa geral e resistência a efeitos.','Reduz o dano de todos os golpes e a duração dos efeitos negativos.']
+ for:['Dano corpo a corpo e Fúria.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque corpo a corpo. A cada 20 pontos: +1 de Fúria por golpe.'],
+ des:['Dano à distância e penetração.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque à distância e +'+preciseNumber(atkPer(run.level)*.5)+' de penetração.'],
+ agi:['Velocidade de ataque, movimento e esquiva.','Cada ponto ganho no treino: +0,4% de velocidade de ataque e +0,5% de movimento. Reduz a recarga da esquiva.'],
+ per:['Chance e dano crítico.','Cada ponto ganho no treino: +0,25% de chance e +0,5% de dano crítico.'],
+ int:['Mana e dano mágico.','Cada ponto ganho no treino: +'+mpPer(run.level)+' de mana e +'+atkPer(run.level)+' de ataque mágico.'],
+ vit:['Vida e Estamina.','Cada ponto ganho no treino: +'+hpPer(run.level)+' de vida e +0,5 de Estamina.'],
+ res:['Defesa física e Fúria máxima.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de defesa física e +0,5 de Fúria máxima.'],
+ esp:['Defesa mágica e regeneração de mana.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de defesa mágica. Recupera mana mais rápido.'],
+ von:['Defesa geral e resistência a efeitos.','Cada ponto ganho no treino: +'+preciseNumber(atkPer(run.level)*.5)+' de defesa contra qualquer golpe e efeitos negativos mais curtos.']
 }}
 /* Linha com dica: passe o mouse (PC) ou toque no nome (celular) para ver a explicação. */
 function tipFmt(t){if(String(t).includes('<br>'))return t;const p=String(t).split(/(?<=[.!])\s+(?=[A-ZÀ-Ú<(+−0-9])/).filter(x=>x.trim());return p.length>1?'<span style="display:block;margin-top:3px">• '+p.join('<br>• ')+'</span>':t}
@@ -264,7 +264,7 @@ function masteryReady114(){const skills=learnedSkills();return skills.length>0&&
 function canRedistribute(){return !!player&&!player.dead}
 function redistributeAttributes(){if(!canRedistribute())return false;let points=0;for(const k in STATN)points+=Math.max(0,Math.floor(run.stats[k]||0));if(!points)return false;for(const k in STATN)run.stats[k]=0;run.pts+=points;refreshStats();saveRun();return true}
 function resetRankTalents(){if(!canRedistribute())return false;profile.rankTalents=[];saveRun();return true}
-function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+className()+'</p><p>'+xpProgressText(xpProgress())+'</p><p><b>'+run.pts+' pontos de atributo disponíveis</b></p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+(run.stats[k]||0)+'</b>',D[k][0],D[k][1],btn('+1','stat',k,run.pts>0)+btn('+5','stat5',k,run.pts>=5));h+=row('Redistribuir atributos','Devolve os pontos investidos. Gratuito por enquanto, em qualquer lugar.',btn('Redistribuir','resetattributes',0,canRedistribute()&&Object.values(run.stats).some(v=>v>0)));h+='<div class="tabs">'+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
+function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+className()+'</p><p>'+xpProgressText(xpProgress())+'</p><p>Atributos sobem <b>treinando</b>: cada ação conta para a meta do atributo e, ao completar, ele ganha 1 ponto.</p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+(run.stats[k]||0)+'</b>',D[k][0],D[k][1],'<span class="a465-stat" data-stat465="'+k+'"></span>');/* v465 (Ian): sem +1/+5 nem Redistribuir — não existe ponto para colocar */h+='<div class="tabs">'+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
 function tipText155(html){return String(html).replace(/<br\s*\/?>|<\/(div|p|li)>/gi,'\n').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/\n\s*\n+/g,'\n').trim()}
 /* v158→ Ian: habilidade não abre/fecha no clique; a explicação aparece no balão ao passar o mouse. */
 function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),tip=tipText155(skillDesc(sk));return '<div class="it skill155" data-tip154="'+gearText(tip)+'" style="cursor:help"><div class="d"><b>'+safeText(sk.n)+'</b><div style="font-size:12px;line-height:1.4;margin:4px 0">'+safeText(sk.kit111?briefSkill260(sk):tipText155(skillEffect102(sk)))+'</div><small>'+(lv>=10?'Melhorias 10/10 · máximo':'Melhorias '+lv+'/10')+' · '+manaCostText258(sk)+(lv<10&&sk.mp>0?' → '+manaCost177(sk,lv+1)+' '+resourceName260(sk):'')+' · Recarga '+skillCooldownText(sk)+'s</small></div><div class="acts">'+(lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost).replace('<button','<button data-tip154="'+gearText(tipText155(up))+'"'))+'</div></div>'}
@@ -393,7 +393,7 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
   if(a==='stat'||a==='stat5'){const n=a==='stat5'?5:1;if(run.pts<n)return;run.pts-=n;run.stats[v]=(run.stats[v]||0)+n;refreshStats();return true}
   if(a==='skup'){if(run.spts<1)return;const l=run.skl[v]||0;if(l>=10)return;run.spts--;run.skl[v]=l+1;return true}
   if(a==='skup2'){if(run.spts<2)return;const l=run.skl[v]||0;if(l>=10)return;run.spts-=2;run.skl[v]=l+1;return true}
-  if(a==='consconv'){if(!consFull()||!run.cpts)return;run.pts=(run.pts||0)+run.cpts;toast('<b>[NARRADOR]</b> '+run.cpts+' pontos de constelação viraram '+run.cpts+' pontos de status.');run.cpts=0;return true}
+  if(a==='consconv'){if(!consFull()||!run.cpts)return;const n=run.cpts;run.cpts=0;for(let i=0;i<n;i++){const ks=Object.keys(STATN).sort((x,y)=>(run.stats[x]||0)-(run.stats[y]||0));if(window.Growth465)Growth465.gift(ks[0],1,'')}toast('<b>[NARRADOR]</b> '+n+' pontos de constelação viraram '+n+' pontos de treino, nos atributos mais baixos.');return true}
   if(a==='mast'){if(run.spts<1||!masteryReady114())return;run.spts--;run.mastery=(run.mastery||0)+1;refreshStats();return true}
   if(a==='powslot'){const [i,k]=String(v).split(':').map(Number);const sk=powLib()[i];if(!sk)return;const old=run.stolen.findIndex(x=>x.n===sk.n);if(old>=0)run.stolen.splice(old,1);/* v165 (Irror): clicar de novo no número ativo tira o poder da tecla. */if(old===k){buildSteal();return true}if(k>=run.stolen.length)run.stolen.push({...sk,cdT:0});else run.stolen[k]={...sk,cdT:0};run.stolen=run.stolen.slice(0,3);buildSteal();return true}
   if(a==='buycry'){const t=+v;if(!Number.isInteger(t)||t<0||t>9)return;const p=crystalPurchasePriceBalance(t);if(t>rankOf()||run.gold<p)return;run.gold-=p;run.res.cry[t]+=10;if(window.Econ154){Econ154.notePurchase(p);Econ154.noteResourcePurchase(t,p);}sfx('coin');return true}
@@ -414,9 +414,9 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
   if(a==='lookh'||a==='lookb'){profile.look=profile.look||{h:0,b:0};const k=a==='lookh'?'h':'b',arr=k==='h'?LOOK_H:LOOK_B;profile.look[k]=(profile.look[k]+1)%arr.length;store.set('pds2_profile',profile);rebuildLook();return true}
   if(a==='copysave'){exportSave384();return 'close0'}
   if(a==='loadsave'){importSave384();return 'close0'}
-  if(a==='reaval'){const cur=rankOf(),off=run.official??profile.rank;if(cur<=off)return;run.official=cur;run.gold+=2000*(cur+1);run.pts=(run.pts||0)+1;closeModal();
+  if(a==='reaval'){const cur=rankOf(),off=run.official??profile.rank;if(cur<=off)return;run.official=cur;run.gold+=2000*(cur+1);if(window.Growth465)Growth465.gift('esp',1,'');closeModal();
     const R=RANKS[cur];bigText('REAVALIAÇÃO · RANK '+R.id,2400);shake(.6);fxRing(player.x,player.z,0xffd54f,5,1);setTimeout(()=>fxRing(player.x,player.z,0xffb347,8,1),300);sfx('level');
-    toast('<b>[NARRADOR]</b> A Ordem registrou você como Viajante <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro, +2 pontos.',6000);saveRun();return}
+    toast('<b>[NARRADOR]</b> A Ordem registrou você como Viajante <b style="color:'+R.c+'">rank '+R.id+'</b>. +'+fmt(2000*(cur+1))+' ouro e +1 de Espírito (a mana despertada conta como treino).',6000);saveRun();return}
   if(a==='album')return albumView(),'close0';
   if(a==='bestv')return bestView(),'close0';
   if(a==='travel'){const c=(profile.visited||{})[v];if(!travelReady265(c))return;const cost=travelCost(c);if(!spendService265(cost))return;

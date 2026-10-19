@@ -63,7 +63,6 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   if(run.demand){const d=run.demand;add('Desafio do Oráculo','Derrote '+d.n+' monstros '+({nododge:'sem esquivar',nopot:'sem usar poções',night:'à noite'}[d.t]||'')+questTargetText262(d)+'. Progresso: '+d.got+' de '+d.n+'. '+questXpText262(d)+'.')}
   if(track){add(track.n,track.progress);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer" onclick="event.stopPropagation();journeyView()"')}
   if(run.daily&&!run.daily.done){const n=DAILY.filter(q=>(run.daily.p[q[0]]||0)>=q[2]).length;add('Missão diária',n+' de '+DAILY.length+' objetivos concluídos. '+questXpText262(run.daily,'daily')+'. Veja os detalhes no Diário.')}
-  if(run.pts)add(run.pts===1?'1 ponto de atributo disponível':run.pts+' pontos de atributo disponíveis','Distribua na Janela de Status'+(touch?'.':' (tecla '+keyLabel(keyOf('status'))+').'));
   if(done)add(done===1?'1 missão concluída':done+' missões concluídas','Fale com Lyra, na Ordem da Fenda, para receber '+(done===1?'a recompensa.':'as recompensas.'));
   else if(q&&(!track||track.n!==q.d))add(q.d,'Progresso: '+q.got+' de '+q.n+'.');
   const count=allies.filter(a=>a.shadow&&!a.dead).length;if(count)add(count===1?'1 eco ativo':count+' ecos ativos','Ordem: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))?.[1]||'Atacar')+(touch?'.':' (tecla '+keyLabel(keyOf('orders'))+').'));
