@@ -1,3 +1,11 @@
+## v473 — Slot de Escudo, escudo na mão esquerda e pose de defesa, 19/10/2026
+- Pedido de Ian: "faz o slot de escudo com modelo na mão e animação de defesa".
+- `tools/shield473.js` (novo, ?v=473): slot "Escudo" (`sh`) entra em `EQUIP_SLOTS`/`EQUIP_LABEL` → aparece na ficha (linha de baixo), em baús, loja e forja como as outras peças; vale meia armadura (`equipFactor` 0,5). Só conta com arma de uma mão (espada, machado, maça sacra, pistola) ou sem arma; com duas mãos/adagas a ficha avisa "Escudo guardado". Segurando o botão direito, o Viajante faz o clipe "guarda".
+- `tools/warrior-player127.js` (?v=473): o escudo da mão esquerda (o mesmo que machado/maça já mostravam) também aparece quando há escudo equipado e arma de uma mão.
+- `tools/guard472.js` (?v=473): "tem escudo" passa a exigir arma de uma mão.
+- Teste (navegador): slots w,a,h,g,b,sh; "Escudo de Mithril" com 127 de escudo; espada + escudo equipados → escudo na mão esquerda (print) e pose de guarda ao defender; cajado → aviso e escudo sem efeito; 44 de 200 itens sorteados foram escudos.
+- Pendente: o clipe "guarda" é uma pose de prontidão, o escudo não sobe à frente do corpo; um clipe próprio de bloquear (escudo erguido) pode ser feito depois.
+
 ## v472 — Defender, aparar e contra-atacar (botão direito); câmera no botão do meio, 19/10/2026
 - Pedido de Ian: "faz o bloqueio, aparar e contra-ataque com escudo e espadas" (referência: combate do Enshrouded) e "Defender no botão direito do mouse; a câmera vai para o botão do meio".
 - `tools/guard472.js` (novo, ?v=472; envolve `hurtPlayer`, `hurtEnemy`, `attack`, `movementSpeed`): segurar o direito = defender (golpes de frente ~75° para cada lado: 50% do dano, 25% com escudo; gasta Estamina 8 + 25% do dano, metade com escudo; sem Estamina a guarda quebra: lento e sem defender 1,5 s); andar a 55% defendendo. Aparar = começar a defender até 0,22 s antes do golpe (0,32 s com escudo): sem dano, "APARADO!", faíscas, inimigo atordoado 1,2 s (chefe 0,5 s) e próximo golpe em 1,6 s é contra-ataque x1,8 (crítico). Defendendo + esquerdo: escudada (só com escudo; empurra 2,5 m, atordoa 0,7 s, 15 Estamina, a cada 1,2 s); sem escudo não ataca enquanto defende. Inimigos que vão golpear de perto piscam branco no começo da preparação.

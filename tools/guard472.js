@@ -17,7 +17,7 @@ const G=window.Guard472={on:true,stats:{blocks:0,parries:0,counters:0,bashes:0,b
 const P_=()=>player;
 const now=()=>(typeof time==='number'?time:performance.now()/1000);
 let held=false,t0=-9,bashCd=0,counterUntil=-9,breakUntil=-9;
-const hasShield=()=>{try{return !!(run&&run.equip&&run.equip.sh)}catch(_){return false}};
+const hasShield=()=>{try{return typeof shieldActive473==='function'?shieldActive473():!!(run&&run.equip&&run.equip.sh)}catch(_){return false}};/* v473: só com arma de uma mão */
 const blocking=()=>held&&G.on&&now()>=breakUntil&&P_()&&!P_().dead&&!(P_().dodgeT>0)&&!(P_().stunT>0)&&!run?.mounted;
 G.blocking=blocking;G.hasShield=hasShield;
 function vigor(){try{return martialState260()}catch(_){return null}}
