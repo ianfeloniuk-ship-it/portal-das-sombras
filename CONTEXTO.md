@@ -1,3 +1,34 @@
+## v477 — Efeitos fluidos estilizados (fantasia RPG) substituindo texturas fotográficas e esclarecimento da defesa, 19/10/2026
+- Pedidos de Ian:
+  1. "Não sei se tu consegue perceber, mas pelo menos na imagem que eu estou colocando, parece distópico de como é o meu jogo. Ela parece algo mais realista da vida real, parece um PNG, tipo uma bomba do Call of Duty. Não parece algo daquela realidade. Mais importante, parece muito um PNG. Não sei se tu consegues fazer efeitos fluidos mais realísticos, mas com a vibe do meu game. Eu não sei como explicar isso, eu preciso de ajuda para isso."
+  2. "Faz isso para todos os auto-ataques e todas as habilidades do jogo. Use o que precisar, Blender ou o que for... para ficar... no estilo Skyrim, mas com a aparência do meu game."
+  3. "E a mecânica ali do escudo de segurar a bolinha para defender, eu não sei como é que está funcionando, se eu preciso ter um escudo ou não, enfim."
+- Mudanças técnicas:
+  - Eliminação total dos efeitos estilo "bomba fotográfica/Call of Duty":
+    - As antigas texturas de vídeo fotográfico/gasolina da Unity Labs foram integralmente substituídas por sequências procedurais de fantasia estilizada renderizadas no Blender 5.2 (EEVEE):
+      - `fx/unity470/explosion_5x5.webp` (?v=477): 25 quadros de detonação mágica de alta energia com núcleo dourado radiante (`#fff2a0`), camada de fogo saturado (`#ff6200`), contornos limpos ("traços") de cinza rubro escuro e faíscas/brasas orbitantes.
+      - `fx/unity470/fireball_8x8.webp` (?v=477): 64 quadros de bola de fogo rodopiante com línguas de fogo estilizadas e brasas dinâmicas.
+      - `fx/unity470/flame_16x4.webp` (?v=477): 64 quadros cíclicos de chamas dançantes com contornos toon para monstros queimando.
+      - `fx/unity470/smoke_8x8.webp` (?v=477): 64 quadros de pluma de fumaça e fuligem estilizada em ardósia escura/obsidiana com brasas douradas vivas e contornos suaves, unindo a volumetria de Skyrim aos traços de Primeva.
+      - `fx/unity470/dust_16x4.webp` (?v=477): 64 quadros de ondas de poeira de impacto físico com tons terrosos quentes de calçamento (`#8f7d66`/`#baa993`).
+  - Harmonização de Escala e Ancoragem ao Solo:
+    - `tools/flip470.js` (?v=477): escalas de spawn reduzidas de 2.6–2.8m para 1.15–1.7m, concentrando os efeitos no corpo do monstro sem cobrir a tela inteira como um billboard plano.
+    - Ancoragem espacial ao terreno: acertos críticos e elementais em `hurtEnemy` e finalizações em `killEnemy` agora geram anéis de choque luminosos no solo via `fxRing`, fixando os efeitos no espaço 3D do mundo.
+  - Esclarecimento da Defesa e Mecânica do Escudo:
+    - **Não é obrigatório ter escudo para defender**: qualquer personagem (com ou sem arma) pode segurar o botão do meio (roda do mouse) para erguer a guarda (bloqueia 50% do dano frontal, custa estamina) e aparar (soltar/iniciar até 0,22s antes do impacto: nega 100% do dano, atordoa o monstro por 1,2s e concede contra-ataque crítico x1,8).
+    - **Com escudo equipado** (slot `sh` no inventário com arma de uma mão): a redução de dano sobe para 75%, o custo de estamina cai pela metade, a janela de aparar aumenta para 0,32s, o modelo 3D do escudo é erguido na mão esquerda cobrindo o peito (`tools/shield473.js`), e libera a habilidade **Escudada** (segurar meio + clique esquerdo empurra o monstro 2,5m e atordoa por 0,7s).
+  - Versão e Service Worker:
+    - `sw.js`: versão elevada para `pds-v477` e hashes atualizados para todas as folhas WebP.
+    - `VERSAO.md`: atualizado para `v477`.
+    - `tools/build.py`: executado com sucesso (montagem do `core_parts`, sincronização e geração do `index.html`).
+- Teste e Validação:
+  - `python tools/core_parts.py check` validou `ok`.
+  - `node --check` em todos os arquivos modificados passou com 0 erros.
+  - Suite automatizada Playwright (`tools/test-v477.cjs`) no Microsoft Edge validou com 100% de sucesso e 0 erros:
+    - Todas as 8 folhas WebP carregadas e instanciadas corretamente no `Flip470`.
+    - Controles de mouse: botão do meio ativa/desativa defesa, botão direito arrasta câmera.
+    - Spawns de explosão, bola de fogo, fumaça híbrida, chamas contínuas, poeira e anéis de choque no solo validados visualmente.
+
 ## v476 — Defesa no botão do meio, câmera no botão direito, magia sem sólidos e fumaça estilo Skyrim harmonizada com Primeva, 19/10/2026
 - Pedidos de Ian:
   1. "Ficou muito ruim o botão de defesa no direito. Troca para ele ser no do meio e a mira voltar a ser onde ela é, a bolinha de movimentar a visão no direito de novo."

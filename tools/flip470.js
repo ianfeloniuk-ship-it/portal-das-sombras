@@ -22,7 +22,7 @@ const SHEETS={
  water:{src:'fx/unity470/water_8x8.webp',c:8,r:8,add:true,fps:36},
  rune:{src:'fx/unity470/rune_8x8.webp',c:8,r:8,add:true,fps:32}};
 const loader=new T.TextureLoader();
-for(const k in SHEETS){const s=SHEETS[k];s.tex=loader.load(s.src+'?v=475');s.tex.colorSpace=T.SRGBColorSpace||s.tex.colorSpace;s.n=s.c*s.r}
+for(const k in SHEETS){const s=SHEETS[k];s.tex=loader.load(s.src+'?v=477');s.tex.colorSpace=T.SRGBColorSpace||s.tex.colorSpace;s.n=s.c*s.r}
 const lite=()=>!!(window.GFX267&&GFX267.lite),MAX=()=>lite()?24:60;
 const live=[];
 function spawn(kind,x,y,z,size,o={}){if(!F.on)return null;const s=SHEETS[kind];if(!s||!s.tex.image)return null;
@@ -62,26 +62,27 @@ function getElem(e,o){
 }
 let lastFx=0;const burning=new WeakMap();
 const H0=hurtEnemy;
-hurtEnemy=function(e,amt,sx,sz,o){const hp0=e&&e.hp,r=H0.apply(this,arguments);
+ hurtEnemy=function(e,amt,sx,sz,o){const hp0=e&&e.hp,r=H0.apply(this,arguments);
  try{if(F.on&&e&&r>0&&e.hp<hp0){const now=performance.now();const b=body(e),sz=Math.max(.8,b.r/.5);
   const elem=getElem(e,o);
   const fire=elem==='fogo',lightning=elem==='raio',water=elem==='gelo'||elem==='água'||elem==='agua',holy=elem==='luz'||elem==='sagrado',dark=elem==='trevas'||elem==='sombra';
   const big=!!(o&&(o.crit||o.third||o.skillHit));
-  if(fire&&now-lastFx>55){lastFx=now;spawn(big?'explosion':'fireball',b.x,b.y+.2,b.z,(big?2.6:1.7)*sz,{grow:.35})}
-  else if(lightning&&now-lastFx>55){lastFx=now;spawn('lightning',b.x,b.y+.2,b.z,(big?2.8:1.8)*sz,{grow:.15})}
-  else if(water&&now-lastFx>55){lastFx=now;spawn('water',b.x,b.y,b.z,(big?2.6:1.7)*sz,{grow:.25})}
-  else if(holy&&now-lastFx>55){lastFx=now;spawn('rune',b.x,ground(b.x,b.z)+.08,b.z,(big?2.5:1.6)*sz,{grow:.1})}
-  else if(dark&&now-lastFx>55){lastFx=now;spawn('smoke',b.x,b.y+.2,b.z,2.0*sz,{tint:0x4c1d95,grow:.3})}
-  else if(big&&now-lastFx>55){lastFx=now;const g=ground(b.x,b.z);spawn('dust',b.x,g+.55,b.z,1.9*sz,{grow:.4,op:.8})}
+  if(fire&&now-lastFx>50){lastFx=now;spawn(big?'explosion':'fireball',b.x,b.y+.15,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0xff7700,(big?1.5:1.1)*sz,.32)}
+  else if(lightning&&now-lastFx>50){lastFx=now;spawn('lightning',b.x,b.y+.15,b.z,(big?1.8:1.2)*sz,{grow:.12});if(typeof fxRing==='function')fxRing(b.x,b.z,0x80d0ff,(big?1.6:1.1)*sz,.24)}
+  else if(water&&now-lastFx>50){lastFx=now;spawn('water',b.x,b.y,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0x38bdf8,(big?1.5:1.1)*sz,.32)}
+  else if(holy&&now-lastFx>50){lastFx=now;spawn('rune',b.x,ground(b.x,b.z)+.08,b.z,(big?1.6:1.1)*sz,{grow:.1});if(typeof fxRing==='function')fxRing(b.x,b.z,0xffd700,(big?1.6:1.2)*sz,.38)}
+  else if(dark&&now-lastFx>50){lastFx=now;spawn('smoke',b.x,b.y+.15,b.z,(big?1.6:1.1)*sz,{tint:0x4c1d95,grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0x7e22ce,(big?1.5:1.1)*sz,.32)}
+  else if(big&&now-lastFx>50){lastFx=now;const g=ground(b.x,b.z);spawn('dust',b.x,g+.45,b.z,1.3*sz,{grow:.25,op:.75});if(typeof fxRing==='function')fxRing(b.x,b.z,0xc2a688,1.2*sz,.28)}
   /* queimando: chama real acompanhando o corpo enquanto durar a queimadura */
-  const d=e.basicDots||{},burnT=Math.max(d.burn?.t||0,d.kitFire111?.t||0);if(burnT>0&&!(burning.get(e)>now)){burning.set(e,now+burnT*1000);spawn('flame',b.x,b.y,b.z,1.5*sz,{follow:e,dur:burnT,op:.9})}}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
+  const d=e.basicDots||{},burnT=Math.max(d.burn?.t||0,d.kitFire111?.t||0);if(burnT>0&&!(burning.get(e)>now)){burning.set(e,now+burnT*1000);spawn('flame',b.x,b.y,b.z,1.1*sz,{follow:e,dur:burnT,op:.85})}}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
  return r};
 const K0=killEnemy;
 killEnemy=function(e){const fire=!!(e&&e.basicDots&&((e.basicDots.burn?.t||0)>0||(e.basicDots.kitFire111?.t||0)>0));let b=null;try{if(e&&!e.dead)b=body(e)}catch(_){}
  const r=K0.apply(this,arguments);
  try{if(F.on&&b){const g=ground(b.x,b.z),sz=Math.max(.8,b.r/.5);
-  if(fire)spawn('explosion',b.x,b.y,b.z,2.8*sz,{grow:.3});
-  spawn('smoke',b.x,g+.6*sz,b.z,2.4*sz,{rise:.85,grow:.4,op:.9,delay:fire?.12:0})}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
+  if(fire){spawn('explosion',b.x,b.y,b.z,1.7*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0xff6600,1.6*sz,.4)}
+  spawn('smoke',b.x,g+.5*sz,b.z,1.7*sz,{rise:.6,grow:.25,op:.85,delay:fire?.12:0});
+  if(!fire&&typeof fxRing==='function')fxRing(b.x,b.z,0x665544,1.4*sz,.35)}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
  return r};
 
 let last=performance.now();
