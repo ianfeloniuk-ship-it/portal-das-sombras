@@ -1,3 +1,35 @@
+## v476 — Defesa no botão do meio, câmera no botão direito, magia sem sólidos e fumaça estilo Skyrim harmonizada com Primeva, 19/10/2026
+- Pedidos de Ian:
+  1. "Ficou muito ruim o botão de defesa no direito. Troca para ele ser no do meio e a mira voltar a ser onde ela é, a bolinha de movimentar a visão no direito de novo."
+  2. "Outro ponto importante é aqueles sólidos que eu usei no Tripo para as habilidades, os outros ataques de mago e etc. Eu disse que podiam ser retirados e usar só aquilo que foi criado no Blender."
+  3. "E também achei a fumaça muito irrealista, não bate com o cenário. Eu queria algo mais desenho, mas também realidade, algo mais fluido, com traços... estilo Skyrim... mas que puxe para o visual do meu RPG, do meu jogo. Tira prints do meu jogo, compara com Skyrim e faz algo novo, algo que remeta ao meu jogo e que seja no estilo Skyrim, mas com a aparência do meu game."
+- Mudanças técnicas:
+  - Controles do Mouse:
+    - `tools/guard472.js` (?v=476): defesa, aparar e escudada mapeadas para o botão do meio (`e.button === 1`, com prevenção de rolagem/autoscroll em `auxclick`).
+    - `src/core/400-loop.js`: rotação e arrasto da câmera restauradas para o botão direito (`e.button === 2`, `e.buttons & 2`).
+    - `tools/witcher377.js` (?v=476): clique curto no botão direito (< 8 px de movimento) trava/solta o alvo (lock-on).
+    - `src/core/630-controles.js`: texto do modal de controles ("CONTROLES DE PC") atualizado para orientar o jogador sobre o botão do meio para defesa e botão direito para câmera/mira.
+  - Magia sem sólidos rígidos:
+    - `src/core/340-efeitos-visuais-por-habilidade.js`: remoção total dos modelos 3D sólidos rígidos do Tripo e esferas/icosaedros sólidos em magias e ataques de magos (`projModel`), bem como do meteoro (`fallFx`). Projéteis mágicos e habilidades de área agora usam exclusivamente sprites animados fluidos (`Flip470` com as folhas de fogo, raio, água, fumaça/trevas, runa dourada).
+    - `src/core/380-acoes.js`: `updateProjectiles253` atualizado para avançar a animação dos quadros da folha de sprite (`userData.spriteFx`) durante a trajetória de voo em sincronia com os rastros de partículas elementais.
+  - Fumaça Híbrida Skyrim + Primeva:
+    - `fx/unity470/smoke_8x8.webp` (?v=476): nova folha de 64 quadros (8x8, 1024x1024, 171 KB) renderizada via Blender 5.2 headless com EEVEE. Combina a turbulência densa, plumas volumétricas de fuligem e brasas ardentes de Skyrim com contornos estilizados ("traços"), sombreamento facetado e iluminação quente em tom âmbar (`#ffd070` / `#ff8a1e`) extraídos diretamente da paleta de Primeva.
+    - `tools/flip470.js` (?v=476): parâmetros de morte de inimigos ajustados para escala natural (1.8 a 2.5), dispersão suave e sem lavagem de cor, revelando as brasas e o contorno da nova fumaça.
+  - Versão e Service Worker:
+    - `sw.js`: versão elevada para `pds-v476` e caches atualizados.
+    - `VERSAO.md`: atualizado para `v476`.
+    - `tools/build.py`: executado com sucesso (montagem do `core_parts`, sincronização e geração do `index.html`).
+- Teste e Validação:
+  - `python tools/core_parts.py check` validou `ok`.
+  - `node --check` em todos os arquivos modificados passou com 0 erros.
+  - Suite automatizada Playwright (`tools/test-v476.cjs`) no Microsoft Edge validou com 100% de sucesso e 0 erros:
+    - Defesa ativa e liberada pelo botão do meio (botão 1).
+    - Rotação de câmera e lock-on ativos no botão direito (botão 2) sem acionar guarda.
+    - Projéteis de mago sem nenhuma malha sólida rígida, com sprites fluidos do Flip470 animados durante o voo.
+    - Meteoro (`fallFx`) sem geometria de esfera sólida.
+    - Renderização da fumaça híbrida de fuligem com brasas sem erros.
+    - Modal de controles exibindo as instruções corretas.
+
 ## v475 — Habilidades: visual realista (raio, água, runa dourada) e área de dano batendo com o visual (zone475), 19/10/2026
 - Pedido de Ian:
   1. Visual realista, fluido e visceral para TODAS as habilidades e auto-ataques: substituir esferas sólidas por efeitos elementais de verdade (fogo, raio, água, fumaça/trevas, luz/sagrado, poeira física), reaproveitando `Flip470.spawn(...)`. Renderizar os efeitos faltantes (raio, água e círculos de runa dourados no estilo tomsilf_motion) no Blender 5.2 headless em sequências de quadros WebP 8x8 (1024x1024).

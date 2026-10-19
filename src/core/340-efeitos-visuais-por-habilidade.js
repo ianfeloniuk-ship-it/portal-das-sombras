@@ -15,19 +15,36 @@ function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==
 
   // v156: modelos do Tripo (Proj155) antes das bolhas de luz.
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
-  const p156=window.Proj155&&Proj155.ready&&Proj155.pick(type,cls);if(p156){const g=Proj155.make(p156,sc);
-  // Pedido do Ian: energia tem que parecer energia — chama no fogo, eletricidade no Condutor, vazio no Devorador. O fluido do Combat139 envolve o modelo.
-  if(ctx405)ctx405.isolate(g);Proj155.addFx(g,p156,col);return g}
-  const fluid139=window.Combat139&&Combat139.projectile(type,col,sc,cls);if(fluid139)return fluid139;
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
-  else if(type==='fire'){const S=window.Shaders312;if(S&&S.fireball){g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.32,2),S.fireball(null,.32)))}else{g.add(new THREE.Mesh(geo('fcore',()=>new THREE.SphereGeometry(.22,10,8)),glowS(0xfff0a0,1)));g.add(new THREE.Mesh(geo('fout',()=>new THREE.SphereGeometry(.36,10,8)),glowS(0xff6a1e,.8)))}const t=new THREE.Mesh(geo('ftail',()=>new THREE.ConeGeometry(.28,.85,8)),glowS(0xff3d0e,.6));t.rotation.x=-Math.PI/2;t.position.z=-.5;g.add(t)}
-  else if(type==='ice'){const shard=new THREE.Mesh(geo('iceBolt',()=>new THREE.ConeGeometry(.18,1.15,6)),glowS(col,.95));shard.rotation.x=Math.PI/2;g.add(shard);const aura=new THREE.Mesh(geo('iceAura',()=>new THREE.CylinderGeometry(.08,.22,1.1,6,1,true)),glowS(0x67e8f9,.45));aura.rotation.x=Math.PI/2;g.add(aura)}
-  else if(type==='stone'){const rock=mesh(geo('stoneBolt',()=>new THREE.DodecahedronGeometry(.3,0)),toonS(col));rock.scale.set(.7,.7,1.5);g.add(rock)}
-  else if(type==='spark'){for(let i=0;i<4;i++){const bolt=new THREE.Mesh(geo('sparkBolt',()=>new THREE.BoxGeometry(.065,.065,.55)),glowS(i%2?0xffffff:col,1));bolt.position.set(i%2?.12:-.12,0,i*.28-.35);bolt.rotation.set(i*.2,i%2?.4:-.4,i*.3);g.add(bolt)}}
-  else if(type==='soul'){g.add(new THREE.Mesh(geo('score',()=>new THREE.SphereGeometry(.22,10,8)),glowS(col,1)));const t=new THREE.Mesh(geo('stail',()=>new THREE.ConeGeometry(.18,.8,8)),glowS(0x2a0f55,.85));t.rotation.x=-Math.PI/2;t.position.z=-.45;g.add(t)}
-  else if(type==='holy'){g.add(new THREE.Mesh(geo('hcore',()=>new THREE.OctahedronGeometry(.24,0)),glowS(0xffffff,1)));g.add(new THREE.Mesh(geo('hring',()=>new THREE.TorusGeometry(.32,.045,6,20)),glowS(col,.95)))}
-  else{g.add(new THREE.Mesh(geo('porb',()=>new THREE.SphereGeometry(.22,10,8)),glowS(col,1)));g.add(new THREE.Mesh(geo('phalo',()=>new THREE.SphereGeometry(.36,10,8)),glowS(col,.45)))}
+  else {
+    /* v476 (Ian): sólidos do Tripo e bolas rígidas retirados; usa os efeitos fluidos criados no Blender */
+    const F=window.Flip470, S=F&&F.SHEETS;
+    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':(type==='ice'||type==='water')?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
+    const sheet=S&&S[kind];
+    if(sheet&&sheet.tex&&sheet.tex.image){
+      const tex=sheet.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/sheet.c,1/sheet.r);
+      const isAdd=sheet.add!==false;
+      const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,blending:isAdd?THREE.AdditiveBlending:THREE.NormalBlending,color:new THREE.Color(col||0xffffff)});
+      const sp=new THREE.Sprite(mat);
+      sp.scale.set(1.5*sc,1.5*sc,1);
+      sp.renderOrder=8;
+      sp.userData.terrainAbsolute245=true;
+      g.add(sp);
+      g.userData.spriteFx={sp,s:sheet,t:0};
+    } else {
+      const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+      const ctx=cv.getContext('2d');
+      const rad=ctx.createRadialGradient(32,32,4,32,32,32);
+      rad.addColorStop(0,'#ffffff');rad.addColorStop(0.35,typeof col==='number'?'#'+col.toString(16).padStart(6,'0'):'#ffb347');rad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rad;ctx.fillRect(0,0,64,64);
+      const tex=new THREE.CanvasTexture(cv);
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      sp.scale.set(1.3*sc,1.3*sc,1);
+      sp.userData.terrainAbsolute245=true;
+      g.add(sp);
+    }
+  }
   g.scale.setScalar(sc);return g;
 }
 function trailFx(p){ // partícula atrás do projétil
@@ -35,12 +52,12 @@ function trailFx(p){ // partícula atrás do projétil
   const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(c,.8));o.userData.terrainAbsolute245=true;o.position.set(p.x+rnd(-.1,.1),(p.y??p.originY??1.1)+rnd(-.1,.1),p.z+rnd(-.1,.1));o.scale.setScalar(p.ptype==='fire'?rnd(1,1.8):rnd(.5,.9));
   scene.add(o);fxs.push({o,t:0,dur:.3,kind:'p',v:{x:0,y:p.ptype==='fire'?2:0,z:0}});
 }
-// v156: habilidades de chuva mostram o que cai de verdade (flechas do Tripo, meteoros), não só um anel de luz.
+// v156: habilidades de chuva mostram o que cai de verdade (flechas, meteoros), não só um anel de luz.
 function pulseFx156(z,ctx405=null){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col,ctx405)}}
 function fallFx(x,z,dur,kind,col,ctx405=null){
   const camera405=ctx405?ctx405.camera:camera;
   const add405=(o,d,fn)=>ctx405?ctx405.vfx302.add(o,d,(k)=>fn(o,k)):fxCustom(o,d,fn);
-  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);/* v342 (Ian): o meteoro que dá o dano usa os shaders de fogo (antes havia um segundo, só de enfeite) */const S342=window.Shaders312;g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.9,2),S342?S342.fireball(null,.9):gl(0xff6a1e,.55)));const t=new THREE.Mesh(new THREE.ConeGeometry(.75,4.5,10,6,true),S342?S342.fire(1):gl(0xffa040,.45));t.position.y=2.4;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
+  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const F=window.Flip470;if(F&&F.SHEETS.fireball&&F.SHEETS.fireball.tex.image){const s=F.SHEETS.fireball,tex=s.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/s.c,1/s.r);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.scale.set(2.4,2.4,1);g.add(sp);g.userData.spriteFx={sp,s,t:0};}else{g.add(new THREE.Mesh(geo('mflame',()=>new THREE.SphereGeometry(.7,8,8)),glow(0xff5511,.9)));}return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
   if(ctx405)ctx405.isolate(o);
   if(kind==='arrow'){o.rotation.x=Math.PI/2;o.scale.setScalar(o.userData.proj155?1.15:1.7)}
   // v153: the PC camera sits ~12 m up; anything spawned at 16 m fell from behind the lens and was never seen.

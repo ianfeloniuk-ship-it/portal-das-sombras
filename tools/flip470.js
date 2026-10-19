@@ -81,7 +81,7 @@ killEnemy=function(e){const fire=!!(e&&e.basicDots&&((e.basicDots.burn?.t||0)>0|
  const r=K0.apply(this,arguments);
  try{if(F.on&&b){const g=ground(b.x,b.z),sz=Math.max(.8,b.r/.5);
   if(fire)spawn('explosion',b.x,b.y,b.z,2.8*sz,{grow:.3});
-  spawn('smoke',b.x,g+.9*sz,b.z,2.1*sz,{rise:.7,grow:.6,op:.5,tint:0xd8d4cc,delay:fire?.12:0})}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
+  spawn('smoke',b.x,g+.6*sz,b.z,2.4*sz,{rise:.85,grow:.4,op:.9,delay:fire?.12:0})}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
  return r};
 
 let last=performance.now();

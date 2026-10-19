@@ -5644,19 +5644,36 @@ function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==
 
   // v156: modelos do Tripo (Proj155) antes das bolhas de luz.
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
-  const p156=window.Proj155&&Proj155.ready&&Proj155.pick(type,cls);if(p156){const g=Proj155.make(p156,sc);
-  // Pedido do Ian: energia tem que parecer energia — chama no fogo, eletricidade no Condutor, vazio no Devorador. O fluido do Combat139 envolve o modelo.
-  if(ctx405)ctx405.isolate(g);Proj155.addFx(g,p156,col);return g}
-  const fluid139=window.Combat139&&Combat139.projectile(type,col,sc,cls);if(fluid139)return fluid139;
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
-  else if(type==='fire'){const S=window.Shaders312;if(S&&S.fireball){g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.32,2),S.fireball(null,.32)))}else{g.add(new THREE.Mesh(geo('fcore',()=>new THREE.SphereGeometry(.22,10,8)),glowS(0xfff0a0,1)));g.add(new THREE.Mesh(geo('fout',()=>new THREE.SphereGeometry(.36,10,8)),glowS(0xff6a1e,.8)))}const t=new THREE.Mesh(geo('ftail',()=>new THREE.ConeGeometry(.28,.85,8)),glowS(0xff3d0e,.6));t.rotation.x=-Math.PI/2;t.position.z=-.5;g.add(t)}
-  else if(type==='ice'){const shard=new THREE.Mesh(geo('iceBolt',()=>new THREE.ConeGeometry(.18,1.15,6)),glowS(col,.95));shard.rotation.x=Math.PI/2;g.add(shard);const aura=new THREE.Mesh(geo('iceAura',()=>new THREE.CylinderGeometry(.08,.22,1.1,6,1,true)),glowS(0x67e8f9,.45));aura.rotation.x=Math.PI/2;g.add(aura)}
-  else if(type==='stone'){const rock=mesh(geo('stoneBolt',()=>new THREE.DodecahedronGeometry(.3,0)),toonS(col));rock.scale.set(.7,.7,1.5);g.add(rock)}
-  else if(type==='spark'){for(let i=0;i<4;i++){const bolt=new THREE.Mesh(geo('sparkBolt',()=>new THREE.BoxGeometry(.065,.065,.55)),glowS(i%2?0xffffff:col,1));bolt.position.set(i%2?.12:-.12,0,i*.28-.35);bolt.rotation.set(i*.2,i%2?.4:-.4,i*.3);g.add(bolt)}}
-  else if(type==='soul'){g.add(new THREE.Mesh(geo('score',()=>new THREE.SphereGeometry(.22,10,8)),glowS(col,1)));const t=new THREE.Mesh(geo('stail',()=>new THREE.ConeGeometry(.18,.8,8)),glowS(0x2a0f55,.85));t.rotation.x=-Math.PI/2;t.position.z=-.45;g.add(t)}
-  else if(type==='holy'){g.add(new THREE.Mesh(geo('hcore',()=>new THREE.OctahedronGeometry(.24,0)),glowS(0xffffff,1)));g.add(new THREE.Mesh(geo('hring',()=>new THREE.TorusGeometry(.32,.045,6,20)),glowS(col,.95)))}
-  else{g.add(new THREE.Mesh(geo('porb',()=>new THREE.SphereGeometry(.22,10,8)),glowS(col,1)));g.add(new THREE.Mesh(geo('phalo',()=>new THREE.SphereGeometry(.36,10,8)),glowS(col,.45)))}
+  else {
+    /* v476 (Ian): sólidos do Tripo e bolas rígidas retirados; usa os efeitos fluidos criados no Blender */
+    const F=window.Flip470, S=F&&F.SHEETS;
+    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':(type==='ice'||type==='water')?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
+    const sheet=S&&S[kind];
+    if(sheet&&sheet.tex&&sheet.tex.image){
+      const tex=sheet.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/sheet.c,1/sheet.r);
+      const isAdd=sheet.add!==false;
+      const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,blending:isAdd?THREE.AdditiveBlending:THREE.NormalBlending,color:new THREE.Color(col||0xffffff)});
+      const sp=new THREE.Sprite(mat);
+      sp.scale.set(1.5*sc,1.5*sc,1);
+      sp.renderOrder=8;
+      sp.userData.terrainAbsolute245=true;
+      g.add(sp);
+      g.userData.spriteFx={sp,s:sheet,t:0};
+    } else {
+      const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+      const ctx=cv.getContext('2d');
+      const rad=ctx.createRadialGradient(32,32,4,32,32,32);
+      rad.addColorStop(0,'#ffffff');rad.addColorStop(0.35,typeof col==='number'?'#'+col.toString(16).padStart(6,'0'):'#ffb347');rad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rad;ctx.fillRect(0,0,64,64);
+      const tex=new THREE.CanvasTexture(cv);
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      sp.scale.set(1.3*sc,1.3*sc,1);
+      sp.userData.terrainAbsolute245=true;
+      g.add(sp);
+    }
+  }
   g.scale.setScalar(sc);return g;
 }
 function trailFx(p){ // partícula atrás do projétil
@@ -5664,12 +5681,12 @@ function trailFx(p){ // partícula atrás do projétil
   const o=new THREE.Mesh(geo('fxp',()=>new THREE.SphereGeometry(.13,6,4)),glow(c,.8));o.userData.terrainAbsolute245=true;o.position.set(p.x+rnd(-.1,.1),(p.y??p.originY??1.1)+rnd(-.1,.1),p.z+rnd(-.1,.1));o.scale.setScalar(p.ptype==='fire'?rnd(1,1.8):rnd(.5,.9));
   scene.add(o);fxs.push({o,t:0,dur:.3,kind:'p',v:{x:0,y:p.ptype==='fire'?2:0,z:0}});
 }
-// v156: habilidades de chuva mostram o que cai de verdade (flechas do Tripo, meteoros), não só um anel de luz.
+// v156: habilidades de chuva mostram o que cai de verdade (flechas, meteoros), não só um anel de luz.
 function pulseFx156(z,ctx405=null){const n=z.s&&z.s.n||'';const kind=/Flecha/.test(n)?'arrow':/Meteoro/.test(n)?'meteor':null;if(!kind)return;const k=kind==='arrow'?7:2;for(let i=0;i<k;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*z.r;fallFx(z.x+Math.cos(a)*r,z.z+Math.sin(a)*r,.3+Math.random()*.25,kind,z.col,ctx405)}}
 function fallFx(x,z,dur,kind,col,ctx405=null){
   const camera405=ctx405?ctx405.camera:camera;
   const add405=(o,d,fn)=>ctx405?ctx405.vfx302.add(o,d,(k)=>fn(o,k)):fxCustom(o,d,fn);
-  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const r=mesh(geo('mrock',()=>new THREE.DodecahedronGeometry(.6,0)),toonS(0x3a2418));g.add(r);/* v342 (Ian): o meteoro que dá o dano usa os shaders de fogo (antes havia um segundo, só de enfeite) */const S342=window.Shaders312;g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.9,2),S342?S342.fireball(null,.9):gl(0xff6a1e,.55)));const t=new THREE.Mesh(new THREE.ConeGeometry(.75,4.5,10,6,true),S342?S342.fire(1):gl(0xffa040,.45));t.position.y=2.4;g.add(t);return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
+  const o=kind==='arrow'?arrowModel(col,true):kind==='meteor'?(()=>{const g=new THREE.Group();const F=window.Flip470;if(F&&F.SHEETS.fireball&&F.SHEETS.fireball.tex.image){const s=F.SHEETS.fireball,tex=s.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/s.c,1/s.r);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.scale.set(2.4,2.4,1);g.add(sp);g.userData.spriteFx={sp,s,t:0};}else{g.add(new THREE.Mesh(geo('mflame',()=>new THREE.SphereGeometry(.7,8,8)),glow(0xff5511,.9)));}return g})():projModel(kind==='soul'?'soul':'orb',col,1.4);
   if(ctx405)ctx405.isolate(o);
   if(kind==='arrow'){o.rotation.x=Math.PI/2;o.scale.setScalar(o.userData.proj155?1.15:1.7)}
   // v153: the PC camera sits ~12 m up; anything spawned at 16 m fell from behind the lens and was never seen.
@@ -6159,7 +6176,9 @@ function updateProjectiles253(dt){
     }
     if(!done&&!bounced){p.x=after.x;p.y=after.y;p.z=after.z;if(terrain){p.x=terrain.x;p.y=terrain.y;p.z=terrain.z;done=true;projectileImpact253(p);}}
     if(!done){const fr=(x,z)=>L.grid?gfree(x,z):worldFree(x,z,.1,p.y);if(!fr(p.x,p.z)){if(p.wallBounce177>0){if(!fr(p.x,before.z))p.vx=-p.vx;if(!fr(before.x,p.z))p.vz=-p.vz;if(fr(p.x,before.z)&&fr(before.x,p.z)){p.vx=-p.vx;p.vz=-p.vz;}p.x=before.x;p.y=before.y;p.z=before.z;p.wallBounce177--;p.mesh.rotation.y=Math.atan2(p.vx,p.vz);}else done=true;}}
-    p.mesh.position.set(p.x,p.y,p.z);if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;
+    p.mesh.position.set(p.x,p.y,p.z);
+    if(p.mesh.userData.spriteFx){const sf=p.mesh.userData.spriteFx;sf.t+=pdt;const k=Math.floor(sf.t*(sf.s.fps||30))%sf.s.n,cx=k%sf.s.c,cy=Math.floor(k/sf.s.c);sf.sp.material.map.offset.set(cx/sf.s.c,1-(cy+1)/sf.s.r)}
+    else if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;
     if(!done){p.tt=(p.tt||0)-dt;if(p.tt<=0){p.tt=.05;if(p.ptype==='fire'||p.elem300==='fogo'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('flame',p.x,p.y,p.z,.7,{grow:.1,dur:.12,op:.85})}else if(p.ptype==='spark'||p.elem300==='raio'){if(window.Flip470&&Math.random()<.55)Flip470.spawn('lightning',p.x,p.y,p.z,.65,{grow:.1,dur:.1,op:.9})}else if(p.ptype==='ice'||p.elem300==='gelo'){if(window.Flip470&&Math.random()<.45)Flip470.spawn('water',p.x,p.y,p.z,.65,{grow:.1,dur:.12,op:.75})}else if(p.ptype==='soul'||p.elem300==='trevas'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('smoke',p.x,p.y,p.z,.6,{tint:0x4c1d95,grow:.15,dur:.15,op:.6})}else if(p.ptype==='sarrow'||p.ptype==='arrow'){trailFx(p)}}}
     if(done){scene.remove(p.mesh);projs.splice(i,1);}
   }
@@ -6658,16 +6677,16 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
-/* Terceira pessoa: botão do meio arrastado gira (v472: o direito passou a defender); cursor livre para avisos e menus. */
+/* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. */
 const pcCam={yaw:0,pitch:.16,distance:3.9,active:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==1||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
-$('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&4)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
-addEventListener('pointerup',e=>{if(e.button===1){window.camMoved472=cameraDrag375?(cameraDrag375.moved472||0):0;releaseCamera373()}});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
+addEventListener('pointerup',e=>{if(e.button===2){window.camMoved472=cameraDrag375?(cameraDrag375.moved472||0):0;releaseCamera373()}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
 addEventListener('pointercancel',releaseCamera373);
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});
@@ -8479,7 +8498,7 @@ function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!act
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(KEYMAP[act]===code)return def}for(const [act,,def] of KEYACT){if(KEYMAP[act]&&code===def)return 'X_'+def}return code}
 function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
-function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Direito (segurar): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Segure o botão do meio e mova o mouse para girar a câmera; um clique curto no botão do meio trava/solta o alvo. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Botão do meio (segurar): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Botão direito (arrastar): girar a câmera; clique curto trava/solta o alvo. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
   h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
 function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e pressione a tecla. Esc cancela. Teclas já usadas trocam de ação. WASD, setas e Esc são reservados.</div>';
@@ -9325,7 +9344,7 @@ requestAnimationFrame(frame);
 <script src="tools/living372.js?v=433"></script><script src="tools/solid429.js?v=433"></script>
 <script src="tools/firearms372.js?v=372"></script>
 <!-- pds-v377: câmera Witcher, lock-on, colisão, lampião de viagem -->
-<script src="tools/witcher377.js?v=472"></script>
+<script src="tools/witcher377.js?v=476"></script>
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=387"></script>
@@ -9361,10 +9380,10 @@ requestAnimationFrame(frame);
 <script src="tools/deep447.js?v=447"></script>
 <script src="tools/impact459.js?v=459"></script>
 <script src="tools/juice468.js?v=468"></script>
-<script src="tools/flip470.js?v=475"></script>
-<script src="tools/guard472.js?v=473"></script>
+<script src="tools/flip470.js?v=476"></script>
+<script src="tools/guard472.js?v=476"></script>
 <script src="tools/shield473.js?v=474"></script>
-<script src="tools/zone475.js?v=475"></script>
+<script src="tools/zone475.js?v=476"></script>
 <script src="tools/attrs462.js?v=469"></script>
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=470"></script>
