@@ -1,3 +1,11 @@
+## v472 — Defender, aparar e contra-atacar (botão direito); câmera no botão do meio, 19/10/2026
+- Pedido de Ian: "faz o bloqueio, aparar e contra-ataque com escudo e espadas" (referência: combate do Enshrouded) e "Defender no botão direito do mouse; a câmera vai para o botão do meio".
+- `tools/guard472.js` (novo, ?v=472; envolve `hurtPlayer`, `hurtEnemy`, `attack`, `movementSpeed`): segurar o direito = defender (golpes de frente ~75° para cada lado: 50% do dano, 25% com escudo; gasta Estamina 8 + 25% do dano, metade com escudo; sem Estamina a guarda quebra: lento e sem defender 1,5 s); andar a 55% defendendo. Aparar = começar a defender até 0,22 s antes do golpe (0,32 s com escudo): sem dano, "APARADO!", faíscas, inimigo atordoado 1,2 s (chefe 0,5 s) e próximo golpe em 1,6 s é contra-ataque x1,8 (crítico). Defendendo + esquerdo: escudada (só com escudo; empurra 2,5 m, atordoa 0,7 s, 15 Estamina, a cada 1,2 s); sem escudo não ataca enquanto defende. Inimigos que vão golpear de perto piscam branco no começo da preparação.
+- Escudo lido de `run.equip.sh`. **Pendente:** criar o slot de escudo (item, inventário, modelo na mão esquerda e animação de defesa) — pedido de Ian.
+- Câmera: `400-loop` gira com o botão do meio arrastado; `tools/witcher377.js` (?v=472): clique curto no meio (sem arrastar) trava/solta o alvo.
+- Partes ligadas: tela de controles (`630`, linha "Mouse") reescrita; comentário do `400`.
+- Teste (navegador, Viajante): sem defesa 16 de dano; aparar 0 + inimigo atordoado 1,2 s; contra-ataque 18 (x1,8); defendendo 6 e gastou 13 de Estamina; de costas não defende (16); com escudo de teste 1 de dano; escudada empurrou 2,5 m e atordoou; velocidade 10 → 5,5 defendendo; câmera girou com o meio. O aviso de piscar não foi visto em ataque real (teste simulado).
+
 ## v471 — Efeitos realistas de fogo, explosão, chamas e fumaça, 19/10/2026
 - Pedido de Ian: "algo mais real, mais fluido, mais visceral" nas habilidades e ataques; combinação aprovada: pacotes prontos + Blender. Ian autorizou baixar os pacotes da Unity Labs (CC0).
 - `fx/unity470/` (novo): 5 folhas WebP da Unity Labs, licença CC0 (`LICENCA-CC0.txt`): bola de fogo 8x8, explosão 5x5, chama 16x4, fumaça 8x8, poeira 16x4.
