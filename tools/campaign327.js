@@ -76,7 +76,7 @@
       { t: 'ev', ev: 'clear', n: 3, d: 'Aproveite a calma: feche 3 portais.' }] },
     { id: 'a11', act: 11, title: 'XI — A Mão do Arquiteto', steps: [
       { t: 'go', d: 'Feche o Portal Primordial perto de {cidade} e faça a Mão do Arquiteto recuar.', verb: 'FECHAR O PORTAL PRIMORDIAL', primordial456: true, fight: { n: 4, el: 2 },
-        done: 'Ao fechar o Portal Primordial, uma imensa mão de pedra e luz (arquiteto246.glb) recua para o outro lado da Fenda.' },
+        done: 'Ao fechar o Portal Primordial, uma imensa mão de pedra e luz recua para o outro lado da Fenda.' },
       { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra sobre a mão do Portal Primordial.', say: ['Uma mão do outro lado… O Fim do Mundo não é um desastre: é um teste. Precisamos dos registros da abertura antiga.'] },
       { t: 'go', d: 'Recupere os registros da abertura antiga, guardados por criaturas da Fenda.', verb: 'RECUPERAR OS REGISTROS', book: true, fight: { n: 8, el: 2 },
         done: 'Os registros contam a mesma abertura duas vezes, com detalhes diferentes.' },
@@ -91,7 +91,7 @@
         done: 'O Arquiteto se desfez em pó dourado no meio da estrada para Aster. Os cinco pedaços voltaram a dormir sob as Âncoras.' }] },
     { id: 'a13', act: 13, title: 'XIII — Quem Fechou a Porta', steps: [
       { t: 'talk', npc: 'Brann', d: 'Ajude Brann a começar a reconstrução.', say: ['A estrada ainda tem pó dourado. Vamos reconstruir.'] },
-      { t: 'go', d: 'Ergam o Marco da Reconstrução junto a Brann e aos sobreviventes na muralha de {cidade}.', verb: 'CONCLUIR A RECONSTRUÇÃO COM BRANN', rebuild456: true, zone: 'edge',
+      { t: 'go', d: 'Erga o Marco da Reconstrução junto a Brann e aos sobreviventes na muralha de {cidade}.', verb: 'CONCLUIR A RECONSTRUÇÃO COM BRANN', rebuild456: true, zone: 'edge',
         done: 'Brann: — As muralhas estão de pé e as cinco Capitais respiram aliviadas.' },
       { t: 'talk', npc: 'Mira', d: 'Veja como estão os feridos com Mira.', say: ['Pela primeira vez em muito tempo: só feridos, nenhum desaparecido.'] },
       { t: 'talk', npc: 'Lyra', d: 'Registre o resultado com Lyra.', say: ['Vou escrever seu nome na parede. Ninguém tinha fechado a porta antes de você, {nome}.'] }] }

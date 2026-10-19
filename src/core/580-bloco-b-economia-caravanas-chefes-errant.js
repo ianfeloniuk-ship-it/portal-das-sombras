@@ -95,7 +95,7 @@ const MONSTERHUNT217=['Atravessei a fenda há cem anos. Hoje caço os que vieram
 function visit217(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d>40*CITYK)return;const V=profile.visited217=profile.visited217||{};if(!V[n.c.id]){V[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z,cap:!!n.c.capital};store.set('pds2_profile',profile);if(n.c.capital&&n.c.name!=='Aster'){storyCh220('act9');bigText(n.c.name.toUpperCase(),1800);showSys('Você chegou a <b>'+n.c.name+'</b>. As capitais guardam o comércio da região e uma Carroça da Ordem para viajar.')}}}
 /* v219 (Ian): preço só pela distância, e crescente (viagem longa pesa). */
 function travelCost219(km){return servicePrice265('travel',{km})}
-function travelView217(){const V=profile.visited217||{},P=player;let h='<div class="sysline">Teren, cocheiro da Ordem, leva você a qualquer cidade que já visitou. O preço sobe com a distância e já inclui os impostos e preços locais.</div>';
+function travelView217(){const V=profile.visited217||{},P=player;let h='<div class="sysline">Teren, cocheiro da Ordem, leva você a qualquer cidade que já visitou. Preço e tempo aumentam com a distância. A viagem avança o relógio em até meio dia e pode virar a data. O valor já inclui as tarifas locais.</div>';
  const L2=Object.entries(V).map(([id,v])=>({id,...v,d:Math.hypot(v.x-P.x,v.z-P.z)})).filter(v=>v.d>200).sort((a,b)=>a.d-b.d);
  for(const v of L2){const km=v.d/1000,cost=travelCost219(km);h+=row((v.cap?'★ ':'')+gearText(v.n),km.toFixed(1)+' km',btn(fmt(cost)+' ouro','travel217',v.id,run.gold>=cost))}
  if(!L2.length)h+='<div class="sysline">Visite outras cidades para liberar destinos.</div>';openModal('CARROÇA DA ORDEM',h)}

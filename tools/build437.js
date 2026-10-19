@@ -13,21 +13,21 @@
       glb: 'fogueira', h: 0.75, w: 1.4, r: 2.8,
       cost: { pedra: 4, lenha: 2 },
       packable: true,
-      d: 'Aquece contra o frio extremo (biomes295), ilumina a noite/fenda, afasta predadores fotofóbicos, ferve/destila água e cozinha carnes, peixes e rações.'
+      d: 'Consome lenha para aquecer, iluminar, cozinhar e tratar água. Afasta criaturas sensíveis à luz.'
     },
     abrigo: {
       n: 'Tenda / Abrigo Portátil de Couro e Galhos',
       glb: 'abrigo', h: 1.85, w: 2.6, r: 3.0,
       cost: { galho: 4, couro: 2, corda: 1 },
       packable: true,
-      d: 'Permite dormir na natureza ou dentro das Fendas para curar ferimentos, avançar o tempo e remover a penalidade de Cansaço (v287). Recolha com F ao partir.'
+      d: 'Durma para recuperar vida e aliviar o Cansaço. O tempo avança enquanto você descansa. Recolha a tenda ao partir.'
     },
     varal: {
       n: 'Varal de Secagem Portátil',
       glb: 'varal', h: 1.65, w: 2.0, r: 2.6,
       cost: { galho: 4, corda: 2 },
       packable: true,
-      d: 'Cura Carne Crua → Carne Seca e Peixe Cru → Peixe Defumado ao calor da fumaça (duram 10 a 14 dias sem estragar). Recolha com F ao terminar.'
+      d: 'Transforma carne em Carne Seca e peixe em Peixe Defumado. Duram mais que os alimentos crus; calor, Miasma e conservação alteram a duração.'
     },
     bancada: {
       n: 'Bancada Rústica de Campo',
@@ -210,7 +210,7 @@
     }
     try { sfx('step'); if (typeof floater === 'function') floater(b.x, b.z, 'RECOLHIDO!', '#a8e6a1', true); } catch (_) {}
     if (!silent) {
-      toast('<b>[ACAMPAMENTO PORTÁTIL]</b> <b>' + def.n + '</b> recolhido(a) para a ' + (nearCart ? 'mochila/carrinho' : 'mochila') + ' — bioma limpo!');
+      toast('<b>[ACAMPAMENTO PORTÁTIL]</b> <b>' + def.n + '</b> recolhido(a) para a ' + (nearCart ? 'mochila/carrinho' : 'mochila') + '.');
     }
     Surv437.save();
     return true;
@@ -226,7 +226,7 @@
       }
     }
     if (countPacked > 0) {
-      toast('<b>[ACAMPAMENTO RECOLHIDO]</b> ' + countPacked + ' estrutura(s) guardada(s) de volta na mochila/carrinho. O bioma ficou 100% limpo!');
+      toast('<b>[ACAMPAMENTO RECOLHIDO]</b> ' + countPacked + ' estrutura(s) guardada(s) de volta na mochila/carrinho.');
       if (typeof modalOpen !== 'undefined' && modalOpen) closeModal();
       return true;
     }
@@ -278,7 +278,7 @@
     const def = STRUCTS[b.kind]; if (!def) return;
     activeModalStruct = b;
     view = () => openStructModal(b);
-    let h = '<div class="sysline">' + def.d + '<br><small style="color:#a8e6a1">💡 Dica: Ao terminar de descansar ou cozinhar, aperte <b>F</b> (ou clique em Recolher) para guardar na mochila/carrinho e deixar o bioma limpo.</small></div>';
+    let h = '<div class="sysline">' + def.d + '<br><small style="color:#a8e6a1">Use <b>Recolher</b> para desmontar e recuperar os materiais antes de partir.</small></div>';
 
     if (b.kind === 'fogueira') {
       const lit = (b.fuel || 0) > 0;

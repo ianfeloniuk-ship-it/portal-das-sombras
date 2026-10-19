@@ -196,8 +196,8 @@
     view = () => open();
     const used = w();
     let h = '<div class="sysline">⚖ Carga no Carrinho: <b>' + used.toFixed(1) + ' / ' + cap() + ' kg</b> · Estrutura: <b>' + Math.round(c.hp) + '%</b><br>' +
-      '🧊 <b>Caixa de Salmoura Ativa:</b> Alimentos guardados nos slots do Carrinho de Carga estragam <b>75% mais devagar</b> enquanto você viaja até a porta da Fenda!<br>' +
-      (c.pulling ? '<b style="color:#ffd54f">Você está puxando o carrinho.</b> Solte-o na porta da Fenda antes de entrar no Outro Mundo.' : 'Carrinho estacionado (visível no minimapa).') + '</div>';
+      '🧊 <b>Caixa de Salmoura Ativa:</b> Os alimentos guardados aqui estragam <b>75% mais devagar</b>.<br>' +
+      (c.pulling ? '<b style="color:#ffd54f">Você está puxando o carrinho.</b> Ao entrar numa Fenda, ele fica estacionado do lado de fora. Leve as provisões na mochila.' : 'Carrinho estacionado (visível no minimapa).') + '</div>';
 
     h += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">' +
       '<button class="btn hot" id="ctPull">' + (c.pulling ? 'Soltar / Estacionar Carrinho (F)' : 'Puxar Carrinho (F)') + '</button>' +
@@ -217,7 +217,7 @@
         const stg = Surv437.freshStage(pct);
         fHtml = ' · <span style="color:' + stg.col + ';font-weight:700">' + stg.name + ' ' + pct + '%</span>';
       }
-      h += row('<b>' + it.n + '</b> ×' + n + ' <small>(' + (it.w * n).toFixed(1) + ' kg)</small>' + fHtml, 'Guardado na Caixa de Salmoura do carrinho',
+      h += row('<b>' + it.n + '</b> ×' + n + ' <small>(' + (it.w * n).toFixed(1) + ' kg)</small>' + fHtml, '',
         '<button class="btn" data-cget="' + k + ':1">Pegar 1</button> <button class="btn hot" data-cget="' + k + ':' + n + '">Pegar Tudo</button>');
     }
 

@@ -1,3 +1,16 @@
+## v469 — Fendas Infinitas: sinal no horizonte (Soberano/retorno), reposicionamento elástico invisível, colisão física sólida em pedras/cristais e revisão geral de textos, 19/10/2026
+- Pedido de Ian:
+  1. Localização do Soberano nas Fendas Infinitas (Combinação A+B): indicador orgânico sem GPS fixo (feixe vertical pulsante para o Soberano e verde-água para o retorno) + reposicionamento elástico invisível (150m–300m à frente) ao explorar para longe sem combate.
+  2. Colisão física sólida em pedras, cristais e estruturas geradas nas Fendas (altura com terrH/floor344/stepVertical357, contorno e pulo).
+  3. Revisão geral de textos: Fendas normais vs portais vermelhos, passagem do tempo na viagem de carroça e expedições, atributos só por treino e guia completo de conservação de alimentos, água tratada, cantis, carrinho e acampamento.
+- Mudanças técnicas:
+  - `tools/otherworld460.js`: feixe vertical de energia (`st.beam469`) no Soberano/Núcleo com pulso de opacidade e feixe verde-água (`st.exitBeam469`) na Fenda de retorno de Fendas normais; lógica elástica em `guide(dt)` que reposiciona o Soberano 180m–250m adiante na direção da caminhada se o jogador se afastar >350m sem combate; travamento do reposicionamento após início do combate (`engaged469`); gerador de colisões sólidas (`addSolid` / `dropSolids`) para pedras e cristais GLB registrados na grade espacial (`solidHash`), com altura de colisão compatível com o salto do jogador; descarregamento de chunks sem deixar colisores fantasmas.
+  - `src/core/170-colisao.js`: integração do `freeAt` e da altura da superfície nas Fendas infinitas.
+  - `tools/cart437.js` e `tools/survival437.js`: painel expansível com tutorial completo e objetivo de sobrevivência (como tratar água no fogo, estágios de frescor da comida, resina, alforjes e salmoura no carrinho), revisão das descrições dos cantis.
+  - `src/core/620-janelas.js` e `src/core/580`: explicação clara da Carroça da Ordem (tempo e calendário de até meio dia na viagem), modal de portais distinguindo Fendas normais e portais vermelhos.
+  - `tools/attrs462.js`: descrições dos 9 atributos atualizadas para refletir treino direto e marcos.
+- Testes: Playwright em Chromium/Edge (`tools/test-fendas469.cjs`), 35 checagens aprovadas (feixe, reposicionamento, colisão, pulo, persistência após combate, descarregamento de chunks e variantes de expedição: standard, hunt, combat, core, floors, rupture). Prints gerados: proof-fendas469.png, proof-suprimentos469.png, proof-status469.png.
+
 ## v468 — Golpe com mais peso: achatamento, rastro branco na vida e som de combo, 19/10/2026
 - Pedido de Ian: itens 1 a 3 do PDF "Técnicas de Instagram para o Primeva" (Drive, pasta Referências - Técnicas (Instagram)). A v459 já tinha flash, hitstop, tremor, faíscas e números de dano; esta versão completa o que faltava.
 - `tools/juice468.js` (novo, ?v=468, carregado depois da impact459; envolve `hurtEnemy` e `bar`): (1) o monstro atingido achata e estica por 0,15 s (0,2 s no crítico) e volta ao tamanho exato de antes; (2) rastro branco atrasado nas barras de vida — HUD do jogador (`#hpb`), barra do chefe (`#bb`) e barrinhas sobre monstros, aliados e jogador (espera 0,35 s e alcança a barra); (3) som: camada grave no impacto + "tic" que sobe 2 semitons a cada acerto seguido (até 8), zera após 1,1 s sem acertar.

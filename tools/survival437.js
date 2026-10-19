@@ -51,8 +51,8 @@
     caixa_salmoura:   { n: 'Caixa de Salmoura (Carrinho)',   w: 1.5, cat: 'tool', cartUpgrade: true, d: 'Compartimento para o Carrinho de Carga: alimentos guardados nos slots do carrinho estragam 75% mais devagar.' },
 
     /* Progressão de Cantis e Ferramentas de Sobrevivência */
-    cantil:         { n: 'Odre de Couro Simples',   w: 1.0,  cat: 'tool', tool: true, canteenTier: 1, d: 'Guarda 4 goles. Pode congelar no frio extremo de Ymiria até aquecer na fogueira e evapora mais rápido no deserto de Zahar.' },
-    cantil_ferro:   { n: 'Cantil de Ferro',         w: 1.4,  cat: 'tool', tool: true, canteenTier: 2, d: 'Maior capacidade (8 goles) e ferve/destila água na metade do tempo.' },
+    cantil:         { n: 'Odre de Couro Simples',   w: 1.0,  cat: 'tool', tool: true, canteenTier: 1, d: 'Guarda 4 goles. Encha em uma fonte e trate na fogueira. A água pode congelar no frio ou evaporar no calor.' },
+    cantil_ferro:   { n: 'Cantil de Ferro',         w: 1.4,  cat: 'tool', tool: true, canteenTier: 2, d: 'Guarda 8 goles e trata a água duas vezes mais rápido junto à fogueira.' },
     cantil_termico: { n: 'Cantil Térmico Isolado',  w: 1.5,  cat: 'tool', tool: true, canteenTier: 3, d: 'Guarda 10 goles. Impede que a água congele na neve ou evapore no deserto e triplica (3×) a duração da potência dos chás medicinais.' },
     machado:        { n: 'Machado de Pedra',        w: 2.2,  cat: 'tool', tool: true, dur: 28, d: 'Derruba árvores para obter Toras e Feixes de Lenha (os tocos regeneram naturalmente).' },
     picareta:       { n: 'Picareta Rústica',        w: 2.6,  cat: 'tool', tool: true, dur: 24, d: 'Quebra rochas brutas e extrai Lascas de Cristal Frio.' },
@@ -1138,13 +1138,13 @@
         ? 'Goteira mineral e poça subterrânea da Fenda. Contém <b>Água Bruta</b> — ferva na Fogueira do seu Acampamento Portátil!'
         : 'Beber água bruta direto do rio/lago causa <b>Parasitas</b>. Use o <b>' + tierName + '</b> e ferva na Fogueira.') + '</div>';
     if (!sea) {
-      h += row('Beber Água Bruta Direto', '+22 Sede, mas causa Parasitas/Corrupção por 90s.', '<button class="btn" id="w437raw">Beber Bruta</button>');
+      h += row('Beber Água Bruta Direto', '+22 Sede, mas causa Parasitas por 90 segundos.', '<button class="btn" id="w437raw">Beber Bruta</button>');
     }
     h += row(sea ? 'Encher com Água Salgada' : 'Encher ' + tierName, 'Guarda ' + canteenMaxSips() + ' goles para ferver ou destilar na Fogueira.', '<button class="btn hot" id="w437fill">Encher Cantil</button>');
     if (count('vara') > 0) {
       h += row('Pescar com Vara', 'Tenta fisgar Peixe Cru para assar na Fogueira ou defumar no Varal Portátil.', '<button class="btn hot" id="w437fish">Pescar</button>');
     }
-    openModal(sea ? 'ÁGUA DO MAR & PESCA' : drip ? 'FONTE DA FENDA' : 'ÁGUA FRESCA & PESCA', h);
+    openModal(sea ? 'ÁGUA DO MAR & PESCA' : drip ? 'FONTE DA FENDA' : 'ÁGUA E PESCA', h);
     const bRaw = document.getElementById('w437raw');
     if (bRaw) bRaw.onclick = () => { s.thirst = Math.min(100, s.thirst + 22); s.sickT = 90; toast('Você bebeu água bruta (+22 Sede) e contraiu Parasitas!'); closeModal(); save(); };
     const bFill = document.getElementById('w437fill');
@@ -1212,7 +1212,7 @@
     const kindLabel = { limpa: 'Água Fervida/Potável', cha: 'Chá Térmico Medicinal', antidoto: 'Antídoto de Ervas', suja: 'Água Bruta (não fervida)', salgada: 'Água Salgada (destilar)' }[s.canteen.kind] || 'Vazio';
 
     let h = '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">' +
-      '<button class="btn ' + (tab === 'inv' ? 'hot' : '') + '" id="svTabInv">Mochila, Frescor & Cantil</button>' +
+      '<button class="btn ' + (tab === 'inv' ? 'hot' : '') + '" id="svTabInv">Mochila e cantil</button>' +
       '<button class="btn ' + (tab === 'craft' ? 'hot' : '') + '" id="svTabCraft">Artesanato & Bolsas (' + (bench ? 'Bancada' : fire ? 'Fogueira' : 'À Mão') + ')</button>' +
       '<button class="btn" id="svTabBuild">Acampamento Portátil [B]</button>' +
       (window.Cart437 ? '<button class="btn" id="svTabCart">Carrinho de Carga</button>' : '') +
@@ -1231,6 +1231,7 @@
       (s.sickT > 0 ? '<br><span style="color:#ff8fa3">☣ Parasitas/Corrupção: beba Chá Térmico, Antídoto ou Água Fervida! (' + Math.ceil(s.sickT) + 's)</span>' : '') +
       '</div>';
 
+    h += '<details class="sysline"><summary>Como conservar comida e tratar água</summary><p>Fome e Sede mostram suas reservas: mantenha as barras cheias. Fresca (60–100%): efeito completo; amanhecida (25–59%): metade da nutrição, sem bônus; estragada (1–24%): pouca nutrição e intoxicação; podre (0%): não alimenta.</p><p>Alforje de Sal: deterioração 50% menor. Mochila Térmica: 80% menor e proteção contra Miasma. Carrinho: 75% menor para a comida guardada nele. Um pacote de resina interrompe a deterioração até ser aberto.</p><p>Encha o cantil em uma fonte. Na fogueira acesa, ferva água bruta ou destile água salgada. Água bruta causa Parasitas; a água tratada é segura. Odre: 4 goles; ferro: 8; térmico: 10, sem congelamento ou evaporação.</p><p>Acampamento [B]: fogueira para cozinhar e tratar água; tenda para descansar; varal para conservar carne e peixe; bancada para fabricar equipamentos. Recolha as estruturas antes de partir.</p></details>';
     if (tab === 'inv') {
       // Bloco do Cantil + Barra de Potência/Calor dos Chás
       const potBar = (s.canteen.kind === 'cha' || s.canteen.kind === 'antidoto') && s.canteen.potency > 0
@@ -1252,7 +1253,7 @@
         const bActs = [];
         if (count('involucro_resina') > 0) bActs.push('<button class="btn hot" id="svSealWrap">Lacrar até 4 Refeições (0% perda)</button>');
         if (count('pacote_lacrado') > 0) bActs.push('<button class="btn hot" id="svUnsealWrap">Abrir Pacote (' + count('pacote_lacrado') + ')</button>');
-        h += row('📦 Invólucros Herméticos de Resina', 'Lacre até 4 refeições para que NÃO estraguem (0% perda) durante a viagem ou dentro do Miasma da Fenda.', bActs.join(' '));
+        h += row('📦 Invólucros Herméticos de Resina', 'Preserva o frescor atual de até 4 refeições até abrir o pacote. Não recupera comida já estragada.', bActs.join(' '));
       }
 
       if (count('tocha') > 0) {
@@ -1291,7 +1292,7 @@
       });
     }
 
-    openModal('SOBREVIVÊNCIA, FRESCOR & EXPEDIÇÃO', h);
+    openModal('SUPRIMENTOS E SOBREVIVÊNCIA', h);
     const ti = document.getElementById('svTabInv'); if (ti) ti.onclick = () => open('inv');
     const tc = document.getElementById('svTabCraft'); if (tc) tc.onclick = () => open('craft');
     const tb = document.getElementById('svTabBuild'); if (tb) tb.onclick = () => { closeModal(); window.Build437?.open(); };

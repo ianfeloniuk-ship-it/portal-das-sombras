@@ -433,5 +433,7 @@ function tutorialTick93(dt){if(!profile.tips93||profile.creationPending91||modal
  else if(!seen.combat&&near){id='combat';title='Combate';body=(touch?'Segure ATACAR':'Clique ou segure o botão esquerdo do mouse')+' para atacar. '+(touch?'':keyLabel(keyOf('jump'))+' pula. ')+(touch?'ESQUIVA':keyLabel(keyOf('dodge')))+' ajuda a evitar golpes.'}
  else if(!seen.style&&canUseMagicStyle()&&!near){id='style';title='Seu ataque básico';body=keyLabel(keyOf('style'))+' alterna entre físico e mágico. Escolha fogo, gelo e outros estilos aprendidos em Personagem → Ataque básico. As habilidades funcionam em ambos.';profile.styleTut71=true}
  else if(!seen.world&&L.mode==='world'&&!near&&nearestCity(player.x,player.z).d>40*CITYK){id='world';title='Exploração';body='O Mapa mostra os portais. Quanto mais longe das cidades, mais perigosos os monstros.'}
+ else if(!seen.training&&!near){id='training';title='Evolução por uso';body='Os 9 atributos crescem com suas ações. Complete a meta de um atributo para ganhar +1 nele. Subir de nível dá 1 ponto de habilidade e o crescimento da classe. Veja o treino de cada atributo no Status.'}
+ else if(!seen.supplies&&!near){id='supplies';title='Preparar a expedição';body='[V] abre os suprimentos: confira comida e água tratada. [B] monta o acampamento. O carrinho fica fora da Fenda; leve o necessário na mochila.'}
  if(!id)return;seen[id]=true;tutorialDelay93=25;store.set('pds2_profile',profile);toast('<div class="guide93"><strong>[TUTORIAL] '+title+':</strong> <p>'+body+'</p></div>',6500)}
 

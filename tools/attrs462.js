@@ -55,7 +55,7 @@
     for: 'golpes corpo a corpo, cortar árvores e minerar',
     des: 'acertos à distância, pescar e fabricar',
     agi: 'esquivar, nadar e andar em Passo Silencioso',
-    per: 'golpes críticos, colher recursos e explorar/rastrear salas nas Fendas',
+    per: 'golpes críticos, colher recursos e explorar e rastrear áreas nas Fendas',
     int: 'magias e habilidades elementais, cozinhar e ferver chás',
     vit: 'gastar e recuperar vida, estamina e fôlego',
     res: 'receber/bloquear dano físico, puxar o carrinho e aguentar frio/calor',
@@ -192,7 +192,7 @@
     statDesc = function () {
       const d = sd0.apply(this, arguments);
       try {
-        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], 'Como sobe: treinando com ' + TRAIN_TXT[k] + ' (não existe ponto para distribuir). ' + d[k][1] + ' Sobrevivência e exploração: ' + survText(k) + ' Marcos a cada 25 pontos: ' + (tier(k) ? 'patamar ' + tier(k) + ', cada ponto rende ×' + num(tierMul(k)) + ' nesses bônus.' : 'no 25º ponto cada ponto passa a render ×1,2 nesses bônus.')];
+        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], 'Treino: ' + TRAIN_TXT[k] + '. ' + d[k][1].replace(/^Como sobe:[^.]*\.\s*/, '') + ' Sobrevivência e exploração: ' + survText(k) + ' Marcos a cada 25 pontos: ' + (tier(k) ? 'patamar ' + tier(k) + ', cada ponto rende ×' + num(tierMul(k)) + ' nesses bônus.' : 'após os primeiros 25, os próximos pontos rendem ×1,2 nesses bônus.')];
       } catch (_) {}
       return d;
     };

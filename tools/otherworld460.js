@@ -29,7 +29,33 @@
 
   const absolute = o => { o.userData.terrainAbsolute245 = true; return o; };
   /* pedra por altura sem passar pela troca automática da v446 (que põe o pedregulho do Tripo sem a cor do mundo): dentro da Fenda o EW mantém a pedra tingida */
-  const EHk = (b, k, x, y, z, ry, H, t) => { const m = ENV.m[k]; return m ? EW(b, k, x, y, z, ry, H * m.w / m.h, t) : 0; };
+  // Each streamed group owns its colliders; unloading it removes them as well.
+  function addSolid(parent, c) {
+    const st = L.ow460; if (!st || !parent.parent) return;
+    const cells = [];
+    for (let x = Math.floor((c.x-c.r)/HB); x <= Math.floor((c.x+c.r)/HB); x++)
+      for (let z = Math.floor((c.z-c.r)/HB); z <= Math.floor((c.z+c.r)/HB); z++) {
+        const key = hkey(x,z); let bucket = st.solidHash.get(key);
+        if (!bucket) st.solidHash.set(key, bucket=[]);
+        bucket.push(c); cells.push(key);
+      }
+    (parent.userData.solids469 ||= []).push({c,cells});
+  }
+  function dropSolids(parent) {
+    const hash = L.ow460.solidHash;
+    parent.traverse(o => { for (const {c,cells} of o.userData.solids469 || []) for (const key of cells) {
+      const a = hash.get(key); if (!a) continue; const i = a.indexOf(c); if (i >= 0) a.splice(i,1); if (!a.length) hash.delete(key);
+    } o.userData.solids469 = []; });
+  }
+  const solidBatch = (parent) => { const b = new EnvBatch(); b.solidParent469 = parent; return b; };
+  function solidEnv(b,k,x,y,z,ry,scale) {
+    if (b.solidParent469 && /rock|rubble|column|pillar|statue|tree|cactus|stump|log_|mushroom/.test(k))
+      envSolid357(c => addSolid(b.solidParent469,c), k,x,y,z,ry,scale);
+    return scale;
+  }
+  const EHs = (b,k,x,y,z,ry,H,t) => solidEnv(b,k,x,y,z,ry,EH(b,k,x,y,z,ry,H,t));
+  const EWs = (b,k,x,y,z,ry,w,t) => solidEnv(b,k,x,y,z,ry,EW(b,k,x,y,z,ry,w,t));
+  const EHk = (b,k,x,y,z,ry,H,t) => { const m=ENV.m[k]; return m ? EWs(b,k,x,y,z,ry,H*m.w/m.h,t) : 0; };
 
   /* ---------- GLB do repositório (Tripo): cristais, rocha flutuante, cactos ---------- */
   const glbCache = new Map();
@@ -75,10 +101,22 @@
   }
   function placeGlb(parent, path, H, x, y, z, ry, mat) {
     return glb(path).then(tpl => {
-      if (!tpl || !parent.parent) return null;
+      if (!tpl || !parent.parent || !L.ow460 || (parent !== L.group && !L.group.getObjectById(parent.id))) return null;
       const g = tpl.clone(true), k = H / tpl.userData.h; g.scale.setScalar(k);
       g.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(mat) : mat(o.material); });
-      const h = new T.Group(); h.position.set(x, y, z); h.rotation.y = ry; h.add(g); parent.add(h); return h;
+      const h = new T.Group(); h.position.set(x, y, z); h.rotation.y = ry; h.add(g); h.userData.terrainRoot245 = true; parent.add(h);
+      // Floating rocks are scenery above the player; ground models are solid.
+      if (y < 5) {
+        h.updateWorldMatrix(true,true);
+        const box = new T.Box3().setFromObject(h), size = box.getSize(new T.Vector3());
+        const radius = Math.max(.12, Math.min(size.x,size.z)*.48), length = Math.max(size.x,size.z);
+        const count = Math.max(1,Math.ceil(length/(radius*1.4)));
+        for (let i=0;i<count;i++) {
+          const offset=count===1?0:(i/(count-1)-.5)*Math.max(0,length-2*radius);
+          addSolid(parent,{x:(box.min.x+box.max.x)/2+(size.x>=size.z?offset:0),z:(box.min.z+box.max.z)/2+(size.z>size.x?offset:0),r:radius,h:box.max.y,anchorX357:h.matrixWorld.elements[12],anchorZ357:h.matrixWorld.elements[14],prop357:path});
+        }
+      }
+      return h;
     });
   }
 
@@ -283,12 +321,12 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   function layout(g, R, variant, wid) {
     const TER = window.TER245, s = ((g.seed >>> 0) % 997) * .0063 + .3;
     TER.OW.value.set(1, 18 + R() * 14, 6.5 + R() * 2.5, s); // x liga, y altura das cordilheiras, z colinas, w semente
-    // chegada perto da origem; a Cidadela fica longe (900–1300 m) numa direção qualquer — sem marca nenhuma
-    const ex = (R() - .5) * 60, ez = (R() - .5) * 60, aB = R() * TAU, dB = 900 + R() * 400 + Math.min(9, g.rank || 0) * 20;
+    // Encontro inicial entre 190 e 280 m; terreno e acampamentos continuam infinitos.
+    const ex = (R() - .5) * 60, ez = (R() - .5) * 60, aB = R() * TAU, dB = 190 + R() * 90;
     const bx = ex + Math.cos(aB) * dB, bz = ez + Math.sin(aB) * dB;
     TER.OWB.value.set(ex, ez, bx, bz); TER.on.value = 1;
     const st = { W: WORLDS[wid] || WORLDS.erebo, seed: s, entry: { x: ex, z: ez }, boss: { x: bx, z: bz }, hunt: variant === 'hunt',
-      reserved: [], over: new Map(), cellCache: new Map(), chunkCache: new Map(), chunks: new Map(), queue: [], dyn: new Map(), t: 0, zone: 1, zoneSeen: { 1: true }, lastDay: 0, floats: [] };
+      solidHash: new Map(), reserved: [], over: new Map(), cellCache: new Map(), chunkCache: new Map(), chunks: new Map(), queue: [], dyn: new Map(), t: 0, zone: 1, zoneSeen: { 1: true }, lastDay: 0, floats: [] };
     const room = (x, z, half, kind) => { const c = cellOf(x, z); return { x: c.x - half, y: c.y - half, w: half * 2, h: half * 2, ow: kind, px: x, pz: z }; };
     // rota escondida (curva) da chegada até a Cidadela: acampamentos e sinais ficam perto dela, não em cima
     const px = -(bz - ez) / dB, pz = (bx - ex) / dB, off = (R() - .5) * 500, kx = (ex + bx) / 2 + px * off, kz = (ez + bz) / 2 + pz * off;
@@ -312,7 +350,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     scene.background = new T.Color(W.fog); scene.fog = new T.FogExp2(W.fog, W.fogD);
     hemi.color.setHex(W.hs); hemi.groundColor.setHex(W.hg); hemi.intensity = W.hI; sun.color.setHex(W.sun); sun.intensity = W.sunI; sun.position.set(-60, 70, 80);
     pLight.color.setHex(0xffe2c0); pLight.intensity = 1.1; pLight.distance = 18; L.cave155 = false; /* sem o véu escuro de caverna: é céu aberto */
-    const grp = L.group;
+    const grp = L.group; grp.userData.terrainContainer245 = true;
     grp.add(st.ground = groundMesh(W, st));
     const sky = absolute(new T.Group()); sky.name = 'ow460-sky';
     const dome = new T.Mesh(new T.SphereGeometry(236, 48, 24), skyMat(W)); dome.frustumCulled = false; dome.renderOrder = -20; dome.userData.own = 1; sky.add(dome); st.skyU = dome.material.uniforms;
@@ -328,12 +366,12 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
 
   /* covil do Soberano: ruínas e cristais soltos, sem muralha (ele não fica preso) */
   function buildLair(grp, W, st, R) {
-    const { x: bx, z: bz } = st.boss, B = ENV.ok ? new EnvBatch() : null;
+    const { x: bx, z: bz } = st.boss, B = ENV.ok ? solidBatch(grp) : null;
     for (let i = 0; i < 9; i++) {
       if (R() < .3) continue; const a = i / 9 * TAU + R() * .4, d = 16 + R() * 10, x = bx + Math.cos(a) * d, z = bz + Math.sin(a) * d;
       if (i % 3 === 0) placeGlb(grp, crystalPath(W.cry[i % W.cry.length]), 6 + R() * 6, x, -.4, z, R() * TAU, m => crystalMat(m, W.vein));
-      else if (B) EH(B, ['statue_obelisk', 'statue_columnDamaged', 'column'][i % 3], x, -.3, z, R() * TAU, 4 + R() * 4, W.peak);
-      if (B && R() < .6) EH(B, 'rubble_large', x + 1.2, -.2, z + .6, R() * TAU, 1.1, W.peak);
+      else if (B) EHs(B, ['statue_obelisk', 'statue_columnDamaged', 'column'][i % 3], x, -.3, z, R() * TAU, 4 + R() * 4, W.peak);
+      if (B && R() < .6) EHs(B, 'rubble_large', x + 1.2, -.2, z + .6, R() * TAU, 1.1, W.peak);
     }
     if (B) envOwn(grp, B.mesh(BLDMAT));
     const disc = new T.Mesh(new T.CircleGeometry(14, 96), runeMat(W.vein, .45)); disc.rotation.x = -Math.PI / 2; disc.position.set(bx, .07, bz); disc.renderOrder = 6; disc.userData.own = 1; grp.add(disc);
@@ -342,15 +380,15 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   /* ---------- Pedaços: formações, flora, rochas flutuantes, recursos e acampamentos novos ---------- */
   function buildChunk(cx, cz) {
     const st = L.ow460, W = st.W, grp = new T.Group(), R = mulberry32(hash2(cx * 7 + 3, cz * 13 - 5, st.seed)), d = chunkData(st, cx, cz), inter = [];
-    L.group.add(grp);
+    grp.userData.terrainContainer245 = true; L.group.add(grp);
     if (ENV.ok) {
-      const bigB = new EnvBatch(), treeB = new EnvBatch(), flora = new EnvBatch();
+      const bigB = solidBatch(grp), treeB = solidBatch(grp), flora = solidBatch(grp);
       for (const f of d.forms) {
         if (f.type === 'spire') EHk(bigB, ['rock_tallA', 'rock_tallB', 'rock_tallC'][f.k % 3], f.x, -.4, f.z, f.ry, f.H, W.rock);
-        else if (f.type === 'mesa') EW(bigB, ['rock_largeA', 'rock_largeB', 'rock_largeC', 'rock_largeD'][f.k % 4], f.x, -.6, f.z, f.ry, f.r * 2.3, W.rock);
-        else if (f.type === 'tree') EH(treeB, W.trees[f.k % W.trees.length], f.x, -.2, f.z, f.ry, f.H, W.tint);
-        else if (f.type === 'shroom') EH(treeB, f.k % 2 ? 'mushroom_redGroup' : 'mushroom_tanGroup', f.x, -.1, f.z, f.ry, f.H, W.tint);
-        else if (f.type === 'ruin') { const key = ['statue_obelisk', 'statue_columnDamaged', 'column', 'statue_column', 'pillar_decorated'][f.k % 5]; EH(bigB, key, f.x, -.3, f.z, f.ry, f.H, W.peak); EH(bigB, 'rubble_large', f.x + 1.4, -.2, f.z + .8, f.ry + 1, 1.2, W.peak); }
+        else if (f.type === 'mesa') EWs(bigB, ['rock_largeA', 'rock_largeB', 'rock_largeC', 'rock_largeD'][f.k % 4], f.x, -.6, f.z, f.ry, f.r * 2.3, W.rock);
+        else if (f.type === 'tree') EHs(treeB, W.trees[f.k % W.trees.length], f.x, -.2, f.z, f.ry, f.H, W.tint);
+        else if (f.type === 'shroom') EHs(treeB, f.k % 2 ? 'mushroom_redGroup' : 'mushroom_tanGroup', f.x, -.1, f.z, f.ry, f.H, W.tint);
+        else if (f.type === 'ruin') { const key = ['statue_obelisk', 'statue_columnDamaged', 'column', 'statue_column', 'pillar_decorated'][f.k % 5]; EHs(bigB, key, f.x, -.3, f.z, f.ry, f.H, W.peak); EHs(bigB, 'rubble_large', f.x + 1.4, -.2, f.z + .8, f.ry + 1, 1.2, W.peak); }
         else if (f.type === 'cactus') placeGlb(grp, 'models/tripo-cacto446' + (f.k % 2 ? 'a' : 'b') + '.glb', f.H, f.x, 0, f.z, f.ry, m => rockMat(m, W.tint));
         else if (f.type === 'crystal') { placeGlb(grp, crystalPath(W.cry[f.k % W.cry.length]), f.H, f.x, -.3, f.z, f.ry, m => crystalMat(m, W.vein)); EHk(bigB, 'rock_largeB', f.x, -.6, f.z, f.ry, f.H * .22, W.rock); }
       }
@@ -358,12 +396,12 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       for (let i = 0; i < 130; i++) {
         const x = (cx + R()) * CHK, z = (cz + R()) * CHK; if (nearB(x, z) || d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + .6)) continue;
         const k = W.small[Math.floor(R() * W.small.length)], rocky = k.startsWith('rock') || k === 'bone_A';
-        (rocky ? EHk : EH)(flora, k, x, rocky ? -.05 : 0, z, R() * TAU, rocky ? .25 + R() * .55 : .35 + R() * .7, rocky ? W.peak : W.tint);
+        (rocky ? EHk : EHs)(flora, k, x, rocky ? -.05 : 0, z, R() * TAU, rocky ? .25 + R() * .55 : .35 + R() * .7, rocky ? W.peak : W.tint);
       }
       for (let i = 0; i < 4; i++) {
         const x = (cx + R()) * CHK, z = (cz + R()) * CHK; if (R() < .35 || Math.hypot(x - st.boss.x, z - st.boss.z) < 27 || d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + 2)) continue;
         const k = R() < .55 ? W.trees[Math.floor(R() * W.trees.length)] : (W.part === 'sand' ? 'cactus_short' : 'plant_bushLarge');
-        EH(treeB, k, x, -.1, z, R() * TAU, k.startsWith('tree') ? 2.6 + R() * 2.4 : 1 + R() * 1.4, W.tint);
+        EHs(treeB, k, x, -.1, z, R() * TAU, k.startsWith('tree') ? 2.6 + R() * 2.4 : 1 + R() * 1.4, W.tint);
       }
       envOwn(grp, bigB.mesh(BLDMAT)); envOwn(grp, treeB.mesh(TREEMAT)); envOwn(grp, flora.mesh(FLORAMAT));
     }
@@ -397,7 +435,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   }
   function dropChunk(key) {
     const c = L.ow460.chunks.get(key); if (!c) return;
-    if (c.grp) { try { envDispose(c.grp); } catch (_) {} L.group.remove(c.grp); const fl = L.ow460.floats; for (let i = fl.length - 1; i >= 0; i--) { let p = fl[i].h; while (p && p !== c.grp) p = p.parent; if (p === c.grp) fl.splice(i, 1); } }
+    if (c.grp) { dropSolids(c.grp); try { envDispose(c.grp); } catch (_) {} L.group.remove(c.grp); const fl = L.ow460.floats; for (let i = fl.length - 1; i >= 0; i--) { let p = fl[i].h; while (p && p !== c.grp) p = p.parent; if (p === c.grp) fl.splice(i, 1); } }
     for (const it of c.inter) { const i = L.inter.indexOf(it); if (i >= 0) L.inter.splice(i, 1); }
     L.ow460.chunks.delete(key);
   }
@@ -476,26 +514,75 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     let p = { x: b.x + 4, z: b.z + 3 }; for (let k = 0; k < 12 && !freeAt(p.x, p.z, 1.2); k++) { const a = k * 1.3; p = { x: b.x + Math.cos(a) * (4 + k), z: b.z + Math.sin(a) * (4 + k) }; }
     const it = riftExit(p.x, p.z, false, 'boss');
     try { if (it.grp && window.Rift131) Rift131.open(it.grp); } catch (_) {}
-    setTimeout(() => { if (L.ow460 === st) { bigText('UMA FENDA NOVA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> O Soberano caiu e rasgou uma Fenda nova bem onde morreu: ela leva de volta a Primeva.' + (L.gate?.red ? ' A Fenda por onde você entrou também destrancou.' : ' A Fenda por onde você entrou continua aberta onde estava.') + ' Em 2 minutos este mundo começa a transbordar.', 7500); } }, 900);
+    setTimeout(() => { if (L.ow460 === st) { bigText('UMA FENDA NOVA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> Vitória! Uma nova Fenda de retorno se abriu no local da conclusão.' + (L.gate?.red ? ' O retorno original também está aberto.' : '') + ' Transbordo em 2 minutos.', 7500); } }, 900);
   }
 
   /* o Soberano anda solto em volta do covil; quando te vê, a IA normal de chefe assume */
   function roam(e, dt) {
-    const st = L.ow460; if (!st || e !== bossE || e.dead || e.aggro || st.hunt || L.defense) return false;
+    const st = L.ow460; if (!st || e !== bossE || e.dead || e.aggro || L.defense) return false;
     const dp = Math.hypot(player.x - e.x, player.z - e.z);
     if (!player.dead && dp < 26 && los(e.x, e.z, player.x, player.z)) { e.aggro = true; try { bossAggro(e); } catch (_) {} return false; }
     const r = st.roam || (st.roam = { wp: null, t: 0, stuck: 0, lx: e.x, lz: e.z });
     r.t -= dt;
     if (!r.wp || Math.hypot(r.wp.x - e.x, r.wp.z - e.z) < 2 || r.t <= 0) {
-      for (let k = 0; k < 12; k++) { const a = Math.random() * TAU, d = 40 + Math.random() * 300, x = st.boss.x + Math.cos(a) * d, z = st.boss.z + Math.sin(a) * d; if (freeAt(x, z, 1.2)) { r.wp = { x, z }; break; } }
+      for (let k = 0; k < 12; k++) { const a = Math.random() * TAU, d = 20 + Math.random() * 90, x = (st.roamAnchor || st.boss).x + Math.cos(a) * d, z = (st.roamAnchor || st.boss).z + Math.sin(a) * d; if (freeAt(x, z, 1.2)) { r.wp = { x, z }; break; } }
       r.t = 25 + Math.random() * 30; r.pause = 2 + Math.random() * 5;
     }
     if (r.pause > 0) { r.pause -= dt; animChibi(e.m, { move: 0, atk: 0, dead: 0, wind: 0 }, time); return true; }
+    if (!r.wp) return true;
     const dx = r.wp.x - e.x, dz = r.wp.z - e.z, len = Math.hypot(dx, dz) || 1, sp = Math.min(len, 2.6 * dt);
     e.face = Math.atan2(dx, dz); const x0 = e.x, z0 = e.z; moveEnt(e, dx / len * sp, dz / len * sp);
     if (Math.hypot(e.x - x0, e.z - z0) < sp * .3) { r.stuck += dt; if (r.stuck > 1.2) { r.wp = null; r.stuck = 0; } } else r.stuck = 0;
     animChibi(e.m, { move: 1, atk: 0, dead: 0, wind: 0 }, time); e.m.root.position.set(e.x, 0, e.z); e.m.root.rotation.y = e.face;
     return true;
+  }
+
+  // v469: an in-world resonance, never a HUD/map marker.
+  function resonance(col) {
+    const mat = new T.MeshBasicMaterial({color:col,transparent:true,opacity:.35,depthWrite:false,fog:false,blending:T.AdditiveBlending,side:T.DoubleSide});
+    const m = absolute(new T.Mesh(new T.CylinderGeometry(.65,2.8,100,12,1,true),mat));
+    m.userData.own = 1; m.frustumCulled = false; L.group.add(m); return m;
+  }
+  function guide(dt) {
+    const st=L.ow460, e=bossE && !bossE.dead && !bossE.gone ? bossE : null;
+    if (!st || player.dead) return;
+    const last=st.lastPlayer469 || {x:player.x,z:player.z}, dx=player.x-last.x, dz=player.z-last.z, moved=Math.hypot(dx,dz);
+    if (moved>.01 && moved<20) st.heading469={x:dx/moved,z:dz/moved};
+    st.lastPlayer469={x:player.x,z:player.z};
+    if (e && (e.aggro || e.hp<e.maxhp || e.act || L.expedition?.retreat || L.expedition?.lure)) st.engaged469=true;
+    const distance=e?Math.hypot(e.x-player.x,e.z-player.z):0;
+    st.relocateCooldown469=Math.max(0,(st.relocateCooldown469||0)-dt);
+    // The creature is hidden by distance/fog. The resonance fades out before shifting.
+    if (e && !st.engaged469 && !L.bossDead && !L.defense && distance>350 && !st.relocateCooldown469) {
+      st.shiftFade469=(st.shiftFade469||0)+dt;
+      if(st.shiftFade469>=1) {
+        const dir=st.heading469 || {x:Math.sin(player.face||0),z:Math.cos(player.face||0)};
+        for(let k=0;k<80;k++) {
+          const angle=Math.atan2(dir.z,dir.x)+(k%2?1:-1)*Math.floor(k/2)*.035, d=180+(k%7)*10;
+          const x=player.x+Math.cos(angle)*d,z=player.z+Math.sin(angle)*d;
+          if(!freeAt(x,z,(e.r||1)+2) || !freeAt(x+3,z,1) || !freeAt(x-3,z,1) || !freeAt(x,z+3,1) || !freeAt(x,z-3,1)) continue;
+          // Reject steep surfaces; keep the new position reachable on foot.
+          if(Math.max(Math.abs(terrH(x+2,z)-terrH(x-2,z)),Math.abs(terrH(x,z+2)-terrH(x,z-2)))>3) continue;
+          e.x=x;e.z=z;e.m.root.position.set(x,0,z);e.path276=null;e.detour276=null;e.block276=0;
+          st.roamAnchor={x,z};st.roam=null;
+          if(L.expedition?.s.type==='hunt'){L.expedition.target=null;L.expedition.path=null;}
+          st.relocateCooldown469=8;break;
+        }
+        st.shiftFade469=0;
+      }
+    } else st.shiftFade469=0;
+    const target=L.bossDead ? L.exits.find(it=>it.ow460==='boss') : e || (L.defense ? L.defense.core : null);
+    if(target) {
+      const beam=st.beam469 ||= resonance(st.W.vein);
+      beam.visible=true;beam.position.set(target.x,terrH(target.x,target.z)+50,target.z);
+      beam.material.opacity=(.22+.12*Math.sin(st.t*1.7))*(1-(st.shiftFade469||0));
+    } else if(st.beam469) st.beam469.visible=false;
+    // A different, shorter resonance helps find the original exit in normal rifts.
+    if(st.exit && !st.exit.locked && !L.bossDead) {
+      const exitBeam=st.exitBeam469 ||= resonance(0x70ffd6);
+      exitBeam.scale.set(.7,.55,.7);exitBeam.position.set(st.exit.x,terrH(st.exit.x,st.exit.z)+27.5,st.exit.z);
+      exitBeam.material.opacity=.16+.09*Math.sin(st.t*1.1);
+    } else if(st.exitBeam469) st.exitBeam469.visible=false;
   }
 
   /* saindo pela Fenda de entrada sem matar o Soberano: ela some atrás de você em Primeva e reabre em outro lugar perto */
@@ -511,7 +598,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     try { if (window.RIFT131_ENABLE && window.Rift131) { const ghost = { ...g, id: ++gateSeq, mesh: null, ring: null, sw: null, dead: false, life: 120 }; delete ghost.cleared; gateMesh(ghost); ghost.closing131 = true; gates.push(ghost); if (ghost.mesh) Rift131.close(ghost.mesh, false); } } catch (_) {}
     try { removeGateMesh(g); } catch (_) {}
     g.x = spot.x; g.z = spot.z;
-    setTimeout(() => toast('<b>[FENDA]</b> A Fenda se fechou atrás de você e reabriu em outro lugar por perto. O Soberano daquele mundo continua vivo.', 6500), 1600);
+    setTimeout(() => toast('<b>[FENDA]</b> A Fenda se fechou atrás de você e reabriu em outro lugar por perto. A expedição ainda não foi concluída.', 6500), 1600);
     return true;
   }
 
@@ -524,10 +611,10 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     const day = L.riftDays456 || 1;
     let line;
     if (L.brk) line = 'O mundo está transbordando · volte por uma Fenda';
-    else if (L.bossDead) line = 'O Soberano caiu · uma Fenda nova abriu onde ele morreu · transbordo em ' + fmtT(Math.max(0, L.closeT));
-    else if (L.defense) line = 'O Núcleo da Fenda fica no covil deste mundo · ache e defenda · ou volte pela Fenda por onde entrou';
-    else if (L.combat117 && !L.combat117.spawned) line = 'Derrote os acampamentos para despertar o Soberano · ou volte pela Fenda por onde entrou';
-    else line = L.gate?.red ? 'O Soberano anda solto · portal vermelho: a Fenda de volta só abre quando ele cair' : 'O Soberano anda solto por este mundo · ache a Fenda por onde entrou para voltar';
+    else if (L.bossDead) line = 'Saída aberta no local da vitória · transbordo em ' + fmtT(Math.max(0, L.closeT));
+    else if (L.defense) line = 'Siga o feixe até o Núcleo · defenda-o para concluir';
+    else if (L.combat117 && !L.combat117.spawned) line = 'Derrote os inimigos marcados como alvo para despertar o Soberano';
+    else line = L.gate?.red ? 'Siga o feixe do Soberano · derrote-o para abrir a saída' : 'Soberano: feixe pulsante · retorno: feixe verde-água';
     let rest = String(obj || '');
     if (/^(\[[^\]]*\] )?Salas /.test(rest) || /^(\[[^\]]*\] )?Transbordo em /.test(rest) || /^(\[[^\]]*\] )?TRANSBORDO/.test(rest)) rest = '';
     return st.name + ' · Dia ' + day + ' · ' + ZONES[st.zone - 1] + '\n' + line + (rest ? '\n' + rest : '');
@@ -549,7 +636,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   /* ---------- Por quadro ---------- */
   function tick(dt) {
     const st = L.ow460; if (!st || L.mode !== 'dungeon') return;
-    uT.value += dt; st.t += dt;
+    uT.value += dt; st.t += dt; guide(dt);
     const a = st.arrival;
     if (a) {
       a.t += dt; if (a.grp) try { Rift131.update(a.grp, dt); } catch (_) {}
@@ -557,7 +644,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       if (a.t > 4.6) {
         if (a.grp) { try { Rift131.dispose(a.grp); } catch (_) {} L.group.remove(a.grp); }
         st.arrival = null;
-        toast('<b>[OUTRO MUNDO · ' + st.name + ']</b> A Fenda sumiu atrás de você e reapareceu em algum lugar deste mundo sem fim. Ache-a para voltar' + (L.gate?.red ? ' (portal vermelho: ela só destranca quando o Soberano cair)' : '') + ', ou cace o <b>Soberano</b>, que anda solto por aqui: a morte dele rasga uma Fenda nova. ' + (st.weather ? '<i>' + st.weather + '.</i>' : ''), 9500);
+        toast('<b>[' + st.name + ']</b> ' + (L.gate?.red ? 'Portal vermelho: conclua o objetivo para sair. ' : 'O feixe verde-água indica a Fenda de retorno. ') + (L.defense ? 'Siga o feixe pulsante até o Núcleo.' : L.combat117 && !L.combat117.spawned ? 'Derrote os inimigos da expedição para despertar o Soberano.' : 'Siga o feixe pulsante até o Soberano. Derrotá-lo abre uma nova saída.'), 8000);
       }
     }
     // chão acompanha o jogador (em passos da malha, sem tremer)
@@ -596,11 +683,11 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
 
   // Ganchos: a lógica por quadro da masmorra e a câmera.
   const prevUD = updDungeon; updDungeon = function (dt) { prevUD.apply(this, arguments); try { tick(dt); } catch (e) { console.warn('OW460.tick', e); } };
-  const prevHM = expHuntMove; expHuntMove = function (e, dt) { if (prevHM.apply(this, arguments)) return true; try { return roam(e, dt); } catch (err) { console.warn('OW460.roam', err); return false; } };
+  const prevHM = expHuntMove; expHuntMove = function (e, dt) { if (L.ow460 && !L.ow460.engaged469 && !e.aggro && !L.expedition?.lure && !L.expedition?.retreat && roam(e,dt)) return true; if (prevHM.apply(this, arguments)) return true; try { return roam(e, dt); } catch (err) { console.warn('OW460.roam', err); return false; } };
   const prevCam = camUpdate; camUpdate = function (dt) { prevCam.apply(this, arguments); try { camAfter(dt); } catch (e) { console.warn('OW460.cam', e); } };
 
   /* cristal pequeno do Tripo para outros sistemas (ex.: marcas do cerco ao sair da Fenda) */
   function shard(parent, x, y, z, H, col) { return placeGlb(parent, crystalPath('cristal-veio'), H, x, y, z, Math.random() * TAU, m => crystalMat(m, col)); }
 
-  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, relocateGate, objective, map, zoneAt, tick, path, roam, cellAt: i => cellAt(L.ow460, i) };
+  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, relocateGate, objective, map, zoneAt, tick, path, roam, guide, addSolid, dropSolids, cellAt: i => cellAt(L.ow460, i) };
 })();
