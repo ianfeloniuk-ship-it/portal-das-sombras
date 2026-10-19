@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "Alchemy470 loaded",
+    "Botanical items registered",
+    "Build437 loaded",
+    "Caldeirão built in camp",
+    "Forja built in camp",
+    "Fogueira built in camp",
+    "Can brew strong heal potion",
+    "Poção de cura rápida criada",
+    "Poção consumida",
+    "Vida restaurada pela poção",
+    "Frasco de veneno na mochila",
+    "Frasco de veneno arremessado",
+    "Frasco consumido no arremesso",
+    "Peixes disponíveis para fritar",
+    "Carpa de Mana frita e comida na fogueira",
+    "Fome saciada com peixe frito",
+    "Lança glacial forjada com sucesso",
+    "Arma customizada inserida em run.items",
+    "Afixo de impacto monstruoso aplicado",
+    "Tela de morte corrigida (sem texto obsoleto de 9 pontos livres)",
+    "Tela de morte avisa retorno dos atributos da classe"
+  ],
+  "errors": []
+}

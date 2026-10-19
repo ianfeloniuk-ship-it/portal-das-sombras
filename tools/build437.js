@@ -36,6 +36,20 @@
       packable: true,
       d: 'Fabrica flechas, cordas, tochas, Bolsas de Conservação (Alforje de Sal, Mochila Térmica, Invólucro de Resina, Caixa de Salmoura), Cantis e conserta o Carrinho de Carga.'
     },
+    caldeirao: {
+      n: 'Caldeirão e Bancada de Alquimia',
+      glb: 'bancada', h: 1.15, w: 1.7, r: 2.8,
+      cost: { pedra: 4, galho: 3, resina: 1 },
+      packable: true,
+      d: 'Destila plantas, flores, fungos e raízes em poções de cura, regeneração, vigor, vitalidade, resistência e frascos arremessáveis (veneno, ácido, fogo, fumaça e choque).'
+    },
+    forja: {
+      n: 'Forja Rústica (Fornalha e Bigorna)',
+      glb: 'bancada', h: 1.35, w: 1.9, r: 2.8,
+      cost: { pedra: 6, galho: 4, lenha: 2 },
+      packable: true,
+      d: 'Forja armas próprias combinando minérios, cristais de Fenda, madeiras nobres e partes de monstros (presas, ossos, escamas) com efeitos únicos.'
+    },
     carrinho: {
       n: 'Carrinho de Carga (com Caixa de Salmoura)',
       glb: 'carrinho', h: 1.25, w: 2.3, r: 3.0,
@@ -295,6 +309,16 @@
           '<button class="btn hot" id="b437cook">Assar Carne</button>');
         h += row('🐟 Assar Peixe na Brasa', 'Peixe Cru (' + Surv437.count('peixe_cru') + ') → Peixe Assado (dura 3–4 dias + forte bônus de Vida/Vigor)',
           '<button class="btn hot" id="b437cookFish">Assar Peixe</button>');
+        if (window.Alchemy470) {
+          const fishes = Alchemy470.getAvailableFish();
+          if (fishes.length) {
+            h += '<div class="sec">FRITAR PEIXE NA BRASA (PESCA & SOBREVIVÊNCIA)</div>';
+            for (const f of fishes) {
+              h += row('🐟 ' + f.name + ' (' + f.count + ')', 'Grelhado ao fogo com chiado e fumaça (+55 Fome, +Vida e bônus de calor por 8m)',
+                '<button class="btn hot" data-fryeat="' + f.key + '">Fritar & Comer</button> <button class="btn" data-frysave="' + f.key + '">Assar p/ Mochila</button>');
+            }
+          }
+        }
         h += row('🍱 Preparar Ração de Expedição', 'Carne Seca (' + Surv437.count('defumada') + ') + 2 Frutas (' + Surv437.count('fruta') + ') + 1 Resina/Sal (' + Surv437.count('resina') + ') → 2× Ração de Expedição (dura +20 dias!)',
           '<button class="btn hot" id="b437ration">Fazer Ração ×2</button>');
       }
@@ -319,6 +343,29 @@
         h += row('🛒 Consertar / Revisar Carrinho de Carga',
           'Estrutura atual do carrinho: <b>' + Math.round(c.hp || 100) + '%</b> · Caixa de Salmoura: <b style="color:#7ef5a5">Ativa (-75% apodrecimento)</b>.',
           '<button class="btn" id="b437repCart">Consertar Carrinho (2 Galhos + 1 Corda)</button>');
+      }
+    } else if (b.kind === 'caldeirao') {
+      h += '<div class="sec">CALDEIRÃO DE ALQUIMIA (POÇÕES & FRASCOS ARREMESSÁVEIS)</div>';
+      h += '<div class="sysline">Destile plantas, flores, raízes e fungos colhidos nos biomas e Fendas para fabricar poções e frascos arremessáveis.</div>';
+      if (window.Alchemy470) {
+        for (const r of Alchemy470.ALCHEMY_RECIPES) {
+          const can = Surv437.has(r.cost);
+          const costTxt = Object.entries(r.cost).map(([ck, cn]) => {
+            const have = Surv437.count(ck);
+            return '<span style="color:' + (have >= cn ? '#a8e6a1' : '#ff8fa3') + '">' + (Surv437.ITEMS[ck]?.n || ck) + ' ' + have + '/' + cn + '</span>';
+          }).join(' · ');
+          h += row('🧪 ' + (Surv437.ITEMS[r.id]?.n || r.id), r.desc + '<br><small>' + costTxt + '</small>',
+            '<button class="btn ' + (can ? 'hot' : '') + '" data-brew="' + r.id + '" ' + (can ? '' : 'disabled') + '>Preparar</button>');
+        }
+      }
+    } else if (b.kind === 'forja') {
+      h += '<div class="sec">FORJA RÚSTICA DE ACAMPAMENTO (FORNALHA & BIGORNA)</div>';
+      h += '<div class="sysline">Forje armas combinando minérios, madeiras e catalisadores monstruosos (presas, ossos, escamas) com afixos de combate próprios.</div>';
+      if (window.Alchemy470) {
+        for (const w of Alchemy470.WEAPON_TYPES) {
+          h += row('🔨 ' + w.n, w.desc + ' · Base: ' + w.baseDmg + ' Dano (Exige ' + w.reqWood + ' Galhos)',
+            '<button class="btn hot" data-forge="' + w.id + '">Forjar Arma</button>');
+        }
       }
     }
 
@@ -423,6 +470,40 @@
     if (brem) brem.onclick = () => { packStruct456(b); };
     const bpackAll = document.getElementById('b437packAll');
     if (bpackAll) bpackAll.onclick = () => { packAllCamp456(); };
+
+    document.querySelectorAll('#modal [data-fryeat]').forEach(btn => btn.onclick = () => {
+      if (window.Alchemy470) Alchemy470.fryFish(btn.dataset.fryeat, true);
+      openStructModal(b);
+    });
+    document.querySelectorAll('#modal [data-frysave]').forEach(btn => btn.onclick = () => {
+      if (window.Alchemy470) Alchemy470.fryFish(btn.dataset.frysave, false);
+      openStructModal(b);
+    });
+    document.querySelectorAll('#modal [data-brew]').forEach(btn => btn.onclick = () => {
+      const rec = window.Alchemy470?.ALCHEMY_RECIPES.find(r => r.id === btn.dataset.brew);
+      if (rec && Surv437.has(rec.cost)) {
+        for (const [ck, cn] of Object.entries(rec.cost)) Surv437.take(ck, cn);
+        Surv437.add(rec.id, rec.n, true);
+        try { if (typeof sfx === 'function') sfx('magic'); if (typeof floater === 'function') floater(player.x, player.z, '+' + rec.n + ' ' + (Surv437.ITEMS[rec.id]?.n || rec.id), '#7ef5a5', true); } catch (_) {}
+        toast('<b>[CALDEIRÃO]</b> Você preparou <b>' + (Surv437.ITEMS[rec.id]?.n || rec.id) + '</b>!');
+      } else {
+        toast('Materiais insuficientes para preparar esta receita.');
+      }
+      openStructModal(b);
+    });
+    document.querySelectorAll('#modal [data-forge]').forEach(btn => btn.onclick = () => {
+      const wId = btn.dataset.forge;
+      const minOrder = ['cristal_frio', 'lasca', 'resina', 'pedra'];
+      const beastOrder = ['raiz_sangue', 'cogu_venenoso', 'couro', 'osso'];
+      const selMin = minOrder.find(k => Surv437.count(k) >= 2);
+      const selBeast = beastOrder.find(k => Surv437.count(k) >= 1);
+      if (!selMin || !selBeast) {
+        toast('Você precisa de 2x minérios (Pedra/Lasca/Cristal) e 1x catalisador (Osso/Couro/Esporo/Raiz) para forjar.');
+        return;
+      }
+      if (window.Alchemy470) Alchemy470.forgeWeapon(wId, selMin, selBeast);
+      openStructModal(b);
+    });
   }
 
   function open() {

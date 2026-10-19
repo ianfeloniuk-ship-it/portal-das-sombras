@@ -494,6 +494,8 @@
       useTool('picareta', 1);
       add('pedra', 3, true);
       add('lasca', 1, true);
+      const inDun = typeof L !== 'undefined' && L && L.mode === 'dungeon';
+      if (d.bio === 'vulcao' || inDun || Math.random() < 0.35) add('liquen_acido', 1, true);
       if (d.bio === 'neve' || d.bio === 'cristal' || Math.random() < 0.45) {
         add('cristal_frio', 1, true);
         floater(d.x, d.z, '+3 Pedras · +1 Lasca · +1 Cristal Frio', '#9fd8ff', true);
@@ -522,13 +524,26 @@
       floater(d.x, d.z, '+2 Frutas · +Fibras', '#8fe388', true);
       try { sfx('step'); if (window.Anim303) Anim303.play('palma', 1.2); } catch (_) {}
     } else if (d.kind === 'erva') {
-      add('erva', 2, true);
+      add('erva', 1, true);
+      add('erva_cura', 1, true);
       add('fibra', 1, true);
-      floater(d.x, d.z, '+2 Ervas Medicinais', '#6fe39a', true);
+      const inDun = typeof L !== 'undefined' && L && L.mode === 'dungeon';
+      let bioHerb = 'erva_vigor';
+      if (inDun) bioHerb = Math.random() < 0.5 ? 'folha_sombra' : 'fungo_luz';
+      else if (d.bio === 'neve' || d.bio === 'cristal') bioHerb = 'musgo_glacial';
+      else if (d.bio === 'vulcao' || d.bio === 'deserto') bioHerb = 'flor_brasa';
+      else if (d.bio === 'pantano') bioHerb = 'raiz_sangue';
+      else if (d.bio === 'flores') bioHerb = 'flor_serena';
+      else bioHerb = Math.random() < 0.5 ? 'erva_vigor' : 'raiz_sangue';
+      add(bioHerb, 1, true);
+      floater(d.x, d.z, '+Erva-da-Vida · +' + (ITEMS[bioHerb]?.n || bioHerb), '#6fe39a', true);
       try { sfx('step'); if (window.Anim303) Anim303.play('palma', 1.2); } catch (_) {}
     } else if (d.kind === 'cogu') {
-      add('cogu_bom', 2, true);
-      floater(d.x, d.z, '+2 Cogumelos Comestíveis', '#e0c898', true);
+      add('cogu_bom', 1, true);
+      const inDun = typeof L !== 'undefined' && L && L.mode === 'dungeon';
+      const coguExtra = inDun ? (Math.random() < 0.5 ? 'fungo_luz' : 'cogu_venenoso') : (d.bio === 'pantano' ? 'cogu_venenoso' : (Math.random() < 0.4 ? 'cogu_venenoso' : 'cogu_bom'));
+      add(coguExtra, 1, true);
+      floater(d.x, d.z, '+Cogumelos · +' + (ITEMS[coguExtra]?.n || coguExtra), '#e0c898', true);
       try { sfx('step'); if (window.Anim303) Anim303.play('palma', 1.2); } catch (_) {}
     }
     // v462 Percepção: coleta extra e achado raro; colher treina Percepção
@@ -1268,6 +1283,8 @@
           const it = ITEMS[k];
           const act = [];
           if (k === 'pacote_lacrado') act.push('<button class="btn hot" data-eat="' + k + '">Abrir Pacote</button>');
+          else if (it.flask) act.push('<button class="btn hot" data-throwflask="' + k + '">Arremessar [G]</button>');
+          else if (it.alchemy) act.push('<button class="btn hot" data-drinkpot="' + k + '">Beber Poção</button>');
           else if (it.bait) act.push('<button class="btn hot" data-bait="' + k + '">Jogar Isca [G]</button>');
           else if (it.eat || it.heal) act.push('<button class="btn hot" data-eat="' + k + '">' + (it.heal ? 'Usar' : 'Comer') + '</button>');
           if (fire && k === 'carne') act.push('<button class="btn" data-cook="assada">Assar</button>');
@@ -1306,6 +1323,8 @@
     const bTorch = document.getElementById('svTorch'); if (bTorch) bTorch.onclick = () => { s.torchOn = !s.torchOn; save(); open(tab); };
 
     document.querySelectorAll('#modal [data-eat]').forEach(b => b.onclick = () => { eat(b.dataset.eat); open(tab); });
+    document.querySelectorAll('#modal [data-throwflask]').forEach(b => b.onclick = () => { closeModal(); if (window.Alchemy470) Alchemy470.throwFlask(b.dataset.throwflask); });
+    document.querySelectorAll('#modal [data-drinkpot]').forEach(b => b.onclick = () => { if (window.Alchemy470) Alchemy470.drinkPotion(b.dataset.drinkpot); open(tab); });
     document.querySelectorAll('#modal [data-bait]').forEach(b => b.onclick = () => { closeModal(); throwBait(); });
     document.querySelectorAll('#modal [data-cook]').forEach(b => b.onclick = () => {
       const targetId = b.dataset.cook;
@@ -1324,7 +1343,12 @@
       e.preventDefault();
       open('inv');
     } else if (e.code === 'KeyG' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
-      if (count('isca_carnica') > 0) {
+      const flaskOrder = ['frasco_fogo', 'frasco_veneno', 'frasco_acido', 'frasco_paralisia', 'frasco_fumaca'];
+      const flask = flaskOrder.find(k => count(k) > 0);
+      if (flask && window.Alchemy470) {
+        e.preventDefault();
+        Alchemy470.throwFlask(flask);
+      } else if (count('isca_carnica') > 0) {
         e.preventDefault();
         throwBait();
       }

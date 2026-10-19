@@ -1,3 +1,15 @@
+## v470 — Autonomia de Sobrevivência: Alquimia, Frascos Arremessáveis, Forja Rústica e Peixe Frito na Fogueira, 19/10/2026
+- Pedido de Ian (Etapa 2):
+  1. Alquimia botânica: matinhos, flores, raízes e fungos variados pelos biomas e Fendas (cura, sangue, veneno, ácido, fogo, gelo, vigor, luminescência); Caldeirão / Bancada de Alquimia no acampamento; poções de beber (cura imediata, regeneração contínua, vida máx, resistência térmica/elemental e vigor); frascos arremessáveis em área com balística 3D (veneno/lentidão, ácido redutor de armadura, fogo líquido, cortina de fumaça e choque paralisante).
+  2. Forja Rústica de Acampamento (Fornalha e Bigorna): estrutura portátil no acampamento [B] combinando minérios, madeiras e partes de monstros para gerar armas com atributos, visuais e efeitos únicos (sangramento, veneno, gelo, fogo e quebra de postura).
+  3. Fritar Peixe na Fogueira: conexão direta entre a pesca (lakeAt239 / run.fish) e a fogueira portátil acesa, permitindo fritar peixes com chiado na brasa, fumaça, restauração de Fome/Vida e bônus de calor de sobrevivência.
+  4. Correção da tela de morte: corrigido o aviso de "Você tem 9 pontos para distribuir" para indicar que os 9 pontos retornaram automaticamente para a classe.
+- Mudanças técnicas:
+  - `tools/alchemy470.js` (novo módulo, ?v=470): catálogo de botânica, caldeirão com receitas de poções e frascos arremessáveis, física de arremesso parabólico 3D (`throwFlask`) com detonação em área, hook no dano para debuff ácido (-50% armadura), sistema de forja rústica de armas e fritura de espécies de peixe.
+  - `tools/build437.js`: inclusão das estruturas `caldeirao` e `forja` em `STRUCTS` com custos balanceados e recolhimento [F]; integração do modal da fogueira com a lista de peixes pescados (`Alchemy470.getAvailableFish`); modais interativos para destilar poções e forjar armas de campo.
+  - `tools/survival437.js`: nós de coleta botânica enriquecidos por bioma e nas Fendas (ervas curativas, raiz de sangue, musgo glacial, flor de brasa, líquen ácido, orquídea abissal, fungo luminoso); botões de beber poção e arremessar frascos; tecla [G] com prioridade para arremesso de frascos de combate.
+  - `src/core/380-acoes.js`: correção do texto da tela de morte para os 9 atributos automáticos da classe.
+
 ## v469 — Fendas Infinitas: sinal no horizonte (Soberano/retorno), reposicionamento elástico invisível, colisão física sólida em pedras/cristais e revisão geral de textos, 19/10/2026
 - Pedido de Ian:
   1. Localização do Soberano nas Fendas Infinitas (Combinação A+B): indicador orgânico sem GPS fixo (feixe vertical pulsante para o Soberano e verde-água para o retorno) + reposicionamento elástico invisível (150m–300m à frente) ao explorar para longe sem combate.

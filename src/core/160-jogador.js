@@ -157,7 +157,7 @@ function loadoutView(slot){view=()=>loadoutView(slot);L.characterTab='skills';le
 const AFX=[{k:'dmg',n:'Afiado',t:'dano'},{k:'hp',n:'Robusto',t:'vida'},{k:'mp',n:'Arcano',t:'mana'},{k:'crit',n:'Preciso',t:'crítico'},{k:'ls',n:'Vampírico',t:'roubo de vida',f:.25},{k:'spd',n:'Veloz',t:'velocidade',f:.4},{k:'fogo',n:'Flamejante',t:'dano de fogo'},{k:'gelo',n:'Congelante',t:'dano de gelo'},{k:'terra',n:'Pétreo',t:'dano de terra'},{k:'raio',n:'Trovejante',t:'dano de raio'}];
 function rollAff2(tier,rar){const n=[0,0,1,1,2,2,2,3][rar]||0,out=[],used=new Set();for(let i=0;i<n;i++){let a;do{a=AFX[Math.floor(Math.random()*AFX.length)]}while(used.has(a.k)&&used.size<AFX.length);used.add(a.k);
   out.push({k:a.k,v:Math.max(1,Math.round((1+tier*.4)*(1+rar*.15)*(a.f||1)*(.7+Math.random()*.6)))})}return out}
-function normalizeGear363(it){if(!it||specialGear354(it))return it;
+function normalizeGear363(it){if(!it||specialGear354(it)||it.customForged)return it;
  if(it.unique183&&UNIQ183[it.unique183])relics183().own[it.unique183]=1;
  for(const field of ['aff','rune','curse','set','depth105','woven153','wlv','wxp','soul','unique183'])delete it[field];
  for(const field of ['name','bn'])if(typeof it[field]==='string'){it[field]=it[field].replace(/ \(Tecido\)| \(Amaldiçoado\)/g,'');for(const S of SETS)it[field]=it[field].replace(' ['+S.n+']','')}

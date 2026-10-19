@@ -219,7 +219,7 @@ function die(){
   profile.towerBest=0;if(profile.relics183){const v=profile.relics183.vault||{};profile.relics183={own:{...v},eq:[],vault:v}}
   resetPointPassives253();const keep={pos:run.invReturn372?{x:run.invReturn372.x,z:run.invReturn372.z}:run.pos,invReturn372:run.invReturn372,classLoadout:run.classLoadout,initialSkillFix259:run.initialSkillFix259};/* v341 (Ian): morrer voltava a habilidade equipada para a primeira da classe */newRun();Object.assign(run,keep);clearMissionsOnDeath332();ensureRun();if(!classLoadout().some(Boolean))run.classLoadout=[profile.cls+':0'];run.pts=(run.pts||0)+CREATION_PTS281;/* v269/v281 (Ian): os 9 pontos da criação voltam */player.skills=pSkills();refreshStats();narratorDeath105();store.set('pds2_profile',profile);player.dead=false;saveRun();player.dead=true;
   const rk=RANKS[profile.rank];
-  $('deadtxt').innerHTML='Você voltou ao nível 1.<br><b>Perdeu:</b> '+fmt(lostG)+' de ouro, '+lostI+' itens, atributos, melhorias de passivas e missões da Ordem.<br><b>Manteve:</b> rank '+rkN(profile.rank)+', despertar e bens no banco e na casa.<br>Você tem 9 pontos para distribuir.'+(redBroken?'<br>O portal vermelho rompeu.':'');
+  $('deadtxt').innerHTML='Você voltou ao nível 1.<br><b>Perdeu:</b> '+fmt(lostG)+' de ouro, '+lostI+' itens, atributos, melhorias de passivas e missões da Ordem.<br><b>Manteve:</b> rank '+rkN(profile.rank)+', despertar e bens no banco e na casa.<br>Os 9 pontos iniciais retornaram para a sua classe. Atributos sobem treinando.'+(redBroken?'<br>O portal vermelho rompeu.':'');
 
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
 }
