@@ -148,10 +148,28 @@
     } catch (_) {}
     return mv0.call(this, e, dx, dz);
   };
-  function sneakPose() { // agachado: tronco à frente, joelhos dobrados (soma à animação do quadro)
-    if (!API.sneaking || !player?.m?.bones || Water.swim()) return;
-    const b = player.m.bones;
-    try { if (b.spine) b.spine.rotation.x += .32; if (b.thigh_l) b.thigh_l.rotation.x -= .5; if (b.thigh_r) b.thigh_r.rotation.x -= .5; if (b.shin_l) b.shin_l.rotation.x += .7; if (b.shin_r) b.shin_r.rotation.x += .7; player.m.root.position.y -= .2; } catch (_) {}
+  function sneakPose() { // agachado: tronco à frente, joelhos dobrados no plano sagital (sem abrir as pernas)
+    if (!API.sneaking || !player?.m?.bones || !player?.m?.root || Water.swim()) return;
+    const m = player.m, b = m.bones, root = m.root;
+    try {
+      root.updateMatrixWorld(true);
+      const charQ = root.getWorldQuaternion(new THREE.Quaternion()), D = Math.PI / 180;
+      const rotBone = (bone, degX, degY = 0, degZ = 0) => {
+        if (!bone || !bone.parent) return;
+        const e = new THREE.Euler(degX * D, degY * D, degZ * D, 'XYZ');
+        const dLocal = new THREE.Quaternion().setFromEuler(e);
+        const dWorld = charQ.clone().multiply(dLocal).multiply(charQ.clone().invert());
+        const bw = bone.getWorldQuaternion(new THREE.Quaternion()), pw = bone.parent.getWorldQuaternion(new THREE.Quaternion());
+        bone.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));
+      };
+      rotBone(b.spine, 16);
+      rotBone(b.thigh_l, -22);
+      rotBone(b.thigh_r, -22);
+      rotBone(b.shin_l, 32);
+      rotBone(b.shin_r, 32);
+      root.position.y -= .12;
+      root.updateMatrixWorld(true);
+    } catch (_) {}
   }
   if (window.Anim303) { const p0 = Anim303.post; Anim303.post = function (P) { const r = p0.apply(this, arguments); try { if (P === player) { sneakPose(); Water.frame(); } } catch (_) {} return r; }; }
 

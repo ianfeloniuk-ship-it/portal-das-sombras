@@ -1,3 +1,37 @@
+## v478 — Direção de ataque por movimento, feixes de portais, minério na dungeon, debuffs de peso/parasitas, gelo cristalino e limpeza da HUD, 19/10/2026
+- Pedidos de Ian:
+  1. "Tá vendo isso aí que tá acontecendo? O ataque não tá indo para o lado que eu tô direcionando. Aparece o fluxo para o lado esquerdo enquanto eu tô apertando para o lado direito. Tá bugado de novo, tem que arrumar também."
+  2. "Não tem aparecido também o feixe dos portais. Isso é ruim, porque daí eu não sei como sair."
+  3. "O asset que é para minerar na dungeon está com o asset de outra coisa que é para tomar água. Tem que arrumar isso aí."
+  4. "O que significa isso e por que ele fica aí? Nada disso é explicado. Me joga várias mecânicas no jogo e se eu não sou o criador, eu não sei como funciona, não sei onde eu vejo. [Placa Cerco Contido e halo na cabeça]"
+  5. "ESSA BARRAS NA MINHA CARA ELA TEM QUE OU ME ACOMPANHAR OU NÃO EXISTIR"
+  6. "Outra coisa, eu estou com mais peso do que eu posso ter na mochila e não está acontecendo nada. Eu deveria pelo menos andar mais devagar ou ter mais dificuldade no meu ataque com espada ou arco ou qualquer coisa, diminuir a velocidade... E parasitas/corrupção está fazendo um bom tempo e não aconteceu nada."
+  7. "Esse gelo está meio bizarro. E tem que fazer nas habilidades também, parece que você só fez nos auto-ataques. Eu queria que tudo isso fosse incluído em todas as habilidades... parece um PNG, tipo uma bomba do Call of Duty."
+  8. "Outra coisa, tem muito texto ali quando você vai escolher a tua classe, muito texto. Eu só queria que mostrasse o quanto ganha por nível, não comparando com nada. Não precisa ter escrito ali que os nove pontos iniciais da classe são distribuídos... Mudou, não preciso escrever que mudou."
+- Mudanças técnicas implementadas:
+  - **Direção de Ataque Prioritária por Movimento**:
+    - `src/core/380-acoes.js`: criada a função `playerMoveDir()` e atualizada a lógica de `faceTarget()`. Quando o jogador está se movimentando com WASD / setas, o golpe (espada, arco, cajado ou habilidade) e o fluxo visual (`fxSlash`, `Combat139`) alinham-se estritamente à direção do movimento, a menos que o cursor esteja ativamente sobre um monstro específico.
+    - `tools/witcher377.js`: removido o gatilho acidental de clique curto do botão direito que ativava a trava de mira (`toggleLock()`) durante o giro de câmera, evitando puxar o ataque para inimigos fora do curso.
+  - **Remoção da Barra na Cara e Halo Flutuante**:
+    - `src/core/410-overlay-e-hud.js`: eliminada a mini-barra verde/azul desenhada em canvas sobre a face do personagem (o HUD principal na tela já monitora HP/MP com precisão). Mantidos apenas os marcadores de status de combate temporários quando afetado por debuffs.
+    - `src/core/160-jogador.js`: removido o toroide branco (`halo`) que ficava permanentemente aceso sobre a cabeça do modelo.
+    - `src/core/270-masmorra-procedural.js`: removida a placa flutuante de texto 3D `CERCO CONTIDO · X DIAS`. O rescaldo da fenda mantém a cratera e estilhaços físicos no solo e interação limpa `F · RELATÓRIO DO CERCO`.
+  - **Feixe Luminoso nos Portais de Saída e Fendas**:
+    - `src/core/260-v341.js`: adicionado feixe vertical luminoso contínuo de 80m de altura com gradiente ciano/lilás nos portais de fenda do mundo aberto (`Rift131`).
+    - `src/core/270-masmorra-procedural.js`: adicionado farol vertical de 85m (`owExitBeam478`) no portal de saída da dungeon procedurais e do Outro Mundo, visível de qualquer sala ou planície.
+  - **Mineração Correta na Dungeon**:
+    - `src/core/270-masmorra-procedural.js` e `tools/otherworld460.js`: substituído o tipo `poca_abissal` por `minerio_abissal`. Renderiza um depósito rochoso multifacetado com cristais puros integrados (`owOreRock478`), com o rótulo `F · MINERAR MINÉRIO E CRISTAIS DO OUTRO MUNDO`, concedendo minério, pedras e cristais abissais com efeito de mineração.
+  - **Debuff de Peso Excessivo (Sobrecarga) e Parasitas Ativos**:
+    - `tools/survival437.js`: conectado o cálculo de velocidade real do motor (`movementSpeed`) ao multiplicador de peso `overMul()`. Ao exceder o peso da mochila, a velocidade cai drasticamente (para até 25%), o sprint é bloqueado (`Sprint373.canSprint = false`), e o intervalo de recuperação dos ataques com espada/arco é retardado proporcionalmente em `src/core/380-acoes.js`, exibindo alerta de sobrecarga.
+    - Parasitas: o debuff agora drena 2.5% da vida máxima a cada 3.5s com números flutuantes roxos, diminui a velocidade em 18% e drena estamina, motivando o jogador a ferver água ou consumir chá/antídoto.
+  - **Gelo Cristalino e Habilidades Fluidas em Todas as Classes**:
+    - `src/core/340-efeitos-visuais-por-habilidade.js`: substituído o sprite plano de água nos projéteis gélidos por um cluster tridimensional com núcleo octaédrico translúcido e lascas de cristal pontiagudas (`iceCore478` e `iceShard478`).
+    - `tools/flip470.js`: impacto de gelo agora produz estilhaços cristalinos vivos (`fxBurst`) e runa suave de geada no chão (`zoneMark178`), sem cartazes planos com bordas quadradas.
+    - `castFluid139`: removido o bloqueio que ignorava classes de ataque à distância; todos os ataques e habilidades agora desfrutam dos rastros fluidos e sequências visuais estéticas de combate.
+  - **Limpeza do Painel de Escolha de Classe**:
+    - `tools/classgrowth465.js`: simplificado o painel de classe para exibir apenas a tabela concisa de ganhos por nível (`+X/nível` de Vida, Mana, Ataque Físico e Mágico), sem comparações com o guerreiro, projeções de nível 50 ou textos explicativos de atualizações passadas.
+    - `src/core/630-controles.js`: removido texto burocrático sobre pontos de atualização no registro do Livro da Ordem.
+
 ## v477 — Efeitos fluidos estilizados (fantasia RPG) substituindo texturas fotográficas e esclarecimento da defesa, 19/10/2026
 - Pedidos de Ian:
   1. "Não sei se tu consegue perceber, mas pelo menos na imagem que eu estou colocando, parece distópico de como é o meu jogo. Ela parece algo mais realista da vida real, parece um PNG, tipo uma bomba do Call of Duty. Não parece algo daquela realidade. Mais importante, parece muito um PNG. Não sei se tu consegues fazer efeitos fluidos mais realísticos, mas com a vibe do meu game. Eu não sei como explicar isso, eu preciso de ajuda para isso."

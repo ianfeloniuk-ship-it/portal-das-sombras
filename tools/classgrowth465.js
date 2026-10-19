@@ -31,33 +31,20 @@
     for (const [k, n] of Object.entries(s)) run.stats[k] = Math.max(0, Math.floor(+run.stats[k] || 0)) + n;
     run.classPts466 = profile.cls;
     try { refreshStats(); saveRun(); } catch (_) {}
-    setTimeout(() => { try { toast('<b>[' + CLASSES[profile.cls].n.toUpperCase() + ']</b> Os 9 pontos iniciais foram para os atributos da sua classe: <b>' + startText(profile.cls) + '</b>. Daqui pra frente, atributo só sobe treinando.', 8000); } catch (_) {} }, 1200);
+    setTimeout(() => { try { toast('<b>[' + CLASSES[profile.cls].n.toUpperCase() + ']</b> Classe despertada! Seus atributos crescem com suas ações no mundo.', 5000); } catch (_) {} }, 1200);
   }
 
   function growth(ci) { try { return RpgBalance.growthFor(ci); } catch (_) { return null; } }
-  function compare(g, w) {
-    const parts = [], diff = (key, label) => {
-      const a = g[key].perLevel, b = w[key].perLevel, r = b > 0 ? a / b : 1;
-      if (r >= 1.15) parts.push({ more: true, t: (r >= 2.5 ? 'muito mais ' : 'mais ') + label });
-      else if (r <= .85) parts.push({ more: false, t: (r <= .4 ? 'bem menos ' : 'menos ') + label });
-    };
-    diff('hp', 'vida'); diff('mp', 'mana'); diff('physical', 'ataque físico'); diff('magic', 'ataque mágico');
-    const m = parts.filter(p => p.more).map(p => p.t), l = parts.filter(p => !p.more).map(p => p.t), j = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' e ' + a.slice(-1) : a[0];
-    if (g.id === w.id) return 'O Guerreiro é a base de comparação: muita vida e ataque físico, quase nada de mana e magia.';
-    if (!m.length && !l.length) return 'Cresce parecido com o Guerreiro.';
-    return 'Comparado ao Guerreiro: ' + [m.length ? j(m) : '', l.length ? j(l) : ''].filter(Boolean).join('; ') + ' a cada nível.';
-  }
-  /* painel para a escolha de classe e para o Status */
+  function compare(g, w) { return ''; }
+  /* painel para a escolha de classe e para o Status (apenas o que ganha por nível, sem comparações ou notas de atualização) */
   function panel(ci, opts = {}) {
     const g = growth(ci); if (!g) return '';
-    const w = growth(0), c = (typeof CLASSES !== 'undefined' && CLASSES[ci]) || { n: '' }, L50 = k => num(g[k].base + g[k].perLevel * 50);
+    const c = (typeof CLASSES !== 'undefined' && CLASSES[ci]) || { n: '' };
     const cell = (lbl, k) => '<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid rgba(231,189,108,.18)"><span>' + lbl + '</span><b>' + num(g[k].base) + ' <span style="color:#7ef5a5">+' + num(g[k].perLevel) + '/nível</span></b></div>';
     return '<div class="g465" style="margin:8px 0;padding:8px 10px;border:1px solid rgba(231,189,108,.35);border-radius:8px;background:rgba(0,0,0,.18);font-size:12.5px;line-height:1.4;text-align:left">' +
-      '<strong style="display:block;letter-spacing:.06em;color:#e7bd6c;font-size:11.5px">AO SUBIR DE NÍVEL' + (opts.name ? ' · ' + esc(c.n).toUpperCase() : '') + '</strong>' +
+      '<strong style="display:block;letter-spacing:.06em;color:#e7bd6c;font-size:11.5px">GANHOS POR NÍVEL' + (opts.name ? ' · ' + esc(c.n).toUpperCase() : '') + '</strong>' +
       cell('Vida', 'hp') + cell('Mana', 'mp') + cell('Ataque físico', 'physical') + cell('Ataque mágico', 'magic') +
-      '<div style="margin-top:5px">' + esc(compare(g, w)) + ' No nível 50: <b>' + L50('hp') + '</b> de vida e <b>' + L50('mp') + '</b> de mana (sem contar atributos e equipamento).</div>' +
-      '<div style="margin-top:4px">Começa com <b>9 pontos</b> nos atributos da classe: <b>' + esc(startText(ci)) + '</b> (vão sozinhos, sem distribuir).</div>' +
-      '<div style="margin-top:4px;opacity:.85">Cada nível também dá <b>1 ponto de habilidade</b>. Os <b>atributos não sobem com o nível</b>: sobem treinando (Força com golpes corpo a corpo, Inteligência com magia, Vitalidade gastando e recuperando vida…).</div></div>';
+      '</div>';
   }
 
   /* ponto de treino direto (recompensas que antes davam ponto para distribuir) */

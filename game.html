@@ -3700,7 +3700,7 @@ function playerModel(){
   const m=window.WARRIOR127_ENABLE&&(profile.cls===0||!/viajanteSoGuerreiro/.test(location.search))&&window.Warrior127&&Warrior127.ok?Warrior127.create({equip,look:lk,legacyLinearOutput:true,tierColors:TIER_COL,rarities:RAR}):makeChibi({body:LOOK_B[lk.b]??c.body,hair:LOOK_H[lk.h]??c.hair,wep:c.wep,wcol:c.sk[0].col,eye:0x1a1a2a,gk:CLASS_GK[profile.cls],tint:LOOK_B[lk.b]??CLASS_TINT[profile.cls],shield:profile.cls===0||profile.cls===2});
   const cape=mesh(geo('cape',()=>new THREE.BoxGeometry(.7,.8,.05)),toonS(c.body===0x2a1840?0x160c24:0x14203a),false);cape.position.set(0,.95,-.36);if(!m.glb)m.body.add(cape);
   const aura=new THREE.Mesh(geo('aura',()=>new THREE.RingGeometry(.7,.85,24)),window.Shaders312?Shaders312.energy(new THREE.Color(RANKS[rankOf()].c).getHex(),.7):glow(new THREE.Color(RANKS[rankOf()].c).getHex(),.55));aura.rotation.x=-Math.PI/2;aura.position.y=.12;if(!aura.material.isShaderMaterial)aura.material=aura.material.clone();aura.material.depthWrite=false;aura.material.polygonOffset=true;aura.material.polygonOffsetFactor=-4;aura.material.polygonOffsetUnits=-4;aura.renderOrder=3; /* v165: o anel não briga mais com o chão (piscava) */aura.visible=false;/* v431 (Ian): sem anel no chão; o rank vira auréola na cabeça */m.root.add(aura);
-  {const ti=profile&&eqTitles()[0]?TITLES.findIndex(t=>t.id===eqTitles()[0]):-1,hc=ti>=0?[0xffd070,0xff6a8a,0xffd08a,0xb18cff,0x6fe39a][ti%5]:new THREE.Color(RANKS[rankOf()].c).getHex();/* v431: auréola sempre (cor do rank; com título equipado, cor do título) */const halo=new THREE.Mesh(new THREE.TorusGeometry(.32,.045,8,32),window.Shaders312?Shaders312.energy(hc,.95):glow(hc,.9));halo.rotation.x=Math.PI/2;halo.position.y=2.45;m.root.add(halo)}
+  /* v478 (Ian): sem auréola flutuante na cabeça */
   scene.add(m.root);return{m,aura}}
 const ELEM={fogo:{n:'Fogo',c:'#ff7a22',d:'Dano altíssimo e explosões',sk:[S('Bola de Fogo','bolt',3,10,3.2,0xff7a22),S('Chuva de Meteoros','rain',10,30,2.6,0xff5a1e),S('Explosão Ígnea','nova',7,18,2.3,0xff6a2a)]},
  gelo:{n:'Água e Gelo',c:'#70ddff',d:'Controle: atordoa e mais forte na neve',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x70ddff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
@@ -4611,7 +4611,12 @@ function gateMesh(g){retireExtraction117(g);
   // Approved rift: walking through the membrane enters the dungeon.
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
-    grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
+    grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));
+    /* v478 (Ian): feixe vertical de luz do portal no mundo */
+    const bCol=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
+    const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,80,8,1,true)),new THREE.MeshBasicMaterial({color:bCol,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    beam.position.y=40;grp.add(beam);
+    L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
     const rPrompt=(g.giant?8.5:4.5);
     const lbl=g.anchor221?'F · ENTRAR NA FENDA DA ÂNCORA':(g.secret?'F · ENTRAR NO PORTAL ???':'F · ENTRAR NO PORTAL '+(GR[g.rank]?.id||''));
     L.inter.push({type:'gate',g,x:g.x,z:g.z,r:rPrompt,label:lbl,use:()=>enterGate(g)});
@@ -4973,12 +4978,18 @@ function exitPortal(x,z,locked){
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({seed:131,red:locked,exit:!locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
     const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
-    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
+    /* v478 (Ian): feixe vertical de luz do portal de saída para ser visto de qualquer sala */
+    const beamCol=locked?0xff3040:0x5ef0d6;
+    const beam=new THREE.Mesh(geo('owExitBeam478',()=>new THREE.CylinderGeometry(.45,.45,85,8,1,true)),new THREE.MeshBasicMaterial({color:beamCol,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    beam.position.y=42;grp.add(beam);
+    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,beam,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
   }
 
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:0x04101e,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
+  const beam=new THREE.Mesh(geo('owExitBeam478',()=>new THREE.CylinderGeometry(.45,.45,85,8,1,true)),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  beam.position.y=42;grp.add(beam);
   const sg=makeSign(locked?'SEM SAÍDA':'SAÍDA',hex(col),.55);sg.position.y=5.5;grp.add(sg);
   L.group.add(grp);
   const it={type:'exit',x,z,r:3.4,ring,grp,sg,locked,label:'F · SAIR DA MASMORRA',use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
@@ -5094,8 +5105,8 @@ function setupOtherworld456(g,rooms,bi,mids,R,randIn){
     L.riftSignalNodes456.push(it);
   });
 
-  // 4. Recursos Exóticos do Outro Mundo (Lenha Abissal, Fungos/Frutas Astrais e Fenda de Água/Pesca)
-  const resTypes=['lenha_abissal','fungo_astral','poca_abissal'];
+  // 4. Recursos Exóticos do Outro Mundo (Lenha Abissal, Fungos/Frutas Astrais e Minério Abissal)
+  const resTypes=['lenha_abissal','fungo_astral','minerio_abissal'];
   mids.forEach((ri,k)=>{
     const r=rooms[ri],p=randIn(r),kind=resTypes[k%resTypes.length];
     const grp=new THREE.Group();grp.position.set(p.x,0,p.z);
@@ -5110,11 +5121,11 @@ function setupOtherworld456(g,rooms,bi,mids,R,randIn){
       const cap=mesh(geo('owCap456',()=>new THREE.SphereGeometry(0.48,12,8,0,TAU,0,Math.PI*0.6)),glowS(ow.moonCol,0.8));cap.position.y=0.62;grp.add(cap);
       label='F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
     }else{
-      const pool=new THREE.Mesh(new THREE.CircleGeometry(1.35,20),new THREE.MeshBasicMaterial({color:ow.moonCol,transparent:true,opacity:0.72}));
-      pool.rotation.x=-Math.PI/2;pool.position.y=0.06;grp.add(pool);
-      const rim=new THREE.Mesh(new THREE.RingGeometry(1.3,1.5,20),toonS(0x2d2938));
-      rim.rotation.x=-Math.PI/2;rim.position.y=0.07;grp.add(rim);
-      label='F · ENCHER CANTIL / PESCAR NA FENDA ABISSAL';
+      const rock=mesh(geo('owOreRock478',()=>new THREE.DodecahedronGeometry(0.85,1)),toonS(0x3e3848));
+      rock.position.y=0.55;rock.scale.set(1.2,0.85,1.1);grp.add(rock);
+      const veins=crystalCluster230(g.rank||2,0.9,false);
+      veins.position.set(0.1,0.4,0.1);grp.add(veins);
+      label='F · MINERAR MINÉRIO E CRISTAIS DO OUTRO MUNDO';
     }
     L.group.add(grp);
     const it={
@@ -5167,15 +5178,10 @@ function gatherOtherworldRes456(it){
     floater(it.x,it.z,'+2 Fungos Frescos · +Erva','#7cf4c2',true);
     toast('<b>[OUTRO MUNDO]</b> Você colheu <b>Fungos Comestíveis (100% Frescos)</b>, <b>Erva</b> e <b>Fibras</b>!');
   }else{
-    const s=Surv437.S();
-    if(s){
-      s.canteen.sips=Surv437.canteenMaxSips();
-      s.canteen.kind='suja';
-      s.canteen.frozen=false;
-    }
-    Surv437.add('peixe_cru',1,true,0);
-    floater(it.x,it.z,'Cantil Cheio + 1 Peixe Abissal','#7fd8ff',true);
-    toast('<b>[FENDA ABISSAL]</b> Você pescou <b>1 Peixe Cru</b> e encheu o Cantil com água condensada (ferva na Fogueira antes de beber!).');
+    Surv437.add('minerio',2,true);Surv437.add('pedra',3,true);Surv437.add('cristal',1,true);
+    floater(it.x,it.z,'+2 Minério · +3 Pedras · +1 Cristal','#b8c8ff',true);
+    toast('<b>[OUTRO MUNDO]</b> Você minerou <b>Minério Abissal</b>, <b>Pedras</b> e <b>Cristais Puros</b>!');
+    sfx('hit');
   }
   sfx('step');
   if(it.charges<=0){
@@ -5206,12 +5212,10 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
       if(window.OW460)OW460.shard(grp,px*0.75,dy-0.05,pz*0.75,1.1+(i%3)*.35,0x9a7cff); /* v460: cristal do Tripo, sem o cristal antigo */
     }
   }
-  const sg=makeSign('CERCO CONTIDO · '+daysPassed+' DIAS','#ffb36b',0.48);
-  sg.position.set(0,3.6,0);grp.add(sg);
   L.group.add(grp);
   const it={
     type:'aftermath456',x:gx,z:gz+3.2,r:3.5,
-    label:'F · RELATÓRIO DE PASSAGEM DO TEMPO ('+daysPassed+' DIAS)',
+    label:'F · RELATÓRIO DO CERCO ('+daysPassed+' DIAS DE EXPEDIÇÃO)',
     use:()=>showRiftTimeReport456(daysPassed,rank)
   };
   L.inter.push(it);
@@ -5646,10 +5650,21 @@ function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
-  else {
+  else if(type==='ice'){
+    const iceG=new THREE.Group();
+    const core=mesh(geo('iceCore478',()=>new THREE.OctahedronGeometry(.32,0)),new THREE.MeshBasicMaterial({color:0xe0f7ff,transparent:true,opacity:.9}));
+    core.scale.set(0.7,2.2,0.7);core.rotation.x=Math.PI/2;iceG.add(core);
+    for(let s=0;s<4;s++){
+      const sh=mesh(geo('iceShard478',()=>new THREE.ConeGeometry(.09,.55,4)),glow(0x7fd8ff,.85));
+      sh.rotation.x=Math.PI/2+0.15*(s%2?1:-1);sh.rotation.y=(s/4)*Math.PI*2;
+      sh.position.set(Math.cos(s)*.1,Math.sin(s)*.1,-.1);
+      iceG.add(sh);
+    }
+    iceG.scale.setScalar(sc);return iceG;
+  } else {
     /* v476 (Ian): sólidos do Tripo e bolas rígidas retirados; usa os efeitos fluidos criados no Blender */
     const F=window.Flip470, S=F&&F.SHEETS;
-    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':(type==='ice'||type==='water')?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
+    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':type==='water'?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
     const sheet=S&&S[kind];
     if(sheet&&sheet.tex&&sheet.tex.image){
       const tex=sheet.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/sheet.c,1/sheet.r);
@@ -5755,7 +5770,7 @@ function skillFx(sk,P){
   else if(sk.n==='Lâmina Envenenada'){cloud({x,z},c);if(F)F.spawn('smoke',x,0.3,z,2.2,{tint:0x166534,grow:.2})}
   else if(sk.t==='dot'){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<5.5)cloud(e,c);cloud({x,z},c);if(F)F.spawn('smoke',x,0.3,z,3.2,{tint:0x166534,grow:.3})}
 }
-function castFluid139(sk){if(!window.Combat139||!player)return;const cls=sk.sourceClass??profile.cls;/* v179 (Ian): rastro luminoso só nas classes corpo a corpo; magos e arqueiro já têm projéteis próprios */if(CLASSES[cls]&&CLASSES[cls].ranged)return;const v=Combat139.cast(sk,cls);if(v){let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}const chain=Combat139.sequence(sk,cls);if(chain){chain.group.position.set(player.x,0,player.z);fxCustom(chain.group,1.15,(_,k)=>chain.update(k));floater(player.x,player.z,'RESSONÂNCIA TRIPLA','#d9c4ff')}}
+function castFluid139(sk){if(!window.Combat139||!player)return;const cls=sk.sourceClass??profile.cls;const v=Combat139.cast(sk,cls);if(v){let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}const chain=Combat139.sequence(sk,cls);if(chain){chain.group.position.set(player.x,0,player.z);fxCustom(chain.group,1.15,(_,k)=>chain.update(k));floater(player.x,player.z,'RESSONÂNCIA TRIPLA','#d9c4ff')}}
 
 /* ================= PERIGOS ================= */
 function hazard(x,z,r,dur,dmg,team,col){if(team==='enemy'&&r>8){r=8;dur=Math.max(dur,1.2)}
@@ -6108,18 +6123,71 @@ function aimPoint(){if(touch||!mouseAim.ok)return null;
   const ray388=ground?new THREE.Vector3(ground.x,ground.y,ground.z):ray.origin.clone().addScaledVector(ray.direction,Math.max(35,camera.position.distanceTo(new THREE.Vector3(player.x,terrH(player.x,player.z)+1.1,player.z))+45));
   aimV.enemy253=best;aimV.ray388=ray388;aimCache253={key,point:aimV.clone(),enemy:best,ray388};return aimV;
 }
+function playerMoveDir(){
+  if(!player)return null;
+  let dx=(typeof input!=='undefined'?input.x:0),dz=(typeof input!=='undefined'?input.z:0);
+  if(keys.KeyW||keys.ArrowUp)dz-=1;if(keys.KeyS||keys.ArrowDown)dz+=1;if(keys.KeyA||keys.ArrowLeft)dx-=1;if(keys.KeyD||keys.ArrowRight)dx+=1;
+  if(typeof pcCam!=='undefined'&&pcCam.yaw&&typeof camRot==='function')[dx,dz]=camRot(dx,dz);
+  if(typeof FX2!=='undefined'&&FX2.inv>0){dx=-dx;dz=-dz}
+  const l=Math.hypot(dx,dz);if(l<.15)return null;
+  return {x:dx/l,z:dz/l,angle:Math.atan2(dx,dz)};
+}
 function faceTarget(max=7){
+  if(window.W377&&W377.target){
+    const e=W377.target;
+    if(!e.dead&&!e.gone&&(typeof enemies!=='undefined'&&enemies.includes(e))&&Math.hypot(e.x-player.x,e.z-player.z)<=(max||7)+e.r+1){
+      player.face=Math.atan2(e.x-player.x,e.z-player.z);
+      return e;
+    }
+  }
   const ap=aimPoint();
-  if(ap){const fa=Math.atan2(ap.x-player.x,ap.z-player.z);player.face=fa;let best=null,bd=1e9;
-    for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>max)continue;let da=Math.atan2(dx,dz)-fa;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));if(da<.7&&d<bd){bd=d;best=e}}
-    return best}
-  const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
+  if(ap&&ap.enemy253){
+    const e=ap.enemy253;
+    player.face=Math.atan2(e.x-player.x,e.z-player.z);
+    return e;
+  }
+  const mv=playerMoveDir();
+  if(mv){
+    player.face=mv.angle;
+    let best=null,bd=1e9;
+    for(const e of enemies){
+      if(e.dead||e.gone)continue;
+      const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);
+      if(d>max+e.r)continue;
+      let da=Math.atan2(dx,dz)-mv.angle;
+      da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
+      if(da<1.0&&d<bd){bd=d;best=e;}
+    }
+    return best;
+  }
+  if(ap){
+    const fa=Math.atan2(ap.x-player.x,ap.z-player.z);
+    player.face=fa;
+    let best=null,bd=1e9;
+    for(const e of enemies){
+      if(e.dead)continue;
+      const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);
+      if(d>max)continue;
+      let da=Math.atan2(dx,dz)-fa;
+      da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
+      if(da<.7&&d<bd){bd=d;best=e}
+    }
+    return best;
+  }
+  const e=nearestEnemy(player.x,player.z,max);
+  if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);
+  return e;
+}
 function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;resourceCombat258();if(kitFormAttack111())return;if(window.Firearms372?.isGun(run.equip.w)){Firearms372.fire();return}
   curDType281=(()=>{const k=weaponKind272(run.equip.w)||'';if(/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k))return 'phy';if(/^(staff|bonestaff|wand|tome|orb)$/.test(k))return 'mag';return basicIsMagic()?'mag':'phy'})();
   const ci=basicAttackId(),c=CLASSES[ci],effectClass=MAGIC_CLS.includes(ci)===basicIsMagic()?ci:null;
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
-  const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;player.atkCd=timing.interval;dprog('atk',1);
+  const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;
+  const overRatio=(window.Surv437&&typeof Surv437.overRatio==='function')?Surv437.overRatio():1.0;
+  const overSlow=overRatio>1.0?Math.min(2.5,1+(overRatio-1.0)*1.6):1.0;
+  player.atkCd=timing.interval*overSlow;dprog('atk',1);
+  if(overRatio>1.0&&Math.random()<0.3){try{floater(player.x,player.z,'PESO EXCESSIVO','#ff9999');}catch(_){}}
   const dmg=player.dmg*timing.damage*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8+.25*rankTalent('finisher'):1)*(FX2.counter?1.6:1);FX2.counter=false;
   /* v272 (Ian): o ataque básico segue a ARMA equipada, não a classe — arco atira flechas, adaga é arremessada (pelo cabo, lâmina na frente), espada/machado batem; cajado/varinha/tomo e mãos vazias seguem a regra da classe */
   const wk272=weaponKind272(run.equip.w),weaponMode272=wk272==='bow'?'arrow':wk272==='dagger'?'tdagger':wk272==='spear'?'tspear':/^(sword|axe|mace|spear|hammer)$/.test(wk272)?'melee':/^(staff|bonestaff|wand|tome|orb)$/.test(wk272)?'magic':null;
@@ -6734,7 +6802,7 @@ function drawOverlay(){
     if(!e.isBoss){bar(p.x,p.y,e.rival?46:34,e.hp/e.maxhp,e.rival?'#ffb84d':e.elite?'#ff8a4d':'#ff4d6a',(e.rival||e.elite)?e.name:null,e.rival?'#ffd89a':'#ffc2a0',e);
     {const lv=eLvl(e),th=threat(lv);oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.85)';const t='Nv '+lv+(th?' ☠':'');const tx=p.x-(e.rival?23:17)-4;oc.textAlign='right';oc.strokeText(t,tx,p.y+4);oc.fillStyle=th||'#c9d3de';oc.fillText(t,tx,p.y+4);oc.textAlign='center'}}if(states.length)drawCombatChips(states,p.x,p.y-14)}
   for(const a of allies){const p=proj(a.x,2.6*(a.m.sc||1),a.z);if(!p.ok)continue;bar(p.x,p.y,34,a.hp/a.maxhp,a.shadow?'#b18cff':'#6ff4ff',healingShield(a)>0?(a.name||a.short||'Aliado')+' · escudo '+fmt(Math.ceil(healingShield(a))):(a.party||a.guest)?a.name:null,a.guest?'#b0ffcc':'#bff4ff',a)}
-  if(!P.dead){const p=proj(P.x,2.35,P.z);if(p.ok){bar(p.x,p.y,44,P.hp/P.maxhp,'#6fe39a',null,null,P);oc.fillStyle='#4f8dff';oc.fillRect(p.x-22,p.y+6,44*clamp(P.mp/P.maxmp,0,1),2);drawCombatChips(playerStatusList(P),p.x,p.y+16)}}
+  if(!P.dead){const states=playerStatusList(P);if(states.length){const p=proj(P.x,2.8,P.z);if(p.ok)drawCombatChips(states,p.x,p.y)}}
   for(const n of npcs){if(n.noLabel||Math.hypot(n.x-P.x,n.z-P.z)>22)continue;const p=proj(n.x,2.35,n.z);if(!p.ok)continue;oc.font='700 10px "Chakra Petch",sans-serif';oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.7)';const t=n.kind==='vendor'?n.name+' · '+n.sign:n.name;oc.strokeText(t,p.x,p.y);oc.fillStyle=n.col||'#e8f6ff';oc.fillText(t,p.x,p.y)}
   for(const f of floats){const p=proj(f.x,f.y+f.t*1.8,f.z);if(!p.ok)continue;/* v459 (Ian, reel "spell juicy" passo 8): número pequeno que nasce grande e "soca" de volta; crítico maior */const s=Math.round((f.big?22:15)*(f.t<.12?1+(f.big?.75:.4)*(1-f.t/.12):1));oc.font='700 '+s+'px "Russo One",sans-serif';oc.globalAlpha=1-Math.max(0,f.t-.5)/.4;oc.lineWidth=3;oc.strokeStyle='rgba(0,0,0,.8)';oc.strokeText(f.txt,p.x,p.y);oc.fillStyle=f.col;oc.fillText(f.txt,p.x,p.y);oc.globalAlpha=1}
   if(FX2.combo>=3){const k=Math.min(1,FX2.comboT/2.2);oc.globalAlpha=.4+.6*k;oc.font='700 '+(26+Math.min(20,FX2.combo))+'px "Russo One",sans-serif';oc.textAlign='right';oc.lineWidth=4;oc.strokeStyle='rgba(0,0,0,.8)';const t='x'+FX2.combo+' COMBO';oc.strokeText(t,W-24,H*.42);oc.fillStyle=FX2.combo>=30?'#ff5a8a':FX2.combo>=15?'#ffd54f':'#7fd8ff';oc.fillText(t,W-24,H*.42);oc.textAlign='center';oc.globalAlpha=1}
@@ -8559,7 +8627,7 @@ function migrateInitialSkill259(){if(profile.creationPending91||run.initialSkill
 function creationDraft(){const d=profile.creationDraft91||(profile.creationDraft91={name:'',skill:0,stats:{for:0,agi:0,per:0,int:0,vit:0}});if(!initialSkill259(d.skill))d.skill=0;for(const k in STATN)d.stats[k]=d.stats[k]||0;return d;}
 function creationUsed(){return Object.values(creationDraft().stats).reduce((a,b)=>a+b,0)}
 function creationEdit(k,v){if(!profile.creationPending91)return;const d=creationDraft();if(k==='name'){d.name=String(v).slice(0,24)}else if(k==='skill'&&initialSkill259(+v))d.skill=+v;else if(k in d.stats&&[1,-1].includes(v)){if(v>0&&creationUsed()>=CREATION_PTS281||v<0&&d.stats[k]<=0)return;d.stats[k]+=v}store.set('pds2_profile',profile);if(k!=='name')creationView()}
-function creationView(){if(!profile.creationPending91)return;const d=creationDraft();view=creationView;let h='<div class="sysline">'+(profile.classless?'Lyra abre o Livro de Registros da Ordem. Registre seu nome. Ao despertar a classe você recebe 9 pontos nos atributos dela, sozinhos; depois, os atributos crescem treinando. Depois, procure Kael: o escambo desperta sua classe e o nível 1.':'Escolha uma habilidade. Os 9 pontos iniciais vão sozinhos para os atributos da sua classe; depois, os atributos crescem treinando.')+'</div><label for="heroName">Nome do personagem</label><input id="heroName" maxlength="24" value="'+safeText(d.name)+'" placeholder="Como você se chama?" oninput="creationEdit(\'name\',this.value)" style="display:block;width:100%;box-sizing:border-box;margin:8px 0">'+(profile.classless?'':'<div class="sec">ESCOLHA SUA PRIMEIRA HABILIDADE</div>');
+function creationView(){if(!profile.creationPending91)return;const d=creationDraft();view=creationView;let h='<div class="sysline">'+(profile.classless?'Lyra abre o Livro de Registros da Ordem. Registre seu nome para começar sua jornada.':'Escolha sua primeira habilidade para começar sua jornada.')+'</div><label for="heroName">Nome do personagem</label><input id="heroName" maxlength="24" value="'+safeText(d.name)+'" placeholder="Como você se chama?" oninput="creationEdit(\'name\',this.value)" style="display:block;width:100%;box-sizing:border-box;margin:8px 0">'+(profile.classless?'':'<div class="sec">ESCOLHA SUA PRIMEIRA HABILIDADE</div>');
  if(!profile.classless)CLASSES[profile.cls].sk.slice(0,3).forEach((sk,i)=>{const full=classSkill(profile.cls,i);h+=row(sk.n,skillDesc(full),'<button class="btn '+(d.skill===i?'on':'')+'" onclick="creationEdit(\'skill\','+i+')">'+(d.skill===i?'Selecionada':'Escolher')+'</button>')});/* v465 (Ian): sem distribuir pontos na criação */h+='<button class="btn hot" onclick="finishCreation()">Confirmar registro</button>';openModal(profile.orderPending401?'LIVRO DE REGISTROS DA ORDEM':'CRIAÇÃO DO PERSONAGEM',h)}
 function finishCreation(){if(!profile.creationPending91)return false;const d=creationDraft(),name=d.name.trim().replace(/[\x00-\x1f]/g,'').slice(0,24);if(!name){toast('Digite um nome para o personagem.');return false}if(creationUsed()>CREATION_PTS281||Object.values(d.stats).some(n=>!Number.isInteger(n)||n<0)||!CLASSES[profile.cls].sk[d.skill])return false;profile.name=name;for(const k in d.stats)run.stats[k]=(run.stats[k]||0)+d.stats[k];run.pts+=CREATION_PTS281-creationUsed();run.classLoadout=profile.classless?[]:[profile.cls+':'+d.skill];run.initialSkillFix259=true;profile.creationPending91=false;delete profile.creationDraft91;player.skills=pSkills();refreshStats();player.hp=player.maxhp;player.mp=player.maxmp;showG();closeModal();$('mx').hidden=false;if(profile.orderPending401){profile.orderPending401=false;profile.orderRegistered401=true;Campaign327.registered();}else startFirstEquipment();saveRun();tutorial();return true}
 function transmigratorLevel253(){return Math.max(0,Math.min(10,Math.floor(Number(profile.transmigratorLv)||0)));}

@@ -17,10 +17,21 @@ function projModel(type,col,sc=1,cls=null,actor405=player,ctx405=null){if(type==
   if(type==='tdagger'){/* v272: adaga arremessada — cabo atrás, lâmina apontando para frente */const g=new THREE.Group();const same274=window.Warrior127?.daggerModel?.();if(same274){/* v274 (Ian): o mesmo modelo da adaga que está na mão */same274.rotation.x=Math.PI/2;g.add(same274);g.scale.setScalar(sc*1.6);return g}const blade=mesh(geo('tdBlade',()=>new THREE.ConeGeometry(.07,.5,4)),toonS(0xcfd8ff));blade.rotation.x=Math.PI/2;blade.position.z=.2;g.add(blade);const guard=mesh(geo('tdGuard',()=>new THREE.BoxGeometry(.22,.04,.05)),toonS(0x8a7a5a));guard.position.z=-.06;g.add(guard);const grip=mesh(geo('tdGrip',()=>new THREE.CylinderGeometry(.035,.035,.22,6)),toonS(0x4a3020));grip.rotation.x=Math.PI/2;grip.position.z=-.2;g.add(grip);g.scale.setScalar(sc*1.3);return g}
   const g=new THREE.Group();
   if(type==='arrow'||type==='sarrow')g.add(arrowModel(col,type==='sarrow'));
-  else {
+  else if(type==='ice'){
+    const iceG=new THREE.Group();
+    const core=mesh(geo('iceCore478',()=>new THREE.OctahedronGeometry(.32,0)),new THREE.MeshBasicMaterial({color:0xe0f7ff,transparent:true,opacity:.9}));
+    core.scale.set(0.7,2.2,0.7);core.rotation.x=Math.PI/2;iceG.add(core);
+    for(let s=0;s<4;s++){
+      const sh=mesh(geo('iceShard478',()=>new THREE.ConeGeometry(.09,.55,4)),glow(0x7fd8ff,.85));
+      sh.rotation.x=Math.PI/2+0.15*(s%2?1:-1);sh.rotation.y=(s/4)*Math.PI*2;
+      sh.position.set(Math.cos(s)*.1,Math.sin(s)*.1,-.1);
+      iceG.add(sh);
+    }
+    iceG.scale.setScalar(sc);return iceG;
+  } else {
     /* v476 (Ian): sólidos do Tripo e bolas rígidas retirados; usa os efeitos fluidos criados no Blender */
     const F=window.Flip470, S=F&&F.SHEETS;
-    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':(type==='ice'||type==='water')?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
+    const kind=(type==='fire'?'fireball':(type==='spark'||type==='lightning')?'lightning':type==='water'?'water':type==='soul'?'smoke':type==='holy'?'rune':'fireball');
     const sheet=S&&S[kind];
     if(sheet&&sheet.tex&&sheet.tex.image){
       const tex=sheet.tex.clone();tex.needsUpdate=true;tex.repeat.set(1/sheet.c,1/sheet.r);
@@ -126,5 +137,5 @@ function skillFx(sk,P){
   else if(sk.n==='Lâmina Envenenada'){cloud({x,z},c);if(F)F.spawn('smoke',x,0.3,z,2.2,{tint:0x166534,grow:.2})}
   else if(sk.t==='dot'){for(const e of enemies)if(!e.dead&&Math.hypot(e.x-x,e.z-z)<5.5)cloud(e,c);cloud({x,z},c);if(F)F.spawn('smoke',x,0.3,z,3.2,{tint:0x166534,grow:.3})}
 }
-function castFluid139(sk){if(!window.Combat139||!player)return;const cls=sk.sourceClass??profile.cls;/* v179 (Ian): rastro luminoso só nas classes corpo a corpo; magos e arqueiro já têm projéteis próprios */if(CLASSES[cls]&&CLASSES[cls].ranged)return;const v=Combat139.cast(sk,cls);if(v){let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}const chain=Combat139.sequence(sk,cls);if(chain){chain.group.position.set(player.x,0,player.z);fxCustom(chain.group,1.15,(_,k)=>chain.update(k));floater(player.x,player.z,'RESSONÂNCIA TRIPLA','#d9c4ff')}}
+function castFluid139(sk){if(!window.Combat139||!player)return;const cls=sk.sourceClass??profile.cls;const v=Combat139.cast(sk,cls);if(v){let x=player.x,z=player.z;if(sk.kit111&&sk.ground){const p=kitPoint111(sk);x=p.x;z=p.z}else if(['rain','thunderstorm'].includes(sk.t)){const p=skillGroundPoint();x=p.x;z=p.z}v.group.position.set(x,0,z);v.group.rotation.y=player.face-Math.PI/2;fxCustom(v.group,.7,(_,k)=>v.update(k))}const chain=Combat139.sequence(sk,cls);if(chain){chain.group.position.set(player.x,0,player.z);fxCustom(chain.group,1.15,(_,k)=>chain.update(k));floater(player.x,player.z,'RESSONÂNCIA TRIPLA','#d9c4ff')}}
 

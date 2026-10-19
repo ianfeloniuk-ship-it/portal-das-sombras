@@ -407,7 +407,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     }
     if (R() < .09) { const x = (cx + R()) * CHK, z = (cz + R()) * CHK, y = 14 + R() * 26, ph = R() * 9; placeGlb(grp, crystalPath('rocha-flutuante'), 3 + R() * 7, x, y, z, R() * TAU, m => rockMat(m, W.peak, .45)).then(h => { if (h) st.floats.push({ h, y, ph }); }); }
     if (R() < .3) {
-      const kinds = ['lenha_abissal', 'fungo_astral', 'poca_abissal'], kind = kinds[Math.floor(R() * 3)], x = (cx + .2 + R() * .6) * CHK, z = (cz + .2 + R() * .6) * CHK;
+      const kinds = ['lenha_abissal', 'fungo_astral', 'minerio_abissal'], kind = kinds[Math.floor(R() * 3)], x = (cx + .2 + R() * .6) * CHK, z = (cz + .2 + R() * .6) * CHK;
       if (!d.forms.some(f => Math.hypot(f.x - x, f.z - z) < f.r + 2) && Math.hypot(x - st.boss.x, z - st.boss.z) > 30) inter.push(...resource(grp, W, kind, x, z, R));
     }
     for (const it of inter) L.inter.push(it);
@@ -424,10 +424,12 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
       if (B) { EH(B, 'mushroom_redGroup', 0, 0, 0, R() * TAU, 1.1, W.tint); EH(B, 'mushroom_tanGroup', .9, 0, .5, R() * TAU, .8, W.vein); }
       label = 'F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
     } else {
-      const pool = new T.Mesh(new T.CircleGeometry(2.4, 48), waterMat(W.vein, W.gr[2])); pool.rotation.x = -Math.PI / 2; pool.position.y = .05; pool.renderOrder = 5; pool.userData.own = 1; rg.add(pool);
-      if (B) for (let k = 0; k < 7; k++) { const a = k / 7 * TAU; EHk(B, k % 2 ? 'rock_smallA' : 'rock_smallC', Math.cos(a) * 2.5, -.05, Math.sin(a) * 2.5, a, .45, W.peak); }
-      out.push({ type: 'riftCampWater456', x, z, r: 0, hidden: false, label: '', use() {} });
-      label = 'F · ENCHER CANTIL / PESCAR NA POÇA DO OUTRO MUNDO';
+      if (B) {
+        EHk(B, 'rock_largeA', 0, -.3, 0, R() * TAU, 1.3, W.rock);
+        EHk(B, 'rock_smallB', .7, -.1, .6, R() * TAU, .6, W.peak);
+      }
+      placeGlb(rg, crystalPath('cristal-veio'), 1.2, 0, .15, 0, R() * TAU, m => crystalMat(m, W.vein));
+      label = 'F · MINERAR MINÉRIO E CRISTAIS DO OUTRO MUNDO';
     }
     if (B) { const m = B.mesh(FLORAMAT); if (m) { m.userData.own = 1; rg.add(m); } }
     const it = { type: 'riftRes456', kind, x, z, r: 2.8, grp: rg, charges: 2, label, use: () => gatherOtherworldRes456(it) };

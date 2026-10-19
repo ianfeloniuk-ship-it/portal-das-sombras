@@ -204,8 +204,9 @@
     const r = overRatio();
     const cartPull = window.Cart437 && Cart437.st && Cart437.st()?.pulling ? 1 - 0.18 * (1 - A('cartRelief')) : 1;
     const coldSlow = (S()?.temp ?? 50) < 18 ? 0.85 : 1;
-    const base = r > 1.25 ? 0.38 : r > 1.0 ? 0.68 : r > 0.85 ? 0.88 : 1;
-    return base * cartPull * coldSlow;
+    const sickSlow = (S()?.sickT ?? 0) > 0 ? 0.82 : 1;
+    const base = r > 1.5 ? 0.25 : r > 1.25 ? 0.38 : r > 1.0 ? 0.60 : r > 0.85 ? 0.85 : 1;
+    return base * cartPull * coldSlow * sickSlow;
   }
   const canRun = () => overRatio() <= 1.0 && (S()?.thirst ?? 100) > 8 && !(window.Cart437 && Cart437.st && Cart437.st()?.pulling && Cart437.w() > Cart437.cap());
 
@@ -1060,7 +1061,15 @@
     const willMul = 1 / Math.max(.2, 1 - A('intox')); // Vontade: parasitas e intoxicação passam mais rápido
     if (s.sickT > 0) {
       s.sickT -= dt * willMul;
-      if (Math.random() < dt * 0.25) player.hp = Math.max(1, player.hp - Math.max(1, Math.round(player.maxhp * 0.012)));
+      s.sickAcc = (s.sickAcc || 0) + dt;
+      if (s.sickAcc >= 3.5) {
+        s.sickAcc = 0;
+        const dmg = Math.max(2, Math.round(player.maxhp * 0.025 * (1 - A('intox') * 0.5)));
+        player.hp = Math.max(1, player.hp - dmg);
+        try { floater(player.x, player.z, '-' + dmg + ' PARASITAS', '#c876ff'); } catch (_) {}
+        try { sfx('hurt'); } catch (_) {}
+        if (typeof screenFlash172 === 'function') screenFlash172('#481232', 0.2);
+      }
     }
     if (s.intoxT > 0) {
       s.intoxT -= dt * willMul;
@@ -1355,11 +1364,22 @@
     }
   });
 
-  // Integra na velocidade do jogador e no máximo de HP temporário (bem alimentado)
-  const origSpd = typeof spdMul === 'function' ? spdMul : null;
-  if (origSpd) {
-    spdMul = function () {
-      return origSpd.apply(this, arguments) * overMul();
+  // Integra na velocidade do jogador e bloqueia corrida quando sobrecarregado
+  if (typeof movementSpeed === 'function') {
+    const ms0 = movementSpeed;
+    movementSpeed = function (raw) {
+      const spd = ms0.apply(this, arguments);
+      return spd * overMul();
+    };
+  }
+  if (typeof window !== 'undefined' && window.Sprint373 && Sprint373.canSprint) {
+    const cs0 = Sprint373.canSprint;
+    Sprint373.canSprint = function (state, resource, held, allowed) {
+      if (overRatio() > 1.0) {
+        state.exhausted = true;
+        return false;
+      }
+      return cs0.apply(this, arguments);
     };
   }
 

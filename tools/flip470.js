@@ -64,25 +64,26 @@ let lastFx=0;const burning=new WeakMap();
 const H0=hurtEnemy;
  hurtEnemy=function(e,amt,sx,sz,o){const hp0=e&&e.hp,r=H0.apply(this,arguments);
  try{if(F.on&&e&&r>0&&e.hp<hp0){const now=performance.now();const b=body(e),sz=Math.max(.8,b.r/.5);
-  const elem=getElem(e,o);
-  const fire=elem==='fogo',lightning=elem==='raio',water=elem==='gelo'||elem==='água'||elem==='agua',holy=elem==='luz'||elem==='sagrado',dark=elem==='trevas'||elem==='sombra';
-  const big=!!(o&&(o.crit||o.third||o.skillHit));
-  if(fire&&now-lastFx>50){lastFx=now;spawn(big?'explosion':'fireball',b.x,b.y+.15,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0xff7700,(big?1.5:1.1)*sz,.32)}
-  else if(lightning&&now-lastFx>50){lastFx=now;spawn('lightning',b.x,b.y+.15,b.z,(big?1.8:1.2)*sz,{grow:.12});if(typeof fxRing==='function')fxRing(b.x,b.z,0x80d0ff,(big?1.6:1.1)*sz,.24)}
-  else if(water&&now-lastFx>50){lastFx=now;spawn('water',b.x,b.y,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0x38bdf8,(big?1.5:1.1)*sz,.32)}
-  else if(holy&&now-lastFx>50){lastFx=now;spawn('rune',b.x,ground(b.x,b.z)+.08,b.z,(big?1.6:1.1)*sz,{grow:.1});if(typeof fxRing==='function')fxRing(b.x,b.z,0xffd700,(big?1.6:1.2)*sz,.38)}
-  else if(dark&&now-lastFx>50){lastFx=now;spawn('smoke',b.x,b.y+.15,b.z,(big?1.6:1.1)*sz,{tint:0x4c1d95,grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0x7e22ce,(big?1.5:1.1)*sz,.32)}
-  else if(big&&now-lastFx>50){lastFx=now;const g=ground(b.x,b.z);spawn('dust',b.x,g+.45,b.z,1.3*sz,{grow:.25,op:.75});if(typeof fxRing==='function')fxRing(b.x,b.z,0xc2a688,1.2*sz,.28)}
-  /* queimando: chama real acompanhando o corpo enquanto durar a queimadura */
+   const elem=getElem(e,o);
+   const fire=elem==='fogo',lightning=elem==='raio',ice=elem==='gelo',water=elem==='água'||elem==='agua',holy=elem==='luz'||elem==='sagrado',dark=elem==='trevas'||elem==='sombra';
+   const big=!!(o&&(o.crit||o.third||o.skillHit));
+   const g=ground(b.x,b.z);
+   if(fire&&now-lastFx>50){lastFx=now;spawn(big?'explosion':'fireball',b.x,b.y+.15,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0xff7700,(big?1.5:1.1)*sz,.32)}
+   else if(lightning&&now-lastFx>50){lastFx=now;spawn('lightning',b.x,b.y+.15,b.z,(big?1.8:1.2)*sz,{grow:.12});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0x80d0ff,(big?1.6:1.1)*sz,.24)}
+   else if(ice&&now-lastFx>50){lastFx=now;if(typeof fxBurst==='function')fxBurst(b.x,b.y+.1,b.z,0xb8e8ff,big?12:7,big?4.5:3.2);if(typeof zoneMark178==='function')zoneMark178(b.x,b.z,(big?1.5:1.1)*sz,0x7fd8ff,0.32)}
+   else if(water&&now-lastFx>50){lastFx=now;spawn('water',b.x,b.y,b.z,(big?1.7:1.15)*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0x38bdf8,(big?1.5:1.1)*sz,.32)}
+   else if(holy&&now-lastFx>50){lastFx=now;spawn('rune',b.x,g+.08,b.z,(big?1.6:1.1)*sz,{grow:.1});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0xffd700,(big?1.6:1.2)*sz,.38)}
+   else if(dark&&now-lastFx>50){lastFx=now;spawn('smoke',b.x,b.y+.15,b.z,(big?1.6:1.1)*sz,{tint:0x4c1d95,grow:.2});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0x7e22ce,(big?1.5:1.1)*sz,.32)}
+   else if(big&&now-lastFx>50){lastFx=now;spawn('dust',b.x,g+.45,b.z,1.3*sz,{grow:.25,op:.75});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0xc2a688,1.2*sz,.28)}
   const d=e.basicDots||{},burnT=Math.max(d.burn?.t||0,d.kitFire111?.t||0);if(burnT>0&&!(burning.get(e)>now)){burning.set(e,now+burnT*1000);spawn('flame',b.x,b.y,b.z,1.1*sz,{follow:e,dur:burnT,op:.85})}}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
  return r};
 const K0=killEnemy;
 killEnemy=function(e){const fire=!!(e&&e.basicDots&&((e.basicDots.burn?.t||0)>0||(e.basicDots.kitFire111?.t||0)>0));let b=null;try{if(e&&!e.dead)b=body(e)}catch(_){}
  const r=K0.apply(this,arguments);
  try{if(F.on&&b){const g=ground(b.x,b.z),sz=Math.max(.8,b.r/.5);
-  if(fire){spawn('explosion',b.x,b.y,b.z,1.7*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,b.z,0xff6600,1.6*sz,.4)}
+  if(fire){spawn('explosion',b.x,b.y,b.z,1.7*sz,{grow:.2});if(typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0xff6600,1.6*sz,.4)}
   spawn('smoke',b.x,g+.5*sz,b.z,1.7*sz,{rise:.6,grow:.25,op:.85,delay:fire?.12:0});
-  if(!fire&&typeof fxRing==='function')fxRing(b.x,b.z,0x665544,1.4*sz,.35)}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
+  if(!fire&&typeof fxRing==='function')fxRing(b.x,g+.08,b.z,0x665544,1.4*sz,.35)}}catch(err){if(!F.err)console.warn('flip470',err);F.err=err}
  return r};
 
 let last=performance.now();

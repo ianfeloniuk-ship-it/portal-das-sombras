@@ -22,18 +22,71 @@ function aimPoint(){if(touch||!mouseAim.ok)return null;
   const ray388=ground?new THREE.Vector3(ground.x,ground.y,ground.z):ray.origin.clone().addScaledVector(ray.direction,Math.max(35,camera.position.distanceTo(new THREE.Vector3(player.x,terrH(player.x,player.z)+1.1,player.z))+45));
   aimV.enemy253=best;aimV.ray388=ray388;aimCache253={key,point:aimV.clone(),enemy:best,ray388};return aimV;
 }
+function playerMoveDir(){
+  if(!player)return null;
+  let dx=(typeof input!=='undefined'?input.x:0),dz=(typeof input!=='undefined'?input.z:0);
+  if(keys.KeyW||keys.ArrowUp)dz-=1;if(keys.KeyS||keys.ArrowDown)dz+=1;if(keys.KeyA||keys.ArrowLeft)dx-=1;if(keys.KeyD||keys.ArrowRight)dx+=1;
+  if(typeof pcCam!=='undefined'&&pcCam.yaw&&typeof camRot==='function')[dx,dz]=camRot(dx,dz);
+  if(typeof FX2!=='undefined'&&FX2.inv>0){dx=-dx;dz=-dz}
+  const l=Math.hypot(dx,dz);if(l<.15)return null;
+  return {x:dx/l,z:dz/l,angle:Math.atan2(dx,dz)};
+}
 function faceTarget(max=7){
+  if(window.W377&&W377.target){
+    const e=W377.target;
+    if(!e.dead&&!e.gone&&(typeof enemies!=='undefined'&&enemies.includes(e))&&Math.hypot(e.x-player.x,e.z-player.z)<=(max||7)+e.r+1){
+      player.face=Math.atan2(e.x-player.x,e.z-player.z);
+      return e;
+    }
+  }
   const ap=aimPoint();
-  if(ap){const fa=Math.atan2(ap.x-player.x,ap.z-player.z);player.face=fa;let best=null,bd=1e9;
-    for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>max)continue;let da=Math.atan2(dx,dz)-fa;da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));if(da<.7&&d<bd){bd=d;best=e}}
-    return best}
-  const e=nearestEnemy(player.x,player.z,max);if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);return e}
+  if(ap&&ap.enemy253){
+    const e=ap.enemy253;
+    player.face=Math.atan2(e.x-player.x,e.z-player.z);
+    return e;
+  }
+  const mv=playerMoveDir();
+  if(mv){
+    player.face=mv.angle;
+    let best=null,bd=1e9;
+    for(const e of enemies){
+      if(e.dead||e.gone)continue;
+      const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);
+      if(d>max+e.r)continue;
+      let da=Math.atan2(dx,dz)-mv.angle;
+      da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
+      if(da<1.0&&d<bd){bd=d;best=e;}
+    }
+    return best;
+  }
+  if(ap){
+    const fa=Math.atan2(ap.x-player.x,ap.z-player.z);
+    player.face=fa;
+    let best=null,bd=1e9;
+    for(const e of enemies){
+      if(e.dead)continue;
+      const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);
+      if(d>max)continue;
+      let da=Math.atan2(dx,dz)-fa;
+      da=Math.abs(Math.atan2(Math.sin(da),Math.cos(da)));
+      if(da<.7&&d<bd){bd=d;best=e}
+    }
+    return best;
+  }
+  const e=nearestEnemy(player.x,player.z,max);
+  if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);
+  return e;
+}
 function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;resourceCombat258();if(kitFormAttack111())return;if(window.Firearms372?.isGun(run.equip.w)){Firearms372.fire();return}
   curDType281=(()=>{const k=weaponKind272(run.equip.w)||'';if(/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k))return 'phy';if(/^(staff|bonestaff|wand|tome|orb)$/.test(k))return 'mag';return basicIsMagic()?'mag':'phy'})();
   const ci=basicAttackId(),c=CLASSES[ci],effectClass=MAGIC_CLS.includes(ci)===basicIsMagic()?ci:null;
   player.combo=player.comboT>0?(player.combo%3)+1:1;player.comboT=.85;
-  const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;player.atkCd=timing.interval;dprog('atk',1);
+  const third=player.combo===3,timing=attackTiming(third);if(player.atkT<=0)player.atkT=.001;
+  const overRatio=(window.Surv437&&typeof Surv437.overRatio==='function')?Surv437.overRatio():1.0;
+  const overSlow=overRatio>1.0?Math.min(2.5,1+(overRatio-1.0)*1.6):1.0;
+  player.atkCd=timing.interval*overSlow;dprog('atk',1);
+  if(overRatio>1.0&&Math.random()<0.3){try{floater(player.x,player.z,'PESO EXCESSIVO','#ff9999');}catch(_){}}
   const dmg=player.dmg*timing.damage*basicDmgMul()*(player.buff>0?player.buffMul:1)*(third?1.8+.25*rankTalent('finisher'):1)*(FX2.counter?1.6:1);FX2.counter=false;
   /* v272 (Ian): o ataque básico segue a ARMA equipada, não a classe — arco atira flechas, adaga é arremessada (pelo cabo, lâmina na frente), espada/machado batem; cajado/varinha/tomo e mãos vazias seguem a regra da classe */
   const wk272=weaponKind272(run.equip.w),weaponMode272=wk272==='bow'?'arrow':wk272==='dagger'?'tdagger':wk272==='spear'?'tspear':/^(sword|axe|mace|spear|hammer)$/.test(wk272)?'melee':/^(staff|bonestaff|wand|tome|orb)$/.test(wk272)?'magic':null;

@@ -126,7 +126,12 @@ function gateMesh(g){retireExtraction117(g);
   // Approved rift: walking through the membrane enters the dungeon.
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
-    grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
+    grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));
+    /* v478 (Ian): feixe vertical de luz do portal no mundo */
+    const bCol=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
+    const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,80,8,1,true)),new THREE.MeshBasicMaterial({color:bCol,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    beam.position.y=40;grp.add(beam);
+    L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
     const rPrompt=(g.giant?8.5:4.5);
     const lbl=g.anchor221?'F · ENTRAR NA FENDA DA ÂNCORA':(g.secret?'F · ENTRAR NO PORTAL ???':'F · ENTRAR NO PORTAL '+(GR[g.rank]?.id||''));
     L.inter.push({type:'gate',g,x:g.x,z:g.z,r:rPrompt,label:lbl,use:()=>enterGate(g)});

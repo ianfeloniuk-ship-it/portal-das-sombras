@@ -260,12 +260,18 @@ function exitPortal(x,z,locked){
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({seed:131,red:locked,exit:!locked,secret:!locked,legacyLinearOutput:true});grp.position.set(x,0,z);grp.scale.setScalar(.86);L.group.add(grp);
     const sg=Rift131.label({exit:true,locked},L.G?.id||GR[L.gate?.rank||0].id);grp.add(sg);
-    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
+    /* v478 (Ian): feixe vertical de luz do portal de saída para ser visto de qualquer sala */
+    const beamCol=locked?0xff3040:0x5ef0d6;
+    const beam=new THREE.Mesh(geo('owExitBeam478',()=>new THREE.CylinderGeometry(.45,.45,85,8,1,true)),new THREE.MeshBasicMaterial({color:beamCol,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    beam.position.y=42;grp.add(beam);
+    const it={type:'exit',x,z,r:3.4,ring:new THREE.Group(),grp,sg,locked,riftLocked131:locked,beam,use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
   }
 
   const col=locked?0xff2030:0xffb347;const grp=new THREE.Group();grp.position.set(x,0,z);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:0x04101e,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
+  const beam=new THREE.Mesh(geo('owExitBeam478',()=>new THREE.CylinderGeometry(.45,.45,85,8,1,true)),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  beam.position.y=42;grp.add(beam);
   const sg=makeSign(locked?'SEM SAÍDA':'SAÍDA',hex(col),.55);sg.position.y=5.5;grp.add(sg);
   L.group.add(grp);
   const it={type:'exit',x,z,r:3.4,ring,grp,sg,locked,label:'F · SAIR DA MASMORRA',use:()=>tryExit(it)};L.inter.push(it);L.exits.push(it);return it;
@@ -381,8 +387,8 @@ function setupOtherworld456(g,rooms,bi,mids,R,randIn){
     L.riftSignalNodes456.push(it);
   });
 
-  // 4. Recursos Exóticos do Outro Mundo (Lenha Abissal, Fungos/Frutas Astrais e Fenda de Água/Pesca)
-  const resTypes=['lenha_abissal','fungo_astral','poca_abissal'];
+  // 4. Recursos Exóticos do Outro Mundo (Lenha Abissal, Fungos/Frutas Astrais e Minério Abissal)
+  const resTypes=['lenha_abissal','fungo_astral','minerio_abissal'];
   mids.forEach((ri,k)=>{
     const r=rooms[ri],p=randIn(r),kind=resTypes[k%resTypes.length];
     const grp=new THREE.Group();grp.position.set(p.x,0,p.z);
@@ -397,11 +403,11 @@ function setupOtherworld456(g,rooms,bi,mids,R,randIn){
       const cap=mesh(geo('owCap456',()=>new THREE.SphereGeometry(0.48,12,8,0,TAU,0,Math.PI*0.6)),glowS(ow.moonCol,0.8));cap.position.y=0.62;grp.add(cap);
       label='F · COLHER FUNGOS E ERVAS DO OUTRO MUNDO';
     }else{
-      const pool=new THREE.Mesh(new THREE.CircleGeometry(1.35,20),new THREE.MeshBasicMaterial({color:ow.moonCol,transparent:true,opacity:0.72}));
-      pool.rotation.x=-Math.PI/2;pool.position.y=0.06;grp.add(pool);
-      const rim=new THREE.Mesh(new THREE.RingGeometry(1.3,1.5,20),toonS(0x2d2938));
-      rim.rotation.x=-Math.PI/2;rim.position.y=0.07;grp.add(rim);
-      label='F · ENCHER CANTIL / PESCAR NA FENDA ABISSAL';
+      const rock=mesh(geo('owOreRock478',()=>new THREE.DodecahedronGeometry(0.85,1)),toonS(0x3e3848));
+      rock.position.y=0.55;rock.scale.set(1.2,0.85,1.1);grp.add(rock);
+      const veins=crystalCluster230(g.rank||2,0.9,false);
+      veins.position.set(0.1,0.4,0.1);grp.add(veins);
+      label='F · MINERAR MINÉRIO E CRISTAIS DO OUTRO MUNDO';
     }
     L.group.add(grp);
     const it={
@@ -454,15 +460,10 @@ function gatherOtherworldRes456(it){
     floater(it.x,it.z,'+2 Fungos Frescos · +Erva','#7cf4c2',true);
     toast('<b>[OUTRO MUNDO]</b> Você colheu <b>Fungos Comestíveis (100% Frescos)</b>, <b>Erva</b> e <b>Fibras</b>!');
   }else{
-    const s=Surv437.S();
-    if(s){
-      s.canteen.sips=Surv437.canteenMaxSips();
-      s.canteen.kind='suja';
-      s.canteen.frozen=false;
-    }
-    Surv437.add('peixe_cru',1,true,0);
-    floater(it.x,it.z,'Cantil Cheio + 1 Peixe Abissal','#7fd8ff',true);
-    toast('<b>[FENDA ABISSAL]</b> Você pescou <b>1 Peixe Cru</b> e encheu o Cantil com água condensada (ferva na Fogueira antes de beber!).');
+    Surv437.add('minerio',2,true);Surv437.add('pedra',3,true);Surv437.add('cristal',1,true);
+    floater(it.x,it.z,'+2 Minério · +3 Pedras · +1 Cristal','#b8c8ff',true);
+    toast('<b>[OUTRO MUNDO]</b> Você minerou <b>Minério Abissal</b>, <b>Pedras</b> e <b>Cristais Puros</b>!');
+    sfx('hit');
   }
   sfx('step');
   if(it.charges<=0){
@@ -493,12 +494,10 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
       if(window.OW460)OW460.shard(grp,px*0.75,dy-0.05,pz*0.75,1.1+(i%3)*.35,0x9a7cff); /* v460: cristal do Tripo, sem o cristal antigo */
     }
   }
-  const sg=makeSign('CERCO CONTIDO · '+daysPassed+' DIAS','#ffb36b',0.48);
-  sg.position.set(0,3.6,0);grp.add(sg);
   L.group.add(grp);
   const it={
     type:'aftermath456',x:gx,z:gz+3.2,r:3.5,
-    label:'F · RELATÓRIO DE PASSAGEM DO TEMPO ('+daysPassed+' DIAS)',
+    label:'F · RELATÓRIO DO CERCO ('+daysPassed+' DIAS DE EXPEDIÇÃO)',
     use:()=>showRiftTimeReport456(daysPassed,rank)
   };
   L.inter.push(it);

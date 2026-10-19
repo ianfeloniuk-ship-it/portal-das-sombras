@@ -33,9 +33,8 @@
   function toggleLock(){if(!started||paused||modalOpen||player?.dead)return;if(W377.target){setLock(null);return}const e=pickLock377();if(e)setLock(e);else toast('Nenhum alvo por perto para travar a câmera.',1800)}
   W377.toggle=toggleLock;
   addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.altKey)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;if(e.code===keyOf('lock377'))toggleLock()});
-  /* v476 (Ian): a câmera volta ao botão direito arrastado; clique curto no direito (< 8 px) trava/solta o alvo; defesa no meio */
+  /* v478 (Ian): botão direito apenas gira a câmera (sem trava acidental de alvo ao clicar); travar mira permanece na tecla E */
   $('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2)return;e.preventDefault()});
-  addEventListener('pointerup',e=>{if(e.pointerType==='touch'||e.button!==2)return;setTimeout(()=>{if((window.camMoved472||0)<8)toggleLock()},0)});
 
   /* com o alvo travado, ataques e magias miram nele */
   const aim0=aimPoint;
