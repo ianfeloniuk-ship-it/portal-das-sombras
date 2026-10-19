@@ -13,6 +13,27 @@
   const num = x => (Math.round(x * 10) / 10).toString().replace('.', ',');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
+  /* v466 (Ian): "são nove pontos… tu ganha nove pontos nas coisas que mais vão favorecer aquela classe" — sem distribuir: vão sozinhos */
+  const START = {
+    warrior: { for: 4, vit: 3, res: 2 }, berserker: { for: 4, vit: 3, res: 2 }, lancer: { for: 4, vit: 3, res: 2 }, monk: { for: 4, agi: 3, vit: 2 }, 'rare-sword': { for: 4, vit: 3, res: 2 },
+    tank: { res: 4, vit: 3, for: 2 }, guardian: { res: 3, vit: 3, int: 3 }, paladin: { vit: 3, res: 3, int: 3 },
+    assassin: { agi: 4, per: 3, for: 2 }, archer: { des: 4, agi: 3, per: 2 }, shapeshifter: { for: 3, agi: 3, vit: 3 },
+    spellblade: { int: 4, for: 3, agi: 2 }, summoner: { int: 4, esp: 3, vit: 2 }, necromancer: { int: 4, esp: 3, vit: 2 }
+  };
+  function startPts(ci) { const g = growth(ci); if (!g) return null; return START[g.id] || (g.magic.perLevel > g.physical.perLevel ? { int: 4, esp: 3, von: 2 } : { for: 4, vit: 3, res: 2 }); }
+  function startText(ci) { const s = startPts(ci); return s ? Object.entries(s).map(([k, n]) => n + ' em ' + NAME[k]).join(', ') : ''; }
+  function giveStart() {
+    if (typeof run === 'undefined' || !run || !run.stats || run.classPts466) return;
+    if (typeof profile === 'undefined' || !profile || profile.classless || profile.creationPending91 || !(typeof CLASSES !== 'undefined' && CLASSES[profile.cls])) return;
+    const g0 = (run.train462 && run.train462.g) || {};
+    if ((run.level || 1) > 1 || KEYS.some(k => (+run.stats[k] || 0) > (+g0[k] || 0))) { run.classPts466 = 'antigo'; return; } /* já tinha os 9 da criação antiga */
+    const s = startPts(profile.cls); if (!s) return;
+    for (const [k, n] of Object.entries(s)) run.stats[k] = Math.max(0, Math.floor(+run.stats[k] || 0)) + n;
+    run.classPts466 = profile.cls;
+    try { refreshStats(); saveRun(); } catch (_) {}
+    setTimeout(() => { try { toast('<b>[' + CLASSES[profile.cls].n.toUpperCase() + ']</b> Os 9 pontos iniciais foram para os atributos da sua classe: <b>' + startText(profile.cls) + '</b>. Daqui pra frente, atributo só sobe treinando.', 8000); } catch (_) {} }, 1200);
+  }
+
   function growth(ci) { try { return RpgBalance.growthFor(ci); } catch (_) { return null; } }
   function compare(g, w) {
     const parts = [], diff = (key, label) => {
@@ -35,6 +56,7 @@
       '<strong style="display:block;letter-spacing:.06em;color:#e7bd6c;font-size:11.5px">AO SUBIR DE NÍVEL' + (opts.name ? ' · ' + esc(c.n).toUpperCase() : '') + '</strong>' +
       cell('Vida', 'hp') + cell('Mana', 'mp') + cell('Ataque físico', 'physical') + cell('Ataque mágico', 'magic') +
       '<div style="margin-top:5px">' + esc(compare(g, w)) + ' No nível 50: <b>' + L50('hp') + '</b> de vida e <b>' + L50('mp') + '</b> de mana (sem contar atributos e equipamento).</div>' +
+      '<div style="margin-top:4px">Começa com <b>9 pontos</b> nos atributos da classe: <b>' + esc(startText(ci)) + '</b> (vão sozinhos, sem distribuir).</div>' +
       '<div style="margin-top:4px;opacity:.85">Cada nível também dá <b>1 ponto de habilidade</b>. Os <b>atributos não sobem com o nível</b>: sobem treinando (Força com golpes corpo a corpo, Inteligência com magia, Vitalidade gastando e recuperando vida…).</div></div>';
   }
 
@@ -54,6 +76,7 @@
     if (typeof run === 'undefined' || !run || !run.stats || run.noFreePts465) return;
     if (typeof profile !== 'undefined' && profile && profile.creationPending91) return;
     let p = Math.max(0, Math.floor(+run.pts || 0)); run.noFreePts465 = true;
+    if (!run.classPts466 && ((run.level || 1) > 1 || KEYS.some(k => (+run.stats[k] || 0) > 0))) run.classPts466 = 'antigo';
     if (!p) { run.pts = 0; return; }
     const n = p;
     while (p > 0) { const k = KEYS.slice().sort((a, b) => (+run.stats[a] || 0) - (+run.stats[b] || 0))[0]; run.stats[k] = (+run.stats[k] || 0) + 1; p--; }
@@ -61,7 +84,7 @@
     try { refreshStats(); saveRun(); } catch (_) {}
     setTimeout(() => { try { showSys('Atributos agora só sobem <b>treinando</b>: não existe mais ponto para distribuir. Os seus <b>' + n + ' pontos livres</b> foram repartidos entre os 9 atributos (os mais baixos primeiro).'); } catch (_) {} }, 2500);
   }
-  setInterval(() => { try { if (typeof started !== 'undefined' && started) migrate(); } catch (_) {} }, 1500);
+  setInterval(() => { try { if (typeof started !== 'undefined' && started) { migrate(); giveStart(); } } catch (_) {} }, 1500);
 
   /* Status: painel de crescimento da classe abaixo do resumo */
   if (typeof statusView === 'function') {
@@ -79,5 +102,5 @@
     };
   }
 
-  window.Growth465 = { panel, gift, compare, migrate };
+  window.Growth465 = { panel, gift, compare, migrate, startPts, startText, giveStart };
 })();

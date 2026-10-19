@@ -1,7 +1,7 @@
 /* ===== v281 (Ian): 9 atributos — Grimório de Atributos e Bestiário (Entregas/Grimorio-Atributos-2026-10-06).
    Um efeito, um atributo. Defesa física (Resistência), mágica (Espírito) e universal (Vontade) separadas.
    Fórmula com retorno decrescente: pts ÷ (pts + K + nível), com teto — funciona para nível infinito. ===== */
-const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=0;/* v465 (Ian): sem pontos iniciais — atributos sobem só treinando */
+const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=0;/* v465/v466 (Ian): os 9 pontos iniciais não se distribuem — vão sozinhos para a classe (tools/classgrowth465.js) */
 /* v283 (Ian): nada tem teto. A fórmula sozinha nunca chega a 100%; o resto (pontos) cresce sem limite. */
 function attrRed281(pts,L,k){pts=Math.max(0,+pts||0);return pts>0?pts/(pts+k+Math.max(1,L)):0}
 function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
