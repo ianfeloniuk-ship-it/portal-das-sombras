@@ -1,3 +1,19 @@
+## v475 — Habilidades: visual realista (raio, água, runa dourada) e área de dano batendo com o visual (zone475), 19/10/2026
+- Pedido de Ian:
+  1. Visual realista, fluido e visceral para TODAS as habilidades e auto-ataques: substituir esferas sólidas por efeitos elementais de verdade (fogo, raio, água, fumaça/trevas, luz/sagrado, poeira física), reaproveitando `Flip470.spawn(...)`. Renderizar os efeitos faltantes (raio, água e círculos de runa dourados no estilo tomsilf_motion) no Blender 5.2 headless em sequências de quadros WebP 8x8 (1024x1024).
+  2. Área de dano batendo com o visual (`tools/zone475.js`): enquanto o efeito estiver na tela, ele dá dano naquela área física/geométrica (sombra convexa no solo atualizada a cada quadro), uma vez por lançamento/cast, e empurra os monstros para fora (fora chefes). Empurrões sem dano (como Maremoto, força 0) passam a ferir como golpe normal (força 1). Efeitos de prender/lentidão/puxar ferem na área sem empurrar.
+- Mudanças técnicas:
+  - `fx/unity470/lightning_8x8.webp` (novo): 64 quadros de arcos elétricos e descargas de raio volumétricas renderizadas via Blender 5.2 headless.
+  - `fx/unity470/water_8x8.webp` (novo): 64 quadros de borrifos fluidos e ondas de água renderizadas via Blender 5.2 headless.
+  - `fx/unity470/rune_8x8.webp` (novo): 64 quadros de círculos e mandalas rúnicas douradas com nós geométricos entrelaçados (estilo tomsilf_motion) renderizadas via Blender 5.2 headless.
+  - `tools/flip470.js` (?v=475): inclusão de `lightning`, `water` e `rune` nas folhas carregadas; detecção aprimorada dos 5 elementos em `hurtEnemy` e `killEnemy`; exposição de `Flip470.live` e propriedade `kind` em cada sprite vivo para rastreamento.
+  - `tools/zone475.js` (novo módulo, ?v=475): intercepta conjurações (`runSkill` e `kitRun111`), rastreia peças visuais ativas (`fxs`, `VFX302.live`, `Flip470.live`), projeta casco convexo no chão atualizado com escala/posição, aplica dano único por conjuração com identificação por alvo, empurra inimigos para fora na direção de propagação do efeito (ou radial ao centro da conjuração) e converte empurrões de força 0 em força 1 padrão.
+  - `src/core/340-efeitos-visuais-por-habilidade.js`: `projModel` atualizado com malhas compostas e brilhos elementais dedicados; `skillFx` integrado com disparos de `Flip470` para labaredas, ondas glaciais/líquidas, relâmpagos e runas douradas de cura/invocação.
+  - `src/core/380-acoes.js`: `projectileImpact253` e `updateProjectiles253` disparando rastros e impactos realistas do `Flip470` conforme o elemento.
+  - `src/core/650-bloco-runtime111.js` e `tools/kit111-runtime.js`: integração do `Flip470` no `kitRun111` e atualização do texto de empurrão no `kitEffect111`.
+  - `game.html` e `sw.js`: inclusão do `tools/zone475.js?v=475`, cache de novos WebP e elevação da versão do Service Worker para `pds-v475`.
+- Teste (navegador Edge headless via Playwright, `tools/test-v475.cjs`): 17 asserções validadas com 0 erros de página ou console: folhas de textura carregadas com sucesso, spawn de raio/água/runa, detecção de área visual no solo, aplicação de dano pow: 1 em empurrão sem dano (Maremoto), empurrão físico do monstro para fora da área, prevenção de dano repetido no mesmo cast (single-hit tracking) e projéteis elementais mágicos com impacto explosivo.
+
 ## v474 — Escudo erguido à frente ao defender, 19/10/2026
 - Pedido de Ian: "faz a animação com o escudo erguido à frente".
 - `tools/shield473.js` (?v=474): por cima do clipe "guarda", logo antes de desenhar, o braço esquerdo é mirado em espaço do mundo (cotovelo à frente/esquerda do peito, mão à frente do peito) e o escudo vira com a face para onde o personagem olha; entra e sai em ~0,1 s e devolve a rotação original do escudo. Só com escudo ativo (arma de uma mão).

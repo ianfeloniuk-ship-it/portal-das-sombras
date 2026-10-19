@@ -72,7 +72,9 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const holder=projModel(type,col,sc,o.vis156??o.basicClass);holder.userData.terrainAbsolute245=true;holder.position.set(x,y,z);holder.rotation.set(-Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),Math.atan2(dir.x,dir.z),0,'YXZ');scene.add(holder);
   projs.push({elem300:o.elem300,dtype281:o.dtype281||(team==='player'?curDType281:null),originY:y,y,vy:dir.y*spd,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:dir.x*spd,vz:dir.z*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
-function projectileImpact253(p){const start=fxs.length;fxBurst(p.x,p.y,p.z,p.col,5,3);for(let i=start;i<fxs.length;i++)fxs[i].o.userData.terrainAbsolute245=true;}
+function projectileImpact253(p){const start=fxs.length;fxBurst(p.x,p.y,p.z,p.col,5,3);for(let i=start;i<fxs.length;i++)fxs[i].o.userData.terrainAbsolute245=true;
+  if(window.Flip470){const elem=p.elem300||(p.ptype==='fire'?'fogo':p.ptype==='spark'?'raio':p.ptype==='ice'?'gelo':p.ptype==='soul'?'trevas':p.ptype==='holy'?'luz':null);if(elem==='fogo')Flip470.spawn('explosion',p.x,p.y,p.z,2.2,{grow:.3});else if(elem==='raio')Flip470.spawn('lightning',p.x,p.y+.2,p.z,2.2,{grow:.15});else if(elem==='gelo')Flip470.spawn('water',p.x,p.y,p.z,2.0,{grow:.25});else if(elem==='trevas')Flip470.spawn('smoke',p.x,p.y,p.z,1.8,{tint:0x4c1d95,grow:.3});else if(elem==='luz')Flip470.spawn('rune',p.x,p.y,p.z,1.6,{grow:.1});else if(p.ptype==='arrow'||p.ptype==='sarrow'||p.ptype==='tspear')Flip470.spawn('dust',p.x,p.y,p.z,1.6,{grow:.3,op:.7});}
+}
 function updateProjectiles253(dt){
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
     p.life-=pdt;p.x+=p.vx*pdt;p.y=before.y+(p.vy||0)*pdt;p.z+=p.vz*pdt;
@@ -89,7 +91,7 @@ function updateProjectiles253(dt){
     if(!done&&!bounced){p.x=after.x;p.y=after.y;p.z=after.z;if(terrain){p.x=terrain.x;p.y=terrain.y;p.z=terrain.z;done=true;projectileImpact253(p);}}
     if(!done){const fr=(x,z)=>L.grid?gfree(x,z):worldFree(x,z,.1,p.y);if(!fr(p.x,p.z)){if(p.wallBounce177>0){if(!fr(p.x,before.z))p.vx=-p.vx;if(!fr(before.x,p.z))p.vz=-p.vz;if(fr(p.x,before.z)&&fr(before.x,p.z)){p.vx=-p.vx;p.vz=-p.vz;}p.x=before.x;p.y=before.y;p.z=before.z;p.wallBounce177--;p.mesh.rotation.y=Math.atan2(p.vx,p.vz);}else done=true;}}
     p.mesh.position.set(p.x,p.y,p.z);if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;
-    if(!done&&/^(fire|soul|sarrow)$/.test(p.ptype)){p.tt-=dt;if(p.tt<=0){p.tt=.03;trailFx(p);}}
+    if(!done){p.tt=(p.tt||0)-dt;if(p.tt<=0){p.tt=.05;if(p.ptype==='fire'||p.elem300==='fogo'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('flame',p.x,p.y,p.z,.7,{grow:.1,dur:.12,op:.85})}else if(p.ptype==='spark'||p.elem300==='raio'){if(window.Flip470&&Math.random()<.55)Flip470.spawn('lightning',p.x,p.y,p.z,.65,{grow:.1,dur:.1,op:.9})}else if(p.ptype==='ice'||p.elem300==='gelo'){if(window.Flip470&&Math.random()<.45)Flip470.spawn('water',p.x,p.y,p.z,.65,{grow:.1,dur:.12,op:.75})}else if(p.ptype==='soul'||p.elem300==='trevas'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('smoke',p.x,p.y,p.z,.6,{tint:0x4c1d95,grow:.15,dur:.15,op:.6})}else if(p.ptype==='sarrow'||p.ptype==='arrow'){trailFx(p)}}}
     if(done){scene.remove(p.mesh);projs.splice(i,1);}
   }
 }

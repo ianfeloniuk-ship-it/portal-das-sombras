@@ -148,7 +148,7 @@ if(!ctx){let mute=0;const fr0=fxRing;fxRing=function(){if(performance.now()<mute
 const wf0=waveFwd;waveFwd=function(){if(performance.now()<mute)return;return wf0.apply(this,arguments)};
 const us0=useSkill;useSkill=function(sk){if(!sk||sk.empty||!player405())return us0.apply(this,arguments);const s0=(player405().skills||[]).find(x=>x&&!x.empty&&x.n===sk.n)||sk,c0=s0.cdT||0;mute=performance.now()+30;let r;try{r=us0.apply(this,arguments)}finally{mute=0}if((s0.cdT||0)>c0)try{(window.VFX302&&window.VFX302.play||play)(sk)}catch(e){console.warn('vfx302',e)}return r};
 }
-return {update:update405,clear:clear405,dispose:clear405,get size(){return live.length},add,fade,add2,dust,spikeLine,play,flames,zap,whirl,fissure,quakeRing,spikes,fireRing,meteor,bolt,storm,pillar,streak,slash,dome,aura,heal,runeCircle,vortex,wind,smoke,poison,dashTrail,shockwave};
+return {update:update405,clear:clear405,dispose:clear405,get size(){return live.length},get live(){return live}/* v475: zone475 lê as peças vivas */,add,fade,add2,dust,spikeLine,play,flames,zap,whirl,fissure,quakeRing,spikes,fireRing,meteor,bolt,storm,pillar,streak,slash,dome,aura,heal,runeCircle,vortex,wind,smoke,poison,dashTrail,shockwave};
 }
 window.VFX302=create405();window.VFX302.createPreview=create405;
 })();
