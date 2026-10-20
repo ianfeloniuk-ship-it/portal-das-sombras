@@ -49,7 +49,7 @@ function buildCity(c,g,addCol,R){
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5),e=c.layout253?.inn;
     const door=e?cityFront253(X+e.x,Z+e.z,e.ry,e.dim.d/2+1.3):{x:X+7,z:Z-4.6};
     inn.position.set(door.x,E?4.2:2.6,door.z);g.add(inn);if(!E){const bd=mesh(geo('bed',()=>new THREE.BoxGeometry(2.2,.5,1.2)),toonS(0x8a2b4a));bd.position.set(X+7,.25,Z-6);g.add(bd)}
-    if(!E||e)L.inter.push({type:'inn',city:c,x:door.x,z:door.z,r:3.2,label:'F · TAVERNA & POUSADA',use:()=>cityFallen(c)?toast('<b>['+c.name.toUpperCase()+']</b> A taverna está trancada enquanto a cidade estiver ocupada.',4000):(window.Tavern482?Tavern482.openEntryPrompt(c,door):innView())});}
+    if(!E||e)L.inter.push({type:'inn',city:c,x:door.x,z:door.z,r:3.2,label:'F · POUSADA',use:()=>cityFallen(c)?toast('<b>['+c.name.toUpperCase()+']</b> A pousada está trancada enquanto a cidade estiver ocupada.',4000):innView()});}
   if(profile.retired&&profile.retired.length&&!cityFallen(c)){const ri=c.name==='Aster'?profile.retired.length-1:((c.cx*7+c.cz*13)%(profile.retired.length+2)+profile.retired.length+2)%(profile.retired.length+2);if(ri<profile.retired.length){const r=profile.retired[ri];const cc=CLASSES[r.cls];const m=makeChibi({body:cc.body,hair:cc.hair,wep:cc.wep,wcol:0xffd08a,eye:0xffd08a,gk:CLASS_GK[r.cls],tint:0xffd08a});m.mats.forEach(mt=>{mt.transparent=true;mt.opacity=.55});m.root.position.set(X,0,Z-14);scene.add(m.root);npcs.push({kind:'vendor',home:c,m,x:X,z:Z-14,face:0,r:.5,name:r.name,short:r.name,shop:'ret'+ri,t:0,col:'#ffd08a',sign:'VIDA PASSADA',label:'F · FALAR COM '+r.name.toUpperCase(),use:()=>retiredView(ri)})}}
   if(!E){const stall=mesh(geo('stall',()=>new THREE.BoxGeometry(3,1.1,1.4)),toonS(0x6b4a2a));stall.position.set(X+5,.55,Z+10.5);g.add(stall);
   const aw=mesh(geo('awn',()=>new THREE.BoxGeometry(3.4,.15,2)),toonS(0x8a2b8a));aw.position.set(X+5,2.6,Z+10.5);g.add(aw)}
@@ -88,7 +88,7 @@ function newGate(){
   // v267 (Ian): cada ranque acima do seu nasce mais longe das cidades (+25 m por ranque, até +100 m).
   // Fica a menos de GATE_NEAR155 do jogador, senão a reposição o ignora e cria portais sem parar.
   const far267=Math.min(100,25*Math.max(0,rank-pr));
-  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<52*CITYK+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<30))continue;if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
+  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;const _nc=nearestCity(x,z),_cl=cityL(_nc.c),_minD=(_cl>=8?135:_cl>=6?105:72)*CITYK;if(_nc.d<_minD+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<30))continue;if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
   const set153=null;
   if(rank===9&&Math.random()<(pr>=9?.3:danger(x,z)>=9?.5:.8))rank=8;
   const life=rnd(420,900);

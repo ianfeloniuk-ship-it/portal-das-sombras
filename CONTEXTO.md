@@ -1,31 +1,24 @@
-## v482 (20/10/2026) — Interiores 3D de Taverna estilo Skyrim/GTA e Matriz Completa de Encontros por Bioma e Clima
+## v482 (20/10/2026) — Correção Crítica de Terreno das Cidades, Bloqueio de Monstros e Matriz Completa de Biomas
 
-Grande expansão do mundo vivo pedida pelo Ian: entrada em interiores sem peso de memória, salão de taverna acolhedor e encontros procedurais ricos por todos os biomas do mapa infinito.
+Correções de alinhamento visual e terreno de cidades solicitadas pelo Ian após inspeção visual com capturas de tela:
 
-1. **Transição de Interiores com Fade Preto Cinematográfico (`tools/tavern482.js`)**:
-   - Ao se aproximar da porta da pousada em qualquer cidade (`F · TAVERNA & POUSADA`), surge o diálogo com escolha entre exploração 3D imersiva do salão ou o menu tradicional de descanso rápido.
-   - Transição suave com fade preto (0.35s) conectando a rua ao interior sem carregar cenas desnecessárias no mundo aberto.
+1. **Remoção do Interior Primitivo de Taverna & Restauração Estável**:
+   - Revertido o protótipo com caixas e cilindros primitivos (`tavern482.js`). Interiores só serão feitos com modelos GLB texturizados e finalizados em Blender no padrão das armas/monstros do jogo.
+   - Pousada de volta ao fluxo seguro e limpo de `innView()` sem telas quebradas ou caixas flutuantes no horizonte.
 
-2. **Salão 3D Modular Aconchegante da Taverna**:
-   - Piso de carvalho escuro em tábuas nobres, vigas rústicas e paredes de cantaria de pedra.
-   - **Grande Lareira de Pedra (Hearth)**: Troncos em brasa ardente com luz pontual âmbar oscilante dinâmica (`PointLight`) simulando a chama crepitante.
-   - **Balcão de Carvalho do Estalajadeiro**:
-     - Diálogo de Boatos e Fofocas Regionais: revela pistas de fendas raras, covis de feras alfas e criptas esquecidas com bússola de direção.
-     - Rodada de Hidromel da Casa (40 ouro): recupera estamina, vida e concede o buff `[FOGO NAS VEIAS]` (+15% de velocidade de movimento por 6 min).
-     - Aluguel de quarto para dormir e passar o tempo com o benefício `[BEM DESCANSADO]`.
-   - **Mural de Contratos de Caçadores (Bounty Board)**: Peneirado na parede de madeira com pergaminhos e selos, abre contratos e caçadas geradas dinamicamente para o bioma atual.
-   - **Porta de Saída**: Leva de volta às ruas da cidade com fade preto suave.
+2. **Aplainamento e Nivelamento Total do Relevo nas 3 Muralhas (`src/core/400-loop.js`, `tools/terrain245.js`)**:
+   - O raio de terraplanagem das cidades foi estendido para acompanhar toda a expansão das muralhas concêntricas (Muralha 2 a 85m e Muralha 3 a 115m + margem de transição suave):
+     - Anteriormente, o relevo só aplainava 76m (`CITYR + 16`), fazendo com que casas e muralhas do nível 6+ e 8+ fossem construídas sobre morros e encostas íngremes (causando casas flutuando no ar ou enterradas na terra).
+     - Agora, `D.push([c.x, c.z, cr + 20, 0])` nivela até 145 metros na cota zero, garantindo que todos os bairros, casas, portões e muralhas fiquem assentados sobre chão plano e uniforme.
+   - O desmatamento (`gw`) em `250-mundo-infinito.js` foi alinhado a 120m para evitar árvores dentro dos distritos murados.
 
-3. **Matriz Completa de Encontros Emergentes por Bioma e Clima (`tools/quests480.js`)**:
+3. **Bloqueio de Monstros e Portais Dentro das Cidades (`src/core/170-colisao.js`, `src/core/260-v341.js`)**:
+   - `inCity(x, z)` agora reconhece dinamicamente o raio real da cidade expandida (até 125m no nível 8+), impedindo que monstros selvagens (aranhas, feras) considerem os bairros externos como natureza e façam spawn nas ruas.
+   - Geração de Fendas (`newGate`) ajustada para respeitar no mínimo 135m de distância das capitais, evitando portais brotando sobre as muralhas ou dentro dos distritos residenciais.
+
+4. **Matriz Completa de Encontros Emergentes por Bioma e Clima (`tools/quests480.js`)**:
    - Detecção ambiental contínua do terreno: biomas (`neve`, `cristal`, `deserto`, `pantano`, `vulcao`, `floresta`, `campos`), águas/costa (`inWater244` / `coast`) e clima (`WX.type === 'rain'`).
-   - 17 encontros vivos completos com chibis temáticos personalizados, diálogos, escolhas e objetivos no minimapa:
-     - **Mar e Litoral**: Pescador Náufrago nos Arrecifes (`shipwreck_sailor`), Carcaça do Leviatã com Saqueadores (`abyssal_carcass`).
-     - **Neve e Picos Glaciais**: Expedição Glacial Cercada por Golens (`frozen_expedition`), Trenó Soterrado por Avalanche (`avalanche_trap`), Skadi e a Chama Eterna (`frost_hermit`).
-     - **Deserto e Dunas**: Caravana no Ataque dos Escaravelhos (`sandstorm_caravan`), Miragem Arcana do Djinn (`dune_mirage`), Farah e a Tumba do Faraó Esquelético (`tomb_raider_sand`).
-     - **Pântanos**: Bruxa do Caldeirão e a Gosma Matriarca (`swamp_witch`), Fogo-Fátuo da Cripta Submersa (`will_o_wisp`).
-     - **Vulcão e Ravinas**: Ignis e a Forja dos Colossos de Magma (`magma_smith`).
-     - **Clima de Tempestade (Chuva/Raios)**: Zephyr, o Mago das Tempestades canalizando relâmpagos (`storm_sorcerer`).
-     - **Florestas e Campos**: Caçador Ferido da Ordem, Mercador de Carroça Quebrada, Sábio do Monólito Ancestral, Batedor Renegado nas Pedras, Druida do Bosque Sagrado (`druid_grove`).
+   - 17 encontros vivos completos com chibis temáticos personalizados, diálogos, escolhas e objetivos no minimapa (Náufragos nas marés, expedições na neve, caravanas no deserto, bruxas de pântano, forja de magma e o Mago da Tempestade na chuva).
 
 ## v481 (20/10/2026) — As 3 Muralhas de Attack on Titan, Ciclo de 1h (40/20), Tempo Proporcional e Encontros Vivos estilo Skyrim
 
