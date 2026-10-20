@@ -11,7 +11,7 @@
   const goal = l => l < GOALS.length ? GOALS[l] : 200 + 50 * (l - GOALS.length + 1);
   const ready = () => typeof started !== 'undefined' && started && typeof run !== 'undefined' && run && run.stats && typeof player !== 'undefined' && player && !(typeof profile !== 'undefined' && profile && profile.creationPending91);
   const pct = x => Math.round(x * 100) + '%';
-  const num = x => (Math.round(x * 10) / 10).toString().replace('.', ',');
+  const num = x => String(Math.round(x)); // v485: sem número quebrado
 
   /* ---------- pontos, marcos e patamares ---------- */
   const pts = k => Math.max(0, Math.floor(+((run && run.stats || {})[k]) || 0));
@@ -19,17 +19,17 @@
   const tierMul = k => 1 + .2 * tier(k);
   // pontos efetivos: os 25 primeiros valem 1, do 26º ao 50º valem 1,2, do 51º ao 75º valem 1,4…
   function eff(k) { const p = pts(k), t = Math.floor(p / 25), r = p - 25 * t; return 25 * (t + .1 * t * (t - 1)) + r * (1 + .2 * t); }
-  const red = (k, K, max) => { const e = eff(k); return e > 0 ? max * e / (e + K) : 0; };
+  const red = (k, K, max) => { const e = eff(k); return e > 0 ? Math.round(max * e / (e + K) * 100) / 100 : 0; }; // v485: % inteiro
 
   function surv() {
     return {
-      carryKg: .8 * eff('for'), cartRelief: red('for', 60, .8), toolSave: red('for', 50, .6), chopExtra: red('for', 60, .6),
-      fishZone: 12 * eff('des') / (eff('des') + 40), craftExtra: red('des', 80, .5),
+      carryKg: Math.round(.8 * eff('for')), cartRelief: red('for', 60, .8), toolSave: red('for', 50, .6), chopExtra: red('for', 60, .6),
+      fishZone: Math.round(12 * eff('des') / (eff('des') + 40)), craftExtra: red('des', 80, .5),
       swim: red('agi', 50, .6), quiet: red('agi', 50, .6),
       gatherExtra: red('per', 50, .7), gatherRare: red('per', 80, .25), reveal: Math.round(6 * eff('per') / (eff('per') + 40)),
       fresh: red('int', 50, .5), tea: red('int', 50, 1),
-      breath: .25 * eff('vit'), hungerSlow: red('vit', 60, .4), sleep: red('vit', 40, 1),
-      climate: red('res', 50, .6), pressure: .15 * eff('res'), fatigue: red('res', 60, .5),
+      breath: Math.floor(eff('vit') / 4), hungerSlow: red('vit', 60, .4), sleep: red('vit', 40, 1),
+      climate: red('res', 50, .6), pressure: Math.floor(.15 * eff('res')), fatigue: red('res', 60, .5),
       miasma: red('esp', 40, .8), fuel: red('esp', 50, .6),
       starve: red('von', 50, .6), intox: red('von', 50, .6)
     };
@@ -82,7 +82,7 @@
       try { floater(player.x, player.z, '+1 ' + NAME[k].toUpperCase(), '#ffd76a', true, 3); sfx('coin'); } catch (_) {}
       if (p % 25 === 0) {
         try { bigText('MARCO ' + p + ' · ' + NAME[k].toUpperCase(), 1600); } catch (_) {}
-        toast('<b>[MARCO ' + p + ' DE ' + NAME[k].toUpperCase() + ']</b> Patamar ' + (p / 25) + ': cada ponto de ' + NAME[k] + ' agora rende ×' + num(1 + .2 * p / 25) + ' nos bônus de sobrevivência e exploração.', 7000);
+        toast('<b>[MARCO ' + p + ' DE ' + NAME[k].toUpperCase() + ']</b> Patamar ' + (p / 25) + ': cada ponto de ' + NAME[k] + ' agora rende +' + Math.round(20 * p / 25) + '% nos bônus de sobrevivência e exploração.', 7000);
       } else {
         toast('<b>[TREINO]</b> ' + NAME[k] + ' subiu para <b>' + p + '</b> com a prática. Próxima meta: 0/' + goal(t.l[k]) + '.', 3500);
       }

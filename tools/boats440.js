@@ -92,7 +92,7 @@
     const b = aboard(); if (!b) return; const k = K[b.t];
     const btn = (id, t, on = true) => '<button class="btn" id="' + id + '"' + (on ? '' : ' disabled') + '>' + t + '</button>';
     const c = run.cart437, cartHere = c && c.onBoat440 === b.id;
-    let h = '<p>' + esc(k.n) + (cartHere ? ' · carrinho no convés (' + Math.round(Cart437.loadKg()) + ' kg)' : '') + '. Fundo aqui: ' + deep(b.x, b.z).toFixed(1).replace('.', ',') + ' m.</p><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    let h = '<p>' + esc(k.n) + (cartHere ? ' · carrinho no convés (' + Math.round(Cart437.loadKg()) + ' kg)' : '') + '. Fundo aqui: ' + Math.round(deep(b.x, b.z)) + ' m.</p><div style="display:flex;gap:8px;flex-wrap:wrap">';
     h += btn('b440l', 'DESEMBARCAR NA MARGEM', !!landSpot(b)) + btn('b440j', 'PULAR NA ÁGUA (mergulhar)');
     if (k.base) h += btn('b440s', 'DORMIR NA CABINE') + btn('b440v', 'SALVAR') + btn('b440c', 'BAÚ DO NAVIO');
     if (cartHere) h += btn('b440k', 'CARGA DO CARRINHO');

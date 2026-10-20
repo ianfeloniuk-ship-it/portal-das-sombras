@@ -27,9 +27,9 @@ function pieceMesh250(i){const G=ARCH242.g;if(!G)return null;const sc=G.scene;sc
 function pieceAttach250(nb,i){const f=pieceMesh250(i);if(!f)return false;nb.m.root.children.forEach(c=>c.visible=false);f.traverse(o=>o.frustumCulled=false);nb.m.root.add(f);nb.frag250=f;const s=nb.m.root.scale.y||1;f.scale.setScalar(1/s);return true}
 function pieceDir250(dx,dz){const a=(Math.atan2(dx,-dz)*180/Math.PI+360)%360;return ['N','NE','L','SE','S','SO','O','NO'][Math.round(a/45)%8]}
 function pieceHud250(){const P=profile&&profile.piece250;if(!P)return '';const ks=Object.keys(P);if(!ks.length||!player)return '';let best=null,bd=1e12;for(const k of ks){const p=P[k],d=Math.hypot(p.x-player.x,p.z-player.z);if(d<bd){bd=d;best=p}}
- return ' · PEÇAS SOLTAS '+ks.length+'/5 · '+PIECES222[best.i]+' '+(bd/1000).toFixed(1)+' km '+pieceDir250(best.x-player.x,best.z-player.z)}
+ return ' · PEÇAS SOLTAS '+ks.length+'/5 · '+PIECES222[best.i]+' '+distTxt(bd)+' '+pieceDir250(best.x-player.x,best.z-player.z)}
 function pieceFlee250(c,i){const P=profile.piece250=profile.piece250||{};if(P[c.id])return;const a=Math.random()*TAU,d=3000+Math.random()*9000;P[c.id]={i,x:c.x+Math.cos(a)*d,z:c.z+Math.sin(a)*d,from:c.id};store.set('pds2_profile',profile);
- showSys('O <b>'+PIECES222[i]+'</b> do Arquiteto fugiu de '+c.name+' e se escondeu a '+(d/1000).toFixed(1)+' km dali. Fechar a Fenda não o prende. Ache e tranque a peça antes que as cinco se soltem.')}
+ showSys('O <b>'+PIECES222[i]+'</b> do Arquiteto fugiu de '+c.name+' e se escondeu a '+distTxt(d)+' dali. Fechar a Fenda não o prende. Ache e tranque a peça antes que as cinco se soltem.')}
 function pieceTick250(dt){const P=profile&&profile.piece250;if(!P||!player||L.mode!=='world')return;
  for(const id in P){const p=P[id];const e=enemies.find(x=>x.piece250===id&&!x.dead);const d=Math.hypot(p.x-player.x,p.z-player.z);
   if(e){p.x=e.x;p.z=e.z;if(!e.frag250)pieceAttach250(e,p.i);/* v449 (Ian): se o modelo do Arquiteto ainda não tinha carregado, a peça nascia com o corpo de chefe genérico; tenta de novo */if(e.frag250){e.m.root.children.forEach(c=>{if(c!==e.frag250)c.visible=false});const f=e.frag250;f.rotation.y+=dt*.4;f.position.y=(f.userData.size.y*.5+1.2)+Math.sin(time*1.3)*.4}continue}
@@ -44,9 +44,9 @@ function joinCine250(x,z){window.CINE231={x,z,t:0,dur:8};const g=new THREE.Group
  shake(.6);sfx('gong');bigText('AS CINCO PEÇAS SE JUNTAM',3000);
  fxCustom(new THREE.Group(),5,(o,k)=>{const r=90*(1-k*k);for(const p of parts){p.m.position.set(x+Math.cos(p.a+k*3)*r,6+Math.sin(k*9+p.a)*3+ (1-k)*20,z+Math.sin(p.a+k*3)*r);p.m.scale.setScalar(1+k*1.5)}if(k>.98){scene.remove(g);fxRing(x,z,0x9566ed,40,1.2);shake(1);bigText('O ARQUITETO DESPERTOU',3000)}})}
 function caps223(){return [[5,0],[-5,0],[0,5],[0,-5],[5,5]].map(([a,b])=>regionCity(a,b))}
-function archHud223(){const k=caps223().filter(anchorOpen221).length,A=profile&&profile.arch223;if(A)return ' · O ARQUITETO MARCHA PARA ASTER: '+(Math.hypot(A.x,A.z)/1000).toFixed(1)+' km';return pieceHud250()}
+function archHud223(){const k=caps223().filter(anchorOpen221).length,A=profile&&profile.arch223;if(A)return ' · O ARQUITETO MARCHA PARA ASTER: '+distTxt(Math.hypot(A.x,A.z));return pieceHud250()}
 function archTick223(dt){if(!profile||!run||!player||profile.classless)return;const W=profile.anch223=profile.anch223||{};let k=0;
- caps223().forEach((c,i)=>{const open=anchorOpen221(c);if(open)k++;if(open&&!W[c.id]){W[c.id]=1;store.set('pds2_profile',profile);const d=(Math.hypot(c.x-player.x,c.z-player.z)/1000).toFixed(1);bigText('ÂNCORA ROMPIDA',2000);sfx('gong');showSys('A Pedra-Âncora de <b>'+c.name+'</b> ('+d+' km) se rompeu. Feche a Fenda e reconstrua a capital.');pieceFlee250(c,i);profile.lastPiece250=c.id}
+ caps223().forEach((c,i)=>{const open=anchorOpen221(c);if(open)k++;if(open&&!W[c.id]){W[c.id]=1;store.set('pds2_profile',profile);const d=distTxt(Math.hypot(c.x-player.x,c.z-player.z));bigText('ÂNCORA ROMPIDA',2000);sfx('gong');showSys('A Pedra-Âncora de <b>'+c.name+'</b> ('+d+') se rompeu. Feche a Fenda e reconstrua a capital.');pieceFlee250(c,i);profile.lastPiece250=c.id}
   else if(!open&&W[c.id]){delete W[c.id];store.set('pds2_profile',profile);toast('<b>[ORDEM]</b> A âncora de '+c.name+' está selada de novo.',5000)}});
  let A=profile.arch223;
  pieceTick250(dt);const nf=Object.keys(profile.piece250||{}).length;if(!A&&nf>=5){const c=caps223().find(q=>q.id===profile.lastPiece250)||caps223()[4];A=profile.arch223={x:c.x,z:c.z,hp:1,cine:0};for(const id in profile.piece250){const e=enemies.find(x=>x.piece250===id&&!x.dead);if(e){e.dead=true;if(e.m.root.parent)e.m.root.parent.remove(e.m.root)}}profile.piece250={};store.set('pds2_profile',profile);shake(.8);if(Math.hypot(c.x-player.x,c.z-player.z)<450&&L.mode==='world'){A.cine=1;joinCine250(c.x,c.z)}else bigText('O ARQUITETO DESPERTOU',3000);showSys('As cinco peças estavam soltas e se juntaram em '+c.name+'. O Arquiteto marcha para <b>Aster</b>. Se ele chegar, este mundo acaba e tudo recomeça do zero. Reúna aliados e detenha-o.')}
@@ -80,16 +80,16 @@ function doRebuild(id){const c=nearestCity(player.x,player.z).c,no344=t=>{toast(
 /* bolsa organizada */
 /* FICHA DO PERSONAGEM: de onde vem cada número (pedido do Irror). */
 /* Dano crítico: x1,7 base (x2,4 com Fúria 10). Chance acima de 100% vira dano crítico extra (+1% por 1% que sobra). */
-function critChance(){return .05+statsBonus().crit+affB().crit/100+.01*cons('fur')+(cons('fur')>=10?.1:0)}
+function critChance(){return Math.round((.05+statsBonus().crit+affB().crit/100+.01*cons('fur')+(cons('fur')>=10?.1:0))*100)/100}/* v485: % inteiro */
 function critMul(){return 2}
 function passivesView(){view=passivesView;L.characterTab='passives';let h=characterTabs('passives')+skillPoints118()+transmigratorRow()+passiveRows263();if(profile.rank>0||profile.rankTalents?.length){h+='<div class="sec">PASSIVAS DE RANK</div>';for(const [k,t] of Object.entries(RANK_TALENTS))if(rankTalent(k)>0)h+=row(t.n+' · '+rankTalent(k)+'/'+t.max,t.d,'<b>Ativa</b>');h+=row('Escolhas de combate do rank','As escolhas e os pontos ficam em Personagem → Rank.',btn('Ver / distribuir','character','rank'))}for(const i of passiveClasses())h+=row(CLASSES[i].n+' · '+PASSIVES[i].n,PASSIVES[i].d,'<b>Ativa</b>');const books=PBOOK.filter(b=>pb(b.k)>0);if(books.length){h+='<div class="sec">TOMOS APRENDIDOS</div>';for(const b of books)h+=row(b.n+' · NV '+pb(b.k),b.d(pb(b.k)),'<b>Ativa</b>')}
  if(unl('constel')||(run.cpts||0)>0||CONS.some(([k])=>cons(k)>0)){h+='<div class="sec">CONSTELAÇÕES</div>';for(const [key,n,d,cap] of CONS){const lv=cons(key);if(lv>0)h+=row(n+' · '+lv+'/10',d+(lv>=10?'<br>'+cap:''),'<b>Ativa</b>')}/* v171 (Irror): sem ponto não há botão. Com tudo cheio, o botão leva direto à conversão. */if((run.cpts||0)>0)h+=btn((consFull()?'Converter · ':'Distribuir · ')+run.cpts+(run.cpts===1?' ponto':' pontos'),'consv',0,true,'hot')}openModal('PERSONAGEM',h,'passives')}
 
 function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls]||{hp:1,dmg:1,def:0},w=run.equip.w,a=run.equip.a,af=affB(),m=isMagic(),g=s.agi||0,
-  P=v=>(v>=0?'+':'')+(Math.round(v*1000)/10).toString().replace('.',',')+'%',X=v=>'×'+v.toString().replace('.',','),cc=critChance(),
+  P=v=>(v>=0?'+':'')+Math.round(v*100)+'%',cc=critChance(),
   // v154 (Irror): a explicação fica sempre visível, sem abrir/fechar, e diz de onde vem cada número.
   line=(n,v,d)=>'<div'+(d?' data-tip154="'+tipAttr154(d)+'" style="cursor:help;':' style="')+'display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,179,71,.12)"><span>'+n+'</span><b style="white-space:nowrap">'+v+'</b></div>',
-  pct=v=>(Math.round(v*10)/10).toString().replace('.',',')+'%',clsName=className(),Lv=run.level,k=atkPer(Lv),growth=RpgBalance.growthFor(profile.classless?'none':profile.cls),base=classBaseStats();
+  pct=v=>Math.round(v)+'%',clsName=className(),Lv=run.level,k=atkPer(Lv),growth=RpgBalance.growthFor(profile.classless?'none':profile.cls),base=classBaseStats();
   let h='<div class="sec">FICHA DO PERSONAGEM</div><div style="font-size:13px">';
   /* v467 (Ian): o ataque à distância (Destreza) aparece separado do corpo a corpo (Força) e o dano por golpe segue a arma equipada */
   const wk467=weaponKind272(run.equip.w)||'',far467=rangedPhysBasic281(),mag467=!far467&&!/^(sword|axe|mace|spear|hammer)$/.test(wk467)&&(/^(staff|bonestaff|wand|tome|orb)$/.test(wk467)||basicIsMagic()),hit467=player.dmg*basicDmgMul();
@@ -103,9 +103,9 @@ function charSheet(){const s=run.stats||{},bp=bonusPool(),cb=CLS_BAL[profile.cls
   h+=line('Escudo',fmt(player.maxsh),'Absorve dano antes da vida. Recupera após 4s sem dano.');h+=line('Defesa (menos dano recebido)',Math.round(player.def*100)+'%','Porcentagem de dano bloqueada.');
   h+=line('Chance de crítico',pct(cc*100),'Chance de causar um acerto crítico.');
   h+=line('Dano crítico',cc<1?'×2':'×'+(1+Math.floor(cc))+(cc%1?' / ×'+(2+Math.floor(cc)):''),'Multiplicador do dano de um acerto crítico.');
-  h+=line('Velocidade de ataque','+'+Math.round(.4*g)+'%','Aumenta a frequência dos ataques básicos.');
-  h+=line('Velocidade de movimento','+'+Math.round(.5*g+af.spd)+'%','Faz você correr mais rápido.');
-  h+=line('Recarga da esquiva',dodgeCdVal().toFixed(2).replace('.',',')+' s','Tempo até poder esquivar novamente.');
+  h+=line('Velocidade de ataque','+'+2*Math.floor(g/5)+'%','Ataques básicos mais frequentes. +2% a cada 5 pontos de Agilidade.');
+  h+=line('Velocidade de movimento','+'+Math.round(Math.floor(g/2)+af.spd)+'%','Faz você correr mais rápido. +1% a cada 2 pontos de Agilidade, mais afixos.');
+  h+=line('Recarga da esquiva','+'+dodgeFaster484()+'% mais rápida','Cada ponto de Agilidade: esquiva recarrega 1% mais rápido. Somado a títulos e constelações.');
   h+=line('Bônus de dano das habilidades','+'+preciseNumber((statsBonus().skill*(1+(setB().skill||0))-1)*100)+'%','Dano adicional das habilidades.');h+=line('Roubo de vida',Math.round(af.ls||0)+'%','Recupera vida com parte do dano causado.');
   h+='<div class="sec">BÔNUS EM % (SOMADOS)</div>';
   for(const x of bp.src)if(x[1]||x[2])h+=line(x[0],(x[1]?P(x[1])+' dano':'')+(x[1]&&x[2]?' · ':'')+(x[2]?P(x[2])+' vida':''),'');

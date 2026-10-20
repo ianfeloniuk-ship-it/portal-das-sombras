@@ -3,19 +3,19 @@
    Fórmula com retorno decrescente: pts ÷ (pts + K + nível), com teto — funciona para nível infinito. ===== */
 const ATTR_NEW281=['des','res','esp','von'],CREATION_PTS281=0;/* v465/v466 (Ian): os 9 pontos iniciais não se distribuem — vão sozinhos para a classe (tools/classgrowth465.js) */
 /* v283 (Ian): nada tem teto. A fórmula sozinha nunca chega a 100%; o resto (pontos) cresce sem limite. */
-function attrRed281(pts,L,k){pts=Math.max(0,+pts||0);return pts>0?pts/(pts+k+Math.max(1,L)):0}
+function attrRed281(pts,L,k){pts=Math.max(0,+pts||0);return pts>0?Math.round(pts/(pts+k+Math.max(1,L))*100)/100:0}/* v485: sempre % inteiro (o que a ficha mostra é o que vale) */
 function st281(k){return Math.max(0,+((run&&run.stats||{})[k])||0)}
 function pDef281(type){const L=run?.level||1;const phy=attrRed281(st281('res'),L,40,.5),mag=attrRed281(st281('esp'),L,40,.5),uni=attrRed281(st281('von'),L,100,.25);return 1-(1-uni)*(1-(type==='mag'?mag:phy))}
 function pStatusRes281(){return attrRed281(st281('von'),run?.level||1,40,.4)}
 function pPen281(){return attrRed281(st281('des'),run?.level||1,60,.25)}
 function lux288(k){try{return (window.Lux267&&Lux267.bonus()[k])||0}catch(_){return 0}}
-function furyMax281(){return 100+.5*st281('res')+lux288('furyMax')}
-function vigorMax281(){return 100+.5*st281('vit')+lux288('vigorMax')}
+function furyMax281(){return 100+Math.floor(st281('res')/2)+lux288('furyMax')}/* v485: +1 a cada 2 pontos */
+function vigorMax281(){return 100+Math.floor(st281('vit')/2)+lux288('vigorMax')}
 function pManaRegen281(){return attrRed281(st281('esp'),run?.level||1,40,.5)}
 function pHealBonus281(){return 0}
 function pVigorRegen281(){return lux288('vigorRate')}
 function pFuryHit281(){return Math.floor(st281('for')/20)+lux288('furyHit')}
-function pCritDmg281(){return st281('per')*.005}
+function pCritDmg281(){return Math.floor(st281('per')/2)*.01}/* v485: +1% a cada 2 pontos */
 /* Destreza: ataque físico à distância (arco, adaga arremessada, classes físicas que atiram) usa Destreza no lugar de Força */
 function atkRanged281(){return atkOf('phy')-atkPer(run.level)*st281('for')+atkPer(run.level)*st281('des')}
 function rangedPhysBasic281(){const k=weaponKind272(run.equip.w)||'';if(/^(bow|dagger|firearm)$/.test(k))return true;if(/^(sword|axe|mace|spear|hammer)$/.test(k))return false;return !basicIsMagic()&&!!basicAttackClass()?.ranged}
@@ -34,7 +34,7 @@ function pDefNums296(){const k=atkPer(run?.level||1);return {phy:st281('res')*k,
 /* v327 (Ian): Tomo da Pele de Ferro dá defesa em número (desconta de todo dano), não porcentagem. */
 function tomeDef327(){return Math.round(1.5*pb('res')*atkPer(run?.level||1))}
 function pDefVal296(type){const d=pDefNums296();return (type==='mag'?d.mag:d.phy)+d.uni}
-function pPenVal296(){return st281('des')*atkPer(run?.level||1)*.5}
+function pPenVal296(){return Math.round(st281('des')*atkPer(run?.level||1)*.5)}
 function mobDefNums296(e){const a=mobAttr281(e),k=atkPer(a.L)*.5;if(a.penV==null)a.penV=(a.des||0)*k;return {phy:(a.res||0)*k,mag:(a.esp||0)*k,uni:(a.von||0)*k*.5}}
 function mobDefVal296(e,type){const d=mobDefNums296(e);return (type==='mag'?d.mag:d.phy)+d.uni}
 let curDType281='phy',inDType281='phy';
@@ -61,7 +61,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){if(!e||e.friendly217||e.ally||!Number.isFin
   const cc=o.fromPlayer?critChance()+((o.crit154||(e.snare154>time)||(!blocked&&passiveCrit327(o)))?1:0):.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn*(o.fromPlayer?1+pCritDmg281():1);if(e.res)amt*=1-e.res;amt=Math.max(0,amt-Math.max(0,mobDefVal296(e,o.dtype281||(o.fromPlayer?curDType281:'phy'))-passiveShred327(e,o)-(o.fromPlayer?pPenVal296():0)));
   if(Number.isInteger(o.basicClass)&&e.hp>e.maxhp*.8)amt*=1+.1*gearRuneCount('stalker');amt=identityHitDamage(e,amt,o);amt=passiveDamage263(e,amt,o);amt=passive297(e,amt,o);amt=passiveHit327(e,amt,o);if(window.elemMul300){const b327=amt;amt=elemMul300(e,amt,o);passiveElem327(b327,amt,o)}
   if(o.fromPlayer)amt*=1+titleHitBonus(e)+(e.isBoss?trophyB():0);if(e.isBoss)amt=Math.min(amt,e.maxhp*(o.sneak?.2:.06));amt=expeditionDamage(e,Math.max(0,Math.round(amt)));if(amt<=0)return 0;const nb=e.bars||3,bar0=e.isBoss?Math.ceil(e.hp/e.maxhp*nb):0;e.hp-=amt;
-  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+.5*pb('ls');if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
+  if(e.isBoss&&e.hp>0&&Math.ceil(e.hp/e.maxhp*nb)<bar0){e.invuln=true;bigText('BARRA QUEBRADA',900);if(hasT('kings'))player.hp=Math.min(player.maxhp,player.hp+player.maxhp*.1);fxRing(e.x,e.z,0xff2d55,4);shake(.4);setTimeout(()=>{e.invuln=false},1500)}if(o.fromPlayer&&!o.pet){const ls=affB().ls+pb('ls');/* v485: Tomo do Vampiro 1% por nível */if(ls)player.hp=Math.min(player.maxhp,player.hp+amt*ls/100)}e.flash=.1;e.aggro=true;
   if(o.fromPlayer){FX2.combo++;FX2.comboT=2.2}
   floater(e.x,e.z,blocked?'BLOQUEIO '+fmt(Math.trunc(amt)):crit3?fmt(amt)+' ×'+(1+cn)+'!':crit?fmt(amt)+'!':fmt(amt),blocked?'#9fb0c4':crit?'#ffd54f':'#ffffff',crit,2.2*(e.isBoss?1.9:1));if(blocked&&time>=(e.blockFeedbackAt||0)){fxRing(e.x,e.z,0xb8c7d8,1.15,.22);e.blockFeedbackAt=time+.12}if(crit&&o.fromPlayer){if(time>=(player.critFeedbackAt||0)){fxBurst(e.x,.72,e.z,crit3?0xffefaa:0xffcf56,crit3?9:5,crit3?3.2:2.3);fxRing(e.x,e.z,crit3?0xffefaa:0xffcf56,crit3?1.9:1.35,.26);player.critFeedbackAt=time+.12}shake(crit3?.18:.12);hitstop(crit3?.055:.035)}
   if(!e.isBoss){const ax=e.x-sx,az=e.z-sz,l=Math.hypot(ax,az)||1;const k=(o.kb??2)*(blocked?.3:1);e.kb.x=ax/l*k*4;e.kb.z=az/l*k*4;if(!blocked)e.stun=Math.max(e.stun,o.stun??.22)}
@@ -82,12 +82,12 @@ const PASSIVES=[
  {n:'Muralha Viva',d:'20% de chance de empurrar o inimigo com força e atordoar.'},
  {n:'Afinidade Arcana',d:'Acertos têm 15% de chance de reduzir a recarga das habilidades em 1 s.'},
  {n:'Olho de Águia',d:'Quanto mais longe o alvo, mais dano: +2% por metro (até +30%).'},
- {n:'Graça',d:'Cada acerto cura 1,5% da sua vida.'},
+ {n:'Graça',d:'Cada acerto cura 2% da sua vida.'},
  {n:'Elo Espiritual',d:'Acertos têm 20% de chance de reduzir a recarga das habilidades em 1 s.'},
  {n:'Colheita de Almas',d:'Cada inimigo derrotado devolve 5% de mana e 3% de vida.'},
  {n:'Queimadura',d:'30% de chance de incendiar (60% do dano ao longo de 3 s).'},
  {n:'Frio Cortante',d:'25% de chance de deixar o inimigo lento por 2 s.'},
- {n:'Abalo',d:'15% de chance de impacto curto (até 0,3s); o alvo resiste a novos atordoamentos por 3s.'},
+ {n:'Abalo',d:'15% de chance de atordoar o alvo por um instante; depois ele resiste a novos atordoamentos por 3s.'},
  {n:'Estática',d:'20% de chance de um raio pular para outro inimigo próximo (50% do dano).'}];
 function passiveClasses(){return jobsOf().filter(i=>!!PASSIVES[i])}
 function hasClassPassive(ci){return !!profile&&passiveClasses().includes(ci)}
@@ -97,22 +97,22 @@ function applyPassive(e,amt,crit,o){const P=player;for(const c of passiveClasses
   else if(c===1&&Math.random()<.25){e.dotT=3;e.dotD=Math.max(e.dotD||0,amt*.5/3);floater(e.x,e.z,'SANGRANDO','#ff4d6a')}
   else if(c===2&&Math.random()<.2&&!e.isBoss){const ax=e.x-P.x,az=e.z-P.z,l=Math.hypot(ax,az)||1;e.kb.x=ax/l*14;e.kb.z=az/l*14;e.stun=Math.max(e.stun,.7);fxRing(e.x,e.z,0x9fd3ff,1.6,.3)}
   else if((c===3&&Math.random()<.15)||(c===6&&Math.random()<.2)){for(const sk of P.skills)sk.cdT=Math.max(0,sk.cdT-1)}
-  else if(c===5&&!hasAff('nocure')){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.015)}
+  else if(c===5&&!hasAff('nocure')){P.hp=Math.min(P.maxhp,P.hp+P.maxhp*.02)}
   else if(c===8&&Math.random()<.3){e.dotT=3;e.dotD=Math.max(e.dotD||0,amt*.6/3);floater(e.x,e.z,'QUEIMANDO','#ff7a22')}
   else if(c===9&&Math.random()<.25){e.slow=Math.max(e.slow,2);floater(e.x,e.z,'LENTO','#ffd08a')}
   else if(c===10&&Math.random()<.15){e.stun=Math.max(e.stun,.8);floater(e.x,e.z,'ATORDOADO','#c8a070')}
   else if(c===11&&Math.random()<.2){let b=null,bd=7;for(const x of enemies){if(x===e||x.dead)continue;const d=Math.hypot(x.x-e.x,x.z-e.z);if(d<bd){bd=d;b=x}}if(b){zig([{x:e.x,z:e.z},{x:b.x,z:b.z}],0xfff36b);hurtEnemy(b,amt*.5,e.x,e.z,{fromPlayer:true,passive:true})}}}}
 /* Explicação de cada habilidade (tooltip no PC e texto na Janela de Status). */
 const SKD={stone_lance:'Ergue uma linha de estacas na direção da mira, atingindo e atordoando quem estiver no caminho',thunderstorm:'Raios na área da mira (até 14 m), mesmo sem inimigos; com alvos, marca até 5 posições antes dos impactos',bolt:'Dispara um projétil forte na direção da mira',nova:'Explosão em volta de você, acerta todos por perto',cone:'Golpe em leque à sua frente',chain:'Raio que salta entre vários inimigos',rain:'Chuva na área da mira (até 14 m), com impactos durante cerca de 3 s; pode lançar no chão vazio',dot:'Área de praga na mira (até 11 m), com 5 pulsos durante 5 s; atinge inimigos que entrarem nela',dash_strike:'Avança rápido golpeando quem estiver no caminho',blink:'Salto rápido para escapar',buff_dmg:'Aumenta muito seu dano por alguns segundos',guard:'Reduz o dano que você recebe por alguns segundos',heal:'Cura parte da sua vida',stealth:'Fica invisível; o próximo ataque causa dano x3',summon:'Invoca aliados que lutam por você (limite pela mana máxima; permanecem até morrer)'};
-function skillCooldown(sk,level){const lv=level==null?(run&&run.skl?run.skl[sk.n]||0:0):level,arc=run?cons('arc'):0;return Math.max(sk.cd*.45,skillCooldownRaw219(sk,lv,arc))}/* v219: recarga nunca abaixo de 45% */
-function skillCooldownRaw219(sk,lv,arc){return sk.cd*(1-.05*lv)*(1-.015*arc)*(arc>=10?.8:1)*(run&&typeof uniqueHas183=='function'&&uniqueHas183('cdr')?1-.12*relicM204('cdr'):1)}
-function skillCooldownText(sk){return String(Math.round(skillCooldown(sk)*100)/100).replace('.',',')}
+function skillCooldown(sk,level){const lv=level==null?(run&&run.skl?run.skl[sk.n]||0:0):level,arc=run?cons('arc'):0;return Math.max(1,Math.round(Math.max(sk.cd*.45,skillCooldownRaw219(sk,lv,arc))))}/* v219: recarga nunca abaixo de 45%. v485 (Ian: sem número quebrado): a recarga real é sempre em segundos inteiros */
+function skillCooldownRaw219(sk,lv,arc){return sk.cd*(1-.05*lv)*(1-.02*arc)*(arc>=10?.8:1)*(run&&typeof uniqueHas183=='function'&&uniqueHas183('cdr')?1-.12*relicM204('cdr'):1)}
+function skillCooldownText(sk){return String(skillCooldown(sk))}
 function skillCooldownRatio(sk){return clamp((sk.cdT||0)/(sk.cdMax||skillCooldown(sk)||1),0,1)}
-function skillButtonState(sk,mp){if(sk.combo261&&comboValidity261())return {kind:'empty',text:'CONFIGURAR'};if(sk.kit111&&sk.effect==='anchor'&&kitState111().anchor?.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.kit111&&sk.energy&&sk.cdT<=0&&kitState111().energy<sk.energy)return {kind:'mana',text:'SEM ENERGIA'};if(sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.empty)return {kind:'empty',text:sk.lockedRank?'BLOQUEADO':'VAZIO'};if(sk.cdT>0)return {kind:'cooldown',text:(sk.cdT<10?sk.cdT.toFixed(1):Math.ceil(sk.cdT))+'s'};const error260=resourceError260(sk,mp);if(error260)return {kind:'mana',text:error260};return {kind:'ready',text:'PRONTA'}}
+function skillButtonState(sk,mp){if(sk.combo261&&comboValidity261())return {kind:'empty',text:'CONFIGURAR'};if(sk.kit111&&sk.effect==='anchor'&&kitState111().anchor?.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.kit111&&sk.energy&&sk.cdT<=0&&kitState111().energy<sk.energy)return {kind:'mana',text:'SEM ENERGIA'};if(sk.t==='rare_anchor'&&AR103.anchor&&AR103.anchor.until>time)return {kind:'ready',text:'RETORNAR'};if(sk.empty)return {kind:'empty',text:sk.lockedRank?'BLOQUEADO':'VAZIO'};if(sk.cdT>0)return {kind:'cooldown',text:Math.ceil(sk.cdT)+'s'};const error260=resourceError260(sk,mp);if(error260)return {kind:'mana',text:error260};return {kind:'ready',text:'PRONTA'}}
 function renderSkillButton(b,sk,mp){const state=skillButtonState(sk,mp);b.dataset.state=state.kind;let label=b.querySelector('.state');if(!label){label=document.createElement('span');label.className='state';b.appendChild(label)}if(label.textContent!==state.text)label.textContent=state.text;b.querySelector('.cd').style.transform='scaleY('+skillCooldownRatio(sk)+')';b.style.opacity='1';b.setAttribute('aria-label',sk.n+' · '+state.text);}
 function skillDamage(sk,level){const P=player;return P.dmg*(sk.sourceClass==null?1:(MAGIC_CLS.includes(sk.sourceClass)?atkOf('mag'):CLASSES[sk.sourceClass]?.ranged?atkRanged281():atkOf('phy'))/Math.max(1,atkOf(isMagic()?'mag':'phy')))*(P.buff>0?P.buffMul:1)*wxSkillMul(sk)*sk.pow*(1+.15*(level==null?(run.skl[sk.n]||0):level))*statsBonus().skill*(1+(setB().skill||0))}
 function healerLevel(sk){return Math.max(0,Math.min(10,Number(run.skl[sk.n])||0))}
-function judgmentRadius(sk){return 6+.4*healerLevel(sk)}
+function judgmentRadius(sk){return 6+Math.floor(healerLevel(sk)/2)}/* v485: +1 m a cada 2 níveis (antes +0,4 m por nível) */
 function healingFraction(sk){return sk.n==='Luz Curativa'?.5+.02*healerLevel(sk):sk.pow}
 function healingShieldCap(sk){return .2+.02*healerLevel(sk)}
 function healingShield(a){if(a.dead||!(a.healShieldUntil>time)){a.healShield=0;return 0}return Math.max(0,Math.min(a.healShield||0,a.maxhp*(a.healShieldCap||0)))}
@@ -123,11 +123,11 @@ function applyHealingLight(a,sk){if(a.dead||hasAff('nocure'))return;const amount
 function blessAllies(P){for(const a of allies)if(!a.dead&&a.life>0&&Math.hypot(a.x-P.x,a.z-P.z)<=8)a.blessingUntil=time+5}
 function allyProtection(a){return Math.min(a.fortressUntil>time?.5:1,a.blessingUntil>time?.7:1)}
 
-function preciseNumber(n){return String(Math.round(n*100)/100).replace('.',',')}
+function preciseNumber(n){return String(Math.round(n))}/* v485 (Ian): o jogo mostra só números inteiros; os valores de origem já são inteiros */
 function judgmentHealing(sk){return 0}
 function skillHasDamage(sk){if(sk.kit111)return sk.pow>0;if(sk.rare103)return ['rare_cut','rare_order'].includes(sk.t);return sk.n!=='Lâmina Envenenada'&&!['heal','guard','buff_dmg','stealth','blink','minionbuff','summon','cleanse','holy_shield','holy_step','holy_bind'].includes(sk.t)}
 function skillDamagePart(sk,lv){if(sk.kit111)return Math.round(skillDamage(sk,lv));const div=sk.n==='Sol Negro'?5:sk.n==='Era do Gelo'?4:sk.n==='Fúria dos Céus'||sk.n==='Lâmina Rúnica'||sk.n==='Flecha Estelar'?3:sk.n==='Mil Cortes'?6:sk.t==='dot'?5:1;return Math.round(skillDamage(sk,lv)/div*(sk.t==='rain'&&/Flecha/.test(sk.n)?.7:1))}
-function skillUpgradeText(sk){const lv=run.skl[sk.n]||0;if(lv>=10)return '';const parts=['Custo '+manaCost177(sk,lv)+' → '+manaCost177(sk,lv+1)+' '+resourceName260(sk)];if(sk.n==='Julgamento'){parts.push('Área +0,4 m de raio')}if(sk.n==='Luz Curativa')parts.push('Cura +2 pontos percentuais');if(sk.n==='Égide Sagrada')parts.push('Escudo +2 pontos percentuais');if(skillHasDamage(sk))parts.push('Dano '+skillDamagePart(sk,lv)+' → '+skillDamagePart(sk,lv+1));parts.push('Recarga '+preciseNumber(skillCooldown(sk,lv))+'s → '+preciseNumber(skillCooldown(sk,lv+1))+'s');return '<b>Próximo nível:</b> '+parts.join(' · ')}
+function skillUpgradeText(sk){const lv=run.skl[sk.n]||0;if(lv>=10)return '';const parts=['Custo '+manaCost177(sk,lv)+' → '+manaCost177(sk,lv+1)+' '+resourceName260(sk)];if(sk.n==='Julgamento'){{const a=6+Math.floor((run.skl[sk.n]||0)/2),b=6+Math.floor(((run.skl[sk.n]||0)+1)/2);parts.push(a===b?'Área '+a+' m (sobe +1 m a cada 2 níveis)':'Área '+a+' m → '+b+' m')}}if(sk.n==='Luz Curativa')parts.push('Cura +2 pontos percentuais');if(sk.n==='Égide Sagrada')parts.push('Escudo +2 pontos percentuais');if(skillHasDamage(sk))parts.push('Dano '+skillDamagePart(sk,lv)+' → '+skillDamagePart(sk,lv+1));parts.push('Recarga '+preciseNumber(skillCooldown(sk,lv))+'s → '+preciseNumber(skillCooldown(sk,lv+1))+'s');return '<b>Próximo nível:</b> '+parts.join(' · ')}
 function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)return (RSK103[sk.n]?.d||'Habilidade rara.')+(sk.t==='rare_anchor'?'<br><b>Retorno:</b> use novamente durante a janela, sem custo adicional.':sk.t==='rare_reprise'?'<br><b>Dano:</b> 60% da habilidade repetida, com seus atributos atuais.':'');const r=preciseNumber,skn=sk.n;
  const named={
  'Julgamento':()=> 'Causa dano sagrado em um raio de '+r(judgmentRadius(sk))+' m.',
@@ -141,16 +141,16 @@ function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)r
  'Flecha Perfurante':()=> 'Flecha que atravessa inimigos.<br><b>Distância:</b> +25% de dano a partir de 8 m do disparo.',
  'Chuva de Flechas':()=> '10 impactos na área da mira, a até 14 m, ao longo de 3s.<br><b>Lentidão:</b> cada impacto reduz o movimento dos inimigos em 50% por 2s.',
  'Bênção':()=> 'Protege por 5s.<br><b>Você:</b> recebe 60% menos dano.<br><b>Aliados a até 8 m:</b> recebem 30% menos dano, mesmo se saírem da área. Com Fortaleza Viva, vale a maior proteção.',
- 'Meteoro':()=> 'Meteoro na mira, a até 14 m. Explode após 0,9s em um raio de 5 m.',
+ 'Meteoro':()=> 'Meteoro na mira, a até 14 m. Explode após 1s em um raio de 5 m.',
  'Sol Negro':()=> 'Área de fogo na mira, a até 14 m.<br><b>Área:</b> 4 m de raio · 5 pulsos, um por segundo.',
- 'Era do Gelo':()=> 'Área de gelo na mira, a até 14 m.<br><b>Área:</b> 6 m de raio · 4 pulsos em 2,4s.<br><b>Lentidão:</b> 50% por 2s a cada acerto.',
- 'Fúria dos Céus':()=> '3 raios na área da mira, a até 14 m.<br><b>Área:</b> 3 m de raio · impactos em 1,1s.',
+ 'Era do Gelo':()=> 'Área de gelo na mira, a até 14 m.<br><b>Área:</b> 6 m de raio · 4 pulsos, um por segundo.<br><b>Lentidão:</b> 50% por 2s a cada acerto.',
+ 'Fúria dos Céus':()=> '3 raios na área da mira, a até 14 m.<br><b>Área:</b> 3 m de raio · os 3 raios caem em 1s.',
  'Sol Nascente':()=> 'Área de cura com 6 m de raio.<br><b>Cura imediata:</b> '+r(sk.pow*50)+'% da vida máxima.<br><b>Cura no chão:</b> mais '+r(sk.pow*50)+'% em 3 pulsos durante 3s. Você e aliados precisam estar na área de cada pulso.',
  'Domínio dos Ecos':()=> 'Atinge e marca inimigos em um raio de 7 m.<br><b>Marca:</b> seus ecos causam +20% de dano nesses alvos por 8s. Renova a marca do Necromante.',
  'Matilha Espiritual':()=> 'Invoca até 3 lobos nas vagas livres; permanecem até morrer.<br><b>Matilha:</b> seus lobos recebem +60% de dano e 45% de redução de dano por 8s, mesmo com o limite cheio.<br><b>Invocações:</b> '+minionAllies().length+'/'+summonCap()+'.',
  'Colosso de Pedra':()=> 'Invoca um golem permanente até morrer, ocupando uma vaga.<br><b>Golem:</b> triplo da vida e dobro do dano de uma invocação comum; movimentação e ataques mais lentos.<br><b>Invocações:</b> '+minionAllies().length+'/'+summonCap()+'.',
- 'Lâmina Rúnica':()=> '3 explosões em linha na direção da mira, até 7,5 m.<br><b>Área:</b> 2,2 m de raio por explosão.',
- 'Mil Cortes':()=> '6 golpes na área onde você lançou, durante 1,15s.<br><b>Área:</b> 4,5 m de raio. Você pode se mover enquanto os cortes continuam.',
+ 'Lâmina Rúnica':()=> '3 explosões em linha na direção da mira, até 9 m.<br><b>Área:</b> 2 m de raio por explosão.',
+ 'Mil Cortes':()=> '6 golpes na área onde você lançou, durante 1s.<br><b>Área:</b> 5 m de raio. Você pode se mover enquanto os cortes continuam.',
  'Fortaleza Viva':()=> 'Protege por 5s.<br><b>Você:</b> recebe '+r((1-sk.pow)*100)+'% menos dano.<br><b>Aliados a até 6 m:</b> recebem 50% menos dano, mesmo se saírem da área. Reaplicar renova a duração.',
  'Flecha Estelar':()=> '3 flechas perfurantes em leque. Mais de uma pode atingir o mesmo inimigo de perto.',
  'Lança de Gelo':()=> 'Projétil perfurante que reduz o movimento dos inimigos por 3s.',
@@ -162,14 +162,14 @@ function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)r
  if(sk.t==='guard')return 'Reduz o dano recebido em '+r((1-sk.pow)*100)+'% por 5s.';
  if(sk.t==='buff_dmg')return 'Aumenta seu dano em '+r((sk.pow-1)*100)+'% por 8s.';
  if(sk.t==='stealth')return 'Furtividade por 5s. Seu próximo ataque básico causa o triplo do dano.';
- if(sk.t==='blink')return 'Salta até 7 m para trás e impede dano por 0,6s.';
+ if(sk.t==='blink')return 'Salta até 7 m para trás e fica imune a dano por um instante.';
  if(sk.t==='nova')return 'Explosão em um raio de '+(skn==='Golpe Sísmico'?8:6)+' m.'+(skn.includes('Gelo')?'<br><b>Lentidão:</b> reduz o movimento dos inimigos por 4s.':'');
- if(sk.t==='cone')return 'Golpe em leque à frente, com alcance de 4,5 m.';
+ if(sk.t==='cone')return 'Golpe em leque à frente, com alcance de 5 m.';
  if(sk.t==='chain')return 'Atinge até 5 inimigos. Alcance: 12 m; saltos de 7 m.<br><b>Saltos:</b> cada salto perde 12% do dano do primeiro acerto.';
  if(sk.t==='stone_lance')return 'Estacas em linha na direção da mira, com alcance de 8 m. Empurram e atordoam inimigos.';
  if(sk.t==='thunderstorm')return 'Até 5 raios na área da mira, a até 14 m. Marcam posições de inimigos antes dos impactos.';
  if(sk.t==='rain')return (/Meteoro/.test(skn)?'5 meteoros':'7 impactos')+' na área da mira, a até 14 m. ';
- if(sk.t==='dot')return 'Área de praga na mira, a até 11 m.<br><b>Área:</b> 5,5 m de raio · 5 pulsos durante 5s.';
+ if(sk.t==='dot')return 'Área de praga na mira, a até 11 m.<br><b>Área:</b> 6 m de raio · 5 pulsos durante 5s.';
  if(sk.t==='dash_strike')return 'Avança cerca de 8 m, atingindo inimigos no caminho.';
  if(sk.t==='bolt')return 'Projétil na direção da mira.'+(skn.includes('Flecha')?' Atravessa inimigos.':'');
  return SKD[sk.t]||'Habilidade especial.';
@@ -263,7 +263,7 @@ function perfectDodge(){if(FX2.perfCd>0)return;narratorEvent105('dodge');FX2.per
 function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   if(player.dead||isCinematic451())return;resourceCombat258();if(player.iT>0){if(player.dodgeT>0)perfectDodge();return}
   if(setHas153('metamorfo','a')&&kitState111().form==='blindada')amt*=.85;const beforeGuard=amt;amt=kitIncoming111(player,amt,compatible111);if(amt<=0)return;if(typeof cm181Hurt==='function')cm181Hurt();hurtHooks183(amt);const guarded=beforeGuard-amt;if(guarded>0&&time>=(player.defenseFeedbackAt||0)){floater(player.x,player.z,'DEFESA -'+fmt(Math.round(guarded)),'#8bdcff',false,3.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.defenseFeedbackAt=time+.3}amt=Math.max(0,Math.round(amt*(1-player.def)*(player.guard>0?player.guardVal:1)*(1-.03*gearRuneCount('ward'))-Math.max(0,pDefVal296(inDType281)-(curAtk?.att281?.penV||0))));if(amt<=0){if(time>=(player.def296At||0)){floater(player.x,player.z,'BLOQUEADO','#8bdcff');player.def296At=time+.5}return}
-  if(pb('eva')&&Math.random()<.015*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
+  if(pb('eva')&&Math.random()<.02*pb('eva')){floater(player.x,player.z,'EVITOU','#c8f4ff');return}
   player.shT=4;const incoming=amt;amt=absorbHealingShield(player,amt);const shielded=incoming-amt;if(shielded>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'ESCUDO -'+fmt(shielded),'#9fe8ff',false,2.8);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}if(player.shield>0){const ab=Math.min(player.shield,amt);player.shield-=ab;amt-=ab;if(ab>0&&time>=(player.shieldFeedbackAt||0)){floater(player.x,player.z,'BARREIRA -'+fmt(ab),'#9fe8ff',false,2.0);fxRing(player.x,player.z,0x8bdcff,1.35,.24);player.shieldFeedbackAt=time+.3}if(amt<=0){sfx('block');return}}
   amt=guardianDamage108(player,amt);if(amt<=0){sfx('block');return}amt=Math.max(1,Math.round(passiveIncoming327(amt)));
   if(hasT('phoenix')&&player.hp-amt<player.maxhp*.2&&time>(player.phxT||0)){player.phxT=time+60;player.shield=player.maxsh;floater(player.x,player.z,'FÊNIX','#ff9a3d',true,3)}

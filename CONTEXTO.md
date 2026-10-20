@@ -1,3 +1,21 @@
+## v485 (20/10/2026) — Linguagem do jogo (estilo Skyrim) e fim dos números quebrados
+
+Pedido de Ian: "estude Skyrim e jogos de RPG… desenvolva uma linguagem… explicações simples e funcionais, que o que for dito realmente aconteça, e não use números quebrados; se tiver número quebrado no jogo, refaça para uma melhor explicação e balanceamento".
+
+1. **`LINGUAGEM.md` (raiz)**: 8 regras (texto = contrato com o código; só inteiros; efeito primeiro; uma frase, uma coisa; "você"; glossário fixo; dizer limites; sabor separado) + glossário + antes/depois + checklist. Citado em `src/LEIA-ME.md` (regra 7).
+2. **A mecânica passou a usar inteiros** (não só o texto):
+   - Recarga de toda habilidade = segundos inteiros (`skillCooldown` arredonda; botão mostra `Math.ceil`). `preciseNumber` agora mostra inteiro.
+   - Catálogo de classes (`class-catalog111-base.json`, `expansion260.py`): Mil Cortes raio 5, Evasão 1s, Golpe de Escudo 5 m, Praga 6 m, Muralhas 2 m, Ruína Anunciada 1s, Pedra Suspensa/Colapso Local 1s, Corpo Etéreo 1s, Julgamento +1 m a cada 2 níveis (`kitRadius111` com floor).
+   - Habilidades antigas (`380-acoes`): Meteoro 1s, Era do Gelo 1 pulso/s, Fúria dos Céus 3 raios em 1s, Lâmina Rúnica 3/6/9 m raio 2, Mil Cortes 1s raio 5, leque 5 m, praga 6 m.
+   - Atributos: movimento +1% a cada 2 de Agilidade, ataque +2% a cada 5, esquiva 1% mais rápida por ponto (ficha mostra "% mais rápida"); crítico +1% a cada 4 de Percepção, dano crítico +1% a cada 2; Estamina/Fúria máximas +1 a cada 2 de Vitalidade/Resistência; `attrRed281`, `critChance`, `bonusPool` e `naturalRegen` arredondados no código (a ficha mostra o que vale); bônus de sobrevivência do `attrs462` em % inteiros, patamares "+20%".
+   - Maestria +1% a cada 2 pontos; Diário de caça +1% por marco (antes 0,5%); Troféus +1% a cada 2 guardiões; Tomo do Vampiro 1%/nível, Tomo do Vento 2%/nível; Sede de sangue 2%/melhoria; Arcano −2% recarga/ponto; Sangue 1% a cada 3 pontos; Graça 2%; Paladino básico 1%; título Inabalável esquiva 15% mais rápida; Veterano poção +15% (Mira 75%/90%); Selene 1 ouro a cada 500 por nível.
+   - Estamina volta após 1s (Retomar o fôlego: na hora); Recuperação tranquila e biomas Flores/Vulcão 1% a cada 3s; Elo Elemental 1s; Contra-Fluxo 2s; Passagem 1s entre travessias; Firmeza atordoa 2s; Frasco de Paralisia 4s; pistola 1s; provações 2s e 3 m; torre +5 níveis a cada 2 andares (andar 100 = nível 250).
+   - Palavras no lugar de frações pequenas: "por um instante", "após um breve aviso".
+   - Peso de peixe e distâncias: `wTxt()` (gramas abaixo de 10 kg) e `distTxt()` (metros abaixo de 10 km) em `020-util.js`.
+3. **Textos reescritos na linguagem nova**: as 12 habilidades raras (`RSK103`).
+4. **Pendente (fase 2)**: peso da mochila/carrinho ainda em kg com vírgula (itens de 0,25–0,75 kg; proposta: unidade "peso" ×10) e reescrita dos ~200 textos de habilidades de classe e passivas no estilo novo.
+5. **Teste**: varredura no navegador de 455 habilidades × 11 níveis (5005 textos) e da ficha/atributos/recuperação = zero números quebrados; habilidades lançadas com recarga inteira; sem erro novo no console (o erro do `deep447.js` já existia).
+
 ## v483 (20/10/2026) — Coleta Automática de Ouro, Carnes/Espólios Opcionais nos Corpos e Botão de Descarte em Lote
 
 Correções fundamentais pedidas pelo Ian para eliminar sobrepeso indesejado por coleta forçada e agilizar o combate:

@@ -37,7 +37,7 @@
     frasco_acido:    { n: 'Frasco de Ácido Corrosivo',   w: 0.50, cat: 'tool', flask: 'acido',    d: 'Arremesse para estilhaçar em ácido: dissolve armaduras inimigas, aumentando em +50% todo o dano recebido por 10s.' },
     frasco_fogo:     { n: 'Frasco de Fogo Líquido',      w: 0.50, cat: 'tool', flask: 'fogo',     d: 'Arremesse para criar poça incendiária: dano imediato de fogo e chamas intensas que queimam alvos que pisarem.' },
     frasco_fumaca:   { n: 'Frasco de Fumaça Ofuscante',  w: 0.45, cat: 'tool', flask: 'fumaca',   d: 'Arremesse para erguer cortina densa de fumaça: quebra perseguição de inimigos na área e permite fuga segura.' },
-    frasco_paralisia:{ n: 'Frasco de Esporos Paralisantes', w: 0.50, cat: 'tool', flask: 'paralisia', d: 'Arremesse para dispersar esporos relampejantes: atordoa e paralisa todos os inimigos na área por 3.5s.' }
+    frasco_paralisia:{ n: 'Frasco de Esporos Paralisantes', w: 0.50, cat: 'tool', flask: 'paralisia', d: 'Arremesse para dispersar esporos relampejantes: atordoa e paralisa todos os inimigos na área por 4s.' }
   };
 
   /* Registrar itens na tabela do Surv437 */
@@ -64,7 +64,7 @@
     { id: 'frasco_acido',        n: 1, cost: { frasco_vazio: 1, liquen_acido: 2, lasca: 1 }, desc: 'Frasco de Ácido Corrosivo: corrói armaduras inimigas (-50% armadura por 10s).' },
     { id: 'frasco_fogo',         n: 1, cost: { frasco_vazio: 1, flor_brasa: 2, resina: 2 }, desc: 'Frasco de Fogo Líquido: explosão incendiária no solo com queima contínua.' },
     { id: 'frasco_fumaca',       n: 1, cost: { frasco_vazio: 1, folha_sombra: 2, galho: 1 }, desc: 'Frasco de Fumaça Ofuscante: cortina espessa que quebra o aggro dos inimigos.' },
-    { id: 'frasco_paralisia',    n: 1, cost: { frasco_vazio: 1, fungo_luz: 2, erva_vigor: 1 }, desc: 'Frasco de Paralisia: esporos de choque que imobilizam inimigos por 3.5s.' }
+    { id: 'frasco_paralisia',    n: 1, cost: { frasco_vazio: 1, fungo_luz: 2, erva_vigor: 1 }, desc: 'Frasco de Paralisia: esporos de choque que imobilizam inimigos por 4s.' }
   ];
 
   /* Efeitos ativos de poções / buffs de sobrevivência */
@@ -157,7 +157,7 @@
       id: flaskId, it, g, col,
       x: startX, y: startY, z: startZ,
       vx, vy, vz,
-      life: 3.5
+      life: 4
     });
 
     try {
@@ -201,7 +201,7 @@
           e.aggro = false; e.target = null; e.blindT470 = 7;
           if (typeof floater === 'function') floater(e.x, e.z, '💨 FUMAÇA (CEGO/SEM ALVO)', '#cccccc', true);
         } else if (f.id === 'frasco_paralisia') {
-          e.stun = Math.max(e.stun || 0, 3.5);
+          e.stun = Math.max(e.stun || 0, 4);
           if (typeof floater === 'function') floater(e.x, e.z, '⚡ PARALISIA (3.5s)', '#44ccff', true);
         }
       }

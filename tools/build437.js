@@ -296,7 +296,7 @@
 
     if (b.kind === 'fogueira') {
       const lit = (b.fuel || 0) > 0;
-      h += row('🔥 Estado da Fogueira', lit ? '<b style="color:#ffb347">Acesa</b> · Combustível: ' + b.fuel.toFixed(1) + ' lenhas (aquece, ilumina e afasta predadores fotofóbicos)' : '<span style="opacity:.7">Apagada (adicione lenha ou galhos)</span>',
+      h += row('🔥 Estado da Fogueira', lit ? '<b style="color:#ffb347">Acesa</b> · Combustível: ' + Math.ceil(b.fuel) + ' lenhas (aquece, ilumina e afasta predadores fotofóbicos)' : '<span style="opacity:.7">Apagada (adicione lenha ou galhos)</span>',
         '<button class="btn hot" id="b437fuel">+1 Lenha (' + Surv437.count('lenha') + ')</button> <button class="btn" id="b437branch">+2 Galhos (' + Surv437.count('galho') + ')</button>');
       if (lit) {
         const ctn = Surv437.S().canteen;

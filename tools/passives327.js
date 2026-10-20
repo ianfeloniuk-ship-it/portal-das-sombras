@@ -4,12 +4,12 @@ const NEW=[
  {id:'resolute',n:'Golpe Resoluto',d:'O 4º ataque básico seguido dá dano dobrado.'},
  {id:'respite',n:'Respiro',d:'Depois de 3s sem apanhar, o próximo golpe recebido tira metade.'},
  {id:'impetus',n:'Ímpeto',d:'Andando sem parar, a velocidade de ataque sobe 4% por segundo, até +20%.'},
- {id:'elem_link',n:'Elo Elemental',d:'Acertar a fraqueza do monstro tira 0,5s da recarga de todas as habilidades (no máximo 1 vez a cada 0,5s).'},
+ {id:'elem_link',n:'Elo Elemental',d:'Acertar a fraqueza do monstro tira 1s da recarga de todas as habilidades (no máximo 1 vez por segundo).'},
  {id:'wear',n:'Desgaste',d:'Cada golpe no mesmo alvo tira 1 ponto da defesa dele, até 20 pontos. Some após 5s sem golpear.'},
  {id:'mark_hunter',n:'Caçador de Marcas',d:'Matar um inimigo marcado passa a Marca para os 2 inimigos mais próximos (até 10m).'},
  {id:'combat_read',n:'Leitura de Combate',d:'+1% de dano contra uma espécie a cada 50 abates dela no Bestiário, até +10% (500 abates).'},
  {id:'cold_blood',n:'Sangue-Frio',d:'Abaixo de 30% de vida, habilidades gastam metade de Mana, Fúria ou Estamina.'},
- {id:'counterflow',n:'Contra-Fluxo',d:'Esquiva perfeita deixa o próximo golpe em até 1,5s crítico garantido.'},
+ {id:'counterflow',n:'Contra-Fluxo',d:'Depois de uma esquiva perfeita, o próximo golpe em até 2s é crítico garantido.'},
  {id:'last_breath',n:'Último Fôlego',d:'Uma vez por portal (ou a cada 3 min fora dele), o golpe que te mataria deixa você com 1 de vida e 2s invulnerável.'}
 ];
 const LV=[55,60,65,70,75,80,85,90,95,100];
@@ -35,10 +35,10 @@ window.passiveHit327=function(e,amt,o){if(!o||!o.fromPlayer||o.pet)return amt;
  return amt};
 
 /* Elo Elemental: chamado com o dano antes/depois da fraqueza */
-window.passiveElem327=function(before,after,o){if(!o||!o.fromPlayer||!has('elem_link')||!(after>before*1.2))return;const t=T();if(t<(player.elem327At||0))return;player.elem327At=t+.5;for(const s of (player.skills||[]))if(s&&s.cdT>0)s.cdT=Math.max(0,s.cdT-.5)};
+window.passiveElem327=function(before,after,o){if(!o||!o.fromPlayer||!has('elem_link')||!(after>before*1.2))return;const t=T();if(t<(player.elem327At||0))return;player.elem327At=t+1;for(const s of (player.skills||[]))if(s&&s.cdT>0)s.cdT=Math.max(0,s.cdT-1)};
 
 /* Contra-Fluxo */
-window.passiveDodge327=function(){if(has('counterflow'))player.cf327Until=T()+1.5};
+window.passiveDodge327=function(){if(has('counterflow'))player.cf327Until=T()+2};
 window.passiveCrit327=function(o){if(o&&o.fromPlayer&&player.cf327Until>T()){player.cf327Until=0;return true}return false};
 
 /* Respiro */

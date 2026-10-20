@@ -4,7 +4,7 @@ function questBudget262(q,type){if(!q)return {xp:0,level:1,minutes:0,difficulty:
 /* v332 (Ian): o orçamento guarda nível/duração da missão (alvos, ouro); o XP é recalculado pelo nível atual do jogador a cada consulta e entrega. */
 function questXpNow332(b){return {...b,xp:RpgBalance.questXpAt(b,run?.level||1)}}
 const QUEST_XP_RULE332='XP ajustado ao seu nível, até 1 nível por entrega.';
-function questXpText262(q,type){const b=questBudget262(q,type);return xpNumber(type==='daily'&&profile.dailyXp262Day===q.day?0:xpAwardAmount262(b.xp,'quest'))+' XP · duração estimada '+String(Math.round(b.minutes*10)/10).replace('.',',')+' min'}
+function questXpText262(q,type){const b=questBudget262(q,type);return xpNumber(type==='daily'&&profile.dailyXp262Day===q.day?0:xpAwardAmount262(b.xp,'quest'))+' XP · duração estimada '+Math.max(1,Math.round(b.minutes))+' min'}
 function questTargetText262(q){return ['kill','pvp','night','nopot','nododge'].includes(q.t)?' · NV '+questBudget262(q).level+' ou desafio equivalente':''}
 function questEnemyEligible262(q,e){if(!e||e.noExpLoot||e.rewardBlocked||e.ally||e.statue)return false;const b=questBudget262(q);return eLvl(e)>=b.level||enemyRewardBalance(e).xp>=RpgBalance.reward({level:b.level,speciesXp:6}).xp}
 

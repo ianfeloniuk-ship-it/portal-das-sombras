@@ -1,7 +1,7 @@
 /* ===== LIVRARIA (ideia do Irror): passivas que servem para qualquer classe. Custam 1 ponto de habilidade + ouro por nível (máx. 10). ===== */
-const PBOOK=[{k:'xp',n:'Tomo da Sabedoria',d:l=>'+'+(3*l)+'% de XP',u:'+3% de XP por nível'},{k:'ls',n:'Tomo do Vampiro',d:l=>String(.5*l).replace('.',',')+'% do dano volta como vida',u:'+0,5% de roubo de vida por nível'},
+const PBOOK=[{k:'xp',n:'Tomo da Sabedoria',d:l=>'+'+(3*l)+'% de XP',u:'+3% de XP por nível'},{k:'ls',n:'Tomo do Vampiro',d:l=>l+'% do dano volta como vida',u:'+1% de roubo de vida por nível'},
  {k:'sh',n:'Tomo da Égide',d:l=>'+'+(4*l)+'% de escudo máximo',u:'+4% de escudo por nível'},{k:'res',n:'Tomo da Pele de Ferro',d:l=>'+'+fmt(Math.round(1.5*l*atkPer(run?.level||1)))+' de defesa universal (desconta de todo dano)',get u(){return '+'+fmt(Math.round(1.5*atkPer(run?.level||1)))+' de defesa universal por nível (cresce com seu nível)'}},
- {k:'eva',n:'Tomo do Vento',d:l=>String(1.5*l).replace('.',',')+'% de chance de evitar um golpe',u:'+1,5% de evasão por nível'},{k:'area',n:'Tomo do Alcance',d:l=>'+'+(4*l)+'% de alcance do ataque corpo a corpo',u:'+4% de alcance por nível'}];
+ {k:'eva',n:'Tomo do Vento',d:l=>(2*l)+'% de chance de evitar um golpe',u:'+2% de evasão por nível'},{k:'area',n:'Tomo do Alcance',d:l=>'+'+(4*l)+'% de alcance do ataque corpo a corpo',u:'+4% de alcance por nível'}];
 function pb(k){return ((run&&run.pbook)||{})[k]||0}
 function pbCost(l){return servicePrice265('passive',{passiveLevel:l})}
 function libView(){view=libView;let h='<div class="sysline">Passivas para todas as classes. Cada melhoria custa <b>1 ponto de habilidade</b> e ouro. Máximo: nível 10. Pontos de habilidade: <b>'+(run.spts||0)+'</b>.</div><div class="sec">PASSIVAS</div>';

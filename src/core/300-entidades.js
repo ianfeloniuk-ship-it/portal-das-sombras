@@ -90,7 +90,7 @@ function inversionHit113(h){if(h.owner?.dead||player.dead||player.iT>0||player.d
 const BMECH={
   costas:{n:'Couraça Frontal',d:'Só toma dano de verdade PELAS COSTAS. Esquive para trás dele.'},
   divide:{n:'Divisão',d:'Na metade da vida, se parte em dois fragmentos.'},
-  inverte:{n:'Olhar Distorcido',d:'Marca uma área violeta a até 14 m. Após 1,2s, quem for atingido tem movimento e esquiva invertidos por 3s. Saia do círculo ou esquive no impacto.'},
+  inverte:{n:'Olhar Distorcido',d:'Marca uma área violeta a até 14 m. Após um breve aviso, quem for atingido tem movimento e esquiva invertidos por 3s. Saia do círculo ou esquive no impacto.'},
   barreira:{n:'Barreira de Mana',d:'De tempos em tempos fica quase imune. Afaste-se e espere a barreira cair.'}};
 function updBossMech(e,dt){if(!e.mech||e.dead)return;
   if(!e.mechShown&&e.intro){e.mechShown=true;const M=BMECH[e.mech];setTimeout(()=>{showSys('Mecânica do chefe: <b>'+M.n+'</b>. '+M.d)},1200)}

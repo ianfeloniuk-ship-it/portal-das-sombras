@@ -9,6 +9,7 @@ O script principal do jogo foi dividido em partes (v388, 14/10/2026, pedido de I
 4. Funções novas e sistemas novos: prefira um arquivo próprio em `tools/` (ex.: `tools/climb383.js`, `tools/rain387.js`) incluído por `<script src>` no fim do `game.html`.
 5. A ordem das partes importa (é um script só). Não renomeie nem reordene sem atualizar `manifest.json`.
 6. `python tools/core_parts.py check` diz se partes e `game.html` estão iguais.
+7. **Textos e números (v485, pedido de Ian):** siga `LINGUAGEM.md` na raiz — só números inteiros, o texto é contrato com o código, efeito primeiro, glossário fixo.
 
 ## Partes (em ordem)
 | Arquivo | Tamanho | Começo |

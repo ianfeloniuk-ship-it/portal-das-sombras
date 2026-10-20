@@ -6,8 +6,8 @@ function selectedPassives263(){const lv=(typeof run!=='undefined'&&run&&run.leve
 function passiveUnlockCheck286(){if(typeof run==='undefined'||!run)return;const lv=run.level||1;run.passSeen286=run.passSeen286??ResourceBalance263.passives.filter((p,i)=>lv>=passiveLevel286(i)).length;const now=ResourceBalance263.passives.filter((p,i)=>lv>=passiveLevel286(i));if(now.length>run.passSeen286){for(const p of now.slice(run.passSeen286))try{toast('<b>[PASSIVA]</b> Nova passiva ativa: <b>'+p.n+'</b> — '+p.d,4500)}catch(_){}run.passSeen286=now.length}}
 function hasPassive263(id){return selectedPassives263().includes(id)}
 function passiveCost263(kind,cost){return cost>0&&hasPassive263(kind+'_saver')?Math.max(1,Math.ceil(Math.round(cost*.9*1e8)/1e8)):cost}
-function vigorRate263(){return ResourceBalance263.vigorRate*(hasPassive263('vigor_flow')?1.15:1)}
-function resourceWait263(kind){return kind==='vigor'?(hasPassive263('vigor_focus')?1:ResourceBalance263.vigorWait):(hasPassive263('fury_hold')?9:ResourceBalance263.furyWait)}
+function vigorRate263(){return Math.round(ResourceBalance263.vigorRate*(hasPassive263('vigor_flow')?1.15:1))}
+function resourceWait263(kind){return kind==='vigor'?(hasPassive263('vigor_focus')?0:ResourceBalance263.vigorWait):(hasPassive263('fury_hold')?9:ResourceBalance263.furyWait)}
 function passiveGuard263(actor,damage){return actor===player&&actor.hp>actor.maxhp*.8&&hasPassive263('ready_guard')?damage*.92:damage}
 function passiveDamage263(enemy,damage,options){return options.fromPlayer&&options.skillHit&&!options.pet&&!options.passive&&enemy.hp<=enemy.maxhp*.35&&hasPassive263('opportunist')?damage*1.08:damage}
 function passiveRows263(){const lv=run.level||1,act=selectedPassives263().length;let h='<div class="sec">PASSIVAS GERAIS · '+act+' DE '+ResourceBalance263.passives.length+' ATIVAS</div><div class="sysline">Ativadas automaticamente ao alcançar o nível necessário. Não ocupam espaços de habilidade.</div>';ResourceBalance263.passives.forEach((p,i)=>{const L=passiveLevel286(i),on=lv>=L;h+=row((on?'':'🔒 ')+p.n,p.d,on?'<b>Ativa</b>':'<span style="color:#9fb0c4">Nível '+L+'</span>')});return h}

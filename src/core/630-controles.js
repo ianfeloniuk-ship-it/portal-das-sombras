@@ -126,7 +126,7 @@ function newPet(){const r=wpick([55,27,12,4.5,1.2,.25,.05].map((w,i)=>({i,w}))).
 function petMul(){const p=run.pet;return RAR[p.rar].m*(1+.08*(p.lvl-1))}
 function petTrainCost(){return servicePrice265('petTraining',{petLevel:run.pet?run.pet.lvl:1})}
 function petRows(){const p=run.pet&&typeof run.pet==='object'?run.pet:null;let h=row('Ovo de Companheiro','Raridade e poder sorteados: Comum até Primordial. Se sair pior que o seu, ele ganha +3 níveis.',btn(fmt(petPrice265())+' ouro','buypet',0,run.gold>=petPrice265()));
-  if(p)h+=row('<b style="color:'+RAR[p.rar].c+'">'+RAR[p.rar].n+' · '+PETP[p.pow].n+'</b> · NV '+p.lvl,PETP[p.pow].d+' · força x'+petMul().toFixed(2),btn('Treinar · '+fmt(petTrainCost()),'trainpet',0,run.gold>=petTrainCost()));return h}
+  if(p)h+=row('<b style="color:'+RAR[p.rar].c+'">'+RAR[p.rar].n+' · '+PETP[p.pow].n+'</b> · NV '+p.lvl,PETP[p.pow].d+' · força +'+Math.round((petMul()-1)*100)+'%',btn('Treinar · '+fmt(petTrainCost()),'trainpet',0,run.gold>=petTrainCost()));return h}
 /* Pet: dragãozinho voando (modelo do Dracônico em miniatura), cor pelo poder e brilho pela raridade. */
 const PET_COL={tiro:0xff7a22,gelo:0xffd08a,raio:0xfff36b,cura:0x6fe39a};
 function makePetModel(pp){const pc=PET_COL[pp.pow]||0xb18cff,rc=new THREE.Color(RAR[pp.rar].c);

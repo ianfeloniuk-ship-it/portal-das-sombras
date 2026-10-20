@@ -50,7 +50,7 @@
     ]
   },
   "vigorRate": 8,
-  "vigorWait": 1.5,
+  "vigorWait": 1,
   "furyWait": 6,
   "passives": [
     {
@@ -76,7 +76,7 @@
     {
       "id": "vigor_focus",
       "n": "Retomar o fôlego",
-      "d": "Estamina começa a recuperar após 1s sem gastar."
+      "d": "Estamina começa a recuperar na hora em que você para de gastar."
     },
     {
       "id": "mana_flow",
@@ -106,7 +106,7 @@
     {
       "id": "recovery",
       "n": "Recuperação tranquila",
-      "d": "Após 6s sem combate, recupera 0,3% da vida máxima por segundo."
+      "d": "Após 6s sem combate, recupera 1% da vida máxima a cada 3 segundos."
     },
     {
       "id": "opportunist",

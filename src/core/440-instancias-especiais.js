@@ -172,7 +172,7 @@ function bankView(){
   view=bankView;const b=profile.bank||0;
   let h='<div class="sysline">Selene: O que fica aqui não se perde, nem se você morrer lá fora. · Com você <b class="gold">'+fmt(run.gold)+'</b> · No banco <b class="gold">'+fmt(b)+'</b></div>';
   h+=row('Depositar','Guarda o ouro com segurança',btn('100','dep','100',run.gold>=100)+btn('1.000','dep','1000',run.gold>=1000)+btn('Tudo','dep','all',run.gold>0,'hot'));
-  h+=(affL('Selene')?row('Juros','Coletar '+fmt(bankInterest266())+' ouro · '+(affL('Selene')*.15).toFixed(2).replace('.',',')+'% do saldo, limitado a '+fmt(20*Math.min(10,affL('Selene')))+' ouro por dia',btn('Coletar','interest',0,profile.intDay!==todayKey()&&b>0)):'')+affRow('Selene');
+  h+=(affL('Selene')?row('Juros','Coletar '+fmt(bankInterest266())+' ouro · '+Math.min(10,affL('Selene'))+' ouro a cada 500 guardados, limitado a '+fmt(20*Math.min(10,affL('Selene')))+' ouro por dia',btn('Coletar','interest',0,profile.intDay!==todayKey()&&b>0)):'')+affRow('Selene');
   h+=row('Sacar','Leva o ouro de volta para a bolsa',btn('100','wd','100',b>=100)+btn('1.000','wd','1000',b>=1000)+btn('Tudo','wd','all',b>0));
   h+='<div class="sec">RECURSOS DA VILA</div>'+row('Preparar a defesa','Brann organiza guardas e vigias; os investimentos ficam nesta vila.',btn('Defesas','defense',0))+row('Desenvolvimento da vila','Consulte melhorias, doações e renda.',btn('Ver evolução','gtab','city'));
   openModal('BANCO DE '+nearestCity(player.x,player.z).c.name.toUpperCase(),h);
