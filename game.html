@@ -7403,15 +7403,15 @@ function agiDesc(){const g=(run.stats||{}).agi||0,f=v=>v.toFixed(2).replace('.',
   return 'Velocidade de ataque: <b>+0,4% por ponto</b> · agora <b>+'+String(Math.round(.4*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Movimento: <b>+0,5% por ponto</b> · agora <b>+'+String(Math.round(.5*g*10)/10).replace('.',',')+'%</b> (sem limite)<br>Esquiva recarrega em <b>'+f(dodgeCdVal())+' s</b> = 1,50 s ÷ (1 + 1% por ponto) · sem limite, cada ponto sempre ajuda'}
 
 function statDesc(){return {
- for:['Dano corpo a corpo e Fúria (não conta para arco e arremesso).','Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque corpo a corpo. A cada 20 pontos: +1 de Fúria por golpe.'],
- des:['Dano à distância (arco, adaga arremessada, arma de fogo) e penetração.','Vale para qualquer classe que atire: um Guerreiro de arco usa Destreza, não Força. Cada ponto ganho no treino: +'+atkPer(run.level)+' de ataque à distância e +'+preciseNumber(atkPer(run.level)*.5)+' de penetração.'],
- agi:['Velocidade de ataque, movimento e esquiva.','Cada ponto ganho no treino: +0,4% de velocidade de ataque e +0,5% de movimento. Reduz a recarga da esquiva.'],
- per:['Chance e dano crítico.','Cada ponto ganho no treino: +0,25% de chance e +0,5% de dano crítico.'],
- int:['Mana e dano mágico.','Cada ponto ganho no treino: +'+mpPer(run.level)+' de mana e +'+atkPer(run.level)+' de ataque mágico.'],
- vit:['Vida e Estamina.','Cada ponto ganho no treino: +'+hpPer(run.level)+' de vida e +0,5 de Estamina.'],
- res:['Defesa física e Fúria máxima.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de defesa física e +0,5 de Fúria máxima.'],
- esp:['Defesa mágica e regeneração de mana.','Cada ponto ganho no treino: +'+atkPer(run.level)+' de defesa mágica. Recupera mana mais rápido.'],
- von:['Defesa geral e resistência a efeitos.','Cada ponto ganho no treino: +'+preciseNumber(atkPer(run.level)*.5)+' de defesa contra qualquer golpe e efeitos negativos mais curtos.']
+  for:['Dano corpo a corpo e Fúria.','+'+atkPer(run.level)+' de ataque corpo a corpo por ponto.'],
+  des:['Dano à distância e penetração.','+'+atkPer(run.level)+' de ataque à distância por ponto.'],
+  agi:['Velocidade e esquiva.','+0,4% de velocidade e +0,5% de movimento por ponto.'],
+  per:['Chance e dano crítico.','+0,25% de chance e +0,5% de dano crítico por ponto.'],
+  int:['Mana e dano mágico.','+'+mpPer(run.level)+' de mana e +'+atkPer(run.level)+' de ataque mágico por ponto.'],
+  vit:['Vida e Estamina.','+'+hpPer(run.level)+' de vida e +0,5 de Estamina por ponto.'],
+  res:['Defesa física e Fúria máxima.','+'+atkPer(run.level)+' de defesa física por ponto.'],
+  esp:['Defesa mágica e regeneração de mana.','+'+atkPer(run.level)+' de defesa mágica por ponto.'],
+  von:['Defesa geral e resistência.','+'+preciseNumber(atkPer(run.level)*.5)+' de defesa por ponto.']
 }}
 /* Linha com dica: passe o mouse (PC) ou toque no nome (celular) para ver a explicação. */
 function tipFmt(t){if(String(t).includes('<br>'))return t;const p=String(t).split(/(?<=[.!])\s+(?=[A-ZÀ-Ú<(+−0-9])/).filter(x=>x.trim());return p.length>1?'<span style="display:block;margin-top:3px">• '+p.join('<br>• ')+'</span>':t}
@@ -7490,7 +7490,7 @@ function masteryReady114(){const skills=learnedSkills();return skills.length>0&&
 function canRedistribute(){return !!player&&!player.dead}
 function redistributeAttributes(){if(!canRedistribute())return false;let points=0;for(const k in STATN)points+=Math.max(0,Math.floor(run.stats[k]||0));if(!points)return false;for(const k in STATN)run.stats[k]=0;run.pts+=points;refreshStats();saveRun();return true}
 function resetRankTalents(){if(!canRedistribute())return false;profile.rankTalents=[];saveRun();return true}
-function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+className()+'</p><p>'+xpProgressText(xpProgress())+'</p><p>Atributos sobem <b>treinando</b>: cada ação conta para a meta do atributo e, ao completar, ele ganha 1 ponto.</p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+(run.stats[k]||0)+'</b>',D[k][0],D[k][1],'<span class="a465-stat" data-stat465="'+k+'"></span>');/* v465 (Ian): sem +1/+5 nem Redistribuir — não existe ponto para colocar */h+='<div class="tabs">'+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
+function statusView(){view=statusView;L.characterTab='status';let h=characterTabs('status')+'<div class="guide93"><strong>'+safeText(profile.name||CLASSES[profile.cls].n)+'</strong><p>Nível '+run.level+' · Rank '+RANKS[rankOf()].id+' · '+className()+'</p><p>'+xpProgressText(xpProgress())+'</p><p>Treinar dá +1 no atributo.</p></div>';const D=statDesc();for(const k in STATN)h+=tipRow(STATN[k]+': <b>'+(run.stats[k]||0)+'</b>',D[k][0],D[k][1],'<span class="a465-stat" data-stat465="'+k+'"></span>');/* v465 (Ian): sem +1/+5 nem Redistribuir — não existe ponto para colocar */h+='<div class="tabs">'+btn('Aparência','look',0)+'</div>';if(run.level>=100*((profile.rebirths||0)+1))h+=row('Reencarnação','Recomeça no nível 1, reinicia atributos e habilidades e concede bônus permanentes. Mantém ouro, itens e ecos.',btn('Reencarnar','rebirth',0,true,'red'));openModal('PERSONAGEM',h,'status')}
 function tipText155(html){return String(html).replace(/<br\s*\/?>|<\/(div|p|li)>/gi,'\n').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/\n\s*\n+/g,'\n').trim()}
 /* v158→ Ian: habilidade não abre/fecha no clique; a explicação aparece no balão ao passar o mouse. */
 function skillUpgradeRow(sk,cost=1){const lv=run.skl[sk.n]||0,up=skillUpgradeText(sk),tip=tipText155(skillDesc(sk));return '<div class="it skill155" data-tip154="'+gearText(tip)+'" style="cursor:help"><div class="d"><b>'+safeText(sk.n)+'</b><div style="font-size:12px;line-height:1.4;margin:4px 0">'+safeText(sk.kit111?briefSkill260(sk):tipText155(skillEffect102(sk)))+'</div><small>'+(lv>=10?'Melhorias 10/10 · máximo':'Melhorias '+lv+'/10')+' · '+manaCostText258(sk)+(lv<10&&sk.mp>0?' → '+manaCost177(sk,lv+1)+' '+resourceName260(sk):'')+' · Recarga '+skillCooldownText(sk)+'s</small></div><div class="acts">'+(lv>=10?'':btn('Melhorar · '+cost+(cost===1?' ponto':' pontos'),cost===1?'skup':'skup2',sk.n,run.spts>=cost).replace('<button','<button data-tip154="'+gearText(tipText155(up))+'"'))+'</div></div>'}

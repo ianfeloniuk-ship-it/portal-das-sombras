@@ -52,15 +52,15 @@
     })[k] || '';
   }
   const TRAIN_TXT = {
-    for: 'golpes corpo a corpo, cortar árvores e minerar',
-    des: 'acertos à distância, pescar e fabricar',
-    agi: 'esquivar, nadar e andar em Passo Silencioso',
-    per: 'golpes críticos, colher recursos e explorar e rastrear áreas nas Fendas',
-    int: 'magias e habilidades elementais, cozinhar e ferver chás',
-    vit: 'gastar e recuperar vida, estamina e fôlego',
-    res: 'receber/bloquear dano físico, puxar o carrinho e aguentar frio/calor',
-    esp: 'gastar/regenerar mana e sobreviver dentro das Fendas',
-    von: 'aguentar vários golpes seguidos, resistir a efeitos e lutar com pouca vida'
+    for: 'golpes corpo a corpo, cortar lenha e minerar',
+    des: 'ataques à distância, pescar e fabricar',
+    agi: 'esquivar, nadar e passo silencioso',
+    per: 'golpes críticos e colher recursos',
+    int: 'magias, cozinhar e preparar chás',
+    vit: 'gastar/recuperar vida e estamina',
+    res: 'bloquear dano e puxar carrinho',
+    esp: 'gastar mana e explorar fendas',
+    von: 'resistir a efeitos e lutar com vida baixa'
   };
 
   /* ---------- treino ---------- */
@@ -192,7 +192,7 @@
     statDesc = function () {
       const d = sd0.apply(this, arguments);
       try {
-        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], 'Treino: ' + TRAIN_TXT[k] + '. ' + d[k][1].replace(/^Como sobe:[^.]*\.\s*/, '') + ' Sobrevivência e exploração: ' + survText(k) + ' Marcos a cada 25 pontos: ' + (tier(k) ? 'patamar ' + tier(k) + ', cada ponto rende ×' + num(tierMul(k)) + ' nesses bônus.' : 'após os primeiros 25, os próximos pontos rendem ×1,2 nesses bônus.')];
+        if (run && run.stats) for (const k of KEYS) if (d[k]) d[k] = [d[k][0], d[k][1] + ' Treino: ' + TRAIN_TXT[k] + '.'];
       } catch (_) {}
       return d;
     };
@@ -214,11 +214,10 @@
       '<button class="btn mini" data-a462-surv>Mochila e sobrevivência [V]</button></div></section>';
   }
   function trainLine(k) {
-    const t = T(), c = t.c[k], g = goal(t.l[k]), p = pts(k), next = 25 * (tier(k) + 1);
-    return '<span class="a462-train"><span class="a462-tb"><i style="width:' + Math.min(100, c / g * 100).toFixed(0) + '%"></i></span>Treino ' + Math.floor(c) + '/' + g +
-      ' · Marco ' + next + (tier(k) ? ' · patamar ' + tier(k) + ' (×' + num(tierMul(k)) + ')' : '') + ' · Total ' + p + (t.g[k] && p > t.g[k] ? ' (' + (p - t.g[k]) + ' de antes + ' + t.g[k] + ' de treino)' : '') + '</span>';
+    const t = T(), c = t.c[k], g = goal(t.l[k]);
+    return '<span class="a462-train"><span class="a462-tb"><i style="width:' + Math.min(100, c / g * 100).toFixed(0) + '%"></i></span>Treino ' + Math.floor(c) + '/' + g + '</span>';
   }
-  function decorateStatus() {
+    function decorateStatus() {
     const mb = document.getElementById('mb'); if (!mb || !run) return;
     if (!mb.querySelector('.a462-surv')) {
       const anchor = mb.querySelector('.c405-points') || mb.querySelector('.guide93');
