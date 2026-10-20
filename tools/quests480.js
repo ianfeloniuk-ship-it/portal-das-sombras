@@ -464,21 +464,25 @@
   let lastTick = performance.now();
 
   // =========================================================================
-  // ENCONTROS EMERGENTES DE MUNDO ABERTO (ESTILO SKYRIM)
-  // NPCs errantes, emboscadas de estrada, carroças quebradas e eremitas
-  // que o jogador encontra organicamente enquanto explora os caminhos.
+  // ENCONTROS EMERGENTES DE MUNDO ABERTO POR BIOMA (ESTILO SKYRIM)
+  // Mar, Neve, Deserto, Pântano, Vulcão, Floresta e Clima de Tempestade.
+  // NPCs errantes, expedições congeladas, náufragos, caravanas e eremitas
+  // que o jogador encontra organicamente enquanto explora qualquer terreno.
   // =========================================================================
   let lastEmergentCheck = performance.now();
   let currentEmergentNpc = null;
 
   const EMERGENT_DEFS = [
+    // --- CAMPOS, FLORESTAS E PLANÍCIES ---
     {
       type: 'injured_hunter',
+      biomes: ['campos', 'floresta', 'flores'],
       name: 'Kallan, Caçador Ferido',
       sign: '! CAÇADOR DA ORDEM',
       speech: 'Pelos Sete... Viajante, aproxime-se! Preciso de ajuda!',
       title: 'ENCONTRO NA ESTRADA · CAÇADOR DA ORDEM',
       desc: 'Minha patrulha foi emboscada por uma alcateia de Feras Abissais na colina logo ao norte. A líder da alcateia levou o amuleto da nossa capitã e dispersou meus companheiros. Se você caçar a fera alfa e vingar a patrulha, a Ordem te recompensará generosamente!',
+      chibi: { body: 0x3d4a36, hair: 0xd0b070, wep: 'bow', wcol: 0xffd08a, gk: 'Rogue', tint: 0xd0ff8a },
       quest: {
         id: 'emergent_alpha_beast',
         title: 'Caçada: A Fera Alfa das Colinas',
@@ -497,11 +501,13 @@
     },
     {
       type: 'broken_cart',
+      biomes: ['campos', 'floresta', 'flores'],
       name: 'Doran, Mercador Ambulante',
       sign: '! CARROÇA SAQUEADA',
       speech: 'Malditos saqueadores! Levaram meus caixotes!',
       title: 'SOCORRO NA ESTRADA · CARROÇA SAQUEADA',
       desc: 'Minha carroça quebrou a roda nesta subida pedregosa e um bando de renegados caiu sobre nós! Eles arrastaram meus fardos de minério refinado e tecidos raros para o acampamento de pedras logo adiante. Recupere minha carga e divido 2.200 de ouro e cristais raros com você!',
+      chibi: { body: 0x5a3a22, hair: 0x8a5a3a, wep: 'none', gk: 'Merchant', tint: 0xffd54f },
       quest: {
         id: 'emergent_stolen_cargo',
         title: 'Resgate: A Carga Roubada de Doran',
@@ -520,11 +526,13 @@
     },
     {
       type: 'ancient_scholar',
+      biomes: ['campos', 'floresta', 'flores', 'ruinas'],
       name: 'Eldrin, Sábio das Ruínas',
       sign: '? MONÓLITO ANCESTRAL',
       speech: 'O eco dos Primevos ressoa neste monumento...',
       title: 'MISTÉRIO ANTIGO · MONÓLITO DOS PRIMEVOS',
       desc: 'Saudações, Transmigrador. Você sente o calor desta pedra antiga? Este monumento guarda o espírito de um Guardião Ancestral que resistiu às primeiras Fendas. Se você tiver a audácia de tocar a runa e superar a Provação da Sombra, os tesouros do santuário reconhecerão seu poder!',
+      chibi: { body: 0x2a3a5a, hair: 0xffffff, wep: 'staff', wcol: 0x7fd8ff, gk: 'Mage', tint: 0x7fd8ff },
       quest: {
         id: 'emergent_monolith_trial',
         title: 'Provação: O Guardião do Monólito Ancestral',
@@ -543,11 +551,13 @@
     },
     {
       type: 'deserter_scout',
+      biomes: ['campos', 'floresta', 'flores'],
       name: 'Vael, Batedor Renegado',
       sign: '! FUGITIVO NAS ROCHAS',
       speech: 'Psiu! Ei, Transmigrador... aqui nas rochas!',
       title: 'SEGREDOS NAS MONTANHAS · O BATEDOR RENEGADO',
       desc: 'A guarnição acha que fugi por covardia, mas a verdade é que descobri algo aterrador: um ninho de feras com chifres guardando uma arca reluzente de cristais abissais em um covil secreto logo acima. Eu não consigo derrotá-los sozinho, mas você sim. Fique com a localização da arca!',
+      chibi: { body: 0x2d3436, hair: 0x636e72, wep: 'dagger', wcol: 0xb2bec3, gk: 'Rogue', tint: 0xdfe6e9 },
       quest: {
         id: 'emergent_deserter_stash',
         title: 'Covil Secreto: A Arca das Rochas Altas',
@@ -562,6 +572,346 @@
         xp: 1400,
         rep: 100,
         trust: 18
+      }
+    },
+    {
+      type: 'druid_grove',
+      biomes: ['floresta', 'pantano'],
+      name: 'Silvanus, Druida Ancestral',
+      sign: '? BOSQUE SAGRADO',
+      speech: 'As raízes deste bosque choram seiva negra... ajude a purificá-las!',
+      title: 'NATUREZA CORROMPIDA · O BOSQUE ANCESTRAL',
+      desc: 'As raízes desta clareira sagrada foram infectadas pelo miasma das fendas. Uma monstruosidade fúngica está sugando a vitalidade das árvores. Elimine o fungo primordial antes que toda a mata apodreça!',
+      chibi: { body: 0x1b4332, hair: 0xd8f3dc, wep: 'staff', wcol: 0x52b788, gk: 'Druid', tint: 0x74c69d },
+      quest: {
+        id: 'emergent_corrupted_grove',
+        title: 'Purificação: O Coração Fúngico da Floresta',
+        giver: 'Silvanus · Druida Ancestral',
+        desc: 'Destrua o fungo primordial corrompido que infecta o bosque sagrado de Silvanus.',
+        bossKind: 'cogufuria',
+        bossName: 'Fungo Primordial Corrompido',
+        bossScale: 1.8,
+        minions: 4,
+        minionKinds: ['cogu'],
+        gold: 2600,
+        xp: 1350,
+        rep: 110,
+        trust: 20
+      }
+    },
+
+    // --- MAR, COSTA E ÁGUAS ---
+    {
+      type: 'shipwreck_sailor',
+      biomes: ['coast', 'water', 'campos'],
+      requireWater: true,
+      name: 'Bran, Pescador Náufrago',
+      sign: '! NÁUFRAGO NO ROCHEDO',
+      speech: 'Minha jangada partiu ao meio nas pedras! As criaturas das marés levaram meus barris!',
+      title: 'MARÉS TRAIÇOEIRAS · O NÁUFRAGO DE ROCHEDOS',
+      desc: 'Uma onda súbita jogou minha embarcação contra os arrecifes. As bestas marinhas de carapaça dura cercaram os caixotes de pérolas que eu trazia da ilha exterior. Me ajude a quebrar as carapaças das feras e recuperar meus bens!',
+      chibi: { body: 0x1e3a8a, hair: 0x93c5fd, wep: 'spear', wcol: 0x38bdf8, gk: 'Warrior', tint: 0x60a5fa },
+      quest: {
+        id: 'emergent_shipwreck_salvage',
+        title: 'Resgate nas Marés: Os Fardos do Náufrago Bran',
+        giver: 'Bran · Pescador Náufrago',
+        desc: 'Derrote os monstros de carapaça nas pedras costeiras e recupere as pérolas da jangada naufragada.',
+        bossKind: 'escaravelho',
+        bossName: 'Caranguejo Titânico dos Arrecifes',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['slime', 'escaravelho'],
+        gold: 2400,
+        xp: 1200,
+        rep: 95,
+        trust: 22
+      }
+    },
+    {
+      type: 'abyssal_carcass',
+      biomes: ['coast', 'water', 'campos'],
+      requireWater: true,
+      name: 'Morren, Caçador de Marés',
+      sign: '! CARCAÇA DO LEVIATÃ',
+      speech: 'Uma fera colossal encalhou aqui... e os corsários querem roubar nosso troféu!',
+      title: 'ESPÓLIOS DA MARÉ · O LEVIATÃ ENCALHADO',
+      desc: 'Conseguimos encurralar uma serpente das profundezas na maré baixa, mas saqueadores da costa chegaram armados para roubar os dentes e o âmbar cinzento. Junte-se a nós para espantar esses piratas e dividiremos o espólio abissal!',
+      chibi: { body: 0x0f172a, hair: 0xe2e8f0, wep: 'axe', wcol: 0x38bdf8, gk: 'Warrior', tint: 0x0284c7 },
+      quest: {
+        id: 'emergent_leviathan_spoils',
+        title: 'Disputa Costeira: Os Espólios do Leviatã',
+        giver: 'Morren · Caçador de Marés',
+        desc: 'Expulse os corsários renegados que tentam roubar a carcaça do leviatã encalhado na costa.',
+        bossKind: 'orcinho',
+        bossName: 'Capitão Corsário dos Arrecifes',
+        bossScale: 1.6,
+        minions: 4,
+        minionKinds: ['ninjinha', 'orcinho'],
+        gold: 2700,
+        xp: 1400,
+        rep: 105,
+        trust: 24
+      }
+    },
+
+    // --- NEVE, TUNDRA E PICOS GLACIAIS ---
+    {
+      type: 'frozen_expedition',
+      biomes: ['neve', 'cristal'],
+      name: 'Yara, Exploradora Glacial',
+      sign: '! EXPEDIÇÃO NA NEVASCA',
+      speech: 'O gelo não perdoa... Meus batedores congelaram e golens nos cercaram!',
+      title: 'EXPEDIÇÃO GLACIAL · O CERCO DE GELO',
+      desc: 'Nossa equipe de mapeamento foi pega por uma tempestade de gelo súbita. O calor da nossa tenda atraiu golens glaciais primordiais que bloquearam a trilha de retorno. Destrua os golens e escolte nossa expedição até a fogueira segura!',
+      chibi: { body: 0xe0f2fe, hair: 0x38bdf8, wep: 'staff', wcol: 0xbae6fd, gk: 'Mage', tint: 0x7dd3fc },
+      quest: {
+        id: 'emergent_frozen_expedition',
+        title: 'Socorro no Gelo: Os Golens Glaciais da Nevasca',
+        giver: 'Yara · Exploradora Glacial',
+        desc: 'Quebre o cerco dos golens de gelo ao redor da tenda da expedição de Yara nas montanhas congeladas.',
+        bossKind: 'golempedra',
+        bossName: 'Colosso do Gelo Eterno',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['golenzinho'],
+        gold: 2600,
+        xp: 1350,
+        rep: 110,
+        trust: 25
+      }
+    },
+    {
+      type: 'avalanche_trap',
+      biomes: ['neve', 'cristal'],
+      name: 'Torik, Condutor da Nevasca',
+      sign: '! TRENÓ SOTERRADO',
+      speech: 'A avalanche bloqueou a passagem e os lobos brancos farejaram nosso rastro!',
+      title: 'PERIGO BRANCO · A AVALANCHE DAS ALTURAS',
+      desc: 'Uma tonelada de neve desabou do pico e soterrou meu trenó de suprimentos. Pior ainda: os lobos da nevasca desceram a crista atraídos pelo cheiro das carnes secas. Me dê cobertura enquanto desenterro a carga!',
+      chibi: { body: 0x475569, hair: 0x94a3b8, wep: 'axe', wcol: 0xf1f5f9, gk: 'Warrior', tint: 0x94a3b8 },
+      quest: {
+        id: 'emergent_avalanche_ambush',
+        title: 'Emboscada na Neve: A Alcateia das Geadas',
+        giver: 'Torik · Condutor da Nevasca',
+        desc: 'Extermine a alcateia de lobos da nevasca que cerca o trenó soterrado pela avalanche.',
+        bossKind: 'lobo',
+        bossName: 'Lobo Alfa da Nevasca',
+        bossScale: 1.8,
+        minions: 4,
+        minionKinds: ['lobo'],
+        gold: 2400,
+        xp: 1250,
+        rep: 95,
+        trust: 18
+      }
+    },
+    {
+      type: 'frost_hermit',
+      biomes: ['neve', 'cristal'],
+      name: 'Skadi, Eremita da Chama Eterna',
+      sign: '? FOGUEIRA MÁGICA',
+      speech: 'Aproxime-se do fogo sagrado, viajante. Os espectros do frio querem apagá-lo.',
+      title: 'CHAMA ETERNA · A VIGÍLIA DA MONTANHA',
+      desc: 'Esta fogueira mágica arde há três séculos sobre o gelo e impede que os mortos sepultados na avalanche acordem. Mas hoje as sombras do frio estão agitadas. Me ajude a repelir os espectros congelados e compartilharei o fogo primordial com sua lâmina!',
+      chibi: { body: 0x1e293b, hair: 0xfbbf24, wep: 'staff', wcol: 0xf59e0b, gk: 'Mage', tint: 0xfcd34d },
+      quest: {
+        id: 'emergent_eternal_flame',
+        title: 'Vigília Sagrada: A Chama Eterna de Skadi',
+        giver: 'Skadi · Eremita da Chama',
+        desc: 'Proteja a fogueira eterna contra a investida dos cavaleiros espectrais do gelo.',
+        bossKind: 'cavaleiro',
+        bossName: 'Cavaleiro Espectral do Gelo',
+        bossScale: 1.8,
+        minions: 3,
+        minionKinds: ['esqueleto'],
+        gold: 2900,
+        xp: 1500,
+        rep: 130,
+        trust: 30
+      }
+    },
+
+    // --- DESERTO, DUNAS E CÂNYONS ---
+    {
+      type: 'sandstorm_caravan',
+      biomes: ['deserto'],
+      name: 'Hakim, Mercador do Oásis',
+      sign: '! CARAVANA NAS DUNAS',
+      speech: 'A tempestade de areia engoliu nossa trilha e os escaravelhos saíram das dunas!',
+      title: 'TERROR NAS AREIAS · O ATAQUE DOS ESCARAVELHOS',
+      desc: 'Nossos camelos empacaram quando as areias movediças cederam. De repente, escaravelhos carnívoros brotaram debaixo da terra querendo estraçalhar nossa carga de especiarias e água pura. Esmague o ninho antes que sejamos devorados!',
+      chibi: { body: 0xb45309, hair: 0xfde68a, wep: 'dagger', wcol: 0xf59e0b, gk: 'Merchant', tint: 0xfbbf24 },
+      quest: {
+        id: 'emergent_dune_beetles',
+        title: 'Praga das Areias: O Ninho de Escaravelhos Gigantes',
+        giver: 'Hakim · Mercador do Oásis',
+        desc: 'Esmague a rainha dos escaravelhos do deserto que cerca a caravana encalhada de Hakim.',
+        bossKind: 'escaravelho',
+        bossName: 'Rainha Escaravelho das Dunas',
+        bossScale: 1.8,
+        minions: 4,
+        minionKinds: ['escaravelho'],
+        gold: 2700,
+        xp: 1350,
+        rep: 110,
+        trust: 22
+      }
+    },
+    {
+      type: 'dune_mirage',
+      biomes: ['deserto'],
+      name: 'Zayd, Guardião das Areias',
+      sign: '? OÁSIS ILUSÓRIO',
+      speech: 'Você vê as águas cristalinas adiante? Não passe: é o encanto de um Djinn furioso!',
+      title: 'ILUSÃO MORTAL · O ENIGMA DO DJINN',
+      desc: 'Aquele oásis verdejante é uma miragem arcana projetada por um feiticeiro do vento corrompido pelas fendas. Todo viajante sedento que se aproxima tem a alma drenada pelas tempestades de poeira. Rompa a miragem derrotando a aparição do Djinn!',
+      chibi: { body: 0x78350f, hair: 0xfef08a, wep: 'staff', wcol: 0xfacc15, gk: 'Mage', tint: 0xfde047 },
+      quest: {
+        id: 'emergent_sand_mirage',
+        title: 'Miragem Arcana: O Djinn das Areias Douradas',
+        giver: 'Zayd · Guardião das Areias',
+        desc: 'Derrote a aparição mágica do Djinn e dissipe a miragem mortal no meio do deserto.',
+        bossKind: 'magote',
+        bossName: 'Aparição do Djinn das Tempestades de Areia',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['magote'],
+        gold: 2800,
+        xp: 1450,
+        rep: 125,
+        trust: 25
+      }
+    },
+    {
+      type: 'tomb_raider_sand',
+      biomes: ['deserto'],
+      name: 'Farah, Saqueadora de Relíquias',
+      sign: '! TUMBA SOTERRADA',
+      speech: 'Consegui quebrar o selo da tumba, mas acordei a múmia guardiã! Me ajude a derrubá-la!',
+      title: 'TUMBA PRIMEVA · O DESPERTAR DO FARAÓ',
+      desc: 'Passei semanas desenterrando a entrada deste mausoléu de arenito. Assim que quebrei a pedra-chave rúnica, um faraó esquelético despertou com guardas de bronze jurando matar quem violasse seu descanso. Ajude a derrotá-lo e o tesouro rúnico é nosso!',
+      chibi: { body: 0x451a03, hair: 0xfbbf24, wep: 'dagger', wcol: 0xd97706, gk: 'Rogue', tint: 0xf59e0b },
+      quest: {
+        id: 'emergent_pharaoh_tomb',
+        title: 'Mausoléu de Arenito: O Faraó Esquelético das Dunas',
+        giver: 'Farah · Saqueadora de Relíquias',
+        desc: 'Penetre na entrada da tumba soterrada e derrote o guardião esquelético das dunas.',
+        bossKind: 'esqueleto',
+        bossName: 'Faraó Esquelético das Areias',
+        bossScale: 1.8,
+        minions: 4,
+        minionKinds: ['esqueleto'],
+        gold: 3000,
+        xp: 1550,
+        rep: 135,
+        trust: 26
+      }
+    },
+
+    // --- PÂNTANO E TERRAS CORROMPIDAS ---
+    {
+      type: 'swamp_witch',
+      biomes: ['pantano'],
+      name: 'Morrigan, Alquimista da Lama',
+      sign: '? CALDEIRÃO NO PÂNTANO',
+      speech: 'Hihihi... Um viajante no meu pântano? Traga-me o núcleo da Gosma Matriarca!',
+      title: 'ALQUIMIA SOMBRIA · O CALDEIRÃO DA BRUXA',
+      desc: 'Eu preparo elixires que os tolos das cidades chamam de veneno. Preciso do núcleo gelatinoso da Gosma Matriarca que vive no charco profundo. Destrua a gosma e coloque o núcleo no meu caldeirão; em troca, te darei uma poção de mutação de dano!',
+      chibi: { body: 0x3b0764, hair: 0xa855f7, wep: 'staff', wcol: 0x9333ea, gk: 'Mage', tint: 0xc084fc },
+      quest: {
+        id: 'emergent_swamp_slime',
+        title: 'Ingrediente Proibido: A Gosma Matriarca do Pântano',
+        giver: 'Morrigan · Alquimista da Lama',
+        desc: 'Derrote a Gosma Matriarca no coração do pântano para alimentar o caldeirão de Morrigan.',
+        bossKind: 'gosma',
+        bossName: 'Gosma Matriarca do Charco Escuro',
+        bossScale: 2.0,
+        minions: 5,
+        minionKinds: ['gosma'],
+        gold: 2700,
+        xp: 1400,
+        rep: 100,
+        trust: 20
+      }
+    },
+    {
+      type: 'will_o_wisp',
+      biomes: ['pantano'],
+      name: 'Espírito das Brumas',
+      sign: '? FOGO-FÁTUO LUMINOSO',
+      speech: 'Siga minha luz fátua... meu túmulo foi profanado nas águas paradas...',
+      title: 'ALMAS ERRANTES · A CRIPTA SUBMERSA',
+      desc: 'Eu era um campeão da Ordem antes das Fendas. Minha armadura ancestral e meus ossos descansam sob a água fétida, guardados por um cavaleiro espectral corrompido pelo lodo. Purifique meu sepulcro e a bênção da minha espada protegerá seu caminho.',
+      chibi: { body: 0x064e3b, hair: 0x34d399, wep: 'sword', wcol: 0x6ee7b7, gk: 'Warrior', tint: 0xa7f3d0 },
+      quest: {
+        id: 'emergent_sunken_tomb',
+        title: 'Purificação Espectral: A Cripta Submersa do Pântano',
+        giver: 'Espírito das Brumas',
+        desc: 'Encontre a cripta submersa indicada pelo fogo-fátuo e derrote o cavaleiro espectral do lodo.',
+        bossKind: 'cavaleiro',
+        bossName: 'Cavaleiro Espectral do Charco',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['esqueleto'],
+        gold: 2900,
+        xp: 1500,
+        rep: 130,
+        trust: 28
+      }
+    },
+
+    // --- VULCÃO E ROCHAS ARDENTES ---
+    {
+      type: 'magma_smith',
+      biomes: ['vulcao'],
+      name: 'Ignis, Forjador das Brasas',
+      sign: '! FORJA NO MAGMA',
+      speech: 'Vim temperar metal no rio de fogo, mas as feras ígneas cercaram minha bigorna!',
+      title: 'FOGO PRIMORDIAL · A FORJA NA LAVA',
+      desc: 'O aço comum quebra contra as garras das fendas; apenas a têmpera no magma verdadeiro produz gumes inquebráveis. Porém, o bater do meu martelo despertou golens de pedra incandescente das fendas vulcânicas. Me ajude a derrubá-los e te darei lingotes de obsidiana viva!',
+      chibi: { body: 0x7f1d1d, hair: 0xf87171, wep: 'axe', wcol: 0xef4444, gk: 'Warrior', tint: 0xfca5a5 },
+      quest: {
+        id: 'emergent_magma_forge',
+        title: 'Forja do Vulcão: Os Colossos de Rocha Ardente',
+        giver: 'Ignis · Forjador das Brasas',
+        desc: 'Elimine os golens de magma incandescente que sitiaram a bigorna de Ignis na ravina vulcânica.',
+        bossKind: 'golempedra',
+        bossName: 'Colosso de Lava e Obsidiana',
+        bossScale: 1.8,
+        minions: 3,
+        minionKinds: ['golenzinho'],
+        gold: 3100,
+        xp: 1600,
+        rep: 140,
+        trust: 30
+      }
+    },
+
+    // --- CLIMA ESPECIAL: TEMPESTADE DE RAIOS ---
+    {
+      type: 'storm_sorcerer',
+      requireRain: true,
+      biomes: ['campos', 'floresta', 'flores', 'coast'],
+      name: 'Zephyr, Mago das Tempestades',
+      sign: '? RELÂMPAGOS NO CÉU',
+      speech: 'A tempestade está em seu ápice! Os golens de trovão foram atraídos pelo meu cajado!',
+      title: 'IRA DOS CÉUS · O SURTO DOS RELÂMPAGOS',
+      desc: 'Aproveito as chuvas torrenciais para sintonizar a magia de choque com as nuvens carregadas. Mas o excesso de eletricidade arcana gerou criaturas de estática pura que estão fora de controle. Supere o choque desses golens elétricos e te concederei a Essência da Tempestade!',
+      chibi: { body: 0x312e81, hair: 0x818cf8, wep: 'staff', wcol: 0x6366f1, gk: 'Mage', tint: 0xa5b4fc },
+      quest: {
+        id: 'emergent_thunder_storm',
+        title: 'Fúria dos Relâmpagos: Os Golens de Trovão da Tempestade',
+        giver: 'Zephyr · Mago das Tempestades',
+        desc: 'Neutralize os golens elétricos atraídos pelo cajado de Zephyr durante a tempestade de raios.',
+        bossKind: 'golempedra',
+        bossName: 'Colosso de Relâmpago e Trovão',
+        bossScale: 1.8,
+        minions: 3,
+        minionKinds: ['magote'],
+        gold: 3300,
+        xp: 1700,
+        rep: 150,
+        trust: 32
       }
     }
   ];
@@ -592,7 +942,7 @@
       ...encDef.quest,
       region: 'mundo_aberto',
       type: 'emergent',
-      biome: 'campos',
+      biome: (encDef.biomes && encDef.biomes[0]) || 'campos',
       offset: { dx: 110, dz: -90 }
     };
     acceptQuest(qid);
@@ -602,7 +952,6 @@
 
   function checkEmergentSpawns() {
     if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
-    try { checkEmergentSpawns(); } catch (_) {}
     if (typeof nearestCity !== 'function') return;
 
     const nc = nearestCity(player.x, player.z);
@@ -617,7 +966,32 @@
       return;
     }
 
-    const encDef = EMERGENT_DEFS[Math.floor(Math.random() * EMERGENT_DEFS.length)];
+    // Identifica o contexto ambiental atual do jogador (bioma, água, chuva)
+    const curBiome = (typeof biomeAt === 'function') ? biomeAt(player.x, player.z) : 'campos';
+    const isWet = (typeof inWater244 === 'function') ? inWater244(player.x, player.z) : false;
+    const isRaining = (typeof WX !== 'undefined' && WX && WX.type === 'rain');
+
+    // Filtra encontros compatíveis com o ambiente atual
+    let matching = EMERGENT_DEFS.filter(enc => {
+      if (enc.requireRain && !isRaining) return false;
+      if (enc.requireWater && !isWet && curBiome !== 'coast') return false;
+      if (enc.biomes && !enc.biomes.includes(curBiome) && !enc.biomes.includes('any')) return false;
+      return true;
+    });
+
+    // Se a chuva estiver ativa, dá prioridade alta para o encontro de tempestade
+    if (isRaining && Math.random() < 0.6) {
+      const stormEnc = EMERGENT_DEFS.find(e => e.type === 'storm_sorcerer');
+      if (stormEnc) matching = [stormEnc];
+    }
+
+    // Fallback gracioso se nenhum bater exatamente com a região
+    if (!matching.length) {
+      matching = EMERGENT_DEFS.filter(enc => !enc.requireRain && !enc.requireWater);
+    }
+    if (!matching.length) return;
+
+    const encDef = matching[Math.floor(Math.random() * matching.length)];
     const pAng = (player.face || 0) + (Math.random() - 0.5) * 0.8;
     const dist = 32 + Math.random() * 12;
     const nx = player.x + Math.sin(pAng) * dist;
@@ -625,14 +999,15 @@
 
     if (typeof makeChibi === 'function' && typeof scene !== 'undefined' && typeof npcs !== 'undefined') {
       try {
-        const m = makeChibi({
+        const look = encDef.chibi || {
           body: 0x3d4a36,
           hair: 0xd0b070,
           wep: 'bow',
           wcol: 0xffd08a,
           gk: 'Rogue',
           tint: 0xd0ff8a
-        });
+        };
+        const m = makeChibi(look);
         m.root.position.set(nx, 0, nz);
         scene.add(m.root);
 

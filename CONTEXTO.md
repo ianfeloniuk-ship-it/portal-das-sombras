@@ -1,3 +1,32 @@
+## v482 (20/10/2026) — Interiores 3D de Taverna estilo Skyrim/GTA e Matriz Completa de Encontros por Bioma e Clima
+
+Grande expansão do mundo vivo pedida pelo Ian: entrada em interiores sem peso de memória, salão de taverna acolhedor e encontros procedurais ricos por todos os biomas do mapa infinito.
+
+1. **Transição de Interiores com Fade Preto Cinematográfico (`tools/tavern482.js`)**:
+   - Ao se aproximar da porta da pousada em qualquer cidade (`F · TAVERNA & POUSADA`), surge o diálogo com escolha entre exploração 3D imersiva do salão ou o menu tradicional de descanso rápido.
+   - Transição suave com fade preto (0.35s) conectando a rua ao interior sem carregar cenas desnecessárias no mundo aberto.
+
+2. **Salão 3D Modular Aconchegante da Taverna**:
+   - Piso de carvalho escuro em tábuas nobres, vigas rústicas e paredes de cantaria de pedra.
+   - **Grande Lareira de Pedra (Hearth)**: Troncos em brasa ardente com luz pontual âmbar oscilante dinâmica (`PointLight`) simulando a chama crepitante.
+   - **Balcão de Carvalho do Estalajadeiro**:
+     - Diálogo de Boatos e Fofocas Regionais: revela pistas de fendas raras, covis de feras alfas e criptas esquecidas com bússola de direção.
+     - Rodada de Hidromel da Casa (40 ouro): recupera estamina, vida e concede o buff `[FOGO NAS VEIAS]` (+15% de velocidade de movimento por 6 min).
+     - Aluguel de quarto para dormir e passar o tempo com o benefício `[BEM DESCANSADO]`.
+   - **Mural de Contratos de Caçadores (Bounty Board)**: Peneirado na parede de madeira com pergaminhos e selos, abre contratos e caçadas geradas dinamicamente para o bioma atual.
+   - **Porta de Saída**: Leva de volta às ruas da cidade com fade preto suave.
+
+3. **Matriz Completa de Encontros Emergentes por Bioma e Clima (`tools/quests480.js`)**:
+   - Detecção ambiental contínua do terreno: biomas (`neve`, `cristal`, `deserto`, `pantano`, `vulcao`, `floresta`, `campos`), águas/costa (`inWater244` / `coast`) e clima (`WX.type === 'rain'`).
+   - 17 encontros vivos completos com chibis temáticos personalizados, diálogos, escolhas e objetivos no minimapa:
+     - **Mar e Litoral**: Pescador Náufrago nos Arrecifes (`shipwreck_sailor`), Carcaça do Leviatã com Saqueadores (`abyssal_carcass`).
+     - **Neve e Picos Glaciais**: Expedição Glacial Cercada por Golens (`frozen_expedition`), Trenó Soterrado por Avalanche (`avalanche_trap`), Skadi e a Chama Eterna (`frost_hermit`).
+     - **Deserto e Dunas**: Caravana no Ataque dos Escaravelhos (`sandstorm_caravan`), Miragem Arcana do Djinn (`dune_mirage`), Farah e a Tumba do Faraó Esquelético (`tomb_raider_sand`).
+     - **Pântanos**: Bruxa do Caldeirão e a Gosma Matriarca (`swamp_witch`), Fogo-Fátuo da Cripta Submersa (`will_o_wisp`).
+     - **Vulcão e Ravinas**: Ignis e a Forja dos Colossos de Magma (`magma_smith`).
+     - **Clima de Tempestade (Chuva/Raios)**: Zephyr, o Mago das Tempestades canalizando relâmpagos (`storm_sorcerer`).
+     - **Florestas e Campos**: Caçador Ferido da Ordem, Mercador de Carroça Quebrada, Sábio do Monólito Ancestral, Batedor Renegado nas Pedras, Druida do Bosque Sagrado (`druid_grove`).
+
 ## v481 (20/10/2026) — As 3 Muralhas de Attack on Titan, Ciclo de 1h (40/20), Tempo Proporcional e Encontros Vivos estilo Skyrim
 
 Avanços cruciais pedidos pelo Ian para consolidar um mundo verdadeiramente vivo, imersivo e contínuo:
