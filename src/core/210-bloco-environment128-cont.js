@@ -59,20 +59,20 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),(TAU*CITYR/76*1.04)/(m.max[0]-m.min[0]),3.1/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
     if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
-  for(let a=0;a<TAU-.01;a+=TAU/108){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.6})}
+  for(let a=0;a<TAU-.01;a+=TAU/180){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.8})}
   cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);
   /* v481 (Ian): 3 MURALHAS CONCÊNTRICAS ESTILO ATTACK ON TITAN (SINA 60m, ROSE 85m, MARIA 115m) */
   if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
     // 2ª Muralha (Muralha Rose / Intermediária - 85m)
     const R2=85,seg2=4,n2=Math.round(TAU*R2/seg2),gap2=6.5/R2;
-    for(let i=0;i<n2;i++){const a=(i+.5)/n2*TAU;if(gate(a)<gap2)continue;const x=X+Math.cos(a)*R2,z=Z+Math.sin(a)*R2;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R2/n2);if(i%2===0)addCol({x,z,r:2})}
+    for(let i=0;i<n2;i++){const a=(i+.5)/n2*TAU;if(gate(a)<gap2)continue;const x=X+Math.cos(a)*R2,z=Z+Math.sin(a)*R2;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R2/n2);addCol({x,z,r:2.6})}
     for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap2+2.2/R2),x=X+Math.cos(aa)*R2,z=Z+Math.sin(aa)*R2;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1);addCol({x,z,r:2.6})}
     cityGates341(c,g,false,R2,6.5,5.5);
   }
   if(!fallen&&cLv>=8&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
     // 3ª Muralha (Muralha Maria / Externa - 115m)
     const R3=115,seg3=4.2,n3=Math.round(TAU*R3/seg3),gap3=7.5/R3;
-    for(let i=0;i<n3;i++){const a=(i+.5)/n3*TAU;if(gate(a)<gap3)continue;const x=X+Math.cos(a)*R3,z=Z+Math.sin(a)*R3;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R3/n3);if(i%2===0)addCol({x,z,r:2.2})}
+    for(let i=0;i<n3;i++){const a=(i+.5)/n3*TAU;if(gate(a)<gap3)continue;const x=X+Math.cos(a)*R3,z=Z+Math.sin(a)*R3;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R3/n3);addCol({x,z,r:2.8})}
     for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap3+2.4/R3),x=X+Math.cos(aa)*R3,z=Z+Math.sin(aa)*R3;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1.2);addCol({x,z,r:2.8})}
     cityGates341(c,g,false,R3,7.5,6.5);
   }

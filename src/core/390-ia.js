@@ -170,8 +170,16 @@ function updAlly(a,dt){if(window.Cogu348&&Cogu348.asleep(a)){animChibi(a.m,{move
   animChibi(a.m,{move:mv,speed:Math.hypot(a.x-a.m.root.position.x,a.z-a.m.root.position.z)/Math.max(dt,.001),atk:clamp(atk,0,1),dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face;
 }
 function updNpc(n,dt){
-  n.t+=dt;const P=player,c=n.home;if(n.kind==='deco')return;
+  n.t=(n.t||0)+dt;const P=player,c=n.home;if(n.kind==='deco')return;
   if(n.kind==='vendor'){if(P&&Math.hypot(P.x-n.x,P.z-n.z)<8)turnTo(n,Math.atan2(P.x-n.x,P.z-n.z),dt,4);animChibi(n.m,{move:0,atk:0,dead:0,wind:0},n.t);n.m.root.rotation.y=n.face;return}
+  if(n.kind==='emergent_skyrim'||n.kind==='emergent'||n.kind==='traveler'){
+    if(P&&Math.hypot(P.x-n.x,P.z-n.z)<14)turnTo(n,Math.atan2(P.x-n.x,P.z-n.z),dt,4);
+    animChibi(n.m,{move:0,atk:0,dead:0,wind:0},n.t);
+    n.m.root.position.set(n.x,0,n.z);
+    n.m.root.rotation.y=n.face;
+    return;
+  }
+  if(!c)return;
   let mv=0;
   if(n.kind==='citizen'){const danger=enemies.find(e=>!e.dead&&!e.gone&&cityRaider341(e)&&Math.hypot(e.x-n.x,e.z-n.z)<20);if(danger){if(!n.panic348){n.panic348=true;floater(n.x,n.z,'SOCORRO!','#ffd7b0')}const dx=n.x-danger.x,dz=n.z-danger.z,d=Math.hypot(dx,dz)||1;turnTo(n,Math.atan2(dx,dz),dt,8);moveEnt(n,dx/d*5.5*dt,dz/d*5.5*dt);n.wait=0;n.path=[];animChibi(n.m,{move:1,atk:0,dead:0,wind:0},n.t);n.m.root.position.set(n.x,0,n.z);n.m.root.rotation.y=n.face;return}else n.panic348=false}
   if(n.kind==='citizen'&&isNight()&&!n.leaving){n.leaving=true;n.path=[];n.wait=0;const a=rnd(0,TAU);n.tx=c.x+Math.cos(a)*27;n.tz=c.z+Math.sin(a)*27}

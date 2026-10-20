@@ -1020,23 +1020,28 @@
           z: nz,
           face: Math.atan2(player.x - nx, player.z - nz),
           r: 0.8,
+          t: 0,
+          wait: 999999,
+          path: [],
           col: '#6fe39a',
           sign: encDef.sign,
           label: `F · FALAR COM ${encDef.name.toUpperCase()}`,
           use: () => openEmergentDialogue(encDef)
         };
+        const interEntry = {
+          type: 'emergent_npc',
+          x: nx,
+          z: nz,
+          r: 3.2,
+          label: npcObj.label,
+          use: npcObj.use
+        };
+        npcObj.interRef = interEntry;
         npcs.push(npcObj);
         currentEmergentNpc = npcObj;
 
         if (typeof L !== 'undefined' && L && Array.isArray(L.inter)) {
-          L.inter.push({
-            type: 'emergent_npc',
-            x: nx,
-            z: nz,
-            r: 3.2,
-            label: npcObj.label,
-            use: npcObj.use
-          });
+          L.inter.push(interEntry);
         }
 
         if (typeof toast === 'function') {
@@ -1050,6 +1055,21 @@
     if (typeof paused !== 'undefined' && paused) return;
     if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
     try { checkEmergentSpawns(); } catch (_) {}
+
+    // Limpeza de NPC emergente distante (> 160m)
+    if (currentEmergentNpc && !currentEmergentNpc.gone) {
+      const dNpc = Math.hypot(player.x - currentEmergentNpc.x, player.z - currentEmergentNpc.z);
+      if (dNpc > 160) {
+        currentEmergentNpc.gone = true;
+        if (currentEmergentNpc.m && currentEmergentNpc.m.root && typeof scene !== 'undefined') {
+          try { scene.remove(currentEmergentNpc.m.root); } catch (_) {}
+        }
+        if (typeof L !== 'undefined' && L && Array.isArray(L.inter) && currentEmergentNpc.interRef) {
+          L.inter = L.inter.filter(i => i !== currentEmergentNpc.interRef);
+        }
+        currentEmergentNpc = null;
+      }
+    }
 
     const S = getState();
     if (!S || !Object.keys(S.active).length) return;
