@@ -205,9 +205,10 @@ const GUILDS=[
 /* dia e noite */
 /* v377 (Ian): dia de 14 min e noite de 10 min (ciclo de 24 min). */
 /* v480 (Ian): ciclo dia/noite estendido estilo Skyrim (48 min: 28 min dia, 20 min noite) */
-let dayT=120;const DAYLEN=2880,NIGHT0_377=.55,NIGHT1_377=.55+1200/2880;
+/* v481 (Ian, 20/10/2026): ciclo dia/noite de 1 hora inteira (40 min dia, 20 min noite) */
+let dayT=120;const DAYLEN=3600,NIGHT0_377=2400/3600,NIGHT1_377=1.0;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
-function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else{const d=(p>=n1?p-n1:p+1-n1)/(1-(n1-n0));h=6+12*d}h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'☾ ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
+function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else h=6+12*(p/n0);h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'🌙 ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
 /* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
 function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;

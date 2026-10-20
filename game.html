@@ -4185,11 +4185,22 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/108){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.6})}
-  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall)cityGates341(c,g,false,cityPalisadeR(cLv),6.5,6);
-  /* v154 (Ian, like Attack on Titan): districts that grow outside live between the inner wall and a second, taller stone wall with gate towers. */
-  if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){const PR=cityPalisadeR(cLv),seg=4,n=Math.round(TAU*PR/seg),gap=6.5/PR;
-    for(let i=0;i<n;i++){const a=(i+.5)/n*TAU;if(gate(a)<gap)continue;const x=X+Math.cos(a)*PR,z=Z+Math.sin(a)*PR;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*PR/n);if(i%2===0)addCol({x,z,r:2})}
-    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap+2.2/PR),x=X+Math.cos(aa)*PR,z=Z+Math.sin(aa)*PR;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1);addCol({x,z,r:2.6})}}
+  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);
+  /* v481 (Ian): 3 MURALHAS CONCÊNTRICAS ESTILO ATTACK ON TITAN (SINA 60m, ROSE 85m, MARIA 115m) */
+  if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
+    // 2ª Muralha (Muralha Rose / Intermediária - 85m)
+    const R2=85,seg2=4,n2=Math.round(TAU*R2/seg2),gap2=6.5/R2;
+    for(let i=0;i<n2;i++){const a=(i+.5)/n2*TAU;if(gate(a)<gap2)continue;const x=X+Math.cos(a)*R2,z=Z+Math.sin(a)*R2;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R2/n2);if(i%2===0)addCol({x,z,r:2})}
+    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap2+2.2/R2),x=X+Math.cos(aa)*R2,z=Z+Math.sin(aa)*R2;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1);addCol({x,z,r:2.6})}
+    cityGates341(c,g,false,R2,6.5,5.5);
+  }
+  if(!fallen&&cLv>=8&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
+    // 3ª Muralha (Muralha Maria / Externa - 115m)
+    const R3=115,seg3=4.2,n3=Math.round(TAU*R3/seg3),gap3=7.5/R3;
+    for(let i=0;i<n3;i++){const a=(i+.5)/n3*TAU;if(gate(a)<gap3)continue;const x=X+Math.cos(a)*R3,z=Z+Math.sin(a)*R3;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R3/n3);if(i%2===0)addCol({x,z,r:2.2})}
+    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap3+2.4/R3),x=X+Math.cos(aa)*R3,z=Z+Math.sin(aa)*R3;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1.2);addCol({x,z,r:2.8})}
+    cityGates341(c,g,false,R3,7.5,6.5);
+  }
   for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const s of[-1,1]){const aa=a+s*.24,x=X+Math.cos(aa)*CITYR,z=Z+Math.sin(aa)*CITYR;
     EH(b,s>0?'building_tower_A_blue':'building_tower_B_blue',x,0,z,Math.atan2(X-x,Z-z),8.6,dark);addCol({x,z,r:2.2});ENV.cast.push({x:x+.8,z:z-.6,r:3.4,k:.45});/* Tower windows provide local amber light. */
     if(cLv>=1&&!fallen)EH(b,'flag_blue',x,8.2,z,-aa,2.2)}
@@ -4461,7 +4472,7 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?30:cl>=7?22:cl>=6?16:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
+  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?55:cl>=7?35:cl>=6?25:0)*CITYK;if(d-gw<m)m=d-gw;if((Math.abs(dx)<4.5||Math.abs(dz)<4.5)&&d<40*CITYK)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -5337,9 +5348,15 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
 function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
-  const durSec=L.enterTime?Math.max(5,Math.floor((performance.now()-L.enterTime)/1000)):30;
-  /* v480 (Ian): tempo da fenda diferenciado — saida rapida/fuga passa so 1 dia; expedicao vitoriosa passa 7 a 14 dias */
-  const daysPassed=cleared?Math.max(7,Math.min(14,6+Math.round(g.rank*0.8)+Math.min(4,Math.round(durSec/120)))):(durSec<60?1:Math.min(3,Math.ceil(durSec/60)));
+    /* v481 (Ian, 20/10/2026): tempo progressivo contínuo na Fenda.
+     60 minutos reais na fenda = 7 dias lá fora. 120 min = 14 dias. Cada 5 min = ~14 horas.
+     Fórmula direta e proporcional: daysPassed = (durSec / 3600) * 7. Sem degraus ou travas! */
+  const durSec = L.enterTime ? Math.max(1, Math.floor((performance.now() - L.enterTime) / 1000)) : 60;
+  const daysPassedFloat = (durSec / 3600) * 7;
+  const daysPassed = Number(daysPassedFloat.toFixed(2));
+  const intDays = Math.floor(daysPassed);
+  const remHours = Math.round((daysPassed - intDays) * 24);
+  const timeDesc = daysPassed < 1 ? (remHours <= 1 ? '1 hora' : remHours + ' horas') : (intDays + (intDays === 1 ? ' dia' : ' dias') + (remHours > 0 ? ' e ' + remHours + 'h' : ''));
   if(run){
     run.days=(run.days||0)+daysPassed;
     run.riftWeeksPassed456=(run.riftWeeksPassed456||0)+daysPassed;
@@ -5357,7 +5374,7 @@ function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
   buildWorld();
   if(wasOw464&&!cleared&&window.OW460)OW460.relocateGate(g);/* v464 (Ian): toda Fenda some atrás de você e reaparece em algum lugar */
-  if(typeof dayT!=='undefined')dayT=(dayT+daysPassed*320)%1200;
+  if(typeof dayT!=='undefined')dayT+=daysPassedFloat*DAYLEN;
   try{if(window.Weather407&&Weather407.setMood)Weather407.setMood('overcast')}catch(_){}
   if(riftClosure){delete riftClosure.cleared;gateMesh(riftClosure);riftClosure.closing131=true;gates.push(riftClosure);Rift131.close(riftClosure.mesh,riftClosure.storyScar131)}
   if(typeof spawnRiftAftermath456==='function')spawnRiftAftermath456(g.x,g.z,g.rank,daysPassed);
@@ -5365,7 +5382,7 @@ function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)
   placeAllies();cam.x=player.x;cam.z=player.z;
   if(cleared){
     setTimeout(()=>{
-      bigText(daysPassed+' DIAS SE PASSARAM EM PRIMEVA',3400);
+      bigText((timeDesc.toUpperCase())+' SE PASSARAM EM PRIMEVA',3400);
       showSys(daysPassed+' dias se passaram em Primeva desde que você entrou na Fenda. Durante sua expedição no Outro Mundo, o clima virou, a Ordem conteve o cerco ao redor do portal e as 5 Capitais atualizaram seu estado.');
     },400);
   }
@@ -7398,9 +7415,10 @@ const GUILDS=[
 /* dia e noite */
 /* v377 (Ian): dia de 14 min e noite de 10 min (ciclo de 24 min). */
 /* v480 (Ian): ciclo dia/noite estendido estilo Skyrim (48 min: 28 min dia, 20 min noite) */
-let dayT=120;const DAYLEN=2880,NIGHT0_377=.55,NIGHT1_377=.55+1200/2880;
+/* v481 (Ian, 20/10/2026): ciclo dia/noite de 1 hora inteira (40 min dia, 20 min noite) */
+let dayT=120;const DAYLEN=3600,NIGHT0_377=2400/3600,NIGHT1_377=1.0;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
-function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else{const d=(p>=n1?p-n1:p+1-n1)/(1-(n1-n0));h=6+12*d}h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'☾ ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
+function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else h=6+12*(p/n0);h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'🌙 ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
 /* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
 function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;
@@ -9508,4 +9526,4 @@ requestAnimationFrame(frame);
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=470"></script>
 <script src="tools/worldsim479.js?v=479"></script>
-<script src="tools/quests480.js?v=480"></script>
+<script src="tools/quests480.js?v=481"></script>

@@ -462,9 +462,219 @@
 
   // Loop de monitoramento para spawn do encontro e conclusão
   let lastTick = performance.now();
+
+  // =========================================================================
+  // ENCONTROS EMERGENTES DE MUNDO ABERTO (ESTILO SKYRIM)
+  // NPCs errantes, emboscadas de estrada, carroças quebradas e eremitas
+  // que o jogador encontra organicamente enquanto explora os caminhos.
+  // =========================================================================
+  let lastEmergentCheck = performance.now();
+  let currentEmergentNpc = null;
+
+  const EMERGENT_DEFS = [
+    {
+      type: 'injured_hunter',
+      name: 'Kallan, Caçador Ferido',
+      sign: '! CAÇADOR DA ORDEM',
+      speech: 'Pelos Sete... Viajante, aproxime-se! Preciso de ajuda!',
+      title: 'ENCONTRO NA ESTRADA · CAÇADOR DA ORDEM',
+      desc: 'Minha patrulha foi emboscada por uma alcateia de Feras Abissais na colina logo ao norte. A líder da alcateia levou o amuleto da nossa capitã e dispersou meus companheiros. Se você caçar a fera alfa e vingar a patrulha, a Ordem te recompensará generosamente!',
+      quest: {
+        id: 'emergent_alpha_beast',
+        title: 'Caçada: A Fera Alfa das Colinas',
+        giver: 'Kallan · Patrulha da Ordem',
+        desc: 'Derrote a fera alfa abissal que emboscou a patrulha de Kallan nas colinas e recupere a honra dos caçadores.',
+        bossKind: 'lobo',
+        bossName: 'Lobo Alfa Abissal',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['lobo'],
+        gold: 1800,
+        xp: 950,
+        rep: 75,
+        trust: 15
+      }
+    },
+    {
+      type: 'broken_cart',
+      name: 'Doran, Mercador Ambulante',
+      sign: '! CARROÇA SAQUEADA',
+      speech: 'Malditos saqueadores! Levaram meus caixotes!',
+      title: 'SOCORRO NA ESTRADA · CARROÇA SAQUEADA',
+      desc: 'Minha carroça quebrou a roda nesta subida pedregosa e um bando de renegados caiu sobre nós! Eles arrastaram meus fardos de minério refinado e tecidos raros para o acampamento de pedras logo adiante. Recupere minha carga e divido 2.200 de ouro e cristais raros com você!',
+      quest: {
+        id: 'emergent_stolen_cargo',
+        title: 'Resgate: A Carga Roubada de Doran',
+        giver: 'Doran · Mercador da Estrada',
+        desc: 'Elimine os saqueadores renegados que emboscaram a carroça de Doran e recupere o baú de mercadorias refinadas.',
+        bossKind: 'orcinho',
+        bossName: 'Chefe dos Saqueadores da Estrada',
+        bossScale: 1.6,
+        minions: 4,
+        minionKinds: ['ninjinha', 'orcinho'],
+        gold: 2200,
+        xp: 1100,
+        rep: 90,
+        trust: 20
+      }
+    },
+    {
+      type: 'ancient_scholar',
+      name: 'Eldrin, Sábio das Ruínas',
+      sign: '? MONÓLITO ANCESTRAL',
+      speech: 'O eco dos Primevos ressoa neste monumento...',
+      title: 'MISTÉRIO ANTIGO · MONÓLITO DOS PRIMEVOS',
+      desc: 'Saudações, Transmigrador. Você sente o calor desta pedra antiga? Este monumento guarda o espírito de um Guardião Ancestral que resistiu às primeiras Fendas. Se você tiver a audácia de tocar a runa e superar a Provação da Sombra, os tesouros do santuário reconhecerão seu poder!',
+      quest: {
+        id: 'emergent_monolith_trial',
+        title: 'Provação: O Guardião do Monólito Ancestral',
+        giver: 'Eldrin · Estudioso das Ruínas',
+        desc: 'Toque o monólito rúnico antigo e derrote a aparição espectral do Guardião Ancestral para liberar seus segredos.',
+        bossKind: 'cavaleiro',
+        bossName: 'Aparição do Guardião Ancestral',
+        bossScale: 1.8,
+        minions: 2,
+        minionKinds: ['esqueleto'],
+        gold: 2500,
+        xp: 1300,
+        rep: 120,
+        trust: 25
+      }
+    },
+    {
+      type: 'deserter_scout',
+      name: 'Vael, Batedor Renegado',
+      sign: '! FUGITIVO NAS ROCHAS',
+      speech: 'Psiu! Ei, Transmigrador... aqui nas rochas!',
+      title: 'SEGREDOS NAS MONTANHAS · O BATEDOR RENEGADO',
+      desc: 'A guarnição acha que fugi por covardia, mas a verdade é que descobri algo aterrador: um ninho de feras com chifres guardando uma arca reluzente de cristais abissais em um covil secreto logo acima. Eu não consigo derrotá-los sozinho, mas você sim. Fique com a localização da arca!',
+      quest: {
+        id: 'emergent_deserter_stash',
+        title: 'Covil Secreto: A Arca das Rochas Altas',
+        giver: 'Vael · Batedor Renegado',
+        desc: 'Siga as coordenadas entregues pelo batedor Vael até o covil oculto nas pedras e conquiste o tesouro das feras.',
+        bossKind: 'cogufuria',
+        bossName: 'Monstruosidade com Chifres',
+        bossScale: 1.7,
+        minions: 3,
+        minionKinds: ['cogu'],
+        gold: 2800,
+        xp: 1400,
+        rep: 100,
+        trust: 18
+      }
+    }
+  ];
+
+  function openEmergentDialogue(encDef) {
+    let h = `<div class="guide93">`;
+    h += `<strong>${encDef.name}</strong>`;
+    h += `<p style="font-size:13px;line-height:1.45;margin-top:6px;color:#dbe8f2">${encDef.desc}</p>`;
+    h += `</div>`;
+
+    h += `<div class="sec">O QUE VOCÊ DESEJA FAZER?</div>`;
+    h += `<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">`;
+    h += `<button class="btn hot" onclick="Quests480.acceptEmergent('${encDef.type}');if(typeof closeModal==='function')closeModal();">Aceitar: ${encDef.quest.title} (+${encDef.quest.gold} Ouro)</button>`;
+    h += `<button class="btn" onclick="if(typeof toast==='function')toast('Você optou por seguir viagem sem se envolver.');if(typeof closeModal==='function')closeModal();">Seguir Viagem (Liberdade de Exploração)</button>`;
+    h += `</div>`;
+
+    if (typeof openModal === 'function') {
+      openModal(encDef.title, h);
+    }
+  }
+
+  function acceptEmergent(encType) {
+    const encDef = EMERGENT_DEFS.find(e => e.type === encType);
+    if (!encDef) return;
+    const qid = encDef.quest.id;
+    // Registra quest dinamicamente no catálogo se não existir
+    QUEST_CATALOG[qid] = {
+      ...encDef.quest,
+      region: 'mundo_aberto',
+      type: 'emergent',
+      biome: 'campos',
+      offset: { dx: 110, dz: -90 }
+    };
+    acceptQuest(qid);
+    if (typeof sfx === 'function') sfx('quest');
+    if (typeof toast === 'function') toast(`<b>[MISSÃO INICIADA]</b> ${encDef.quest.title}! Veja o marcador no minimapa e no HUD.`, 6000);
+  }
+
+  function checkEmergentSpawns() {
+    if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
+    try { checkEmergentSpawns(); } catch (_) {}
+    if (typeof nearestCity !== 'function') return;
+
+    const nc = nearestCity(player.x, player.z);
+    if (!nc || nc.d < 110) return; // Só spawna fora das cidades, na natureza e estradas
+
+    const now = performance.now();
+    if (now - lastEmergentCheck < 35000) return; // Intervalo de 35s entre checagens
+    lastEmergentCheck = now;
+
+    // Se já tem um encontro vivo por perto, não spawna outro
+    if (currentEmergentNpc && !currentEmergentNpc.gone && Math.hypot(player.x - currentEmergentNpc.x, player.z - currentEmergentNpc.z) < 120) {
+      return;
+    }
+
+    const encDef = EMERGENT_DEFS[Math.floor(Math.random() * EMERGENT_DEFS.length)];
+    const pAng = (player.face || 0) + (Math.random() - 0.5) * 0.8;
+    const dist = 32 + Math.random() * 12;
+    const nx = player.x + Math.sin(pAng) * dist;
+    const nz = player.z + Math.cos(pAng) * dist;
+
+    if (typeof makeChibi === 'function' && typeof scene !== 'undefined' && typeof npcs !== 'undefined') {
+      try {
+        const m = makeChibi({
+          body: 0x3d4a36,
+          hair: 0xd0b070,
+          wep: 'bow',
+          wcol: 0xffd08a,
+          gk: 'Rogue',
+          tint: 0xd0ff8a
+        });
+        m.root.position.set(nx, 0, nz);
+        scene.add(m.root);
+
+        const npcObj = {
+          kind: 'emergent_skyrim',
+          name: encDef.name,
+          short: encDef.name.split(',')[0],
+          m,
+          x: nx,
+          z: nz,
+          face: Math.atan2(player.x - nx, player.z - nz),
+          r: 0.8,
+          col: '#6fe39a',
+          sign: encDef.sign,
+          label: `F · FALAR COM ${encDef.name.toUpperCase()}`,
+          use: () => openEmergentDialogue(encDef)
+        };
+        npcs.push(npcObj);
+        currentEmergentNpc = npcObj;
+
+        if (typeof L !== 'undefined' && L && Array.isArray(L.inter)) {
+          L.inter.push({
+            type: 'emergent_npc',
+            x: nx,
+            z: nz,
+            r: 3.2,
+            label: npcObj.label,
+            use: npcObj.use
+          });
+        }
+
+        if (typeof toast === 'function') {
+          toast(`<b>[AVISTAMENTO]</b> Um viajante chama sua atenção adiante: <i>"${encDef.speech}"</i>`, 6000);
+        }
+      } catch (_) {}
+    }
+  }
+
   function tick(dt) {
     if (typeof paused !== 'undefined' && paused) return;
     if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
+    try { checkEmergentSpawns(); } catch (_) {}
 
     const S = getState();
     if (!S || !Object.keys(S.active).length) return;

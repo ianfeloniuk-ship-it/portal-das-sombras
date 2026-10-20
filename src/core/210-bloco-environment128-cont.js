@@ -60,11 +60,22 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
     if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/108){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.6})}
-  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall)cityGates341(c,g,false,cityPalisadeR(cLv),6.5,6);
-  /* v154 (Ian, like Attack on Titan): districts that grow outside live between the inner wall and a second, taller stone wall with gate towers. */
-  if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){const PR=cityPalisadeR(cLv),seg=4,n=Math.round(TAU*PR/seg),gap=6.5/PR;
-    for(let i=0;i<n;i++){const a=(i+.5)/n*TAU;if(gate(a)<gap)continue;const x=X+Math.cos(a)*PR,z=Z+Math.sin(a)*PR;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*PR/n);if(i%2===0)addCol({x,z,r:2})}
-    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap+2.2/PR),x=X+Math.cos(aa)*PR,z=Z+Math.sin(aa)*PR;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1);addCol({x,z,r:2.6})}}
+  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);
+  /* v481 (Ian): 3 MURALHAS CONCÊNTRICAS ESTILO ATTACK ON TITAN (SINA 60m, ROSE 85m, MARIA 115m) */
+  if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
+    // 2ª Muralha (Muralha Rose / Intermediária - 85m)
+    const R2=85,seg2=4,n2=Math.round(TAU*R2/seg2),gap2=6.5/R2;
+    for(let i=0;i<n2;i++){const a=(i+.5)/n2*TAU;if(gate(a)<gap2)continue;const x=X+Math.cos(a)*R2,z=Z+Math.sin(a)*R2;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R2/n2);if(i%2===0)addCol({x,z,r:2})}
+    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap2+2.2/R2),x=X+Math.cos(aa)*R2,z=Z+Math.sin(aa)*R2;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1);addCol({x,z,r:2.6})}
+    cityGates341(c,g,false,R2,6.5,5.5);
+  }
+  if(!fallen&&cLv>=8&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
+    // 3ª Muralha (Muralha Maria / Externa - 115m)
+    const R3=115,seg3=4.2,n3=Math.round(TAU*R3/seg3),gap3=7.5/R3;
+    for(let i=0;i<n3;i++){const a=(i+.5)/n3*TAU;if(gate(a)<gap3)continue;const x=X+Math.cos(a)*R3,z=Z+Math.sin(a)*R3;b.add('outerwall154',x,0,z,-(a+Math.PI/2),TAU*R3/n3);if(i%2===0)addCol({x,z,r:2.2})}
+    for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const sd of[-1,1]){const aa=a+sd*(gap3+2.4/R3),x=X+Math.cos(aa)*R3,z=Z+Math.sin(aa)*R3;b.add('building_tower_A_blue',x,0,z,Math.atan2(X-x,Z-z),1.2);addCol({x,z,r:2.8})}
+    cityGates341(c,g,false,R3,7.5,6.5);
+  }
   for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const s of[-1,1]){const aa=a+s*.24,x=X+Math.cos(aa)*CITYR,z=Z+Math.sin(aa)*CITYR;
     EH(b,s>0?'building_tower_A_blue':'building_tower_B_blue',x,0,z,Math.atan2(X-x,Z-z),8.6,dark);addCol({x,z,r:2.2});ENV.cast.push({x:x+.8,z:z-.6,r:3.4,k:.45});/* Tower windows provide local amber light. */
     if(cLv>=1&&!fallen)EH(b,'flag_blue',x,8.2,z,-aa,2.2)}

@@ -210,12 +210,15 @@
       if (starHunter) starHunter.victories += Math.round(daysPassed * 0.5);
 
       // b. Verificação de subida de nível da Cidade/Capital
+      const BUILD_LEVEL_MAX = [300, 500, 800, 1200, 1800, 2600, 3600, 5000, 7000, 10000];
+      rState.buildMax = BUILD_LEVEL_MAX[Math.min(BUILD_LEVEL_MAX.length - 1, rState.level)] || 2000;
+
       let leveledUp = false;
       const oldLevel = rState.level;
-      while (rState.buildPoints >= rState.buildMax && rState.level < 10) {
+      if (rState.buildPoints >= rState.buildMax && rState.level < 10) {
         rState.buildPoints -= rState.buildMax;
         rState.level += 1;
-        rState.buildMax = Math.round(rState.buildMax * 1.35);
+        rState.buildMax = BUILD_LEVEL_MAX[Math.min(BUILD_LEVEL_MAX.length - 1, rState.level)] || 2000;
         leveledUp = true;
       }
 
@@ -457,6 +460,23 @@
     h += `<div class="sysline" style="margin-top:10px">As mudanças acima já se refletem no mapa, nos estoques das lojas e no nível das capitais. Visite o marco no centro de Aster ou das capitais para ver os novos Editais do Conselho.</div>`;
     return h;
   }
+
+  // v481 (Ian): Simulação autônoma contínua no mundo aberto
+  let simAccumSec = 0;
+  function worldTick(dt) {
+    if (typeof paused !== 'undefined' && paused) return;
+    if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
+    simAccumSec += dt;
+    if (simAccumSec >= 20) {
+      simAccumSec = 0;
+      // 20s no mundo real avança uma fração suave de tempo autônomo (caçadores patrulham e entregam suprimentos)
+      simulate(0.015, { continuous: true });
+    }
+  }
+
+  setInterval(() => {
+    try { worldTick(0.5); } catch (_) {}
+  }, 500);
 
   // Publica módulo no escopo global
   global.WorldSim479 = {

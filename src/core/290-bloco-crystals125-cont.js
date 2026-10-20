@@ -37,9 +37,15 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
 function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
-  const durSec=L.enterTime?Math.max(5,Math.floor((performance.now()-L.enterTime)/1000)):30;
-  /* v480 (Ian): tempo da fenda diferenciado — saida rapida/fuga passa so 1 dia; expedicao vitoriosa passa 7 a 14 dias */
-  const daysPassed=cleared?Math.max(7,Math.min(14,6+Math.round(g.rank*0.8)+Math.min(4,Math.round(durSec/120)))):(durSec<60?1:Math.min(3,Math.ceil(durSec/60)));
+    /* v481 (Ian, 20/10/2026): tempo progressivo contínuo na Fenda.
+     60 minutos reais na fenda = 7 dias lá fora. 120 min = 14 dias. Cada 5 min = ~14 horas.
+     Fórmula direta e proporcional: daysPassed = (durSec / 3600) * 7. Sem degraus ou travas! */
+  const durSec = L.enterTime ? Math.max(1, Math.floor((performance.now() - L.enterTime) / 1000)) : 60;
+  const daysPassedFloat = (durSec / 3600) * 7;
+  const daysPassed = Number(daysPassedFloat.toFixed(2));
+  const intDays = Math.floor(daysPassed);
+  const remHours = Math.round((daysPassed - intDays) * 24);
+  const timeDesc = daysPassed < 1 ? (remHours <= 1 ? '1 hora' : remHours + ' horas') : (intDays + (intDays === 1 ? ' dia' : ' dias') + (remHours > 0 ? ' e ' + remHours + 'h' : ''));
   if(run){
     run.days=(run.days||0)+daysPassed;
     run.riftWeeksPassed456=(run.riftWeeksPassed456||0)+daysPassed;
@@ -57,7 +63,7 @@ function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)
   if(toCity){const c=nearestCity(g.x,g.z).c;player.x=c.x;player.z=c.z+6}else{player.x=g.x;player.z=g.z+5}
   buildWorld();
   if(wasOw464&&!cleared&&window.OW460)OW460.relocateGate(g);/* v464 (Ian): toda Fenda some atrás de você e reaparece em algum lugar */
-  if(typeof dayT!=='undefined')dayT=(dayT+daysPassed*320)%1200;
+  if(typeof dayT!=='undefined')dayT+=daysPassedFloat*DAYLEN;
   try{if(window.Weather407&&Weather407.setMood)Weather407.setMood('overcast')}catch(_){}
   if(riftClosure){delete riftClosure.cleared;gateMesh(riftClosure);riftClosure.closing131=true;gates.push(riftClosure);Rift131.close(riftClosure.mesh,riftClosure.storyScar131)}
   if(typeof spawnRiftAftermath456==='function')spawnRiftAftermath456(g.x,g.z,g.rank,daysPassed);
@@ -65,7 +71,7 @@ function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)
   placeAllies();cam.x=player.x;cam.z=player.z;
   if(cleared){
     setTimeout(()=>{
-      bigText(daysPassed+' DIAS SE PASSARAM EM PRIMEVA',3400);
+      bigText((timeDesc.toUpperCase())+' SE PASSARAM EM PRIMEVA',3400);
       showSys(daysPassed+' dias se passaram em Primeva desde que você entrou na Fenda. Durante sua expedição no Outro Mundo, o clima virou, a Ordem conteve o cerco ao redor do portal e as 5 Capitais atualizaram seu estado.');
     },400);
   }

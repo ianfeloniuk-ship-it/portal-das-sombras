@@ -1,3 +1,37 @@
+## v481 (20/10/2026) — As 3 Muralhas de Attack on Titan, Ciclo de 1h (40/20), Tempo Proporcional e Encontros Vivos estilo Skyrim
+
+Avanços cruciais pedidos pelo Ian para consolidar um mundo verdadeiramente vivo, imersivo e contínuo:
+
+1. **As 3 Muralhas Concêntricas de Attack on Titan (Sina, Rose e Maria)**:
+   - **Muralha 1 (Central / Sina — 60m)**: Sempre presente, cerca a Praça do Selo, Pedra-Âncora, o Banco, a Guilda, Taverna e as primeiras casas nobres.
+   - **Muralha 2 (Intermediária / Rose — 85m)**: Desbloqueada no Nível 6 municipal. Cerca o Primeiro Distrito com 14 casas adicionais, feira de rua, oficinas, estábulos e 4 portões com torres.
+   - **Muralha 3 (Externa / Maria — 115m)**: Desbloqueada no Nível 8 municipal. Cerca o Segundo Distrito com 18 casas, a grande Catedral de Pedra com vitrais iluminados, serraria, moinhos internos e baluartes reforçados.
+   - Todas as 3 muralhas permanecem de pé simultaneamente a partir do nível 8, formando a gigantesca fortaleza de três anéis concêntricos com portões quádruplos alinhados para carroças e pedestres.
+
+2. **Duração do Dia/Noite Calibrada para 1 Hora Real (40 min / 20 min)**:
+   - Ciclo completo definido exatamente em 60 minutos reais (`DAYLEN = 3600`).
+   - 40 minutos de luz solar contínua (06:00 às 18:00 no relógio).
+   - 20 minutos de noite densa e atmosférica (18:00 às 06:00 no relógio).
+   - Transição e relógio (`clock384`) perfeitamente calibrados para as novas proporções.
+
+3. **Ritmo de Tempo das Fendas 100% Contínuo e Proporcional**:
+   - Fim dos degraus artificiais e travas fixas: `daysPassed = (durSec / 3600) * 7`.
+   - Exatamente: 60 minutos reais dentro de uma fenda equivalem a 7 dias no mundo exterior; 120 minutos reais equivalem a 14 dias; cada 5 minutos equivalem a ~14 horas.
+   - Recuar após 30 segundos ou 1 minuto avança apenas frações suaves de hora, sem queimar dias inteiros desnecessariamente.
+
+4. **Simulação Autônoma Contínua no Mundo Aberto (`WorldSim479.worldTick`)**:
+   - A simulação das regiões não espera o jogador e não depende exclusivamente das saídas de fenda: roda de forma contínua durante a exploração do mundo aberto.
+   - Caçadores patrulham, enfrentam monstros e entregam suprimentos continuamente.
+   - Requisitos de construção (`buildMax`) escalonados (300 a 10.000 pontos) para que a evolução das cidades seja uma conquista progressiva e realista ao longo de semanas de jogo, e não um salto repentino.
+
+5. **Missões Secundárias Orgânicas Encontradas no Mundo Aberto estilo Skyrim (`tools/quests480.js`)**:
+   - Encontros dinâmicos que surgem espontaneamente ao explorar estradas e ermos:
+     - **Caçador Ferido na Estrada**: Emboscado por feras, clama por socorro e pede vingança contra o lobo alfa.
+     - **Mercador de Carroça Quebrada**: Saqueado por bandidos, oferece divisão de lucros se você recuperar a carga no esconderijo.
+     - **Sábio do Monólito Ancestral**: Estuda runas antigas e propõe a provação da sombra contra um guardião de pedra.
+     - **Batedor Renegado**: Escondido nas rochas, entrega as coordenadas de uma caverna secreta com arca abissal.
+   - Total liberdade Skyrim: aproxime-se, converse com `[F]`, escolha aceitar, ajudar ou simplesmente seguir viagem sem penalidades.
+
 ## v480 (20/10/2026) — Carroça rápida, ciclo de tempo calibrado, visual vivo das cidades e Missões Secundárias estilo Skyrim
 
 Quatro grandes avanços pedidos pelo Ian com foco em jogabilidade fluida, liberdade de exploração e mundo vivo:
