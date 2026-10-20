@@ -6063,7 +6063,13 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){corpseDrop353(e,{type:'book',n:1})}
   if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER ECO',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('DESPERTE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
-  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0)corpseDrop353(e,{type:'gold',n:g})
+  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));
+  if(g>0&&run){
+    run.gold=(run.gold||0)+g;
+    if(typeof $('gold')!=='undefined'&&$('gold'))$('gold').textContent=fmt(run.gold);
+    if(typeof floater==='function')floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',true);
+    if(typeof sfx==='function')sfx('coin');
+  }
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
   qev('kill',e);demandKill(e);
   if(e.expl){hazard(e.x,e.z,2.4,.6,e.dmg*1.5,'enemy',0xff6030)}
@@ -9491,7 +9497,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/reclaim372.js?v=404"></script><script src="tools/loot353.js?v=464"></script>
+<script src="tools/reclaim372.js?v=404"></script><script src="tools/loot353.js?v=483"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -9522,7 +9528,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 <script src="tools/mechanics434.js?v=462"></script>
-<script src="tools/survival437.js?v=469"></script>
+<script src="tools/survival437.js?v=483"></script>
 <script src="tools/cart437.js?v=469"></script>
 <script src="tools/build437.js?v=469"></script>
 <script src="tools/otherworld460.js?v=469"></script>
@@ -9545,9 +9551,9 @@ requestAnimationFrame(frame);
 <script src="tools/worldsim479.js?v=479"></script>
 <script src="tools/quests480.js?v=482"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v482</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v483</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=482;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=483;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

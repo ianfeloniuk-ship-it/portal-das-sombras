@@ -24,14 +24,14 @@ window.Loot353=(()=>{
  }
  function create(e){if(region!==L){clear();region=L}if(e.corpse353)return;const r={id:crypto.randomUUID(),name:e.name||KINDS[e.kind]?.n||'Criatura',kind:e.kind,x:e.x,z:e.z,entries:e.loot353,archPiece464:!!(e.piece250||e.piece222||e.arch223)};records().push(r);e.corpse353=r.id;attach(r,e);dirty=true}
  function remove(r){const list=records(),i=list.indexOf(r);if(i>=0)list.splice(i,1);const a=active.get(r.id);if(a){a.inter.hidden=true;L.inter=L.inter.filter(it=>it!==a.inter);a.root.remove(a.marker);if(!a.boss||r.reclaimed372)scene.remove(a.root);active.delete(r.id)}}
- function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.name+' × '+x.n}
- function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':''}
+ function label(x){return x.type==='equipment'?x.item.name:x.type==='gold'?fmt(x.n)+' ouro':x.type==='potion'?'Poção de vida × '+x.n:x.type==='book'?'Livro de habilidade × '+x.n:x.type==='core'?'Núcleo '+GR[x.rank].id+' × '+x.n:x.type==='surv'?(x.name||window.Surv437?.ITEMS?.[x.itemKey]?.n||x.itemKey)+' × '+x.n:x.name+' × '+x.n}
+ function detail(x){return x.type==='equipment'?RAR[x.item.rar].n+' · '+statTxt(x.item):x.type==='book'?'+1 ponto de habilidade por livro.':x.type==='material'?(x.b?'Troféu de chefe · vai para Bolsa → Materiais.':'Material de forja · vai para Bolsa → Materiais.'):x.type==='core'?'Recurso para comércio e melhorias.':x.type==='potion'?'Recupera vida.':x.type==='surv'?(window.Surv437?.ITEMS?.[x.itemKey]?.d||'Recurso de caça e sobrevivência · vai para Mochila [V].'):''}
  function open(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return;view=()=>open(id);let h='<p>Escolha o que levar. Bolsa: '+run.items.length+'/'+bagCapacity353()+'.</p>';
   if(r.entries.length)h+=btn('Pegar tudo','lootall376',id);
   for(const x of r.entries)h+=row(safeText(label(x)),detail(x),btn('Pegar','loottake353',id+'|'+x.id,x.type!=='equipment'||run.items.length<bagCapacity353()));
   const boss=bossE&&bossE.dead&&!bossE.absorbed&&Math.hypot(bossE.x-r.x,bossE.z-r.z)<1;
   if(boss)h+=btn(canArise()?'Erguer eco / essência':'Absorver essência','lootpower353',id);
-  h+='<p>Ouro e recursos são recolhidos manualmente. Depois que a Mão recolhe o corpo, o cristal desaparece em 10 segundos de jogo. O tempo pausa enquanto você escolhe o saque.'+(L.mode==='world'?'':' Saques abandonados somem ao sair da masmorra.')+'</p>';
+  h+='<p>O ouro é recolhido automaticamente ao abater inimigos. Espólios, peles e carnes são opcionais e ficam no corpo para você escolher o que levar. Depois que a Mão recolhe o corpo, o cristal desaparece em 10 segundos de jogo. O tempo pausa enquanto você escolhe o saque.'+(L.mode==='world'?'':' Saques abandonados somem ao sair da masmorra.')+'</p>';
   openModal('SAQUE · '+r.name,h);
  }
  function take(id,entryId){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return false;const i=r.entries.findIndex(x=>x.id===entryId);if(i<0)return false;const x=r.entries[i];
@@ -41,8 +41,9 @@ window.Loot353=(()=>{
   else if(x.type==='potion')run.pots+=x.n;
   else if(x.type==='book')run.spts=(run.spts||0)+x.n;
   else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value);old.b=!!(old.b||x.b)}
+  else if(x.type==='surv'){const surv=window.Surv437||window.Survival437;if(surv&&typeof surv.add==='function')surv.add(x.itemKey,x.n,false);else{run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:1});old.n+=x.n}}
   else return false;
-  r.entries.splice(i,1);if(!r.entries.length){reclaim(r);remove(r);}saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');sfx('coin');return true;
+  r.entries.splice(i,1);if(!r.entries.length){reclaim(r);remove(r);}saveRun();if(x.type==='material'&&x.b)toast('Guardado em Bolsa → Materiais: '+x.name+' × '+x.n+'.');if(x.type==='surv')toast('Recolhido para mochila: '+x.name+' × '+x.n+'.');sfx('coin');return true;
  }
  function takeAll(id){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return false;let taken=false;for(const x of [...r.entries])taken=take(id,x.id)||taken;return taken}
  function refreshLoot(id){if(records().some(r=>r.id===id))open(id);else closeModal()}

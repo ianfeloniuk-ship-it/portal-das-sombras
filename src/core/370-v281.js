@@ -202,7 +202,13 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){corpseDrop353(e,{type:'book',n:1})}
   if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER ECO',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('DESPERTE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
-  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));if(g>0)corpseDrop353(e,{type:'gold',n:g})
+  const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));
+  if(g>0&&run){
+    run.gold=(run.gold||0)+g;
+    if(typeof $('gold')!=='undefined'&&$('gold'))$('gold').textContent=fmt(run.gold);
+    if(typeof floater==='function')floater(e.x,e.z,'+'+fmt(g)+' ouro','#ffd54f',true);
+    if(typeof sfx==='function')sfx('coin');
+  }
   fxBurst(e.x,1,e.z,e.isBoss?0xffd070:0xa26bff,e.isBoss?30:10,e.isBoss?8:4);
   qev('kill',e);demandKill(e);
   if(e.expl){hazard(e.x,e.z,2.4,.6,e.dmg*1.5,'enemy',0xff6030)}

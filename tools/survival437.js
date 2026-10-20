@@ -1177,34 +1177,43 @@
     if (bFish) bFish.onclick = () => { fishAtWater(); closeModal(); };
   }
 
-  /* ---------- Drops de caça ao abater criaturas ---------- */
+  /* ---------- Drops de caça opcionais nos corpos das criaturas (v483) ---------- */
+  function addSurvivalCorpseDrops(e) {
+    if (typeof corpseDrop353 !== 'function') return;
+    const k = (e.kind || '').replace(/_[fa]$/, '');
+    if (['coelho', 'alpaca', 'alpacaimp', 'lobo', 'orc', 'orcinho', 'yeti', 'yetinho', 'dino', 'raptor', 'sapo', 'escaravelho'].includes(k)) {
+      const meatCount = ['dino', 'yeti', 'alpaca', 'alpacaimp'].includes(k) ? 2 : 1;
+      corpseDrop353(e, { type: 'surv', itemKey: 'carne', name: 'Carne Crua', n: meatCount });
+      if (Math.random() < 0.75) corpseDrop353(e, { type: 'surv', itemKey: 'couro', name: 'Couro Cru', n: 1 });
+      if (Math.random() < 0.5) corpseDrop353(e, { type: 'surv', itemKey: 'osso', name: 'Osso / Chifre', n: 1 });
+    } else if (['passaro', 'abelha', 'vespa', 'arraia'].includes(k)) {
+      corpseDrop353(e, { type: 'surv', itemKey: 'pena', name: 'Pena', n: 2 });
+      if (k === 'passaro') corpseDrop353(e, { type: 'surv', itemKey: 'carne', name: 'Carne Crua', n: 1 });
+    } else if (['peixinho', 'homempeixe', 'lula'].includes(k)) {
+      corpseDrop353(e, { type: 'surv', itemKey: 'peixe_cru', name: 'Peixe Cru', n: 1 });
+    } else if (['cogu', 'cogufuria', 'reicogu'].includes(k)) {
+      corpseDrop353(e, { type: 'surv', itemKey: 'cogu_bom', name: 'Cogumelo Comestível', n: 1 });
+    } else if (['caveira', 'minion', 'warrior', 'rogue'].includes(k)) {
+      corpseDrop353(e, { type: 'surv', itemKey: 'osso', name: 'Osso / Chifre', n: 1 });
+    }
+    if (e.kind && /_f$|_a$/.test(e.kind) && Math.random() < 0.35) {
+      corpseDrop353(e, { type: 'surv', itemKey: 'cristal_frio', name: 'Lasca de Cristal Frio', n: 1 });
+    }
+  }
+
   const origKill = typeof killEnemy === 'function' ? killEnemy : null;
   if (origKill) {
     killEnemy = function (e) {
       const wasAlive = e && !e.dead;
+      if (wasAlive && !e.ally && !e.statue) {
+        try {
+          addSurvivalCorpseDrops(e);
+        } catch (_) {}
+      }
       const r = origKill.apply(this, arguments);
-      try {
-        if (wasAlive && e.dead && !e.ally && !e.statue) {
-          const k = (e.kind || '').replace(/_[fa]$/, '');
-          if (['coelho', 'alpaca', 'alpacaimp', 'lobo', 'orc', 'orcinho', 'yeti', 'yetinho', 'dino', 'raptor', 'sapo', 'escaravelho'].includes(k)) {
-            add('carne', ['dino', 'yeti', 'alpaca', 'alpacaimp'].includes(k) ? 2 : 1, true);
-            if (Math.random() < 0.75) add('couro', 1, true);
-            if (Math.random() < 0.5) add('osso', 1, true);
-          } else if (['passaro', 'abelha', 'vespa', 'arraia'].includes(k)) {
-            add('pena', 2, true);
-            if (k === 'passaro') add('carne', 1, true);
-          } else if (['peixinho', 'homempeixe', 'lula'].includes(k)) {
-            add('peixe_cru', 1, true);
-          } else if (['cogu', 'cogufuria', 'reicogu'].includes(k)) {
-            add('cogu_bom', 1, true);
-          } else if (['caveira', 'minion', 'warrior', 'rogue'].includes(k)) {
-            add('osso', 1, true);
-          }
-          if (e.kind && /_f$|_a$/.test(e.kind) && Math.random() < 0.35) {
-            add('cristal_frio', 1, true);
-          }
-        }
-      } catch (_) {}
+      if (wasAlive && e.dead && !e.corpse353 && e.loot353?.length && typeof finishCorpse353 === 'function') {
+        try { finishCorpse353(e); } catch (_) {}
+      }
       return r;
     };
   }
@@ -1300,6 +1309,7 @@
           if (fire && k === 'peixe_cru') act.push('<button class="btn" data-cook="peixe_assado">Assar</button>');
           if (fire && k === 'cogu_bom') act.push('<button class="btn" data-cook="cogu_assado">Assar</button>');
           act.push('<button class="btn" data-drop="' + k + '">Largar 1</button>');
+          if (n > 1) act.push('<button class="btn" data-dropall="' + k + '">Largar Tudo</button>');
           h += row('<b>' + it.n + '</b> ×' + n + ' <small>(' + (it.w * n).toFixed(1) + ' kg)</small>', it.d + freshnessBarHtml(k), act.join(' '));
         }
       }
@@ -1342,6 +1352,7 @@
       open(tab);
     });
     document.querySelectorAll('#modal [data-drop]').forEach(b => b.onclick = () => { take(b.dataset.drop, 1); open(tab); });
+    document.querySelectorAll('#modal [data-dropall]').forEach(b => b.onclick = () => { take(b.dataset.dropall, count(b.dataset.dropall)); open(tab); });
     document.querySelectorAll('#modal [data-craft]').forEach(b => b.onclick = () => { craft(+b.dataset.craft); open(tab); });
   }
 
@@ -1411,4 +1422,5 @@
     freshnessPct, freshStage, sealBundle, unsealBundle, throwBait,
     canteenTier, canteenMaxSips, spoilMult
   };
+  window.Survival437 = window.Surv437;
 })();

@@ -1,3 +1,25 @@
+## v483 (20/10/2026) — Coleta Automática de Ouro, Carnes/Espólios Opcionais nos Corpos e Botão de Descarte em Lote
+
+Correções fundamentais pedidas pelo Ian para eliminar sobrepeso indesejado por coleta forçada e agilizar o combate:
+
+1. **Coleta Automática Imediata de Ouro (`src/core/370-v281.js`)**:
+   - O ouro dropado por monstros, elites e chefes agora é creditado automaticamente e de forma instantânea diretamente na carteira do jogador (`run.gold`) no exato momento da morte da criatura.
+   - Dispara som de moeda (`sfx('coin')`), feedback visual flutuante dourado (`+X ouro`) e atualiza o HUD imediatamente.
+   - O ouro não é mais deixado no chão nem dentro do corpo da criatura, eliminando o trabalho tedioso de abrir corpos apenas para pegar moedas.
+
+2. **Carnes e Espólios de Monstros 100% Opcionais (`tools/survival437.js`, `tools/loot353.js`)**:
+   - Removida a inserção forçada de carne crua (`carne`), couro (`couro`), ossos (`osso`), penas (`pena`), etc., que era injetada automaticamente na mochila de sobrevivência ao matar qualquer fera e causava sobrepeso imediato.
+   - Todos os recursos de caça agora são depositados no saque do corpo (`corpseDrop353` com `type: 'surv'`), ficando visíveis na interação `F · VASCULHAR`.
+   - O jogador tem total liberdade: pode inspecionar e escolher pegar apenas o que precisa, ou ignorar completamente os restos mortais sem carregar peso extra.
+
+3. **Botão "Largar Tudo" na Mochila de Sobrevivência (`tools/survival437.js`)**:
+   - Na janela de suprimentos (`Tecla V`), itens com quantidade maior que 1 agora exibem um botão `Largar Tudo` ao lado de `Largar 1`.
+   - Permite descartar em 1 clique qualquer estoque excessivo acumulado anteriormente.
+
+4. **Regra de Partes Ligadas & Integração**:
+   - `tools/loot353.js`: atualizadas as explicações da janela de saque ("O ouro é recolhido automaticamente ao abater inimigos. Espólios, peles e carnes são opcionais e ficam no corpo...").
+   - Teste automatizado `tools/test-v483-loot-gold.cjs` cobre e valida os novos comportamentos.
+
 ## v482 (20/10/2026) — Correção Crítica de Terreno das Cidades, Bloqueio de Monstros e Matriz Completa de Biomas
 
 Correções de alinhamento visual e terreno de cidades solicitadas pelo Ian após inspeção visual com capturas de tela:
