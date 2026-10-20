@@ -3856,7 +3856,7 @@ function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3
 function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> <span class="tipi" style="cursor:help" data-tip154="Limita a corrida e a montaria. 100% é a velocidade inicial.">Limitar minha velocidade de movimento</span></label><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%">'}
 
 function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2-x1,z2-z1));for(let i=1;i<n;i++){const t=i/n;if(!gfree(x1+(x2-x1)*t,z1+(z2-z1)*t))return false}return true}
-const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);const cl=cityL(n.c),cr=cl>=8?125:cl>=6?95:65;return n.d<cr*CITYK&&!cityFallen(n.c)};
+const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);const cl=cityL(n.c),cr=cl>=8?125:cl>=6?95:65;return n.d<cr&&!cityFallen(n.c)};/* v486 (Ian): cr já está em metros (muralha 60/85/115 m + folga); o ×CITYK fazia a "cidade" ir até 220 m e bloqueava dano longe dela */
 
 /* ================= NÍVEL: LIMPEZA ================= */
 function clearLevel(){if(window.TER245&&TER245.OW)TER245.OW.value.x=0;/* v460: relevo do Outro Mundo só vale dentro da Fenda */if(window.Loot353)Loot353.clear();FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
@@ -9564,9 +9564,9 @@ requestAnimationFrame(frame);
 <script src="tools/worldsim479.js?v=479"></script>
 <script src="tools/quests480.js?v=482"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v485</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v486</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=485;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=486;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

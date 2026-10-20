@@ -1,3 +1,9 @@
+## v486 (20/10/2026) — "MURALHA" fora da cidade
+- Pedido de Ian: usou habilidade num lobo longe de qualquer cidade e o jogo mostrou "MURALHA" e não deu dano.
+- Causa: na v482 `inCity` passou a usar raio em metros (65/95/125) mas continuou multiplicando por CITYK (1,76): a cidade "ia" até 114/167/220 m.
+- Correção: `src/core/170-colisao.js` usa o raio direto. Ligado: o mesmo `inCity` vale para bloqueio de dano (wallBlock341), zona segura e sobrevivência — todos voltam ao tamanho certo.
+- Teste: inCity em níveis 1/6/8 = dentro até 63/90/120 m, fora a partir de 70/100/130 m.
+
 ## v485 (20/10/2026) — Linguagem do jogo (estilo Skyrim) e fim dos números quebrados
 
 Pedido de Ian: "estude Skyrim e jogos de RPG… desenvolva uma linguagem… explicações simples e funcionais, que o que for dito realmente aconteça, e não use números quebrados; se tiver número quebrado no jogo, refaça para uma melhor explicação e balanceamento".
