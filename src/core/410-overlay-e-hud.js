@@ -40,6 +40,7 @@ function drawMap(ctx,S,full){
     for(const e of enemies)if(e.legend&&!e.dead){const X=tx(e.x),Z=tz(e.z),r=full?9:6;ctx.fillStyle='#ffd54f';ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(X+Math.cos(a)*rr,Z+Math.sin(a)*rr)}ctx.closePath();ctx.stroke();ctx.fill();if(full){ctx.font='700 11px sans-serif';ctx.fillStyle='#ffd54f';ctx.textAlign='left';ctx.fillText(e.name,X+11,Z+4)}}
     for(const e of enemies)if(e.world&&!e.dead){ctx.fillStyle='#ff5a1e';ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),6,0,TAU);ctx.fill()}
     if(window.Civic343)try{Civic343.map(ctx,tx,tz,full)}catch(_){}
+    if(window.Quests480)try{Quests480.drawMinimap(ctx,tx,tz,full)}catch(_){}
     for(const n of npcs)if(n.kind==='hunter'){ctx.fillStyle='rgba(232,246,255,.7)';ctx.fillRect(tx(n.x)-1.5,tz(n.z)-1.5,3,3)}
   }else{
     /* v461: no Outro Mundo (infinito) o mapa grande mostra 600 m em volta de você */const G=L.grid,ow461=!!L.ow460,k=full?(ow461?S/600:S/(G.W*G.CS)):2.6,cx=full&&!ow461?0:P.x,cz=full&&!ow461?floorMapCenter():P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
@@ -59,6 +60,8 @@ function drawMap(ctx,S,full){
 }
 function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),add=(title,detail)=>rows.push('<div class="objective-row"><strong>'+safe(title)+'</strong><small>'+safe(detail)+'</small></div>');
   const track=trackedObjective(),qs=run.quests||[],done=qs.filter(q=>q.got>=q.n).length,q=qs.find(q=>q.got<q.n);
+  const qt=window.Quests480?.getHudTrackText();
+  if(qt){add('Contrato · '+qt.title,qt.detail);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer;border-left:2px solid #58a6ff" onclick="event.stopPropagation();window.Quests480?.openBoard()"');}
   if(L.inv)add('Invasão em '+L.inv.c.name,fmtT(Math.max(0,L.inv.t))+' restantes. '+enemies.filter(e=>e.inv&&!e.dead).length+' inimigos vivos.');
   if(run.demand){const d=run.demand;add('Desafio do Oráculo','Derrote '+d.n+' monstros '+({nododge:'sem esquivar',nopot:'sem usar poções',night:'à noite'}[d.t]||'')+questTargetText262(d)+'. Progresso: '+d.got+' de '+d.n+'. '+questXpText262(d)+'.')}
   if(track){add(track.n,track.progress);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer" onclick="event.stopPropagation();journeyView()"')}

@@ -275,7 +275,7 @@
       const dx = player.x - c.x, dz = player.z - c.z, d = Math.hypot(dx, dz);
       const targetDist = 2.05;
       if (d > targetDist) {
-        const step = Math.min(d - targetDist, 9 * dt);
+        /* v480: reboque de alta velocidade */ const step = Math.min(d - targetDist, 35 * dt);
         c.x += (dx / d) * step;
         c.z += (dz / d) * step;
         c.rot = Math.atan2(dx, dz);

@@ -220,9 +220,27 @@
       }
 
       // Sincroniza o nível com o sistema de cidades do núcleo (profile.cityLv)
-      if (rid === 'aster' && typeof profile !== 'undefined' && profile && typeof profile.cityLv !== 'undefined') {
-        const asterCity = (typeof citiesAround === 'function') ? (citiesAround(0, 0, 500)[0] || { id: '0,0' }) : { id: '0,0' };
-        profile.cityLv[asterCity.id] = Math.max(profile.cityLv[asterCity.id] || 0, rState.level);
+      if (typeof profile !== 'undefined' && profile) {
+        profile.cityLv = profile.cityLv || {};
+        const keyMap = {
+          aster: '0,0',
+          ymiria: '0,-5',
+          zahar: '5,0',
+          thalor: '-5,0',
+          urdan_verden: '0,5',
+          solaria: '1,0'
+        };
+        const cityKey = keyMap[rid] || (rid === 'aster' ? '0,0' : null);
+        if (cityKey) {
+          profile.cityLv[cityKey] = Math.max(profile.cityLv[cityKey] || 0, rState.level);
+        }
+        if (leveledUp) {
+          if (typeof store !== 'undefined' && store.set) store.set('pds2_profile', profile);
+          if (typeof reloadCityChunks === 'function' && typeof cityCache !== 'undefined') {
+            const c = cityCache.get(cityKey);
+            if (c) reloadCityChunks(c);
+          }
+        }
       }
 
       const curDay = (typeof profile !== 'undefined' && profile && profile.gameDays) || 1;

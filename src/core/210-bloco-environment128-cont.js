@@ -87,12 +87,27 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   EW(b,'campfire_stones',X+4.8,0,Z-3.6,0,1.3);
   for(let i=0;i<9;i++){const a=i/9*TAU,x=X-7+Math.cos(a)*2.55,z=Z-6+Math.sin(a)*2.55;EW(b,pk(R,['rock_smallA','rock_smallC','stone_smallA']),x,-.04,z,R()*TAU,.8+R()*.3)}
   EW(b,'lily_large',X-7.6,.07,Z-6.4,R()*TAU,.9);EW(b,'lily_small',X-6.2,.07,Z-5.3,R()*TAU,.6);EH(fl,'grass_large',X-9.3,0,Z-6.8,0,.7);EH(fl,'grass',X-4.8,0,Z-7.4,1,.6);
-  if(cLv>=2&&!fallen){EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8)}
-  if(cLv>=3&&!fallen)for(const s of[-1,1]){EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);addCol({x:X+s*9.4,z:Z+11.2,r:.85})}/* v429: coluna sólida */
+  if(cLv>=2&&!fallen){
+    EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});
+    EW(b,'cart',X-12.5,0,Z-15,-.6,2.4);addCol({x:X-12.5,z:Z-15,r:1.3});
+    envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);
+    envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8);
+    envSolidEW357(addCol,b,'crates_stacked',X+14,0,Z+13,0,1.4);
+  }
+  if(cLv>=3&&!fallen){
+    for(const sx of[-1,1])for(const sz of[-1,1]){
+      EH(b,'statue_column',X+sx*8.8,0,Z+sz*8.8,0,3.4,1.25);
+      addCol({x:X+sx*8.8,z:Z+sz*8.8,r:.85});
+    }
+  }/* v429: coluna sólida */
   /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
   if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.26;
-    if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
-      EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3})}
+    if(cLv>=4){
+      for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
+      EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);
+      EW(b,'stall-red',X-12,0,Z-6,Math.PI/2,3.2);EW(b,'stall-green',X+12,0,Z-6,-Math.PI/2,3.2);
+      addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3});addCol({x:X-12,z:Z-6,r:1.3});addCol({x:X+12,z:Z-6,r:1.3});
+    }
     if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,26,34,42]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
     if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
     if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}

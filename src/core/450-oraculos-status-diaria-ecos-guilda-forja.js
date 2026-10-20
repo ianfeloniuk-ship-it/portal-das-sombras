@@ -204,7 +204,8 @@ const GUILDS=[
  {n:'Caçadores Livres',lvl:1,req:0,lead:'Toma, rank D',h:'A guilda de quem está começando. Pouco bônus, muito coração. Metade dos caçadores famosos passou por aqui.'}];
 /* dia e noite */
 /* v377 (Ian): dia de 14 min e noite de 10 min (ciclo de 24 min). */
-let dayT=120;const DAYLEN=1440,NIGHT0_377=.55,NIGHT1_377=.55+600/1440;
+/* v480 (Ian): ciclo dia/noite estendido estilo Skyrim (48 min: 28 min dia, 20 min noite) */
+let dayT=120;const DAYLEN=2880,NIGHT0_377=.55,NIGHT1_377=.55+1200/2880;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
 function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else{const d=(p>=n1?p-n1:p+1-n1)/(1-(n1-n0));h=6+12*d}h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'☾ ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
@@ -300,11 +301,29 @@ function journeyObjectives(){const list=[],nx=profile.rank+1;const eq=run.extrac
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d+questTargetText262(q),d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+questXpText262(q)+' · '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda. '+QUEST_XP_RULE332,progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
-function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+btn('Bestiário / Grimório','bestv',0)+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+btn('Bestiário / Grimório','bestv',0)+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas'],['contracts','Contratos']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){if(profile.firstEquipment92?.done)h+=row('Seu primeiro equipamento · concluído','Você conquistou ouro, comprou uma peça e aprendeu a equipá-la.','✓');h+='<div class="sysline">Escolha um objetivo para acompanhar. Receba recompensas com Lyra, na Ordem.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
     h+='<div class="sec">MISSÃO DIÁRIA'+(run.daily&&run.daily.done?' · CONCLUÍDA':'')+'</div><div class="sysline"><span class="tipi" style="cursor:help" data-tip154="Recompensa: '+questXpText262(run.daily,'daily')+', +10 reputação, +1 atributo, vida e mana cheias. Bônus: '+STREAK214[streakDay214()-1]+'. Faltar um dia reinicia a sequência.">Complete os quatro objetivos até a meia-noite. Sequência: dia '+streakDay214()+'/7 ('+STREAK214[streakDay214()-1]+').</span></div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
+    }else if(tab==='contracts'){
+    h+='<div class="sysline">Missões secundárias e contratos de caça no estilo Skyrim. Aceite nas capitais e explore livremente.</div>';
+    h+=row('Mural de Contratos da Região','Explore os contratos das capitais, consulte alvos e colete recompensas.',btn('Abrir Mural','openbountyboard',0,true,'hot'));
+    if(window.Quests480){
+      const st=window.Quests480.getState();
+      const actKeys=Object.keys(st?.active||{});
+      if(actKeys.length){
+        h+='<div class="sec">SEUS CONTRATOS ATIVOS ('+actKeys.length+')</div>';
+        for(const qid of actKeys){
+          const q=window.Quests480.CATALOG[qid];
+          if(!q)continue;
+          const isTrack=st.tracked===qid;
+          h+=row(q.title+(isTrack?' · ★ acompanhando':''),q.desc+'<br><b>Recompensa: '+fmt(q.rewardGold)+' ouro · '+q.giver+'</b>',btn(isTrack?'Parar':'Acompanhar','trackcontract',isTrack?'':qid,true,isTrack?'':'hot'));
+        }
+      }else{
+        h+='<div class="sysline">Nenhum contrato ativo no momento. Fale com os governantes ou consulte o mural de uma capital.</div>';
+      }
+    }
   }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
     for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
     if(!any)h+='<div class="sysline">Passe na primeira Prova de Rank para receber o chamado de Lyra.</div>';
@@ -422,7 +441,9 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
   if(a==='travel'){const c=(profile.visited||{})[v];if(!travelReady265(c))return;const cost=travelCost(c);if(!spendService265(cost))return;
     closeModal();player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);fxRing(player.x,player.z,0xffb347,4,.8);bigText(c.n,1400);sfx('arise');narratorEvent105('travel');saveRun();return}
   if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};refreshKeyLabels();try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
-  if(a==='journeytab')return journeyView(v),'close0';if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
+  if(a==='journeytab')return journeyView(v),'close0';
+  if(a==='openbountyboard')return (window.Quests480?window.Quests480.openBoard(v||'aster'):null),'close0';
+  if(a==='trackcontract'){if(window.Quests480)window.Quests480.trackQuest(v||null);return journeyView('contracts'),'close0';}if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
   if(a==='status')return statusView(),'close0';if(a==='army')return armyView(),'close0';if(a==='diary')return diaryView(),'close0';if(a==='look')return lookView(),'close0';
 }
 /* tutorial */

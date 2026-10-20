@@ -158,17 +158,17 @@ window.Civic343=(()=>{
     if(A.parked){A.t+=dt;const rideW=window.Living372&&Living372.rideWagon?Living372.rideWagon():null;if(rideW!==w&&(pd>75||A.t>150&&pd>28)){wagonRemove(w);continue}}
     else{const q=A.pts[A.i],dx=q[0]-w.x,dz=q[1]-w.z,d=Math.hypot(dx,dz),last=A.i===A.pts.length-1;
      if(d<(last?.06:1.2)){if(last){A.parked=true;A.t=0;if(window.Living372&&Living372.arrive429)Living372.arrive429(w,A.c);else if(pd<14)speech153(w.n,'Chegamos a '+A.c.name+'.','Mercador')}else A.i++}
-     else if(!blocked429(w,dx/d,dz/d)){const sp=2.7*(last?clamp(d/6,.22,1):1)*dt,want=Math.atan2(dx,dz),df=Math.atan2(Math.sin(want-w.face),Math.cos(want-w.face));w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face+=df*Math.min(1,dt*2.6);moving=true}}}
+     else if(!blocked429(w,dx/d,dz/d)){/* v480: carroca rapida */ const sp=14.5*(last?clamp(d/6,.22,1):1)*dt,want=Math.atan2(dx,dz),df=Math.atan2(Math.sin(want-w.face),Math.cos(want-w.face));w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face+=df*Math.min(1,dt*2.6);moving=true}}}
    else{/* v381 (Ian): carroças não entram uma na outra — cada uma anda na mão direita da estrada e espera a da frente. */
     const seg0=w.pts[w.fwd?w.s:w.s+1]||w.pts[w.s],seg1=w.pts[w.fwd?w.s+1:w.s],sl=Math.hypot(seg1[0]-seg0[0],seg1[1]-seg0[1])||1,rx=(seg1[1]-seg0[1])/sl*-1.7,rz=(seg1[0]-seg0[0])/sl*1.7;
     const tgt=[seg1[0]+rx,seg1[1]+rz],dx=tgt[0]-w.x,dz=tgt[1]-w.z,d=Math.hypot(dx,dz);
     const blocked=wagons.some(o=>o!==w&&!o.gone&&!o.wreck&&o.fwd===w.fwd&&o.pts===w.pts&&(()=>{const ox=o.x-w.x,oz=o.z-w.z,od=Math.hypot(ox,oz);return od<9.5&&(ox*dx+oz*dz)/(Math.max(d,1e-3)*Math.max(od,1e-3))>.5})())||d>=1&&blocked429(w,dx/d,dz/d);
     if(d<1){if(w.fwd?w.s>=1:w.s<=0){wagonRemove(w);continue}w.s+=w.fwd?1:-1}
-    else if(!blocked){const sp=2.7*dt;w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face=Math.atan2(dx,dz);moving=true;
+    else if(!blocked){/* v480: carroca mais rapida que sprint */ const sp=14.5*dt;w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face=Math.atan2(dx,dz);moving=true;
      /* puxa a carroça para a própria faixa (1,7 m à direita do centro) */const ux=(seg1[0]-seg0[0])/sl,uz=(seg1[1]-seg0[1])/sl,lat=(w.x-seg0[0])*-uz+(w.z-seg0[1])*ux,want=1.7,k=Math.min(1,dt*1.5)*(want-lat);w.x+=-uz*k;w.z+=ux*k}
     {const nc=nearestCity(w.x,w.z);if(nc.c===w.dest&&!cityFallen(nc.c)&&nc.d<cityWall429(nc.c)+28)w.arr429=arrival429(w,nc.c);else if(nc.d<70&&w.t>6){wagonRemove(w);continue}}}
    w.n.x=w.x;w.n.z=w.z;if(!w.wreck){w.g.position.set(w.x,0,w.z);w.g.rotation.y=w.face}
-   if(w.detailed369){Wagon369.animate(w,dt,Math.hypot(w.x-prevX,w.z-prevZ),Math.atan2(Math.sin(w.face-prevFace),Math.cos(w.face-prevFace)))}else if(moving){for(const wh of w.wheels)wh.rotation.x+=dt*5.4;w.legs.forEach((l,i)=>{l.rotation.x=Math.sin(w.t*6+(i%3?Math.PI:0))*.5})}
+   if(w.detailed369){Wagon369.animate(w,dt,Math.hypot(w.x-prevX,w.z-prevZ),Math.atan2(Math.sin(w.face-prevFace),Math.cos(w.face-prevFace)))}else if(moving){for(const wh of w.wheels)wh.rotation.x+=dt*18.0;w.legs.forEach((l,i)=>{l.rotation.x=Math.sin(w.t*6+(i%3?Math.PI:0))*.5})}
    if(w.driver&&!w.detailed369&&pd<60)try{animChibi(w.driver,{move:0,atk:0,dead:0,wind:0},time)}catch(_){}}}
  function clearWagons(){for(const w of[...wagons])wagonRemove(w)}
 

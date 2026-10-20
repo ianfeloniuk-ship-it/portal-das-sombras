@@ -1,0 +1,601 @@
+/* v480 (Ian, 20/10/2026): Sistema de Missões Secundárias e Murais de Contratos estilo Skyrim.
+   Mundo aberto com total liberdade: contratos de caçada (bounties), resgates de caravanas na estrada,
+   criptas/ruínas antigas com relíquias, ninhos de pragas e entregas expressas de carroça.
+   Acesse pelos Murais nas praças, Pousadas, Conselho Regional ou pelo Diário [L]. */
+(function (global) {
+  'use strict';
+
+  const TAU = Math.PI * 2;
+
+  // Catálogo rico de Missões Secundárias & Contratos das 6 Regiões (Estilo Skyrim)
+  const QUEST_CATALOG = {
+    // ASTER
+    bounty_gorlok: {
+      id: 'bounty_gorlok',
+      region: 'aster',
+      type: 'bounty',
+      title: 'Caçada: Gorlok, o Rompe-Muralhas',
+      giver: 'Comandante Brann · Mural da Ordem',
+      desc: 'Um chefe orc desertor reuniu batedores e tem saqueado carroças nas colinas a noroeste de Aster. Abata Gorlok e traga paz à estrada.',
+      rank: 1, // D
+      biome: 'campos',
+      offset: { dx: 130, dz: -110 },
+      bossKind: 'orcinho',
+      bossName: 'Gorlok Rompe-Muralhas',
+      bossScale: 1.6,
+      minions: 4,
+      minionKinds: ['orcinho', 'magote'],
+      gold: 950,
+      xp: 420,
+      rep: 45,
+      trust: 12,
+      rewardItem: 'Espada de Aço Refinado'
+    },
+    rescue_caravan_aster: {
+      id: 'rescue_caravan_aster',
+      region: 'aster',
+      type: 'rescue',
+      title: 'Socorro na Estrada das Brumas',
+      giver: 'Edran Protetor da Carroça',
+      desc: 'Uma caravana com novatos transmigradores foi encurralada por feras nas brumas da estrada. Use sua carroça rápida para chegar a tempo e espantar as feras.',
+      rank: 0, // E
+      biome: 'campos',
+      offset: { dx: -120, dz: 90 },
+      minions: 5,
+      minionKinds: ['slime', 'gosma'],
+      gold: 650,
+      xp: 280,
+      rep: 35,
+      trust: 15
+    },
+    crypt_aster: {
+      id: 'crypt_aster',
+      region: 'aster',
+      type: 'crypt',
+      title: 'Cripta do Primeiro Cavaleiro',
+      giver: 'Chanceler Lyra · Arquivos da Ordem',
+      desc: 'Relatos de uma antiga tumba de pedra selada por runas. O guardião de pedra acordou e protege o relicário de armadura ancestral da Primeira Cruzada.',
+      rank: 2, // C
+      biome: 'campos',
+      offset: { dx: 180, dz: 140 },
+      bossKind: 'golempedra',
+      bossName: 'Guardião de Pedra da Cripta',
+      bossScale: 1.5,
+      minions: 2,
+      minionKinds: ['golenzinho'],
+      gold: 1400,
+      xp: 650,
+      rep: 60,
+      trust: 10,
+      relicReward: 'Relíquia: Selo do Cavaleiro Antigo'
+    },
+
+    // SOLARIA
+    bounty_valkor_solaria: {
+      id: 'bounty_valkor_solaria',
+      region: 'solaria',
+      type: 'bounty',
+      title: 'Caçada: Valkor Lâmina-do-Sol Negro',
+      giver: 'Grão-Mestre Aurelius · Domo Solar',
+      desc: 'Um antigo paladino solar corrompido pelo miasma da fenda desafia quem cruza o desfiladeiro brilhante. Purifique sua lâmina em combate.',
+      rank: 3, // B
+      biome: 'flores',
+      offset: { dx: 150, dz: -160 },
+      bossKind: 'escaravelho',
+      bossName: 'Valkor Lâmina-do-Sol Negro',
+      bossScale: 1.5,
+      minions: 3,
+      minionKinds: ['coelho', 'abelha'],
+      gold: 2100,
+      xp: 950,
+      rep: 80,
+      trust: 15
+    },
+    courier_solaria_aster: {
+      id: 'courier_solaria_aster',
+      region: 'solaria',
+      type: 'delivery',
+      title: 'Entrega Expressa de Quartzo Solar',
+      giver: 'Consórcio de Mascates de Solaria',
+      desc: 'Os forjadores de Aster precisam com urgência de lentes de quartzo solar para refratar portais. Use sua carroça de alta velocidade para fazer a entrega.',
+      rank: 1, // D
+      biome: 'flores',
+      offset: { dx: -80, dz: 110 },
+      gold: 1100,
+      xp: 480,
+      rep: 50,
+      trust: 14
+    },
+
+    // YMIRIA
+    bounty_yeti_ymiria: {
+      id: 'bounty_yeti_ymiria',
+      region: 'ymiria',
+      type: 'bounty',
+      title: 'Caçada: Garra-Gélida, o Yeti Ancião',
+      giver: 'Arquiduquesa Astrid Frostgard',
+      desc: 'Um yeti colossal desceu dos picos nevados e bloqueia a passagem das caravanas geotérmicas. Derrube a fera e proteja o abastecimento de carvão.',
+      rank: 4, // A
+      biome: 'neve',
+      offset: { dx: -160, dz: -140 },
+      bossKind: 'yeti',
+      bossName: 'Garra-Gélida o Ancião',
+      bossScale: 1.7,
+      minions: 4,
+      minionKinds: ['yetinho'],
+      gold: 3200,
+      xp: 1500,
+      rep: 120,
+      trust: 20
+    },
+    rescue_ymiria: {
+      id: 'rescue_ymiria',
+      region: 'ymiria',
+      type: 'rescue',
+      title: 'Batedores Soterrados na Geada',
+      giver: 'Torben Machado-de-Gelo',
+      desc: 'Uma nevasca violenta cercou dois batedores entre as pedras de gelo. Leve provisões quentes na carroça e elimine os lobos que farejam o rastro.',
+      rank: 2, // C
+      biome: 'neve',
+      offset: { dx: 110, dz: 160 },
+      minions: 5,
+      minionKinds: ['yetinho'],
+      gold: 1600,
+      xp: 750,
+      rep: 65,
+      trust: 16
+    },
+
+    // ZAHAR
+    bounty_wyrm_zahar: {
+      id: 'bounty_wyrm_zahar',
+      region: 'zahar',
+      type: 'bounty',
+      title: 'Caçada: O Verme das Dunas Vermelhas',
+      giver: 'Emir Tariq Al-Zahar',
+      desc: 'Uma criatura subterrânea gigantesca tem atacado poços artesianos e engolido camelos de carga inteiros. Cace a fera no coração das dunas.',
+      rank: 4, // A
+      biome: 'deserto',
+      offset: { dx: 190, dz: -130 },
+      bossKind: 'cactogig',
+      bossName: 'Verme Soberano das Areias',
+      bossScale: 1.6,
+      minions: 4,
+      minionKinds: ['cactinho', 'escaravelho'],
+      gold: 3400,
+      xp: 1600,
+      rep: 130,
+      trust: 20
+    },
+
+    // THALOR
+    bounty_kraken_thalor: {
+      id: 'bounty_kraken_thalor',
+      region: 'thalor',
+      type: 'bounty',
+      title: 'Caçada: O Terror dos Arrecifes',
+      giver: 'Almirante Varis Onda-Viva',
+      desc: 'Uma fera abissal com carapaça de corais tem afundado barcos de pesca nos recifes externos. Limpe as águas para os pescadores de Thalor.',
+      rank: 3, // B
+      biome: 'pantano',
+      offset: { dx: -140, dz: 150 },
+      bossKind: 'homempeixe',
+      bossName: 'Campeão Abissal dos Arrecifes',
+      bossScale: 1.5,
+      minions: 5,
+      minionKinds: ['homempeixe', 'sapo'],
+      gold: 2400,
+      xp: 1100,
+      rep: 90,
+      trust: 18
+    },
+
+    // URDAN & VERDEN
+    bounty_treant_urdan: {
+      id: 'bounty_treant_urdan',
+      region: 'urdan_verden',
+      type: 'bounty',
+      title: 'Caçada: Raiz-Maldita, o Guardião Corrompido',
+      giver: 'Arquidruida Eldrin · Conselho das Raízes',
+      desc: 'Um treant secular teve seu cerne infectado por esporos da Fenda e começou a estrangular animais e nascentes de água pura. Purifique o bosque.',
+      rank: 3, // B
+      biome: 'floresta',
+      offset: { dx: 130, dz: 150 },
+      bossKind: 'cogufuria',
+      bossName: 'Raiz-Maldita o Corrompido',
+      bossScale: 1.6,
+      minions: 4,
+      minionKinds: ['cogu', 'ninjinha'],
+      gold: 2600,
+      xp: 1200,
+      rep: 100,
+      trust: 18
+    }
+  };
+
+  // Garante estado das missões no profile
+  function getState() {
+    let p = null;
+    if (typeof profile !== 'undefined' && profile) p = profile;
+    else if (typeof window !== 'undefined' && window.profile) p = window.profile;
+    if (!p) return null;
+
+    p.quests480 = p.quests480 || {};
+    const Q = p.quests480;
+    Q.active = Q.active || {};       // { [questId]: { progress: 0, max: 1, targetPos: {x, z}, spawned: false } }
+    Q.completed = Q.completed || {}; // { [questId]: timestamp }
+    Q.tracked = Q.tracked || null;   // questId sendo rastreado no HUD/compasso
+    return Q;
+  }
+
+  // Retorna as coordenadas da cidade / capital
+  function getCityPos(regionKey) {
+    if (typeof CITIES !== 'undefined' && Array.isArray(CITIES)) {
+      const match = CITIES.find(c => (c.name || '').toLowerCase().includes(regionKey.toLowerCase()) || (c.id || '').includes(regionKey));
+      if (match) return { x: match.x, z: match.z };
+    }
+    if (typeof nearestCity === 'function' && typeof player !== 'undefined' && player) {
+      const near = nearestCity(player.x, player.z);
+      if (near && near.c) return { x: near.c.x, z: near.c.z };
+    }
+    return { x: 0, z: 0 };
+  }
+
+  // Aceita uma missão secundária
+  function acceptQuest(qid) {
+    const qdef = QUEST_CATALOG[qid];
+    if (!qdef) return false;
+    const S = getState();
+    if (!S) return false;
+
+    if (S.completed[qid]) {
+      if (typeof toast === 'function') toast('Você já concluiu este contrato anteriormente.');
+      return false;
+    }
+    if (S.active[qid]) {
+      trackQuest(qid);
+      if (typeof toast === 'function') toast(`<b>[MISSÃO]</b> Agora acompanhando: <b>${qdef.title}</b>.`);
+      return true;
+    }
+
+    const cityPos = getCityPos(qdef.region);
+    const targetX = cityPos.x + (qdef.offset?.dx || 100);
+    const targetZ = cityPos.z + (qdef.offset?.dz || 100);
+
+    S.active[qid] = {
+      id: qid,
+      acceptedAt: Date.now(),
+      progress: 0,
+      max: 1,
+      targetPos: { x: targetX, z: targetZ },
+      spawned: false
+    };
+    S.tracked = qid;
+
+    if (typeof bigText === 'function') bigText('NOVA MISSÃO: ' + qdef.title.toUpperCase(), 1800);
+    if (typeof sfx === 'function') sfx('gong');
+    if (typeof toast === 'function') {
+      toast(`<b>[MURAL DE CONTRATOS]</b> Missão aceita: <b>${qdef.title}</b>!<br>Abra o Diário [L] para acompanhar os detalhes no mapa.`);
+    }
+
+    saveState();
+    return true;
+  }
+
+  // Define qual missão é acompanhada no HUD
+  function trackQuest(qid) {
+    const S = getState();
+    if (!S) return;
+    S.tracked = qid;
+    saveState();
+  }
+
+  // Abandona uma missão secundária (liberdade Skyrim)
+  function abandonQuest(qid) {
+    const S = getState();
+    if (!S || !S.active[qid]) return;
+    delete S.active[qid];
+    if (S.tracked === qid) S.tracked = Object.keys(S.active)[0] || null;
+    if (typeof toast === 'function') toast('Contrato abandonado.');
+    saveState();
+  }
+
+  // Conclui uma missão secundária com recompensas completas
+  function completeQuest(qid) {
+    const qdef = QUEST_CATALOG[qid];
+    const S = getState();
+    if (!qdef || !S || !S.active[qid]) return;
+
+    delete S.active[qid];
+    S.completed[qid] = Date.now();
+    if (S.tracked === qid) S.tracked = Object.keys(S.active)[0] || null;
+
+    // Entrega recompensas
+    const curRun = (typeof run !== 'undefined' && run) ? run : (typeof window !== 'undefined' ? window.run : null);
+    if (curRun) {
+      curRun.gold = (curRun.gold || 0) + (qdef.gold || 500);
+    }
+    if (typeof gainXp === 'function') {
+      gainXp(qdef.xp || 500, 'quest');
+    }
+    if (typeof addOrderRep === 'function') {
+      addOrderRep(qdef.rep || 50, 'Contrato cumprido: ' + qdef.title);
+    }
+
+    // Melhora a relação e confiança com a região
+    if (typeof regionEvent116 === 'function') {
+      const cityPos = getCityPos(qdef.region);
+      regionEvent116({ name: qdef.region.toUpperCase(), ...cityPos }, qdef.trust || 12, -4, 'Você concluiu o contrato: ' + qdef.title);
+    }
+
+    if (typeof bigText === 'function') bigText('MISSÃO CONCLUÍDA!', 2400);
+    if (typeof sfx === 'function') { sfx('level'); sfx('coin'); }
+    if (typeof toast === 'function') {
+      toast(`<b>[CONTRATO CUMPRIDO]</b> <b>${qdef.title}</b>!<br>Recompensas: <b>+${qdef.gold} ouro</b>, <b>+${qdef.xp} XP</b> e <b>+${qdef.rep} reputação da Ordem</b>.`, 8000);
+    }
+
+    saveState();
+  }
+
+  function saveState() {
+    try {
+      if (typeof profile !== 'undefined' && profile && typeof store !== 'undefined' && store.set) {
+        store.set('pds2_profile', profile);
+      }
+      if (typeof saveRun === 'function') saveRun();
+    } catch (_) {}
+  }
+
+  // Modal do Mural de Recompensas e Contratos
+  function openBoard(regionKey = 'aster') {
+    const S = getState();
+    let h = `<div class="guide93" style="border-left:4px solid #ffd070">`;
+    h += `<strong>MURAL DE RECOMPENSAS & CONTRATOS REGIONAIS</strong>`;
+    h += `<p>Ao estilo dos murais de Skyrim, escolha seus próprios objetivos pelo mundo aberto. Você pode caçar feras lendárias, resgatar caravanas de mercadores ou explorar criptas ancestrais com total liberdade.</p>`;
+    h += `</div>`;
+
+    const quests = Object.values(QUEST_CATALOG).filter(q => q.region === regionKey || regionKey === 'all');
+    h += `<div class="sec">CONTRATOS DISPONÍVEIS NA REGIÃO</div>`;
+
+    if (!quests.length) {
+      h += `<div class="sysline">Nenhum contrato ativo neste mural no momento. Verifique as outras capitais.</div>`;
+    }
+
+    for (const q of quests) {
+      const isDone = S && S.completed[q.id];
+      const isActive = S && S.active[q.id];
+      const isTracked = S && S.tracked === q.id;
+
+      let actHtml = '';
+      if (isDone) {
+        actHtml = '<b style="color:#6fe39a">✔ CONCLUÍDO</b>';
+      } else if (isActive) {
+        actHtml = `<button class="btn ${isTracked ? 'on' : 'hot'}" onclick="Quests480.trackQuest('${q.id}');Quests480.openBoard('${regionKey}')">${isTracked ? 'Acompanhando' : 'Acompanhar'}</button> ` +
+                  `<button class="btn" style="color:#ff8fa3" onclick="Quests480.abandonQuest('${q.id}');Quests480.openBoard('${regionKey}')">Abandonar</button>`;
+      } else {
+        actHtml = `<button class="btn hot" onclick="Quests480.acceptQuest('${q.id}');Quests480.openBoard('${regionKey}')">Aceitar Contrato</button>`;
+      }
+
+      const rankBadge = typeof GR !== 'undefined' && GR[q.rank] ? `<span class="rl" style="color:${RANKS[q.rank]?.c || '#ffd54f'}">${GR[q.rank].id}</span> · ` : '';
+      const typeLabel = q.type === 'bounty' ? '☠ CAÇADA' : q.type === 'rescue' ? '🛡 RESGATE' : q.type === 'crypt' ? '⚔ CRIPTA' : '📜 CONTRATO';
+
+      let rewardText = `Recompensa: <b>${q.gold} ouro</b> · <b>+${q.xp} XP</b> · <b>+${q.rep} reputação</b>`;
+      if (q.rewardItem) rewardText += ` · <i>${q.rewardItem}</i>`;
+
+      h += row(
+        `${rankBadge}<b>${q.title}</b> <small style="color:#ffd070">[${typeLabel}]</small>`,
+        `${q.desc}<br><small style="color:#8fe3ff">Contratante: ${q.giver}</small><br><span style="color:#7ef5a5">${rewardText}</span>`,
+        actHtml
+      );
+    }
+
+    // Seletor de Capitais
+    h += `<div class="sec">VER MURAIS DE OUTRAS REGIÕES</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
+    const regions = [
+      ['aster', 'Aster'],
+      ['solaria', 'Solaria'],
+      ['ymiria', 'Ymiria'],
+      ['zahar', 'Zahar'],
+      ['thalor', 'Thalor'],
+      ['urdan_verden', 'Urdan & Verden']
+    ];
+    for (const [rid, rname] of regions) {
+      h += `<button class="btn ${rid === regionKey ? 'on' : ''}" onclick="Quests480.openBoard('${rid}')">${rname}</button>`;
+    }
+    h += `</div>`;
+
+    if (typeof openModal === 'function') {
+      openModal('MURAL DE CONTRATOS & RECOMPENSAS', h);
+    }
+  }
+
+  // Hook no Minimapa para desenhar marcadores de missões secundárias ativas
+  function hookMinimap() {
+    if (typeof window.Campaign327 !== 'undefined' && typeof window.Campaign327.map === 'function' && !window.Campaign327.map.__quests480) {
+      const origMap = window.Campaign327.map;
+      const wrapped = function (ctx, S, full) {
+        origMap.apply(this, arguments);
+        try {
+          const st = getState();
+          if (!st || !st.tracked || !st.active[st.tracked] || typeof player === 'undefined' || !player) return;
+          const q = QUEST_CATALOG[st.tracked];
+          const act = st.active[st.tracked];
+          if (!q || !act || !act.targetPos) return;
+
+          const k = full ? S / 560 : 2.2;
+          const dx = (act.targetPos.x - player.x) * k;
+          const dz = (act.targetPos.z - player.z) * k;
+          const lim = S / 2 - 12;
+          const scale = Math.min(1, lim / Math.max(Math.abs(dx), Math.abs(dz), 1));
+          const mx = S / 2 + dx * scale;
+          const my = S / 2 + dz * scale;
+
+          ctx.save();
+          ctx.translate(mx, my);
+          ctx.fillStyle = '#ff4d6a';
+          ctx.strokeStyle = '#2b050d';
+          ctx.lineWidth = 2.2;
+          ctx.shadowColor = '#ff4d6a';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          if (scale < 1) {
+            ctx.rotate(Math.atan2(dz, dx));
+            ctx.moveTo(8, 0); ctx.lineTo(-6, -6); ctx.lineTo(-3, 0); ctx.lineTo(-6, 6); ctx.closePath();
+          } else {
+            ctx.arc(0, 0, 6, 0, TAU);
+          }
+          ctx.fill();
+          ctx.stroke();
+
+          if (full) {
+            ctx.fillStyle = '#ffe5b4';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.fillText(q.title.split(':')[0] || 'Missão', 10, 3);
+          }
+          ctx.restore();
+        } catch (_) {}
+      };
+      wrapped.__quests480 = true;
+      window.Campaign327.map = wrapped;
+    }
+  }
+
+  // Loop de monitoramento para spawn do encontro e conclusão
+  let lastTick = performance.now();
+  function tick(dt) {
+    if (typeof paused !== 'undefined' && paused) return;
+    if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
+
+    const S = getState();
+    if (!S || !Object.keys(S.active).length) return;
+
+    for (const [qid, act] of Object.entries(S.active)) {
+      const qdef = QUEST_CATALOG[qid];
+      if (!qdef || !act.targetPos) continue;
+
+      const dist = Math.hypot(player.x - act.targetPos.x, player.z - act.targetPos.z);
+
+      // Spawna o encontro quando o jogador se aproxima (dist < 45m)
+      if (!act.spawned && dist < 45) {
+        act.spawned = true;
+        if (typeof toast === 'function') {
+          toast(`<b>[OBJETIVO DE MISSÃO]</b> Você encontrou o local do contrato: <b>${qdef.title}</b>!`, 6000);
+        }
+        if (typeof bigText === 'function') bigText('ÁREA DA MISSÃO', 1400);
+
+        // Spawna os inimigos / alvo do contrato
+        if (typeof spawnKind === 'function' && typeof enemies !== 'undefined') {
+          const gr = qdef.rank || 1;
+          const kBoss = qdef.bossKind || 'orcinho';
+          try {
+            const b = spawnKind(kBoss, act.targetPos.x, act.targetPos.z, gr, { wild: true });
+            if (b) {
+              b.questBoss480 = qid;
+              b.questTarget480 = true;
+              b.hp *= 2.2;
+              b.maxhp *= 2.2;
+              b.dmg *= 1.35;
+              b.name = qdef.bossName || qdef.title;
+              b.aggro = true;
+              if (b.m && b.m.root) b.m.root.scale.setScalar(qdef.bossScale || 1.5);
+              if (typeof fxRing === 'function') fxRing(b.x, b.z, 0xff4d6a, 2.5);
+            }
+          } catch (_) {}
+
+          // Spawna os lacaios da emboscada / bando
+          const nMinions = qdef.minions || 3;
+          for (let i = 0; i < nMinions; i++) {
+            const a = (i / nMinions) * TAU + Math.random() * 0.5;
+            const mx = act.targetPos.x + Math.cos(a) * (4 + Math.random() * 5);
+            const mz = act.targetPos.z + Math.sin(a) * (4 + Math.random() * 5);
+            const kMinion = (qdef.minionKinds && qdef.minionKinds[i % qdef.minionKinds.length]) || 'slime';
+            try {
+              const m = spawnKind(kMinion, mx, mz, gr, { wild: true });
+              if (m) {
+                m.questLethal480 = qid;
+                m.aggro = true;
+              }
+            } catch (_) {}
+          }
+        }
+      }
+
+      // Verifica se o chefe / alvos foram abatidos
+      if (act.spawned) {
+        const remainingBoss = typeof enemies !== 'undefined' ? enemies.some(e => e.questBoss480 === qid && !e.dead) : false;
+        const remainingMinions = typeof enemies !== 'undefined' ? enemies.some(e => e.questLethal480 === qid && !e.dead) : false;
+        if (!remainingBoss && !remainingMinions) {
+          completeQuest(qid);
+        }
+      }
+    }
+  }
+
+  // Desenha marcador no minimapa do mundo
+  function drawMinimap(ctx, tx, tz, full) {
+    try {
+      const st = getState();
+      if (!st || !st.tracked || !st.active[st.tracked]) return;
+      const q = QUEST_CATALOG[st.tracked];
+      const act = st.active[st.tracked];
+      if (!q || !act || !act.targetPos) return;
+      const px = tx(act.targetPos.x), pz = tz(act.targetPos.z);
+      ctx.save();
+      ctx.fillStyle = '#4ade80';
+      ctx.strokeStyle = '#052e16';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px, pz - 7);
+      ctx.lineTo(px + 6, pz);
+      ctx.lineTo(px, pz + 7);
+      ctx.lineTo(px - 6, pz);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      if (full) {
+        ctx.font = '700 11px sans-serif';
+        ctx.fillStyle = '#86efac';
+        ctx.fillText(q.title, px + 9, pz + 3);
+      }
+      ctx.restore();
+    } catch (_) {}
+  }
+
+  // Retorna texto de acompanhamento para o HUD
+  function getHudTrackText() {
+    const S = getState();
+    if (!S || !S.tracked || !S.active[S.tracked]) return null;
+    const qid = S.tracked;
+    const qdef = QUEST_CATALOG[qid];
+    const act = S.active[qid];
+    if (!qdef || !act || !act.targetPos || typeof player === 'undefined' || !player) return null;
+
+    const d = Math.round(Math.hypot(player.x - act.targetPos.x, player.z - act.targetPos.z));
+    return {
+      title: qdef.title,
+      detail: `Distância: ${d}m · ${qdef.giver}`
+    };
+  }
+
+  // Intervalo do loop
+  setInterval(() => {
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - lastTick) / 1000);
+    lastTick = now;
+    try { tick(dt); hookMinimap(); } catch (_) {}
+  }, 100);
+
+  // Expõe a API globalmente
+  global.Quests480 = {
+    CATALOG: QUEST_CATALOG,
+    getState,
+    acceptQuest,
+    trackQuest,
+    abandonQuest,
+    completeQuest,
+    openBoard,
+    getHudTrackText,
+    drawMinimap
+  };
+
+})(window);

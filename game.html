@@ -4212,12 +4212,27 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   EW(b,'campfire_stones',X+4.8,0,Z-3.6,0,1.3);
   for(let i=0;i<9;i++){const a=i/9*TAU,x=X-7+Math.cos(a)*2.55,z=Z-6+Math.sin(a)*2.55;EW(b,pk(R,['rock_smallA','rock_smallC','stone_smallA']),x,-.04,z,R()*TAU,.8+R()*.3)}
   EW(b,'lily_large',X-7.6,.07,Z-6.4,R()*TAU,.9);EW(b,'lily_small',X-6.2,.07,Z-5.3,R()*TAU,.6);EH(fl,'grass_large',X-9.3,0,Z-6.8,0,.7);EH(fl,'grass',X-4.8,0,Z-7.4,1,.6);
-  if(cLv>=2&&!fallen){EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8)}
-  if(cLv>=3&&!fallen)for(const s of[-1,1]){EH(b,'statue_column',X+s*9.4,0,Z+11.2,0,3.2,1.25);addCol({x:X+s*9.4,z:Z+11.2,r:.85})}/* v429: coluna sólida */
+  if(cLv>=2&&!fallen){
+    EW(b,'cart',X+12.5,0,Z-15,.6,2.4);addCol({x:X+12.5,z:Z-15,r:1.3});
+    EW(b,'cart',X-12.5,0,Z-15,-.6,2.4);addCol({x:X-12.5,z:Z-15,r:1.3});
+    envSolidEW357(addCol,b,'resource_lumber',X-14,0,Z+13,.3,2.2);
+    envSolidEW357(addCol,b,'resource_stone',X-16.5,0,Z+11,.2,1.8);
+    envSolidEW357(addCol,b,'crates_stacked',X+14,0,Z+13,0,1.4);
+  }
+  if(cLv>=3&&!fallen){
+    for(const sx of[-1,1])for(const sz of[-1,1]){
+      EH(b,'statue_column',X+sx*8.8,0,Z+sz*8.8,0,3.4,1.25);
+      addCol({x:X+sx*8.8,z:Z+sz*8.8,r:.85});
+    }
+  }/* v429: coluna sólida */
   /* CIDADE QUE CRESCE (pedido do Ian): cada nível muda o visual; do 6 em diante surgem bairros fora da muralha. */
   if(!fallen){const gA=a=>gate(((a%TAU)+TAU)%TAU)<.26;
-    if(cLv>=4){for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
-      EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3})}
+    if(cLv>=4){
+      for(let i=0;i<16;i++){const a=i/16*TAU+TAU/32;if(gA(a))continue;EH(b,'flag_blue',X+Math.cos(a)*CITYR,4.5,Z+Math.sin(a)*CITYR,-a,1.8)}
+      EW(b,'stall',X+2,0,Z+14,Math.PI,3.2);EW(b,'stall-bench',X-2.5,0,Z+14,Math.PI,3.2);
+      EW(b,'stall-red',X-12,0,Z-6,Math.PI/2,3.2);EW(b,'stall-green',X+12,0,Z-6,-Math.PI/2,3.2);
+      addCol({x:X+2,z:Z+14,r:1.3});addCol({x:X-2.5,z:Z+14,r:1.3});addCol({x:X-12,z:Z-6,r:1.3});addCol({x:X+12,z:Z-6,r:1.3});
+    }
     if(cLv>=5)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])for(const d of[18,26,34,42]){for(const sd of[-1,1]){const x=X+Math.cos(a)*d+Math.cos(a+Math.PI/2)*sd*3.2,z=Z+Math.sin(a)*d+Math.sin(a+Math.PI/2)*sd*3.2;EH(b,'lantern_standing',x,0,z,-a,2.2);glowL.push({x,y:2.4,z,s:.6});addCol({x,z,r:.3})}}
     if(cLv>=9){for(const s2 of[-1,1]){EH(b,'statue_head',X+s2*12,0,Z-12,s2*.6,2.6);addCol({x:X+s2*12,z:Z-12,r:1.2})}glowL.push({x:X,y:6.4,z:Z})}
     if(cLv>=10)for(let i=0;i<24;i++){const a=i/24*TAU;glowL.push({x:X+Math.cos(a)*5.6,y:.9,z:Z+Math.sin(a)*5.6,s:.5})}}
@@ -4474,7 +4489,7 @@ function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene
 function reloadCityChunks(c){if(!c)return;for(const ch of[...chunks.values()])if((ch.city&&ch.city.id===c.id)||(Math.abs(ch.cx-c.cx)<=2&&Math.abs(ch.cz-c.cz)<=2))unloadChunk(ch);updChunks(true)}
 /* v415 (Ian: "jogo travado em 20 fps"): árvores/pedras instanciadas de até 49 pedaços eram desenhadas (≈2,9 mi de triângulos), mesmo na neblina.
    Enfeites instanciados só aparecem nos pedaços a até ~115 m do jogador; o chão e as colisões continuam carregados. */
-function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()){if(!ch.group)continue;let n=0;ch.group.traverse(()=>n++);if(!ch.props415||ch.n415!==n){ch.n415=n;ch.props415=[];ch.lod415=null;ch.group.traverse(o=>{if(o.isInstancedMesh&&(!window.NAT422||!o.userData.tripo153||NAT422.has(o.userData.tripo153))){/* v422: muralha/casas não afinam (sobravam pedaços soltos) */o.userData.count415=o.userData.count415??o.count;ch.props415.push(o)}})}
+function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()){if(!ch.group||ch.city)continue;let n=0;ch.group.traverse(()=>n++);if(!ch.props415||ch.n415!==n){ch.n415=n;ch.props415=[];ch.lod415=null;ch.group.traverse(o=>{if(o.isInstancedMesh&&(!window.NAT422||!o.userData.tripo153||NAT422.has(o.userData.tripo153))){/* v422: muralha/casas não afinam (sobravam pedaços soltos) */o.userData.count415=o.userData.count415??o.count;ch.props415.push(o)}})}
  const d=Math.hypot(ch.cx*CH-P.x,ch.cz*CH-P.z),lod=d<CH*1.1?2:d<CH*2?1:0;if(ch.lod415===lod)continue;ch.lod415=lod;
  for(const m of ch.props415){if(m.userData.lite180||m.userData.isLite423){m.userData.thin423=lod===2?1:lod===1?.5:.2;continue}/* v424: árvore/construção com versão leve: o CULL180 separa por distância */const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
 function updChunks(force){
@@ -4612,10 +4627,7 @@ function gateMesh(g){retireExtraction117(g);
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
     grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));
-    /* v478 (Ian): feixe vertical de luz do portal no mundo */
-    const bCol=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
-    const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,80,8,1,true)),new THREE.MeshBasicMaterial({color:bCol,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-    beam.position.y=40;grp.add(beam);
+    /* v480 (Ian): feixe vertical de luz fica APENAS dentro da masmorra no portal de saida */
     L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
     const rPrompt=(g.giant?8.5:4.5);
     const lbl=g.anchor221?'F · ENTRAR NA FENDA DA ÂNCORA':(g.secret?'F · ENTRAR NO PORTAL ???':'F · ENTRAR NO PORTAL '+(GR[g.rank]?.id||''));
@@ -4627,7 +4639,6 @@ function gateMesh(g){retireExtraction117(g);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:g.secret?0x000000:g.red?0x2a0008:0x0a0a2a,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
   const sw=new THREE.Mesh(geo('gsw',()=>new THREE.RingGeometry(.3,2,24,1,0,4.5)),glowS(col,.5));sw.position.set(0,2.6,.03);grp.add(sw);
-  const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,70,8,1,true)),glowS(col,.18));beam.position.y=35;grp.add(beam);
   const base=new THREE.Mesh(geo('gbase',()=>new THREE.RingGeometry(2.6,3,32)),glowS(col,.5));base.rotation.x=-Math.PI/2;base.position.y=.05;grp.add(base);
   const lbl=makeSign(g.secret?'???':g.inverse?'INVERTIDO':g.time?'PASSADO':g.custom?'CRIADO · '+gid(g.rank):'RANK '+GR[g.rank].id+(g.red?' · VERMELHO':''),hex(col),.6);lbl.position.y=5.7;grp.add(lbl);
   L.group.add(grp);g.mesh=grp;g.ring=ring;g.sw=sw;
@@ -5309,7 +5320,7 @@ function enterGate(g){if(run&&!(run.rez187>0)&&(g.red||g.rank>=Math.max(2,(profi
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
   if(g.time){closeModal();curGate=g;buildSpecial('past',g);return}
-  closeModal();curGate=g;buildDungeon(g);narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
+  closeModal();curGate=g;buildDungeon(g);L.enterTime=performance.now();narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
   cam.x=player.x;cam.z=player.z;
   bigText((L.otherworld456?.name||'OUTRO MUNDO')+' · RANK '+GR[g.rank].id,1800);
   if(L.ow460)setTimeout(()=>toast('<b>[MIASMA DA FENDA]</b> O Miasma acelera a deterioração dos alimentos em até <b>2×</b>. Espírito reduz esse efeito; a Mochila Térmica bloqueia o Miasma e os pacotes lacrados conservam o frescor. Veja os suprimentos em [V].',6000),9000);
@@ -5326,8 +5337,9 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
 function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
-  const riftDays=L.riftDays456||2;
-  const daysPassed=cleared?Math.max(14,riftDays>=8?riftDays*2:14):Math.max(7,riftDays*3);
+  const durSec=L.enterTime?Math.max(5,Math.floor((performance.now()-L.enterTime)/1000)):30;
+  /* v480 (Ian): tempo da fenda diferenciado — saida rapida/fuga passa so 1 dia; expedicao vitoriosa passa 7 a 14 dias */
+  const daysPassed=cleared?Math.max(7,Math.min(14,6+Math.round(g.rank*0.8)+Math.min(4,Math.round(durSec/120)))):(durSec<60?1:Math.min(3,Math.ceil(durSec/60)));
   if(run){
     run.days=(run.days||0)+daysPassed;
     run.riftWeeksPassed456=(run.riftWeeksPassed456||0)+daysPassed;
@@ -6837,6 +6849,7 @@ function drawMap(ctx,S,full){
     for(const e of enemies)if(e.legend&&!e.dead){const X=tx(e.x),Z=tz(e.z),r=full?9:6;ctx.fillStyle='#ffd54f';ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(X+Math.cos(a)*rr,Z+Math.sin(a)*rr)}ctx.closePath();ctx.stroke();ctx.fill();if(full){ctx.font='700 11px sans-serif';ctx.fillStyle='#ffd54f';ctx.textAlign='left';ctx.fillText(e.name,X+11,Z+4)}}
     for(const e of enemies)if(e.world&&!e.dead){ctx.fillStyle='#ff5a1e';ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),6,0,TAU);ctx.fill()}
     if(window.Civic343)try{Civic343.map(ctx,tx,tz,full)}catch(_){}
+    if(window.Quests480)try{Quests480.drawMinimap(ctx,tx,tz,full)}catch(_){}
     for(const n of npcs)if(n.kind==='hunter'){ctx.fillStyle='rgba(232,246,255,.7)';ctx.fillRect(tx(n.x)-1.5,tz(n.z)-1.5,3,3)}
   }else{
     /* v461: no Outro Mundo (infinito) o mapa grande mostra 600 m em volta de você */const G=L.grid,ow461=!!L.ow460,k=full?(ow461?S/600:S/(G.W*G.CS)):2.6,cx=full&&!ow461?0:P.x,cz=full&&!ow461?floorMapCenter():P.z,tx=x=>S/2+(x-cx)*k,tz=z=>S/2+(z-cz)*k;
@@ -6856,6 +6869,8 @@ function drawMap(ctx,S,full){
 }
 function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),add=(title,detail)=>rows.push('<div class="objective-row"><strong>'+safe(title)+'</strong><small>'+safe(detail)+'</small></div>');
   const track=trackedObjective(),qs=run.quests||[],done=qs.filter(q=>q.got>=q.n).length,q=qs.find(q=>q.got<q.n);
+  const qt=window.Quests480?.getHudTrackText();
+  if(qt){add('Contrato · '+qt.title,qt.detail);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer;border-left:2px solid #58a6ff" onclick="event.stopPropagation();window.Quests480?.openBoard()"');}
   if(L.inv)add('Invasão em '+L.inv.c.name,fmtT(Math.max(0,L.inv.t))+' restantes. '+enemies.filter(e=>e.inv&&!e.dead).length+' inimigos vivos.');
   if(run.demand){const d=run.demand;add('Desafio do Oráculo','Derrote '+d.n+' monstros '+({nododge:'sem esquivar',nopot:'sem usar poções',night:'à noite'}[d.t]||'')+questTargetText262(d)+'. Progresso: '+d.got+' de '+d.n+'. '+questXpText262(d)+'.')}
   if(track){add(track.n,track.progress);rows[rows.length-1]=rows[rows.length-1].replace('class="objective-row"','class="objective-row" style="cursor:pointer" onclick="event.stopPropagation();journeyView()"')}
@@ -7382,7 +7397,8 @@ const GUILDS=[
  {n:'Caçadores Livres',lvl:1,req:0,lead:'Toma, rank D',h:'A guilda de quem está começando. Pouco bônus, muito coração. Metade dos caçadores famosos passou por aqui.'}];
 /* dia e noite */
 /* v377 (Ian): dia de 14 min e noite de 10 min (ciclo de 24 min). */
-let dayT=120;const DAYLEN=1440,NIGHT0_377=.55,NIGHT1_377=.55+600/1440;
+/* v480 (Ian): ciclo dia/noite estendido estilo Skyrim (48 min: 28 min dia, 20 min noite) */
+let dayT=120;const DAYLEN=2880,NIGHT0_377=.55,NIGHT1_377=.55+1200/2880;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
 function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else{const d=(p>=n1?p-n1:p+1-n1)/(1-(n1-n0));h=6+12*d}h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'☾ ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
@@ -7478,11 +7494,29 @@ function journeyObjectives(){const list=[],nx=profile.rank+1;const eq=run.extrac
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d+questTargetText262(q),d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+questXpText262(q)+' · '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda. '+QUEST_XP_RULE332,progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
 function trackedObjective(){return run.trackObj?journeyObjectives().find(o=>o.id===run.trackObj)||null:null}
-function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+btn('Bestiário / Grimório','bestv',0)+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
+function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='world'?regionSummary116(nearestCity(player.x,player.z).c):'')+btn('Bestiário / Grimório','bestv',0)+((profile.album||[]).length||run.shadows.length?btn('Coleção de ecos','album',0):'')+row('O Narrador e você','Lembranças da sua jornada e uma relação que muda com suas experiências.',btn('Ver lembranças','narrator105',0))+'<div class="tabs">'+[['goals','Missões e objetivos'],['story','História'],['lore','Descobertas'],['contracts','Contratos']].map(([k,n])=>btn(n,'journeytab',k,true,k===tab?'on':'')).join('')+'</div>';
   if(tab==='goals'){if(profile.firstEquipment92?.done)h+=row('Seu primeiro equipamento · concluído','Você conquistou ouro, comprou uma peça e aprendeu a equipá-la.','✓');h+='<div class="sysline">Escolha um objetivo para acompanhar. Receba recompensas com Lyra, na Ordem.</div>';const list=journeyObjectives(),tracked=trackedObjective();
     for(const o of list){const active=tracked&&tracked.id===o.id;h+=row('<b>'+o.n+'</b>'+(active?' · ◆ acompanhando':''),o.d+'<br><b>'+o.progress+'</b>',btn(active?'Parar de acompanhar':'Acompanhar','trackobj',active?'':o.id,true,o.ready?'hot':''))}
     if(!list.length)h+='<div class="sysline">Nenhum objetivo pendente. Novas histórias estão na Ordem da Fenda.</div>';
     h+='<div class="sec">MISSÃO DIÁRIA'+(run.daily&&run.daily.done?' · CONCLUÍDA':'')+'</div><div class="sysline"><span class="tipi" style="cursor:help" data-tip154="Recompensa: '+questXpText262(run.daily,'daily')+', +10 reputação, +1 atributo, vida e mana cheias. Bônus: '+STREAK214[streakDay214()-1]+'. Faltar um dia reinicia a sequência.">Complete os quatro objetivos até a meia-noite. Sequência: dia '+streakDay214()+'/7 ('+STREAK214[streakDay214()-1]+').</span></div>';for(const [k,n,total,unit] of DAILY){const got=Math.min(total,(run.daily&&run.daily.p&&run.daily.p[k])||0);h+=row(n,Math.floor(got)+'/'+total+(unit?' '+unit:''),got>=total?'✓':'')}
+    }else if(tab==='contracts'){
+    h+='<div class="sysline">Missões secundárias e contratos de caça no estilo Skyrim. Aceite nas capitais e explore livremente.</div>';
+    h+=row('Mural de Contratos da Região','Explore os contratos das capitais, consulte alvos e colete recompensas.',btn('Abrir Mural','openbountyboard',0,true,'hot'));
+    if(window.Quests480){
+      const st=window.Quests480.getState();
+      const actKeys=Object.keys(st?.active||{});
+      if(actKeys.length){
+        h+='<div class="sec">SEUS CONTRATOS ATIVOS ('+actKeys.length+')</div>';
+        for(const qid of actKeys){
+          const q=window.Quests480.CATALOG[qid];
+          if(!q)continue;
+          const isTrack=st.tracked===qid;
+          h+=row(q.title+(isTrack?' · ★ acompanhando':''),q.desc+'<br><b>Recompensa: '+fmt(q.rewardGold)+' ouro · '+q.giver+'</b>',btn(isTrack?'Parar':'Acompanhar','trackcontract',isTrack?'':qid,true,isTrack?'':'hot'));
+        }
+      }else{
+        h+='<div class="sysline">Nenhum contrato ativo no momento. Fale com os governantes ou consulte o mural de uma capital.</div>';
+      }
+    }
   }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
     for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
     if(!any)h+='<div class="sysline">Passe na primeira Prova de Rank para receber o chamado de Lyra.</div>';
@@ -7600,7 +7634,9 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
   if(a==='travel'){const c=(profile.visited||{})[v];if(!travelReady265(c))return;const cost=travelCost(c);if(!spendService265(cost))return;
     closeModal();player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);fxRing(player.x,player.z,0xffb347,4,.8);bigText(c.n,1400);sfx('arise');narratorEvent105('travel');saveRun();return}
   if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};refreshKeyLabels();try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
-  if(a==='journeytab')return journeyView(v),'close0';if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
+  if(a==='journeytab')return journeyView(v),'close0';
+  if(a==='openbountyboard')return (window.Quests480?window.Quests480.openBoard(v||'aster'):null),'close0';
+  if(a==='trackcontract'){if(window.Quests480)window.Quests480.trackQuest(v||null);return journeyView('contracts'),'close0';}if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
   if(a==='status')return statusView(),'close0';if(a==='army')return armyView(),'close0';if(a==='diary')return diaryView(),'close0';if(a==='look')return lookView(),'close0';
 }
 /* tutorial */
@@ -7730,6 +7766,9 @@ function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNe
   let h=regionSummary116(c);
   if(window.WorldSim479){
     h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');
+  }
+  if(window.Quests480){
+    h+=row('Quadro de Contratos (Skyrim)','Missões secundárias, caça a monstros e fugitivos de '+c.name,'<button class="btn hot" onclick="Quests480.openBoard(\''+c.id+'\')">Ver Contratos</button>');
   }
   h+='<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(l>=6?row('Renda da cidade',fmt(inc)+' ouro disponível hoje · limite total de 800 por dia',btn(got?'Coletado hoje':inc?'Coletar':'Limite diário atingido','cityinc',0,!got&&inc>0,'hot')):'')
@@ -8191,7 +8230,7 @@ function regionSummary116(c){const r=regionState116(c),d=regionDiscount116(r);re
 function regionCost116(){return {gold:servicePrice265('regionalAid'),cry:8}}
 function regionAid116(){if(L.mode!=='world'||player.dead||!inCity(player.x,player.z)||L.inv||L.siege)return false;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116();if(cityFallen(c)||r.damage<=0||run.gold<k.gold||run.res.cry.reduce((a,b)=>a+b,0)<k.cry)return false;if(!spendService265(k.gold))return false;let need=k.cry;for(let i=0;i<run.res.cry.length&&need;i++){const n=Math.min(need,run.res.cry[i]);run.res.cry[i]-=n;need-=n}regionEvent116(c,3,-5,'Você entregou materiais para a recuperação. Confiança +3; acréscimo de abastecimento reduzido em até 5 pontos.');saveRun();return true}
 function regionSupply116(){if(L.mode!=='world'||player.dead||!inCity(player.x,player.z)||L.inv||L.siege)return false;const c=nearestCity(player.x,player.z).c,r=regionState116(c);if(cityFallen(c)||r.trust<50||r.damage||r.supplyDay===todayKey())return false;r.supplyDay=todayKey();run.pots=(run.pots||0)+2;store.set('pds2_profile',profile);saveRun();toast('<b>['+safeText(c.name)+']</b> A guarnição entregou duas poções.');return true}
-function regionView116(){if(L.mode!=='world'){toast('Consulte as regiões ao voltar ao mundo.');return}view=regionView116;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116(),local=inCity(player.x,player.z)&&!cityFallen(c)&&!L.inv&&!L.siege;let h='<div class="guide93"><strong>'+safeText(c.name)+'</strong><p>'+regionStanding116(r)+' · confiança '+r.trust+'/100.</p><p>A confiança vale só nesta cidade.</p></div>';if(window.WorldSim479)h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');h+=row('Comércio local','Desconto por confiança: '+regionDiscount116(r)+'%.<br>Acréscimo por abastecimento: '+r.damage+'%. Válidos para armas, armaduras e poções comuns.','');h+=row('Apoio da guarnição','Duas poções por dia nesta cidade. Requer 50 de confiança e abastecimento recuperado.',btn(r.supplyDay===todayKey()?'Recebido hoje':'Receber suprimentos','supply116',0,local&&r.trust>=50&&!r.damage&&r.supplyDay!==todayKey()));if(r.damage)h+=row('Ajudar na recuperação',fmt(k.gold)+' ouro e '+k.cry+' cristais de qualquer rank. Reduz o acréscimo em 5 pontos e concede 3 de confiança.',btn('Entregar materiais','aid116',0,local&&run.gold>=k.gold&&run.res.cry.reduce((a,b)=>a+b,0)>=k.cry));if(window.Civic343)h+=Civic343.regionRows(c,local);h+='<div class="sec">MEMÓRIA DA REGIÃO</div>';h+=r.history.length?r.history.slice().reverse().map(x=>row(safeText(x),'','')).join(''):'<div class="sysline">Sua história por aqui ainda está começando.</div>';h+='<div class="sysline" data-tip154="'+tipAttr154('Portais +2 · Defesa ou cerco +15 · Carroças e evolução +5 · Reconstrução +20. Descontos: 5%/10%/15% aos 25/50/75 de confiança.')+'" style="cursor:help">Como ganhar confiança ⓘ</div>';openModal('REGIÃO',h)}
+function regionView116(){if(L.mode!=='world'){toast('Consulte as regiões ao voltar ao mundo.');return}view=regionView116;const c=nearestCity(player.x,player.z).c,r=regionState116(c),k=regionCost116(),local=inCity(player.x,player.z)&&!cityFallen(c)&&!L.inv&&!L.siege;let h='<div class="guide93"><strong>'+safeText(c.name)+'</strong><p>'+regionStanding116(r)+' · confiança '+r.trust+'/100.</p><p>A confiança vale só nesta cidade.</p></div>';if(window.WorldSim479)h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');if(window.Quests480)h+=row('Quadro de Contratos (Skyrim)','Missões secundárias e caçadas regionais de '+safeText(c.name),'<button class="btn hot" onclick="Quests480.openBoard(\''+c.id+'\')">Abrir Contratos</button>');h+=row('Comércio local','Desconto por confiança: '+regionDiscount116(r)+'%.<br>Acréscimo por abastecimento: '+r.damage+'%. Válidos para armas, armaduras e poções comuns.','');h+=row('Apoio da guarnição','Duas poções por dia nesta cidade. Requer 50 de confiança e abastecimento recuperado.',btn(r.supplyDay===todayKey()?'Recebido hoje':'Receber suprimentos','supply116',0,local&&r.trust>=50&&!r.damage&&r.supplyDay!==todayKey()));if(r.damage)h+=row('Ajudar na recuperação',fmt(k.gold)+' ouro e '+k.cry+' cristais de qualquer rank. Reduz o acréscimo em 5 pontos e concede 3 de confiança.',btn('Entregar materiais','aid116',0,local&&run.gold>=k.gold&&run.res.cry.reduce((a,b)=>a+b,0)>=k.cry));if(window.Civic343)h+=Civic343.regionRows(c,local);h+='<div class="sec">MEMÓRIA DA REGIÃO</div>';h+=r.history.length?r.history.slice().reverse().map(x=>row(safeText(x),'','')).join(''):'<div class="sysline">Sua história por aqui ainda está começando.</div>';h+='<div class="sysline" data-tip154="'+tipAttr154('Portais +2 · Defesa ou cerco +15 · Carroças e evolução +5 · Reconstrução +20. Descontos: 5%/10%/15% aos 25/50/75 de confiança.')+'" style="cursor:help">Como ganhar confiança ⓘ</div>';openModal('REGIÃO',h)}
 function regionInvasion116(I,won){if(I.regionalDone116)return;I.regionalDone116=true;if(won)regionEvent116(I.c,I.helped116?15:0,-20,I.helped116?'Você participou da defesa vitoriosa. Confiança +15; abastecimento recuperado.':'Os defensores venceram a invasão. O abastecimento foi recuperado.');else regionEvent116(I.c,0,20,'A invasão prejudicou o abastecimento. Os preços locais têm acréscimo de até 20% durante a recuperação. Sua confiança não diminuiu.');}
 
 // END REGIONS116
@@ -9469,3 +9508,4 @@ requestAnimationFrame(frame);
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=470"></script>
 <script src="tools/worldsim479.js?v=479"></script>
+<script src="tools/quests480.js?v=480"></script>

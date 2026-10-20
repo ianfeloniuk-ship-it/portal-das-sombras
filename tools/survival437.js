@@ -202,13 +202,13 @@
   function overRatio() { return totalW() / Math.max(1, maxW()); }
   function overMul() {
     const r = overRatio();
-    const cartPull = window.Cart437 && Cart437.st && Cart437.st()?.pulling ? 1 - 0.18 * (1 - A('cartRelief')) : 1;
+    /* v480 (Ian): carroca/carrinho corre mais que o player correndo */ const cartPull = window.Cart437 && Cart437.st && Cart437.st()?.pulling ? 1.48 : 1;
     const coldSlow = (S()?.temp ?? 50) < 18 ? 0.85 : 1;
     const sickSlow = (S()?.sickT ?? 0) > 0 ? 0.82 : 1;
     const base = r > 1.5 ? 0.25 : r > 1.25 ? 0.38 : r > 1.0 ? 0.60 : r > 0.85 ? 0.85 : 1;
     return base * cartPull * coldSlow * sickSlow;
   }
-  const canRun = () => overRatio() <= 1.0 && (S()?.thirst ?? 100) > 8 && !(window.Cart437 && Cart437.st && Cart437.st()?.pulling && Cart437.w() > Cart437.cap());
+  const canRun = () => overRatio() <= 1.0 && (S()?.thirst ?? 100) > 8;
 
   function count(id) {
     const s = S(); if (!s) return 0;

@@ -1,3 +1,36 @@
+## v480 (20/10/2026) — Carroça rápida, ciclo de tempo calibrado, visual vivo das cidades e Missões Secundárias estilo Skyrim
+
+Quatro grandes avanços pedidos pelo Ian com foco em jogabilidade fluida, liberdade de exploração e mundo vivo:
+
+1. **Velocidade da Carroça e Transporte de Cargas**:
+   - Carroça cívica das estradas (`Civic343`): velocidade aumentada para 14.5 m/s (rotação das rodas a 18.0 rad/s), superando com folga o sprint do jogador (8.6 m/s).
+   - Carroça manual do jogador (`Cart437` / `Survival437`): puxar a carroça concede multiplicador de 1.48x de velocidade sem penalidade de estamina por sobrepeso, permitindo transporte ágil de minérios e materiais entre postos e capitais.
+
+2. **Calibração do Ritmo Temporal e Fendas**:
+   - Duração do ciclo dia/noite duplicada para 48 minutos reais (`DAYLEN = 2880`), garantindo 28 minutos de dia e 20 minutos de noite para exploração calma.
+   - Saída de emergência das Fendas: fugir de uma fenda perigosa ou de nível muito alto nos primeiros 60 segundos avança apenas 1 dia no mundo exterior. Expedições profundas e completas avançam os dias conforme a profundidade (7 a 14 dias).
+   - Remoção do feixe vertical de luz dos portais do mundo comum; o feixe brilhante agora é exclusivo do portal de saída dentro das masmorras para orientar fugas seguras.
+
+3. **Cidades que Mudam Visualmente a Cada Nível (Nível 0 a 10)**:
+   - Densidade de casas internas cresce dinamicamente (de 4 casas em assentamentos básicos até 14 na vila desenvolvida).
+   - Nível 1: Estandartes heráldicos nas torres e acessos.
+   - Nível 2: Área de suprimentos com carroças, caixotes e pilhas de madeira e pedra.
+   - Nível 3: Quatro colunas de mármore adornando a praça e cristais rúnicos nas muralhas.
+   - Nível 4: Grande feira central com barracas coloridas, toldos e bancadas de mercadorias.
+   - Nível 5: Rede de postes de luz nas quatro avenidas principais, iluminando a cidade à noite com lâmpadas douradas.
+   - Nível 6: Bairros externos (extramuros) com muralha secundária alta e torres ao estilo Attack on Titan.
+   - Nível 7: Moinhos de vento funcionais e serraria nos campos agrícolas.
+   - Nível 8: Segunda expansão extramuros e Catedral de pedra com vitrais iluminados.
+   - Nível 9: Monumentos de heróis e Obelisco de Mana irradiando feixe para o céu.
+   - Nível 10: Praça dourada com runas circulares ativas e honras imperiais.
+   - Sincronização em tempo real de todas as capitais no simulador autônomo com recarregamento imediato dos modelos 3D dos chunks.
+
+4. **Missões Secundárias & Liberdade Aberta estilo Skyrim (`tools/quests480.js`)**:
+   - Murais de Contratos e Recompensas nas praças das 6 capitais (Aster, Solaria, Ymiria, Zahar, Thalor, Urdan & Verden).
+   - Contratos de caça a feras abissais, bandidos renegados e resgates com recompensas generosas de ouro, reputação e títulos.
+   - Integração completa: botão de acompanhamento no HUD com distância métrica em tempo real, marcador verde em diamante no Minimapa do mundo aberto, e aba dedicada "Contratos" no Diário de Jornada [L].
+   - Liberdade absoluta: o jogador pode aceitar, ignorar, desviar o caminho ou abandonar qualquer contrato a qualquer momento sem falhas ou punições.
+
 ## v479 — Simulação Autônoma de Mundo Vivo: Capitais, Governantes, Editais, Economia e Caçadores NPCs, 19/10/2026
 - Pedido de Ian:
   - "Uma coisa que eu quero implementar no jogo, e pode ser agora mesmo depois de terminar tudo o que está fazendo. O mundo tem que acontecer sozinhos. Se eu estou dentro da masmorra e passou 14 dias, as coisas que estão descritas ali que aconteceram depois que eu saí tem que ter acontecido mesmo. Tipo, Astera pode crescer, pode ser melhorada e passar para os próximos níveis sem precisar de mim. Caçadores que chegam ali no jogo, eles mesmos vão aí, botam, tentam ajudar, Astera cresce. Todas as regiões, elas têm que ter uma natureza, uma economia e um sistema próprio que funciona sozinho, sabe, no jogo. Podem ter reis, prefeitos, presidentes, governadores das regiões. Tem que ter esse sistema, sabe? Eu quero um jogo que ele funcione sem eu precisar estar lá, e quando eu estou, eu só agrego. Entende? É um sistema mais ou menos assim."

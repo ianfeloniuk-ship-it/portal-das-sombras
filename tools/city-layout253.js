@@ -6,7 +6,7 @@
  function overlap(a,b,pad=0){return !(a.maxX+pad<=b.minX||b.maxX+pad<=a.minX||a.maxZ+pad<=b.minZ||b.maxZ+pad<=a.minZ);}
  function clearance(a,b){return Math.hypot(Math.max(0,a.minX-b.maxX,b.minX-a.maxX),Math.max(0,a.minZ-b.maxZ,b.minZ-a.maxZ));}
  const wallRadius=level=>level>=8?106:level>=7?94:82;
- function plan(o){const radius=o.radius||60,level=o.level||1,dim=o.dimensions,random=o.random||(()=>.5),homes=o.homeKeys,used=[],residences=[],services=[];
+ function plan(o){const radius=o.radius||60,level=(typeof o.level==='number'?o.level:1),dim=o.dimensions,random=o.random||(()=>.5),homes=o.homeKeys,used=[],residences=[],services=[];
   function entry(key,x,z,ry,width,role){const d=dim(key,width);return {key,x,z,ry,width,role,dim:d,footprint:bounds(d,x,z,ry)};}
   function reserve(e){used.push(e);return e;}
   for(const s of o.shopEntries)reserve(entry(s.key,s.x,s.z,s.ry,s.width,'shop'));
@@ -20,7 +20,10 @@
   if(level>=7){for(const a of[45,225]){const e=place('building_windmill_blue',a,81,7,'mill',wallRadius(level));if(e)services.push(e);}const e=place('building_lumbermill_blue',135,81,6.5,'lumber',wallRadius(level));if(e)services.push(e);}
   if(level>=8){const e=place('building_church_blue',315,84,8,'church',wallRadius(level));if(e)services.push(e);}
   function home(a,r,width,limit){const key=homes[Math.min(homes.length-1,Math.floor(random()*homes.length))],e=place(key,a,r,width,'residence',limit);if(e)residences.push(e);}
-  for(const a of[15,30,60,75,105,120,195,210,240,255,285,300,330,345])home(a,44,5.4+random()*1.2,radius);
+    // Densidade residencial interna cresce visivelmente a cada nível da cidade
+  const innerAngles = [15, 105, 195, 285, 75, 255, 30, 210, 60, 240, 330, 120, 300, 345];
+  const innerCount = level <= 0 ? 4 : level === 1 ? 6 : level === 2 ? 8 : level === 3 ? 10 : level === 4 ? 12 : 14;
+  for(let i = 0; i < innerCount && i < innerAngles.length; i++) home(innerAngles[i], 44, 5.4 + random() * 1.2, radius);
   if(level>=6)for(let i=0;i<14;i++)home(i/14*360+3,71,5+random()*1.2,wallRadius(level));
   if(level>=8)for(let i=0;i<18;i++)home(i/18*360+3,94,5.4+random()*1.2,wallRadius(level));
   return {inn,residences,services,footprints:used,gap,bank};

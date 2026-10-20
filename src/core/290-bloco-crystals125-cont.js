@@ -20,7 +20,7 @@ function enterGate(g){if(run&&!(run.rez187>0)&&(g.red||g.rank>=Math.max(2,(profi
   if(g.secret){closeModal();curGate=g;buildSpecial('temple',g);return}
   if(g.inverse){closeModal();curGate=g;buildSpecial('reverse',g);return}
   if(g.time){closeModal();curGate=g;buildSpecial('past',g);return}
-  closeModal();curGate=g;buildDungeon(g);narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
+  closeModal();curGate=g;buildDungeon(g);L.enterTime=performance.now();narratorEnter105(g);placeAllies();sfx('portal');unlockLore(g.rank>=6?'high':'gate');if(g.giant){for(const e of enemies)e.gold*=3}
   cam.x=player.x;cam.z=player.z;
   bigText((L.otherworld456?.name||'OUTRO MUNDO')+' · RANK '+GR[g.rank].id,1800);
   if(L.ow460)setTimeout(()=>toast('<b>[MIASMA DA FENDA]</b> O Miasma acelera a deterioração dos alimentos em até <b>2×</b>. Espírito reduz esse efeito; a Mochila Térmica bloqueia o Miasma e os pacotes lacrados conservam o frescor. Veja os suprimentos em [V].',6000),9000);
@@ -37,8 +37,9 @@ function updBreak(dt){const B=L.brk,P=player;B.t+=dt;B.sp-=dt;if(Math.floor(B.t)
 function leaveDungeon(toCity){const wasOw464=!!(L&&L.ow460);expAbandon();if(run)delete run.inGate269;if(L.brk){const t=Math.floor(L.brk.t);profile.brkBest=Math.max(profile.brkBest||0,t);store.set('pds2_profile',profile);checkTitles();toast('<b>[QUEBRA]</b> Você saiu vivo depois de '+fmtT(t)+'. Recorde: '+fmtT(profile.brkBest)+'.',5000)}
   if(L.special){const sp=L.special,g=L.gate;curGate=null;if((sp.done||sp.cleared)&&!L.failed103&&g.ref&&g.ref.id){recordSpecialOrderRep();g.ref.dead=true;}player.x=g.x;player.z=g.z+(g.ref?5:0);player.bowT=0;buildWorld();for(let t=0;t<20&&!worldFree(player.x,player.z,.6);t++){player.x+=rnd(-3,3);player.z+=rnd(-3,3)}placeAllies();cam.x=player.x;cam.z=player.z;sfx('portal');toast('<b>[NARRADOR]</b> Você voltou ao mundo.');saveRun();return}
   const g=L.gate,cleared=L.bossDead&&!L.failed103,riftClosure=cleared&&window.RIFT131_ENABLE&&window.Rift131?{...g,mesh:null,dead:false,life:120}:null;narratorPortal105(g,cleared);
-  const riftDays=L.riftDays456||2;
-  const daysPassed=cleared?Math.max(14,riftDays>=8?riftDays*2:14):Math.max(7,riftDays*3);
+  const durSec=L.enterTime?Math.max(5,Math.floor((performance.now()-L.enterTime)/1000)):30;
+  /* v480 (Ian): tempo da fenda diferenciado — saida rapida/fuga passa so 1 dia; expedicao vitoriosa passa 7 a 14 dias */
+  const daysPassed=cleared?Math.max(7,Math.min(14,6+Math.round(g.rank*0.8)+Math.min(4,Math.round(durSec/120)))):(durSec<60?1:Math.min(3,Math.ceil(durSec/60)));
   if(run){
     run.days=(run.days||0)+daysPassed;
     run.riftWeeksPassed456=(run.riftWeeksPassed456||0)+daysPassed;

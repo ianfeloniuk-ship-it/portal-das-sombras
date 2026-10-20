@@ -127,10 +127,7 @@ function gateMesh(g){retireExtraction117(g);
   if(window.RIFT131_ENABLE&&window.Rift131){
     const grp=Rift131.create({...g,legacyLinearOutput:true});grp.position.set(g.x,0,g.z);
     grp.add(Rift131.label(g,g.anchor221?'Nv ???':GR[g.rank].id+' · Nv '+gateLvl207(g)));
-    /* v478 (Ian): feixe vertical de luz do portal no mundo */
-    const bCol=g.secret?0xffd070:g.red?0xff2030:new THREE.Color(RANKS[g.rank].c).getHex();
-    const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,80,8,1,true)),new THREE.MeshBasicMaterial({color:bCol,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-    beam.position.y=40;grp.add(beam);
+    /* v480 (Ian): feixe vertical de luz fica APENAS dentro da masmorra no portal de saida */
     L.group.add(grp);g.mesh=grp;g.ring=new THREE.Group();g.sw=new THREE.Group();if(!g.opened233&&grp.userData.rift131&&player&&Math.hypot(g.x-player.x,g.z-player.z)<160){g.opened233=true;Rift131.open(grp)}/* v233 (Ian): todo portal abre rasgando como no Tecelão */
     const rPrompt=(g.giant?8.5:4.5);
     const lbl=g.anchor221?'F · ENTRAR NA FENDA DA ÂNCORA':(g.secret?'F · ENTRAR NO PORTAL ???':'F · ENTRAR NO PORTAL '+(GR[g.rank]?.id||''));
@@ -142,7 +139,6 @@ function gateMesh(g){retireExtraction117(g);
   const ring=new THREE.Mesh(geo('gring',()=>new THREE.TorusGeometry(2.3,.22,8,40)),glowS(col,1));ring.position.y=2.6;grp.add(ring);
   const disc=new THREE.Mesh(geo('gdisc',()=>new THREE.CircleGeometry(2.15,40)),new THREE.MeshBasicMaterial({color:g.secret?0x000000:g.red?0x2a0008:0x0a0a2a,side:THREE.DoubleSide}));disc.position.y=2.6;grp.add(disc);
   const sw=new THREE.Mesh(geo('gsw',()=>new THREE.RingGeometry(.3,2,24,1,0,4.5)),glowS(col,.5));sw.position.set(0,2.6,.03);grp.add(sw);
-  const beam=new THREE.Mesh(geo('gbeam',()=>new THREE.CylinderGeometry(.35,.35,70,8,1,true)),glowS(col,.18));beam.position.y=35;grp.add(beam);
   const base=new THREE.Mesh(geo('gbase',()=>new THREE.RingGeometry(2.6,3,32)),glowS(col,.5));base.rotation.x=-Math.PI/2;base.position.y=.05;grp.add(base);
   const lbl=makeSign(g.secret?'???':g.inverse?'INVERTIDO':g.time?'PASSADO':g.custom?'CRIADO · '+gid(g.rank):'RANK '+GR[g.rank].id+(g.red?' · VERMELHO':''),hex(col),.6);lbl.position.y=5.7;grp.add(lbl);
   L.group.add(grp);g.mesh=grp;g.ring=ring;g.sw=sw;
