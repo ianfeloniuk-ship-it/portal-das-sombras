@@ -1,3 +1,13 @@
+## v487 (20/10/2026) — VFX aprovados e personagem animado, lote 1
+- Ian aprovou os efeitos de Guerreiro, Assassino e Tanque e pediu movimentos próprios para as novas habilidades. Também aprovou a publicação automática de todos os próximos lotes testados: fazer os magos primeiro (fogo, gelo, terra e raio), depois as demais classes; cobrir básicos e todas as habilidades, normais e raras.
+- `tools/golpes487.js`: peças e receitas originais da demo, bloom seletivo normal, partículas reduzidas e sem bloom no leve, decalques no terreno, efeitos antigos invisíveis e colisão/dano liberados uma vez no impacto. Só as 3 classes deste lote estão integradas.
+- `tools/anim303.js`: movimentos novos para Corte Giratório (dois giros), Mil Cortes (sequência rápida e final cruzado) e Golpe de Escudo (preparação e empurrão), sincronizados pelo tempo do jogo; esquiva interrompe a pose. Animações anteriores do básico preservadas. A rigidez na prévia anterior vinha do gravador: ADT estava zerado durante update; o gravador agora avança ADT antes de animar.
+- Ian autorizou sincronizar os acertos com a demo, preservando dano total, recarga e alvos. Mil Cortes mantém seis parcelas em sequência rápida e o contato adicional de colisão já existente, sem aumento do total.
+- Correção ligada ao teste de console: `deep447.js` usava `Surv437.IT`, mas a bolsa exporta `ITEMS`; itens do mar passam a registrar sem TypeError.
+- Testes: build e core_parts ok; sintaxe; três básicos + habilidade nas 3 classes × 2 modos; zero efeitos vivos após limpeza; lançamento por useSkill, fim das poses, pausa e esquiva; andar e janela de status. Dano com VFX desligado/ligado: Guerreiro [50,50,0], Assassino [203,102,0], Tanque [62,62,0] nos alvos a 2/4/7 m, nos dois modos. Zero erros JavaScript registrados; recursos ausentes da base podem ainda gerar avisos HTTP.
+- FPS em cena aberta 720×720, Edge sem interface e renderização por software, amostra curta: controle 79, normal 56, leve 72. Não é garantia em todos os mapas/aparelhos.
+- Código, relatório e prévia R3: https://drive.google.com/drive/folders/1TffooHVxm4BfRkhw2_CyEZNl4GD3j8JA
+
 ## v486 (20/10/2026) — "MURALHA" fora da cidade
 - Pedido de Ian: usou habilidade num lobo longe de qualquer cidade e o jogo mostrou "MURALHA" e não deu dano.
 - Causa: na v482 `inCity` passou a usar raio em metros (65/95/125) mas continuou multiplicando por CITYK (1,76): a cidade "ia" até 114/167/220 m.

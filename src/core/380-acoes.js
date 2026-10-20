@@ -125,7 +125,7 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const holder=projModel(type,col,sc,o.vis156??o.basicClass);holder.userData.terrainAbsolute245=true;holder.position.set(x,y,z);holder.rotation.set(-Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),Math.atan2(dir.x,dir.z),0,'YXZ');scene.add(holder);
   projs.push({elem300:o.elem300,dtype281:o.dtype281||(team==='player'?curDType281:null),originY:y,y,vy:dir.y*spd,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:dir.x*spd,vz:dir.z*spd,dmg,team,col,life:1.4,pierce:!!o.pierce,hit:new Set(),r:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
-function projectileImpact253(p){const start=fxs.length;fxBurst(p.x,p.y,p.z,p.col,5,3);for(let i=start;i<fxs.length;i++)fxs[i].o.userData.terrainAbsolute245=true;
+function projectileImpact253(p){if(window.Golpes487&&!Golpes487.legacyDepth&&p.team==='player'&&!p.skillHit&&Golpes487.basic(p.basicClass??profile.cls)&&p.ptype==='tdagger')return Golpes487.legacy(()=>projectileImpact253(p));const start=fxs.length;fxBurst(p.x,p.y,p.z,p.col,5,3);for(let i=start;i<fxs.length;i++)fxs[i].o.userData.terrainAbsolute245=true;
   if(window.Flip470){const elem=p.elem300||(p.ptype==='fire'?'fogo':p.ptype==='spark'?'raio':p.ptype==='ice'?'gelo':p.ptype==='soul'?'trevas':p.ptype==='holy'?'luz':null);if(elem==='fogo')Flip470.spawn('explosion',p.x,p.y,p.z,2.2,{grow:.3});else if(elem==='raio')Flip470.spawn('lightning',p.x,p.y+.2,p.z,2.2,{grow:.15});else if(elem==='gelo')Flip470.spawn('water',p.x,p.y,p.z,2.0,{grow:.25});else if(elem==='trevas')Flip470.spawn('smoke',p.x,p.y,p.z,1.8,{tint:0x4c1d95,grow:.3});else if(elem==='luz')Flip470.spawn('rune',p.x,p.y,p.z,1.6,{grow:.1});else if(p.ptype==='arrow'||p.ptype==='sarrow'||p.ptype==='tspear')Flip470.spawn('dust',p.x,p.y,p.z,1.6,{grow:.3,op:.7});}
 }
 function updateProjectiles253(dt){
@@ -198,7 +198,7 @@ function magicEvolution(sk,dmg){const P=player,col=sk.col;
 // v155: habilidades com animação própria no Viajante (Chuva de Flechas: com arco mira para o alto; sem arco joga um punhado de flechas para cima).
 /* v303 (Ian): cada habilidade tem a sua animação de lançamento (antes só a Chuva de Flechas tinha). Usa as animações do modelo do Viajante. */
 /* Shared animation choice: gameplay and the isolated class gallery use the same clips. */
-function skillAnimationPlan405(sk,src,wk,bow){if(!sk)return {clip:null,overlay:null,duration:.75};const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),mag=MAGIC_CLS.includes(src),staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null;
+function skillAnimationPlan405(sk,src,wk,bow){const own487=window.Golpes487?.animationPlan?.(sk);if(own487)return own487;if(!sk)return {clip:null,overlay:null,duration:.75};const n=sk.n||'',t=sk.t==='kit111'?sk.effect:(sk.effect||sk.t),mag=MAGIC_CLS.includes(src),staff=/^(staff|bonestaff|wand|tome)$/.test(wk);let k=null;
 
  if(/Chuva de Flechas/.test(n))k=!bow?'chuva_sem_arco':'chuva_com_arco';
  else if(/terremoto|tremor|sísm|abalo|erup|impacto|golpe brutal|golpe pesado|quebra|rompante|pisão|esmag/i.test(n))k='pesado2';
@@ -216,7 +216,7 @@ function skillAnimationPlan405(sk,src,wk,bow){if(!sk)return {clip:null,overlay:n
  const overlay=mapped||(/terremoto|tremor|sísm|abalo|erup|impacto|salto do dragão|quebra/i.test(n)?'salto_impacto':/girat|redemoinho|varredura|rodopio|meia-lua/i.test(n)?'giro':/raio|tempest|trovo|meteor|céus|ceus|chuva|sol negro|estrela/i.test(n)&&!/flecha/i.test(n)?'ceu':/heal|healzone|rewindheal|cleanse/.test(t)?'ajoelhar':/guard|ward|block|barrier|anchorward|interpose/.test(t)?'firme':/push|line|bolt|chain|fan/.test(t)&&mag?'palmas':null);
  return {clip:mapped?null:k,overlay,duration:.75};
 }
-function skillAnim155(sk){if(!sk||!player)return;const plan=skillAnimationPlan405(sk,sk.sourceClass??profile.cls,weaponKind272(run.equip.w)||'',hasBow259());if(plan.clip)player.skillAnim155={k:plan.clip,until:time+plan.duration};if(window.Anim303?.map?.[sk.n])player.skillAnim155=null;if(plan.overlay)try{Anim303.play(plan.overlay)}catch(_){}}
+function skillAnim155(sk){if(!sk||!player)return;const plan=skillAnimationPlan405(sk,sk.sourceClass??profile.cls,weaponKind272(run.equip.w)||'',hasBow259());if(plan.clip)player.skillAnim155={k:plan.clip,until:time+plan.duration};if(!plan.clip)player.skillAnim155=null;if(plan.overlay)try{Anim303.play(plan.overlay)}catch(_){}}
 
 function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(sk);return}
   const P=player,dmg=skillDamage(sk),col=sk.col;faceTarget(14);if(physicalEvolution(sk,dmg)||magicEvolution(sk,dmg)){castFluid139(sk);sfx('skill');return}skillFx(sk,P);castFluid139(sk);

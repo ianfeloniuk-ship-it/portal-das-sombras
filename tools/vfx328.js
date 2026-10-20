@@ -10,7 +10,7 @@ function create405(ctx=null){
   const V = ctx?ctx.vfx302:window.VFX302; if (!V) return;
   const T = THREE, R = (a, b) => a + Math.random() * (b - a), TAU = Math.PI * 2;
   const player405=()=>ctx?ctx.player:player,camera405=()=>ctx?ctx.camera:camera,enemies405=()=>ctx?ctx.enemies:enemies,allies405=()=>ctx?(ctx.allies||[]):(typeof allies!=='undefined'?allies:[]);
-  const defer405=(fn,ms)=>ctx?ctx.defer(fn,ms):setTimeout(fn,ms),point405=(...a)=>ctx?ctx.point(...a):skillGroundPoint(...a);
+  const defer405=(fn,ms)=>ctx?ctx.defer(fn,ms):setTimeout(window.Golpes487?Golpes487.bindLegacy(fn):fn,ms),point405=(...a)=>ctx?ctx.point(...a):skillGroundPoint(...a);
   const kitPoint405=s=>ctx?ctx.kitPoint(s):kitPoint111(s),kitRadius405=s=>ctx?ctx.kitRadius(s):kitRadius111(s),kitTarget405=s=>ctx?ctx.kitTarget(s):kitTarget111(s),kitTargets405=(s,p)=>ctx?ctx.kitTargets(s,p):kitTargets111(s,p);
   const projModel405=(...a)=>ctx?ctx.projectile(...a):projModel(...a);
   const E = (col, op = 1) => V.add2(0, col, op);

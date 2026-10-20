@@ -35,7 +35,7 @@ function spawn(kind,x,y,z,size,o={}){if(!F.on)return null;const s=SHEETS[kind];i
 function setFrame(fx,i){if(i===fx.frame)return;fx.frame=i;const s=fx.s,cx=i%s.c,cy=Math.floor(i/s.c);fx.sp.material.map.offset.set(cx/s.c,1-(cy+1)/s.r)}
 function body(e){try{const b=projectileBody253(e);return {x:b.x,y:b.y,z:b.z,r:b.r||e.r||.5,h:(b.hitHeight||1.4)+2*(b.r||.5)}}catch(_){const g=typeof terrH==='function'?terrH(e.x,e.z):0;return {x:e.x,y:g+.9,z:e.z,r:e.r||.5,h:1.6}}}
 function ground(x,z){try{return terrH(x,z)}catch(_){return 0}}
-function step(dt){dt*=F.speed;for(let i=live.length-1;i>=0;i--){const fx=live[i];fx.t+=dt;if(fx.t<0){fx.sp.visible=false;continue}fx.sp.visible=true;const s=fx.s;
+function step(dt){dt*=F.speed;for(let i=live.length-1;i>=0;i--){const fx=live[i];if(fx.sp.userData.gate487&&!fx.sp.userData.gate487.ready)continue;fx.t+=dt;if(fx.t<0){fx.sp.visible=false;continue}fx.sp.visible=true;const s=fx.s;
   let k=Math.floor(fx.t*s.fps);
   if(s.loop&&fx.dur>0){if(fx.t>fx.dur){scene.remove(fx.sp);fx.sp.material.map.dispose();fx.sp.material.dispose();live.splice(i,1);continue}k%=s.n;const left=fx.dur-fx.t;fx.sp.material.opacity=Math.min(1,left/.4)}
   else if(k>=s.n){scene.remove(fx.sp);fx.sp.material.map.dispose();fx.sp.material.dispose();live.splice(i,1);continue}
@@ -63,7 +63,7 @@ function getElem(e,o){
 let lastFx=0;const burning=new WeakMap();
 const H0=hurtEnemy;
  hurtEnemy=function(e,amt,sx,sz,o){const hp0=e&&e.hp,r=H0.apply(this,arguments);
- try{if(F.on&&e&&r>0&&e.hp<hp0){const now=performance.now();const b=body(e),sz=Math.max(.8,b.r/.5);
+ try{if(F.on&&e&&r>0&&e.hp<hp0&&!(window.Golpes487&&Golpes487.replacesHit(o))){const now=performance.now();const b=body(e),sz=Math.max(.8,b.r/.5);
    const elem=getElem(e,o);
    const fire=elem==='fogo',lightning=elem==='raio',ice=elem==='gelo',water=elem==='água'||elem==='agua',holy=elem==='luz'||elem==='sagrado',dark=elem==='trevas'||elem==='sombra';
    const big=!!(o&&(o.crit||o.third||o.skillHit));

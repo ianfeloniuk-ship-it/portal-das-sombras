@@ -1,0 +1,1 @@
+Three.js r128 examples, MIT license. Vendored from https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/ for the approved bloom technique. Original engine: Ian-approved golpes-demo.html, 20 October 2026.

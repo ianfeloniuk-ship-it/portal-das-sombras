@@ -32,7 +32,7 @@ function comboSound(crit){const t0=now();
 const H0=hurtEnemy;
 /* só reage quando a vida caiu de fato: a v459 guarda o golpe para o quadro do impacto e chama de novo */
 hurtEnemy=function(e,amt,sx,sz,o){const hp0=e&&e.hp,r=H0.apply(this,arguments);
- try{if(J.on&&e&&r>0&&e.hp<hp0&&!(o&&o.dot)&&!(o&&o.tick)){const crit=!!(o&&o.crit);squash(e,crit);if(o&&(o.fromPlayer||o.skillHit||o.basicClass!=null))comboSound(crit)}}catch(_){}return r};
+ try{if(J.on&&e&&r>0&&e.hp<hp0&&!(o&&o.dot)&&!(o&&o.tick)){const crit=!!(o&&o.crit);if(!(window.Golpes487&&Golpes487.replacesHit(o)))squash(e,crit);if(o&&(o.fromPlayer||o.skillHit||o.basicClass!=null))comboSound(crit)}}catch(_){}return r};
 
 /* ---------- 2 barras com rastro ---------- */
 /* barrinhas desenhadas no canvas: bar(...) ganha um 8º parâmetro opcional, a entidade */

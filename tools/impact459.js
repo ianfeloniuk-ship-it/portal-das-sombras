@@ -97,7 +97,7 @@ hurtEnemy=function(e,amt,sx,sz,o){
   let crit=false,blocked=false;for(let i=fl0;i<floats.length;i++){const f=floats[i];if(/^BLOQUEIO/.test(f.txt))blocked=true;else if(f.big&&f.col==='#ffd54f')crit=true}
   const proj=!!op.ptype300,melee=inAttack>0&&!proj,col=colorOf(el,op,crit,blocked);
   if(proj)pend={e,crit,blocked,el,col,frame:frameNo};
-  else{const b=body(e),cy=b.y+(e.isBoss?.2:0),near=Math.max(.25,b.r*.75);
+  else if(!(window.Golpes487&&Golpes487.replacesHit(op))){const b=body(e),cy=b.y+(e.isBoss?.2:0),near=Math.max(.25,b.r*.75);
    flashAt(e.x-dx*near,cy,e.z-dz*near,(crit?1.75:blocked?.8:1.15)*(e.isBoss?1.35:1),blocked?0xdfe8ff:crit?0xfff1b0:0xffffff,crit?.14:.11);
    burst(e.x+dx*b.r*.3,cy,e.z+dz*b.r*.3,dx,.12,dz,(crit?17:blocked?6:direct?11:6)*(e.isBoss?1.3:1),col,{spread:blocked?.9:.6,lifeK:crit?1.25:1})}
   if(direct){
@@ -109,7 +109,7 @@ hurtEnemy=function(e,amt,sx,sz,o){
 
 /* ---------- projétil do jogador acertando: explosão no ponto do acerto ---------- */
 if(typeof projectileImpact253==='function'){const P0=projectileImpact253;projectileImpact253=function(p){const r=P0.apply(this,arguments);
- try{if(I.on&&p&&p.team==='player'&&pend&&pend.frame===frameNo){const q=pend;pend=null;const sp=Math.hypot(p.vx||0,p.vy||0,p.vz||0)||1,dx=(p.vx||0)/sp,dy=(p.vy||0)/sp,dz=(p.vz||0)/sp;
+ try{if(I.on&&p&&p.team==='player'&&pend&&pend.frame===frameNo&&!(window.Golpes487&&Golpes487.replacesHit(p))){const q=pend;pend=null;const sp=Math.hypot(p.vx||0,p.vy||0,p.vz||0)||1,dx=(p.vx||0)/sp,dy=(p.vy||0)/sp,dz=(p.vz||0)/sp;
   const phys=PHYS_PT.test(p.ptype||''),big=!!(p.mesh&&p.mesh.scale&&p.mesh.scale.x>1.4),y=p.y??(p.originY??1.1);
   flashAt(p.x-dx*.15,y,p.z-dz*.15,(q.crit?2:1.35)*(big?1.5:1)*(phys?.55:1),phys?0xffffff:q.col,phys?.09:.14);
   burst(p.x,y,p.z,dx,dy+.1,dz,(phys?8:13)+(q.crit?8:0)+(big?6:0),q.col,{spread:phys?.45:.7,sp0:phys?5:6,sp1:phys?10:13,lifeK:phys?.9:1.15});
@@ -141,13 +141,13 @@ function muzzle(){const m=player&&player.m;if(!m||!m.root)return null;let p=null
    lâmina chegar no monstro (medido: a espada cruza o alvo a ~25% do golpe). Os acertos, o congelamento e a tremida
    desse golpe agora esperam esse tempo; dano, alcance e alvos são os mesmos (escolhidos no clique). */
 function kitForm(){try{return !!kitState111().form}catch(_){return false}}
-function runDefer(d){const hs=d.stops;inAttack++;try{for(const a of d.hits){try{hurtEnemy.apply(window,a)}catch(err){console.warn('impact459 hit',err)}}}finally{inAttack--}for(const [f,a] of hs){try{(f==='h'?hitstop:shake)(a)}catch(_){}}}
+function runDefer(d){const hs=d.stops;inAttack++;try{for(const a of d.hits){try{hurtEnemy.apply(window,a)}catch(err){console.warn('impact459 hit',err)}}}finally{inAttack--}for(const [f,a] of hs){if(window.Golpes487&&Golpes487.basic(d.hits[0]?.[4]?.basicClass))continue;try{(f==='h'?hitstop:shake)(a)}catch(_){}}}
 const A0=attack;attack=function(){const n0=projs.length,b0=window.beep,hs0=window.hitstop,sh0=window.shake;let beeped=null;window.beep=function(f,d,v,t){beeped=[f,d,v,t]};
  const canDefer=I.on&&!defer&&player&&!kitForm()&&!(window.Firearms372&&Firearms372.isGun(run.equip.w));
  if(canDefer){deferQ={hits:[],stops:[]};window.hitstop=function(a){deferQ.stops.push(['h',a])};window.shake=function(a){deferQ.stops.push(['s',a])}}
  inAttack++;let r;const atk0=player&&player.atkCd;
  try{r=A0.apply(this,arguments)}finally{inAttack--;window.beep=b0;const q=deferQ;deferQ=null;window.hitstop=hs0;window.shake=sh0;
-  if(q){if(q.hits.length){const iv=Math.max(.05,player.atkCd||.3);defer={hits:q.hits,stops:q.stops,left:Math.min(.13,iv*.26),L:L}}else for(const [f,a] of q.stops)(f==='h'?hs0:sh0)(a)}}
+  if(q){if(q.hits.length){const iv=Math.max(.05,player.atkCd||.3);defer={hits:q.hits,stops:q.stops,left:window.Golpes487&&Golpes487.basic(q.hits[0]?.[4]?.basicClass)?(q.hits[0][4].basicClass===2?.12:.08):Math.min(.13,iv*.26),L:L}}else for(const [f,a] of q.stops)(f==='h'?hs0:sh0)(a)}}
  try{const fresh=projs.slice(n0).filter(p=>p&&p.team==='player');
   if(I.on&&fresh.length){const p=fresh[0],pt=p.ptype||'';
    if(/^(arrow|sarrow)$/.test(pt))play('twang');else if(/^(tdagger|tspear)$/.test(pt))play('toss');
@@ -163,7 +163,7 @@ function stepCharge(dt){if(!started||!player||player.dead||paused||time-lastCast
  core.visible=true;core.position.set(mz.x,mz.y,mz.z);core.material.color.setHex(castCol);const sc=(.2+.34*cl)*(1+.08*Math.sin(time*31));core.scale.set(sc,sc,1);core.material.opacity=(.3+.6*cl)*coreOn;
  if(dt>0&&Math.random()<(lite()?.45:.9)){const u=R(-1,1),a=R(0,6.283),c=Math.sqrt(1-u*u),rr=R(.45,.75),life=R(.14,.22),px=mz.x+Math.cos(a)*c*rr,py=mz.y+u*rr,pz=mz.z+Math.sin(a)*c*rr;
   spark(px,py,pz,(mz.x-px)/life,(mz.y-py)/life,(mz.z-pz)/life,{life,len:.22,w:.035,c0:0xffffff,c1:castCol,b:.7+.6*cl,g:0,drag:0})}}
-function stepTrails(dt){if(dt<=0)return;for(const p of projs){if(!p||p.team!=='player'||!p.mesh)continue;const pt=p.ptype||'';if(/^(fire|soul|sarrow|bullet372)$/.test(pt))continue;p.tr459=(p.tr459||0)-dt;if(p.tr459>0)continue;p.tr459=lite()?.06:.032;
+function stepTrails(dt){if(dt<=0)return;for(const p of projs){if(!p||p.team!=='player'||!p.mesh||(window.Golpes487&&Golpes487.basic(p.basicClass??profile.cls)&&p.ptype==='tdagger'))continue;const pt=p.ptype||'';if(/^(fire|soul|sarrow|bullet372)$/.test(pt))continue;p.tr459=(p.tr459||0)-dt;if(p.tr459>0)continue;p.tr459=lite()?.06:.032;
   const y=p.y??(p.originY??1.1),phys=/^(arrow|tdagger|tspear|stone)$/.test(pt);
   if(phys)spark(p.x,y,p.z,(p.vx||0)*.04,(p.vy||0)*.04,(p.vz||0)*.04,{life:.12,len:.55,w:.025,c0:0xe8f0ff,c1:0x9fb0c4,b:.45,g:0,drag:0});
   else{spark(p.x+R(-.08,.08),y+R(-.08,.08),p.z+R(-.08,.08),R(-.4,.4),R(-.1,.5),R(-.4,.4),{life:R(.16,.26),w:R(.05,.09),mode:1,c0:p.col??0xffd08a,c1:p.col??0xffd08a,b:.75,g:-.5,drag:2})}}}

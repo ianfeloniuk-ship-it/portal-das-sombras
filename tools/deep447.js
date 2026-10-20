@@ -17,7 +17,7 @@
   /* ---------- itens e receitas ---------- */
   function addItems() {
     if (!U() || !window.Build437) { setTimeout(addItems, 300); return; }
-    Object.assign(U().IT, {
+    Object.assign(U().ITEMS, {
       algas: { n: 'Algas', kg: .3, d: 'Do fundo raso do mar. Com água limpa na fogueira viram Chá de Algas.' },
       cha_algas: { n: 'Chá de Algas', kg: .4, d: 'Beber: +50% de Fôlego e +10 m de limite de pressão por 5 min.' },
       perola: { n: 'Pérola', kg: .05, d: 'Das ostras gigantes do recife. Vende bem na cidade (bolsa → VENDER PÉROLAS perto de uma cidade).' },

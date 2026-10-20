@@ -126,8 +126,26 @@ const MAP={};
 const ORDER=['hips','spine','chest','neck','head','upperarm_l','forearm_l','hand_l','upperarm_r','forearm_r','hand_r','thigh_l','shin_l','foot_l','thigh_r','shin_r','foot_r'];
 function sample(an,t){const k=an.k;let i=0;while(i<k.length-2&&t>k[i+1].t)i++;const a=k[i],b=k[i+1],u=ease(Math.max(0,Math.min(1,(t-a.t)/Math.max(1e-6,b.t-a.t))));
  const out={root:{y:lerp(a.root?.y||0,b.root?.y||0,u),spin:lerp(a.root?.spin||0,b.root?.spin||0,u)},b:{}};const names=new Set([...Object.keys(a.b||{}),...Object.keys(b.b||{})]);for(const n of names){const x=a.b[n]||[0,0,0],y=b.b[n]||[0,0,0];out.b[n]=[lerp(x[0],y[0],u),lerp(x[1],y[1],u),lerp(x[2],y[2],u)]}return out}
+// v487: authored body motions for the approved VFX; game time keeps live play and frame capture in sync.
+const giro487={spine:[10,0,0],chest:[0,-22,0],upperarm_r:[-75,0,-65],forearm_r:[-15,0,0],upperarm_l:[-35,0,55],forearm_l:[-55,0,0],thigh_l:[-25,0,-12],shin_l:[28,0,0],thigh_r:[12,0,12],shin_r:[12,0,0]};
+A.giro487={d:.86,gameClock:true,k:[
+ {t:0,b:{}},{t:.14,root:{spin:-25,y:-.08},b:{...giro487,chest:[0,-45,0],upperarm_r:[-40,0,-55]}},
+ {t:.18,root:{spin:0,y:-.1},b:giro487},{t:.42,root:{spin:360,y:-.08},b:giro487},
+ {t:.66,root:{spin:720,y:-.06},b:{...giro487,chest:[8,25,0]}},
+ {t:.83,root:{spin:720},b:{spine:[5,0,0],upperarm_r:[-35,0,-30],forearm_r:[-40,0,0]}},
+ {t:1,root:{spin:720},b:{}}]};
+const cutR487={spine:[12,0,0],chest:[0,24,0],upperarm_r:[-105,0,-35],forearm_r:[-15,0,0],upperarm_l:[-45,0,20],forearm_l:[-90,0,0],thigh_l:[-22,0,0],shin_l:[25,0,0],thigh_r:[10,0,0]};
+const cutL487={...cutR487,chest:[0,-24,0],upperarm_l:[-105,0,28],forearm_l:[-15,0,0],upperarm_r:[-45,0,-30],forearm_r:[-90,0,0]};
+const ck487=[{t:0,b:{}}];
+for(let i=0;i<7;i++){const sec=.06+i*.1;ck487.push({t:(sec-.035)/1.04,root:{y:-.05},b:{spine:[4,0,0],chest:[0,i%2?15:-15,0],upperarm_r:[-60,0,-40],forearm_r:[-70,0,0],upperarm_l:[-60,0,30],forearm_l:[-70,0,0]}},{t:sec/1.04,root:{y:-.08},b:i%2?cutL487:cutR487})}
+ck487.push({t:.73/1.04,root:{y:-.1},b:{spine:[-5,0,0],upperarm_r:[-150,0,-55],forearm_r:[-35,0,0],upperarm_l:[-145,0,50],forearm_l:[-35,0,0]}},{t:.8/1.04,root:{y:-.14},b:{spine:[24,0,0],chest:[8,0,0],upperarm_r:[-55,0,-65],forearm_r:[-15,0,0],upperarm_l:[-55,0,65],forearm_l:[-15,0,0],thigh_l:[-30,0,0],shin_l:[35,0,0]}},{t:.9/1.04,b:{spine:[12,0,0],upperarm_r:[-45,0,-50],upperarm_l:[-45,0,50]}},{t:1,b:{}});
+A.cortes487={d:1.04,gameClock:true,k:ck487};
+const brace487={spine:[8,0,0],chest:[-5,-20,0],upperarm_l:[-75,0,30],forearm_l:[-95,0,0],upperarm_r:[-40,0,-35],forearm_r:[-65,0,0],thigh_l:[-30,0,-10],shin_l:[35,0,0],thigh_r:[15,0,10],shin_r:[15,0,0]};
+A.escudo487={d:.96,gameClock:true,k:[{t:0,b:{}},{t:.16,root:{y:-.08},b:brace487},{t:.31,root:{y:-.12},b:{...brace487,chest:[-8,-30,0]}},
+ {t:.46,root:{y:-.16},b:{...brace487,spine:[25,0,0],chest:[10,25,0],upperarm_l:[-100,0,25],forearm_l:[-25,0,0],thigh_l:[-45,0,0],shin_l:[50,0,0]}},
+ {t:.6,root:{y:-.14},b:{...brace487,spine:[20,0,0],upperarm_l:[-90,0,25],forearm_l:[-35,0,0]}},{t:.8,root:{y:-.06},b:brace487},{t:1,b:{}}]};
 let cur=null,rootNow=null;
-function play(name,slow=1){if(!A[name]||!player)return;cur={name,t0:performance.now()/1000,slow}}
+function play(name,slow=1){if(!A[name]||!player)return;cur={name,t0:A[name].gameClock?time:performance.now()/1000,slow}}
 const qa=new T.Quaternion(),qb=new T.Quaternion(),qc=new T.Quaternion(),e=new T.Euler();
 /* v343 (Ian): pose de pulo do Viajante (Espaço). Sobe com as pernas recolhidas, desce com elas esticando; não mexe se uma animação de habilidade estiver tocando. */
 const UP={spine:[-8,0,0],thigh_l:[-38,0,0],thigh_r:[-22,0,0],shin_l:[58,0,0],shin_r:[40,0,0],upperarm_l:[-35,0,22],upperarm_r:[-20,0,-25]},DOWN={spine:[8,0,0],thigh_l:[-14,0,0],thigh_r:[-8,0,0],shin_l:[22,0,0],shin_r:[14,0,0],upperarm_l:[-75,0,40],upperarm_r:[-30,0,-40]};
@@ -144,7 +162,7 @@ function applyPose405(m,name,seconds,armed){const an=A[name];if(!an||!m?.bones||
   b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}
  return s.root;
 }
-function post(P){if(P?.dodgeT>0)return;if(!cur||!P?.m?.bones)return;const an=A[cur.name],seconds=(performance.now()/1000-cur.t0)/(cur.slow||1);if(seconds>=an.d){cur=null;rootNow=null;return}rootNow=applyPose405(P.m,cur.name,seconds,!!run?.equip?.w)}
+function post(P){if(P?.dodgeT>0){if(cur&&A[cur.name]?.gameClock){cur=null;rootNow=null}return}if(!cur||!P?.m?.bones)return;const an=A[cur.name],seconds=((an.gameClock?time:performance.now()/1000)-cur.t0)/(cur.slow||1);if(seconds>=an.d){cur=null;rootNow=null;return}rootNow=applyPose405(P.m,cur.name,seconds,!!run?.equip?.w)}
 /* v305 (Ian): chefes, elites e rivais também se movem ao usar ataques, com efeito visual no momento do impacto. */
 function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)return;const A=e.act,root=e.m.root,sc=e.isBoss?1.3:1;
  const body=e.m.body||root.children.find(c=>c.isObject3D&&!c.isLight)||null;if(body&&body.userData.y305==null)body.userData.y305=body.position.y;const lift=v=>{if(body)body.position.y=body.userData.y305+v/(root.scale.y||1)};
@@ -157,5 +175,5 @@ function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)retur
  else if(A.type==='shoot'){root.rotation.x=after<0?-.12*w:0}}
 /* v331: o jogo reposiciona a raiz depois do post; o giro e a altura são reaplicados aqui */
 function rootFix(P){if(P?.dodgeT>0)return;if(!cur||!rootNow||!P||!P.m||!P.m.root)return;const r=P.m.root;if(rootNow.spin)r.rotation.y+=rootNow.spin*D;if(rootNow.y)r.position.y+=rootNow.y}
-window.Anim303={applyPose:applyPose405,play,post,air,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
+window.Anim303={applyPose:applyPose405,play,stop:()=>{cur=null;rootNow=null},post,air,enemyPost,root:rootFix,active:()=>cur?cur.name:null,list:Object.keys(A),map:MAP,A};
 })();

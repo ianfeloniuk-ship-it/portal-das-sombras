@@ -15,7 +15,7 @@ function frame(now){
   if(FX2.slow>0){FX2.slow-=rdt;dt*=.3}FX2.cine-=rdt;if(FX2.inv>0)FX2.inv-=dt;if(dt>0&&bossE)updBossMech(bossE,dt);
   if(started&&bossE&&!bossE.dead&&!bossE.intro&&player&&Math.hypot(bossE.x-player.x,bossE.z-player.z)<17){bossE.intro=true;FX2.cine=1.8;FX2.slow=Math.max(FX2.slow,1);bigText(bossE.boss&&bossE.boss.n?bossE.boss.n:'GUARDIÃO',2000);shake(.5);sfx('arise')}FX2.comboT-=dt;if(FX2.comboT<=0)FX2.combo=0;FX2.perfCd-=rdt;
   time+=dt;ADT=dt;ENV.wind.value=time;if(dt>0){rareUpdate103(dt);update(dt);narratorUpdate105(dt);updateReadySounds();tutorialTick93(dt)}
-  camUpdate(rdt);ENV.pl.value.set(player.x,1.1+terrH(player.x,player.z),player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;renderer.render(scene,camera);drawOverlay();if(!paused&&now>=hudAt348){hudAt348=now+100;hud()}GFX267.tick(realDt);
+  camUpdate(rdt);ENV.pl.value.set(player.x,1.1+terrH(player.x,player.z),player.z);ENV.ca.value.copy(camera.position);ENV.occ.value=player.dead?0:1;if(window.Golpes487)Golpes487.render();else renderer.render(scene,camera);drawOverlay();if(!paused&&now>=hudAt348){hudAt348=now+100;hud()}GFX267.tick(realDt);
 }
 let tcA=0;function titleCam(dt){tcA+=dt*.06;camera.position.set(Math.sin(tcA)*46,24,Math.cos(tcA)*46);camera.lookAt(0,2,0);if(L.crystal)L.crystal.rotation.y+=dt}
 /* v243: vida no mundo — folhas caindo, borboletas de dia e vaga-lumes à noite, só perto do jogador */
@@ -114,7 +114,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
   if(L.mode==='world')updWorld(dt);else updDungeon(dt);
   updateProjectiles253(dt);
   updHazards(dt);
-  for(let i=fxs.length-1;i>=0;i--){const f=fxs[i];f.t+=dt;const k=f.t/f.dur;
+  for(let i=fxs.length-1;i>=0;i--){const f=fxs[i];if(f.o?.userData.gate487&&!f.o.userData.gate487.ready)continue;f.t+=dt;const k=f.t/f.dur;
     if(f.kind==='ring'){f.o.scale.setScalar(1+k*f.r*1.6);f.o.material.opacity=.9*(1-k)}
     else if(f.kind==='p'){f.o.position.x+=f.v.x*dt;f.o.position.y+=f.v.y*dt;f.o.position.z+=f.v.z*dt;f.v.y-=12*dt;f.o.material.opacity=1-k}
     else if(f.kind==='fn'){f.upd(f,Math.min(1,k),dt)}
