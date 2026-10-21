@@ -29,13 +29,13 @@
   EW = function (b, k, x, y, z, ry, W, t) { if (GREEN.test(k) && ice(x, z) > 20) return iceSwap(ew0, b, k, x, y, z, ry, W); return ew0.apply(this, arguments); };
 
   /* ---------- sorteio dos encontros ---------- */
-  const TYPES = ['camp', 'ruin', 'chest', 'altar', 'carcass', 'den', 'npc'];
-  const BASE = { camp: 22, ruin: 18, chest: 14, altar: 9, carcass: 17, den: 14, npc: 9 };
+  const TYPES = ['camp', 'ruin', 'marble_ruin', 'chest', 'altar', 'carcass', 'den', 'npc'];
+  const BASE = { camp: 20, ruin: 14, marble_ruin: 12, chest: 12, altar: 9, carcass: 15, den: 12, npc: 9 };
   const MOD = {
-    deserto: { carcass: 2, ruin: 1.3, camp: .6 }, neve: { camp: .5, carcass: 1.5 },
-    pantano: { den: 1.5, altar: .5 }, vulcao: { den: 1.6, altar: .6, camp: .3 }, floresta: { camp: 1.3 }, cristal: { altar: 1.5, camp: .5 }
+    deserto: { carcass: 2, ruin: 1.3, marble_ruin: 1.4, camp: .6 }, neve: { camp: .5, carcass: 1.5, marble_ruin: 1.1 },
+    pantano: { den: 1.5, altar: .5 }, vulcao: { den: 1.6, altar: .6, camp: .3 }, floresta: { camp: 1.3, marble_ruin: 1.2 }, cristal: { altar: 1.5, camp: .5, marble_ruin: 1.3 }
   };
-  const CLEAR = { camp: 9, ruin: 15, chest: 7, altar: 9, carcass: 7, den: 10, npc: 8 };
+  const CLEAR = { camp: 9, ruin: 15, marble_ruin: 14, chest: 7, altar: 9, carcass: 7, den: 10, npc: 8 };
   let seed = null; const cache = new Map();
   function pickType(R, bio) {
     const m = MOD[bio] || {}; let t = 0; for (const k of TYPES) t += BASE[k] * (m[k] || 1);
@@ -106,8 +106,34 @@
       P('barrel_small', s.ry + 2.4, 3.2, null, 1); P('sack', s.ry + 3, 2.8, null, .6); if (k < .5) P('crate_B_small', s.ry + 4.2, 3.6, null, .7);
       if (k > .5) P('tent_detailedOpen', s.ry + 3.6, 7.5, R() * TAU, 2.4);
       if (s.r2 < .5) P('bone_A', s.ry + 5.2, 5.5, null, .4);
+      /* carroça de suprimentos estacionada */
+      if (R() < .75) { P('cart', s.ry + 2.8, 8.2, s.ry + .3, 2.2); col(s.ry + 2.8, 8.2, 1.8); P('barrel', s.ry + 2.5, 9.4, null, 1); P('crate_A_big', s.ry + 3.1, 9.4, null, 1.1); }
+      /* paliçada rústica de retaguarda */
+      if (R() < .6) { wall(s.ry + 3.2, 9.5, 5, 1.4, 0); }
       pile(s.ry + 5.5, 7 + R() * 2, R() * TAU, 2 + R() * 1.5);
-      label = 'F · VASCULHAR ACAMPAMENTO ABANDONADO'; guard = s.r2 < .25 ? 2 : 0;
+      label = 'F · VASCULHAR ACAMPAMENTO'; guard = s.r2 < .25 ? 2 : 0;
+    } else if (s.type === 'marble_ruin') {
+      /* Ruínas de Mármore: colunas e capitéis caídos e jogados */
+      const marble = 0xf6f2e8;
+      const nw = 4 + Math.floor(R() * 4);
+      for (let i = 0; i < nw; i++) {
+        const a = s.ry + i * TAU / nw + (R() - .5) * .6, d = 4.2 + R() * 6.5;
+        const kind = ['statue_column', 'statue_columnDamaged', 'column', 'd_pillar', 'pillar_decorated'][Math.floor(R() * 5)];
+        P(kind, a, d, R() * TAU, 2.8 + R() * 1.6, marble);
+        col(a, d, 1.3);
+      }
+      for (let i = 0; i < 3; i++) {
+        const a = s.ry + R() * TAU, d = 2.5 + R() * 4.8;
+        P(R() < .5 ? 'statue_block' : 'statue_head', a, d, R() * TAU, 1.4 + R() * .8, marble);
+        col(a, d, 1.0);
+      }
+      for (let i = 0; i < 3; i++) {
+        const a = s.ry + R() * TAU, d = 3.2 + R() * 5.8;
+        P(R() < .5 ? 'rubble_large' : 'rubble_half', a, d, null, 1.2, marble);
+      }
+      P('statue_obelisk', 0, 0, s.ry, 3.8, marble); col(0, 0, 1.6);
+      chest = { k: 'chest_gold', a: s.ry + 1.57, d: 2.2, H: 1.1 };
+      label = 'F · ABRIR RELICÁRIO DE MÁRMORE'; mult = 2.4; minRar = 2;
     } else if (s.type === 'ruin') {
       /* prédio medieval caído: casa, capela, taverna, moinho, forja, guilda ou torre, afundado no chão e achatado */
       const [id, H] = BUILDINGS[Math.floor(R() * BUILDINGS.length)], sy = .55 + R() * .3;

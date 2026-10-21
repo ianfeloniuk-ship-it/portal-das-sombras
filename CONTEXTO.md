@@ -1,3 +1,18 @@
+## v526 (21/10/2026) — Marcos do mundo: Acampamentos com carroças, Ruínas de Mármore e Estátua Gigantesca da Colina
+- Pedido de Ian: "Coloca no jogo acampamentos que a gente precisa, pedras de mármore que vão fazer construções jogadas. Sabe aquela estátua gigantesca que tem lá no topo de uma colina que tem coisas dentro? Eu quero também no jogo."
+- Implementação:
+  1) Acampamentos de Estrada aprimorados (`tools/encontros502.js`):
+     - Acampamentos agora contam com carroças de mantimentos rústicas (`cart`), paliçadas perimetrais (`wall`), caixotes, barris e fogueiras de acampamento rústicas, sem primitivas vazias.
+  2) Ruínas de Mármore (`tools/encontros502.js`):
+     - Novo tipo de encontro `marble_ruin` distribuído pelo mundo aberto com densidade e semente determinística.
+     - Colunatas imperiais e capitéis tombados no solo em ângulos naturais (`statue_column`, `statue_columnDamaged`, `column`, `d_pillar`, `pillar_decorated`), blocos esculpidos (`statue_block`, `statue_head`) e entulho de mármore marfim antigo (0xf6f2e8).
+     - Baú Relicário de Mármore central com tesouro dobrado e itens raros.
+  3) A Estátua Gigantesca na Colina (`tools/marcos526.js`):
+     - Monumento de 30 metros de altura erguido no topo da colina sudeste de Aster (x = 210, z = 360).
+     - Malha de colosso ancestral de pedra (m_colosso.glb) emoldurada por contrafortes de rocha natural (tripo-rocha-musgo154).
+     - Câmara oca esculpida na base da estátua acessível por portal frontal em arco.
+     - No interior da câmara: tochas e lanternas com luz suave, Altar do Titã e Baú Relicário Dourado interativo (F) entregando ouro e o Coração Rúnico do Titã.
+
 ## v525 (21/10/2026) — Correção do covil secreto / arca das rochas altas e encontros emergentes
 - Pedido de Ian (print e mensagem): "to aqui mas não aparece oq fazer nem nada" (no local do contrato "Covil Secreto: A Arca das Rochas Altas").
 - Diagnóstico:
