@@ -1159,33 +1159,151 @@
     }
   }
 
-  // Desenha marcador no minimapa do mundo
+  // Desenha marcador no minimapa do mundo e mapa grande (v524)
   function drawMinimap(ctx, tx, tz, full) {
     try {
       const st = getState();
-      if (!st || !st.tracked || !st.active[st.tracked]) return;
-      const q = QUEST_CATALOG[st.tracked];
-      const act = st.active[st.tracked];
-      if (!q || !act || !act.targetPos) return;
-      const px = tx(act.targetPos.x), pz = tz(act.targetPos.z);
-      ctx.save();
-      ctx.fillStyle = '#4ade80';
-      ctx.strokeStyle = '#052e16';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(px, pz - 7);
-      ctx.lineTo(px + 6, pz);
-      ctx.lineTo(px, pz + 7);
-      ctx.lineTo(px - 6, pz);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      if (full) {
-        ctx.font = '700 11px sans-serif';
-        ctx.fillStyle = '#86efac';
-        ctx.fillText(q.title, px + 9, pz + 3);
+      if (!st || !st.active) return;
+
+      if (!full) {
+        // --- MINIMAPA CIRCULAR DO HUD ---
+        if (!st.tracked || !st.active[st.tracked]) return;
+        const act = st.active[st.tracked];
+        const q = QUEST_CATALOG[st.tracked] || act.def490;
+        if (!q || !act || !act.targetPos || typeof player === 'undefined' || !player) return;
+
+        const cx = 96, cz = 96, maxR = 82;
+        const dx = (act.targetPos.x - player.x) * 2.2;
+        const dz = (act.targetPos.z - player.z) * 2.2;
+        const distM = Math.hypot(act.targetPos.x - player.x, act.targetPos.z - player.z);
+        const distPx = Math.hypot(dx, dz);
+
+        ctx.save();
+        if (distPx > maxR) {
+          // CLAMP NA BORDA DO MINIMAPA COM SETA DIREÇÃO (ESTILO SKYRIM)
+          const angle = Math.atan2(dz, dx);
+          const ex = cx + Math.cos(angle) * maxR;
+          const ey = cz + Math.sin(angle) * maxR;
+
+          ctx.translate(ex, ey);
+          ctx.rotate(angle);
+
+          // Seta direcional apontando para o objetivo
+          ctx.fillStyle = '#4ade80';
+          ctx.strokeStyle = '#052e16';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(8, 0);
+          ctx.lineTo(-4, -6);
+          ctx.lineTo(-1, 0);
+          ctx.lineTo(-4, 6);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Ponto dourado
+          ctx.rotate(-angle);
+          ctx.fillStyle = '#ffd54f';
+          ctx.beginPath();
+          ctx.arc(0, 0, 3, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Badge com distância em metros
+          const dTxt = Math.round(distM) + 'm';
+          ctx.font = '700 8.5px "Chakra Petch", sans-serif';
+          const tw = ctx.measureText(dTxt).width;
+          ctx.fillStyle = 'rgba(5, 35, 18, 0.88)';
+          ctx.fillRect(-tw / 2 - 2, -14, tw + 4, 10);
+          ctx.fillStyle = '#86efac';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(dTxt, 0, -9);
+        } else {
+          // DENTRO DO MINIMAPA: DIAMANTE PULSANTE
+          const px = cx + dx, pz = cz + dz;
+          const pulse = (Date.now() % 1200) / 1200;
+          ctx.strokeStyle = `rgba(74, 222, 128, ${1 - pulse})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(px, pz, 7 + pulse * 6, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#4ade80';
+          ctx.strokeStyle = '#052e16';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(px, pz - 8);
+          ctx.lineTo(px + 7, pz);
+          ctx.lineTo(px, pz + 8);
+          ctx.lineTo(px - 7, pz);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffd54f';
+          ctx.beginPath();
+          ctx.arc(px, pz, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      } else {
+        // --- MAPA GRANDE (MAPA-MÚNDI) ---
+        // Desenha todos os contratos ativos com destaque
+        const entries = Object.entries(st.active);
+        for (const [qid, qact] of entries) {
+          if (!qact || !qact.targetPos) continue;
+          const curQ = QUEST_CATALOG[qid] || qact.def490;
+          if (!curQ) continue;
+          const isTrack = st.tracked === qid;
+          const px = tx(qact.targetPos.x), pz = tz(qact.targetPos.z);
+          const col = isTrack ? '#ffd070' : '#4ade80';
+          const colDark = isTrack ? '#3b2505' : '#052e16';
+
+          ctx.save();
+          // Halo de destaque
+          ctx.fillStyle = isTrack ? 'rgba(255, 208, 112, 0.35)' : 'rgba(74, 222, 128, 0.25)';
+          ctx.beginPath();
+          ctx.arc(px, pz, isTrack ? 12 : 9, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Diamante
+          ctx.fillStyle = col;
+          ctx.strokeStyle = colDark;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(px, pz - (isTrack ? 9 : 7));
+          ctx.lineTo(px + (isTrack ? 8 : 6), pz);
+          ctx.lineTo(px, pz + (isTrack ? 9 : 7));
+          ctx.lineTo(px - (isTrack ? 8 : 6), pz);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Ponto central
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(px, pz, isTrack ? 3 : 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Placa com o nome da missão e distância
+          const distM = (typeof player !== 'undefined' && player) ? Math.round(Math.hypot(player.x - qact.targetPos.x, player.z - qact.targetPos.z)) : 0;
+          const tag = isTrack ? '★ [MISSÃO] ' : '[MISSÃO] ';
+          const titleTxt = tag + (curQ.title.length > 24 ? curQ.title.slice(0, 22) + '...' : curQ.title) + (distM ? ` (${distM}m)` : '');
+
+          ctx.font = '700 11px "Chakra Petch", sans-serif';
+          const tw = ctx.measureText(titleTxt).width;
+          ctx.fillStyle = 'rgba(12, 18, 28, 0.9)';
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1;
+          ctx.fillRect(px + 12, pz - 9, tw + 8, 18);
+          ctx.strokeRect(px + 12, pz - 9, tw + 8, 18);
+          ctx.fillStyle = col;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(titleTxt, px + 16, pz);
+          ctx.restore();
+        }
       }
-      ctx.restore();
     } catch (_) {}
   }
 
@@ -1194,7 +1312,7 @@
     const S = getState();
     if (!S || !S.tracked || !S.active[S.tracked]) return null;
     const qid = S.tracked;
-    const qdef = QUEST_CATALOG[qid];
+    const qdef = QUEST_CATALOG[qid] || S.active[qid]?.def490;
     const act = S.active[qid];
     if (!qdef || !act || !act.targetPos || typeof player === 'undefined' || !player) return null;
 

@@ -1,9 +1,12 @@
-/* v520 (Ian, 21/10/2026): diálogo com NPCs de encontro como no Skyrim — as respostas levam a coisas.
-   Cada NPC lembra do que você fez (profile.dialogo520[tipo]): recusar, ameaçar, barganhar, ajudar de graça, concluir.
-   Liga em tools/quests480.js (openEmergentDialogue chama Dialogo520.open). */
+/* v524 (Ian, 21/10/2026): HUD de diálogo estilo Skyrim e correção de lojas/banco.
+   1. Diálogo estilo Skyrim com HUD próprio (#skyrim-dialog): legendas do NPC no centro inferior, escolhas verticais à direita com atalhos numéricos [1-9], setas ◆ e [ESC] Sair.
+   2. Banco e lojas corrigidos: abrir loja ou banco fecha o diálogo e NÃO executa closeModal prematuro; banco ganha opções próprias (Depositar/Sacar, etc.).
+   3. Cada NPC lembra do que você fez (profile.dialogo520[tipo]): afeto, recusa, ameaça, barganha, gratidão. */
 (function (global) {
   'use strict';
-  let ctx = null; // { def, npc, node }
+  let ctx = null; // { def, npc, builder, tree, node }
+  let activeOptions = [];
+  let keyHandlerAttached = false;
 
   function mem(type) {
     if (typeof profile === 'undefined' || !profile) return { flags: {}, meets: 0 };
@@ -32,13 +35,187 @@
     try { if (typeof L !== 'undefined' && L && Array.isArray(L.inter) && n.interRef) L.inter = L.inter.filter(i => i !== n.interRef); } catch (_) {}
   }
 
-  /* Cada nó: { t: texto do NPC, o: [ { l: rótulo, if?: ()=>bool, go?: nó, fn?: ()=>nó|null|'fim' } ] }.
-     fn devolve o próximo nó (string), ou 'fim' para fechar. */
+  /* --- HUD ESTILO SKYRIM --- */
+  function ensureSkyrimUI() {
+    let el = document.getElementById('skyrim-dialog');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'skyrim-dialog';
+      el.innerHTML = `
+        <style>
+          #skyrim-dialog {
+            position: fixed; inset: 0; z-index: 120; pointer-events: none; display: none;
+            font-family: "Chakra Petch", sans-serif; user-select: none;
+            background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(3,7,14,0.45) 75%, rgba(2,4,8,0.78) 100%);
+          }
+          .skyrim-dialog-subtitles {
+            position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+            width: min(680px, 92vw); text-align: center; pointer-events: auto;
+            animation: skyrimFadeIn 0.18s ease-out;
+          }
+          .skyrim-dialog-speaker {
+            font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: #ffd070;
+            text-transform: uppercase; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+          }
+          .skyrim-dialog-text {
+            font-size: 15px; line-height: 1.5; color: #f5f8ff; font-weight: 500;
+            background: rgba(10, 16, 26, 0.78); padding: 10px 22px; border-radius: 4px;
+            border: 1px solid rgba(255, 208, 112, 0.28); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+          }
+          .skyrim-dialog-choices {
+            position: absolute; bottom: 125px; right: 44px; width: min(440px, 92vw);
+            display: flex; flex-direction: column; gap: 7px; pointer-events: auto;
+            animation: skyrimSlideIn 0.2s ease-out;
+          }
+          @media (max-width: 768px) {
+            .skyrim-dialog-choices { right: 14px; bottom: 135px; width: min(380px, 94vw); }
+            .skyrim-dialog-subtitles { bottom: 18px; }
+          }
+          .skyrim-dialog-header {
+            font-size: 11px; font-weight: 700; letter-spacing: 1.8px; color: rgba(255, 208, 112, 0.75);
+            text-transform: uppercase; margin-bottom: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+          }
+          .skyrim-choice-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            background: rgba(14, 20, 30, 0.82); border: 1px solid rgba(255, 208, 112, 0.22);
+            border-radius: 3px; color: #dce7f5; font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.12s ease-out; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+          }
+          .skyrim-choice-item:hover, .skyrim-choice-item.selected {
+            background: rgba(28, 40, 60, 0.94); border-color: rgba(255, 208, 112, 0.9);
+            color: #ffffff; transform: translateX(-4px); box-shadow: 0 0 16px rgba(255, 208, 112, 0.4);
+          }
+          .skyrim-choice-num {
+            font-size: 11px; color: #ffd070; background: rgba(255,208,112,0.15);
+            padding: 2px 6px; border-radius: 2px; border: 1px solid rgba(255,208,112,0.3);
+          }
+          .skyrim-choice-icon {
+            color: rgba(255, 208, 112, 0.6); font-size: 11px; transition: color 0.12s ease-out;
+          }
+          .skyrim-choice-item:hover .skyrim-choice-icon { color: #ffd070; }
+          .skyrim-choice-text { flex: 1; line-height: 1.35; }
+          .skyrim-dialog-footer {
+            font-size: 11px; color: rgba(180, 195, 215, 0.65); text-align: right;
+            margin-top: 3px; letter-spacing: 0.5px;
+          }
+          @keyframes skyrimFadeIn {
+            from { opacity: 0; transform: translate(-50%, 8px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+          }
+          @keyframes skyrimSlideIn {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+        </style>
+        <div class="skyrim-dialog-subtitles">
+          <div class="skyrim-dialog-speaker" id="skyrim-speaker"></div>
+          <div class="skyrim-dialog-text" id="skyrim-speech"></div>
+        </div>
+        <div class="skyrim-dialog-choices">
+          <div class="skyrim-dialog-header">RESPOSTAS [1-9]</div>
+          <div id="skyrim-choices-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="skyrim-dialog-footer">[ESC] Sair</div>
+        </div>
+      `;
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function onKeyDown(e) {
+    if (!ctx) return;
+    if (e.code === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      closeSkyrimDialog();
+      return;
+    }
+    let num = -1;
+    if (e.code.startsWith('Digit')) num = parseInt(e.code.replace('Digit', ''), 10);
+    else if (e.code.startsWith('Numpad')) num = parseInt(e.code.replace('Numpad', ''), 10);
+    if (num >= 1 && num <= activeOptions.length) {
+      e.preventDefault(); e.stopPropagation();
+      pick(num - 1);
+      return;
+    }
+    if (e.code === 'KeyF' || e.code === 'Enter' || e.code === 'Space') {
+      e.preventDefault(); e.stopPropagation();
+      if (activeOptions.length > 0) pick(0);
+      return;
+    }
+  }
+
+  function closeSkyrimDialog() {
+    ctx = null;
+    activeOptions = [];
+    const el = document.getElementById('skyrim-dialog');
+    if (el) el.style.display = 'none';
+    if (keyHandlerAttached) {
+      if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('keydown', onKeyDown, true);
+      keyHandlerAttached = false;
+    }
+  }
+
+  function render() {
+    if (!ctx) return;
+    const def = ctx.def, N = ctx.tree, nd = N[ctx.node];
+    if (!nd) { closeSkyrimDialog(); return; }
+
+    const el = ensureSkyrimUI();
+    const speakerEl = document.getElementById('skyrim-speaker');
+    const speechEl = document.getElementById('skyrim-speech');
+    const listEl = document.getElementById('skyrim-choices-list');
+
+    if (speakerEl) speakerEl.textContent = def.name || def.title;
+    if (speechEl) speechEl.innerHTML = nd.t;
+
+    activeOptions = nd.o.filter(o => !o.if || o.if());
+    if (listEl) {
+      listEl.innerHTML = '';
+      activeOptions.forEach((o, i) => {
+        const item = document.createElement('div');
+        item.className = 'skyrim-choice-item';
+        item.innerHTML = `<span class="skyrim-choice-num">${i + 1}</span><span class="skyrim-choice-icon">◆</span><span class="skyrim-choice-text">${o.l}</span>`;
+        item.onclick = (e) => { e.stopPropagation(); pick(i); };
+        item.onmouseenter = () => { try { if (typeof beep === 'function') beep(800, 0.02, 0.02, 'triangle'); } catch (_) {} };
+        listEl.appendChild(item);
+      });
+    }
+
+    el.style.display = 'block';
+
+    if (!keyHandlerAttached) {
+      if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('keydown', onKeyDown, true);
+      keyHandlerAttached = true;
+    }
+  }
+
+  function pick(i) {
+    if (!ctx) return;
+    const o = activeOptions[i];
+    if (!o) return;
+    if (typeof sfx === 'function') sfx('click');
+    let next = o.go || (o.fn ? o.fn() : 'fim');
+    if (!next || next === 'fim') {
+      closeSkyrimDialog();
+      return;
+    }
+    ctx.tree = ctx.builder(ctx.def);
+    ctx.node = next;
+    render();
+  }
+
+  /* Cada nó de encontro: { t: texto do NPC, o: [ { l: rótulo, if?: ()=>bool, go?: nó, fn?: ()=>nó|null|'fim' } ] } */
   function build(def) {
     const q = def.quest, m = mem(def.type), f = m.flags, g = q.gold;
     const nome = def.name.split(',')[0];
     const pay = Math.round(g * 1.25);
-    const accept = over => { Quests480.acceptEmergent(def.type, over); f.aceitou = 1; f.recusou = 0; save(); return 'fim'; };
+    const accept = over => {
+      Quests480.acceptEmergent(def.type, over);
+      f.aceitou = 1; f.recusou = 0; save();
+      return 'fim';
+    };
     const N = {};
 
     N.raiz = {
@@ -71,7 +248,7 @@
       t: 'Posso contar com você? Diga como quer fazer isso.',
       o: [
         { l: 'Aceito o pagamento combinado (' + g + ' de ouro)', fn: () => accept({}) },
-        { l: 'Ajudo de graça, por honra (sem ouro, o dobro de reputação e confiança)', fn: () => { f.honra = 1; return accept({ gold: 0, rep: q.rep * 2, trust: q.trust * 2 }); } },
+        { l: 'Ajudo de graça, por honra (sem ouro, o dobro de reputação)', fn: () => { f.honra = 1; return accept({ gold: 0, rep: q.rep * 2, trust: q.trust * 2 }); } },
         { l: 'Voltar', go: 'raiz' }
       ]
     };
@@ -107,7 +284,7 @@
       ]
     };
     N.ativa = {
-      t: 'Você já aceitou meu pedido. Veja o marcador no minimapa. Boa sorte.',
+      t: 'Você já aceitou meu pedido. Veja o marcador no minimapa e no horizonte. Boa sorte.',
       o: [{ l: 'Certo', fn: () => 'fim' }]
     };
     N.obrigado = {
@@ -131,20 +308,6 @@
     return 'raiz';
   }
 
-  function render() {
-    const def = ctx.def, N = ctx.tree, nd = N[ctx.node];
-    let h = '<div class="guide93"><strong>' + def.name + '</strong>'
-      + '<p style="font-size:13px;line-height:1.45;margin-top:6px;color:#dbe8f2">' + nd.t + '</p></div>'
-      + '<div class="sec">O QUE VOCÊ RESPONDE?</div>'
-      + '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
-    nd.o.forEach((o, i) => {
-      if (o.if && !o.if()) return;
-      h += '<button class="btn' + (i === 0 ? ' hot' : '') + '" onclick="Dialogo520.pick(' + i + ')">' + o.l + '</button>';
-    });
-    h += '</div>';
-    if (typeof openModal === 'function') openModal(def.title, h);
-  }
-
   function open(def, npc) {
     mem(def.type).meets++;
     ctx = { def, npc, builder: build, tree: build(def), node: null };
@@ -152,37 +315,87 @@
     render();
   }
 
-  /* v521: NPCs de cidade e vilas (vendedores e caçadores). Memória por NPC: afeto (0 a 5) e ofensa. */
+  /* --- NPCs DE CIDADE E VILAS (VENDEDORES, BANCO, FERREIRO, CAÇADORES) --- */
   function tmem(n) {
     const m = mem('cidade:' + (n.name || n.short));
     if (m.bond == null) m.bond = 0;
     return m;
   }
+
   function buildTown(n, orig) {
-    const m = tmem(n), f = m.flags, nome = n.short || n.name, vend = n.kind === 'vendor';
+    const m = tmem(n), f = m.flags, nome = n.short || n.name;
+    const shop = n.shop || '', sign = (n.sign || '').toUpperCase();
+    const isBank = shop === 'bank' || sign.includes('BANCO') || nome === 'Selene';
+    const isWep = shop === 'wep' || sign.includes('EQUIPAMENTO') || nome === 'Kael';
+    const isMkt = shop === 'mkt' || sign.includes('MERCADO') || nome === 'Dorian';
+    const isPot = shop === 'pot' || sign.includes('POÇÕES') || nome === 'Mira';
+    const isArm = shop === 'arm' || shop === 'defense' || sign.includes('DEFESA') || nome === 'Brann';
+    const isGuild = shop === 'guild' || sign.includes('ORDEM') || nome === 'Lyra';
+    const isVendor = n.kind === 'vendor';
+
     const N = {};
     const news = () => { try { return (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Anda tudo calmo por aqui.'; } catch (_) { return 'Anda tudo calmo por aqui.'; } };
-    const bondTxt = () => m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : 'Olá, viajante. Em que posso ajudar?';
+    
+    let defaultGreeting = 'Olá, viajante. Em que posso ajudar?';
+    if (isBank) defaultGreeting = 'Bem-vindo ao Banco de Aster. Seu ouro e seus bens estão sempre protegidos aqui.';
+    else if (isWep) defaultGreeting = 'Aço bom e corte afiado mantêm um guerreiro vivo. O que procura hoje?';
+    else if (isMkt) defaultGreeting = 'Minérios, peixes e provisões do dia. Tenho de tudo um pouco.';
+    else if (isPot) defaultGreeting = 'Ervas raras e poções frescas. Uma boa poção na hora certa salva vidas.';
+    else if (isArm) defaultGreeting = 'Armadura pesada é a diferença entre voltar para casa ou virar comida de fera.';
+    else if (isGuild) defaultGreeting = 'A Ordem da Fenda está sempre à procura de caçadores corajosos.';
+
+    const bondTxt = () => m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : defaultGreeting;
+
+    // Ação principal de cada NPC de comércio/serviço
+    let actionLabel = 'Ver as mercadorias';
+    if (isBank) actionLabel = 'Acessar o Banco (Depositar e Sacar)';
+    else if (isWep) actionLabel = 'Quero ver suas armas e equipamentos';
+    else if (isMkt) actionLabel = 'Quero negociar recursos do mercado';
+    else if (isPot) actionLabel = 'Quero comprar poções e pergaminhos';
+    else if (isArm) actionLabel = 'Quero ver armaduras e defesas da vila';
+    else if (isGuild) actionLabel = 'Ver missões e serviços da Ordem';
+    else if (!isVendor) actionLabel = 'Ouvir o que ' + nome + ' tem a dizer';
+
     N.raiz = {
       t: f.ofendido ? 'Depois do que você me disse, não tenho nada a tratar com você.' : bondTxt(),
       o: f.ofendido ? [
         { l: 'Pedir desculpas e pagar 100 de ouro', if: () => gold() >= 100, fn: () => { addGold(-100); f.ofendido = 0; m.bond = Math.max(0, m.bond - 1); save(); say('<b>' + nome + ':</b> "Está bem. Vou esquecer isso."'); return 'raiz'; } },
         { l: 'Ir embora', fn: () => 'fim' }
       ] : [
-        { l: vend ? 'Ver as mercadorias' : 'Ouvir o que ' + nome + ' tem a dizer', fn: () => { ctx = null; if (typeof closeModal === 'function') closeModal(); try { orig(); } catch (_) {} return 'fim'; } },
+        { l: actionLabel, fn: () => {
+          closeSkyrimDialog();
+          try { orig(); } catch (e) { console.warn('Erro ao abrir serviço do NPC', e); }
+          return 'fim';
+        } },
+        ...(isBank ? [{ l: 'Como funciona a segurança do Banco?', go: 'sobre_banco' }] : []),
+        ...(isWep ? [{ l: 'Como funciona o aprimoramento de armas?', go: 'dica_forja' }] : []),
+        ...(isPot ? [{ l: 'Qual poção você mais recomenda?', go: 'dica_pocao' }] : []),
         { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
         { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
         { l: 'Pedir um agrado', go: 'agrado' },
         { l: 'Provocar: "Você não vale nada"', go: 'provoca' },
-        { l: 'Sair', fn: () => 'fim' }
+        { l: 'Até logo', fn: () => 'fim' }
       ]
+    };
+
+    N.sobre_banco = {
+      t: 'O que fica no banco não se perde, mesmo se você cair lá fora. E o seu ouro guardado rende juros diários todos os dias.',
+      o: [{ l: 'Entendi, obrigado', go: 'raiz' }]
+    };
+    N.dica_forja = {
+      t: 'Traga ouro e cristais da categoria do item. Cada nível concede +8% de poder. Acima do nível 10, há risco de perder os materiais se falhar.',
+      o: [{ l: 'Entendi', go: 'raiz' }]
+    };
+    N.dica_pocao = {
+      t: 'Poções de cura salvam na hora do aperto. E se for enfrentar Fendas de rank alto, leve sempre um Pergaminho de Ressurgimento.',
+      o: [{ l: 'Boa dica', go: 'raiz' }]
     };
     N.noticias = {
       t: news(),
-      o: [{ l: 'Obrigado pela conversa', fn: () => { if (!f.noticias) { f.noticias = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
+      o: [{ l: 'Obrigado pela informação', fn: () => { if (!f.noticias) { f.noticias = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
     };
     N.elogio = {
-      t: f.elogiou ? 'Você já disse isso. Mas continuo gostando de ouvir.' : 'Fico feliz que tenha notado! Poucos dizem isso.',
+      t: f.elogiou ? 'Você já disse isso. Mas continuo gostando de ouvir.' : 'Fico feliz que tenha notado! Poucos reparam nisso.',
       o: [{ l: 'Voltar', fn: () => { if (!f.elogiou) { f.elogiou = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
     };
     N.agrado = m.bond >= 3
@@ -199,13 +412,15 @@
     };
     return N;
   }
+
   function town(n, orig) {
     const m = tmem(n); m.meets++;
     const def = { name: n.name || n.short, title: n.short || n.name, type: 'cidade:' + (n.name || n.short) };
     ctx = { def, npc: n, builder: () => buildTown(n, orig), tree: buildTown(n, orig), node: 'raiz' };
     render();
   }
-  /* v522: mendigos. Dar esmola cria afeto; com afeto 3 ele devolve algo; expulsar custa reputação. */
+
+  /* --- MENDIGOS (v522) --- */
   const PASSADO = [
     'Eu era ferreiro, até a Fenda levar minha oficina e tudo que eu tinha.',
     'Fui soldado da Ordem. Perdi a perna esquerda num cerco e ninguém me quis depois.',
@@ -218,11 +433,11 @@
     const N = {};
     N.raiz = {
       t: f.expulso ? 'Por favor... não me bata de novo.'
-        : m.bond >= 4 ? 'Meu amigo! Que bom ver você. Os outros dizem que é um bom homem.'
-        : m.bond >= 2 ? 'Você de novo... Deus lhe pague pelo que já fez.'
+        : m.bond >= 4 ? 'Meu amigo! Que bom ver você. Os outros dizem que você é um homem honrado.'
+        : m.bond >= 2 ? 'Você de novo... Que a luz lhe pague pelo que já fez.'
         : 'Uma moedinha, nobre viajante? Faz dois dias que não como.',
       o: [
-        { l: 'Dar 1 de ouro', if: () => gold() >= 1, fn: () => { addGold(-1); m.bond = Math.min(5, m.bond + 1); f.expulso = 0; save(); say('<b>' + nome + ':</b> "Obrigado, obrigado."'); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
+        { l: 'Dar 1 de ouro', if: () => gold() >= 1, fn: () => { addGold(-1); m.bond = Math.min(5, m.bond + 1); f.expulso = 0; save(); say('<b>' + nome + ':</b> "Obrigado, de coração."'); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
         { l: 'Dar 10 de ouro', if: () => gold() >= 10, fn: () => { addGold(-10); m.bond = Math.min(5, m.bond + 2); f.expulso = 0; save(); return m.bond >= 3 && !f.presente ? 'presente' : 'noticia'; } },
         { l: 'Dar 50 de ouro', if: () => gold() >= 50 && !f.deu50, fn: () => { addGold(-50); f.deu50 = 1; f.expulso = 0; m.bond = 5; if (typeof addOrderRep === 'function') addOrderRep(5, 'A Ordem soube da sua bondade'); save(); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
         { l: 'Perguntar o que aconteceu com ele', go: 'passado' },
@@ -245,7 +460,8 @@
     ctx = { def, npc: n, builder: () => buildBeggar(n), tree: buildBeggar(n), node: 'raiz' };
     render();
   }
-  /* v523: moradores com rotina, guardas, bêbados e ladrões (tools/vida523.js) */
+
+  /* --- MORADORES COM ROTINA, GUARDAS E BÊBADOS (v523) --- */
   function actTxt(n) { return ({ trabalho: 'Estou no meio do trabalho.', almoco: 'É hora do almoço, deixe eu comer em paz.', taverna: 'Depois do serviço, nada como uma caneca na taverna.', casa: 'Estou indo para casa descansar.', patrulha: 'Estou de ronda.' })[n.act523] || 'Tenho muito o que fazer hoje.'; }
   function buildGuard(n) {
     const m = tmem(n), f = m.flags, nome = n.short || n.name;
@@ -255,14 +471,14 @@
       t: multa() ? 'Alto lá. Você me deve uma multa por desordem.' : m.bond >= 3 ? 'Cidadão de bem! Ando de olho nos ladrões, pode andar tranquilo.' : 'Mantenha a ordem e não teremos problema.',
       o: [
         { l: 'Pagar a multa de 50 de ouro', if: () => multa() && gold() >= 50, fn: () => { addGold(-50); profile.multa523 = 0; save(); say('<b>' + nome + ':</b> "Multa paga. Siga em frente."'); return 'raiz'; } },
-        { l: 'Subornar o guarda (100 de ouro, -10 de reputação)', if: () => multa() && gold() >= 100, fn: () => { addGold(-100); profile.multa523 = 0; subRep(10); save(); say('<b>' + nome + '</b> olha para o lado e some a multa.'); return 'raiz'; } },
+        { l: 'Subornar o guarda (100 de ouro, -10 de reputação)', if: () => multa() && gold() >= 100, fn: () => { addGold(-100); profile.multa523 = 0; subRep(10); save(); say('<b>' + nome + '</b> olha para o lado e perdoa a multa.'); return 'raiz'; } },
         { l: 'Perguntar se há ladrões por perto', go: 'ladroes' },
         { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
         { l: 'Provocar: "Você é um covarde"', go: 'provoca' },
-        { l: 'Seguir', fn: () => 'fim' }
+        { l: 'Seguir em frente', fn: () => 'fim' }
       ]
     };
-    N.ladroes = { t: n.home && n.home.ladrao523 ? 'Sim! Um ladrão anda por aqui. Se ele roubar você, grite que eu corro atrás dele.' : 'Por enquanto está tudo calmo. Eles aparecem mais à noite.', o: [{ l: 'Obrigado', go: 'raiz' }] };
+    N.ladroes = { t: n.home && n.home.ladrao523 ? 'Sim! Um ladrão anda rondando. Se ele roubar você, grite que eu corro atrás dele.' : 'Por enquanto está tudo calmo. Eles aparecem mais à noite.', o: [{ l: 'Obrigado', go: 'raiz' }] };
     N.noticias = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Tudo calmo.', o: [{ l: 'Obrigado', fn: () => { if (!f.n) { f.n = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
     N.provoca = { t: 'Repita isso e vai passar a noite na cela.', o: [
       { l: 'Repetir (multa de 50 e -10 de reputação)', fn: () => { profile.multa523 = 1; m.bond = 0; subRep(10); save(); return 'raiz'; } },
@@ -293,6 +509,7 @@
     }
     town(n, () => { try { if (typeof speech153 === 'function') speech153(n, actTxt(n), n.job523 || ''); } catch (_) {} });
   }
+
   function wrapTownNpcs() {
     try {
       if (typeof npcs === 'undefined' || !Array.isArray(npcs)) return;
@@ -307,17 +524,5 @@
   }
   setInterval(wrapTownNpcs, 1500);
 
-  function pick(i) {
-    if (!ctx) return;
-    const o = ctx.tree[ctx.node].o[i];
-    if (!o) return;
-    let next = o.go || (o.fn ? o.fn() : 'fim');
-    if (!next || next === 'fim') { ctx = null; if (typeof closeModal === 'function') closeModal(); return; }
-    // nós que dependem do estado atual (barganha) são refeitos ao entrar
-    ctx.tree = ctx.builder(ctx.def);
-    ctx.node = next;
-    render();
-  }
-
-  global.Dialogo520 = { open, pick, town, mendigo, vida };
+  global.Dialogo520 = { open, pick, town, mendigo, vida, close: closeSkyrimDialog };
 })(typeof window !== 'undefined' ? window : globalThis);

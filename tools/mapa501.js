@@ -73,7 +73,7 @@
     for(const e of enemies)if(!e.dead&&(e.legend||e.world)){ctx.fillStyle=e.legend?'#ffd54f':'#ff5a1e';ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),4,0,7);ctx.fill();ctx.stroke()}
     if(run.tmap){ctx.strokeStyle='#ffd54f';ctx.lineWidth=3;const X=tx(run.tmap.x),Z=tz(run.tmap.z);ctx.beginPath();ctx.moveTo(X-6,Z-6);ctx.lineTo(X+6,Z+6);ctx.moveTo(X+6,Z-6);ctx.lineTo(X-6,Z+6);ctx.stroke()}
     try{if(window.Civic343)Civic343.map(ctx,tx,tz,false)}catch(_){}
-    try{if(window.Quests480)Quests480.drawMinimap(ctx,tx,tz,false)}catch(_){}
+    try{if(window.Quests480)Quests480.drawMinimap(ctx,tx,tz,true)}catch(_){}
     try{const t=window.Campaign327&&Campaign327.target();if(t){ctx.fillStyle='#ffda68';ctx.strokeStyle='#3b2505';ctx.lineWidth=2;ctx.beginPath();ctx.arc(tx(t.x),tz(t.z),5,0,7);ctx.fill();ctx.stroke()}}catch(_){}
     /* jogador: seta + cone de visão */
     ctx.save();ctx.translate(tx(P.x),tz(P.z));ctx.rotate(-P.face+Math.PI);

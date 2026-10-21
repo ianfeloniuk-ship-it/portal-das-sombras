@@ -124,7 +124,23 @@ function bagItems(){
 function mapView(){
   view=mapView;const P=player;
   let h='<canvas id="bigmap" width="600" height="600" style="width:100%;max-width:min(720px,65vh);aspect-ratio:1;display:block;margin:0 auto;border-radius:4px"></canvas>';
-  if(L.mode==='world'){h+='<div class="sec">CIDADES PRÓXIMAS</div>';citiesAround(P.x,P.z,700).map(c=>({c,d:Math.hypot(c.x-P.x,c.z-P.z)})).sort((a,b)=>a.d-b.d).slice(0,5).forEach(({c,d})=>{h+=row(c.name,Math.round(d)+'m · zona segura com lojas','')});h+='<div class="sec">PORTAIS ABERTOS</div>';gates.filter(g=>!g.dead).map(g=>({g,d:Math.hypot(g.x-P.x,g.z-P.z)})).sort((a,b)=>a.d-b.d).forEach(({g,d})=>{if(g.secret){h+=row('<span class="rl" style="color:#ffd070">???</span> · portal desconhecido',Math.round(d)+'m · fecha em '+fmtT(g.life)+' · o Oráculo não consegue medir','');return}h+=row('<span class="rl" style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+GR[g.rank].id+'</span>'+(g.red?' · vermelho':'')+' · '+gateTheme124(g).n,Math.round(d)+'m · fecha em '+fmtT(g.life)+' · nível do portal <b>'+(g.anchor221?'???':gateLvl207(g))+'</b>','')})}
+  if(L.mode==='world'){
+    if(window.Quests480){
+      const st=window.Quests480.getState();
+      const actKeys=Object.keys(st?.active||{});
+      if(actKeys.length){
+        h+='<div class="sec">MISSÕES E CONTRATOS ATIVOS</div>';
+        for(const qid of actKeys){
+          const act=st.active[qid];
+          const q=window.Quests480.CATALOG[qid]||act?.def490;
+          if(!q||!act.targetPos)continue;
+          const d=Math.round(Math.hypot(P.x-act.targetPos.x,P.z-act.targetPos.z));
+          const isTrack=st.tracked===qid;
+          h+=row((isTrack?'<b style="color:#ffd070">★ </b>':'')+q.title,d+'m de você · '+q.giver+'<br>'+q.desc,'<button class="btn '+(isTrack?'on':'hot')+'" onclick="if(window.Quests480)Quests480.trackQuest(\''+qid+'\');mapView()">'+(isTrack?'Acompanhando':'Acompanhar')+'</button>');
+        }
+      }
+    }
+    h+='<div class="sec">CIDADES PRÓXIMAS</div>';citiesAround(P.x,P.z,700).map(c=>({c,d:Math.hypot(c.x-P.x,c.z-P.z)})).sort((a,b)=>a.d-b.d).slice(0,5).forEach(({c,d})=>{h+=row(c.name,Math.round(d)+'m · zona segura com lojas','')});h+='<div class="sec">PORTAIS ABERTOS</div>';gates.filter(g=>!g.dead).map(g=>({g,d:Math.hypot(g.x-P.x,g.z-P.z)})).sort((a,b)=>a.d-b.d).forEach(({g,d})=>{if(g.secret){h+=row('<span class="rl" style="color:#ffd070">???</span> · portal desconhecido',Math.round(d)+'m · fecha em '+fmtT(g.life)+' · o Oráculo não consegue medir','');return}h+=row('<span class="rl" style="color:'+(g.red?'#ff4d6a':RANKS[g.rank].c)+'">RANK '+GR[g.rank].id+'</span>'+(g.red?' · vermelho':'')+' · '+gateTheme124(g).n,Math.round(d)+'m · fecha em '+fmtT(g.life)+' · nível do portal <b>'+(g.anchor221?'???':gateLvl207(g))+'</b>','')})}
   else h+='<div class="sysline" style="font-size:12px">'+(L.floors?'Andar '+(L.floors.current+1)+'/3 · escadas em verde · saída somente no 1º andar. ':'')+'Salas exploradas '+L.seen.size+'/'+L.rooms.length+'. Azul: saída. Dourado: baú e guardião.</div>';
   openModal(L.mode==='world'?'MAPA · TERRAS DESPERTAS':L.special?'MAPA · '+L.special.name.toUpperCase():'MAPA · MASMORRA RANK '+L.G.id,h);
   drawMap($('bigmap').getContext('2d'),600,true);

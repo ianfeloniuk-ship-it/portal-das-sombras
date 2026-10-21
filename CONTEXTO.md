@@ -1,3 +1,29 @@
+## v524 (21/10/2026) — HUD de diálogo Skyrim, correção de banco/lojas e missões no minimapa/mapa
+- Pedido de Ian (áudios e print):
+  1) "O HUD de falar ali tem que mudar, tem que ser que nem no Skyrim, que tem as escolhas ali, não assim como tá agora."
+  2) "Banco tem ver mercadorias e eu não consigo entrar, tá tudo no diálogo... tá errado isso aqui, não é assim que funciona o banco e as coisas, tem que ser arrumado."
+  3) "Vou no mercado, aperto em ver mercadorias e sai da loja. Não consigo ver. Mesma coisa com o ferreiro."
+  4) "Às vezes eu pego uma missão com NPC e ela não aparece no mapa."
+- `tools/dialogo520.js`:
+  - HUD de diálogo próprio no estilo Skyrim (`#skyrim-dialog`): legendas com nome e fala do NPC centralizadas na parte inferior em card translúcido escuro com borda dourada suave; menu vertical de escolhas à direita com atalhos numéricos [1-9], diamante ◆ e suporte a teclado (números 1-9, F/Enter/Espaço para escolher a primeira, ESC para sair).
+  - Correção de lojas e banco: abrir uma loja ou banco fecha o HUD de diálogo e abre a janela do serviço SEM chamar `closeModal()` indevido (antes fechava instantaneamente a janela que o NPC acabava de abrir).
+  - Diálogos especializados e imersivos para cada comerciante:
+    - Selene (Banco): opção 1 é "Acessar o Banco (Depositar e Sacar)", além de dúvidas sobre o banco, notícias e saída.
+    - Kael (Ferreiro): opção 1 é "Quero ver suas armas e equipamentos", além de dicas de aprimoramento.
+    - Dorian (Mercado): opção 1 é "Quero negociar recursos do mercado".
+    - Mira (Poções): opção 1 é "Quero comprar poções e pergaminhos".
+    - Brann (Defesa da Vila): opção 1 é "Quero ver armaduras e defesas da vila".
+    - Lyra (Ordem): opção 1 é "Ver missões e serviços da Ordem".
+- `tools/quests480.js`:
+  - Minimapa circular do HUD: quando o objetivo da missão fica além do raio do minimapa (>40m, como os 142m do encontro do Zephyr), o marcador é clampado na borda do minimapa como uma seta de bússola estilo Skyrim, com diamante dourado e a distância exata em metros (ex.: "142m"). Quando o jogador entra no raio, o marcador vira um diamante verde pulsante sobre o local exato.
+  - Mapa-múndi grande (tecla M / `mapa501.js`): desenha todas as missões ativas com halo brilhante, diamante de destaque e plaqueta escura com o título da missão e distância em metros.
+- `src/core/410-overlay-e-hud.js`:
+  - Marcador 3D no mundo: desenha o diamante dourado flutuante `◆ [MISSÃO] Titulo · N metros` projetado no horizonte sobre o local do objetivo quando no campo de visão.
+  - HUD (caixa amarela do minimapa `obj`): adiciona linha com a missão rastreada e distância, garantindo que o objetivo seja visível mesmo se o painel de objetivos for fechado.
+- `src/core/620-janelas.js`:
+  - Janela do Mapa (tecla M): adiciona a seção "MISSÕES E CONTRATOS ATIVOS" listando cada contrato com título, distância e botão de acompanhar/localizar.
+- Teste: simulação em Node (Selene abre banco sem fechar modal, Kael abre equipamentos, Dorian abre mercado, Zephyr aceita missão e registra coordenadas; clamp do minimapa desenha seta na borda e badge de distância 142m; mapa grande desenha plaqueta com título; verificação de integridade das partes e build.py ok).
+
 ## v523 (21/10/2026) — Mundo vivo, parte 2: rotina dos moradores, guardas, bêbados e ladrões
 - Pedido de Ian: rotina dos moradores (trabalhar, comer, dormir em casa) e ladrões, bêbados e guardas.
 - `tools/vida523.js` (novo): cada cidade de pé ganha 3 moradores e 2 guardas. Rotina pelo relógio do jogo: 0 a 5% sai de casa, 5 a 30% trabalha perto da barraca do mercado (o varredor circula na praça), 30 a 38% almoça na pousada, 38 a 50% trabalha, 50 a 67% taverna na pousada (1 em 3 vira bêbado), noite volta para casa e dorme (some dentro da casa, vira kind `deco`, e reaparece de manhã). Guardas patrulham um círculo de 14 m. À noite (ou depois de 55% do dia), com o jogador a menos de 45 m da cidade, no máximo uma vez a cada 90 s e com 1 chance em 4, aparece um Vulto Encapuzado que corre até o jogador e rouba 10% do ouro (de 10 a 150, só com 20 ou mais de ouro) e foge: se um guarda estiver a 35 m ele persegue e devolve o ouro; se o jogador alcançar e apertar F, recupera o ouro e ganha 3 de reputação; senão o ladrão escapa.
