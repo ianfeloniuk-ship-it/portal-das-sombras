@@ -141,7 +141,7 @@ function updateProjectiles253(dt){
     for(const e of targets){if(e.dead||p.hit.has(e))continue;const body=projectileBody253(e),hit=Projectiles253.segmentCapsule(before,after,body,body.r+p.r,body.hitHeight);if(hit.hit&&hit.t<limit)hits.push({e,hit});}
     hits.sort((a,b)=>a.hit.t-b.hit.t);
     for(const {e,hit} of hits){p.x=hit.p.x;p.y=hit.p.y;p.z=hit.p.z;p.hit.add(e);
-      if(p.team==='player'){hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,ptype300:p.ptype,elem300:p.elem300,basicClass:p.basicClass,skillHit:p.skillHit,skillVfx487:p.fx487?.sk,third:p.third,dtype281:p.dtype281});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3);}projectileImpact253(p);if(bounceBasic(p)){bounced=true;break;}if(!p.pierce){done=true;break;}}
+      if(p.team==='player'){hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,ptype300:p.ptype,elem300:p.elem300,basicClass:p.basicClass,skillHit:p.skillHit,skillVfx487:p.fx487?.sk,basicVfx487:p.fx487?.ci,third:p.third,dtype281:p.dtype281});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3);}projectileImpact253(p);if(bounceBasic(p)){bounced=true;break;}if(!p.pierce){done=true;break;}}
       else{if(e===player){window.projOwner333=p.owner333||null;inDType281=MAGIC_PT281.test(p.ptype||'')?'mag':'phy';hurtPlayer(p.dmg,!p.fromBoss111);inDType281='phy';window.projOwner333=null}else hurtAlly(e,p.dmg);projectileImpact253(p);done=true;break;}
     }
     if(!done&&!bounced){p.x=after.x;p.y=after.y;p.z=after.z;if(terrain){p.x=terrain.x;p.y=terrain.y;p.z=terrain.z;done=true;projectileImpact253(p);}}

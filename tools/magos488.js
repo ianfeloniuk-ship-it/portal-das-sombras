@@ -45,7 +45,7 @@ const shoot0=shoot;shoot=function(){const n=projs.length,s=G.legacySkill,r=shoot
  }
  return r;
 };
-const pi0=projectileImpact253;projectileImpact253=function(p){if(!G.projectile(p))return pi0.apply(this,arguments);const r=pi0.apply(this,arguments),e=[...p.hit].at(-1);impact(p.fx487.ci,p,e,p.third);return r};
+const pi0=projectileImpact253;projectileImpact253=function(p){if(!G.projectile(p)||!P.basic(p.fx487.ci))return pi0.apply(this,arguments);const r=pi0.apply(this,arguments),e=[...p.hit].at(-1);impact(p.fx487.ci,p,e,p.third);return r};
 // Motions authored on the existing rig. These do not move the collider or replace the normal attack clips.
 const A=Anim303.A,ready={upperarm_r:[-70,0,-35],forearm_r:[-60,0,0],upperarm_l:[-75,0,30],forearm_l:[-60,0,0],spine:[8,0,0],thigh_l:[-15,0,0],shin_l:[20,0,0]};
 A.mage488_ceu={d:2.15,gameClock:true,mage488:true,k:[{t:0,b:{}},{t:.16,b:{upperarm_r:[-160,0,-35],upperarm_l:[-150,0,35],forearm_r:[-20,0,0],chest:[-15,0,0],head:[-20,0,0]}},{t:.4,b:{...ready,upperarm_r:[-120,0,-35],upperarm_l:[-130,0,35],chest:[-10,15,0]}},{t:.7,b:{...ready,upperarm_r:[-95,0,-35],upperarm_l:[-110,0,35],chest:[10,-15,0]}},{t:.88,b:ready},{t:1,b:{}}]};

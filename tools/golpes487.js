@@ -215,9 +215,9 @@ const RECIPES=[
  {id:5,n:'Paladino',arma:'varinha sagrada',melee:false,dist:4.2,col:[0xffffff,0xffe28a,0xd08a20],pal:'gold',basic:'Luz sagrada',skill:'Julgamento',
   b(){const c=this.col;[0,.42,.84].forEach(d=>at(d,()=>{const a=hand(1.05);shot(a,tgt(),13,p=>orb(p,.55,c,{noise:.6}),(p)=>{fade(sprite(starTex,p,1.6,{color:c[1]}),.25,.3);ringFace(p,c[1],.3,1.5,.3);sparks(p,12,c[1],4,2);knock(F,.2)},{trail:[.3,c,{len:12}]})}))},
   s(){const c=this.col,H=hero.position.clone();rune(H,c[1],2.4,1.6,1.5);at(.1,()=>{const col=new T.Mesh(new T.CylinderGeometry(.42,.42,9,24,1,true),ribMat(c,{mode:1,center:1,noise:.6,ns:3,spd:-3,gain:1.2}));col.userData.ownGeo=true;
-   col.material.uniforms.uMode.value=2;col.position.set(H.x,4.5,H.z);scene.add(col);col.scale.set(.1,1,.1);
+   col.material.uniforms.uMode.value=2;col.position.set(H.x,ground(H.x,H.z)+4.5,H.z);scene.add(col);col.scale.set(.1,1,.1);
    spawn(col,(o,dt,t)=>{o.material.uniforms.uTime.value=time;const k=t/.55;o.scale.set(Math.sin(Math.min(1,k)*Math.PI)+.05,1,Math.sin(Math.min(1,k)*Math.PI)+.05);o.material.uniforms.uFade.value=Math.max(0,1-k);if(k>=1){kill(o);return false}return true})});
-   at(.35,()=>{flash(.8,.9,.3);rune(H,c[1],7,1.1,.8);ringFlat(H,c[1],1,8,.6);ringFlat(H,0xffffff,1,6,.45,.08);sparks(H.clone().setY(1),36,c[1],8,1.5,.2,.7);embers(H,30,c[1],5,1.5);meleeHit(c,this.pal,false);knock(F,.4,.4);fade(sprite(starTex,tgt(),2,{color:c[1]}),.3,.3)})}},
+   at(.35,()=>{flash(.8,.9,.3);rune(H,c[1],currentCtx?.areaRadius?currentCtx.areaRadius*2.15:7,1.1,.8);ringFlat(H,c[1],1,currentCtx?.areaRadius?currentCtx.areaRadius/.36:8,.6);ringFlat(H,0xffffff,1,currentCtx?.areaRadius?currentCtx.areaRadius*.75/.36:6,.45,.08);sparks(H.clone().setY(1),36,c[1],8,1.5,.2,.7);embers(H,30,c[1],5,1.5);meleeHit(c,this.pal,false);knock(F,.4,.4);fade(sprite(starTex,tgt(),2,{color:c[1]}),.3,.3)})}},
  {id:6,n:'Invocador',arma:'tomo',melee:false,dist:5.6,col:[0xffffff,0x8fb8ff,0x6a30e0],pal:'arcane',basic:'Esfera arcana',skill:'Lobo Espiritual',
   b(){const c=this.col;[0,.45,.9].forEach(d=>at(d,()=>{const a=hand(1.05);const o0=orb(a,.5,c,{noise:.8});const gl=[];for(let k=0;k<3;k++){gl.push(sprite(starTex,a,.18,{color:c[1]}))}
    let pos=a.clone();spawn(o0,(o,dt,t)=>{gl.forEach((g,k)=>{const an=t*14+k*2.09;g.position.copy(o.position).add(new T.Vector3(Math.cos(an)*.32,Math.sin(an*1.3)*.18,Math.sin(an)*.32))});return o.parent!=null});
@@ -302,7 +302,7 @@ const RECIPES=[
 
 
 API.referenceRecipes=RECIPES;
-API.fx={T,UP,GEOS,BLADE,PAL,crystalMat,ribMat,orb,bolt,shot,slash,trail,stripGeo,sparks,embers,smoke,chunk,bits,crystal,ringFlat,ringFace,ringDir,rune,crack,flash,knock,sprite,fade,glowTex,starTex,softTex,spawn,at,kill,add:addFX,pos:gp,ground,context,actor,inContext,faceCam};
+API.fx={random:()=>rand(),T,UP,GEOS,BLADE,PAL,crystalMat,ribMat,orb,bolt,shot,slash,trail,stripGeo,sparks,embers,smoke,chunk,bits,crystal,ringFlat,ringFace,ringDir,rune,crack,flash,knock,sprite,fade,glowTex,starTex,softTex,spawn,at,kill,add:addFX,pos:gp,ground,context,actor,inContext,faceCam};
 API.releaseCast=impactCast;
 API.releaseTarget=(c,e)=>{if(!c||c.cancelled)return;c.ready=true;const keep=[];for(const h of c.hits){if(h[0]===e)releaseHit({e:h[0],d:h[1],sk:h[2],region:c.region});else keep.push(h)}c.hits=keep;};
 
@@ -314,7 +314,7 @@ function skillContext(ci,e,pt,cast){const c=context(ci,e,pt);c.cast=cast;return 
 function impactCast(c){if(!c||c.cancelled||c.ready)return;c.ready=true;c.releasing=true;const hits=c.hits.splice(0);for(const [e,d,sk]of hits)releaseHit({e,d,sk,region:c.region});c.releasing=false;}
 
 API.withSkill=function(sk,fn){const prev=activeSkill,hs=window.hitstop,sh=window.shake;activeSkill=sk;try{if(API.handles(sk)){window.hitstop=()=>{};window.shake=()=>{}}return fn()}finally{activeSkill=prev;window.hitstop=hs;window.shake=sh}};
-API.delayFor=sk=>!API.handles(sk)||API.provider(sk)===window.Magos493?0:sk.sourceClass===0?.27:sk.sourceClass===2?.44:.06;
+API.delayFor=sk=>!API.handles(sk)?0:API.provider(sk)?.delayFor?.(sk)??(sk.sourceClass===0?.27:sk.sourceClass===2?.44:.06);
 API.pulseTimes=sk=>API.on?(API.provider(sk)?.pulseTimes?.(sk)||(API.handles(sk)&&sk.sourceClass===1?[.16,.26,.36,.46,.56,.8]:null)):null;
 const originalPlay=VFX302.play;
 // The entire old presentation is collision-only. The recipes above own the visible presentation.
@@ -328,9 +328,9 @@ function skillStart(sk,K,cast){const provider=API.provider(sk);if(provider){API.
 const originalKit=kitRun111;
 kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,arguments);const K=VFX328.truth(sk);if(!K)return originalKit.apply(this,arguments);K.origin={x:player.x,z:player.z};K.alliesBefore=new Set(allies);const cast={hits:[],region:L,releasing:false,ready:!!API.provider(sk)?.immediate?.(sk),cancelled:false},prev=activeCast;castStates.set(sk,cast);statesById.set(sk.skillId,cast);activeCast=cast;activeSkill=sk;let result;try{result=API.legacy(()=>originalKit.apply(this,arguments))}finally{activeCast=prev;activeSkill=null}
  skillStart(sk,{...K,list:cast.hits.length?[...new Set(cast.hits.map(h=>h[0]))]:K.list},cast);return result};
-API.replacesHit=o=>!!(API.on&&o&&o.fromPlayer&&!o.pet&&!o.passive&&!o.dot&&!o.tick&&(o.skillHit?API.handles(activeSkill||o.skillVfx487||o.fx487?.sk):([0,1,2].includes(o.basicClass??profile.cls)||API.providers.some(p=>p.basic(o.basicClass)))));
+API.replacesHit=o=>!!(API.on&&o&&o.fromPlayer&&!o.pet&&!o.passive&&!o.dot&&!o.tick&&(o.skillHit?API.handles(activeSkill||o.skillVfx487||o.fx487?.sk):([0,1,2].includes(o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls)||API.providers.some(p=>p.basic(o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls)&&(!p.replacesBasic||p.replacesBasic(o))))));
 const H=hurtEnemy;
-hurtEnemy=function(e,amt,sx,sz,o){const hp=e&&e.hp,owns=API.replacesHit(o),hs=window.hitstop,sh=window.shake;let r;try{if(owns){window.hitstop=()=>{};window.shake=()=>{}}r=H.apply(this,arguments)}finally{window.hitstop=hs;window.shake=sh}if(API.replacesHit(o)&&!o.skillHit&&[0,1,2].includes(o.basicClass??profile.cls)&&e&&e.hp<hp){const ci=o.basicClass??profile.cls,c=COLORS[ci],ctx=context(ci,e);inContext(ctx,()=>{if(ci===1){const p=tgt();sparks(p,10,0xff3050,3.5,7,.14);sparks(p,6,c[1],4);slash(p.clone(),S.yaw,{col:c,r:.45,w:.3,arc:2,tilt:.8,dur:.08,fade:.12});knock(F,.2)}else{meleeHit(c,PALS[ci],!!o.third);if(ci===2&&o.third){ringFlat(F.position,c[1],.5,4,.4);for(let k=0;k<8;k++)chunk('steel',F.position,1.4)}}});API.stats.hits++}return r};
+hurtEnemy=function(e,amt,sx,sz,o){const hp=e&&e.hp,owns=API.replacesHit(o),hs=window.hitstop,sh=window.shake;let r;try{if(owns){window.hitstop=()=>{};window.shake=()=>{}}r=H.apply(this,arguments)}finally{window.hitstop=hs;window.shake=sh}if(API.replacesHit(o)&&!o.skillHit&&[0,1,2].includes(o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls)&&e&&e.hp<hp){const ci=o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls,c=COLORS[ci],ctx=context(ci,e);inContext(ctx,()=>{if(ci===1){const p=tgt();sparks(p,10,0xff3050,3.5,7,.14);sparks(p,6,c[1],4);slash(p.clone(),S.yaw,{col:c,r:.45,w:.3,arc:2,tilt:.8,dur:.08,fade:.12});knock(F,.2)}else{meleeHit(c,PALS[ci],!!o.third);if(ci===2&&o.third){ringFlat(F.position,c[1],.5,4,.4);for(let k=0;k<8;k++)chunk('steel',F.position,1.4)}}});API.stats.hits++}return r};
 const oldSlash=fxSlash;
 fxSlash=function(x,z,a,c,r,big,ci,footY){if(!API.on||![0,1,2].includes(ci))return oldSlash.apply(this,arguments);const ctx=context(ci,null,{x,z}),i=big?2:Math.max(0,(player.combo||1)-1)%3;ctx.hero.position=gp(x,z,footY||0);ctx.S={dir:new T.Vector3(Math.sin(a),0,Math.cos(a)),yaw:a};inContext(ctx,()=>{lunge(ci===2?.3:.35,S.dir,ci===2?.22:.18);slash(hero.position.clone().setY(ci===2?1.2:big?1.1:.95),S.yaw,{col:COLORS[ci],r:ci===2?1.25:1.35,w:ci===2?(big?.85:.65):(big?.7:.5),arc:ci===2?2:2.5,tilt:ci===2?1.5:i===0?.35:i===1?-.4:1.45,rev:i===1,dur:ci===2?.17:.15})});API.stats.basics++};
 // Replace each real dagger's drawing, never its physics or its collision mesh/radius.
