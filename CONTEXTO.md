@@ -1,3 +1,9 @@
+﻿## v497 (21/10/2026) — Marco Zero do Livro I: Arquiteto, Adrian e Estrada Sul
+- Pedido de Ian: abertura canonica com o Arquiteto e o despertar na estrada ao lado de Adrian e da carroca tombada.
+- **Frase Oficial do Arquiteto (tools/dream488.js)**: Correcao para a frase do livro: *"Voce vai ser aquele que vai me erguer ou me destruir."* na transicao do vacuo da Fenda.
+- **Alinhamento do Marco Zero (tools/campaign327.js)**: O Ato I (a1) fixa a carroca (wagon369.glb) e Adrian (edran452.glb) deterministamente na Estrada Sul de Aster ([c.x, c.z + wall + 22]).
+- **Enquadramento de Camera e Moldura Cenica**: Ao acordar da cutscene, o jogador desperta deitado na estrada olhando a 0 graus (Norte) em direcao ao Portao Sul de Aster e as tochas da muralha. O trecho da estrada e emoldurado por coniferas nordicas rusticas (tripo-conifera153) e rochedos com musgo (tripo-rocha-musgo154, tripo-rochedo154) nas margens, sem nenhuma forma geometrica primitiva pura.
+
 ## v496 (21/10/2026) — Arqueiro e Paladino: básicos, Chuva de Flechas e Julgamento
 - Continuação automática autorizada por Ian. `tools/luz-flechas496.js` usa as peças aprovadas: flechas BLADE de cristal verde (terceira maior), rastro e impacto verde; orbe sagrado com estrela dourada no contato; 16 flechas de cristal caindo e ficando cravadas; Julgamento com runas, coluna e onda de luz. Este lote cobre básicos e uma habilidade de cada classe; as demais ativas delas ainda estão pendentes.
 - As 16 flechas acompanham os cinco pulsos canônicos sem alterar a cadência. Julgamento libera o orçamento original de dano no clarão de 0,35s; círculo e onda usam o raio real da habilidade, inclusive crescimento. Movimento próprio de puxar/disparar o arco para cima e conjurar a coluna; básicos mantêm os clipes existentes.

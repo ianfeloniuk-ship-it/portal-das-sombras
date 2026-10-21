@@ -116,7 +116,7 @@
 
   const LINES = [
     { text: "— Sim... é você. Eu finalmente o encontrei.", start: 0.8, end: 3.4 },
-    { text: "— Você vai ser aquele que vai me libertar... ou então acabar comigo.", start: 3.6, end: 6.5 },
+    { text: "— Você vai ser aquele que vai me erguer ou me destruir.", start: 3.6, end: 6.5 },
     { text: "— Acorde. Vamos juntos destruir o que resta deste mundo.", start: 6.7, end: 9.1 }
   ];
 

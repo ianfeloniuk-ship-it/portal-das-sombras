@@ -267,6 +267,7 @@
       return [s.pos[0] + 8 * i, s.pos[1]];
     }
     const c = nearestCity(player.x, player.z).c, wall = wallOf(c); s.city = c.name;
+    if (mId === 'a1') return [c.x, c.z + wall + 22];
     if (mId === 'a8') {
       if (s.s === 0) return [c.x - (wall + 28), c.z];
       if (s.s === 1) return [c.x - (wall + 58), c.z - 8];
@@ -452,6 +453,42 @@
       /* v457 (Ian): quem está preso fica EMBAIXO da carroceria tombada (lona e tábuas por cima do corpo, só a cabeça para fora);
          antes ficavam no chão livre ao lado e, ao levantar a carroça, ela cairia em cima deles */
       [[s1, -1.6, -1.15], [s2, -1.75, -0.3]].forEach(([f, lx, lz]) => pinUnderCart457(c, f, lx, lz));
+    }
+    if (m.id === 'a1' && pts[0]) {
+      const p0 = pts[0], cx = p0[0], cz = p0[1];
+      const sg = new THREE.Group(); sg.userData.terrainAbsolute245 = true;
+      const offsets = [
+        [-10, -18, 'fir', 8.5], [9.5, -16, 'fir', 9.0],
+        [-12, 6, 'fir', 7.5], [10.2, 8, 'fir', 8.0],
+        [-8.5, -3, 'mossrock', 3.2], [9.0, -1, 'boulder', 3.6],
+        [-9.2, 20, 'mossrock', 2.8], [9.8, 22, 'fir', 8.2]
+      ];
+      const addFrame = () => {
+        if (!window.TripoEnvironment153?.models) return;
+        offsets.forEach(([ox, oz, key, h]) => {
+          const mDef = TripoEnvironment153.models[key];
+          if (!mDef) return;
+          const rx = cx + ox, rz = cz + oz, ry = gy(rx, rz);
+          const grp = new THREE.Group();
+          grp.position.set(rx, ry, rz);
+          grp.rotation.y = Math.sin(ox * 2.3 + oz * 1.7) * Math.PI;
+          const scale = h / (mDef.h || 4);
+          grp.scale.setScalar(scale);
+          mDef.parts.forEach(p => {
+            const mesh = new THREE.Mesh(p.geometry, p.material);
+            mesh.castShadow = true; mesh.receiveShadow = true;
+            grp.add(mesh);
+          });
+          sg.add(grp);
+          addCol({ x: rx, z: rz, r: key === 'fir' ? 1.0 : 1.6 });
+        });
+      };
+      if (window.TripoEnvironment153?.ready) {
+        TripoEnvironment153.ready.then(addFrame);
+      } else {
+        addFrame();
+      }
+      scene.add(sg); w.grps.push(sg);
     }
     if(m.id==='a1'&&s.s===0&&s.edranHelp401&&w.cart){w.inters[0].x=w.cart.position.x;w.inters[0].z=w.cart.position.z+2.3;w.inters[0].label='F · EMPURRAR A CARROÇA'}
     if (m.id === 'a8' && pts[0]) {
@@ -650,7 +687,7 @@
       begin(m); const s = state(m.id); s.pos = P.slice(); s.helped401 = false; s.extra = []; s.extraStep = 0; save();
       const px = P[0] + 1.8, pz = P[1] + 3;
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
-      player.face = Math.PI; pcCam.yaw = 0; pcCam.pitch = .06; run.pos = { x: px, z: pz }; s.roadSpawn401={x:px,z:pz};save();
+      player.face = 0; pcCam.yaw = 0; pcCam.pitch = .06; run.pos = { x: px, z: pz }; s.roadSpawn401={x:px,z:pz};save();
       try { buildWorldFor(m); } catch (_) {}
       if (window.Dream488 && !s.dreamSeen) {
         s.dreamSeen = true; save();
