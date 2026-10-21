@@ -1,3 +1,11 @@
+## v514 (21/10/2026) — Mapa feito à mão como Skyrim: serras, passagens e estradas sinuosas
+- Pedido de Ian: o mapa não pode ter grade nem estrada reta ("anda reto e chega no fim"); tem que ter as coisas bem colocadas, como Skyrim.
+- `tools/terrain245.js` (CPU e GLSL iguais): `ridge513` = 4 serras feitas à mão (norte entre Aster e Ymiria, leste antes do deserto de Zahar, sul antes de Urdan, oeste antes de Thalor), com ~170 m e encosta íngreme (só passa escalando, com Estamina). Cada serra tem uma passagem (0,−2150 · 1820,0 · 0,2050 · −2400,0). O achatamento da estrada usa a distância real até o trecho (`sd513`), não mais uma caixa.
+- `tools/mundo513.js` (novo, depois de `mapa500.js`): as 19 vilas ficam em lugares escolhidos (costa, beira de rio, pé da serra, oásis), não mais sorteadas na grade. 16 estradas curvas (Catmull-Rom, trechos de 40 m, 1.168 no total) ligam Aster às Capitais pelas passagens e as vilas entre si. `roadSegs`/`onRoad` foram trocados (distância real até o trecho). A estrada sul continua reta no desfiladeiro do marco zero (x = 0, z de 88 a 280).
+- Partes ligadas: `580` (ponte sobre o rio agora acha o cruzamento de qualquer trecho, não só horizontal).
+- Teste: navegador local, mapa-múndi com serras e estradas curvas, passagem norte vista do chão, encosta até 1,23 de inclinação (só escalando), marco zero na estrada, sem erro novo. Reaplicado por cima da v513.
+- Pendente: no mapa-múndi as serras aparecem brancas como neve (a cor é pela altura), inclusive no deserto e na floresta; trechos de estrada em morro cortam uma vala (comportamento antigo).
+
 ## v513 (21/10/2026) — Elmo fora do cenário e narrador com menos falas
 - Pedido de Ian: remover definitivamente a armadura do Metamorfo usada como pedra; impedir narrador junto do Arquiteto e reduzir comentários.
 - Confirmado por render: `tripo-rochedo154.glb` é o elmo preto/vermelho do print. Removido do catálogo de cenário e LOD; moldura da carroça e desfiladeiro usam rocha com musgo. Armadura legítima em set153 preservada. Build rejeita reintrodução do nome errado nos scripts.

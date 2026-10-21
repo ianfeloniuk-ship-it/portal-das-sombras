@@ -38,7 +38,7 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
   /* v391 (Ian): dá para nadar no lago; monstros continuam fora (tools/water391.js) */L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
  const rv=riverNear239(x0,z0);if(rv.d>CH)return;if(nearestCity(x0,z0).d<220)return;
  /* v240 (Ian): neve/cristal = gelo (dá para andar); deserto/vulcão = seco; estrada passa por cima do rio (mureta de pedra), água some sob a estrada. */
- const RS=roadSegs(x0,z0,1),cross=[];for(const [x1,z1,x2,z2] of RS){if(z1!==z2||Math.abs(z1-z0)>CH/2+6)continue;const bx=riverCenter239(rv.b,z1);if(bx<Math.min(x1,x2)||bx>Math.max(x1,x2))continue;cross.push({x:bx,z:z1})}
+ const RS=roadSegs(x0,z0,1),cross=[];for(const [x1,z1,x2,z2] of RS){/* v513: estradas curvas — cruza onde a estrada troca de lado do rio */const f1=x1-riverCenter239(rv.b,z1),f2=x2-riverCenter239(rv.b,z2);if(f1*f2>0||f1===f2)continue;const t=f1/(f1-f2),cz=z1+(z2-z1)*t;if(Math.abs(cz-z0)>CH/2+6)continue;cross.push({x:riverCenter239(rv.b,cz),z:cz})}
  const fd=(x,z)=>{const b=snowB(x,z);return [1-Math.min(1,Math.max(0,(b-.25)/.08)),Math.min(1,Math.max(0,(b-.66)/.06))]},kind=(x,z)=>{const [f,d]=fd(x,z);return d>.95?0:f>.5?2:1};
  const N=24,pts=[];for(let i=0;i<=N;i++){const z=z0-CH/2+i*CH/N,x=riverCenter239(rv.b,z),[f,d]=fd(x,z);pts.push({x,z,f,d,road:cross.some(c=>Math.abs(c.z-z)<5),k:kind(x,z)})}
  {let seg=[];const flushS=()=>{if(seg.length<2){seg=[];return}const pos=[],uv=[],fdA=[],idx=[];seg.forEach((p,i)=>{pos.push(p.x-riverWidth351(rv.b,p.z)/2,.06,p.z,p.x+riverWidth351(rv.b,p.z)/2,.06,p.z);uv.push(0,.5,1,.5);fdA.push(p.f,p.d,p.f,p.d);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
