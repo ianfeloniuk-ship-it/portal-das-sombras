@@ -1,3 +1,10 @@
+## v517 (21/10/2026) — Bola de Fogo grande e bichos/NPCs fora da água
+- Pedido de Ian (áudios + prints): a Bola de Fogo saía igual ao ataque básico do mago de fogo e deveria ser 3 a 4 vezes maior; havia bichos e NPCs dentro da água.
+- `src/core/380-acoes.js`: habilidade Bola de Fogo sai com escala 5,4 (era 1,8) e acerto `r` 1,3 para projéteis grandes. `tools/vfx328.js`: bola e explosão da pré-visualização acompanham (escala 5,4, explosão 3,2).
+- `tools/agua517.js` (novo): a cada meio segundo, inimigo ou NPC não aquático dentro do mar, lago ou rio é levado à margem seca mais próxima (até 1600 m). Aquáticos (peixinho, homem-peixe etc.) ficam.
+- Teste: navegador local, goblin no mar foi para a costa (-4055, 0), peixinho ficou; sem erro no console. Bola de Fogo não vista em jogo (só código); Meteoro continua pendente.
+- Pendente: personagem entrando na rocha do bioma (print 2), NPC Ignis em formas geométricas, decisão de tirar o mar (rios e pontes), relógio/tempo bugado, NPCs que chamam o jogador como no Skyrim.
+
 ## v516 (21/10/2026) — Serras no mapa-múndi com cor de rocha do bioma
 - Pedido de Ian: as serras da v514 apareciam brancas como neve no mapa em qualquer bioma.
 - `tools/mapa501.js`: onde há serra (`TER245.ridge513`), o mapa pinta rocha do bioma (cinza no campo, musgo escuro na floresta, arenito no deserto, basalto no vulcão, lodo no pântano, rocha clara na neve, lilás no cristal) com sombra de relevo; cume nevado só no bioma de neve. A cordilheira de gelo do norte continua branca.

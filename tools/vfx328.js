@@ -241,7 +241,7 @@ function create405(ctx=null){
   def('Reserva de Guarda', c => { V.dome(c.P.x, c.P.z, C.tank, 2, true); V.aura(C.tank); });
   def('Rompante', c => { V.dashTrail(C.tank); V.spikeLine(c.P.x, c.P.z, c.ang, 7, 0x8a7a60, 'rock'); });
   /* magos (Bola de Fogo, Nova de Gelo e Corrente de Raios são compartilhadas) */
-  def('Bola de Fogo', c => { if (c.real) { const p = c.at(.9); V.flames(p.x, p.z, { n: 3, r: .25, h: 1.1, dur: .45 }); } else fly('fire', { ang: c.ang, dist: 9, speed: 22, sc: 2, col: C.fire, cls: 8, onHit: (x, z) => blast(x, z, 1.6) }); });
+  def('Bola de Fogo', c => { if (c.real) { const p = c.at(.9); V.flames(p.x, p.z, { n: 3, r: .25, h: 1.1, dur: .45 }); } else fly('fire', { ang: c.ang, dist: 9, speed: 22, sc: 5.4, col: C.fire, cls: 8, onHit: (x, z) => blast(x, z, 3.2) }); });
   def('Nova de Gelo', c => { V.spikes(c.P.x, c.P.z, C.ice, 14, 4.2, 'ice'); V.shockwave(c.P.x, c.P.z, C.ice, 4.5); });
   def('Corrente de Raios|Descarga', c => { const real = c.K ? chainReal(c.sk) : foes(10).slice(0, 4).map(e => ({ x: e.x, z: e.z })); const pts = [{ x: c.P.x, z: c.P.z }, ...real]; if (pts.length < 2) { V.zap(c.P.x, c.P.z, c.at(3).x, c.at(3).z, C.bolt, .3, 1.2); return; } for (let i = 0; i < pts.length - 1; i++) defer405(() => { V.zap(pts[i].x, pts[i].z, pts[i + 1].x, pts[i + 1].z, c.col === 0xffffff ? C.bolt : c.col, .4, 1.8); star(pts[i + 1].x, pts[i + 1].z, C.bolt, 1); }, i * 90); });
   /* Arqueiro */
