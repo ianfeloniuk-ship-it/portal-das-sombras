@@ -2699,3 +2699,14 @@ Complemento da revisão v361: a área livre ao redor de um acampamento é respei
 ## v509 — habilidades de Guerreiro, Assassino e Tanque — 21/10/2026
 As 27 ativas restantes receberam peças da demo, impactos nos alvos reais e seis movimentos no esqueleto. As 30 dessas três classes estão cobertas com o lote anterior; as 40 dos quatro magos também. Preservados dano, cura, defesa, recursos, recarga e deslocamento. Normal/leve, equivalência, combos, saque, troca gráfica e limpeza verificados. Publicação automática autorizada por Ian nesta conversa. Prévia, fonte incremental e relatório: https://drive.google.com/drive/folders/1Z0-TGo6xs_yj8kfRH9QXOMU09kfvLWdL
 Continuam pendentes as outras habilidades de Arqueiro, Paladino, Invocador, Monge, Lâmina Arcana, Lanceiro e Berserker, além das classes raras.
+
+## Diretriz Mestre de World Design e Escala Visual — Skyrim × Primeva (21/10/2026)
+- Pedido de Ian: unificação completa da análise do vídeo "Depois de 15 ANOS eu FINALMENTE entendi SKYRIM" (Taozen) com a lore canônica de Primeva (O Manuscrito Completo), o PROMPT-MESTRE-ORIGINAL.md do Estúdio Visual e a Seção 11 de "PRIMEVA — Ideias Futuras".
+- Documento Mestre gerado e sincronizado: docs/COMO-TEM-QUE-SER-O-MUNDO-SKYRIM.md e espelhado no Google Drive na pasta Estudio-Visual-Primeva-Skyrim (1pL1iP24kxwmfVIOvDXV2ETjkACQ34qeu) e Registros-da-IA (1DYIYOjJSMZCdh7nZ1epi-KO3lcbj8m4x).
+- Pilares integrados ao jogo:
+  1. Oclusão e Quebra de Linhas de Visão: relevo em desfiladeiro e garganta fechando a visão a cada 120-150m em terrain245.js para destruir o "efeito maquete" dos 100 km² e valorizar marcos emoldurados (Muralha de Aster, Farol de Thalor, Picos de Ymiria).
+  2. Proporção Vertical 3x: coníferas e falésias de 15–25m de altura, diminuindo o Viajante (2,05m) e forçando a câmera de baixo para cima.
+  3. Matriz de 7 Categorias de Missões × 8 Gatilhos Orgânicos: Campanha das 5 Âncoras ativa sem punir por desviar; 4 Ordens (Vanguarda, Círculo Alquímico, Artífices de Aço/Ferrugem, Rede de Caravanas); Guerra Civil Guardiões vs Despertadores; Altares dos Primeiros Viajantes (Daédricas) com as Coroas dos 10 Sets Raros.
+  4. Nós de Encontros Aleatórios (World Encounter Nodes): 80 a 120 pontos invisíveis nas 6 Rotas Reais sorteando eventos por nível/semente com carroça e a pé (encontros502.js).
+  5. Efeito Blackreach: Abóbada Primordial (Cap. 27 do Manuscrito) como subsolo colossal de coral branco sob o continente.
+  6. Quadro Técnico dos 5 Especialistas (Arte, Geometria, Shaders/PBR, Biomas e Performance) consolidado como diretriz de execução obrigatória.
