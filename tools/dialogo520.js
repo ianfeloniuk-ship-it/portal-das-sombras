@@ -245,6 +245,54 @@
     ctx = { def, npc: n, builder: () => buildBeggar(n), tree: buildBeggar(n), node: 'raiz' };
     render();
   }
+  /* v523: moradores com rotina, guardas, bêbados e ladrões (tools/vida523.js) */
+  function actTxt(n) { return ({ trabalho: 'Estou no meio do trabalho.', almoco: 'É hora do almoço, deixe eu comer em paz.', taverna: 'Depois do serviço, nada como uma caneca na taverna.', casa: 'Estou indo para casa descansar.', patrulha: 'Estou de ronda.' })[n.act523] || 'Tenho muito o que fazer hoje.'; }
+  function buildGuard(n) {
+    const m = tmem(n), f = m.flags, nome = n.short || n.name;
+    const multa = () => profile && profile.multa523;
+    const N = {};
+    N.raiz = {
+      t: multa() ? 'Alto lá. Você me deve uma multa por desordem.' : m.bond >= 3 ? 'Cidadão de bem! Ando de olho nos ladrões, pode andar tranquilo.' : 'Mantenha a ordem e não teremos problema.',
+      o: [
+        { l: 'Pagar a multa de 50 de ouro', if: () => multa() && gold() >= 50, fn: () => { addGold(-50); profile.multa523 = 0; save(); say('<b>' + nome + ':</b> "Multa paga. Siga em frente."'); return 'raiz'; } },
+        { l: 'Subornar o guarda (100 de ouro, -10 de reputação)', if: () => multa() && gold() >= 100, fn: () => { addGold(-100); profile.multa523 = 0; subRep(10); save(); say('<b>' + nome + '</b> olha para o lado e some a multa.'); return 'raiz'; } },
+        { l: 'Perguntar se há ladrões por perto', go: 'ladroes' },
+        { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
+        { l: 'Provocar: "Você é um covarde"', go: 'provoca' },
+        { l: 'Seguir', fn: () => 'fim' }
+      ]
+    };
+    N.ladroes = { t: n.home && n.home.ladrao523 ? 'Sim! Um ladrão anda por aqui. Se ele roubar você, grite que eu corro atrás dele.' : 'Por enquanto está tudo calmo. Eles aparecem mais à noite.', o: [{ l: 'Obrigado', go: 'raiz' }] };
+    N.noticias = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Tudo calmo.', o: [{ l: 'Obrigado', fn: () => { if (!f.n) { f.n = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
+    N.provoca = { t: 'Repita isso e vai passar a noite na cela.', o: [
+      { l: 'Repetir (multa de 50 e -10 de reputação)', fn: () => { profile.multa523 = 1; m.bond = 0; subRep(10); save(); return 'raiz'; } },
+      { l: 'Recuar', go: 'raiz' }] };
+    return N;
+  }
+  function buildDrunk(n) {
+    const m = tmem(n), f = m.flags, nome = n.short || n.name;
+    const N = {};
+    N.raiz = {
+      t: m.bond >= 3 ? 'Meu... hic... melhor amigo! Senta aqui!' : 'Hic... quem é você? Paga uma pra mim?',
+      o: [
+        { l: 'Pagar uma bebida (5 de ouro)', if: () => gold() >= 5, fn: () => { addGold(-5); m.bond = Math.min(5, m.bond + 1); save(); return 'rumor'; } },
+        { l: 'Ajudar a ir para casa', fn: () => { if (!f.ajudou) { f.ajudou = 1; if (typeof addOrderRep === 'function') addOrderRep(2, 'Ajudou um bêbado a voltar para casa'); } n.act523 = 'casa'; n.drunk523 = 0; save(); return 'fim'; } },
+        { l: 'Provocar: "Bêbado inútil"', fn: () => { if (profile) profile.multa523 = 1; subRep(10); save(); say('Um guarda viu a confusão. Você ganhou uma multa de 50 de ouro.'); return 'fim'; } },
+        { l: 'Seguir', fn: () => 'fim' }
+      ]
+    };
+    N.rumor = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Hic... a cidade é boa, só tem muito ladrão à noite.', o: [{ l: 'Saúde!', go: 'raiz' }] };
+    return N;
+  }
+  function vida(n, orig) {
+    if (n.role523 === 'guarda' || n.role523 === 'bebado') {
+      const b = n.role523 === 'guarda' ? buildGuard : buildDrunk, m = tmem(n); m.meets++;
+      const def = { name: n.name, title: n.short || n.name, type: 'cidade:' + n.name };
+      ctx = { def, npc: n, builder: () => b(n), tree: b(n), node: 'raiz' };
+      render(); return;
+    }
+    town(n, () => { try { if (typeof speech153 === 'function') speech153(n, actTxt(n), n.job523 || ''); } catch (_) {} });
+  }
   function wrapTownNpcs() {
     try {
       if (typeof npcs === 'undefined' || !Array.isArray(npcs)) return;
@@ -271,5 +319,5 @@
     render();
   }
 
-  global.Dialogo520 = { open, pick, town, mendigo };
+  global.Dialogo520 = { open, pick, town, mendigo, vida };
 })(typeof window !== 'undefined' ? window : globalThis);
