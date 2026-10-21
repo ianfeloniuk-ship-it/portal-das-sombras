@@ -1,14 +1,17 @@
-## v488 (20/10/2026) — Redação de UX, linguagem direta e revisão de textos do jogo
-- Pedido de Ian: eliminar explicações prolixas, desencaixadas e confusas; criar regra/skill para manter os textos coesos, curtos e fáceis de entender para qualquer jogador, sem blocos gigantes de texto jogado sem sentido.
-- Criada a skill `primeva-textos` (`.agents/skills/primeva-textos/SKILL.md`) com os princípios de UX Writing para games: foco no efeito imediato, ordem direta, teto rígido de linhas e corte de "gordura mística" e termos meta.
-- Revisão dos textos em interface, tutoriais e murais:
-  - Eliminação de menções meta a "Skyrim" visíveis para o jogador nos botões e avisos (`Mural de Contratos` em vez de `Quadro de Contratos (Skyrim)` em `460-ideias`, `600-regions`, `450-oraculos` e `quests480`).
-  - Redução drástica do guia de sobrevivência em `survival437.js`: bloco de 4 parágrafos densos substituído por 3 tópicos diretos e escaneáveis (Comida, Água, Acampamento).
-  - Simplificação e síntese do Segundo Despertar e afinidades em `660-bloco-runtime111-cont.js` (regras claras em frases curtas).
-  - Enxugamento dos toasts de tutorial de estilo e dicas de treino/suprimentos em `450-oraculos`.
-  - Simplificação das descrições de combinação de habilidades e progressão de paladino em `160-jogador.js`.
-  - Melhoria dos avisos de missões e reavaliação de rank em `620-janelas.js`.
-- Testes: build e core_parts ok; node --check em todos os arquivos modificados e scripts inline; testes unitários passando sem regressões.
+## v488 (20/10/2026) — Cutscene de sonho com a Mão do Arquiteto e despertar estilo Skyrim
+- Pedido de Ian: adicionar na cutscene de abertura de Novo Jogo (logo no início, antes de despertar da queda da Fenda) a cena de sonho em 1ª pessoa com a Mão do Arquiteto:
+  1. Cena em 1ª pessoa no vazio escuro/violeta da Fenda: a Mão do Arquiteto (`arquiteto246.glb`) desce lentamente da escuridão em direção à câmera/rosto do jogador com tremor de câmera e pulso de luz púrpura.
+  2. Fala sincronizada do Arquiteto em 3 legendas diretas (~9s) com botão de Pular opcional:
+     - "— Sim... é você. Eu finalmente o encontrei."
+     - "— Você vai ser aquele que vai me libertar... ou então acabar comigo."
+     - "— Acorde. Vamos juntos destruir o que resta deste mundo."
+  3. Transição estilo Skyrim: a Mão avança como se fosse tocar a cabeça do jogador -> corte com efeito de piscar os olhos (pálpebras superiores e inferiores abrindo com fade-in da visão turva para nítida) acordando diretamente na Estrada Sul em frente à carroça tombada e Edran caído.
+- `tools/dream488.js`: módulo da cena de sonho, iluminação púrpura, partículas de fenda, áudio atmosférico profundo, sincronia de legendas, botão "PULAR [ESC]" e overlay de abertura de olhos com desfoque progressivo estilo Skyrim.
+- `tools/reclaim372.js`: exporta `cachedHand`, `poseHand404` e `handRig404` para reuso da malha real e articulação de dedos de `arquiteto246.glb`.
+- `tools/campaign327.js`: `spawnAwakening()` dispara `window.Dream488.play()` para novo personagem sem classe, com transição direta ao fim ou no pulo para a Estrada Sul.
+- `src/core/370-v281.js`: `isCinematic451()` protege o jogador durante a cena de sonho.
+- Revisão de textos de UX (princípios da skill `primeva-textos`): murais, descrições de classes e sobrevivência enxutos e diretos.
+- Testes: `node tools/test-dream488.cjs` executado com Playwright no Microsoft Edge — ativação da cena de sonho em Novo Jogo aprovada, 3 legendas validadas, corte no avanço da mão validado, efeito de piscar de olhos e despertar na Estrada Sul validado, botão Pular validado; `test-intro401.cjs`, `test-intro402.cjs` e `test-reclaim402.cjs` passando; `python tools/build.py` e `python tools/core_parts.py check` ok.
 
 ## v487 (20/10/2026) — VFX aprovados e personagem animado, lote 1
 - Ian aprovou os efeitos de Guerreiro, Assassino e Tanque e pediu movimentos próprios para as novas habilidades. Também aprovou a publicação automática de todos os próximos lotes testados: fazer os magos primeiro (fogo, gelo, terra e raio), depois as demais classes; cobrir básicos e todas as habilidades, normais e raras.

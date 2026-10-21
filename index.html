@@ -5665,6 +5665,38 @@ function hitstop(s){freeze=Math.max(freeze,s)}
 let historyUnread95=0;
 function historyEntry95(html,kind='event'){return {h:String(html),t:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),at:Date.now(),kind,n:1}}
 function appendHistory95(list,entry){const last=list[0];if(last&&last.h===entry.h&&entry.at-(last.at||0)<5000){last.n=(last.n||1)+1;last.at=entry.at;last.t=entry.t;return true}list.unshift(entry);if(list.length>200)list.length=200;return false}
+
+/* v488 (Ian): o Narrador aparece no topo da tela com banner elegante e som suave, visível mesmo com o histórico fechado. */
+function narratorSayTop(text, ms = 7500){
+  if(!text)return;
+  const clean = String(text).replace(/^<b>\[NARRADOR\]<\/b>\s*/i, '').replace(/<[^>]*>/g, '').trim();
+  if(!clean)return;
+  logNews('<b>[NARRADOR]</b> ' + clean, 'narratorPersonal105');
+  if(typeof modalOpen !== 'undefined' && modalOpen)return;
+  let box = document.getElementById('narratorTopBar');
+  if(!box){
+    box = document.createElement('aside');
+    box.id = 'narratorTopBar';
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.style.cssText = 'position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-10px);z-index:9999;width:min(580px,calc(100vw - 32px));background:linear-gradient(180deg,rgba(16,23,34,0.96),rgba(10,14,22,0.94));border:1px solid rgba(231,187,104,0.7);border-radius:8px;padding:9px 18px;color:#fdf4e4;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,0.8),0 0 18px rgba(231,187,104,0.22);pointer-events:auto;cursor:pointer;transition:opacity .35s ease,transform .35s ease;opacity:0;box-sizing:border-box;';
+    box.onclick = () => { box.style.opacity = '0'; box.style.transform = 'translateX(-50%) translateY(-10px)'; };
+    document.body.appendChild(box);
+  }
+  box.innerHTML = '<small style="display:block;color:#e7bb68;font:bold 10px/1.3 sans-serif;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:3px">O NARRADOR</small><span style="font:italic 15px/1.45 Georgia,serif;color:#fbf2e3;display:block">“' + clean + '”</span>';
+  try{ beep(165, .035, .01, 'triangle'); }catch(_){}
+  clearTimeout(narratorSayTop._timer);
+  requestAnimationFrame(()=>{
+    box.style.opacity = '1';
+    box.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  const dur = Math.max(ms, 3500 + clean.length * 28);
+  narratorSayTop._timer = setTimeout(()=>{
+    box.style.opacity = '0';
+    box.style.transform = 'translateX(-50%) translateY(-10px)';
+  }, dur);
+}
+
 function logNews(html,kind='event'){if(!profile)return;profile.news=Array.isArray(profile.news)?profile.news:[];const repeat=appendHistory95(profile.news,historyEntry95(html,kind));store.set('pds2_profile',profile);if(started)renderHistory95(false,repeat)}
 function historyHtml95(html){const t=document.createElement('template');t.innerHTML=String(html);for(const el of [...t.content.querySelectorAll('*')]){if(!['B','STRONG','SMALL','BR','EM','I','SPAN'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent));continue}for(const a of [...el.attributes])el.removeAttribute(a.name)}return t.innerHTML}
 function historyRow95(x){const d=document.createElement('div');d.className='history-entry95'+(x.kind==='important'||/desbloque|liberad|nova habilidade|novo sistema/i.test(x.h)?' important':'');d.innerHTML='<span class="history-time95">'+safeText(x.t||'')+'</span>'+historyHtml95(x.h)+(x.n>1?'<span class="history-repeat95">×'+x.n+'</span>':'');return d}
@@ -5683,7 +5715,7 @@ function popNews194(html,ms){const key=String(html).replace(/<[^>]*>/g,'').repla
 function popNext277(){if(modalOpen){POPQ277.length=0;popBusy277=false;return}const q=POPQ277.shift();if(!q){popBusy277=false;return}popBusy277=q.key;let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;pointer-events:none;width:min(420px,calc(100vw - 32px))';document.body.appendChild(box)}
  const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.96);border:1px solid rgba(255,179,71,.7);border-radius:8px;padding:6px 10px;color:#fff6e6;font-size:13px;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;pointer-events:none;box-sizing:border-box;width:100%;overflow-wrap:anywhere';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
  const t=Math.min(6500,Math.max(q.ms||0,2500+d.textContent.length*18));setTimeout(()=>{d.style.opacity='0';setTimeout(()=>{d.remove();popNext277()},320)},t)}
-function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
+function toast(html,ms=2600){NR105.quietFor=6;if(String(html).includes('[NARRADOR]')){narratorSayTop(html,ms);return}logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
 function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){if(document.pointerLockElement)document.exitPointerLock();mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
 
@@ -6113,6 +6145,7 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function isCinematic451(){
+  if(window.Dream488?.active)return true;
   if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
   if(typeof FX2!=='undefined'&&FX2.cine>0)return true;
   if(window.CINE231)return true;
@@ -7211,7 +7244,7 @@ function replicaTick169(){const S=L.special;if(!S||S.stage!==4||!S.rep169)return
   if(time>R.until||player.dead){S.stage=6;player.skills=S.saved169||pSkills();if(typeof showG==='function')showG();if(R.temp){const a=awakening103();a.unlocked=a.unlocked.filter(c=>c!==R.cls)}L.awaken155=null;bigText('PROVA FALHOU',1600);toast('<b>[NARRADOR]</b> Ainda não. Você manteve as peças; vista o set de novo para tentar outra vez.',7000)}}
 setInterval(()=>{try{replicaTick169()}catch(e){}},250);
 {const useSkill0=useSkill;useSkill=function(sk){const S=L&&L.special,R=S&&S.stage===4&&S.rep169;const before=R&&sk&&!sk.empty?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk).cdT:0;const r=useSkill0.apply(this,arguments);if(R&&sk&&!sk.empty&&R.names.includes(sk.n)){const now=(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk).cdT;if(now>before){R.done.add(sk.n);floater(player.x,player.z,'REPLICADA: '+sk.n,'#ffd070',true)}}return r}}
-function awakeningView103(){view=awakeningView103;L.characterTab='awakening';const a=awakening103();let h=characterTabs('awakening')+'<div class="guide93"><strong>DESPERTAR</strong><p>Equipe as 5 peças do chefe de uma classe rara. Aceite o chamado, vença a prova e desperte essa classe.</p></div>';
+function awakeningView103(){view=awakeningView103;L.characterTab='awakening';const a=awakening103();let h=characterTabs('awakening')+'<div class="guide93"><strong>O SEGUNDO DESPERTAR</strong><p>Derrote os chefes de classes raras em Fendas Vermelhas para conquistar suas armaduras com passivas exclusivas.</p><p>Reúna e equipe as 5 peças do conjunto completo para liberar a prova do guardião e despertar a classe correspondente.</p></div>';
   for(const c of RARE103){const learned=a.unlocked.includes(c.id)||profile.cls===c.id;h+=row(c.n,learned?'Desperta. '+(c.exclusive||''):'Ainda não despertou.',learned?'<b>Desperta</b>':'')}openModal('PERSONAGEM',h,'awakening')}
 function awakenKey169(id){return equippedItems().filter(it=>it.set153===id).map(it=>it.uid).sort().join('|')}
 function awakenPopup169(force){if(!started||!run||!player||player.dead||L.mode!=='world'||(!force&&(modalOpen||paused))||profile.creationPending91)return;profile.awDeclined169=profile.awDeclined169||{};
@@ -7995,7 +8028,7 @@ function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citie
   (on?row('Portal Primordial','Arconte inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
 const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
-function showSys(t){logNews('<b>[NARRADOR]</b> '+t,'important');if(!modalOpen)try{popNews194('<b>[NARRADOR]</b> '+t,6000)}catch(_){}}
+function showSys(t){narratorSayTop(t,6000)}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Arconte, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){normalizeStoryProgress262();if(!profile.levelStory262.includes(l)){profile.levelStory262.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0,repRank97:Math.min(9,rankOf())};questBudget262(run.demand);const demandText=run.demand.d+questTargetText262(run.demand)+'. '+questXpText262(run.demand);setTimeout(()=>showSys('Tenho uma exigência. '+demandText+'. Não me decepcione.'),5000)}}
 function demandKill(e){const d=run.demand;if(!d||!questEnemyEligible262(d,e))return;if(d.t==='night'&&!isNight())return;d.got++;if(d.got>=d.n){const baseXp=questBudget262(d).xp;giveBoon184(20);const g253=Math.round(800*(1+rankOf()));run.gold+=g253;run.demand=null;addOrderRep(20,'Exigência cumprida');const xp=gainXp(baseXp,'quest');saveRun();showSys('Exigência cumprida. +'+xpNumber(xp)+' XP, Bênção da Fenda por 20 min e +'+fmt(g253)+' ouro. Você me diverte.')}}
@@ -8938,7 +8971,12 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
  if(modalOpen||NR105.quietFor>0||m.clock-m.lastSpoke<interval||nearestEnemy(player.x,player.z,18)||AR103.trial)return;
  for(let i=0;i<NR105.queue.length;i++){const e=NR105.queue[i];if(m.clock-e.at<6||m.clock-(m.last['said:'+e.kind]??-1000)<600)continue;const line=narratorChoose105(e,m);if(!line)continue;
  m.seen[line.id]=m.clock;m.last['said:'+e.kind]=m.clock;m.lastSpoke=m.clock;NR105.queue.splice(i,1);
- logNews('<b>[NARRADOR]</b> '+line.text,'narratorPersonal105');return;
+ narratorSayTop(line.text);return;
+ }
+ if(!NR105.queue.length&&m.clock-m.lastSpoke>=interval){
+  const ambientKind=L.mode==='world'?(inCity(player.x,player.z)?'city':'explore'):'fenda';
+  const line=narratorChoose105({kind:ambientKind},m);
+  if(line){m.seen[line.id]=m.clock;m.last['said:'+ambientKind]=m.clock;m.lastSpoke=m.clock;narratorSayTop(line.text);return}
  }
 }
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Liga ou desliga comentários no histórico. Avisos importantes continuam ativos.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}
@@ -9173,18 +9211,9 @@ function affinity103(ci){return awakening103().affinity===ci&&rareActive103(ci)?
 function rareOnPortal103(g){return; /* v169 (Ian): a fissura antiga não existe mais; o despertar vem dos sets dos chefes */if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id),color:g.red?'red':'violet'};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Você sente a fissura. Uma nova aba apareceu em Personagem.',7000);store.set('pds2_profile',profile)}
 /* v292 (Ian): o rank ★ só aparece depois que o jogador ganha uma classe secreta (rara) */
 function secretRankKnown292(){try{return (profile.rank||0)>=9||awakening103().unlocked.length>0||(awakening103().total||0)>=1}catch(_){return false}}
-function isTwiceAwakened103(){return awakening103().total>=3}
-/* v187 (Ian): rank ★ na Guilda só depois do segundo despertar (ter despertado uma classe rara). */
-function starReady187(){return awakening103().unlocked.length>0}
-function rareEligible103(ci){const a=awakening103();return RARE_IDS111.includes(ci)&&a.total>=3&&(a.points[ci]||0)>0&&!a.unlocked.includes(ci)}
-function rareLearn103(ci){if(!rareEligible103(ci)||!canRedistribute())return false;const a=awakening103();a.unlocked.push(ci);narratorEvent105('learnrare');profile.jobs=[...new Set([...jobsOf(),ci])];store.set('pds2_profile',profile);saveRun();return true}
-function rareAttune103(ci){const a=awakening103(),max=Math.max(0,...Object.values(a.points));if(!canRedistribute()||!a.unlocked.includes(ci)||a.points[ci]!==max||a.affinity===ci||a.total-(a.attunedAt||0)<3)return false;a.affinity=ci;a.attunedAt=a.total;narratorEvent105('affinity');store.set('pds2_profile',profile);saveRun();return true}
-function awakeningViewOld103(){if(!awakeningDiscovered109())return;view=awakeningView103;L.characterTab='awakening';const a=awakening103();if(!isTwiceAwakened103()){let h=characterTabs('awakening')+'<div class="guide93"><strong>A FISSURA</strong><p>O portal fechou, mas você ainda sente algo ali. Uma passagem que parece responder à sua presença.</p><p>O Narrador percebe que alguma coisa mudou. Ainda não sabe o que está acontecendo.</p></div>';if(a.pending)h+=row('Um vestígio permanece','Posição '+Math.round(a.pending.x)+', '+Math.round(a.pending.z)+'. Distância: '+Math.round(Math.hypot(player.x-a.pending.x,player.z-a.pending.z))+' m. Aproxime-se para investigar.',btn('Investigar','awinspect',0,L.mode==='world'&&Math.hypot(player.x-a.pending.x,player.z-a.pending.z)<5));else h+=row('A sensação permanece','Não há um vestígio para investigar agora. Continue sua jornada.','');if(a.total>0)h+=row('O que você viveu',a.total+' '+(a.total===1?'vestígio investigado':'vestígios investigados')+'. Você ainda está descobrindo o que isso significa.','');h+=trialJournal113();openModal('PERSONAGEM',h,'awakening');return}let h=characterTabs('awakening')+'<div class="guide93"><strong>O SEGUNDO DESPERTAR</strong><p>Você agora pode aprender classes raras e equipar até seis habilidades.</p><p>Sua afinidade principal dobra a característica exclusiva da classe correspondente.</p></div>';
- h+=row('Rank e Despertar','Rank '+RANKS[profile.rank].id+' · '+(isTwiceAwakened103()?'Despertar concluído':'Em andamento')+'. Para alcançar o Rank ★, chegue ao Rank SS+ e conclua o Segundo Despertar.','');
- h+=row('Capítulo 1 · A fissura que permaneceu',a.discovered?'Investigações concluídas: '+a.total+' / 3 para despertar. Energia de Fendas: '+a.energy+'.':'A partir do nível 30, conclua e saia de uma Fenda de pelo menos seu rank atual (inclusive F). Investigue o vestígio deixado no mundo.','');
- if(a.pending)h+=row('Fissura para investigar','Posição '+Math.round(a.pending.x)+', '+Math.round(a.pending.z)+'. Distância: '+Math.round(Math.hypot(player.x-a.pending.x,player.z-a.pending.z))+' m. Ela permanece disponível se você sair para se preparar.',btn('Investigar','awinspect',0,L.mode==='world'&&Math.hypot(player.x-a.pending.x,player.z-a.pending.z)<5));
- h+='<div class="sec">CAMINHOS DO SEGUNDO DESPERTAR</div>';for(const c of RARE103){if(!c.ready){h+=row(c.n,'Chega nas próximas etapas do Segundo Despertar.','Em desenvolvimento');continue}const learned=a.unlocked.includes(c.id);h+=row(c.n,'Afinidade construída: '+(a.points[c.id]||0)+'. '+c.exclusive+'<br>'+(a.affinity===c.id?'Afinidade principal · ×2':'Característica ativa ao equipar habilidade rara da classe.'),(learned?'<b>Aprendida</b>':btn('Aprender','awlearn',c.id,rareEligible103(c.id)&&canRedistribute()))+(learned?btn('Afinidade principal','awattune',c.id,canRedistribute()&&a.affinity!==c.id&&a.points[c.id]===Math.max(0,...Object.values(a.points))&&a.total-(a.attunedAt||0)>=3):''))}
- h+='<div class="sysline"><b>Como funciona:</b> Cada investigação concluída fortalece a classe escolhida. Você pode trocar sua afinidade principal a cada 3 investigações. Nenhuma classe ou habilidade é perdida.</div>';h+=trialJournal113();openModal('PERSONAGEM',h,'awakening')}
+/* v187 (Ian): o Segundo Despertar é obtido reunindo e equipando o set de 5 peças de armadura do chefe de classe rara em Fendas Vermelhas. */
+function isTwiceAwakened103(){return (awakening103().unlocked||[]).length>0}
+function starReady187(){return isTwiceAwakened103()}
 // BEGIN JOURNEY113
 // Investigations require only movement, basic combat and interaction, never a rare skill.
 const TRIALS113={
@@ -9261,7 +9290,7 @@ function rareUpdate103(dt){laterTick181();if((window.AR223=(window.AR223||0)+dt)
  const ps=AR103.passages;if(ps&&ps.until>time)for(const ent of [P,...allies]){if(ent.dead||time<(ent.passageAt103||0))continue;if(ent.passageLock103&&Math.hypot(ent.x-ent.passageLock103.x,ent.z-ent.passageLock103.z)<1.5)continue;ent.passageLock103=null;let dest=null;if(Math.hypot(ent.x-ps.a.x,ent.z-ps.a.z)<1.2)dest=ps.b;else if(Math.hypot(ent.x-ps.b.x,ent.z-ps.b.z)<1.2)dest=ps.a;if(dest&&freeAt(dest.x,dest.z,ent.r||.5)&&los(ent.x,ent.z,dest.x,dest.z)){ent.x=dest.x;ent.z=dest.z;ent.passageAt103=time+1;ent.passageLock103=dest;ent.act=null}}
 }
 function rareHud103(){const a=profile.awakening103;if(!a||!a.discovered)return '';const t=AR103.trial;return (t?trialHud113(t):'')+guardianHud108()+kitHud111()+(rareActive103(12)?' · TEMPO '+preciseNumber(AR103.reserve||0)+'/'+3*affinity103(12)+'s':'')+(AR103.anchor&&AR103.anchor.until>time?' · ÂNCORA '+Math.ceil(AR103.anchor.until-time)+'s':'')}
-function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'close0'}if(a==='awinspect'){inspectFissure103();return 'close0'}if(a==='awtrial'){startTrial103(+v);return 'close0'}if(a==='awlearn'){rareLearn103(+v);awakeningView103();return 'close0'}if(a==='awattune'){rareAttune103(+v);awakeningView103();return 'close0'}if(a==='awgate'){rareOpenGate103(+v);return 'close0'}return null}
+function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'close0'}return null}
 
 // Local rift review controls131 — explicitly requested test URL only.
 if(window.RIFT131_ENABLE&&new URLSearchParams(location.search).get('fendas')==='teste'){
@@ -9570,10 +9599,11 @@ requestAnimationFrame(frame);
 <script src="tools/bloom487/ShaderPass.js?v=487"></script>
 <script src="tools/bloom487/UnrealBloomPass.js?v=487"></script>
 <script src="tools/golpes487.js?v=487r3"></script>
+<script src="tools/dream488.js?v=488"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v488</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v489</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=488;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=489;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

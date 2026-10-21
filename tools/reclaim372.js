@@ -108,4 +108,4 @@ if(!e.corpse353){e.loot353=e.loot353||[];Loot353.create(e)}
 const r=Loot353.records().find(r=>r.id===e.corpse353),a=Loot353.active.get(e.corpse353);if(!r||!a)return false;
 if(e.isIntroTutorial)r.introCrystal402=true;else return false;
 try{const job=start(a,r);if(job){try{sfx('gong');shake(.35)}catch(_){}}return !!job||!!a.waiting402}catch(err){console.warn('Reclaim372.claimEnemy',err);return false}}
-return{start,tick,clear,jobs,apply,claimEnemy,attachCrystal,crystals,pending};})();
+return{start,tick,clear,jobs,apply,claimEnemy,attachCrystal,crystals,pending,cachedHand,poseHand404,handRig404};})();

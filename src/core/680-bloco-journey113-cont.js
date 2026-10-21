@@ -38,7 +38,7 @@ function rareUpdate103(dt){laterTick181();if((window.AR223=(window.AR223||0)+dt)
  const ps=AR103.passages;if(ps&&ps.until>time)for(const ent of [P,...allies]){if(ent.dead||time<(ent.passageAt103||0))continue;if(ent.passageLock103&&Math.hypot(ent.x-ent.passageLock103.x,ent.z-ent.passageLock103.z)<1.5)continue;ent.passageLock103=null;let dest=null;if(Math.hypot(ent.x-ps.a.x,ent.z-ps.a.z)<1.2)dest=ps.b;else if(Math.hypot(ent.x-ps.b.x,ent.z-ps.b.z)<1.2)dest=ps.a;if(dest&&freeAt(dest.x,dest.z,ent.r||.5)&&los(ent.x,ent.z,dest.x,dest.z)){ent.x=dest.x;ent.z=dest.z;ent.passageAt103=time+1;ent.passageLock103=dest;ent.act=null}}
 }
 function rareHud103(){const a=profile.awakening103;if(!a||!a.discovered)return '';const t=AR103.trial;return (t?trialHud113(t):'')+guardianHud108()+kitHud111()+(rareActive103(12)?' · TEMPO '+preciseNumber(AR103.reserve||0)+'/'+3*affinity103(12)+'s':'')+(AR103.anchor&&AR103.anchor.until>time?' · ÂNCORA '+Math.ceil(AR103.anchor.until-time)+'s':'')}
-function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'close0'}if(a==='awinspect'){inspectFissure103();return 'close0'}if(a==='awtrial'){startTrial103(+v);return 'close0'}if(a==='awlearn'){rareLearn103(+v);awakeningView103();return 'close0'}if(a==='awattune'){rareAttune103(+v);awakeningView103();return 'close0'}if(a==='awgate'){rareOpenGate103(+v);return 'close0'}return null}
+function rareActions103(a,v){if(a==='awakening'){awakeningView103();return 'close0'}return null}
 
 // Local rift review controls131 — explicitly requested test URL only.
 if(window.RIFT131_ENABLE&&new URLSearchParams(location.search).get('fendas')==='teste'){

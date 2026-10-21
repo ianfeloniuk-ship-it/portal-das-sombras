@@ -641,10 +641,9 @@
       }, 400);
     } catch (_) {}
   }
-  /* Personagem novo: tela preta com fade-in, nasce na estrada perto da carroça tombada e Edran. */
+  /* Personagem novo: cena curta de sonho com a Mão do Arquiteto -> despertar estilo Skyrim na estrada perto da carroça tombada e Edran. */
   function spawnAwakening() {
     try {
-      introFade();
       const m = ACTS[0], c = nearestCity(player.x, player.z).c, wall = wallOf(c); let P = null;
       // Aster's south gate: the road and wall share the initial camera axis.
       P = [c.x, c.z + wall + 20];
@@ -653,6 +652,18 @@
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
       player.face = Math.PI; pcCam.yaw = 0; pcCam.pitch = .06; run.pos = { x: px, z: pz }; s.roadSpawn401={x:px,z:pz};save();
       try { buildWorldFor(m); } catch (_) {}
+      if (window.Dream488 && !s.dreamSeen) {
+        s.dreamSeen = true; save();
+        window.Dream488.play({
+          onAwaken: () => {
+            setTimeout(() => {
+              try { toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 7000); } catch (_) {}
+            }, 800);
+          }
+        });
+        return true;
+      }
+      introFade();
       setTimeout(() => {
         try {
           toast('<b>[NARRADOR]</b> A muralha… Vá para a muralha.', 7000);

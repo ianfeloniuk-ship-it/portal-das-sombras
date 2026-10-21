@@ -123,7 +123,12 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
  if(modalOpen||NR105.quietFor>0||m.clock-m.lastSpoke<interval||nearestEnemy(player.x,player.z,18)||AR103.trial)return;
  for(let i=0;i<NR105.queue.length;i++){const e=NR105.queue[i];if(m.clock-e.at<6||m.clock-(m.last['said:'+e.kind]??-1000)<600)continue;const line=narratorChoose105(e,m);if(!line)continue;
  m.seen[line.id]=m.clock;m.last['said:'+e.kind]=m.clock;m.lastSpoke=m.clock;NR105.queue.splice(i,1);
- logNews('<b>[NARRADOR]</b> '+line.text,'narratorPersonal105');return;
+ narratorSayTop(line.text);return;
+ }
+ if(!NR105.queue.length&&m.clock-m.lastSpoke>=interval){
+  const ambientKind=L.mode==='world'?(inCity(player.x,player.z)?'city':'explore'):'fenda';
+  const line=narratorChoose105({kind:ambientKind},m);
+  if(line){m.seen[line.id]=m.clock;m.last['said:'+ambientKind]=m.clock;m.lastSpoke=m.clock;narratorSayTop(line.text);return}
  }
 }
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Liga ou desliga comentários no histórico. Avisos importantes continuam ativos.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}

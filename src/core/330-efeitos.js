@@ -14,6 +14,38 @@ function hitstop(s){freeze=Math.max(freeze,s)}
 let historyUnread95=0;
 function historyEntry95(html,kind='event'){return {h:String(html),t:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),at:Date.now(),kind,n:1}}
 function appendHistory95(list,entry){const last=list[0];if(last&&last.h===entry.h&&entry.at-(last.at||0)<5000){last.n=(last.n||1)+1;last.at=entry.at;last.t=entry.t;return true}list.unshift(entry);if(list.length>200)list.length=200;return false}
+
+/* v488 (Ian): o Narrador aparece no topo da tela com banner elegante e som suave, visível mesmo com o histórico fechado. */
+function narratorSayTop(text, ms = 7500){
+  if(!text)return;
+  const clean = String(text).replace(/^<b>\[NARRADOR\]<\/b>\s*/i, '').replace(/<[^>]*>/g, '').trim();
+  if(!clean)return;
+  logNews('<b>[NARRADOR]</b> ' + clean, 'narratorPersonal105');
+  if(typeof modalOpen !== 'undefined' && modalOpen)return;
+  let box = document.getElementById('narratorTopBar');
+  if(!box){
+    box = document.createElement('aside');
+    box.id = 'narratorTopBar';
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.style.cssText = 'position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-10px);z-index:9999;width:min(580px,calc(100vw - 32px));background:linear-gradient(180deg,rgba(16,23,34,0.96),rgba(10,14,22,0.94));border:1px solid rgba(231,187,104,0.7);border-radius:8px;padding:9px 18px;color:#fdf4e4;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,0.8),0 0 18px rgba(231,187,104,0.22);pointer-events:auto;cursor:pointer;transition:opacity .35s ease,transform .35s ease;opacity:0;box-sizing:border-box;';
+    box.onclick = () => { box.style.opacity = '0'; box.style.transform = 'translateX(-50%) translateY(-10px)'; };
+    document.body.appendChild(box);
+  }
+  box.innerHTML = '<small style="display:block;color:#e7bb68;font:bold 10px/1.3 sans-serif;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:3px">O NARRADOR</small><span style="font:italic 15px/1.45 Georgia,serif;color:#fbf2e3;display:block">“' + clean + '”</span>';
+  try{ beep(165, .035, .01, 'triangle'); }catch(_){}
+  clearTimeout(narratorSayTop._timer);
+  requestAnimationFrame(()=>{
+    box.style.opacity = '1';
+    box.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  const dur = Math.max(ms, 3500 + clean.length * 28);
+  narratorSayTop._timer = setTimeout(()=>{
+    box.style.opacity = '0';
+    box.style.transform = 'translateX(-50%) translateY(-10px)';
+  }, dur);
+}
+
 function logNews(html,kind='event'){if(!profile)return;profile.news=Array.isArray(profile.news)?profile.news:[];const repeat=appendHistory95(profile.news,historyEntry95(html,kind));store.set('pds2_profile',profile);if(started)renderHistory95(false,repeat)}
 function historyHtml95(html){const t=document.createElement('template');t.innerHTML=String(html);for(const el of [...t.content.querySelectorAll('*')]){if(!['B','STRONG','SMALL','BR','EM','I','SPAN'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent));continue}for(const a of [...el.attributes])el.removeAttribute(a.name)}return t.innerHTML}
 function historyRow95(x){const d=document.createElement('div');d.className='history-entry95'+(x.kind==='important'||/desbloque|liberad|nova habilidade|novo sistema/i.test(x.h)?' important':'');d.innerHTML='<span class="history-time95">'+safeText(x.t||'')+'</span>'+historyHtml95(x.h)+(x.n>1?'<span class="history-repeat95">×'+x.n+'</span>':'');return d}
@@ -32,7 +64,7 @@ function popNews194(html,ms){const key=String(html).replace(/<[^>]*>/g,'').repla
 function popNext277(){if(modalOpen){POPQ277.length=0;popBusy277=false;return}const q=POPQ277.shift();if(!q){popBusy277=false;return}popBusy277=q.key;let box=document.getElementById('pop194');if(!box){box=document.createElement('div');box.id='pop194';box.style.cssText='position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;pointer-events:none;width:min(420px,calc(100vw - 32px))';document.body.appendChild(box)}
  const d=document.createElement('div');d.innerHTML=q.html;d.style.cssText='background:rgba(14,12,22,.96);border:1px solid rgba(255,179,71,.7);border-radius:8px;padding:6px 10px;color:#fff6e6;font-size:13px;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;pointer-events:none;box-sizing:border-box;width:100%;overflow-wrap:anywhere';box.replaceChildren(d);requestAnimationFrame(()=>d.style.opacity='1');
  const t=Math.min(6500,Math.max(q.ms||0,2500+d.textContent.length*18));setTimeout(()=>{d.style.opacity='0';setTimeout(()=>{d.remove();popNext277()},320)},t)}
-function toast(html,ms=2600){NR105.quietFor=6;logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
+function toast(html,ms=2600){NR105.quietFor=6;if(String(html).includes('[NARRADOR]')){narratorSayTop(html,ms);return}logNews(html);if(!modalOpen)try{popNews194(html,ms)}catch(_){}if(modalOpen){$('modalNotice95').innerHTML=historyHtml95(html);$('modalNotice95').hidden=false}}
 function bigText(t,ms=1600){logNews('<b>'+safeText(t)+'</b>','important')}
 function toggleGameMenu95(force){const open=typeof force==='boolean'?force:$('gameMenu95').hidden;$('gameMenu95').hidden=!open;$('bMenu').setAttribute('aria-expanded',String(open));if(open){if(document.pointerLockElement)document.exitPointerLock();mouseHeld=false;for(const k in keys)keys[k]=false;const b=$('gameMenu95').querySelector('button:not([hidden])');if(b)b.focus()}}
 

@@ -249,6 +249,7 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
 function isCinematic451(){
+  if(window.Dream488?.active)return true;
   if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
   if(typeof FX2!=='undefined'&&FX2.cine>0)return true;
   if(window.CINE231)return true;
