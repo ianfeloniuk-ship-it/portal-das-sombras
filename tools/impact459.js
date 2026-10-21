@@ -152,18 +152,18 @@ const A0=attack;attack=function(){const n0=projs.length,b0=window.beep,hs0=windo
   if(I.on&&fresh.length){const p=fresh[0],pt=p.ptype||'';
    if(/^(arrow|sarrow)$/.test(pt))play('twang');else if(/^(tdagger|tspear)$/.test(pt))play('toss');
    else if(pt!=='bullet372'){I.stats.casts++;castCol=p.col??castCol;castEl=PT[pt]||null;lastCast=time;castInt=Math.max(.05,player.atkCd||.3);play('cast',castEl);
-    const mz=muzzle();if(mz){flashAt(mz.x,mz.y,mz.z,.95,castCol,.1);const f=player.face;burst(mz.x,mz.y,mz.z,Math.sin(f),.05,Math.cos(f),6,castCol,{spread:.35,sp0:3,sp1:7,lifeK:.7,wK:.8})}}}
+    const mz=muzzle();if(mz&&!(window.Golpes487&&Golpes487.projectile(p))){flashAt(mz.x,mz.y,mz.z,.95,castCol,.1);const f=player.face;burst(mz.x,mz.y,mz.z,Math.sin(f),.05,Math.cos(f),6,castCol,{spread:.35,sp0:3,sp1:7,lifeK:.7,wK:.8})}}}
   else if(beeped&&b0)b0.apply(window,beeped)}catch(_){}
  return r};
 
 /* ---------- por quadro: partículas, carga, rastros, fogo e sangue ---------- */
 let coreOn=0;
-function stepCharge(dt){if(!started||!player||player.dead||paused||time-lastCast>2.5||!mouseHeld){coreOn=Math.max(0,coreOn-dt*8);core.material.opacity=.6*coreOn;core.visible=coreOn>0;return}
+function stepCharge(dt){if(window.Golpes487&&typeof basicAttackId==='function'&&Golpes487.basic(basicAttackId())){coreOn=0;core.visible=false;return}if(!started||!player||player.dead||paused||time-lastCast>2.5||!mouseHeld){coreOn=Math.max(0,coreOn-dt*8);core.material.opacity=.6*coreOn;core.visible=coreOn>0;return}
  const mz=muzzle();if(!mz){core.visible=false;return}const cl=1-Math.max(0,Math.min(1,(player.atkCd||0)/castInt));coreOn=Math.min(1,coreOn+dt*10);
  core.visible=true;core.position.set(mz.x,mz.y,mz.z);core.material.color.setHex(castCol);const sc=(.2+.34*cl)*(1+.08*Math.sin(time*31));core.scale.set(sc,sc,1);core.material.opacity=(.3+.6*cl)*coreOn;
  if(dt>0&&Math.random()<(lite()?.45:.9)){const u=R(-1,1),a=R(0,6.283),c=Math.sqrt(1-u*u),rr=R(.45,.75),life=R(.14,.22),px=mz.x+Math.cos(a)*c*rr,py=mz.y+u*rr,pz=mz.z+Math.sin(a)*c*rr;
   spark(px,py,pz,(mz.x-px)/life,(mz.y-py)/life,(mz.z-pz)/life,{life,len:.22,w:.035,c0:0xffffff,c1:castCol,b:.7+.6*cl,g:0,drag:0})}}
-function stepTrails(dt){if(dt<=0)return;for(const p of projs){if(!p||p.team!=='player'||!p.mesh||(window.Golpes487&&Golpes487.basic(p.basicClass??profile.cls)&&p.ptype==='tdagger'))continue;const pt=p.ptype||'';if(/^(fire|soul|sarrow|bullet372)$/.test(pt))continue;p.tr459=(p.tr459||0)-dt;if(p.tr459>0)continue;p.tr459=lite()?.06:.032;
+function stepTrails(dt){if(dt<=0)return;for(const p of projs){if(!p||p.team!=='player'||!p.mesh||(window.Golpes487&&(Golpes487.projectile(p)||(Golpes487.basic(p.basicClass??profile.cls)&&p.ptype==='tdagger'))))continue;const pt=p.ptype||'';if(/^(fire|soul|sarrow|bullet372)$/.test(pt))continue;p.tr459=(p.tr459||0)-dt;if(p.tr459>0)continue;p.tr459=lite()?.06:.032;
   const y=p.y??(p.originY??1.1),phys=/^(arrow|tdagger|tspear|stone)$/.test(pt);
   if(phys)spark(p.x,y,p.z,(p.vx||0)*.04,(p.vy||0)*.04,(p.vz||0)*.04,{life:.12,len:.55,w:.025,c0:0xe8f0ff,c1:0x9fb0c4,b:.45,g:0,drag:0});
   else{spark(p.x+R(-.08,.08),y+R(-.08,.08),p.z+R(-.08,.08),R(-.4,.4),R(-.1,.5),R(-.4,.4),{life:R(.16,.26),w:R(.05,.09),mode:1,c0:p.col??0xffd08a,c1:p.col??0xffd08a,b:.75,g:-.5,drag:2})}}}

@@ -14,7 +14,7 @@ const P={handles:s=>!!s&&IDS.has(s.skillId),basic:ci=>CIS.includes(ci),immediate
    X.ringFlat(base,rs.col[1],3,3.2,(s.delay||.1)+(s.pulses-1)*.65+.5);
    for(let i=0;i<s.pulses;i++){const hitAt=(s.delay||.1)+i*.65,fly=Math.min(flight,hitAt),launch=hitAt-fly;
     X.at(launch,()=>{const g=base.clone().add(new T.Vector3((Math.random()-.5)*2.8,.1,(Math.random()-.5)*2.8));if(i===2)g.copy(base).setY(.1);const a=g.clone().add(new T.Vector3(-3,9,2.2));
-     X.shot(a,g,a.distanceTo(g)/Math.max(.03,fly),p=>{const group=new T.Group(),rock=new T.Mesh(X.GEOS[i%8],X.crystalMat('magma'));rock.scale.set(.45,.6,.45);group.add(rock);const fire=X.orb(new T.Vector3(),1.4,rs.col,{fire:1});group.add(fire);group.position.copy(p);X.add(group);X.spawn(group,(o,dt,t)=>{rock.rotation.x+=dt*6;fire.quaternion.copy(camera.quaternion);fire.material.uniforms.uTime.value=time;return !!group.parent});return group},p=>rs.boom(p,1.6),{trail:[.8,rs.col]});
+     X.shot(a,g,a.distanceTo(g)/Math.max(.03,fly),p=>{const group=new T.Group(),rock=new T.Mesh(X.GEOS[i%8],X.crystalMat('magma'));rock.scale.set(.45,.6,.45);group.add(rock);const fire=X.orb(new T.Vector3(),1.4,rs.col,{fire:1});group.add(fire);group.position.copy(p);X.add(group);X.spawn(group,(o,dt,t)=>{rock.rotation.x+=dt*6;fire.quaternion.copy(camera.quaternion);fire.material.uniforms.uTime.value=time;return !!group.parent});return group},p=>rs.boom(new T.Vector3(p.x,p.y,p.z),1.6),{trail:[.8,rs.col]});
     });
    }
   });return}
@@ -29,15 +29,15 @@ const P={handles:s=>!!s&&IDS.has(s.skillId),basic:ci=>CIS.includes(ci),immediate
 };
 G.providers.push(P);window.Magos488=P;
 function impact(ci,p,e,big){const r=recipe(ci),c=ctx(ci,e||null,{x:p.x,z:p.z});c.foe.position=X.pos(p.x,p.z);const b=world(p);
- X.inContext(c,()=>{if(ci===8){r.boom(b,big?1.15:1);return}
+ X.inContext(c,()=>{if(ci===8){r.boom(new T.Vector3(b.x,b.y,b.z),big?1.15:1);return}
   if(ci===9){X.bits('ice',b,8);X.sparks(b,10,r.col[1],4);X.ringFace(b,r.col[1],.2,1.2,.25);for(let k=0;k<3;k++)X.crystal('ice',X.pos(p.x+(Math.random()-.5)*.8,p.z+(Math.random()-.5)*.8),.35+Math.random()*.2,.6,.5,new T.Vector3(Math.random()-.5,0,Math.random()-.5).normalize(),{hold:.25,grow:.08,chunks:1});X.knock(c.foe,.22);return}
   if(ci===10){for(let k=0;k<8;k++)X.chunk('stone',c.foe.position,1.2);X.bits('stone',b,6);X.smoke(b,4,0x6a5240,.8,1,1,.35);X.sparks(b,8,r.col[1],3.5);X.crack(c.foe.position,r.col[1],1.6,.5);X.knock(c.foe,big?.45:.25);if(big)X.flash(.3,.5,.2);return}
   X.sparks(b,12,r.col[1],5,3);X.fade(X.sprite(X.glowTex,b,1,{color:r.col[1]}),.15,.5);X.knock(c.foe,.2);X.flash(.15,.35,.05);
  });
 }
 const shoot0=shoot;shoot=function(){const n=projs.length,s=G.legacySkill,r=shoot0.apply(this,arguments);if(!G.on)return r;
- for(let i=n;i<projs.length;i++){const p=projs[i],ci=P.handles(s)?s.sourceClass:p.basicClass;if(p.team!=='player'||!P.basic(ci)||p.skillHit&&!P.handles(s))continue;
-  p.fx487={ci,sk:P.handles(s)?{...s}:null,start:world(p),serial:player.combo||1};p.mesh.traverse(o=>o.layers.set(31));const c=ctx(ci,null,{x:p.x,z:p.z}),rs=recipe(ci);
+ for(let i=n;i<projs.length;i++){const p=projs[i],ci=G.handles(s)?s.sourceClass:p.basicClass;if(p.team!=='player'||!P.basic(ci)||p.skillHit&&!G.handles(s))continue;
+  p.fx487={ci,sk:G.handles(s)?{...s}:null,start:world(p),serial:player.combo||1};p.mesh.traverse(o=>o.layers.set(31));const c=ctx(ci,null,{x:p.x,z:p.z}),rs=recipe(ci);
   X.inContext(c,()=>{let m;if(ci===8)m=X.orb(world(p),.75,rs.col,{fire:1,noise:.8});else if(ci===9||ci===10){m=new T.Mesh(X.GEOS[ci===9?2:Math.min(7,p.fx487.serial+2)],X.crystalMat(ci===9?'ice':'stone'));m.scale.set(...(ci===9?[.5,1.1,.5]:[.6,.6,.6]));m.position.copy(world(p));X.add(m)}else{m=new T.Group();m.position.copy(world(p));X.add(m)}heads.set(p,m);
    if(ci!==11)X.trail(()=>projs.includes(p)?world(p):null,ci===8?.45:ci===9?.22:.28,rs.col);
    let beamAt=0;X.spawn(m,(o,dt,t)=>{if(!projs.includes(p)||t>3){heads.delete(p);X.kill(o);return false}o.position.copy(world(p));if(ci===8){o.material.uniforms.uTime.value=time;X.faceCam(o)}else if(ci===9)o.quaternion.setFromUnitVectors(X.UP,new T.Vector3(p.vx,p.vy||0,p.vz).normalize());else if(ci===10){o.rotation.x+=dt*9;o.rotation.z+=dt*7;o.material.uniforms.uTime.value=time}else{beamAt-=dt;if(beamAt<=0){beamAt=.04;X.bolt(p.fx487.start,world(p),rs.col,{width:.14,life:.16})}}return true});

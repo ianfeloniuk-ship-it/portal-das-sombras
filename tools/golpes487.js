@@ -134,7 +134,7 @@ function stripGeo(pts,width,taper=true){const p=[],uv=[],idx=[],n=pts.length,vie
 function trail(getPos,width,col,o={}){const pts=[],mat=ribMat(col,{mode:1,center:1,noise:o.noise??.5,ns:o.ns??5,spd:o.spd??6,gain:o.gain??1.3}),m=new T.Mesh(new T.BufferGeometry(),mat);m.frustumCulled=false;addFX(m);const len=o.len??14;let dead=0;
  spawn(m,(ob,dt,t)=>{mat.uniforms.uTime.value=time;const p=getPos();if(p){pts.unshift(p.clone());if(pts.length>len)pts.pop()}else{dead+=dt;pts.pop();mat.uniforms.uFade.value=Math.max(0,1-dead/.25)}
   if(pts.length>1){ob.geometry.dispose();ob.geometry=stripGeo(pts,width)}if(!p&&(pts.length<2||dead>.25)){kill(ob);return false}return true});return m}
-function bolt(a,b,col,o={}){const life=o.life??.16,width=o.width??.16;let m=null,acc=0;const mat=ribMat(col,{mode:1,center:1,noise:.35,ns:12,spd:14,gain:1.6});mat.uniforms.uMode.value=2;
+function bolt(a,b,col,o={}){const life=o.life??.16,width=o.width??.16;let m=null,acc=0;const mat=ribMat(col,{mode:1,center:1,noise:.35,ns:12,spd:14,gain:o.gain??1.6});mat.uniforms.uMode.value=2;
  const build=()=>{const pts=[a.clone()],n=o.seg??12,d=b.clone().sub(a),len=d.length(),side=new T.Vector3(-d.z,0,d.x).normalize();for(let i=1;i<n;i++){const f=i/n,jit=(o.jit??.35)*Math.sin(Math.PI*f);pts.push(a.clone().addScaledVector(d,f).addScaledVector(side,(rand()-.5)*jit*2).add(new T.Vector3(0,(rand()-.5)*jit*1.4,0)))}pts.push(b.clone());
   if(m){m.geometry.dispose();m.geometry=stripGeo(pts,width,false)}else{m=new T.Mesh(stripGeo(pts,width,false),mat);m.frustumCulled=false;addFX(m)}};
  build();spawn(m,(ob,dt,t)=>{acc+=dt;mat.uniforms.uTime.value=time;if(acc>.04){acc=0;build()}mat.uniforms.uFade.value=Math.max(0,1-t/life)*(.75+.25*Math.sin(t*90));if(t>life){kill(m);return false}return true});
@@ -234,7 +234,7 @@ const RECIPES=[
  {id:8,n:'Mago de Fogo',arma:'cajado',melee:false,dist:6.4,col:[0xfff2c0,0xff8a20,0xc01a00],pal:'magma',basic:'Bola de fogo',skill:'Chuva de Meteoros',
   b(){const c=this.col;[0,.45,.9].forEach(d=>at(d,()=>{const a=hand(1.05);shot(a,tgt(),12,p=>orb(p,.75,c,{fire:1,noise:.8}),(p)=>this.boom(p,1),{trail:[.45,c,{len:14,noise:.9,ns:4,spd:8}]})}))},
   boom(p,s){const c=this.col;const o=orb(p,.8*s,c,{fire:1});spawn(o,(ob,dt,t)=>{faceCam(ob);ob.material.uniforms.uTime.value=time;ob.scale.setScalar(s*(.8+t*5));ob.material.uniforms.uFade.value=Math.max(0,1-t/.35);if(t>.35){kill(ob);return false}return true});
-   for(let i=0;i<5;i++)slash(p.clone().setY(Math.max(.3,p.y-.2)),rand()*6.28,{col:c,r:.5*s,w:.35*s,arc:1.6,pitch:-.9-rand()*.5,dur:.12,fade:.2,noise:1,ns:5});
+   for(let i=0;i<5;i++)slash(new T.Vector3(p.x,Math.max(ground(p.x,p.z)+.3,p.y-.2),p.z),rand()*6.28,{col:c,r:.5*s,w:.35*s,arc:1.6,pitch:-.9-rand()*.5,dur:.12,fade:.2,noise:1,ns:5});
    embers(p,14*s,c[1],.8*s,1.1);sparks(p,10*s,0xffd080,4*s,4);smoke(p,4*s,0x3a2a24,.8*s,1.3,1*s,.35);crack(new T.Vector3(p.x,0,p.z),c[1],1.6*s,.5);knock(F,.25*s);if(s>1)flash(.5,.7,.25)},
   s(){const c=this.col,P=F.position.clone();ringFlat(P,c[1],3,3.2,1.9);for(let i=0;i<5;i++)at(.15+i*.28,()=>{const g=P.clone().add(new T.Vector3((rand()-.5)*2.8,.1,(rand()-.5)*2.8));if(i===2)g.copy(P).setY(.1);const s0=g.clone().add(new T.Vector3(-3,9,2.2));
    shot(s0,g,16,p=>{const grp=new T.Group();const rock=new T.Mesh(GEOS[i%8],crystalMat('magma'));rock.scale.set(.45,.6,.45);grp.add(rock);const fo=orb(new T.Vector3(),1.4,c,{fire:1});grp.add(fo);grp.position.copy(p);scene.add(grp);
@@ -252,7 +252,7 @@ const RECIPES=[
     for(const side of [-1,1]){if(f<.12)continue;const q=p.clone().addScaledVector(perp,side*(.18+f*.32)).addScaledVector(dir,(rand()-.5)*.2);at(born+.035,()=>crystal(pal,q,h*(.45+rand()*.2),w*.62,.62+rand()*.25,perp.clone().multiplyScalar(side).addScaledVector(dir,.6).normalize(),{hold:hold+.02,chunks:1}))}}
    at(.92,()=>{flash(1,.8,.32);crack(B,c[1],3.6,1.3,1);knock(F,.4,.45);for(let i=0;i<16;i++){const a=i/16*6.28,r=1.05+rand()*.55,p=new T.Vector3(B.x+Math.cos(a)*r,0,B.z+Math.sin(a)*r);crystal(pal,p,.28+rand()*.22,.9+rand()*.6,1.25,new T.Vector3(Math.cos(a),0,Math.sin(a)),{grow:.1,hold:1.1,bits:false,chunks:0})}
     for(let i=0;i<11;i++){const a=i/11*6.28,r=.25+rand()*.45,p=new T.Vector3(B.x+Math.cos(a)*r,0,B.z+Math.sin(a)*r);crystal(pal,p,1.5+rand()*1.1,1.5+rand()*.7,.28+rand()*.32,new T.Vector3(Math.cos(a),0,Math.sin(a)).addScaledVector(dir,.3).normalize(),{grow:.11,hold:1+rand()*.1,melt:.38})}
-    for(let i=0;i<20;i++)chunk(pal,new T.Vector3(B.x+(rand()-.5)*1.4,0,B.z+(rand()-.5)*1.4),1.6);fade(sprite(glowTex,new T.Vector3(B.x,1.2,B.z),.5,{color:c[1]}),.35,6);
+    for(let i=0;i<20;i++)chunk(pal,new T.Vector3(B.x+(rand()-.5)*1.4,0,B.z+(rand()-.5)*1.4),1.6);fade(sprite(glowTex,gp(B.x,B.z,1.2),.5,{color:c[1]}),.35,6);
     if(frost){at(.85,()=>{smoke(A.clone().lerp(B,.6),10,0x9cc8ff,3,1.6,1.2,.2);embers(A.clone().lerp(B,.55),40,0xdff4ff,3.5,1.6)})}else{at(.9,()=>smoke(A.clone().lerp(B,.6),12,0x6a5240,3,1.6,1.4,.3))}})}},
  {id:10,n:'Mago da Terra',arma:'cajado',melee:false,dist:6.4,col:[0xfff0c0,0xffa040,0x8a3a08],pal:'stone',basic:'Rocha arremessada',skill:'Estaca de Pedra',
   b(){const c=this.col;[0,.45,.9].forEach((d,i)=>at(d,()=>{const a=hand(1.05);shot(a,tgt(),13,p=>{const m=new T.Mesh(GEOS[i+3],crystalMat('stone'));m.position.copy(p);m.scale.set(.6,.6,.6);scene.add(m);return m},(p)=>{for(let k=0;k<8;k++)chunk('stone',F.position,1.2);bits('stone',p,6);smoke(p,4,0x6a5240,.8,1,1,.35);sparks(p,8,c[1],3.5);crack(F.position,c[1],1.6,.5);knock(F,i===2?.45:.25);if(i===2)flash(.3,.5,.2)},{tumble:true,arcH:.6,trail:[.28,c,{len:10}]})}))},
@@ -314,19 +314,19 @@ function skillContext(ci,e,pt,cast){const c=context(ci,e,pt);c.cast=cast;return 
 function impactCast(c){if(!c||c.cancelled||c.ready)return;c.ready=true;c.releasing=true;const hits=c.hits.splice(0);for(const [e,d,sk]of hits)releaseHit({e,d,sk,region:c.region});c.releasing=false;}
 
 API.withSkill=function(sk,fn){const prev=activeSkill,hs=window.hitstop,sh=window.shake;activeSkill=sk;try{if(API.handles(sk)){window.hitstop=()=>{};window.shake=()=>{}}return fn()}finally{activeSkill=prev;window.hitstop=hs;window.shake=sh}};
-API.delayFor=sk=>!API.handles(sk)?0:sk.sourceClass===0?.27:sk.sourceClass===2?.44:.06;
+API.delayFor=sk=>!API.handles(sk)||API.provider(sk)===window.Magos493?0:sk.sourceClass===0?.27:sk.sourceClass===2?.44:.06;
 API.pulseTimes=sk=>API.on?(API.provider(sk)?.pulseTimes?.(sk)||(API.handles(sk)&&sk.sourceClass===1?[.16,.26,.36,.46,.56,.8]:null)):null;
 const originalPlay=VFX302.play;
 // The entire old presentation is collision-only. The recipes above own the visible presentation.
 VFX302.play=function(sk){if(API.handles(sk))return API.legacy(()=>originalPlay.apply(this,arguments),sk);return originalPlay.apply(this,arguments)};
 const oldFluid=castFluid139;castFluid139=function(sk){return API.handles(sk)?API.legacy(()=>oldFluid.apply(this,arguments),sk):oldFluid.apply(this,arguments)};
 const kitHit0=kitHit111;
-kitHit111=function(e,d,sk){const old=activeSkill;activeSkill=API.handles(sk)?sk:null;try{if(API.handles(sk)&&activeCast&&!activeCast.ready&&!activeCast.releasing){activeCast.hits.push([e,d,{...sk}]);return d}return kitHit0.apply(this,arguments)}finally{activeSkill=old}};
+kitHit111=function(e,d,sk){const old=activeSkill;activeSkill=API.handles(sk)?sk:null;try{if(API.handles(sk)&&activeCast&&!activeCast.ready&&!activeCast.releasing){activeCast.hits.push([e,d,{...sk}]);return d}const hp=e?.hp,r=kitHit0.apply(this,arguments);if(API.handles(sk)&&e?.hp<hp)API.provider(sk)?.hit?.(sk,e);return r}finally{activeSkill=old}};
 let activeCast=null;const hitEvents=[];
 function releaseHit(q){if(q.region!==L||!q.e||q.e.dead||!player||player.dead)return;const old=activeSkill;activeSkill=q.sk;try{const hp=q.e.hp;kitHit0(q.e,q.d,q.sk);API.stats.hits+=q.e.hp<hp?1:0}finally{activeSkill=old}}
 function skillStart(sk,K,cast){const provider=API.provider(sk);if(provider){API.stats.skills++;return provider.start(sk,K,cast)}const ci=sk.sourceClass,targets=K.list.slice(),recipe=RECIPES.find(c=>c.id===ci);API.stats.skills++;if(ci===1){const list=targets.length?targets:[null];for(const e of list){const ctx=skillContext(ci,e,K.pt,cast);ctx.follow=e;ctx.followAt=e?{x:e.x,z:e.z}:null;inContext(ctx,()=>recipe.s())}}else inContext(skillContext(ci,targets[0]||null,K.pt,cast),()=>recipe.s())}
 const originalKit=kitRun111;
-kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,arguments);const K=VFX328.truth(sk);if(!K)return originalKit.apply(this,arguments);const cast={hits:[],region:L,releasing:false,ready:!!API.provider(sk)?.immediate?.(sk),cancelled:false},prev=activeCast;castStates.set(sk,cast);statesById.set(sk.skillId,cast);activeCast=cast;activeSkill=sk;let result;try{result=API.legacy(()=>originalKit.apply(this,arguments))}finally{activeCast=prev;activeSkill=null}
+kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,arguments);const K=VFX328.truth(sk);if(!K)return originalKit.apply(this,arguments);K.origin={x:player.x,z:player.z};K.alliesBefore=new Set(allies);const cast={hits:[],region:L,releasing:false,ready:!!API.provider(sk)?.immediate?.(sk),cancelled:false},prev=activeCast;castStates.set(sk,cast);statesById.set(sk.skillId,cast);activeCast=cast;activeSkill=sk;let result;try{result=API.legacy(()=>originalKit.apply(this,arguments))}finally{activeCast=prev;activeSkill=null}
  skillStart(sk,{...K,list:cast.hits.length?[...new Set(cast.hits.map(h=>h[0]))]:K.list},cast);return result};
 API.replacesHit=o=>!!(API.on&&o&&o.fromPlayer&&!o.pet&&!o.passive&&!o.dot&&!o.tick&&(o.skillHit?API.handles(activeSkill||o.skillVfx487||o.fx487?.sk):([0,1,2].includes(o.basicClass??profile.cls)||API.providers.some(p=>p.basic(o.basicClass)))));
 const H=hurtEnemy;
