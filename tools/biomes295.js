@@ -38,7 +38,7 @@ const FX={
  flores:{n:'Campos floridos',d:'Ar perfumado: fora de combate, recupera 1% da vida a cada 3 segundos.',regen:.01/3,good:true},
  floresta:{n:'Floresta',d:'Sombras densas: +5% de chance de crítico.',crit:.05,good:true},
  cristal:{n:'Cavernas de cristal',d:'Mana no ar: +25% de regeneração de mana.',mana:.25,good:true},
- deserto:{n:'Deserto',d:'Calor árido: a Sede cai mais que o dobro da velocidade, o cansaço chega 2× mais rápido e o estamina volta 25% mais devagar.',tired:2,vigor:-.25,thirst:2.35,item:'cantil'},
+ deserto:{n:'Deserto',d:'Calor árido: o cansaço chega 2× mais rápido e o estamina volta 25% mais devagar.',tired:2,vigor:-.25,thirst:2.35,item:'cantil'},
  neve:{n:'Neve',d:'Frio glacial: −12% de velocidade, −20% de regeneração de mana e Congelamento longe de calor (use Fogueira com Feixes de Lenha, Tocha com Resina ou Chá Térmico).',move:-.12,mana:-.2,cold:1,item:'capa'},
  vulcao:{n:'Vulcão',d:'Ar quente: perde 1% da vida a cada 3 segundos (nunca abaixo de 20%).',burn:.01/3,item:'unguento'},
  pantano:{n:'Pântano',d:'Lama funda: −10% de velocidade de movimento e o estamina volta 15% mais devagar.',move:-.1,vigor:-.15,item:'botas'}};

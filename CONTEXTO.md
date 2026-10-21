@@ -1,3 +1,10 @@
+## v505 (21/10/2026) — Sem Sede (cânon)
+- Pedido de Ian: tirar a barra de Sede e o sistema de sede (o cânon diz que não existe Sede em Primeva).
+- `tools/survival437.js`: a Sede não cai mais (fica sempre 100, então nunca dá dano de "Sede extrema"). A janela de água não tem mais "Beber Água Bruta Direto". Os textos de beber (chá, água fervida) e a linha de status não falam mais em Sede. Fome, temperatura, cantil (Chá Térmico/Antídoto) e pesca continuam iguais.
+- `tools/attrs462.js`: o HUD (painel Ficha) e a janela de Status mostram só a Fome. Os textos de Vitalidade e Vontade foram atualizados.
+- Partes ligadas: `biomes295` (texto do deserto sem Sede), `campaign327` (missão dos refugiados: "Fome e Cansaço", 5 textos).
+- Teste: navegador local, Sede forçada em 10 volta a 100, HUD só com Fome, Status e mochila sem "Sede". Sem erro novo.
+
 ## v504 (21/10/2026) — As 5 Capitais com cara de capital
 - Pedido: Ymiria, Zahar, Thalor, Urdan e Verden maiores que cidade comum, com muralha e identidade do bioma (Aster não mudou).
 - `tools/capitais504.js` (gancho em `buildCity`): muralha externa de 150 m (muro de pedra ou paliçada Tripo, tingido por instância; peças `dim` sem a luz própria forte para a cor pegar), 4 portões (`cityGates341`), 12 torres, tochas, lanternas nas avenidas, praça pavimentada, marco com farol de luz (torre de 46–50 m; Verden = Árvore-Mãe). Ymiria: pedra azul-escura, abetos, tochas azuis. Zahar: arenito, 14 tendas (m437 cabana/abrigo), cactos. Thalor: muro claro mais alto voltado ao mar, cais de tábuas até a água funda, navio, veleiros e canoas atracados. Urdan: paliçada que escurece do pântano (norte) para carvão (sul), brasas subindo, pedras. Verden: paliçada verde, carvalhos gigantes dentro.

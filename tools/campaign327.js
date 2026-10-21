@@ -55,9 +55,9 @@
       { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com F para lutar livre) e desobstrua as pedras e troncos da passagem.', verb: 'DESOBSTRUIR PEDRAS E TRONCOS DO DESFILADEIRO', fight: { n: 6, el: 1, kinds: GOB },
         done: 'O desfiladeiro está desobstruído e livre, mantendo o relevo natural intacto. O estandarte dos saqueadores foi pintado por cima: não é o vermelho do Clã Ferrugem.' },
       { t: 'go', d: 'Avance ao vale da fundição velha e ajude Torvo a defender os refugiados cercados.', verb: 'FALAR COM TORVO NO VALE', fight: { n: 5, el: 1 }, fig: { torvo: true },
-        done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio lutar ao nosso lado. Os refugiados estão exaustos de Fome, Sede e Cansaço.' },
-      { t: 'go', d: 'Cure a Fome, Sede e Cansaço dos refugiados no vale da fundição velha: monte/acenda uma Fogueira perto ou entregue Água Fervida / Comida Assada.', verb: 'AQUECER / ENTREGAR ÁGUA FERVIDA OU COMIDA ASSADA', same: 1, fig: { civ: true, name: 'Refugiado' },
-        done: 'Refugiado: — Água fervida, comida quente e fogo… A sede e o cansaço passaram. Obrigado!' },
+        done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio lutar ao nosso lado. Os refugiados estão exaustos de Fome e Cansaço.' },
+      { t: 'go', d: 'Cure a Fome e Cansaço dos refugiados no vale da fundição velha: monte/acenda uma Fogueira perto ou entregue Água Fervida / Comida Assada.', verb: 'AQUECER / ENTREGAR ÁGUA FERVIDA OU COMIDA ASSADA', same: 1, fig: { civ: true, name: 'Refugiado' },
+        done: 'Refugiado: — Água fervida, comida quente e fogo… A fome e o cansaço passaram. Obrigado!' },
       { t: 'go', d: 'Colha o testemunho de Torvo no vale da fundição velha.', verb: 'COLHER TESTEMUNHO DE TORVO', same: 1, fig: { torvo: true },
         done: 'Torvo: — Atravessamos há cem anos. Nosso mundo foi esvaziado. Ele não destrói mundos: ele os recolhe.' },
       { t: 'talk', npc: 'Lyra', d: 'Registre o testemunho de Torvo com Lyra, na Ordem.', say: ['Um povo inteiro que atravessou há cem anos porque o mundo deles foi recolhido…', 'Vou registrar o testemunho de Torvo nos arquivos da Ordem, {nome}.'] }] },
@@ -734,7 +734,7 @@
       const boilCanteen = ctn && (ctn.kind === 'limpa' || ctn.kind === 'cha') && (ctn.sips || 0) > 0 ? ctn : null;
       const roastFood = ['assada', 'defumada', 'cogu_assado', 'racao_expedicao'].find(k => window.Surv437?.count?.(k) > 0);
       if (!hasFire && !boilCanteen && !roastFood) {
-        toast('<b>[HISTÓRIA]</b> Os refugiados estão com Fome, Sede e Cansaço! Monte/acenda uma <b>Fogueira</b> perto, ferva <b>Água no Cantil</b> ou traga <b>Carne Assada</b>.', 6500);
+        toast('<b>[HISTÓRIA]</b> Os refugiados estão com Fome e Cansaço! Monte/acenda uma <b>Fogueira</b> perto, ferva <b>Água no Cantil</b> ou traga <b>Carne Assada</b>.', 6500);
         return;
       }
       if (boilCanteen && !hasFire) { boilCanteen.sips = Math.max(0, (boilCanteen.sips || 1) - 1); if (!boilCanteen.sips) boilCanteen.kind = null; }
@@ -742,7 +742,7 @@
       s.refugeeHealed441 = true;
       const w = W.get(m.id);
       if (w) for (const f of w.figs) if (f && f.name === 'Refugiado' && f.m) { f.down = false; f.m.wounded401 = false; f.m.root.rotation.z = 0; }
-      try { addFloat(p0[0], gy(p0[0], p0[1]) + 2.2, p0[1], 'FOME, SEDE E CANSAÇO CURADOS!', '#7ef5a5'); } catch (_) {}
+      try { addFloat(p0[0], gy(p0[0], p0[1]) + 2.2, p0[1], 'FOME E CANSAÇO CURADOS!', '#7ef5a5'); } catch (_) {}
     }
     if (m.id === 'a10' && sp.logos456) {
       profile.godKills192 = (profile.godKills192 || 0) + 1;

@@ -45,10 +45,10 @@
       agi: 'Nado e mergulho ' + pct(s.swim) + ' mais rápidos; no Passo Silencioso as feras só percebem ' + pct(s.quiet) + ' mais de perto.',
       per: pct(s.gatherExtra) + ' de chance de coleta extra e ' + pct(s.gatherRare) + ' de achado raro (ervas, resina, cristal frio); nas Fendas o mapa revela +' + s.reveal + ' casas em volta.',
       int: 'Comida apodrece ' + pct(s.fresh) + ' mais devagar; Chá Térmico e Antídoto duram ' + pct(s.tea) + ' a mais.',
-      vit: 'Fôlego debaixo d\'água +' + num(s.breath) + ' s; Fome e Sede caem ' + pct(s.hungerSlow) + ' mais devagar; dormir na Tenda deixa o descanso ' + pct(s.sleep) + ' mais longo.',
+      vit: 'Fôlego debaixo d\'água +' + num(s.breath) + ' s; a Fome cai ' + pct(s.hungerSlow) + ' mais devagar; dormir na Tenda deixa o descanso ' + pct(s.sleep) + ' mais longo.',
       res: 'Frio de Ymiria e calor de Zahar afetam ' + pct(s.climate) + ' menos; fôlego/pressão no fundo +' + num(s.pressure) + ' s; o Cansaço acumula ' + pct(s.fatigue) + ' mais devagar.',
       esp: 'Miasma da Fenda ' + pct(s.miasma) + ' mais fraco (comida apodrece menos lá dentro); lenha da fogueira e tocha rendem ' + pct(s.fuel) + ' mais tempo.',
-      von: 'Dano de Fome/Sede zeradas ' + pct(s.starve) + ' menor; Parasitas e Intoxicação passam ' + pct(s.intox) + ' mais rápido.'
+      von: 'Dano da Fome zerada ' + pct(s.starve) + ' menor; Parasitas e Intoxicação passam ' + pct(s.intox) + ' mais rápido.'
     })[k] || '';
   }
   const TRAIN_TXT = {
@@ -206,9 +206,8 @@
     const w = Surv437.totalW(), mw = Surv437.maxW();
     const bar = (lbl, v, c, tip) => '<div class="a462-meter" data-tip154="' + tip + '" style="cursor:help"><div class="a462-l"><span>' + lbl + '</span><b style="color:' + c + '">' + Math.round(v) + '%</b></div><div class="a462-b"><i style="width:' + Math.max(0, Math.min(100, v)) + '%;background:' + c + '"></i></div></div>';
     const temp = s.temp < 25 ? 'Frio' : s.temp > 75 ? 'Calor' : 'Normal';
-    return '<section class="a462-surv"><div class="sec">SOBREVIVÊNCIA</div><div class="a462-grid">' +
+    return '<section class="a462-surv"><div class="sec">SOBREVIVÊNCIA</div><div class="a462-grid" style="grid-template-columns:1fr">' +
       bar('Fome', s.hunger, col(s.hunger, '#7ef5a5'), 'Cai com o tempo (mais devagar dentro da cidade). Coma pela mochila [V]. Vitalidade desacelera a queda.') +
-      bar('Sede', s.thirst, col(s.thirst, '#6fd2ff'), 'Cai mais rápido no deserto e no vulcão. Beba do cantil pela mochila [V]. Vitalidade desacelera a queda.') +
       '</div><div class="a462-info"><span>Temperatura: <b>' + temp + '</b> (' + Math.round(s.temp) + '°)</span><span>Carga: <b style="color:' + (w > mw ? '#ff5d5d' : w > mw * .85 ? '#ffd54f' : 'inherit') + '">' + w.toFixed(1) + ' / ' + Math.round(mw) + ' kg</b></span>' +
       (s.intoxT > 0 ? '<span style="color:#ff8fa3">Intoxicado</span>' : '') + (s.sickT > 0 ? '<span style="color:#ff8fa3">Parasitas</span>' : '') +
       '<button class="btn mini" data-a462-surv>Mochila e sobrevivência [V]</button></div></section>';
@@ -238,7 +237,7 @@
     const cs0 = charSheet;
     charSheet = function () {
       const h = cs0.apply(this, arguments);
-      try { const s = SV(); if (s) return h + row('Fome', Math.round(s.hunger) + '%', '') + row('Sede', Math.round(s.thirst) + '%', ''); } catch (_) {}
+      try { const s = SV(); if (s) return h + row('Fome', Math.round(s.hunger) + '%', ''); } catch (_) {}
       return h;
     };
   }
@@ -252,15 +251,14 @@
     if (!box || box.nextElementSibling !== xp) {
       if (box) box.remove();
       // v463 (Ian): mesmo bloco do Status (caixinha, nome à esquerda, % colorido à direita, barra embaixo)
-      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" class="a462-grid" title="Fome e Sede · clique para abrir a mochila [V]" style="cursor:pointer;pointer-events:auto">' +
+      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" class="a462-grid" title="Fome · clique para abrir a mochila [V]" style="cursor:pointer;pointer-events:auto;grid-template-columns:1fr">' +
         '<div class="a462-meter"><div class="a462-l"><span>Fome</span><b id="a462hFv"></b></div><div class="a462-b"><i id="a462hF"></i></div></div>' +
-        '<div class="a462-meter"><div class="a462-l"><span>Sede</span><b id="a462hSv"></b></div><div class="a462-b"><i id="a462hS"></i></div></div></div>');
+        '</div>');
       document.getElementById('a462hud').onclick = () => { try { Surv437.open('inv'); } catch (_) {} };
       box = document.getElementById('a462hud');
     }
     const set = (id, v, c) => { const i = document.getElementById(id); if (i) { i.style.width = Math.max(0, Math.min(100, v)).toFixed(0) + '%'; i.style.background = c; } const t = document.getElementById(id + 'v'); if (t) { t.textContent = Math.round(v) + '%'; t.style.color = c; } };
     set('a462hF', s.hunger, col(s.hunger, '#7ef5a5'));
-    set('a462hS', s.thirst, col(s.thirst, '#6fd2ff'));
   }
   const css = document.createElement('style');
   css.textContent = '.a462-surv{margin:10px 0 4px}.a462-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.a462-meter{background:rgba(255,255,255,.03);border:1px solid rgba(201,164,92,.25);border-radius:6px;padding:7px 10px}.a462-l{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.a462-b{height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}.a462-b i{display:block;height:100%}.a462-info{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;opacity:.9;margin-top:7px}.a462-info .btn{margin-left:auto}.a462-train{display:flex;align-items:center;gap:6px;font-size:11px;opacity:.85;margin-top:3px;flex-wrap:wrap}.a462-tb{width:54px;height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;display:inline-block}.a462-tb i{display:block;height:100%;background:#d6b468}#a462hud{margin:6px 0 4px;gap:6px}#a462hud .a462-meter{padding:5px 8px}#a462hud .a462-l{font-size:11px;margin-bottom:4px}#a462hud .a462-b{height:5px}@media (max-width:520px){.a462-grid{grid-template-columns:1fr}}';

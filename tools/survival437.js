@@ -764,7 +764,7 @@
       s.sickT = 0; s.intoxT = 0;
       if (run) run.awake287 = Math.max(0, (run.awake287 || 0) - 360);
       player.hp = Math.min(player.maxhp, player.hp + Math.round(player.maxhp * 0.20));
-      toast('<b>[CHÁ TÉRMICO · POTÊNCIA ' + Math.round(s.canteen.potency) + '%]</b> +48 Sede, aquece contra o frio extremo e reduz o Cansaço!');
+      toast('<b>[CHÁ TÉRMICO · POTÊNCIA ' + Math.round(s.canteen.potency) + '%]</b> Aquece contra o frio extremo e reduz o Cansaço!');
     } else if (s.canteen.kind === 'antidoto' && (s.canteen.potency || 0) > 0) {
       s.thirst = Math.min(100, s.thirst + 45);
       s.sickT = 0; s.intoxT = 0; s.antidoteT = 240 * (1 + A('tea'));
@@ -774,7 +774,7 @@
     } else if (s.canteen.kind === 'limpa' || ((s.canteen.kind === 'cha' || s.canteen.kind === 'antidoto') && (s.canteen.potency || 0) <= 0)) {
       s.canteen.kind = 'limpa';
       s.thirst = Math.min(100, s.thirst + 42);
-      toast('Você bebeu <b>Água Fervida/Destilada</b> (+42 Sede). Restam ' + s.canteen.sips + ' goles.');
+      toast('Você bebeu <b>Água Fervida/Destilada</b>. Restam ' + s.canteen.sips + ' goles.');
     } else {
       // Água Bruta: causa Parasitas / Corrupção
       s.thirst = Math.min(100, s.thirst + 22);
@@ -945,7 +945,7 @@
     let bio = 'campos';
     try { bio = L.mode === 'dungeon' ? (L.otherworld456?.bio || L.gate?.bio124 || 'cristal') : biomeAt(player.x, player.z); } catch (_) {}
     const hotMul = (bio === 'deserto' || bio === 'vulcao') ? 1.55 : 1;
-    s.thirst = Math.max(0, s.thirst - (100 / (DAY() * 0.95)) * dt * rate * hotMul * vitSlow);
+    s.thirst = 100; /* v505 (Ian, cânon): não existe Sede em Primeva */
 
     // Temperatura corporal
     const night = L.mode === 'dungeon' || (typeof isNight === 'function' && isNight());
@@ -1163,7 +1163,7 @@
         ? 'Goteira mineral e poça subterrânea da Fenda. Contém <b>Água Bruta</b> — ferva na Fogueira do seu Acampamento Portátil!'
         : 'Beber água bruta direto do rio/lago causa <b>Parasitas</b>. Use o <b>' + tierName + '</b> e ferva na Fogueira.') + '</div>';
     if (!sea) {
-      h += row('Beber Água Bruta Direto', '+22 Sede, mas causa Parasitas por 90 segundos.', '<button class="btn" id="w437raw">Beber Bruta</button>');
+      /* v505: sem Sede, beber água bruta direto não tem mais motivo */
     }
     h += row(sea ? 'Encher com Água Salgada' : 'Encher ' + tierName, 'Guarda ' + canteenMaxSips() + ' goles para ferver ou destilar na Fogueira.', '<button class="btn hot" id="w437fill">Encher Cantil</button>');
     if (count('vara') > 0) {
@@ -1171,7 +1171,7 @@
     }
     openModal(sea ? 'ÁGUA DO MAR & PESCA' : drip ? 'FONTE DA FENDA' : 'ÁGUA E PESCA', h);
     const bRaw = document.getElementById('w437raw');
-    if (bRaw) bRaw.onclick = () => { s.thirst = Math.min(100, s.thirst + 22); s.sickT = 90; toast('Você bebeu água bruta (+22 Sede) e contraiu Parasitas!'); closeModal(); save(); };
+    if (bRaw) bRaw.onclick = () => { s.thirst = Math.min(100, s.thirst + 22); s.sickT = 90; toast('Você bebeu água bruta e contraiu Parasitas!'); closeModal(); save(); };
     const bFill = document.getElementById('w437fill');
     if (bFill) bFill.onclick = () => { if (fillCanteen(sea)) closeModal(); };
     const bFish = document.getElementById('w437fish');
@@ -1258,7 +1258,7 @@
         ? '<b style="color:#ffd54f">Alforje de Couro Curado no Sal (-50% apodrecimento)</b>'
         : '<span style="opacity:.8">Sem bolsa térmica (apodrecimento normal · 2× mais rápido nas Fendas)</span>';
 
-    h += '<div class="sysline">🍖 Fome: <b>' + Math.round(s.hunger) + '%</b> · 💧 Sede: <b>' + Math.round(s.thirst) + '%</b> · 🌡 Temp: <b>' + Math.round(s.temp) + '°</b> · ⚖ Carga: <b>' + w.toFixed(1) + ' / ' + Math.round(mw) + ' kg</b><br>' +
+    h += '<div class="sysline">🍖 Fome: <b>' + Math.round(s.hunger) + '%</b> · 🌡 Temp: <b>' + Math.round(s.temp) + '°</b> · ⚖ Carga: <b>' + w.toFixed(1) + ' / ' + Math.round(mw) + ' kg</b><br>' +
       '🎒 Conservação: ' + bagStatus +
       (s.foodBuff ? '<br><span style="color:#6fe39a">✨ Saciedade (' + s.foodBuff.label + '): +' + Math.round(s.foodBuff.hpPct * 100) + '% Vida Máx e +' + Math.round((s.foodBuff.vigMult - 1) * 100) + '% regen de Vigor (' + Math.ceil(s.foodBuff.t) + 's)</span>' : '') +
       (s.intoxT > 0 ? '<br><span style="color:#ff8fa3">⚠ Intoxicação Leve (comida rançosa): regeneração de Vigor reduzida (' + Math.ceil(s.intoxT) + 's)</span>' : '') +
