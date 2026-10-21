@@ -158,6 +158,8 @@ function upgrade(a){const o=a.p482;if(!o.base){const R=rng(o.seed^0x9e3779b9);o.
  const m=create(o.base,g,o);if(!swapIn(a,m)){dispose(m);return false}return true}
 function tick(){if(!API.ready||!API.bases.length||typeof L==='undefined'||L.mode!=='world'||typeof player==='undefined'||!player||!global.Warrior127)return;
  if(!Warrior127.animsSettled)Warrior127.loadAnims('models/anim-viajante155.glb?v=374');
+ /* v517 (Ian): NPCs de encontro (Ignis etc.) nasciam como boneco de caixas; entram no Povo482 como civis */
+ if(typeof npcs!=='undefined')for(const n of npcs){if(n&&n.kind==='emergent_skyrim'&&!n.p482&&n.m&&!n.m.povo482)register(n,{role:'civil',sex:sexOfName(n.short||n.name)||(/a$/i.test(String(n.short||n.name).split(/[ ,·]/)[0])?'f':'m'),seed:hash('enc|'+n.name+'|'+Math.round(n.x)+'|'+Math.round(n.z)),region:regionOf(null),priority:true})}
  const P=player,rows=[];for(const a of API.reg){if(!current(a)){if(a.m&&a.m.povo482&&(a.gone||a.dead||!a.m.root.parent))dispose(a.m);if(a.gone||!a.m||!a.m.root.parent)API.reg.delete(a);continue}
   rows.push({a,d:Math.hypot(P.x-a.x,P.z-a.z)-(a.p482.priority?20:0)})}
  rows.sort((x,y)=>x.d-y.d);const want=new Set(rows.filter(r=>r.d<FAR).slice(0,CAP).map(r=>r.a));

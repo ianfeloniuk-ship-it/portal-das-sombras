@@ -1,3 +1,9 @@
+## v518 (21/10/2026) — NPCs de encontro com modelo do Povo482
+- Pedido de Ian (print do Ignis): o Ignis era um boneco de caixas, não um NPC de verdade.
+- `tools/npc482.js`: NPCs `emergent_skyrim` (Ignis, Zephyr etc., criados em `quests480.js` com `makeChibi`) entram no Povo482 como civis (sexo pelo nome: lista, senão final «a» = f, senão m). Perto de 60 m viram o modelo rigado e animado; longe voltam ao boneco.
+- Teste: navegador local, NPC de teste «Ignis» virou `povo482` (civil_artesa_f, antes do ajuste de sexo) sem erro novo. Ainda não: roupa/martelo de ferreiro próprios; Ignis ficou civil comum.
+- Pendente: bugs da v517 (rocha, Meteoro, mar, relógio, NPCs que chamam como no Skyrim).
+
 ## v517 (21/10/2026) — Bola de Fogo grande e bichos/NPCs fora da água
 - Pedido de Ian (áudios + prints): a Bola de Fogo saía igual ao ataque básico do mago de fogo e deveria ser 3 a 4 vezes maior; havia bichos e NPCs dentro da água.
 - `src/core/380-acoes.js`: habilidade Bola de Fogo sai com escala 5,4 (era 1,8) e acerto `r` 1,3 para projéteis grandes. `tools/vfx328.js`: bola e explosão da pré-visualização acompanham (escala 5,4, explosão 3,2).
