@@ -441,6 +441,7 @@
       else if (sel < 0.80) kind = (bio === 'vulcao') ? 'pedra' : 'erva';
       else if (sel < 0.92) kind = (bio === 'pantano' || bio === 'floresta' || bio === 'cristal') ? 'cogu' : 'arbusto';
       else kind = 'rocha';
+      try { if (window.TER245 && TER245.ice500 && TER245.ice500(x, z) > 20 && (kind === 'arbusto' || kind === 'erva' || kind === 'cogu')) kind = 'pedra'; } catch (_) {} /* v502: cordilheira de gelo sem arbusto nem erva */
       out.push({ id: cx + ',' + cz + ':' + i, kind, x, z, bio, ry: hash(cx, cz, i * 7 + 5) * TAU, s: 0.85 + hash(cx, cz, i * 7 + 6) * 0.35 });
     }
     return out;

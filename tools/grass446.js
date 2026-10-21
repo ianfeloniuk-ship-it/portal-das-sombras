@@ -69,6 +69,8 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
   const tiles = new Map(); const M = new T.Matrix4(), Q = new T.Quaternion(), V = new T.Vector3(), Sc = new T.Vector3(), up = new T.Vector3(0, 1, 0);
   function blocked(x, z) {
     if (window.Water391 && Water391.waterAt(x, z)) return true;
+    if (window.TER245 && TER245.ice500 && TER245.ice500(x, z) > 20) return true; /* v502: cordilheira de gelo sem grama */
+    if (window.Enc502 && Enc502.clearAt(x, z)) return true; /* v502: clareira em volta dos encontros */
     if (window.TER245 && TER245.path444 && TER245.path444(x, z) > .25) return true;
     return false;
   }
