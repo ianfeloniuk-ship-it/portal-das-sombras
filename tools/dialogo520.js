@@ -205,6 +205,46 @@
     ctx = { def, npc: n, builder: () => buildTown(n, orig), tree: buildTown(n, orig), node: 'raiz' };
     render();
   }
+  /* v522: mendigos. Dar esmola cria afeto; com afeto 3 ele devolve algo; expulsar custa reputação. */
+  const PASSADO = [
+    'Eu era ferreiro, até a Fenda levar minha oficina e tudo que eu tinha.',
+    'Fui soldado da Ordem. Perdi a perna esquerda num cerco e ninguém me quis depois.',
+    'Tinha uma plantação ao norte. As feras comeram tudo em uma noite.',
+    'Fui mercador. Um golpe de sócio me deixou sem nada, só a roupa do corpo.'
+  ];
+  function buildBeggar(n) {
+    const m = tmem(n), f = m.flags, nome = n.short || n.name;
+    const h = (String(nome).length + (m.meets || 0)) % PASSADO.length;
+    const N = {};
+    N.raiz = {
+      t: f.expulso ? 'Por favor... não me bata de novo.'
+        : m.bond >= 4 ? 'Meu amigo! Que bom ver você. Os outros dizem que é um bom homem.'
+        : m.bond >= 2 ? 'Você de novo... Deus lhe pague pelo que já fez.'
+        : 'Uma moedinha, nobre viajante? Faz dois dias que não como.',
+      o: [
+        { l: 'Dar 1 de ouro', if: () => gold() >= 1, fn: () => { addGold(-1); m.bond = Math.min(5, m.bond + 1); f.expulso = 0; save(); say('<b>' + nome + ':</b> "Obrigado, obrigado."'); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
+        { l: 'Dar 10 de ouro', if: () => gold() >= 10, fn: () => { addGold(-10); m.bond = Math.min(5, m.bond + 2); f.expulso = 0; save(); return m.bond >= 3 && !f.presente ? 'presente' : 'noticia'; } },
+        { l: 'Dar 50 de ouro', if: () => gold() >= 50 && !f.deu50, fn: () => { addGold(-50); f.deu50 = 1; f.expulso = 0; m.bond = 5; if (typeof addOrderRep === 'function') addOrderRep(5, 'A Ordem soube da sua bondade'); save(); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
+        { l: 'Perguntar o que aconteceu com ele', go: 'passado' },
+        { l: 'Expulsar: "Saia daqui, vagabundo" (-15 de reputação)', fn: () => { f.expulso = 1; m.bond = 0; subRep(15); save(); dismissNpc(); say('<b>' + nome + '</b> sai arrastando os pés. Quem viu não gostou.'); return 'fim'; } },
+        { l: 'Ignorar e seguir', fn: () => 'fim' }
+      ]
+    };
+    N.passado = { t: PASSADO[h], o: [{ l: 'Sinto muito', go: 'raiz' }] };
+    N.noticia = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'A cidade anda calma.', o: [{ l: 'Obrigado pela notícia', go: 'raiz' }] };
+    N.presente = {
+      t: 'Espere... guardei isto escondido dos saqueadores. Você foi o único que me tratou como gente. Fique com isto.',
+      o: [{ l: 'Aceitar (150 de ouro)', fn: () => { f.presente = 1; addGold(150); save(); say('<b>' + nome + '</b> entrega 150 de ouro escondidos.'); return 'raiz'; } },
+        { l: 'Recusar: "Guarde para você"', fn: () => { f.presente = 1; m.bond = 5; if (typeof addOrderRep === 'function') addOrderRep(10, 'Recusou a esmola de um mendigo'); save(); return 'raiz'; } }]
+    };
+    return N;
+  }
+  function mendigo(n) {
+    const m = tmem(n); m.meets++;
+    const def = { name: n.name, title: n.short || n.name, type: 'cidade:' + n.name };
+    ctx = { def, npc: n, builder: () => buildBeggar(n), tree: buildBeggar(n), node: 'raiz' };
+    render();
+  }
   function wrapTownNpcs() {
     try {
       if (typeof npcs === 'undefined' || !Array.isArray(npcs)) return;
@@ -231,5 +271,5 @@
     render();
   }
 
-  global.Dialogo520 = { open, pick, town };
+  global.Dialogo520 = { open, pick, town, mendigo };
 })(typeof window !== 'undefined' ? window : globalThis);

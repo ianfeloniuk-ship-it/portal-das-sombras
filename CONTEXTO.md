@@ -6,6 +6,13 @@
 - Teste: Edge sem tela (Playwright) num clone; capturas olhadas ao longo do trecho. Rocha em vista alta tem padrão ondulado; sem pinheiros gigantes nem névoa de vale; pontes e ruínas perto de estrada fora do trecho sem teste.
 - Combinado com a v513/v514 de outra sessão: o `roadSegs/onRoad` dessa sessão vale (a minha versão em `250-mundo-infinito.js` foi descartada).
 
+## v522 (21/10/2026) — Mundo vivo, parte 1: mendigos nas cidades
+- Pedido de Ian: «um mundo totalmente vivo e independente, mendigos e tal». Esta é a primeira parte; o resto da lista abaixo ainda não foi feito.
+- `tools/vida522.js` (novo): cada cidade de pé ganha 1 mendigo (2 se o nível da cidade for 3 ou mais), com nome, roupa rasgada e vida própria: de dia fica no pátio, à noite perto da pousada, e troca de ponto sozinho quando o jogador está a mais de 40 m. Some se o jogador passa de 220 m.
+- `tools/dialogo520.js`: menu do mendigo — dar 1, 10 ou 50 de ouro (afeto; 50 dá 5 de reputação da Ordem), perguntar o passado, expulsar (-15 de reputação, ele foge). Com afeto 3 ele entrega 150 de ouro escondidos (ou você recusa e ganha 10 de reputação). Memória em `profile.dialogo520["cidade:Nome"]`.
+- Teste: só simulação em Node (spawn de 2 mendigos, esmola, afeto, presente, troca de ponto e sumiço). Não testado no navegador. Mendigo é parado no ponto (sem andar e sem sentar); não aparece à noite no modelo Povo482.
+- Pendente (mundo vivo): rotina de trabalho dos moradores (comércio, dormir em casa), ladrões que roubam o jogador, bêbados na pousada, crianças, guardas de patrulha, NPCs que brigam entre si, notícias que mudam com o que o jogador fez.
+
 ## v521 (21/10/2026) — Diálogo com escolhas nos NPCs de cidade e vilas
 - Pedido de Ian: levar o diálogo com escolhas para os NPCs de cidade e vilas.
 - `tools/dialogo520.js`: vendedores e caçadores (kind `vendor` e `hunter`, inclusive Povo482) ganham menu ao apertar F: ver mercadorias / ouvir o NPC (abre o que já existia), perguntar da cidade, elogiar (afeto de 0 a 5), pedir um agrado (só com afeto 3: 100 de ouro uma vez, depois 25) e provocar (-10 de reputação; ele recusa loja e conversa até você pedir desculpas por 100 de ouro). Memória em `profile.dialogo520["cidade:Nome"]`. O módulo troca o `use` dos NPCs a cada 1,5 s; o que o NPC já fazia (loja, fala de caçador, passos da campanha) continua pela primeira opção.
