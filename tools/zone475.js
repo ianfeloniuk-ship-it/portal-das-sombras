@@ -93,7 +93,7 @@ function step(){if(!Z.on||!player)return;adopt();if(!owned.size)return;
   const gate=c.gate487||(window.Golpes487&&Golpes487.castState(c.sk));if(gate&&(!gate.ready||gate.cancelled))continue;const S=shapes(en.o);if(!S.length)continue;
   for(const e of enemies){if(!e||e.dead||e.ally||e.friendly217)continue;const r=(e.r||.5);
    for(const s of S){if(Math.abs(e.x-s.cx)>40||Math.abs(e.z-s.cz)>40)continue;const q=inside(s.h,e.x,e.z);if(q.d>r)continue;
-    if(!c.hit.has(e)){c.hit.add(e);if(c.dmg>0){try{const hit487=()=>H0(e,c.dmg,c.cx,c.cz,{fromPlayer:true,skillHit:true,pierce:true,kb:0,zone475:true});if(window.Golpes487&&Golpes487.handles(c.sk))Golpes487.withSkill(c.sk,hit487);else hit487();Z.stats.hits++}catch(_){}}}
+    if(!c.hit.has(e)){c.hit.add(e);if(c.dmg>0){try{const hit487=()=>H0(e,c.dmg,c.cx,c.cz,{fromPlayer:true,skillHit:true,pierce:true,kb:0,zone475:true});const hp500=e.hp;if(window.Golpes487&&Golpes487.handles(c.sk))Golpes487.withSkill(c.sk,hit487);else hit487();if(e.hp<hp500&&window.Golpes487?.on)Golpes487.provider(c.sk)?.zoneHit?.(c.sk,e);Z.stats.hits++}catch(_){}}}
     if(e.isBoss||e.dead||c.hold)break;
     /* empurra para fora: na direção em que a peça avança, senão para longe do centro da habilidade */
     const pc=prevC.get(en),mx=pc?s.cx-pc.x:(en.vel?en.vel.x:(en.vx||0)),mz=pc?s.cz-pc.z:(en.vel?en.vel.z:(en.vz||0)),mv=Math.hypot(mx,mz);

@@ -19,9 +19,8 @@ Regras: ler primeva-golpes-vfx e primeva-codigo; usar as peças/código da demo;
 - Invocações reais não são VFX descartáveis: restaurar a camada visível do modelo que nasceu durante a execução legada. Conferido golem com 25 malhas visíveis e escudos sumindo ao perder proteção. Na gravação, limpar aliados entre casos; manter invocações do caso anterior contamina a prévia.
 
 ## Ordem pendente
-1. Básicos e receita aprovada de Monge, Lâmina Arcana, Lanceiro, Berserker.
-2. Demais habilidades das classes normais, incluindo Guerreiro/Assassino/Tanque.
-3. Básicos e todas as habilidades das classes raras.
+1. Demais habilidades das classes normais, incluindo Guerreiro/Assassino/Tanque, Arqueiro/Paladino/Invocador e as quatro marciais.
+2. Básicos e todas as habilidades das classes raras.
 
 ## Identidade dos vídeos / ids internos
 01 Guerreiro=0; 02 Assassino=1; 03 Tanque=2; 04 Arqueiro=4; 05 Paladino=5; 06 Invocador=6; 07 Mago de Fogo=8; 08 Mago de Gelo=9; 09 Mago da Terra=10; 10 Mago do Raio=11; 11 Monge=21; 12 Lâmina Arcana=22; 13 Lanceiro=23; 14 Berserker=24. Não confundir número do arquivo com id do código.
@@ -33,3 +32,6 @@ Regras: ler primeva-golpes-vfx e primeva-codigo; usar as peças/código da demo;
 
 ## Lições de teste
 O gravador precisa atribuir ADT antes de update; caso contrário os clipes ficam sem avançar. Use useSkill e habilidade equipada para testar o fluxo real. Pause treino/progressão somente nos controles numéricos, para não comparar personagens que ganharam atributos entre tentativas. O teste de FPS precisa esperar a cena carregar e aquecer a habilidade por tempo de jogo, pois um aquecimento só por tempo real pode terminar antes de compilar os materiais. Todas as limitações devem constar do relatório.
+
+## Lote v503
+- As14 normais têm básico + habilidade da referência; os magos já têm todas40 ativas. Quatro marciais usam peças aprovadas, fila de nova protegida da área antiga, avanço real e pose de salto exclusiva da habilidade. Prévia e evidências: https://drive.google.com/drive/folders/1s1dtIDfN8L1AGwZ-1fTdqVU9K-RREQ6I

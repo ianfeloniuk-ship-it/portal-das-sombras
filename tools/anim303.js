@@ -162,7 +162,7 @@ function applyPose405(m,name,seconds,armed){const an=A[name];if(!an||!m?.bones||
   b.quaternion.copy(pw.invert().multiply(dWorld.multiply(bw)));b.updateMatrixWorld(true)}
  return s.root;
 }
-function post(P){if(P?.dodgeT>0){if(cur&&A[cur.name]?.gameClock){cur=null;rootNow=null}return}if(!cur||!P?.m?.bones)return;const an=A[cur.name],seconds=((an.gameClock?time:performance.now()/1000)-cur.t0)/(cur.slow||1);if(seconds>=an.d){cur=null;rootNow=null;return}rootNow=applyPose405(P.m,cur.name,seconds,!!run?.equip?.w)}
+function post(P){if(P?.dodgeT>0&&!(P.dashDmg&&cur&&A[cur.name]?.skillDash500)){if(cur&&A[cur.name]?.gameClock){cur=null;rootNow=null}return}if(!cur||!P?.m?.bones)return;const an=A[cur.name],seconds=((an.gameClock?time:performance.now()/1000)-cur.t0)/(cur.slow||1);if(seconds>=an.d){cur=null;rootNow=null;return}rootNow=applyPose405(P.m,cur.name,seconds,!!run?.equip?.w)}
 /* v305 (Ian): chefes, elites e rivais também se movem ao usar ataques, com efeito visual no momento do impacto. */
 function enemyPost(e,dt){if(!(e.isBoss||e.elite||e.rival)||!e.m||!e.m.root)return;const A=e.act,root=e.m.root,sc=e.isBoss?1.3:1;
  const body=e.m.body||root.children.find(c=>c.isObject3D&&!c.isLight)||null;if(body&&body.userData.y305==null)body.userData.y305=body.position.y;const lift=v=>{if(body)body.position.y=body.userData.y305+v/(root.scale.y||1)};

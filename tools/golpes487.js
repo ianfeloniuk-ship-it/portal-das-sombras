@@ -8,7 +8,7 @@ const T=THREE,lite=()=>GFX267.lite;
 const API=window.Golpes487={on:true,bloomOn:true,optimizeBloomDepth:true,bloomScale:.75,legacyDepth:0,stats:{basics:0,skills:0,hits:0,peak:0},errors:[]};
 const supported=new Set(['0:0','1:3','2:0']);
 API.providers=[];API.provider=sk=>API.providers.find(p=>p.handles(sk));
-API.handles=sk=>!!(API.on&&sk&&sk.t==='kit111'&&(supported.has(sk.skillId)||!!API.provider(sk)));
+API.handles=sk=>!!(API.on&&sk&&((sk.t==='kit111'&&supported.has(sk.skillId))||!!API.provider(sk)));
 API.basic=ci=>API.on&&([0,1,2].includes(ci)||API.providers.some(p=>p.basic(ci)));
 API.projectile=p=>API.on&&!!p?.fx487;
 API.legacy=function(fn,sk=activeSkill){const prev=API.legacySkill;API.legacySkill=sk;API.legacyDepth++;try{return fn()}finally{API.legacyDepth--;API.legacySkill=prev}};
@@ -73,7 +73,7 @@ void main(){float x=vUv.x,y=vUv.y,al;
  vec3 c=uCenter>.5?mix(uC,uB,smoothstep(.1,.9,body*n+.2))+uA*core*1.4:mix(uC,uB,smoothstep(.15,.7,y)*(.75+.5*n))+uA*core;
  gl_FragColor=vec4(c*uGain,clamp(a*uFade,0.,1.));}`;
 function ribMat(col,o={}){return new T.ShaderMaterial({vertexShader:ribVS,fragmentShader:ribFS,transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
- uniforms:{uTime:{value:0},uProg:{value:0},uTail:{value:o.tail??.75},uFade:{value:1},uMode:{value:o.mode??0},uCenter:{value:o.center??0},uNoise:{value:o.noise??.7},uNs:{value:o.ns??7},uSpd:{value:o.spd??5},uDis:{value:o.dis??0},uGain:{value:o.gain??1.25},
+ uniforms:{uTime:{value:0},uProg:{value:0},uTail:{value:o.tail??.75},uFade:{value:1},uMode:{value:o.mode??0},uCenter:{value:o.center??0},uNoise:{value:o.noise??.7},uNs:{value:o.ns??7},uSpd:{value:o.spd??5},uDis:{value:o.dis??0},uGain:{value:(o.gain??1.25)*(currentCtx?.energyGain500??1)},
   uA:{value:new T.Color(col[0])},uB:{value:new T.Color(col[1])},uC:{value:new T.Color(col[2])}}})}
 /* orbe/bola: quadrado sempre virado para a câmera */
 const orbFS=NOISE+`uniform float uTime,uFade,uNoise,uFire;uniform vec3 uA,uB,uC;varying vec2 vUv;
@@ -189,7 +189,7 @@ const poses=new Map();
 function followOffset(ctx){return ctx?.follow&&ctx.followAt?new T.Vector3(ctx.follow.x-ctx.followAt.x,0,ctx.follow.z-ctx.followAt.z):new T.Vector3()}
 function lunge(d,dir,dur=.2){const e=hero.entity;spawn(null,(o,dt,t)=>{let p=poses.get(e);if(!p){p={offset:new T.Vector3(),rot:new T.Euler()};poses.set(e,p)}const k=t/dur;p.offset.copy(dir).multiplyScalar(d*Math.sin(Math.min(1,k)*Math.PI));if(k>=1){p.offset.set(0,0,0);return false}return true})}
 function knock(f,amt=.3,dur=.35){const e=f.entity;if(!e)return;spawn(null,(o,dt,t)=>{let p=poses.get(e);if(!p){p={offset:new T.Vector3(),rot:new T.Euler()};poses.set(e,p)}const k=t/dur;p.rot.z=-amt*Math.sin(Math.min(1,k)*Math.PI)*(1-k);p.rot.x=amt*.5*Math.sin(Math.min(1,k)*Math.PI)*(1-k);if(k>=1){p.rot.set(0,0,0);return false}return true})}
-function meleeHit(col,pal,big){if(currentCtx?.cast)impactCast(currentCtx.cast);const p=tgt();sparks(p,big?22:12,col[1],big?6:4.5);fade(sprite(glowTex,p,big?1.4:.8,{color:col[1]}),.18,1);knock(F,big?.45:.25);if(big){flash(.6,.7,.22);crack(F.position,col[1],2.4,.6)}else flash(0,.25,.06)}
+function meleeHit(col,pal,big){if(currentCtx?.manualImpact500)return;if(currentCtx?.cast)impactCast(currentCtx.cast);const p=tgt();sparks(p,big?22:12,col[1],big?6:4.5);fade(sprite(glowTex,p,big?1.4:.8,{color:col[1]}),.18,1);knock(F,big?.45:.25);if(big){flash(.6,.7,.22);crack(F.position,col[1],2.4,.6)}else flash(0,.25,.06)}
 const RECIPES=[
  {id:0,n:'Guerreiro',arma:'espada',melee:true,col:[0xffffff,0xffc94d,0xff5a10],pal:'gold',basic:'Combo de espada',skill:'Corte Giratório',
   b(){const c=this.col;[0,.42,.84].forEach((d,i)=>at(d,()=>{lunge(.35,S.dir,.18);const big=i===2;slash(hero.position.clone().setY(big?1.1:.95),S.yaw,{col:c,r:1.35,w:big?.7:.5,arc:2.5,tilt:i===0?.35:i===1?-.4:1.45,rev:i===1,dur:.15});at(.08,()=>meleeHit(c,this.pal,big))}))},
@@ -310,6 +310,7 @@ API.animationPlan=sk=>(API.on&&API.provider(sk)?.animationPlan?.(sk))||(API.hand
 let activeSkill=null,lastRegion=null,trackedClass=null;
 let castStates=new WeakMap(),statesById=new Map();
 API.castState=sk=>sk&&(castStates.get(sk)||statesById.get(sk.skillId));
+API.trackCast=(sk,c)=>{castStates.set(sk,c);statesById.set(sk.skillId,c);return c};
 function skillContext(ci,e,pt,cast){const c=context(ci,e,pt);c.cast=cast;return c;}
 function impactCast(c){if(!c||c.cancelled||c.ready)return;c.ready=true;c.releasing=true;const hits=c.hits.splice(0);for(const [e,d,sk]of hits)releaseHit({e,d,sk,region:c.region});c.releasing=false;}
 
