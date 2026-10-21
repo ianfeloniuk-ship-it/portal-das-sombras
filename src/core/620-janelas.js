@@ -55,7 +55,7 @@ function openShop(id){
 function guildView(tab){
   view=()=>guildView(tab);
   let h='<div class="tabs">'+[['quests','Missões'],['alvos','Alvos Notórios'],['prova','Prova de Rank'],['jobs','Trabalhos'],['story','Histórias'],['job','Classe'],['weekly','Semanal'],['tower','Torre'],['season','Sazonal'],['domain','Domínios'],['city','Cidade'],['guild','Guilda'],['hire','Recrutar'],['clone','Prova'],['god','Criar portal'],['rank','Ranking'],['reaval','Reavaliação'],['travel','Viagem']].filter(([k])=>k!=='reaval'&&(k==='quests'||k==='alvos'||k==='story'||k==='prova'||k==='jobs'||k==='rank'||k==='reaval'||k==='travel'||unl(k))).map(([k,n])=>btn(n,'gtab',k,true,k===tab?'on':'')).join('')+'<span style="margin-left:auto" class="gold">'+fmt(run.gold)+' ouro</span></div>';
-  if(tab==='quests'){h+='<div class="sysline">Lyra: Ganhe XP, ouro e reputação. XP considera o desafio e a duração esperada; esperar não aumenta o prêmio. As missões renovam ao receber.<br>'+QUEST_XP_RULE332+'</div>';h+=affRow('Lyra');h+=extractionMissionRow117();run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d+questTargetText262(q),'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · '+questXpText262(q)+' · '+fmt(q.rw)+' ouro + '+questOrderRep(q)+' de reputação da Ordem',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
+  if(tab==='quests'){h+='<div class="sysline">Lyra: Cumpra missões para ganhar ouro, XP e reputação da Ordem. Novas missões aparecem ao concluir as atuais.<br>'+QUEST_XP_RULE332+'</div>';h+=affRow('Lyra');h+=extractionMissionRow117();run.quests.forEach((q,i)=>{const ok=q.got>=q.n;h+=row(q.d+questTargetText262(q),'Progresso '+Math.min(q.got,q.n)+'/'+q.n+' · '+questXpText262(q)+' · '+fmt(q.rw)+' ouro + '+questOrderRep(q)+' de reputação da Ordem',btn(ok?'RECEBER':'Em andamento','claim',i,ok,ok?'hot':''))})}
   else if(tab==='job'){const A=ADV[profile.cls],c=CLASSES[profile.cls];h+=fusionRows();
     if(run.adv)h+='<div class="sec">PROVAÇÃO DA CLASSE</div><div class="sysline">A cada 100 níveis sua classe pode evoluir de novo: +15% de dano e vida, +3 pontos de habilidade e novo título. Evoluções: <b>'+tierOf()+'</b>.</div>'+row('Próxima: '+(TIER_N[Math.min(tierOf()+1,TIER_N.length-1)]+' '+A.n),'Nível '+tierNeed()+' · você está no '+run.level+' · 3 ondas + Mestre da Provação.',btn('ENFRENTAR','tier',0,run.level>=tierNeed(),'hot'))+'<div class="sysline">Você já é <b>'+className()+'</b>. Habilidade exclusiva: <b>'+A.sk.n+'</b> (botão G). Vida +25% e dano +30%.</div>';
     else{h+='<div class="sysline">Lyra: Todo '+c.n+' que passa no Julgamento vira <b>'+A.n+'</b>. Sua classe não muda, ela evolui.</div>';
@@ -68,7 +68,7 @@ function guildView(tab){
   else if(tab==='guild'){h+=guildTab()+huntRows203()}
   else if(tab==='travel'){h+=travelTab()}
   else if(tab==='reaval'){const cur=rankOf(),off=run.official??profile.rank,ok=cur>off;
-    h+='<div class="sysline">Lyra: A Ordem só reconhece oficialmente o rank depois da <b>Reavaliação</b>. O cristal mede sua mana e o resultado vai para o registro nacional.</div>'+
+    h+='<div class="sysline">Lyra: A Ordem só oficializa seu novo rank após a <b>Reavaliação</b>. Toque o cristal para registrar sua força.</div>'+
       row('Rank oficial','Registrado na Ordem','<b class="rl" style="color:'+RANKS[off].c+'">'+RANKS[off].id+'</b>')+
       row('Mana medida agora','Seu poder atual','<b class="rl" style="color:'+RANKS[cur].c+'">'+RANKS[cur].id+'</b>')+
       row('Recompensa','Bônus da Ordem por subir de rank: '+fmt(2000*(cur+1))+' ouro e +1 de Espírito (conta como treino)','')+

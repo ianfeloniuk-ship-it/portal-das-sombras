@@ -1,3 +1,15 @@
+## v488 (20/10/2026) — Redação de UX, linguagem direta e revisão de textos do jogo
+- Pedido de Ian: eliminar explicações prolixas, desencaixadas e confusas; criar regra/skill para manter os textos coesos, curtos e fáceis de entender para qualquer jogador, sem blocos gigantes de texto jogado sem sentido.
+- Criada a skill `primeva-textos` (`.agents/skills/primeva-textos/SKILL.md`) com os princípios de UX Writing para games: foco no efeito imediato, ordem direta, teto rígido de linhas e corte de "gordura mística" e termos meta.
+- Revisão dos textos em interface, tutoriais e murais:
+  - Eliminação de menções meta a "Skyrim" visíveis para o jogador nos botões e avisos (`Mural de Contratos` em vez de `Quadro de Contratos (Skyrim)` em `460-ideias`, `600-regions`, `450-oraculos` e `quests480`).
+  - Redução drástica do guia de sobrevivência em `survival437.js`: bloco de 4 parágrafos densos substituído por 3 tópicos diretos e escaneáveis (Comida, Água, Acampamento).
+  - Simplificação e síntese do Segundo Despertar e afinidades em `660-bloco-runtime111-cont.js` (regras claras em frases curtas).
+  - Enxugamento dos toasts de tutorial de estilo e dicas de treino/suprimentos em `450-oraculos`.
+  - Simplificação das descrições de combinação de habilidades e progressão de paladino em `160-jogador.js`.
+  - Melhoria dos avisos de missões e reavaliação de rank em `620-janelas.js`.
+- Testes: build e core_parts ok; node --check em todos os arquivos modificados e scripts inline; testes unitários passando sem regressões.
+
 ## v487 (20/10/2026) — VFX aprovados e personagem animado, lote 1
 - Ian aprovou os efeitos de Guerreiro, Assassino e Tanque e pediu movimentos próprios para as novas habilidades. Também aprovou a publicação automática de todos os próximos lotes testados: fazer os magos primeiro (fogo, gelo, terra e raio), depois as demais classes; cobrir básicos e todas as habilidades, normais e raras.
 - `tools/golpes487.js`: peças e receitas originais da demo, bloom seletivo normal, partículas reduzidas e sem bloom no leve, decalques no terreno, efeitos antigos invisíveis e colisão/dano liberados uma vez no impacto. Só as 3 classes deste lote estão integradas.

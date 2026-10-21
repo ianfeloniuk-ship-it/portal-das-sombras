@@ -1264,7 +1264,7 @@
       (s.sickT > 0 ? '<br><span style="color:#ff8fa3">☣ Parasitas/Corrupção: beba Chá Térmico, Antídoto ou Água Fervida! (' + Math.ceil(s.sickT) + 's)</span>' : '') +
       '</div>';
 
-    h += '<details class="sysline"><summary>Como conservar comida e tratar água</summary><p>Fome e Sede mostram suas reservas: mantenha as barras cheias. Fresca (60–100%): efeito completo; amanhecida (25–59%): metade da nutrição, sem bônus; estragada (1–24%): pouca nutrição e intoxicação; podre (0%): não alimenta.</p><p>Alforje de Sal: deterioração 50% menor. Mochila Térmica: 80% menor e proteção contra Miasma. Carrinho: 75% menor para a comida guardada nele. Um pacote de resina interrompe a deterioração até ser aberto.</p><p>Encha o cantil em uma fonte. Na fogueira acesa, ferva água bruta ou destile água salgada. Água bruta causa Parasitas; a água tratada é segura. Odre: 4 goles; ferro: 8; térmico: 10, sem congelamento ou evaporação.</p><p>Acampamento [B]: fogueira para cozinhar e tratar água; tenda para descansar; varal para conservar carne e peixe; bancada para fabricar equipamentos. Recolha as estruturas antes de partir.</p></details>';
+    h += '<details class="sysline"><summary>Guia Rápido de Sobrevivência</summary><p>• <b>Comida:</b> Coma antes que estrague. Defumar ou guardar no carrinho faz durar muito mais.</p><p>• <b>Água:</b> Beba água fervida ou destilada. Beber água bruta causa parasitas.</p><p>• <b>Acampamento [B]:</b> Acenda a fogueira para cozinhar, ferver água e descansar.</p></details>';
     if (tab === 'inv') {
       // Bloco do Cantil + Barra de Potência/Calor dos Chás
       const potBar = (s.canteen.kind === 'cha' || s.canteen.kind === 'antidoto') && s.canteen.potency > 0

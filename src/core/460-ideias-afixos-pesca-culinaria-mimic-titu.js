@@ -115,7 +115,7 @@ function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNe
     h+=row('Conselho Regional e Governantes','Editais públicos, caçadores autônomos e crescimento da região','<button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Abrir Conselho</button>');
   }
   if(window.Quests480){
-    h+=row('Quadro de Contratos (Skyrim)','Missões secundárias, caça a monstros e fugitivos de '+c.name,'<button class="btn hot" onclick="Quests480.openBoard(\''+c.id+'\')">Ver Contratos</button>');
+    h+=row('Mural de Contratos','Missões secundárias, caça a monstros e fugitivos de '+c.name,'<button class="btn hot" onclick="Quests480.openBoard(\''+c.id+'\')">Ver Contratos</button>');
   }
   h+='<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(l>=6?row('Renda da cidade',fmt(inc)+' ouro disponível hoje · limite total de 800 por dia',btn(got?'Coletado hoje':inc?'Coletar':'Limite diário atingido','cityinc',0,!got&&inc>0,'hot')):'')

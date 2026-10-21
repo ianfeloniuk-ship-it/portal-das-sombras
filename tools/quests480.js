@@ -351,7 +351,7 @@
     const S = getState();
     let h = `<div class="guide93" style="border-left:4px solid #ffd070">`;
     h += `<strong>MURAL DE RECOMPENSAS & CONTRATOS REGIONAIS</strong>`;
-    h += `<p>Ao estilo dos murais de Skyrim, escolha seus próprios objetivos pelo mundo aberto. Você pode caçar feras lendárias, resgatar caravanas de mercadores ou explorar criptas ancestrais com total liberdade.</p>`;
+    h += `<p>Escolha contratos para caçar feras lendárias, resgatar caravanas ou explorar criptas com total liberdade pelo mundo aberto.</p>`;
     h += `</div>`;
 
     const quests = Object.values(QUEST_CATALOG).filter(q => q.region === regionKey || regionKey === 'all');
