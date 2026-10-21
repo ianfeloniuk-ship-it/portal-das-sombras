@@ -1,0 +1,36 @@
+/* Isolated loot exhibit. Resource colors and crystal shader belong to Primeva. */
+(()=>{'use strict';
+const T=THREE;let active=null;
+const supports=x=>['core','cry','crystal'].includes(x?.type);
+function model(x){
+ const rank=Math.max(0,Math.min(RANKS.length-1,Number(x.rank)||0)),root=new T.Group(),core=x.type==='core';
+ const col=new T.Color(RANKS[rank].c),parts=core?[[0,0,0,1,.25],[.28,-.12,.12,.44,.9],[-.28,.08,-.16,.35,-.7]]:[[0,0,0,1,.08],[.3,-.23,.08,.62,.5],[-.28,-.3,-.12,.44,-.4]];
+ for(let n=0;n<parts.length;n++){
+  const [px,py,pz,scale,lean]=parts[n],g=cryGeo230().clone(),a=g.attributes.position;
+  // Position-based displacement keeps duplicate facet vertices welded.
+  for(let i=0;i<a.count;i++){const x=a.getX(i),y=a.getY(i),z=a.getZ(i),v=Math.sin(x*8.1+y*4.7+z*6.3+n*2.1);a.setXYZ(i,x*(.9+.13*v)+y*.07,y*(core?.68:1)+.045*v,z*(.83+.14*v))}
+  g.computeVertexNormals();const m=window.Crystal310?Crystal310.mat(col.getHex(),.92):new T.MeshStandardMaterial({color:col,roughness:.35,metalness:.15,flatShading:true});
+  const shard=new T.Mesh(g,m);shard.position.set(px,py-.5,pz);shard.rotation.set(lean*.23,n*1.7,lean*.3);shard.scale.set(scale*(core?1.35:.72),scale,scale*(core?1.1:.72));root.add(shard);
+ }
+ root.userData.loot513=true;return root;
+}
+function dispose(){active?.dispose();active=null}
+function mount(r){dispose();const host=$('mb');if(!host||!r.entries.length)return;const panel=document.createElement('section');panel.className='loot513';panel.innerHTML='<div class="loot513-stage" tabindex="0" role="img" aria-label="Prévia do recurso em 3D"><canvas></canvas><span role="status"></span></div><div class="loot513-info"><small>EXAMINAR</small><h3></h3><p></p><div class="loot513-controls"><button type="button" aria-label="Girar para a esquerda">↶</button><button type="button" aria-label="Girar para a direita">↷</button><button type="button">Recentrar</button></div><small>Arraste ou use as setas para girar.</small></div>';host.prepend(panel);$('mbox').classList.add('loot513-box');
+ const stage=panel.querySelector('.loot513-stage'),canvas=panel.querySelector('canvas'),status=panel.querySelector('[role=status]');let renderer,object=null,angle=.35,pitch=.12,drag=null,dead=false,fit=3;
+ const scene=new T.Scene(),camera=new T.PerspectiveCamera(34,1,.01,40);scene.add(new T.HemisphereLight(0xcfe3dc,0x263530,.85));const light=new T.DirectionalLight(0xffe0aa,1.3);light.position.set(-3,6,4);scene.add(light);
+ const listeners=[],on=(el,type,fn)=>{el.addEventListener(type,fn);listeners.push(()=>el.removeEventListener(type,fn))};
+ function release(){if(!object)return;scene.remove(object);object.traverse(o=>{if(o.isMesh){o.geometry.dispose();for(const m of [].concat(o.material))m.dispose()}});object=null}
+ function render(){if(!renderer||dead||!object)return;object.rotation.set(pitch,angle,0);camera.position.set(0,0,fit);camera.lookAt(0,0,0);renderer.render(scene,camera);stage.dataset.angle=String(angle)}
+ function resize(){if(!renderer)return;const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();fit=1.15/Math.sin(Math.min(camera.fov*Math.PI/360,Math.atan(Math.tan(camera.fov*Math.PI/360)*camera.aspect)));render()}
+ function choose(x){release();const container=!x; x=x||{type:'cry',rank:r.rank513??0};panel.querySelector('h3').textContent=container?'Cristal de saque':(x.type==='core'?'Núcleo ':'Cristal ')+GR[Math.max(0,Math.min(GR.length-1,x.rank||0))].id;panel.querySelector('p').textContent=container?'Contém os recursos listados abaixo.':(x.n+' unidades · Recurso para comércio e melhorias.');try{if(renderer){object=model(x);const box=new T.Box3().setFromObject(object),center=box.getCenter(new T.Vector3());object.position.sub(center);scene.add(object);angle=.35;pitch=.12;resize();status.textContent='';stage.dataset.ready='true'}}catch(e){status.textContent='Prévia indisponível.';console.warn('Loot513 model',e)}}
+ try{renderer=new T.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.95}catch(e){status.textContent='Prévia 3D indisponível neste dispositivo.';console.warn('Loot513 renderer',e)}
+ const ro=new ResizeObserver(resize);ro.observe(stage);const obs=new MutationObserver(()=>{if($('modal').hidden||!panel.isConnected)dispose()});obs.observe($('modal'),{attributes:true,attributeFilter:['hidden']});obs.observe(host,{childList:true});
+ on(stage,'pointerdown',e=>{if(e.button!==0)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId);stage.focus();e.preventDefault()});on(stage,'pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;angle+=(e.clientX-drag.x)*.012;pitch=Math.max(-.7,Math.min(.7,pitch+(e.clientY-drag.y)*.008));drag.x=e.clientX;drag.y=e.clientY;render()});on(stage,'pointerup',()=>{drag=null});on(stage,'pointercancel',()=>{drag=null});on(stage,'keydown',e=>{if(!['ArrowLeft','ArrowRight','Home'].includes(e.key))return;e.preventDefault();e.stopPropagation();angle=e.key==='Home'?.35:angle+(e.key==='ArrowLeft'?-.3:.3);render()});
+ const buttons=panel.querySelectorAll('button');buttons[0].onclick=()=>{angle-=.35;render()};buttons[1].onclick=()=>{angle+=.35;render()};buttons[2].onclick=()=>{angle=.35;pitch=.12;render()};
+ active={id:r.id,choose,dispose(){if(dead)return;dead=true;obs.disconnect();ro.disconnect();listeners.forEach(f=>f());release();renderer?.renderLists.dispose();renderer?.dispose();renderer?.forceContextLoss();$('mbox').classList.remove('loot513-box')}};
+ choose(r.entries.find(supports));
+}
+function select(r,id){if(active?.id!==r.id)mount(r);const x=r.entries.find(x=>x.id===id);if(supports(x))active?.choose(x)}
+const css=document.createElement('style');css.textContent=`#mbox.loot513-box{background:#111715;border-color:#89704b;color:#eae5dc;width:min(900px,94vw)}.loot513{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;padding-bottom:18px;border-bottom:1px solid #89704b66;margin-bottom:16px}.loot513-stage{height:290px;background:#0d1312;border:1px solid #35433f;touch-action:none;position:relative;cursor:grab}.loot513-stage canvas{display:block;width:100%;height:100%}.loot513-stage [role=status]{position:absolute;bottom:15px;left:15px;right:15px;color:#c9c3b5}.loot513-info{align-self:center}.loot513-info h3{font:24px Georgia,serif;color:#f5e7c8;margin:10px 0}.loot513-info p{line-height:1.5}.loot513-info small{color:#b9b2a5}.loot513-info>small:first-child{color:#cfae6a;letter-spacing:2px}.loot513-controls{display:flex;gap:8px;margin:22px 0 12px}.loot513-controls button{background:#202722;color:#eae5dc;border:1px solid #89704b;padding:8px 13px;cursor:pointer}.loot513 button:focus-visible,.loot513-stage:focus-visible{outline:2px solid #cfae6a;outline-offset:3px}@media(max-width:600px){.loot513{grid-template-columns:1fr;gap:12px}.loot513-stage{height:200px}.loot513-info h3{font-size:21px}.loot513-controls{margin:10px 0}}`;document.head.append(css);
+window.Loot513={model,mount,select,supports,dispose,get active(){return !!active}};
+})();

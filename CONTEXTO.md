@@ -1,3 +1,12 @@
+## v515 (21/10/2026) — coleta em 3D, Mão só nos chefes e Edran
+- Pedido e autorização de publicação: Ian neste chat («pode»). Comuns desaparecem deixando cristal de saque, sem Mão nem câmera do efeito. Mão limitada a chefes, incluindo agrupamento; partes físicas do Arquiteto excluídas. Cristal acessível durante a animação do chefe.
+- `tools/loot513.js`: palco isolado girável para núcleo/cristal, material Crystal310 e cor do rank, geometria facetada assimétrica, arraste/teclado/botões, responsivo e descarte ao fechar. Outros itens mantêm lista; palco mostra recipiente de saque sem substituir sua identidade.
+- Partes ligadas: `loot353`, `reclaim372`, Edran em `campaign327` (cristal/F/dez segundos/ouro automático), objetivo `intro401` e aviso de saque de rival. Recompensas, chances/quantidades de drops e bolsa preservadas. Mercado, constelações e estrada fora desta etapa.
+- Integração: base v513 fa2064c preservada (elmo fora do cenário, silêncio do narrador). Nomes internos loot513 são identificadores do módulo, não número da versão pública.
+- Validação: Edge headless desktop e viewport 390px, comuns/chefes/chefes agrupados, coleta única, expiração, registro restaurado, tutorial sem mão, rotação por botão/teclado, descarte e ausência de pageerror. Estado preparado por fixture; sem playtest humano nem medição de FPS. Sintaxe/montagem/partes verificadas; repetição sobre a base integrada antes do push.
+- História de por que a projeção recolhe chefes segue proposta no Drive; não fixada como novo cânon por este código. Manuscrito antigo descreve comuns, pendente de reconciliação na próxima revisão narrativa.
+- Fontes/prévia/evidência: https://drive.google.com/drive/folders/1rsU6mbhyfWBW3fCNzjqAaT725uGJ-sYj . Confirmar implantação após push.
+
 ## v514 (21/10/2026) — Mapa feito à mão como Skyrim: serras, passagens e estradas sinuosas
 - Pedido de Ian: o mapa não pode ter grade nem estrada reta ("anda reto e chega no fim"); tem que ter as coisas bem colocadas, como Skyrim.
 - `tools/terrain245.js` (CPU e GLSL iguais): `ridge513` = 4 serras feitas à mão (norte entre Aster e Ymiria, leste antes do deserto de Zahar, sul antes de Urdan, oeste antes de Thalor), com ~170 m e encosta íngreme (só passa escalando, com Estamina). Cada serra tem uma passagem (0,−2150 · 1820,0 · 0,2050 · −2400,0). O achatamento da estrada usa a distância real até o trecho (`sd513`), não mais uma caixa.

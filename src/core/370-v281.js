@@ -214,7 +214,7 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   if(e.expl){hazard(e.x,e.z,2.4,.6,e.dmg*1.5,'enemy',0xff6030)}
   if(e.nemesis){profile.nemKills=(profile.nemKills||0)+1;profile.nemesis=null;store.set('pds2_profile',profile);bigText('VINGANÇA',1400);toast('<b>[NÊMESIS]</b> Você derrotou quem te matou.',5000)}
   if(!e.rival){const gr=e.gr??0,ch=e.isBoss||e.elite?1:(npcHas('Dorian')?.5:.35);if(Math.random()<ch){const n=e.isBoss?3:1;corpseDrop353(e,{type:'core',rank:gr,n})}}
-  if(e.rival){qev('pvp',e);toast('<b>[NARRADOR]</b> Caçador '+e.name+' derrotado. Vasculhe o corpo para recolher o saque.');}
+  if(e.rival){qev('pvp',e);toast('<b>[NARRADOR]</b> Caçador '+e.name+' derrotado. Recolha o saque deixado no local.');}
   weaponXp(trainingXpBalance(e));if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
   else if(Math.random()<.06)corpseDrop353(e,{type:'potion',n:1});
   finishCorpse353(e);

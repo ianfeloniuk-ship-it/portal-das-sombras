@@ -48,7 +48,7 @@ function poseHand404(hand,grip){
   p.needsUpdate=n.needsUpdate=true;
  }
 }
-function start(a,r){if(!a?.model||a.reclaim372||a.failed402)return null;
+function start(a,r){if(!r?.boss513||r.archPiece464)return null;if(!a?.model||a.reclaim372||a.failed402)return null;
 if(!r.introCrystal402){if(window.Intro401?.guided())return null;const j=jobs[0];if(j&&!j.intro&&j.t<1.2&&j.bodies.length<4&&Math.hypot(r.x-j.r.x,r.z-j.r.z)<6){const joined=join(j,a,r);if(joined)saveRun();return joined;}if(jobs.length||pending.size||cooldown>0)return null;}else if(jobs.length)return null;
 if(!ARCH242.g){if(a.waiting402)return null;a.waiting402=true;const level=L,gen=generation;if(r.introCrystal402){a.inter.hidden=true;a.marker.visible=false;}
 pending.set(a,{root:a.root,sky:7,intro:!!r.introCrystal402,level,a,r,waiting:true});
@@ -67,12 +67,12 @@ for(const p of cachedHand()){const geometry=p.geometry.clone();geo.push(geometry
 if(!hand.children.length){scene.remove(root);geo.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());owned.forEach(m=>m.dispose());a.root.add(a.marker);a.failed402=true;a.inter.hidden=false;console.warn('A Mão do Arquiteto não possui geometria carregada.');return null;}
 hand.userData.tripo372=true;a.reclaim372=true;r.reclaimed372=true;r.crystal402=true;
 const dust=new T.Group();root.add(dust);const particles=[];for(let i=0;i<(r.introCrystal402?36:12);i++){const p=mesh(new T.OctahedronGeometry(scale*(.013+(i%4)*.004)),vein,dust);particles.push(p)}
-const original=a.root;original.userData.reclaimed372=true;scene.remove(original);a.model.mixer?.stopAllAction();const residue=new T.Group();residue.position.set(r.x,0,r.z);residue.userData.terrainRoot245=true;residue.add(a.marker);a.marker.position.y=.25;a.marker.visible=false;a.inter.hidden=true;scene.add(residue);a.root=residue;a.model=null;a.original=false;a.inter.label='F · RECOLHER VESTÍGIOS DE '+r.name;
+const original=a.root;original.userData.reclaimed372=true;scene.remove(original);a.model.mixer?.stopAllAction();const residue=new T.Group();residue.position.set(r.x,0,r.z);residue.userData.terrainRoot245=true;residue.add(a.marker);a.marker.position.y=.25;a.marker.visible=false;a.inter.hidden=false;scene.add(residue);a.root=residue;a.model=null;a.original=false;a.inter.label='F · RECOLHER VESTÍGIOS DE '+r.name;
 const job={root,body,portal,hand,fingers,particles,scale,sky,owned,geo,mats,baseScale,t:0,a,r,intro:!!r.introCrystal402,level:L};
 job.bodies=[{body,baseScale,owned,a,r}];jobs.push(job);
 if(!job.intro)for(const [id,b] of Loot353.active){if(job.bodies.length>=4)break;const rec=Loot353.records().find(x=>x.id===id);if(b!==a&&b.model&&!b.reclaim372&&b.root.visible!==false&&rec&&!rec.introCrystal402&&Math.hypot(rec.x-r.x,rec.z-r.z)<6)join(job,b,rec)}
-apply(job,0);saveRun();return job;}
-function join(j,a,r){if(!a?.model||a.reclaim372||j.bodies.length>=4)return null;
+attachCrystal(a,r);apply(job,0);saveRun();return job;}
+function join(j,a,r){if(!r?.boss513||r.archPiece464)return null;if(!a?.model||a.reclaim372||j.bodies.length>=4)return null;
 a.root.remove(a.marker);const body=T.SkeletonUtils.clone(a.model.root),owned=[];body.userData.terrainRoot245=false;
 body.position.set(r.x-j.root.position.x,0,r.z-j.root.position.z);
 body.traverse(o=>{if(o.isMesh){const clone=m=>{const c=m.clone();if(c.emissive&&m.userData.e0!==undefined)c.emissive.setHex(m.userData.e0);c.onBeforeCompile=m.onBeforeCompile;c.customProgramCacheKey=m.customProgramCacheKey;c.transparent=true;owned.push(c);return c};o.material=Array.isArray(o.material)?o.material.map(clone):clone(o.material)}});
@@ -81,10 +81,10 @@ const homeX=body.position.x,homeZ=body.position.z,bounds=posedBounds(body),cente
 const endX=homeX-center.x+(j.bodies.length-2)*j.scale*.2,endZ=homeZ-center.z;
 const baseScale=body.scale.x;scene.remove(a.root);a.model.mixer?.stopAllAction();a.root.userData.reclaimed372=true;
 const residue=new T.Group();residue.position.set(r.x,0,r.z);residue.userData.terrainRoot245=true;residue.add(a.marker);a.marker.visible=false;a.marker.position.y=.25;scene.add(residue);
-a.root=residue;a.model=null;a.original=false;a.reclaim372=true;a.inter.hidden=true;a.inter.label='F · RECOLHER VESTÍGIOS DE '+r.name;r.reclaimed372=true;r.crystal402=true;
-j.root.add(body);j.owned.push(...owned);j.bodies.push({body,baseScale,owned,a,r,homeX,homeZ,endX,endZ});return j;}
+a.root=residue;a.model=null;a.original=false;a.reclaim372=true;a.inter.hidden=false;a.inter.label='F · RECOLHER VESTÍGIOS DE '+r.name;r.reclaimed372=true;r.crystal402=true;
+j.root.add(body);j.owned.push(...owned);j.bodies.push({body,baseScale,owned,a,r,homeX,homeZ,endX,endZ});attachCrystal(a,r);return j;}
 function reveal(j){if(j.revealed)return;j.revealed=true;for(const b of j.bodies||[j]){b.a.inter.hidden=false;attachCrystal(b.a,b.r)}}
-/* Descida visível, contato, subida conjunta, fechamento e só então o cristal. */
+/* Boss animation never delays or hides access to its loot crystal. */
 function apply(j,t){const {body,portal,hand,particles,scale:s,sky}=j;
 const emerge=ease(t/.6),reach=ease((t-.6)/1.4),grip=ease((t-2)/.65),pull=ease((t-2.7)/1.9),fade=ease((t-4.45)/.6),close=ease((t-5.15)/.7);
 poseHand404(hand,grip);
@@ -96,16 +96,16 @@ particles.forEach((p,i)=>{const q=(t*.55+i/particles.length)%1,a=i*2.399+t*2,rad
 if(t>=5.15)reveal(j);
 }
 function attachCrystal(a,r){if(!a?.root?.parent||crystals.has(a.root))return;
-r.crystal402=true;if(r.crystalLife402==null)r.crystalLife402=10;a.inter.label='F · RECOLHER CRISTAL · '+r.name;a.marker.visible=false;const crystal=new T.Mesh(new T.OctahedronGeometry(.24),new T.MeshStandardMaterial({color:0xc8b0ff,emissive:0x7951cd,emissiveIntensity:1.2,roughness:.25,metalness:.5,transparent:true}));crystal.position.y=1.1;a.root.add(crystal);a.root.userData.introCrystal401=true;crystals.set(a.root,{crystal,r,level:L,t:0});}
-function disposeCrystal(root,c){root.remove(c.crystal);c.crystal.geometry.dispose();c.crystal.material.dispose();crystals.delete(root);}
+r.crystal402=true;if(r.crystalLife402==null)r.crystalLife402=10;a.inter.label='F · RECOLHER CRISTAL · '+r.name;a.marker.visible=false;const crystal=window.Loot513?.model({type:'core',rank:r.rank513??0})||new T.Mesh(new T.OctahedronGeometry(.24),new T.MeshStandardMaterial({color:0xc8b0ff,emissive:0x7951cd,emissiveIntensity:1.2,roughness:.25,metalness:.5,transparent:true}));crystal.scale.setScalar(.36);crystal.position.y=1.1;a.root.add(crystal);a.root.userData.introCrystal401=true;crystals.set(a.root,{crystal,r,level:L,t:0});}
+function disposeCrystal(root,c){root.remove(c.crystal);c.crystal.traverse(o=>{if(o.isMesh){o.geometry?.dispose();for(const m of [].concat(o.material||[]))m.dispose()}});crystals.delete(root);}
 function dispose(j){scene.remove(j.root);j.geo.forEach(g=>g.dispose());j.mats.forEach(m=>m.dispose());j.owned.forEach(m=>m.dispose())}
 function tick(dt){cooldown=Math.max(0,cooldown-dt);for(const [a,p] of pending)if(p.level!==L||!a.root.parent){a.waiting402=false;pending.delete(a)}for(let i=jobs.length-1;i>=0;i--){const j=jobs[i];j.t+=dt;apply(j,j.t);if(j.t>=6){dispose(j);jobs.splice(i,1);if(!j.intro)cooldown=1.5}}
-for(const [root,c] of crystals){if(c.level!==L||!root.parent){disposeCrystal(root,c);continue}c.t+=dt;c.crystal.rotation.y=c.t;c.crystal.position.y=1.1+Math.sin(c.t*2)*.12;c.crystal.material.opacity=Math.min(1,(c.r.crystalLife402??10)/2);c.crystal.material.emissiveIntensity=1.2+Math.sin(c.t*4)*.25;}}
+for(const [root,c] of crystals){if(c.level!==L||!root.parent){disposeCrystal(root,c);continue}c.t+=dt;c.crystal.rotation.y=c.t;c.crystal.position.y=1.1+Math.sin(c.t*2)*.12;c.crystal.traverse(o=>{if(!o.material)return;for(const m of [].concat(o.material)){if(m.uniforms?.uOpacity)m.uniforms.uOpacity.value=Math.min(.92,(c.r.crystalLife402??10)/2);else m.opacity=Math.min(1,(c.r.crystalLife402??10)/2)}});}}
 function clear(){generation++;cooldown=0;for(const [a] of pending){a.waiting402=false;a.inter.hidden=false}pending.clear();jobs.splice(0).forEach(dispose);for(const [root,c] of crystals)disposeCrystal(root,c);}
 function claimEnemy(e){if(!e?.m?.root||e.m.root.userData.reclaimed372)return false;
 // A single loot record owns both the corpse and the residue. Never reattach the original body.
 if(!e.corpse353){e.loot353=e.loot353||[];Loot353.create(e)}
 const r=Loot353.records().find(r=>r.id===e.corpse353),a=Loot353.active.get(e.corpse353);if(!r||!a)return false;
-if(e.isIntroTutorial)r.introCrystal402=true;else return false;
+if(!e.isBoss){Loot353.settle(r);saveRun();return true;}r.boss513=true;
 try{const job=start(a,r);if(job){try{sfx('gong');shake(.35)}catch(_){}}return !!job||!!a.waiting402}catch(err){console.warn('Reclaim372.claimEnemy',err);return false}}
 return{start,tick,clear,jobs,apply,claimEnemy,attachCrystal,crystals,pending,cachedHand,poseHand404,handRig404};})();
