@@ -19,7 +19,7 @@ Regras: ler primeva-golpes-vfx e primeva-codigo; usar as peças/código da demo;
 - Invocações reais não são VFX descartáveis: restaurar a camada visível do modelo que nasceu durante a execução legada. Conferido golem com 25 malhas visíveis e escudos sumindo ao perder proteção. Na gravação, limpar aliados entre casos; manter invocações do caso anterior contamina a prévia.
 
 ## Ordem pendente
-1. Demais habilidades das classes normais, incluindo Guerreiro/Assassino/Tanque, Arqueiro/Paladino/Invocador e as quatro marciais.
+1. Demais habilidades das classes normais, Arqueiro/Paladino/Invocador e as quatro marciais.
 2. Básicos e todas as habilidades das classes raras.
 
 ## Identidade dos vídeos / ids internos
@@ -35,3 +35,9 @@ O gravador precisa atribuir ADT antes de update; caso contrário os clipes ficam
 
 ## Lote v503
 - As14 normais têm básico + habilidade da referência; os magos já têm todas40 ativas. Quatro marciais usam peças aprovadas, fila de nova protegida da área antiga, avanço real e pose de salto exclusiva da habilidade. Prévia e evidências: https://drive.google.com/drive/folders/1s1dtIDfN8L1AGwZ-1fTdqVU9K-RREQ6I
+
+## Lote v509
+- Guerreiro, Assassino e Tanque: outras 27 habilidades com movimentos de corte, arremesso, guarda, passo, preparo e grito. Junto das três referências anteriores, as 30 ativas dessas classes estão cobertas.
+- Dano, alcance, recarga, deslocamento, marcas, recursos e defesas mantidos. Impactos legados e filhos adicionados depois ficam invisíveis; os objetos reais do mundo, inclusive cadáver e marcador de saque, continuam visíveis. Impactos dos projéteis migrados usam a apresentação nova.
+- Entrega e evidências: https://drive.google.com/drive/folders/1Z0-TGo6xs_yj8kfRH9QXOMU09kfvLWdL
+- As 54 gravações foram feitas sobre v503; a integração preserva v504–v508 das capitais, encontros, horizonte e remoção da sede. Controles repetidos sobre a base integrada; desempenho por software é amostra controlada, sem garantia de FPS no aparelho de Ian.

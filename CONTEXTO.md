@@ -2694,3 +2694,8 @@ Complemento da revisão v361: a área livre ao redor de um acampamento é respei
 - Tripo Fendido gerou olho no chapéu: reconstruído no Blender a partir da anatomia válida e cristal texturizado recuperado. Abissal completado de um para quatro cristais. Duas gerações de 60 créditos, sem rig pago.
 - Variantes usam modelos próprios, aproximam-se para nuvem sinalizada de dano nominal e sono; Fendido busca alvo com mana. Padrão conserva fuga e esporos defensivos. Congelamento/atordoamento/morte interrompem emissão, sair do raio evita acerto.
 - 50 verificações no jogo local, 15 clipes × 21 amostras Three r128, GLBs reimportados. Celular não testado, aprovação criativa pendente.
+
+
+## v509 — habilidades de Guerreiro, Assassino e Tanque — 21/10/2026
+As 27 ativas restantes receberam peças da demo, impactos nos alvos reais e seis movimentos no esqueleto. As 30 dessas três classes estão cobertas com o lote anterior; as 40 dos quatro magos também. Preservados dano, cura, defesa, recursos, recarga e deslocamento. Normal/leve, equivalência, combos, saque, troca gráfica e limpeza verificados. Publicação automática autorizada por Ian nesta conversa. Prévia, fonte incremental e relatório: https://drive.google.com/drive/folders/1Z0-TGo6xs_yj8kfRH9QXOMU09kfvLWdL
+Continuam pendentes as outras habilidades de Arqueiro, Paladino, Invocador, Monge, Lâmina Arcana, Lanceiro e Berserker, além das classes raras.
