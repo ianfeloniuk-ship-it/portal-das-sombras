@@ -102,7 +102,7 @@
       let f = sh.fragmentShader;
       if (col) { sh.uniforms.capTint = { value: new T.Color(col[0], col[1], col[2]) }; f = 'uniform vec3 capTint;\n' + f.replace('#include <map_fragment>', '#include <map_fragment>\n{float l=dot(diffuseColor.rgb,vec3(.3,.59,.11));diffuseColor.rgb=mix(diffuseColor.rgb,vec3(l)*capTint*3.1,.92);}'); }
       /* neblina reduzida: a silhueta da muralha e das torres aparece de longe */
-      f = f.replace('#include <fog_fragment>', '#ifdef USE_FOG\nfloat ff504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ff504*.28);\n#endif');
+      f = f.replace('#include <fog_fragment>', '#ifdef USE_FOG\nfloat ff504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ff504*.2);\n#endif');
       sh.fragmentShader = f;
     };
     const k0 = m.customProgramCacheKey ? m.customProgramCacheKey() : ''; r.customProgramCacheKey = () => k0 + '-cap504-' + key;
@@ -119,6 +119,17 @@
   EH = function (batch, key, x, y, z, ry, height, tint) {
     if (CTX && key === 'lantern') { CTX.lamps.push({ x, z }); return eh0.call(this, batch, 'post_skull', x, y, z, ry, 3.3, tint); }
     return eh0.apply(this, arguments);
+  };
+  /* pilares lisos do portão (caixa cinza + cone) saem; entram peças de muro do cenário Tripo, na cor do bioma */
+  const gates0 = cityGates341;
+  cityGates341 = function (c, g, fallen, ring, half, h) {
+    const n0 = GATES341.length, r = gates0.apply(this, arguments);
+    if (CTX) for (const gt of GATES341.slice(n0)) {
+      const G = gt.g, ry = G.rotation.y, cs = Math.cos(ry), sn = Math.sin(ry);
+      G.children.forEach(m => { if (m.isMesh) m.visible = false; });
+      for (const sd of [-1, 1]) { const lx = sd * (half + .5); CTX.pillars.push({ x: G.position.x + lx * cs, z: G.position.z - lx * sn, ry, h: h + 3.5 }); }
+    }
+    return r;
   };
   EnvBatch.prototype.mesh = function () { const g = mesh0.apply(this, arguments); if (CTX && g) { try { recolor(g, CTX.S); } catch (e) { console.warn('capitais504 recolor', e); } } return g; };
   EnvBatch.prototype.add = function (k, x, y, z, ry, sx, sy, sz, tint) { /* Urdan/Verden: o muro da cidade interna também vira paliçada */
@@ -218,6 +229,7 @@
       for (let i = 0; i < 14; i++) { const p = spot(72, RC - 14); if (!p) continue; EH(b, 'tree_oak', p.x, 0, p.z, R() * TAU, 5 + R() * 2); col(p.x, p.z, 1); }
     }
 
+    if (wm) for (const p of CTX.pillars) { push(S.wall, p.x, p.z, p.ry, 2.4 / wm.sx, p.h / wm.h, 2.6 / wm.sz, null); }
     /* monta o lote instanciado e tinge por instância */
     const group = b.mesh(BLDMAT);
     if (group) {
@@ -288,13 +300,13 @@
   const bc0 = buildCity;
   buildCity = function (c, g, addCol, R) {
     const S = c && c.capital && STYLE[c.name] && !cityFallen(c) && window.TripoEnvironment153 ? STYLE[c.name] : null;
-    if (S) CTX = { S, lamps: [] };
+    if (S) CTX = { S, lamps: [], pillars: [] };
     let r;
     try {
       r = bc0.apply(this, arguments);
       if (S) {
         if (TripoEnvironment153.models.wall) capital(c, g, addCol);
-        else TripoEnvironment153.ready.then(() => { if (g.parent) { CTX = { S, lamps: [] }; try { capital(c, g, addCol); } finally { CTX = null; } } });
+        else TripoEnvironment153.ready.then(() => { if (g.parent) { CTX = { S, lamps: [], pillars: [] }; try { capital(c, g, addCol); } finally { CTX = null; } } });
         const lp = points(CTX.lamps.map(l => ({ x: l.x, y: 3.55, z: l.z, size: 3.2 })), S.flame, 1.1); if (lp) g.add(lp);
       }
     } catch (e) { console.warn('capitais504', e); } finally { CTX = null; }
@@ -313,7 +325,29 @@
       if (camera.far !== want) { camera.far = want; camera.updateProjectionMatrix(); }
     } catch (_) {}
   }, 400);
+  /* ---------- chão distante: malha única de baixa resolução em volta do jogador ---------- */
+  const FAR = { R: 1100, N: 72, step: 150, mesh: null, cx: 1e9, cz: 1e9, on: true };
+  function farUpdate() {
+    if (typeof L === 'undefined' || typeof player === 'undefined' || !player || typeof scene === 'undefined') return;
+    const world = L.mode === 'world' && FAR.on && window.TER245 && TER245.on.value;
+    if (FAR.mesh) FAR.mesh.visible = !!world;
+    if (!world) return;
+    const cx = Math.round(player.x / FAR.step) * FAR.step, cz = Math.round(player.z / FAR.step) * FAR.step;
+    if (cx === FAR.cx && cz === FAR.cz && FAR.mesh) return;
+    FAR.cx = cx; FAR.cz = cz;
+    const pg = new T.PlaneGeometry(FAR.R * 2, FAR.R * 2, FAR.N, FAR.N); pg.rotateX(-PI / 2); pg.translate(cx, 0, cz);
+    envGroundColors(pg, []);
+    if (!FAR.mesh) {
+      const base = envGroundMat(), fm = base.clone();
+      const g = function (sh, rd) { const bf = Object.getOwnPropertyDescriptor(T.Material.prototype, 'onBeforeCompile').get.call(base); bf.call(this, sh, rd); sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>', '#ifdef USE_FOG'+String.fromCharCode(10)+'float ffg504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ffg504*.2);'+String.fromCharCode(10)+'#endif'); };
+      g._w245 = true; fm.onBeforeCompile = g; fm.customProgramCacheKey = () => 'far504';
+      FAR.mesh = new T.Mesh(pg, fm); FAR.mesh.frustumCulled = false; FAR.mesh.renderOrder = -2; FAR.mesh.position.y = -3.2; /* abaixo do chão carregado: sem briga de profundidade */
+      FAR.mesh.userData.farGround504 = true; scene.add(FAR.mesh);
+    } else { FAR.mesh.geometry.dispose(); FAR.mesh.geometry = pg; }
+  }
+  setInterval(() => { try { farUpdate(); } catch (e) { console.warn('capitais504 far', e); FAR.on = false; } }, 250);
   window.Capitais501 = {
+    FAR,
     STYLE, RC,
     want(P, list) { if (L.mode !== 'world') return; for (const c of caps()) if (near(c, P, 700)) list.push([c.cx, c.cz, 99]); },
     keep(ch, P) { return L.mode === 'world' && ch.city && STYLE[ch.city.name] && near(ch.city, P, 820); }
