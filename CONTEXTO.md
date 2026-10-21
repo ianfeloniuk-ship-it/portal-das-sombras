@@ -1,3 +1,10 @@
+## v511 (21/10/2026) — Dragões de verdade no mundo, estilo Skyrim
+- Pedido de Ian (print do Dragão Errante chibi com duas placas vermelhas): "tu não colocou os dragões no jogo"; quer que apareçam do nada, com chance, atacando uma vila, como no Skyrim.
+- `tools/dragoes510.js`: o Dragão Errante (chefe de mundo, `spawnWorldBoss`) e o Dragão Sitiante (ataque à cidade, `startSiege`) usam os dragões novos de `models/povo482` pelo bioma (neve/cristal → Gélido de Ymiria; deserto → Serpe de Zahar; floresta/pântano → Musgo de Verden; vulcão → Ancião; resto → Ancião ou Dragonete). Sem modelo carregado, cai no antigo.
+- Voo: chega pelo céu (~24 m de altura), circula o alvo (você; no ataque à vila, a cidade) soltando sopro no chão a cada ~3 s (o chão acende e queima 0,7 s depois; cor pelo elemento), pousa depois de ~14 s e luta com a IA de chefe; decola de novo após 20 s (12 s se ferido).
+- Frequência: Errante a cada ~10 min (era 20); ataque de dragão à vila também em cidades nível 2–4 (antes só 5+).
+- Teste local: spawn do Errante, voo → circula → pousa → luta, sopros com dano, sem erros no console; print do Ancião voando.
+
 ## v508 (21/10/2026) — Chão distante: as Capitais deixam de flutuar
 - `tools/capitais504.js`: malha única de relevo distante (72×72, ±1100 m em volta do jogador, refeita a cada 150 m andados), com o mesmo material/shader do chão (`envGroundMat` clonado + `envGroundColors`: mesmo relevo e cor de bioma, sem vegetação), 3,2 m abaixo do chão carregado (sem briga de profundidade) e neblina reduzida a 20%. O mar e a cordilheira de gelo saem do próprio shader do chão. Só aparece no mundo aberto. Pilares lisos dos portões (caixa + cone) trocados por peças de muro Tripo na cor do bioma, nas Capitais.
 - Teste: prints de Zahar e Ymiria a 600 m com a muralha pousada no chão, cordilheira de gelo vista de Ymiria, portão de Zahar. Custo de quadro medido com `frame()` em loop: ~7 ms com e sem a malha distante (sem diferença visível).
