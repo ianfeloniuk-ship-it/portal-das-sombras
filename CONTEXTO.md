@@ -1,3 +1,10 @@
+## v506 (21/10/2026) — Encontros sem primitivas + NPC errante (correção da revisão da v502)
+- `tools/encontros502.js`: ruína = prédio medieval Tripo caído (casa, capela, taverna, moinho, forja, guilda ou torre, afundado e achatado, às vezes uma segunda casa), com pedaços do muro Tripo, pilhas de pedras e rochas com musgo; baú dourado ao lado. Altar = círculo de pedras antigas em pé (rocha com musgo Tripo) com laje, velas e lanternas. Baú escondido e covil = rochões Tripo. Nos biomas secos/vulcão/neve as pedras viram rocha do env.glb pintada com a cor do bioma. Saíram pilares, colunas, estátuas e blocos lisos do env.glb.
+- Variação: prédio, escala, giro e peças pela semente; um encontro nunca repete o tipo do vizinho (4 lados).
+- Novo tipo `npc`: viajante parado junto a uma fogueira — peregrino, mercador ambulante ou caçador errante, com modelo do Povo482 (civil ou soldado) e três falas curtas cada (`speech153`). Aparece a 90 m e some a 150 m; sem mecânica nova.
+- Teste: prints a ~15 m de ruína (floresta e deserto), altar, baú, covil, acampamento, carcaça e NPC; fala do caçador abre; sem erro novo.
+
+
 ## v505 (21/10/2026) — Sem Sede (cânon)
 - Pedido de Ian: tirar a barra de Sede e o sistema de sede (o cânon diz que não existe Sede em Primeva).
 - `tools/survival437.js`: a Sede não cai mais (fica sempre 100, então nunca dá dano de "Sede extrema"). A janela de água não tem mais "Beber Água Bruta Direto". Os textos de beber (chá, água fervida) e a linha de status não falam mais em Sede. Fome, temperatura, cantil (Chá Térmico/Antídoto) e pesca continuam iguais.

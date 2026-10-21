@@ -28,18 +28,19 @@
   EW = function (b, k, x, y, z, ry, W, t) { if (GREEN.test(k) && ice(x, z) > 20) return iceSwap(ew0, b, k, x, y, z, ry, W); return ew0.apply(this, arguments); };
 
   /* ---------- sorteio dos encontros ---------- */
-  const TYPES = ['camp', 'ruin', 'chest', 'altar', 'carcass', 'den'];
-  const BASE = { camp: 22, ruin: 18, chest: 14, altar: 9, carcass: 17, den: 14 };
+  const TYPES = ['camp', 'ruin', 'chest', 'altar', 'carcass', 'den', 'npc'];
+  const BASE = { camp: 22, ruin: 18, chest: 14, altar: 9, carcass: 17, den: 14, npc: 9 };
   const MOD = {
     deserto: { carcass: 2, ruin: 1.3, camp: .6 }, neve: { camp: .5, carcass: 1.5 },
     pantano: { den: 1.5, altar: .5 }, vulcao: { den: 1.6, altar: .6, camp: .3 }, floresta: { camp: 1.3 }, cristal: { altar: 1.5, camp: .5 }
   };
-  const CLEAR = { camp: 9, ruin: 11, chest: 7, altar: 8, carcass: 7, den: 10 };
+  const CLEAR = { camp: 9, ruin: 15, chest: 7, altar: 9, carcass: 7, den: 10, npc: 8 };
   let seed = null; const cache = new Map();
   function pickType(R, bio) {
     const m = MOD[bio] || {}; let t = 0; for (const k of TYPES) t += BASE[k] * (m[k] || 1);
     let r = R() * t; for (const k of TYPES) { r -= BASE[k] * (m[k] || 1); if (r < 0) return k; } return 'camp';
   }
+  const rawType = (cx, cz) => { const R = mulberry32(rh(cx, cz, 501)); R(); R(); return pickType(R, biomeAt((cx + .5) * CELL, (cz + .5) * CELL)); };
   function make(cx, cz) {
     const R = mulberry32(rh(cx, cz, 501));
     const x = (cx + .5) * CELL + (R() - .5) * 90, z = (cz + .5) * CELL + (R() - .5) * 90, r1 = R(), ry = R() * TAU, r2 = R();
@@ -56,7 +57,10 @@
       try { const h0 = terrH(x, z); steep = Math.abs(terrH(x + 6, z) - h0) > 2.4 || Math.abs(terrH(x, z + 6) - h0) > 2.4; } finally { TER245.on.value = o; }
       if (steep) return null;
     } catch (_) { return null; }
-    const bio = biomeAt(x, z), type = pickType(() => r1, bio);
+    const bio = biomeAt(x, z); let type = pickType(() => r1, bio);
+    /* dois encontros iguais lado a lado: o sorteio de cada vizinho (sem filtros) é comparado e o tipo é re-sorteado */
+    const nb = [rawType(cx - 1, cz), rawType(cx, cz - 1), rawType(cx + 1, cz), rawType(cx, cz + 1)];
+    for (let t = 0; t < 5 && nb.includes(type); t++) type = pickType(R, bio);
     return { id: cx + ',' + cz, x, z, ry, r2, bio, type, cl: CLEAR[type] };
   }
   function site(cx, cz) {
@@ -66,54 +70,94 @@
   function near(x, z, rad) { const out = [], c0 = Math.floor((x - rad) / CELL), c1 = Math.floor((x + rad) / CELL), d0 = Math.floor((z - rad) / CELL), d1 = Math.floor((z + rad) / CELL);
     for (let i = c0; i <= c1; i++) for (let j = d0; j <= d1; j++) { const s = site(i, j); if (s && Math.hypot(s.x - x, s.z - z) <= rad) out.push(s); } return out; }
 
-  /* ---------- peças de cada encontro (só modelos de env.glb) ---------- */
+  /* ---------- peças de cada encontro ----------
+     Pedra, prédio e muro vêm dos modelos Tripo (TripoEnvironment153, com textura); do env.glb ficam só peças com cor própria
+     (tenda, barril, ossos, baú...) e o entulho, pintado com a cor da pedra do bioma. */
+  const TM = () => (window.TripoEnvironment153 && TripoEnvironment153.models) || {};
+  const BUILDINGS = [['house', 6.6], ['church', 12], ['inn', 10], ['mill', 11], ['forge', 7], ['guild', 11], ['defense', 12]];
   function build(s, b, addCol, inter) {
-    const R = mulberry32(rh(Math.round(s.x), Math.round(s.z), 502)), X = s.x, Z = s.z, snow = s.bio === 'neve' || ice(X, Z) > 20;
-    const rk = snow ? 0xf0f4f8 : s.bio === 'vulcao' ? 0x6a5a52 : s.bio === 'deserto' ? 0xe8d2a0 : undefined;
-    const P = (k, a, d, ry, H, tint, y) => { const x = X + Math.cos(a) * d, z = Z + Math.sin(a) * d; return eh0(b, k, x, y || 0, z, ry == null ? R() * TAU : ry, H, tint) && { x, z }; };
-    const col = (a, d, r) => addCol({ x: X + Math.cos(a) * d, z: Z + Math.sin(a) * d, r });
-    const ring = (keys, n, d, H, jit, tint, r) => { for (let i = 0; i < n; i++) { if (R() < jit) continue; const a = s.ry + i / n * TAU + (R() - .5) * .3; const k = keys[Math.floor(R() * keys.length)]; P(k, a, d + (R() - .5) * 1.4, R() * TAU, H * (.8 + R() * .5), tint); if (r) col(a, d, r); } };
+    const R = mulberry32(rh(Math.round(s.x), Math.round(s.z), 502)), X = s.x, Z = s.z, TMs = TM();
+    const snow = s.bio === 'neve' || s.bio === 'cristal' || ice(X, Z) > 20, dry = snow || s.bio === 'vulcao' || s.bio === 'deserto';
+    const stone = snow ? 0xf0f4f8 : s.bio === 'vulcao' ? 0x8a766c : s.bio === 'deserto' ? 0xe8d2a0 : s.bio === 'campos' || s.bio === 'flores' ? 0xb5ab98 : 0x8fa07a;
+    const rockId = () => dry ? 'stones' : 'mossrock';
+    const pos = (a, d) => [X + Math.cos(a) * d, Z + Math.sin(a) * d];
+    const P = (k, a, d, ry, H, tint, y) => { const [x, z] = pos(a, d); return eh0(b, k, x, y || 0, z, ry == null ? R() * TAU : ry, H, tint) && { x, z }; };
+    const col = (a, d, r) => { const [x, z] = pos(a, d); addCol({ x, z, r }); };
+    /* modelo Tripo por largura (w) ou altura (h); sy estica na vertical; y negativo enterra */
+    const tp = (id, a, d, ry, o) => { const m = TMs[id]; if (!m) return null; const [x, z] = pos(a, d), sc = o.h ? o.h / m.h : o.w / m.w;
+      (b.tripo153 || (b.tripo153 = [])).push({ id, x, y: o.y || 0, z, ry, scale: sc, sy: sc * (o.sy || 1), sz: sc }); return { m, sc, x, z }; };
+    /* pedra de terra úmida: Tripo (musgo/pedras); nos biomas secos, rocha do env.glb pintada com a cor do bioma */
+    const ashT = s.bio === 'vulcao' ? 0x5a4a44 : stone;
+    const pile = (a, d, ry, w) => { if (!dry) return tp('stones', a, d, ry, { w }); const [x, z] = pos(a, d); return ew0(b, 'rock_smallA', x, -.05, z, ry, w, ashT); };
+    const rocks = (n, d, w0, w1, sy, r, gap) => { for (let i = 0; i < n; i++) { if (R() < (gap || 0)) continue; const a = s.ry + i / n * TAU + (R() - .5) * .35, w = w0 + R() * (w1 - w0);
+      const dd = d + (R() - .5) * 1.2, ry = R() * TAU;
+      if (dry) { const [x, z] = pos(a, dd); ew0(b, ['rock_tallA', 'rock_tallB', 'rock_tallC'][Math.floor(R() * 3)], x, -.05, z, ry, w * .8, ashT); col(a, d, w * .38); }
+      else if (tp(rockId(), a, dd, ry, { w, sy: sy * (.85 + R() * .4), y: -.25 })) col(a, d, w * .38); } };
+    const wall = (a, d, L, h, y) => { const m = TMs.wall; if (!m) return; const [x, z] = pos(a, d), ry = a + Math.PI / 2 + (R() - .5) * .5;
+      (b.tripo153 || (b.tripo153 = [])).push({ id: 'wall', x, y, z, ry, scale: L / m.sx, sy: h / m.h, sz: 1.4 / m.sz });
+      for (const f of [-.3, .3]) addCol({ x: x + Math.cos(ry) * L * f, z: z - Math.sin(ry) * L * f, r: 1 }); };
     const gr = Math.max(0, Math.min(9, danger(X, Z)));
-    let label, mult = 1, minRar = 0, chestKey = null, guard = 0;
+    let label, mult = 1, minRar = 0, chest = null, guard = 0, npc = null;
     if (s.type === 'camp') {
-      P('tent_detailedOpen', 0, 0, s.ry, 3.2); col(0, 0, 1.7);
-      P('campfire_stones', s.ry + 1, 4.4, 0, .45); P('log', s.ry + 2.2, 5, null, .5); P('log_stack', s.ry + 4.8, 4.8, null, .8);
-      P('barrel_small', s.ry + 2.4, 3.2, null, 1); P('sack', s.ry + 3, 2.8, null, .6); P('crate_B_small', s.ry + 4.2, 3.6, null, .7);
+      const k = R();
+      P('tent_detailedOpen', 0, 0, s.ry, 3 + R() * .8); col(0, 0, 1.7);
+      P('campfire_stones', s.ry + 1, 4.4 + R(), 0, .45); if (k < .6) P('log', s.ry + 2.2, 5, null, .5); if (k > .35) P('log_stack', s.ry + 4.8, 4.8, null, .8);
+      P('barrel_small', s.ry + 2.4, 3.2, null, 1); P('sack', s.ry + 3, 2.8, null, .6); if (k < .5) P('crate_B_small', s.ry + 4.2, 3.6, null, .7);
+      if (k > .5) P('tent_detailedOpen', s.ry + 3.6, 7.5, R() * TAU, 2.4);
       if (s.r2 < .5) P('bone_A', s.ry + 5.2, 5.5, null, .4);
+      pile(s.ry + 5.5, 7 + R() * 2, R() * TAU, 2 + R() * 1.5);
       label = 'F · VASCULHAR ACAMPAMENTO ABANDONADO'; guard = s.r2 < .25 ? 2 : 0;
     } else if (s.type === 'ruin') {
-      ring(['pillar_decorated', 'd_pillar', 'column', 'statue_columnDamaged', 'pillar'], 7, 6.2, 3.8, .22, rk, 1);
-      P('arch', s.ry, 6.4, s.ry + Math.PI / 2, 5, rk); col(s.ry, 6.4, 1.2);
-      ring(['rubble_large', 'rubble_half'], 5, 3.4, 1.1, .1, rk);
-      P('statue_head', s.ry + 2, 3.2, null, 1.4, rk);
-      chestKey = 'chest_gold'; label = 'F · ABRIR BAÚ DA RUÍNA'; mult = 2; minRar = 1;
+      /* prédio medieval caído: casa, capela, taverna, moinho, forja, guilda ou torre, afundado no chão e achatado */
+      const [id, H] = BUILDINGS[Math.floor(R() * BUILDINGS.length)], sy = .55 + R() * .3;
+      const mp = tp(id, 0, 0, R() * TAU, { h: H * (.9 + R() * .2), y: -H * (.16 + R() * .2), sy });
+      if (mp) col(0, 0, Math.min(mp.m.sx, mp.m.sz) * mp.sc * .42);
+      if (R() < .55) { const a = s.ry + 1 + R() * 3, q = tp('house', a, 12 + R() * 3, R() * TAU, { h: 5.4, y: -2.2, sy: .5 + R() * .25 }); if (q) addCol({ x: q.x, z: q.z, r: 2.2 }); }
+      const nw = 3 + Math.floor(R() * 3); for (let i = 0; i < nw; i++) wall(s.ry + i * TAU / nw + (R() - .5) * .7, 9 + R() * 3.5, 4 + R() * 3, 1 + R() * 2.4, -.35 - R() * .4);
+      for (let i = 0; i < 3; i++) pile(s.ry + R() * TAU, 4 + R() * 4, R() * TAU, 2 + R() * 2);
+      rocks(2 + Math.floor(R() * 2), 10 + R() * 3, 3, 5, .8, 1, .2);
+      for (let i = 0; i < 2; i++) P(R() < .5 ? 'rubble_large' : 'rubble_half', s.ry + R() * TAU, 5 + R() * 3, null, 1.1, stone);
+      const cd = mp ? Math.max(mp.m.sx, mp.m.sz) * mp.sc * .5 + 2.6 : 6; chest = { k: 'chest_gold', a: s.ry + 3.14, d: cd, H: 1 };
+      label = 'F · ABRIR BAÚ DA RUÍNA'; mult = 2; minRar = 1;
     } else if (s.type === 'chest') {
-      ring(['rock_largeA', 'rock_largeB', 'rock_largeC'], 4, 3.6, 3, 0, rk, 1.7);
-      P('tree_dead_large', s.ry + .8, 7.5, null, 5.2);
-      chestKey = 'chest'; label = 'F · ABRIR BAÚ ESCONDIDO'; mult = 1.4; minRar = 1;
+      rocks(4 + (R() < .4 ? 1 : 0), 3.6, 2.8, 3.8, 1.5, 1.7, 0);
+      P('tree_dead_large', s.ry + .8, 7.5, null, 4.6 + R() * 1.6); if (R() < .5) P('bone_A', s.ry + 2, 5, null, .4);
+      chest = { k: 'chest', a: 0, d: 0, H: .9 }; label = 'F · ABRIR BAÚ ESCONDIDO'; mult = 1.4; minRar = 1;
     } else if (s.type === 'altar') {
-      P('statue_block', 0, 0, s.ry, 1.1, rk); col(0, 0, 1.3); P('candle_triple', 0, 0, s.ry, .5, undefined, 1.1);
-      P('statue_obelisk', s.ry, 3.4, s.ry, 4.4, rk); col(s.ry, 3.4, 1);
-      P('pillar', s.ry + 2, 4.2, null, 3, rk); col(s.ry + 2, 4.2, .7); P('pillar', s.ry - 2, 4.2, null, 3, rk); col(s.ry - 2, 4.2, .7);
-      P('lantern_standing', s.ry + 1, 2.6, null, 1.6); P('lantern_standing', s.ry - 1, 2.6, null, 1.6);
+      /* círculo de pedras antigas em pé, laje de pedras no meio, velas e lanternas */
+      rocks(5 + Math.floor(R() * 2), 5.6, 2.2, 3.2, 1.9, 1.4, .12);
+      pile(0, 0, s.ry, 2.6); col(0, 0, 1.2); P('candle_triple', 0, 0, s.ry, .5, undefined, 1.0);
+      P('lantern_standing', s.ry + 1, 2.8, null, 1.6); if (R() < .6) P('lantern_standing', s.ry - 1, 2.8, null, 1.6);
+      if (R() < .5) P('skull', s.ry + 2.4, 2.2, null, .5);
       label = 'F · REZAR NO ALTAR ANTIGO';
     } else if (s.type === 'carcass') {
-      P('ribcage', 0, 0, s.ry, 1.5); P('skull', s.ry + 1, 2.2, null, .5); ring(['bone_A', 'bone_A', 'skull'], 3, 3, .5, .2);
-      P('sword_shield', s.ry + 2.6, 1.8, null, 1); P('sack', s.ry + 3.4, 2.4, null, .6);
-      if (s.r2 < .5) { P('cart', s.ry + 4.4, 4.5, s.ry, 1.7); col(s.ry + 4.4, 4.5, 1.4); } else P('gravemarker_A', s.ry + 4.4, 3.5, null, 1.1);
+      P('ribcage', 0, 0, s.ry, 1.3 + R() * .6); P('skull', s.ry + 1, 2.2, null, .5);
+      for (let i = 0, n = 2 + Math.floor(R() * 3); i < n; i++) P(R() < .7 ? 'bone_A' : 'skull', s.ry + 2 + i * 2.1, 3 + R(), null, .5);
+      P('sword_shield', s.ry + 2.6, 1.8, null, 1); P('sack', s.ry + 3.4, 2.4, null, .6); if (R() < .4) P('barrel_small', s.ry + 3.9, 3.2, null, .9);
+      if (s.r2 < .5) { P('cart', s.ry + 4.4, 4.5, s.ry, 1.5 + R() * .4); col(s.ry + 4.4, 4.5, 1.4); } else pile(s.ry + 4.4, 3.5, R() * TAU, 1.8);
       label = 'F · REVISTAR OS RESTOS'; mult = .8;
+    } else if (s.type === 'den') {
+      rocks(6, 5.6, 3, 4.6, 1.5, 1.4, .15);
+      P('post_skull', s.ry + .4, 4.4, null, 2.4 + R() * .5); P('post_skull', s.ry - .9, 4.4, null, 2.4 + R() * .5);
+      P('ribcage', s.ry + 2.2, 2.4, null, 1.3); P('skull', s.ry + 3, 2, null, .5); for (let i = 0; i < 3; i++) P('bone_A', s.ry + i * 2.1, 3, null, .5);
+      P('tree_dead_large', s.ry + 3.8, 8.5, null, 4.8 + R() * 1.4);
+      chest = { k: 'chest', a: s.ry + 3.14, d: 1.1, H: .9 }; label = 'F · ABRIR BAÚ DO COVIL'; mult = 1.6; minRar = 1; guard = 2 + (gr >= 4 ? 1 : 0) + (s.r2 < .3 ? 1 : 0);
     } else {
-      ring(['rock_tallA', 'rock_tallB', 'rock_tallC'], 6, 5.6, 3.6, .15, rk, 1.2);
-      P('post_skull', s.ry + .4, 4.4, null, 2.6); P('post_skull', s.ry - .9, 4.4, null, 2.6);
-      P('ribcage', s.ry + 2.2, 2.4, null, 1.3); P('skull', s.ry + 3, 2, null, .5); ring(['bone_A'], 3, 3, .5, 0);
-      P('tree_dead_large', s.ry + 3.8, 8.5, null, 5.4);
-      chestKey = 'chest'; label = 'F · ABRIR BAÚ DO COVIL'; mult = 1.6; minRar = 1; guard = 2 + (gr >= 4 ? 1 : 0) + (s.r2 < .3 ? 1 : 0);
+      /* viajante parado junto a uma fogueira: peregrino, mercador ambulante ou caçador */
+      const kind = s.r2 < .34 ? 'peregrino' : s.r2 < .67 ? 'mercador' : 'cacador';
+      P('campfire_stones', s.ry, 2.6, 0, .45); P('log', s.ry + 1.4, 3.4, null, .5); P('sack', s.ry + 2.4, 3, null, .6);
+      if (kind === 'mercador') { P('cart', s.ry + 3.4, 5, s.ry, 1.6); col(s.ry + 3.4, 5, 1.5); P('barrel', s.ry + 4, 3.6, null, 1); }
+      else if (kind === 'cacador') { P('tent_detailedOpen', s.ry + 3.4, 5.5, R() * TAU, 2.6); col(s.ry + 3.4, 5.5, 1.5); }
+      else pile(s.ry + 3.4, 4.6, R() * TAU, 1.8);
+      npc = kind; label = 'F · FALAR';
     }
-    if (chestKey) P(chestKey, s.ry + 3.14, 1.1, s.ry, chestKey === 'chest_gold' ? 1 : .9);
+    let cx = X, cz = Z;
+    if (chest) { const [x, z] = pos(chest.a, chest.d); cx = x; cz = z; P(chest.k, chest.a, chest.d, s.ry, chest.H); }
     const done = () => !!(run && run.enc502 && run.enc502[s.id]);
-    const it = { type: 'enc502', x: X + (chestKey ? Math.cos(s.ry + 3.14) * 1.1 : 0), z: Z + (chestKey ? Math.sin(s.ry + 3.14) * 1.1 : 0), r: 3.2, label, hidden: done(), use: () => use(s, it, mult, minRar, label) };
-    if (s.type === 'altar') { it.x = X; it.z = Z; it.r = 3.6; it.hidden = false; }
-    inter.push(it); BUILT.set(s.id, { s, guard, spawned: false });
+    const it = { type: 'enc502', x: cx, z: cz, r: 3.2, label, hidden: !npc && done(), use: () => use(s, it, mult, minRar, label) };
+    if (s.type === 'altar') { it.r = 3.6; it.hidden = false; }
+    if (!npc) inter.push(it);
+    const old = BUILT.get(s.id); BUILT.set(s.id, { s, guard, spawned: old ? old.spawned : false, npc, npcObj: old ? old.npcObj : null });
   }
 
   /* ---------- usar ---------- */
@@ -136,6 +180,37 @@
     toast('<b>[ACHADO]</b> Você encontrou ' + msg + '.', 3500); try { sfx('coin'); } catch (_) {} saveRun();
   }
 
+  /* ---------- viajantes parados (peregrino, mercador ambulante, caçador errante): modelos do Povo482 ---------- */
+  const WHO = {
+    peregrino: { sub: 'Peregrino', names: [['Irmão Aldren', 'm'], ['Irmã Maud', 'f'], ['Peregrino Osric', 'm']], lines: [
+      'Caminho para Aster desde a primeira geada. As Fendas abrem mais perto a cada lua.',
+      'Reze antes de dormir. O que atravessa as Fendas não pede licença.',
+      'Os mortos não descansam nesta estrada. Mantenha a fogueira acesa.'] },
+    mercador: { sub: 'Mercador ambulante', names: [['Brígida, a mercadora', 'f'], ['Mercadora Elsbeth', 'f'], ['Mercadora Petronela', 'f']], lines: [
+      'Vendo o que sobrou das caravanas. O resto ficou na estrada, com quem o carregava.',
+      'Ouro não compra a volta para casa, viajante. Mas ajuda no caminho.',
+      'Se achar um covil por perto, não diga que fui eu quem avisou.'] },
+    cacador: { sub: 'Caçador errante', names: [['Caçador Voss', 'm'], ['Caçadora Mirae', 'f'], ['Caçador Kargan', 'm']], lines: [
+      'Rastreei algo grande por esta mata. Não é bicho. Dorme mal quem já viu os olhos dele.',
+      'A Ordem paga pouco e esquece rápido. Os monstros, não.',
+      'Cuidado com os covis: o que vive neles aprendeu a esperar.'] }
+  };
+  function spawnNpc(e) {
+    const s = e.s, w = WHO[e.npc], R = mulberry32(rh(Math.round(s.x), Math.round(s.z), 503)), [name, sex] = w.names[Math.floor(R() * w.names.length)];
+    const a = s.ry + .7, x = s.x + Math.cos(a) * 3.2, z = s.z + Math.sin(a) * 3.2, pk = arr => arr[Math.floor(R() * arr.length)];
+    const m = makeChibi({ body: pk([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a, 0x7a5a9a]), hair: pk([0x222222, 0xc85a1e, 0xe8e8ff, 0x6b4a2a, 0xd8b060]), wep: 'none', gk: pk(['Knight', 'Barbarian', 'Mage', 'Rogue']), scale: .9 });
+    m.root.position.set(x, 0, z); m.root.userData.terrainRoot245 = true; scene.add(m.root);
+    let k = 0;
+    const n = { kind: 'traveler', m, x, z, face: Math.atan2(s.x - x, s.z - z), r: .45, name, short: name, col: '#d9c9a8', t: R() * 9, label: 'F · FALAR COM ' + name.toUpperCase(), gone: false };
+    n.use = () => speech153(n, w.lines[(k++) % w.lines.length], w.sub);
+    npcs.push(n); e.npcObj = n;
+    try {
+      const P = window.Povo482, seed = rh(Math.round(s.x), Math.round(s.z), 504);
+      if (P && P.register) P.register(n, e.npc === 'cacador' ? { role: 'hunter', family: 'soldado', cls: 0, rank: 1, sex, seed, isCurrent: () => !n.gone && L.mode === 'world' } : { role: 'civil', sex, seed });
+    } catch (_) {}
+  }
+  function dropNpc(e) { const n = e.npcObj; if (!n) return; n.gone = true; try { scene.remove(n.m.root); } catch (_) {} e.npcObj = null; }
+
   /* ---------- covil / acampamento vigiado: criaturas aparecem quando você chega ---------- */
   const BUILT = new Map();
   setInterval(() => {
@@ -143,7 +218,8 @@
       if (typeof started === 'undefined' || !started || !player || !run || L.mode !== 'world' || player.dead) return;
       for (const [id, e] of BUILT) {
         const d = Math.hypot(e.s.x - player.x, e.s.z - player.z);
-        if (d > 400) { BUILT.delete(id); continue; }
+        if (e.npc) { if (!e.npcObj && d < 90) spawnNpc(e); else if (e.npcObj && d > 150) dropNpc(e); }
+        if (d > 400) { dropNpc(e); BUILT.delete(id); continue; }
         if (!e.guard || e.spawned || d > 42 || (run.enc502 && run.enc502[id])) continue;
         e.spawned = true; const gr = Math.max(0, Math.min(9, danger(e.s.x, e.s.z)));
         for (let i = 0; i < e.guard; i++) {
