@@ -1,4 +1,5 @@
-/* v502 (Ian, 21/10/2026): densidade estilo Skyrim no mapa finito — um segredo ou encontro a cada ~150 m.
+/* v508: depois de vasculhar, Gat508.onLoot(s) pode entregar uma carta/diário (tools/gatilhos508.js).
+   v502 (Ian, 21/10/2026): densidade estilo Skyrim no mapa finito — um segredo ou encontro a cada ~150 m.
    - Grade de 150 m com posição sorteada por semente (rh/mulberry32): mesmo mundo = mesmos encontros. Seis tipos:
      acampamento abandonado, ruína com baú, baú escondido entre rochas, altar antigo, carcaça de viajante e covil.
      O tipo muda com o bioma (deserto: mais carcaças; neve/vulcão: menos acampamentos; pântano/vulcão: mais covis).
@@ -178,6 +179,7 @@
     if (minRar > 0 || Math.random() < .3) { try { const item = rollItem(gr, false, 0, minRar); if (item && addItem(item)) msg += ' e ' + item.name; } catch (_) {} }
     const sv = window.Surv437; if (sv && sv.add && s.type !== 'ruin') { try { sv.add(s.type === 'camp' ? 'galho' : 'erva', 2, true); } catch (_) {} }
     toast('<b>[ACHADO]</b> Você encontrou ' + msg + '.', 3500); try { sfx('coin'); } catch (_) {} saveRun();
+    try { if (window.Gat508) Gat508.onLoot(s); } catch (_) {}
   }
 
   /* ---------- viajantes parados (peregrino, mercador ambulante, caçador errante): modelos do Povo482 ---------- */

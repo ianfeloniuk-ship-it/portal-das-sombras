@@ -320,11 +320,12 @@ function journeyView(tab='goals'){view=()=>journeyView(tab);let h=(L.mode==='wor
           const q=window.Quests480.CATALOG[qid];
           if(!q)continue;
           const isTrack=st.tracked===qid;
-          h+=row(q.title+(isTrack?' · ★ acompanhando':''),q.desc+'<br><b>Recompensa: '+fmt(q.rewardGold)+' ouro · '+q.giver+'</b>',btn(isTrack?'Parar':'Acompanhar','trackcontract',isTrack?'':qid,true,isTrack?'':'hot'));
+          h+=row((q.tag508?'['+q.tag508+'] ':'')+q.title+(isTrack?' · ★ acompanhando':''),q.desc+'<br><b>Recompensa: '+fmt(q.rewardGold??q.gold??0)+' ouro · '+q.giver+'</b>',btn(isTrack?'Parar':'Acompanhar','trackcontract',isTrack?'':qid,true,isTrack?'':'hot'));
         }
       }else{
         h+='<div class="sysline">Nenhum contrato ativo no momento. Fale com os governantes ou consulte o mural de uma capital.</div>';
       }
+      if(window.Gat508)h+=Gat508.diaryRows();/* v508: cartas e diários achados no mundo */
     }
   }else if(tab==='story'){h+='<div class="sysline">Cada Prova de Rank revela um ato. As histórias paralelas começam com a Ordem da Fenda.</div>';let any=false;
     for(let i=1;i<MAIN_ACTS.length;i++)if(profile.rank>=i||(profile.acts||[]).includes(i)){any=true;h+=row('<b>'+MAIN_ACTS[i][0]+'</b>',MAIN_ACTS[i][1],'')}
@@ -444,6 +445,7 @@ function extraActions(a,v){if(window.Loot353){const handled=Loot353.action(a,v);
     closeModal();player.x=c.x+rnd(-3,3);player.z=c.z+14;cam.x=player.x;cam.z=player.z;player.m.root.position.set(player.x,0,player.z);updChunks(true);fxRing(player.x,player.z,0xffb347,4,.8);bigText(c.n,1400);sfx('arise');narratorEvent105('travel');saveRun();return}
   if(a==='bindk'){bindWait=v;return keysView(),'close0'}if(a==='bindreset'){KEYMAP={};refreshKeyLabels();try{localStorage.removeItem('pds_keys')}catch(_){}return keysView(),'close0'}if(a==='keys')return keysView(),'close0';
   if(a==='journeytab')return journeyView(v),'close0';
+  if(a==='gat508read'){if(window.Gat508)Gat508.readDoc(v);return 'close0'}
   if(a==='openbountyboard')return (window.Quests480?window.Quests480.openBoard(v||'aster'):null),'close0';
   if(a==='trackcontract'){if(window.Quests480)window.Quests480.trackQuest(v||null);return journeyView('contracts'),'close0';}if(a==='trackobj'){if(v&&!journeyObjectives().some(o=>o.id===v))return;run.trackObj=v||null;saveRun();return journeyView(),'close0'}
   if(a==='status')return statusView(),'close0';if(a==='army')return armyView(),'close0';if(a==='diary')return diaryView(),'close0';if(a==='look')return lookView(),'close0';

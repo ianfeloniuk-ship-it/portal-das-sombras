@@ -1081,6 +1081,7 @@
     for (const [qid, act] of Object.entries(S.active)) {
       const qdef = QUEST_CATALOG[qid];
       if (!qdef || !act.targetPos) continue;
+      if (qdef.custom508) continue; // v508: missões de "ir até lá" são resolvidas por tools/gatilhos508.js
 
       const dist = Math.hypot(player.x - act.targetPos.x, player.z - act.targetPos.z);
 
