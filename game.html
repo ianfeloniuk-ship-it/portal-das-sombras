@@ -5219,7 +5219,9 @@ function gatherOtherworldRes456(it){
 
 function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   if(!L||L.mode!=='world'||!L.group)return;
-  if(window.WorldSim479)WorldSim479.simulate(daysPassed,{fromRift:true,rank});
+  /* v490 (Ian): o tempo da Fenda passa uma vez só; o relatório só lê o resultado guardado */
+  const sim490=window.WorldSim479?WorldSim479.simulate(daysPassed,{fromRift:true,rank}):null;
+  const events490=(sim490&&sim490.events)||[];
   const grp=new THREE.Group();
   const y0=typeof terrH==='function'?terrH(gx,gz):0;
   grp.position.set(gx,y0,gz);
@@ -5242,14 +5244,14 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   const it={
     type:'aftermath456',x:gx,z:gz+3.2,r:3.5,
     label:'F · RELATÓRIO DO CERCO ('+daysPassed+' DIAS DE EXPEDIÇÃO)',
-    use:()=>showRiftTimeReport456(daysPassed,rank)
+    use:()=>showRiftTimeReport456(daysPassed,rank,events490)
   };
   L.inter.push(it);
 }
 
-function showRiftTimeReport456(daysPassed,rank){
+function showRiftTimeReport456(daysPassed,rank,events){
   if(window.WorldSim479){
-    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank);
+    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank,events||[]);
     h+='<div style="text-align:center;margin-top:14px"><button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Ver Conselho e Governantes</button></div>';
     openModal('IMPACTO TEMPORAL · '+daysPassed+' DIAS DEPOIS',h);
     return;
@@ -6183,9 +6185,12 @@ const mouseAim={x:0,y:0,ok:false},aimRay=new THREE.Raycaster(),aimPlane=new THRE
 if(!touch)addEventListener('mousemove',e=>{mouseAim.x=e.clientX;mouseAim.y=e.clientY;mouseAim.ok=true});
 // Bounds are measured once from the actual model; terrain is added only to its rigid base.
 function projectileBody253(e){const m=e.m;let b=m?.projectileBounds253;
-  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0,rw:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)/2};}
+  /* v490 (Ian): o GLB (ex.: Lobo Fendido) chega depois do corpo provisório; medir de novo quando o modelo trocar, senão a mira desce para o chão */
+  const src490=m&&(m.model||m.body||m.root);if(b&&(b.src490!==src490||b.kids490!==(src490?.children?.length||0)))b=null;
+  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0,rw:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)/2,src490,kids490:src490?.children?.length||0};/* SkinnedMesh do Lobo Fendido mede ~230 m na pose de ligação: caixa absurda volta ao corpo pelo raio */if(!isFinite(b.lo)||!isFinite(b.hi)||b.hi-b.lo<.3||b.hi-b.lo>Math.max(6,(e.r||.5)*10)){b.rw=e.r||.5;b.lo=0;b.hi=Math.max(.8,(e.r||.5)*2.5);}}
   const low=b?.lo??0,high=b?.hi??Math.max(.8,(e.r||.5)*2.5),h=Math.max(.1,high-low),r=Math.max(.1,e.r||.5,Math.min(2.5,(b?.rw||0)*.7)),lift=(m?.body?.position.y||0)-(b?.bodyY||0);
-  return {x:e.x,y:terrH(e.x,e.z)+(m?.root?.position.y||0)+lift+(low+high)/2,z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
+  const gy490=terrH(e.x,e.z);
+  return {x:e.x,y:Math.max(gy490+Math.min(h/2,1.2),gy490+(m?.root?.position.y||0)+lift+(low+high)/2),z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
 }
 let aimCache253=null;
 function aimPoint(){if(touch||!mouseAim.ok)return null;
@@ -9573,8 +9578,8 @@ requestAnimationFrame(frame);
 <script src="tools/attrs462.js?v=485"></script>
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=485"></script>
-<script src="tools/worldsim479.js?v=479"></script>
-<script src="tools/quests480.js?v=488"></script>
+<script src="tools/worldsim479.js?v=490"></script>
+<script src="tools/quests480.js?v=490"></script>
 <script src="tools/bloom487/CopyShader.js?v=487"></script>
 <script src="tools/bloom487/LuminosityHighPassShader.js?v=487"></script>
 <script src="tools/bloom487/EffectComposer.js?v=487"></script>

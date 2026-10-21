@@ -225,6 +225,8 @@
     Q.active = Q.active || {};       // { [questId]: { progress: 0, max: 1, targetPos: {x, z}, spawned: false } }
     Q.completed = Q.completed || {}; // { [questId]: timestamp }
     Q.tracked = Q.tracked || null;   // questId sendo rastreado no HUD/compasso
+    // v490: contratos de encontro (Aceitar no diálogo) voltam ao catálogo depois de recarregar
+    for (const k in Q.active) { const d = Q.active[k] && Q.active[k].def490; if (d && !QUEST_CATALOG[k]) QUEST_CATALOG[k] = d; }
     return Q;
   }
 
@@ -258,7 +260,8 @@
       return true;
     }
 
-    const cityPos = getCityPos(qdef.region);
+    // v490: encontro no mundo aberto marca perto de onde você aceitou, não na cidade mais próxima
+    const cityPos = (qdef.region === 'mundo_aberto' && typeof player !== 'undefined' && player) ? { x: player.x, z: player.z } : getCityPos(qdef.region);
     const targetX = cityPos.x + (qdef.offset?.dx || 100);
     const targetZ = cityPos.z + (qdef.offset?.dz || 100);
 
@@ -268,7 +271,8 @@
       progress: 0,
       max: 1,
       targetPos: { x: targetX, z: targetZ },
-      spawned: false
+      spawned: false,
+      def490: qdef.type === 'emergent' ? qdef : undefined
     };
     S.tracked = qid;
 
@@ -1195,6 +1199,8 @@
     CATALOG: QUEST_CATALOG,
     getState,
     acceptQuest,
+    acceptEmergent,
+    openEmergentDialogue,
     trackQuest,
     abandonQuest,
     completeQuest,

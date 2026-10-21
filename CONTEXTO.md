@@ -1,3 +1,11 @@
+## v490 (20/10/2026) — Aceitar missão de encontro, mira no Lobo Fendido, relatório do cerco
+- Pedido de Ian (áudios 20/10): "aperto nas missões e não acontece nada"; mira de longe desce para o chão no Lobo Fendido; abrir o relatório do cerco contava o tempo da Fenda de novo.
+- `tools/quests480.js` (?v=490): `acceptEmergent`/`openEmergentDialogue` não estavam exportados — o botão "Aceitar: …" dos encontros (ex.: Vael, Batedor Renegado) dava erro e não fazia nada. Exportados; contrato de encontro guarda a definição no save (volta depois de recarregar) e marca o alvo perto de onde foi aceito.
+- `src/core/380-acoes.js`: `projectileBody253` media o Lobo Fendido pela pose de ligação do SkinnedMesh (~230 m de altura) → cápsula absurda. Caixa absurda volta ao raio do bicho; mede de novo se o modelo trocar; centro nunca abaixo do chão. Mira trava no lobo a 0,7 m.
+- `src/core/270-masmorra-procedural.js` + `tools/worldsim479.js` (?v=490): o mundo simula o tempo da Fenda uma vez, ao sair; o relatório só mostra o resultado guardado (antes cada abertura simulava de novo).
+- Teste: navegador local, lobo fendido + mira no centro (trava, y 0,7), relatório aberto 2× sem mudar o save, aceitar `deserter_scout` → missão ativa e no HUD. Sem erros no console.
+- Pendentes (áudios): fenda vencida pelo guardião 3× não aparece no registro; golpe seguir a arma; NPCs batendo em objetos; gravidade de itens.
+
 ## v489 (20/10/2026) — Segundo Despertar por Armaduras de Chefes e Narrador no topo da tela
 - Pedido de Ian:
   1. Segundo Despertar: confirmar e garantir a regra real. O jogador entra em um portal que se torna vermelho, derrota o chefe de classe rara e obtém partes da armadura dele (cada uma com passiva exclusiva). Ao reunir e equipar as 5 peças do conjunto completo, abre-se a prova para despertar a classe daquele chefe. Removido do código todo e qualquer resquício antigo de "investigações de fissuras com o Narrador" e "afinidades".

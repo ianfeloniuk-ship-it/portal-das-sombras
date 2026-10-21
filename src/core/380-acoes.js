@@ -4,9 +4,12 @@ const mouseAim={x:0,y:0,ok:false},aimRay=new THREE.Raycaster(),aimPlane=new THRE
 if(!touch)addEventListener('mousemove',e=>{mouseAim.x=e.clientX;mouseAim.y=e.clientY;mouseAim.ok=true});
 // Bounds are measured once from the actual model; terrain is added only to its rigid base.
 function projectileBody253(e){const m=e.m;let b=m?.projectileBounds253;
-  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0,rw:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)/2};}
+  /* v490 (Ian): o GLB (ex.: Lobo Fendido) chega depois do corpo provisório; medir de novo quando o modelo trocar, senão a mira desce para o chão */
+  const src490=m&&(m.model||m.body||m.root);if(b&&(b.src490!==src490||b.kids490!==(src490?.children?.length||0)))b=null;
+  if(!b&&m){m.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(m.model||m.body||m.root),base=m.root.matrixWorld.elements[13];b=m.projectileBounds253={lo:box.min.y-base,hi:box.max.y-base,bodyY:m.body?.position.y||0,rw:Math.max(box.max.x-box.min.x,box.max.z-box.min.z)/2,src490,kids490:src490?.children?.length||0};/* SkinnedMesh do Lobo Fendido mede ~230 m na pose de ligação: caixa absurda volta ao corpo pelo raio */if(!isFinite(b.lo)||!isFinite(b.hi)||b.hi-b.lo<.3||b.hi-b.lo>Math.max(6,(e.r||.5)*10)){b.rw=e.r||.5;b.lo=0;b.hi=Math.max(.8,(e.r||.5)*2.5);}}
   const low=b?.lo??0,high=b?.hi??Math.max(.8,(e.r||.5)*2.5),h=Math.max(.1,high-low),r=Math.max(.1,e.r||.5,Math.min(2.5,(b?.rw||0)*.7)),lift=(m?.body?.position.y||0)-(b?.bodyY||0);
-  return {x:e.x,y:terrH(e.x,e.z)+(m?.root?.position.y||0)+lift+(low+high)/2,z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
+  const gy490=terrH(e.x,e.z);
+  return {x:e.x,y:Math.max(gy490+Math.min(h/2,1.2),gy490+(m?.root?.position.y||0)+lift+(low+high)/2),z:e.z,r,hitHeight:Math.max(0,h-2*r),entity:e};
 }
 let aimCache253=null;
 function aimPoint(){if(touch||!mouseAim.ok)return null;

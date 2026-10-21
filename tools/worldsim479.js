@@ -440,9 +440,9 @@
   }
 
   // Gera o relatório dinâmico e real para o pós-masmorra
-  function generateRiftReportHtml(daysPassed, rank) {
-    const simResult = simulate(daysPassed, { fromRift: true, rank });
-    const events = (simResult && simResult.events) || [];
+  function generateRiftReportHtml(daysPassed, rank, savedEvents) {
+    // v490: abrir o relatório não simula de novo; usa o que já aconteceu ao sair da Fenda
+    const events = Array.isArray(savedEvents) ? savedEvents : [];
 
     let h = `<div class="sysline" style="font-size:13px;line-height:1.4">`;
     h += `<b>${daysPassed} dias se passaram em Primeva enquanto você esteve nas profundezas da Fenda.</b><br>`;

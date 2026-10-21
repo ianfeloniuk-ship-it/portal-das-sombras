@@ -476,7 +476,9 @@ function gatherOtherworldRes456(it){
 
 function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   if(!L||L.mode!=='world'||!L.group)return;
-  if(window.WorldSim479)WorldSim479.simulate(daysPassed,{fromRift:true,rank});
+  /* v490 (Ian): o tempo da Fenda passa uma vez só; o relatório só lê o resultado guardado */
+  const sim490=window.WorldSim479?WorldSim479.simulate(daysPassed,{fromRift:true,rank}):null;
+  const events490=(sim490&&sim490.events)||[];
   const grp=new THREE.Group();
   const y0=typeof terrH==='function'?terrH(gx,gz):0;
   grp.position.set(gx,y0,gz);
@@ -499,14 +501,14 @@ function spawnRiftAftermath456(gx,gz,rank,daysPassed){
   const it={
     type:'aftermath456',x:gx,z:gz+3.2,r:3.5,
     label:'F · RELATÓRIO DO CERCO ('+daysPassed+' DIAS DE EXPEDIÇÃO)',
-    use:()=>showRiftTimeReport456(daysPassed,rank)
+    use:()=>showRiftTimeReport456(daysPassed,rank,events490)
   };
   L.inter.push(it);
 }
 
-function showRiftTimeReport456(daysPassed,rank){
+function showRiftTimeReport456(daysPassed,rank,events){
   if(window.WorldSim479){
-    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank);
+    let h=WorldSim479.generateRiftReportHtml(daysPassed,rank,events||[]);
     h+='<div style="text-align:center;margin-top:14px"><button class="btn hot" onclick="WorldSim479.openCouncilView(\'aster\')">Ver Conselho e Governantes</button></div>';
     openModal('IMPACTO TEMPORAL · '+daysPassed+' DIAS DEPOIS',h);
     return;
