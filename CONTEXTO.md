@@ -1,3 +1,8 @@
+## v516 (21/10/2026) — Serras no mapa-múndi com cor de rocha do bioma
+- Pedido de Ian: as serras da v514 apareciam brancas como neve no mapa em qualquer bioma.
+- `tools/mapa501.js`: onde há serra (`TER245.ridge513`), o mapa pinta rocha do bioma (cinza no campo, musgo escuro na floresta, arenito no deserto, basalto no vulcão, lodo no pântano, rocha clara na neve, lilás no cristal) com sombra de relevo; cume nevado só no bioma de neve. A cordilheira de gelo do norte continua branca.
+- Teste: navegador local, mapa aberto com as 4 serras visíveis em cores diferentes por bioma, sem erro novo.
+
 ## v515 (21/10/2026) — coleta em 3D, Mão só nos chefes e Edran
 - Pedido e autorização de publicação: Ian neste chat («pode»). Comuns desaparecem deixando cristal de saque, sem Mão nem câmera do efeito. Mão limitada a chefes, incluindo agrupamento; partes físicas do Arquiteto excluídas. Cristal acessível durante a animação do chefe.
 - `tools/loot513.js`: palco isolado girável para núcleo/cristal, material Crystal310 e cor do rank, geometria facetada assimétrica, arraste/teclado/botões, responsivo e descarte ao fechar. Outros itens mantêm lista; palco mostra recipiente de saque sem substituir sua identidade.

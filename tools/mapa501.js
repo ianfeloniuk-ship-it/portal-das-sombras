@@ -9,6 +9,7 @@
   const mix=(a,b,r)=>[a[0]+(b[0]-a[0])*r,a[1]+(b[1]-a[1])*r,a[2]+(b[2]-a[2])*r];
   const C={cv:null,lo:null,job:0,vec:null,seed:-1};
 
+  const ROCK516={campos:[106,98,88],flores:[106,98,88],floresta:[76,82,68],deserto:[158,116,72],vulcao:[54,44,42],pantano:[76,80,64],neve:[178,190,206],cristal:[122,112,152]};
   function sample(x,z,m){
     const T=window.TER245,sd=T&&T.SEA439?T.SEA439.d(x,z):-1;
     if(sd>0){const t=Math.min(1,sd/1300);return mix(M.WATER,DEEP,t)}
@@ -17,7 +18,13 @@
     let col=M.biomeColor(x,z);
     const mt=T&&T.mt383?T.mt383(x,z):0;if(mt>12)col=mix(col,[150,140,128],Math.min(1,(mt-12)/18)*.6);
     if(sd>-90)col=mix(col,SAND,Math.min(1,(sd+90)/90)*.85);/* praia */
-    const ic=T&&T.ice500?T.ice500(x,z):0;if(ic>8)col=mix(col,[226,236,246],Math.min(1,(ic-8)/60));
+    const ic=T&&T.ice500?T.ice500(x,z):0;
+    /* v516 (Ian): serras com cor de rocha do bioma (antes ficavam brancas como neve em todo lugar) */
+    const rg=T&&T.ridge513?T.ridge513(x,z):0;
+    if(rg>10&&ic<=8){let bio='campos';try{bio=biomeAt(x,z)}catch(_){}const R=ROCK516[bio]||ROCK516.campos,k=Math.min(1,(rg-10)/35);col=mix(col,R,k);
+      const rl=T.ridge513(x-m,z-m),lit=Math.max(.6,Math.min(1.45,1+(rg-rl)*.035));col=[col[0]*lit,col[1]*lit,col[2]*lit];if(rg>120)col=mix(col,[235,228,214],Math.min(1,(rg-120)/40)*.35);
+      if(bio==='neve'&&rg>90)col=mix(col,[236,242,250],Math.min(1,(rg-90)/40))}
+    else if(ic>8)col=mix(col,[226,236,246],Math.min(1,(ic-8)/60));
     else if(h>34)col=mix(col,[240,240,240],Math.min(1,(h-34)/8));
     return [col[0]*sh,col[1]*sh,col[2]*sh]}
 
