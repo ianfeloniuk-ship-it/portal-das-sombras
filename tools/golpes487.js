@@ -13,8 +13,11 @@ API.basic=ci=>API.on&&([0,1,2].includes(ci)||API.providers.some(p=>p.basic(ci)))
 API.projectile=p=>API.on&&!!p?.fx487;
 API.legacy=function(fn,sk=activeSkill){const prev=API.legacySkill;API.legacySkill=sk;API.legacyDepth++;try{return fn()}finally{API.legacyDepth--;API.legacySkill=prev}};
 API.bindLegacy=fn=>{if(!API.legacyDepth)return fn;const sk=API.legacySkill;return function(){const a=arguments,t=this;return API.legacy(()=>fn.apply(t,a),sk)}};
+const legacyRoots504=new Set();
+function pruneLegacy504(mask=false){for(const o of legacyRoots504){if(!o.parent||(o.layers.mask>>>0)!==0x80000000){legacyRoots504.delete(o);continue}if(mask)o.traverse(c=>c.layers.set(31))}}
+API.legacyCount504=()=>legacyRoots504.size;
 const sceneAdd=scene.add;
-scene.add=function(...objs){if(API.legacyDepth)for(const o of objs){o.userData.gate487=API.castState?API.castState(API.legacySkill):null;o.traverse(c=>c.layers.set(31));}else if(currentCtx){for(const o of objs)addFX(o);return this}return sceneAdd.apply(this,objs)};
+scene.add=function(...objs){if(API.legacyDepth)for(const o of objs){if(o.userData.terrainRoot245){o.traverse(c=>c.layers.set(0));continue}legacyRoots504.add(o);o.userData.gate487=API.castState?API.castState(API.legacySkill):null;o.traverse(c=>c.layers.set(31));}else if(currentCtx){for(const o of objs)addFX(o);return this}return sceneAdd.apply(this,objs)};
 function addFX(o){o.userData.ctx487=currentCtx;o.traverse(c=>{if(c.material)for(const m of [].concat(c.material)){m.toneMapped=false;m.fog=false}});o.userData.terrainAbsolute245=true;o.userData.golpes487=true;sceneAdd.call(scene,o)}
 const ground=(x,z)=>typeof terrH==='function'?terrH(x,z):0;
 const pos=(x,z,y=0)=>new T.Vector3(x,ground(x,z)+y,z);
@@ -302,7 +305,7 @@ const RECIPES=[
 
 
 API.referenceRecipes=RECIPES;
-API.fx={random:()=>rand(),T,UP,GEOS,BLADE,PAL,crystalMat,ribMat,orb,bolt,shot,slash,trail,stripGeo,sparks,embers,smoke,chunk,bits,crystal,ringFlat,ringFace,ringDir,rune,crack,flash,knock,sprite,fade,glowTex,starTex,softTex,spawn,at,kill,add:addFX,pos:gp,ground,context,actor,inContext,faceCam};
+API.fx={hexShield,random:()=>rand(),T,UP,GEOS,BLADE,PAL,crystalMat,ribMat,orb,bolt,shot,slash,trail,stripGeo,sparks,embers,smoke,chunk,bits,crystal,ringFlat,ringFace,ringDir,rune,crack,flash,knock,sprite,fade,glowTex,starTex,softTex,spawn,at,kill,add:addFX,pos:gp,ground,context,actor,inContext,faceCam};
 API.releaseCast=impactCast;
 API.releaseTarget=(c,e)=>{if(!c||c.cancelled)return;c.ready=true;const keep=[];for(const h of c.hits){if(h[0]===e)releaseHit({e:h[0],d:h[1],sk:h[2],region:c.region});else keep.push(h)}c.hits=keep;};
 
@@ -320,7 +323,7 @@ API.pulseTimes=sk=>API.on?(API.provider(sk)?.pulseTimes?.(sk)||(API.handles(sk)&
 const originalPlay=VFX302.play;
 // The entire old presentation is collision-only. The recipes above own the visible presentation.
 VFX302.play=function(sk){if(API.handles(sk))return API.legacy(()=>originalPlay.apply(this,arguments),sk);return originalPlay.apply(this,arguments)};
-const oldFluid=castFluid139;castFluid139=function(sk){return API.handles(sk)?API.legacy(()=>oldFluid.apply(this,arguments),sk):oldFluid.apply(this,arguments)};
+const oldFluid=castFluid139;castFluid139=function(sk){if(!API.handles(sk))return oldFluid.apply(this,arguments);const f=floater;floater=function(x,z,txt,...a){if(txt==='RESSONÂNCIA TRIPLA')return;return f(x,z,txt,...a)};try{return API.legacy(()=>oldFluid.apply(this,arguments),sk)}finally{floater=f}};
 const kitHit0=kitHit111;
 kitHit111=function(e,d,sk){const old=activeSkill;activeSkill=API.handles(sk)?sk:null;try{if(API.handles(sk)&&activeCast&&!activeCast.ready&&!activeCast.releasing){activeCast.hits.push([e,d,{...sk}]);return d}const hp=e?.hp,r=kitHit0.apply(this,arguments);if(API.handles(sk)&&e?.hp<hp)API.provider(sk)?.hit?.(sk,e);return r}finally{activeSkill=old}};
 let activeCast=null;const hitEvents=[];
@@ -339,6 +342,7 @@ API.replacesHit=o=>{
 };
 const H=hurtEnemy;
 hurtEnemy=function(e,amt,sx,sz,o){const hp=e&&e.hp,owns=API.replacesHit(o),hs=window.hitstop,sh=window.shake;let r;try{if(owns){window.hitstop=()=>{};window.shake=()=>{}}r=H.apply(this,arguments)}finally{window.hitstop=hs;window.shake=sh}if(API.replacesHit(o)&&!o.skillHit&&[0,1,2].includes(o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls)&&e&&e.hp<hp){const ci=o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls,c=COLORS[ci],ctx=context(ci,e);inContext(ctx,()=>{if(ci===1){const p=tgt();sparks(p,10,0xff3050,3.5,7,.14);sparks(p,6,c[1],4);slash(p.clone(),S.yaw,{col:c,r:.45,w:.3,arc:2,tilt:.8,dur:.08,fade:.12});knock(F,.2)}else{meleeHit(c,PALS[ci],!!o.third);if(ci===2&&o.third){ringFlat(F.position,c[1],.5,4,.4);for(let k=0;k<8;k++)chunk('steel',F.position,1.4)}}});API.stats.hits++}return r};
+const originalImpact504=projectileImpact253;projectileImpact253=function(p){if(!API.replacesHit(p)&&!API.projectile(p))return originalImpact504.apply(this,arguments);const args=arguments,self=this;return API.legacy(()=>originalImpact504.apply(self,args),p?.fx487?.sk||null)};
 const oldSlash=fxSlash;
 fxSlash=function(x,z,a,c,r,big,ci,footY){if(!API.on||![0,1,2].includes(ci))return oldSlash.apply(this,arguments);const ctx=context(ci,null,{x,z}),i=big?2:Math.max(0,(player.combo||1)-1)%3;ctx.hero.position=gp(x,z,footY||0);ctx.S={dir:new T.Vector3(Math.sin(a),0,Math.cos(a)),yaw:a};inContext(ctx,()=>{lunge(ci===2?.3:.35,S.dir,ci===2?.22:.18);slash(hero.position.clone().setY(ci===2?1.2:big?1.1:.95),S.yaw,{col:COLORS[ci],r:ci===2?1.25:1.35,w:ci===2?(big?.85:.65):(big?.7:.5),arc:ci===2?2:2.5,tilt:ci===2?1.5:i===0?.35:i===1?-.4:1.45,rev:i===1,dur:ci===2?.17:.15})});API.stats.basics++};
 // Replace each real dagger's drawing, never its physics or its collision mesh/radius.
@@ -346,7 +350,7 @@ const tracked=new Map();
 function projectiles(){for(const p of projs){if(p.team!=='player'||p.skillHit||![0,1,2].includes(p.basicClass??profile.cls)||p.ptype!=='tdagger'||tracked.has(p))continue;const ci=p.basicClass??profile.cls,m=new T.Mesh(BLADE,crystalMat(PALS[ci]));m.scale.setScalar(.95);addFX(m);p.mesh.layers.set(31);p.mesh.traverse(o=>o.layers.set(31));tracked.set(p,m);trail(()=>projs.includes(p)?new T.Vector3(p.x,p.y,p.z):null,.18,COLORS[ci]);spawn(m,(o,dt,t)=>{if(!projs.includes(p)||t>3){tracked.delete(p);kill(o);return false}o.position.set(p.x,p.y,p.z);o.quaternion.setFromUnitVectors(UP,new T.Vector3(p.vx,p.vy||0,p.vz).normalize());o.material.uniforms.uTime.value=time;return true})}}
 function clear(){for(const p of API.providers)p.clear?.();if(window.Anim303?.A?.[Anim303.active()]?.mage488)Anim303.stop();if(/^(giro|cortes|escudo)487$/.test(window.Anim303?.active?.()||''))Anim303.stop();for(const [p,m]of tracked){if(p.mesh)p.mesh.traverse(o=>o.layers.set(0))}for(const l of live)kill(l.obj);live=[];activeEntries.clear();tracked.clear();poses.clear();for(const c of statesById.values()){c.cancelled=true;c.ready=true;c.hits.length=0}castStates=new WeakMap();statesById=new Map();hitEvents.length=0;rand=rng((profile?.cls||0)+1);shakeT=0;flashV=bloomKick=0;API.errors.length=0}
 API.clear=clear;Object.defineProperty(API,'live',{get:()=>live.length});
-function step(dt){if(lastRegion!==L||trackedClass!==profile?.cls){clear();lastRegion=L;trackedClass=profile?.cls}if(!API.on){if(live.length)clear();return}time+=dt;for(const p of API.providers)p.update?.(dt);for(let i=hitEvents.length-1;i>=0;i--){const q=hitEvents[i];q.left-=dt;if(q.left<=1e-8){hitEvents.splice(i,1);releaseHit(q)}}projectiles();const batch=live.slice().reverse();for(const l of batch){if(!activeEntries.has(l))continue;l.t+=dt;try{if(l.obj?.userData.dead487||l.t>l.maxAge||inContext(l.ctx,()=>l.update(l.obj,dt,l.t))===false){kill(l.obj);activeEntries.delete(l)}}catch(e){API.errors.push(String(e));console.error('golpes487',e);kill(l.obj);activeEntries.delete(l)}}live=live.filter(l=>activeEntries.has(l));for(const [e,p]of poses)if((!e?.m?.root)||(p.offset.lengthSq()<1e-12&&Math.abs(p.rot.x)+Math.abs(p.rot.z)<1e-12))poses.delete(e);shakeT=Math.max(0,shakeT-dt);flashV=Math.max(0,flashV-dt*6);bloomKick=Math.max(0,bloomKick-dt*5)}
+function step(dt){pruneLegacy504();if(lastRegion!==L||trackedClass!==profile?.cls){clear();lastRegion=L;trackedClass=profile?.cls}if(!API.on){if(live.length)clear();return}time+=dt;for(const p of API.providers)p.update?.(dt);for(let i=hitEvents.length-1;i>=0;i--){const q=hitEvents[i];q.left-=dt;if(q.left<=1e-8){hitEvents.splice(i,1);releaseHit(q)}}projectiles();const batch=live.slice().reverse();for(const l of batch){if(!activeEntries.has(l))continue;l.t+=dt;try{if(l.obj?.userData.dead487||l.t>l.maxAge||inContext(l.ctx,()=>l.update(l.obj,dt,l.t))===false){kill(l.obj);activeEntries.delete(l)}}catch(e){API.errors.push(String(e));console.error('golpes487',e);kill(l.obj);activeEntries.delete(l)}}live=live.filter(l=>activeEntries.has(l));for(const [e,p]of poses)if((!e?.m?.root)||(p.offset.lengthSq()<1e-12&&Math.abs(p.rot.x)+Math.abs(p.rot.z)<1e-12))poses.delete(e);shakeT=Math.max(0,shakeT-dt);flashV=Math.max(0,flashV-dt*6);bloomKick=Math.max(0,bloomKick-dt*5)}
 API.update=step;
 const cam0=camUpdate;camUpdate=function(){step(typeof ADT==='number'?ADT:0);return cam0.apply(this,arguments)};
 // All legacy asynchronous callbacks created inside a migrated recipe retain the collision-only layer.
@@ -355,6 +359,7 @@ let composer=null,bloom=null,lastW=0,lastH=0,lastRatio=0,quad=null;
 const decalPoint=new T.Vector3();
 function conformGround(){for(const l of live){const m=l.obj;if(!m?.userData.groundDecal487||!m.geometry)continue;m.updateMatrixWorld(true);const a=m.geometry.attributes.position;for(let i=0;i<a.count;i++){decalPoint.set(a.getX(i),a.getY(i),0).applyMatrix4(m.matrixWorld);a.setZ(i,(ground(decalPoint.x,decalPoint.z)+m.userData.groundDecal487-m.position.y)/Math.max(.0001,m.scale.z));}a.needsUpdate=true;}}
 const draw0=function(){
+ pruneLegacy504(true);
  conformGround();
  syncPools();renderer.render(scene,camera);
  if(!API.on||!API.bloomOn||lite()||!T.EffectComposer||!live.some(l=>l.obj&&l.obj.parent&&l.obj.visible))return;
