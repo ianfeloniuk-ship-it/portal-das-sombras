@@ -9,6 +9,7 @@
 
   function biomeColor(x,z){let b='campos';try{b=biomeAt(x,z)}catch(_){}return BIO[b]||BIO.campos}
   function waterKind(x,z){ // 0 seco/terra, 1 água, 2 gelo
+    try{if(window.TER245&&TER245.SEA439&&TER245.SEA439.d(x,z)>0)return 1}catch(_){}/* v501: mar do mapa finito */
     try{const rv=riverNear239(x,z),w=riverWidth351(rv.b,z);if(rv.d<w/2){const s=snowB(x,z);if(s>.717)return 0;return s<.29?2:1}
       const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));if(lk&&Math.hypot(x-lk.x,z-lk.z)<lk.r)return ['neve','cristal'].includes(biomeAt(lk.x,lk.z))?2:1}catch(_){}
     return 0}
@@ -21,6 +22,7 @@
     const ox=cx-(S/2+pad)/k,oz=cz-(S/2+pad)/k,m=step/k;
     for(let j=0;j<W;j++)for(let i=0;i<W;i++){const x=ox+(i+.5)*m,z=oz+(j+.5)*m,o=(j*W+i)*4;let col;
       const wk=waterKind(x,z);
+      if(Math.abs(x)>5000||Math.abs(z)>5000){col=[24,18,12]}else /* v501: fora do mapa finito */
       if(wk){col=wk===2?ICE:WATER}else{
         const h=terrH(x,z),hx=terrH(x+m,z+m),sh=Math.max(.55,Math.min(1.35,1+(h-hx)*.16/Math.max(.6,m)));
         col=biomeColor(x,z);const mt=window.TER245&&TER245.mt383?TER245.mt383(x,z):0;
@@ -92,5 +94,5 @@
     try{d0(ctx,S,full)}finally{ctx.fillRect=fr;ctx.clearRect=cr}
     try{icons(ctx,S,full);frame(ctx,S,full);window.Campaign327?.map(ctx,S,full)}catch(_){}
   };
-  window.Map393={cache,raster};
+  window.Map393={cache,raster,waterKind,biomeColor,frame,tent,tower,BIO,WATER,ICE,ROAD};
 })();

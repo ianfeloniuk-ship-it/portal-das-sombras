@@ -1,3 +1,11 @@
+## v501 (21/10/2026) — Mapa-múndi finito e minimapa com mar
+- Pedido (diretor): o mapa grande mostra o quadrado inteiro de 10 km, não mais 560 m em volta do jogador.
+- `tools/mapa501.js` (novo, carregado depois de `mapa500.js`): em mundo aberto, `drawMap(…, full)` desenha o mundo todo: mar (azul, mais fundo longe da costa) a oeste/leste/sul, praia, cordilheira de gelo ao norte, cor do bioma (`biomeAt`) e sombra de relevo numa grade de 400×400 guardada numa tela (versão 100×100 na hora, a detalhada em fatias de 20 linhas depois; sem tarefa longa), rios/lagos, 120 trechos de estrada, 25 cidades (nome), as 6 Capitais com estrela e nome em destaque, postos avançados, acampamentos (pontos), portais, chefes lendários, tesouro, alvo da campanha, jogador com seta e cone de visão. Dentro de masmorra/Outro Mundo/especial o mapa antigo continua.
+- `tools/map393.js`: `waterKind` reconhece o mar (`SEA439.d>0`); pixels fora de ±5000 ficam escuros (minimapa e mapa); exporta `Map393.{waterKind,biomeColor,frame,tent,tower,…}`. O minimapa segue local (~90 m), agora com mar na borda.
+- Sem neblina de guerra: o mundo aberto não tem sistema de áreas exploradas (só as masmorras).
+- Textos: nenhum texto de interface fala em mundo infinito (só o Outro Mundo da Fenda e a Torre da Ascensão, que são infinitos de verdade; comentário/arquivo `250-mundo-infinito.js` é só nome interno).
+- Teste: navegador local, mapa aberto com tudo no lugar, sem erros; desenho em cache 0,8 ms, primeira abertura ~90 ms, grade detalhada em ~0,75 s sem tarefa longa; 20 aberturas/fechamentos 2,6 ms cada.
+
 ## v500 (21/10/2026) — Mapa finito de 10 km × 10 km: bordas, biomas e as 5 Capitais
 - Pedido de Ian: montar o mapa finito (x e z de −5000 a +5000) com Aster no centro e as 5 Capitais em volta.
 - `tools/mapa500.js`: só existem as regiões −2..2 (25 cidades, nomes sem repetir em ordem fixa). Capitais fixas: Ymiria (0, −3400) na neve, Zahar (3400, 0) no deserto, Thalor (−3850, 0) na costa oeste, Urdan (0, 3400) com pântano ao norte e vulcão ao sul, Verden (2300, 2300) na floresta. Aster fica em campos temperados. Os biomas são forçados por `biomeSample317`, então o chão, a vegetação e os efeitos mudam juntos. Cidades comuns ficam dentro de 3,7 km. Estradas para fora do mapa somem. Ninguém passa de ±4920 m (toast "Cordilheira de gelo" ou "Mar sem fim").
