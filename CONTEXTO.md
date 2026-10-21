@@ -1,3 +1,9 @@
+## v528 (21/10/2026) — Garganta com pinheiros nas cristas e rocha facetada
+- Pedido de Ian: «faz» para os pendentes da v522 (rocha com padrão de camuflagem; pinheiros gigantes, névoa e tochas não apareciam; pontes/ruínas; cidades maiores).
+- `tools/desfiladeiro510.js`: as peças seguem a curva da garganta (centro `gc510`, igual a `terrain245.js` e `mundo513.js`); pinheiros de 18 a 24 m nas cristas até z 520 (antes só até 236 e fora da curva); névoa rasteira até z 520; fogo das tochas na altura do chão (antes y fixo 1,8, enterrado em morro); rochedos pequenos escuros removidos (os paredões são relevo).
+- `tools/environment128.js` + `src/core/200-bloco-environment128.js`: rocha com facetas angulares (distorção pequena e rápida) no lugar do padrão ondulado.
+- Teste: Edge sem tela; portão, trecho a 150–230 m e vista alta olhados: pinheiros e rocha aparecem. Tochas e névoa continuam sem aparecer nas capturas (não confirmados). Pontes: a v513 já adaptou o cruzamento (não visto). Cidades maiores: não feito (mexe em muralha, colisão, povo e lojas).
+
 ## v527 (21/10/2026) — Mundo vivo, parte 3: crianças, brigas e notícias que mudam
 - Pedido de Ian («faz ai», depois da lista de pendências da v523).
 - `tools/vida527.js` (novo): 2 crianças por cidade de dia, correm entre pontos da praça e falam frases soltas; à noite vão dormir (somem). Brigas: no máximo uma a cada 150 s, de dia, a menos de 60 m do jogador, dois moradores discutem no meio da rua por 25 s; depois de 10 s o guarda mais próximo vai até lá e separa.

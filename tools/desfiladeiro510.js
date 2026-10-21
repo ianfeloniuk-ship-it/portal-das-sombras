@@ -194,6 +194,12 @@
     { x:  13, z: 180, h: 12.5, ry: 2.2, rz: -0.04 }
   ];
 
+  /* v523: a garganta agora vai até z 520; mais pinheiros nas cristas, lados alternados, alturas e giros determinísticos */
+  for (let z = 250, i = 0; z <= 520; z += 17, i++) {
+    const r1 = Math.abs(Math.sin(z * 12.9898 + 4.1)) , r2 = Math.abs(Math.sin(z * 78.233 + 1.7)), side = i % 2 ? 1 : -1;
+    PINES.push({ x: side * (22 + r1 * 5), z, h: 18 + r2 * 6.5, ry: r1 * 6.28, rz: side * (-.04 - r2 * .06) });
+  }
+
   const WALLS = [
     // Muro de pedra seca rústico (rebaixado a 1.25m) segurando o barranco
     { x: -7.2, z: 98,  h: 1.3, sx: 4.8, ry: 0.08 },
@@ -212,6 +218,11 @@
     { x: -5.2, y: 1.8, z: 195.0, size: 2.6 }
   ];
 
+  /* v523: a garganta serpenteia (centro gc510, igual a terrain245.js e mundo513.js); as peças seguem o centro */
+  const ssm = (a, b, v) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const gc510 = z => ssm(100, 260, z) * (130 * Math.sin(z * .005712) + 52 * Math.sin(z * .013369) + 18 * Math.sin(z * .033069));
+  const follow = arr => arr.map(o => Object.assign({}, o, { x: o.x + gc510(o.z) }));
+
   /* Montagem cenográfica completa */
   API.build = function (c, parentGroup, addCol) {
     if (API.mounted && API.grp && API.grp.parent) return API.grp;
@@ -224,6 +235,7 @@
     parent.add(g);
     API.grp = g;
 
+    const PI = follow(PINES), WA = follow(WALLS), TO = follow(TORCHES);
     Promise.all([
       Promise.resolve(null), // slot legado do elmo removido; usa mMoss abaixo
       glb('tripo-rocha-musgo154'),
@@ -240,7 +252,7 @@
       };
 
       // 1. Falésias e paredões de rocha lascada
-      CLIFFS.forEach(cf => {
+      [].forEach(cf => { /* v523: os paredões agora são relevo (terrain245.js) */
         const tpl = cf.t === 'mossrock' ? (mMoss || mBoulder) : (mBoulder || mMoss);
         if (!tpl) return;
         const y = gy(cf.x, cf.z) - 0.4;
@@ -251,7 +263,7 @@
 
       // 2. Coníferas nórdicas majestosas
       if (mFir) {
-        PINES.forEach(pn => {
+        PI.forEach(pn => {
           const y = gy(pn.x, pn.z) - 0.3;
           const tree = place(mFir, { x: pn.x, y, z: pn.z, h: pn.h, ry: pn.ry, rz: pn.rz });
           g.add(tree);
@@ -261,7 +273,7 @@
 
       // 3. Muros de pedra seca rústicos nas margens
       if (mWall) {
-        WALLS.forEach(wl => {
+        WA.forEach(wl => {
           const y = gy(wl.x, wl.z) - 0.15;
           const wMesh = place(mWall, { x: wl.x, y, z: wl.z, h: wl.h, sx: wl.sx, ry: wl.ry, sy: 0.45 });
           g.add(wMesh);
@@ -279,12 +291,12 @@
       }
 
       // 5. Postes de tocha com fogo suave
-      const torchMesh = torchFlame(TORCHES);
+      const torchMesh = torchFlame(TO.map(t => ({ x: t.x, y: gy(t.x, t.z) + 1.8, z: t.z, size: t.size })));
       if (torchMesh) g.add(torchMesh);
 
       // Adicionar postes de madeira rústicos sob as tochas
       if (typeof ENV !== 'undefined' && ENV.m && ENV.m.post_skull && typeof envMesh === 'function') {
-        TORCHES.forEach(tc => {
+        TO.forEach(tc => {
           const py = gy(tc.x, tc.z);
           const post = envMesh('post_skull');
           post.scale.setScalar(1.2);
@@ -295,10 +307,10 @@
 
       // 6. Neblina rasteira do vale (Ground Mist)
       const mistPoints = [];
-      for (let z = 92; z <= 245; z += 12) {
+      for (let z = 92; z <= 520; z += 12) {
         for (let x = -8; x <= 8; x += 8) {
           const my = gy(x, z) + 0.6;
-          mistPoints.push({ x: x + (Math.random() - .5) * 4, y: my, z: z + (Math.random() - .5) * 4, size: 9.5 + Math.random() * 4 });
+          mistPoints.push({ x: x + gc510(z) + (Math.random() - .5) * 4, y: my, z: z + (Math.random() - .5) * 4, size: 9.5 + Math.random() * 4 });
         }
       }
       const mist = groundMist(mistPoints);

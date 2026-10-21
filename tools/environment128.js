@@ -60,7 +60,7 @@ const Environment128=(()=>{
     float rut=smoothstep(.55,.95,noise128(vec2(tp.x*.8+tp.y*.8,dmin*2.4)));
     diffuseColor.rgb=mix(diffuseColor.rgb,dirt*(1.-rut*.18),trail*.94);
     mat3 Rt=transpose(mat3(viewMatrix));vec3 wn=normalize(Rt*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));float steep=smoothstep(.90,.66,abs(wn.y));
-    vec3 pw=cameraPosition-Rt*vViewPosition;float lay=noise128(vec2((pw.x+pw.z)*.11,pw.y*.75));vec2 cu=vec2((pw.x+pw.z)*.38,pw.y*.8);cu+=(vec2(noise128(pw.xz*.31+pw.y*.4),noise128(pw.zx*.29+pw.y*.5))-.5)*4.;cu.x+=floor(cu.y)*.43;vec2 ci=floor(cu),cf=fract(cu);float blk=hash128(ci);float edgeL=min(min(cf.x,1.-cf.x),min(cf.y,1.-cf.y));float crackL=1.-smoothstep(.02,.11,edgeL+noise128(pw.xz*3.+pw.y*3.)*.05);
+    vec3 pw=cameraPosition-Rt*vViewPosition;float lay=noise128(vec2((pw.x+pw.z)*.11,pw.y*.75));vec2 cu=vec2((pw.x+pw.z)*.38,pw.y*.8);cu+=(vec2(noise128(pw.xz*.8+pw.y*.9),noise128(pw.zx*.77+pw.y*1.1))-.5)*1.1;cu.x+=floor(cu.y)*.43;vec2 ci=floor(cu),cf=fract(cu);float blk=hash128(ci);float edgeL=min(min(cf.x,1.-cf.x),min(cf.y,1.-cf.y));float crackL=1.-smoothstep(.02,.11,edgeL+noise128(pw.xz*3.+pw.y*3.)*.05);
     vec3 rock=mix(vec3(.17,.16,.15),vec3(.58,.56,.52),blk*.75+lay*.25)*(1.-crackL*.45)*(.85+noise128(pw.xz*7.+pw.y*7.)*.3);
     rock=mix(rock,vec3(.30,.38,.20),smoothstep(.5,.92,abs(wn.y))*.3*noise128(pw.xz*.6));
     diffuseColor.rgb=mix(diffuseColor.rgb,rock,steep*(1.-trail));}
