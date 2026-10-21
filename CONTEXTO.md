@@ -1,3 +1,8 @@
+## v521 (21/10/2026) — Diálogo com escolhas nos NPCs de cidade e vilas
+- Pedido de Ian: levar o diálogo com escolhas para os NPCs de cidade e vilas.
+- `tools/dialogo520.js`: vendedores e caçadores (kind `vendor` e `hunter`, inclusive Povo482) ganham menu ao apertar F: ver mercadorias / ouvir o NPC (abre o que já existia), perguntar da cidade, elogiar (afeto de 0 a 5), pedir um agrado (só com afeto 3: 100 de ouro uma vez, depois 25) e provocar (-10 de reputação; ele recusa loja e conversa até você pedir desculpas por 100 de ouro). Memória em `profile.dialogo520["cidade:Nome"]`. O módulo troca o `use` dos NPCs a cada 1,5 s; o que o NPC já fazia (loja, fala de caçador, passos da campanha) continua pela primeira opção.
+- Teste: só simulação em Node (vendedor: elogio, agrado cedo, provocar, recusa, desculpas, loja abre). Não testado no navegador. Pendente: falas próprias por NPC; consequência no mundo.
+
 ## v520 (21/10/2026) — Diálogo com escolhas e consequências (como Skyrim)
 - Pedido de Ian (áudio): as respostas do diálogo com NPCs têm que levar a coisas, e o jogo muda conforme o que você faz.
 - `tools/dialogo520.js` (novo): árvore de diálogo para todos os NPCs de encontro. Respostas: aceitar (pelo ouro ou de graça por honra, com o dobro de reputação e confiança), perguntar o que acontece (um lacaio a menos e 10% a mais de XP), pedir mais pagamento (+25%, só com 200 de reputação da Ordem), ameaçar (ele foge e deixa 10% do ouro, -20 de reputação, e passa a recusar falar até você pedir desculpas por 200 de ouro) e seguir viagem (ele lembra e fala «você voltou»). Depois de concluir a missão, agradece uma vez com ouro. A memória fica em `profile.dialogo520[tipo]`.

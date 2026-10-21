@@ -147,10 +147,77 @@
 
   function open(def, npc) {
     mem(def.type).meets++;
-    ctx = { def, npc, tree: build(def), node: null };
+    ctx = { def, npc, builder: build, tree: build(def), node: null };
     ctx.node = start(def);
     render();
   }
+
+  /* v521: NPCs de cidade e vilas (vendedores e caçadores). Memória por NPC: afeto (0 a 5) e ofensa. */
+  function tmem(n) {
+    const m = mem('cidade:' + (n.name || n.short));
+    if (m.bond == null) m.bond = 0;
+    return m;
+  }
+  function buildTown(n, orig) {
+    const m = tmem(n), f = m.flags, nome = n.short || n.name, vend = n.kind === 'vendor';
+    const N = {};
+    const news = () => { try { return (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Anda tudo calmo por aqui.'; } catch (_) { return 'Anda tudo calmo por aqui.'; } };
+    const bondTxt = () => m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : 'Olá, viajante. Em que posso ajudar?';
+    N.raiz = {
+      t: f.ofendido ? 'Depois do que você me disse, não tenho nada a tratar com você.' : bondTxt(),
+      o: f.ofendido ? [
+        { l: 'Pedir desculpas e pagar 100 de ouro', if: () => gold() >= 100, fn: () => { addGold(-100); f.ofendido = 0; m.bond = Math.max(0, m.bond - 1); save(); say('<b>' + nome + ':</b> "Está bem. Vou esquecer isso."'); return 'raiz'; } },
+        { l: 'Ir embora', fn: () => 'fim' }
+      ] : [
+        { l: vend ? 'Ver as mercadorias' : 'Ouvir o que ' + nome + ' tem a dizer', fn: () => { ctx = null; if (typeof closeModal === 'function') closeModal(); try { orig(); } catch (_) {} return 'fim'; } },
+        { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
+        { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
+        { l: 'Pedir um agrado', go: 'agrado' },
+        { l: 'Provocar: "Você não vale nada"', go: 'provoca' },
+        { l: 'Sair', fn: () => 'fim' }
+      ]
+    };
+    N.noticias = {
+      t: news(),
+      o: [{ l: 'Obrigado pela conversa', fn: () => { if (!f.noticias) { f.noticias = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
+    };
+    N.elogio = {
+      t: f.elogiou ? 'Você já disse isso. Mas continuo gostando de ouvir.' : 'Fico feliz que tenha notado! Poucos dizem isso.',
+      o: [{ l: 'Voltar', fn: () => { if (!f.elogiou) { f.elogiou = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
+    };
+    N.agrado = m.bond >= 3
+      ? { t: 'Como você tem sido bom comigo, aceite isto. Não conte a ninguém.',
+        o: [{ l: 'Aceitar (' + (f.agrado ? 'já recebeu antes, vale 25' : '100') + ' de ouro)', fn: () => { addGold(f.agrado ? 25 : 100); f.agrado = 1; m.bond = Math.max(0, m.bond - 1); save(); return 'raiz'; } }, { l: 'Recusar com educação', go: 'raiz' }] }
+      : { t: 'Um agrado? A gente mal se conhece. Volte quando eu souber mais de você (afeto 3 de 5).',
+        o: [{ l: 'Entendi', go: 'raiz' }] };
+    N.provoca = {
+      t: 'O que foi que você disse?!',
+      o: [
+        { l: 'Repetir e ir embora (-10 de reputação)', fn: () => { f.ofendido = 1; m.bond = 0; subRep(10); save(); say('<b>' + nome + '</b> vira as costas. Ele não vai tratar com você tão cedo.'); return 'fim'; } },
+        { l: 'Rir: "Brincadeira!"', go: 'raiz' }
+      ]
+    };
+    return N;
+  }
+  function town(n, orig) {
+    const m = tmem(n); m.meets++;
+    const def = { name: n.name || n.short, title: n.short || n.name, type: 'cidade:' + (n.name || n.short) };
+    ctx = { def, npc: n, builder: () => buildTown(n, orig), tree: buildTown(n, orig), node: 'raiz' };
+    render();
+  }
+  function wrapTownNpcs() {
+    try {
+      if (typeof npcs === 'undefined' || !Array.isArray(npcs)) return;
+      for (const n of npcs) {
+        if (n.dlg520 || (n.kind !== 'vendor' && n.kind !== 'hunter') || typeof n.use !== 'function') continue;
+        n.dlg520 = 1;
+        const orig = n.use;
+        n.use = () => town(n, orig);
+        if (typeof L !== 'undefined' && L && Array.isArray(L.inter)) for (const it of L.inter) if (it.use === orig) it.use = n.use;
+      }
+    } catch (_) {}
+  }
+  setInterval(wrapTownNpcs, 1500);
 
   function pick(i) {
     if (!ctx) return;
@@ -159,10 +226,10 @@
     let next = o.go || (o.fn ? o.fn() : 'fim');
     if (!next || next === 'fim') { ctx = null; if (typeof closeModal === 'function') closeModal(); return; }
     // nós que dependem do estado atual (barganha) são refeitos ao entrar
-    ctx.tree = build(ctx.def);
+    ctx.tree = ctx.builder(ctx.def);
     ctx.node = next;
     render();
   }
 
-  global.Dialogo520 = { open, pick };
+  global.Dialogo520 = { open, pick, town };
 })(typeof window !== 'undefined' ? window : globalThis);
