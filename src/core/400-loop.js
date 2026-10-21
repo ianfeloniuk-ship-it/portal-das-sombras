@@ -68,7 +68,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const ow460=L.mode==='dungeon'&&!!L.ow460;if(T.OW)T.OW.value.x=ow460?1:0;const on=(L.mode==='world'||ow460)&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player||ow460)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
  if(run&&run.surv437&&run.surv437.leveled&&run.surv437.leveled.length)run.surv437.leveled=[];
- for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65;D.push([c.x,c.z,cr+20,0]);}
+ for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65,cap501=c.capital&&c.name!=='Aster'&&window.Capitais501;D.push([c.x,c.z,cap501?175:cr+20,0]);}/* v504: Capitais com muralha de 150 m ficam planas até 175 m */
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
  const sd=r=>Math.hypot(P.x-clamp(P.x,Math.min(r[0],r[2]),Math.max(r[0],r[2])),P.z-clamp(P.z,Math.min(r[1],r[3]),Math.max(r[1],r[3]))),R=roadSegs(P.x,P.z,1).sort((a,b)=>sd(a)-sd(b));T.R.value.forEach((v,i)=>{const r=R[i];if(r)v.set(r[0],r[1],r[2],r[3]);else v.set(1e7,1e7,1e7,1e7)})}

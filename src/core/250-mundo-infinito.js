@@ -62,7 +62,7 @@ function propCull415(){const P=player||{x:0,z:0};for(const ch of chunks.values()
  for(const m of ch.props415){if(m.userData.lite180||m.userData.isLite423){m.userData.thin423=lod===2?1:lod===1?.5:.2;continue}/* v424: árvore/construção com versão leve: o CULL180 separa por distância */const full=m.userData.count415;m.count=lod===2?full:lod===1?Math.ceil(full*.5):Math.ceil(full*.2)}/* v418: só afina a quantidade; quem liga/desliga (perto/leve/longe) é o CULL180 */}}
 function updChunks(force){
   const P=player||{x:0,z:0},pcx=Math.round(P.x/CH),pcz=Math.round(P.z/CH);let n=0;const want=[];
-  for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)want.push([pcx+i,pcz+j,i*i+j*j]);want.sort((a,b)=>a[2]-b[2]);
+  for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)want.push([pcx+i,pcz+j,i*i+j*j]);try{window.Capitais501&&Capitais501.want(P,want)}catch(_){}/* v504: chunk central das Capitais fica carregado até 430 m (muralha e marco aparecem de longe) */want.sort((a,b)=>a[2]-b[2]);
   for(const [x,z] of want){if(chunks.has(x+','+z))continue;loadChunk(x,z);if(!force&&++n>=(ENV.ok?1:2))break}
-  for(const ch of[...chunks.values()])if(Math.abs(ch.cx-pcx)>3||Math.abs(ch.cz-pcz)>3)unloadChunk(ch);try{propCull415()}catch(_){}
+  for(const ch of[...chunks.values()])if((Math.abs(ch.cx-pcx)>3||Math.abs(ch.cz-pcz)>3)&&!(window.Capitais501&&Capitais501.keep(ch,P)))unloadChunk(ch);try{propCull415()}catch(_){}
 }
