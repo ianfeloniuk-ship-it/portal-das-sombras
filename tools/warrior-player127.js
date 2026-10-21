@@ -232,8 +232,12 @@
   };
   const v1=new T.Vector3(),v2=new T.Vector3(),q4=new T.Quaternion(),m4=new T.Matrix4();
   function modelQ(o,inv,out){return out.copy(inv).multiply(o.getWorldQuaternion(q4))}
-  function setup155(m){
-    const rig=T.SkeletonUtils.clone(anim155.scene);rig.traverse(o=>{if(o.isMesh)o.visible=false});rig.updateMatrixWorld(true);
+  /* v486 Povo482: bancos extras de clipes (mesmo esqueleto Mixamo), cada um com seu próprio rig de referência, mesmo retarget por delta da pose T. */
+  const banks486={};API.banks486=banks486;
+  API.loadBank486=function(id,url){if(banks486[id])return banks486[id].p;const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);const B=banks486[id]={ok:false};
+    B.p=new Promise(res=>L.load(url,g=>{const clips={};for(const a of g.animations)clips[a.name]=a;B.src={scene:g.scene,clips};B.names=Object.keys(clips);B.ok=true;res(true)},undefined,e=>{console.warn('Banco de animação '+id+' não carregou',e);res(false)}));return B.p};
+  function setup155(m,src,key){src=src||anim155;key=key||'a155';
+    const rig=T.SkeletonUtils.clone(src.scene);rig.traverse(o=>{if(o.isMesh)o.visible=false});rig.updateMatrixWorld(true);
     const kb={};rig.traverse(o=>{const mx=o.name.replace(/^mixamorig:?/,'');const g=KAY155[o.name]||(mx!==o.name&&MIXG155[mx]);if(g)kb[g]=o});
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert(),minv=new T.Matrix4().copy(m.model.matrixWorld).invert();
     // Pose de repouso do Viajante (antes de qualquer animação): usa a guardada na criação.
@@ -241,8 +245,8 @@
       pairs.push({b:o,k,restB:o.userData.rest155M.clone(),restK:k.getWorldQuaternion(new T.Quaternion())})});
     const hips=pairs.find(p=>p.b.name==='hips');
     const hipH=hips.b.userData.rest155P.y,kayH=hips.k.getWorldPosition(new T.Vector3()).y;
-    const mixer=new T.AnimationMixer(rig),act={};for(const [k,c] of Object.entries(anim155.clips))act[k]=mixer.clipAction(c);
-    m.a155={rig,pairs,hips,ratio:hipH/kayH,kayRestP:hips.k.getWorldPosition(new T.Vector3()),parentInv:new T.Matrix4().copy(minv.clone().multiply(hips.b.parent.matrixWorld)).invert(),mixer,act,cur:null,state:null,t0:0};
+    const mixer=new T.AnimationMixer(rig),act={};for(const [k,c] of Object.entries(src.clips))act[k]=mixer.clipAction(c);
+    m[key]={rig,pairs,hips,ratio:hipH/kayH,kayRestP:hips.k.getWorldPosition(new T.Vector3()),parentInv:new T.Matrix4().copy(minv.clone().multiply(hips.b.parent.matrixWorld)).invert(),mixer,act,cur:null,state:null,t0:0};
   }
   function play155(A,name,fade,once,restart){const a=A.act[name]||A.act.idle;if(A.cur===a&&!restart)return a;if(A.cur===a){a.reset();return a}if(!A.cur)A.mixer.stopAllAction();else for(const o of Object.values(A.act))if(o!==A.cur&&o!==a)o.stop();a.reset();a.setLoop(once?T.LoopOnce:T.LoopRepeat);a.clampWhenFinished=!!once;a.paused=false;a.timeScale=1;a.play();if(A.cur)A.cur.crossFadeTo(a,fade,false);A.cur=a;return a}
   /* v195 (Ian): correndo, a arma vai nas costas (como aljava). Ao parar, ele leva a mão ao ombro, saca e segura;
@@ -282,18 +286,7 @@
       const hp0=(B.hips||ch).getWorldPosition(new T.Vector3()),bp=dag?hp0.clone().addScaledVector(R,.2).addScaledVector(F,.02).addScaledVector(U,.05):bow?cp.clone().addScaledVector(F,-.2).addScaledVector(U,-.05):cp.clone().addScaledVector(F,-.2).addScaledVector(R,.16).addScaledVector(U,.22);
       const k=S.s*S.s*(3-2*S.s),wp=hp.lerp(bp,k),wq=hq.slerp(bq,k),M=new T.Matrix4().compose(wp,wq,hs);
       W.parent.updateMatrixWorld(true);M.premultiply(new T.Matrix4().copy(W.parent.matrixWorld).invert());M.decompose(W.position,W.quaternion,W.scale)}}
-  function frame155(m,st,dt){
-    sheathRestore195(m);
-    if(!m.a155)setup155(m);const A=m.a155;let a;
-    if(st.dead>0)play155(A,'morte',.12,true);
-    // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
-    else if(st.dodge){a=play155(A,'esquiva',.045,true,A.state!=='esquiva');a.timeScale=a.getClip().duration/.32;A.state='esquiva'}
-    else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
-    else if(st.atk>0){const seq=ATK155[m.staff174&&/^(staff|bonestaff|wand|tome|orb)$/.test(st.wep||'')?'staff':st.wep]||ATK155.fist,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
-      // Golpe novo (mesmo tipo repetido) reinicia o clipe.
-      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
-    else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
-    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?3.2:6.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
+  function apply486(m,A,st,dt){
     A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
     for(const p of A.pairs){
@@ -305,6 +298,29 @@
     const hp=A.hips.k.getWorldPosition(v1).sub(A.kayRestP).multiplyScalar(A.ratio);hp.x=0;hp.z=st.dead>0?hp.z:0;
     A.hips.b.position.copy(v2.copy(A.hips.b.userData.rest155P).add(hp).applyMatrix4(A.parentInv));
     // v168 (Irror): tiro com arco = braço esquerdo esticado para o alvo segurando o arco em pé; mão direita puxa a corda até o rosto.
+  }
+  function frame155(m,st,dt){
+    sheathRestore195(m);
+    const bank=st.bank486&&banks486[st.bank486]&&banks486[st.bank486].ok?banks486[st.bank486]:null;
+    if(bank){const key='bank486_'+st.bank486;if(!m[key])setup155(m,bank.src,key);const A=m[key];A.state=null;
+      /* clipe do dia a dia pedido pelo NPC (st.clip486); senão andar/correr/parado pelo movimento */
+      let name=st.clip486&&A.act[st.clip486]?st.clip486:null,a;
+      if(st.dead>0&&A.act.defeat_02)a=play155(A,'defeat_02',.15,true);
+      else if(name){a=play155(A,name,st.fade486||.3,!!st.once486);a.timeScale=st.rate486||1}
+      else if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const run=st.sprint!==false&&(st.speed||0)>4&&A.act.run;a=play155(A,run?'run':'walk',.25);a.timeScale=st.speed==null?1:clamp(st.speed/(run?6:1.6),.5,1.6)}
+      else{a=play155(A,'idle',.3);a.timeScale=st.rate486||1}
+      apply486(m,A,st,dt);return}
+    if(!m.a155)setup155(m);const A=m.a155;let a;
+    if(st.dead>0)play155(A,'morte',.12,true);
+    // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
+    else if(st.dodge){a=play155(A,'esquiva',.045,true,A.state!=='esquiva');a.timeScale=a.getClip().duration/.32;A.state='esquiva'}
+    else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
+    else if(st.atk>0){const seq=ATK155[m.staff174&&/^(staff|bonestaff|wand|tome|orb)$/.test(st.wep||'')?'staff':st.wep]||ATK155.fist,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
+      // Golpe novo (mesmo tipo repetido) reinicia o clipe.
+      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
+    else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
+    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?3.2:6.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
+    apply486(m,A,st,dt);
     if(m.bowHolder155&&(/^arco/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||''))){aimPose168(m);const bh2=m.bowHolder155,rq=m.root.getWorldQuaternion(new T.Quaternion()),want=rq.multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWAIM168)));bh2.parent.updateWorldMatrix(true,false);bh2.quaternion.copy(bh2.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want));bh2.position.set(0,0,0);bh2.userData.idle155=false;bh2.userData.aim168=true}
     // v174 (Ian): cajado parado fica em pé na mão (como bastão), não atravessado; no golpe segue a animação de cajado.
     {const sw=visibleStaff251(m);if(sw){const casting=performance.now()<(m.staffCast251||0)||(st.atk>0&&/^cajado/.test(A.state||''));

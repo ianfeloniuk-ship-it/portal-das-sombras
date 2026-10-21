@@ -1,0 +1,15 @@
+{
+ "id": "arqueiro_f",
+ "race": "human",
+ "sex": "f",
+ "role": "hunter",
+ "heightScale": 0.95,
+ "family": "arqueiro",
+ "rig": "mixamo23-v482",
+ "weights": "heat",
+ "skirt": false,
+ "legs": "pants",
+ "hood": false,
+ "tris": 9000,
+ "source": "arqueiro_f.glb"
+}

@@ -1,0 +1,40 @@
+{
+ "id": "dragao_musgo_verden",
+ "kind": "dragon",
+ "race": "dragon",
+ "body": "quad",
+ "family": "dragao",
+ "height": 3.3,
+ "tempo": 1.1,
+ "tris": 18748,
+ "kb": 2179,
+ "bones": 69,
+ "clips": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly",
+  "TakeOff",
+  "Land",
+  "Bite",
+  "TailSwipe",
+  "WingBuffet",
+  "Breath",
+  "Roar",
+  "Hit",
+  "Death"
+ ],
+ "fps": 30,
+ "inPlace": true,
+ "flyHeight": 0.99,
+ "weights": "heat",
+ "loops": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly"
+ ],
+ "note": "rig e animação por código no Blender (tools/blender482/rig_dragon.py)"
+}

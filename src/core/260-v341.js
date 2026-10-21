@@ -209,7 +209,7 @@ function releaseRedPortalBreaks(){
 
 function genCands(){const pr=Math.min(9,run?rankOf():0);const out=[];for(let i=0;i<3;i++){const rank=clamp(pr+Math.floor(rnd(-1,2)),0,TOPR);const lvl=Math.max(1,(run?run.level:1)+Math.floor(rnd(-3,5)));out.push({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank,lvl,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),cost:Math.round(HIRE[rank]*(1+lvl*.03))})}return out}
 function spawnHunter(c,inside){
-  const cl=/* v337: sem o Mago Elemental (classe extinta) */CLASSES.filter((c,i)=>i<7&&!c.legacy)[Math.floor(Math.random()*6)],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
+  const cl=/* v337: sem o Mago Elemental (classe extinta). v482 (Povo482): também magos de elemento, Monge, Lâmina Arcana, Lanceiro e Berserker, menos comuns */CLASSES[wpick([0,1,2,4,5,6].map(i=>({i,w:1})).concat([8,9,10,11,21,22,23,24].filter(i=>CLASSES[i]&&!CLASSES[i].legacy).map(i=>({i,w:.35})))).i],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
   const m=makeChibi({body:cl.body,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),wep:cl.wep,wcol:cl.sk[0].col,gk:CLASS_GK[CLASSES.indexOf(cl)],tint:CLASS_TINT[CLASSES.indexOf(cl)],shield:CLASSES.indexOf(cl)===0});
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
   m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);

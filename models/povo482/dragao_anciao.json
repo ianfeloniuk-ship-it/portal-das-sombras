@@ -1,0 +1,39 @@
+{
+ "id": "dragao_anciao",
+ "kind": "dragon",
+ "race": "dragon",
+ "body": "quad",
+ "family": "dragao",
+ "height": 4.0,
+ "tris": 19750,
+ "kb": 2055,
+ "bones": 69,
+ "clips": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly",
+  "TakeOff",
+  "Land",
+  "Bite",
+  "TailSwipe",
+  "WingBuffet",
+  "Breath",
+  "Roar",
+  "Hit",
+  "Death"
+ ],
+ "fps": 30,
+ "inPlace": true,
+ "flyHeight": 1.2,
+ "weights": "heat",
+ "loops": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly"
+ ],
+ "note": "rig e animação por código no Blender (tools/blender482/rig_dragon.py)"
+}

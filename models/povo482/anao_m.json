@@ -1,0 +1,15 @@
+{
+ "id": "anao_m",
+ "race": "dwarf",
+ "sex": "m",
+ "role": "civil",
+ "heightScale": 0.7,
+ "family": "anao",
+ "rig": "mixamo23-v482",
+ "weights": "heat",
+ "skirt": true,
+ "legs": "auto",
+ "hood": false,
+ "tris": 9000,
+ "source": "anao_m.glb"
+}

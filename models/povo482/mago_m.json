@@ -1,0 +1,14 @@
+{
+ "id": "mago_m",
+ "race": "human",
+ "sex": "m",
+ "role": "hunter",
+ "heightScale": 1.0,
+ "family": "mago",
+ "rig": "mixamo23-v482",
+ "weights": "heat",
+ "skirt": true,
+ "legs": "auto",
+ "tris": 9000,
+ "source": "mago_m.glb"
+}

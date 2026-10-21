@@ -1,0 +1,19 @@
+{
+ "_doc": "Marcos do Dragao de Musgo de Verden (altura = 1, chao z=0, frente -Y, esquerda +X). Nuvem de pontos com grade em 20/10/2026; empinado (tronco quase em pe), patas dianteiras erguidas como bracos, asas abertas para cima num plano inclinado, cauda curva para a esquerda.",
+ "body": "quad",
+ "root": [0, -0.12, 0],
+ "pelvis": [0, -0.10, 0.30],
+ "spine": [[0, -0.10, 0.30], [0, -0.22, 0.40], [0, -0.33, 0.50]],
+ "neck": [[0, -0.33, 0.50], [0, -0.38, 0.57], [0, -0.40, 0.63], [0, -0.42, 0.68], [0, -0.44, 0.72]],
+ "head": [0, -0.46, 0.74],
+ "snout": [0, -0.56, 0.72],
+ "jaw": [0, -0.47, 0.71],
+ "chin": [0, -0.54, 0.68],
+ "mouth": [[0, -0.56, 0.705], [0, -0.48, 0.71]],
+ "tail": "auto",
+ "hind": {"hip": [0.12, -0.10, 0.28], "knee": [0.12, -0.16, 0.17], "hock": [0.12, -0.08, 0.08], "ball": [0.13, -0.15, 0.02], "toe": [0.13, -0.21, 0.01]},
+ "fore": {"shoulder": [0.11, -0.32, 0.48], "elbow": [0.13, -0.29, 0.36], "wrist": [0.13, -0.41, 0.32], "ball": [0.13, -0.45, 0.29], "toe": [0.13, -0.49, 0.27]},
+ "wing": {"root": [0.05, -0.28, 0.53], "shoulder": [0.12, -0.30, 0.56], "elbow": [0.20, -0.38, 0.72], "wrist": [0.22, -0.50, 0.95],
+          "thumb": [0.23, -0.53, 0.98],
+          "fingers": [[0.57, -0.36, 0.64], [0.47, -0.26, 0.35], [0.34, -0.20, 0.27], [0.24, -0.24, 0.36]]}
+}

@@ -1,0 +1,15 @@
+{
+ "id": "sombra_f",
+ "race": "human",
+ "sex": "f",
+ "role": "hunter",
+ "heightScale": 0.95,
+ "family": "sombra",
+ "rig": "mixamo23-v482",
+ "weights": "heat",
+ "skirt": false,
+ "legs": "auto",
+ "hood": true,
+ "tris": 8999,
+ "source": "sombra_f.glb"
+}

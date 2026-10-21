@@ -1,0 +1,40 @@
+{
+ "id": "dragonete",
+ "kind": "dragon",
+ "race": "dragon",
+ "body": "quad",
+ "family": "dragao",
+ "height": 1.3,
+ "tempo": 0.72,
+ "tris": 15000,
+ "kb": 1713,
+ "bones": 69,
+ "clips": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly",
+  "TakeOff",
+  "Land",
+  "Bite",
+  "TailSwipe",
+  "WingBuffet",
+  "Breath",
+  "Roar",
+  "Hit",
+  "Death"
+ ],
+ "fps": 30,
+ "inPlace": true,
+ "flyHeight": 0.39,
+ "weights": "heat",
+ "loops": [
+  "Idle",
+  "Walk",
+  "Run",
+  "FlyIdle",
+  "Fly"
+ ],
+ "note": "rig e animação por código no Blender (tools/blender482/rig_dragon.py)"
+}

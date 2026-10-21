@@ -249,7 +249,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/terrain245.js?v=461"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=473"></script>
+<script src="tools/warrior-player127.js?v=493"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
@@ -2602,7 +2602,7 @@ const SHOPS=[
  {id:'pot',n:'LOJA DE POÇÕES',sign:'POÇÕES',vendor:'Mira',x:25,z:-25,w:8,d:7,h:5,col:0x8a2b4a,roof:0x4a1426,sc:'#ff8fa3',vb:0x8a2b4a,vh:0xffb0c8,vw:'staff'},
  {id:'wep',n:'EQUIPAMENTOS DO KAEL',sign:'EQUIPAMENTOS',vendor:'Kael',x:25,z:25,w:9,d:7,h:5.5,col:0x7a4a2a,roof:0x3a2414,sc:'#ffb84d',vb:0x7a4a2a,vh:0xc85a1e,vw:'axe'},
  {id:'arm',n:'DEFESA DA VILA',sign:'DEFESA',vendor:'Brann',x:-25,z:25,w:9,d:7,h:5.5,col:0x5f6f86,roof:0x2b3446,sc:'#c9d3de',vb:0x5f6f86,vh:0x2b2b2b,vw:'sword'}];
-const NAMES=['Voss','Ryuga','Mirae','Taeho','Selin','Kargan','Yuna','Draven','Hyejin','Oren','Aiko','Bastian','Dara','Ekko','Juno','Kenji','Lior','Nayra','Rurik','Soren','Talia','Vega'];
+/* v486 (Ian: "que nomes são esses? é um mundo medieval"): nomes medievais de fantasia */const NAMES=['Voss','Aldren','Mirela','Godric','Selene','Kargan','Ysolde','Draven','Brunhild','Oren','Elowen','Bastian','Dara','Edric','Isolde','Tormund','Lior','Rowena','Rurik','Soren','Talia','Wulfric'];
 const HLINES=['Portais mais longe da cidade costumam ser de rank mais alto.','Nas Fendas, siga o feixe pulsante até o Soberano. O feixe verde-água aponta o retorno; no portal vermelho, ele só abre após a vitória.','Viu um portal vermelho? Lá dentro não tem saída até o guardião cair. Mas paga o dobro.','Se um portal de rank D ou maior fecha sem ninguém limpar, os monstros escapam. Transbordo da fenda.','A Ordem paga bem pelas missões do quadro.','O Kael só vende as armas do seu rank. Suba primeiro.','Ressurgimento protege você da perda por morte. Pergaminho não tira ninguém de um portal vermelho antes da vitória.','Tem caçador que entra nas masmorras só para caçar outros caçadores.','Contrate um paladino na Ordem. Faz diferença no guardião.','Baú de guardião sempre traz equipamento.','Masmorra rank A? Vi uma vez. O trono lá dentro brilha dourado.','Quanto mais longe da muralha, mais fortes os monstros das planícies.','Guardas de escudo bloqueiam de frente. Pegue pelas costas.'];
 
 /* ================= PERFIL ================= */
@@ -4723,7 +4723,7 @@ function releaseRedPortalBreaks(){
 
 function genCands(){const pr=Math.min(9,run?rankOf():0);const out=[];for(let i=0;i<3;i++){const rank=clamp(pr+Math.floor(rnd(-1,2)),0,TOPR);const lvl=Math.max(1,(run?run.level:1)+Math.floor(rnd(-3,5)));out.push({name:pick(NAMES),cls:Math.floor(Math.random()*7),rank,lvl,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),cost:Math.round(HIRE[rank]*(1+lvl*.03))})}return out}
 function spawnHunter(c,inside){
-  const cl=/* v337: sem o Mago Elemental (classe extinta) */CLASSES.filter((c,i)=>i<7&&!c.legacy)[Math.floor(Math.random()*6)],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
+  const cl=/* v337: sem o Mago Elemental (classe extinta). v482 (Povo482): também magos de elemento, Monge, Lâmina Arcana, Lanceiro e Berserker, menos comuns */CLASSES[wpick([0,1,2,4,5,6].map(i=>({i,w:1})).concat([8,9,10,11,21,22,23,24].filter(i=>CLASSES[i]&&!CLASSES[i].legacy).map(i=>({i,w:.35})))).i],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
   const m=makeChibi({body:cl.body,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),wep:cl.wep,wcol:cl.sk[0].col,gk:CLASS_GK[CLASSES.indexOf(cl)],tint:CLASS_TINT[CLASSES.indexOf(cl)],shield:CLASSES.indexOf(cl)===0});
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
   m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);
@@ -6834,7 +6834,7 @@ function updWorld(dt){updEcon(dt);
   if(safe&&L.lastCity!==nc.c){L.lastCity=nc.c;if(nc.c.name!=='Aster')unlockLore('city');bigText(nc.c.name.toUpperCase(),1200);(nc.c.name==='Aster'?logNews:toast)('<b>[NARRADOR]</b> Zona segura: cidade de '+nc.c.name+'.');L.cands=genCands()}
   if(!safe&&nc.d>40)L.lastCity=null;
   L.turT=(L.turT||0)-dt;if(L.turT<=0){L.turT=1;for(const e of enemies){if(e.dead||!e.breaker)continue;const n=nearestCity(e.x,e.z);if(n.d<defenseRange(n.c)&&cityL(n.c)>=5&&!cityFallen(n.c)){hurtEnemy(e,e.maxhp*.06,n.c.x,n.c.z,{kb:0,pierce:true});fxLine([{x:n.c.x+(e.x-n.c.x)/Math.max(.01,n.d)*CITYR,z:n.c.z+(e.z-n.c.z)/Math.max(.01,n.d)*CITYR},{x:e.x,z:e.z}],0xffd070)}}}
-  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length<4+Math.min(6,cityL(ch.city))){spawnCitizen(ch.city);if(npcs.filter(n=>n.critter&&!n.gone&&n.home===ch.city).length<3)spawnCritter(ch.city)}for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
+  L.hunterT-=dt;if(L.hunterT<=0){L.hunterT=10;if(!isNight())for(const ch of chunks.values())if(ch.city&&!cityFallen(ch.city)&&npcs.filter(n=>n.kind==='citizen'&&!n.gone&&n.home===ch.city).length</*v486 (Ian: "tem muita pessoa")*/2+Math.min(4,Math.ceil(cityL(ch.city)/2))){spawnCitizen(ch.city);if(npcs.filter(n=>n.critter&&!n.gone&&n.home===ch.city).length<3)spawnCritter(ch.city)}for(const ch of chunks.values())if(ch.city&&npcs.filter(n=>n.kind==='hunter'&&n.home===ch.city).length<5)spawnHunter(ch.city,false)}
 }
 function updDungeon(dt){
   for(const it of L.exits){if(it.grp?.userData.rift131){riftExitVisual131(it);Rift131.update(it.grp,dt);}else it.ring.rotation.z+=dt*.8;}
@@ -7944,7 +7944,7 @@ function buildHouse(c,g,E,addCol){const X=c.x,Z=c.z,hx=X+46,hz=Z+12;if(cityFalle
 
 /* ===== MORADORES E FESTIVAIS ===== */
 const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu um eco andando sozinha.'];
-const CNAMES=['Aldo','Bia','Caio','Duda','Enzo','Flora','Gil','Helena','Ivo','Júlia','Leo','Maya','Nina','Otto','Pietra','Rui'];
+const CNAMES=['Aldo','Brígida','Cedric','Elsbeth','Godwin','Flora','Gerold','Helena','Ivo','Matilde','Leofric','Maud','Nesta','Otto','Petronela','Roderic'];/* v486: nomes medievais (antes Enzo, Duda, Pietra...) */
 function festival(){const d=new Date(),m=d.getMonth()+1,dd=d.getDate(),w=d.getDay();
   if((m===10&&dd>=25)||(m===11&&dd<=2))return{n:'Noite dos Ecos',d:'XP +50% à noite',xp:isNight()?.5:0,shop:0,line:'Na Noite dos Ecos os portais ficam inquietos...'};
   if((m===12&&dd>=20)||(m===1&&dd<=6))return{n:'Festival de Inverno',d:'lojas 20% mais baratas e XP +25%',xp:.25,shop:.2,line:'Feliz Festival de Inverno!'};
@@ -9496,7 +9496,7 @@ requestAnimationFrame(frame);
 <script src="tools/service-prices265.js?v=266"></script>
 <script src="tools/economy154.js?v=343"></script>
 <script src="tools/lux267.js?v=288"></script>
-<script src="tools/bestiary294.js?v=324"></script>
+<script src="tools/bestiary294.js?v=493"></script>
 <script src="tools/biomes295.js?v=485"></script>
 <script src="tools/rare298.js?v=324"></script>
 <script src="tools/corrupt299.js?v=320"></script>
@@ -9530,7 +9530,7 @@ requestAnimationFrame(frame);
 <script src="tools/scenes406.js?v=458"></script>
 <script src="tools/npc456.js?v=457"></script>
 <script src="tools/campaign327.js?v=469"></script>
-<script src="tools/ecology410.js?v=458"></script>
+<script src="tools/ecology410.js?v=493"></script>
 
 <script src="tools/classes316.js?v=352"></script>
 
@@ -9592,6 +9592,8 @@ requestAnimationFrame(frame);
 <script src="tools/alchemy470.js?v=485"></script>
 <script src="tools/worldsim479.js?v=490"></script>
 <script src="tools/quests480.js?v=490"></script>
+<script src="tools/npc482.js?v=493"></script>
+<script src="tools/vida486.js?v=493"></script>
 <script src="tools/bloom487/CopyShader.js?v=487"></script>
 <script src="tools/bloom487/LuminosityHighPassShader.js?v=487"></script>
 <script src="tools/bloom487/EffectComposer.js?v=487"></script>
