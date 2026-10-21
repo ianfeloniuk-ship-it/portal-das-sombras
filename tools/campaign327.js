@@ -401,6 +401,7 @@
   }
   function clearWorld(id) {
     const w = W.get(id); if (!w) return;
+    w.disposed498 = true;
     window.Scenes406?.dispose(w);
     for (const g of w.grps) {
       if (g === w.cart && state(id)?.cartRescued401 && w.L === L) {
@@ -456,7 +457,7 @@
     }
     if (m.id === 'a1' && pts[0]) {
       const p0 = pts[0], cx = p0[0], cz = p0[1];
-      const sg = new THREE.Group(); sg.userData.terrainAbsolute245 = true;
+      const sg = new THREE.Group(); sg.userData.mats = []; sg.userData.terrainAbsolute245 = true; sg.userData.roadFrame498 = true;
       const offsets = [
         [-10, -18, 'fir', 8.5], [9.5, -16, 'fir', 9.0],
         [-12, 6, 'fir', 7.5], [10.2, 8, 'fir', 8.0],
@@ -464,7 +465,7 @@
         [-9.2, 20, 'mossrock', 2.8], [9.8, 22, 'fir', 8.2]
       ];
       const addFrame = () => {
-        if (!window.TripoEnvironment153?.models) return;
+        if (w.disposed498 || w.L !== L || !window.TripoEnvironment153?.models) return;
         offsets.forEach(([ox, oz, key, h]) => {
           const mDef = TripoEnvironment153.models[key];
           if (!mDef) return;
@@ -480,7 +481,7 @@
             grp.add(mesh);
           });
           sg.add(grp);
-          addCol({ x: rx, z: rz, r: key === 'fir' ? 1.0 : 1.6 });
+          window.Solid429?.prop(grp, [{ x: 0, z: 0, r: key === 'fir' ? 1.0 : 1.6 }]);
         });
       };
       if (window.TripoEnvironment153?.ready) {
