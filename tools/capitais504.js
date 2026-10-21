@@ -1,4 +1,4 @@
-/* v504 (Ian, 21/10/2026): as 5 CAPITAIS ganham cara de capital.
+/* v504–v507 (Ian, 21/10/2026): as 5 CAPITAIS ganham cara de capital.
    Cada Capital (Ymiria, Zahar, Thalor, Urdan, Verden — Aster fica como está) recebe, em volta da cidade comum:
    - muralha externa de 150 m de raio (muro de pedra ou paliçada do cenário Tripo, tingido pelo bioma), 4 portões, torres e tochas;
    - praça pavimentada no centro, marco visível de longe (torre/árvore gigante com farol de luz) e adornos do bioma;
@@ -11,11 +11,11 @@
   const hex = h => { const c = new T.Color(h); return [c.r, c.g, c.b]; };
   /* tint = multiplica a textura do modelo (1 = original). halo/flame = cores do farol e das tochas */
   const STYLE = {
-    Ymiria: { wall: 'wall', H: 9, tint: [.5, .56, .8], tower: [.28, .5, 1.25], flame: 0x9fdcff, halo: 0x8fd8ff, plaza: [.85, .95, 1.15], lmAng: 235, lmR: 104, lmH: 50, lm: 'defense', lmTint: [.28, .5, 1.25] },
-    Zahar: { wall: 'wall', H: 8, tint: [2.7, 1.9, .85], tower: [1.5, 1.12, .7], flame: 0xffc25a, halo: 0xffd27a, plaza: [1.5, 1.2, .8], lmAng: 320, lmR: 104, lmH: 48, lm: 'defense', lmTint: [1.6, 1.2, .7] },
-    Thalor: { wall: 'wall', H: 9, tint: [2.4, 2.4, 2.2], tower: [1.0, 1.5, 3.0], flame: 0xfff0c8, halo: 0xfff4d8, plaza: [1.4, 1.4, 1.4], lmAng: 200, lmR: 128, lmH: 46, lm: 'defense', lmTint: [1.0, 1.5, 3.0] },
-    Urdan: { wall: 'palisade', H: 7.5, tint: [.7, .62, .5], tower: [.4, .3, .3], flame: 0xff7a2a, halo: 0xff5a1a, plaza: [.8, .7, .65], lmAng: 50, lmR: 104, lmH: 46, lm: 'defense', lmTint: [.4, .28, .28] },
-    Verden: { wall: 'palisade', H: 8, tint: [.78, 1.12, .6], tower: [.3, .85, .4], flame: 0xb8ff7a, halo: 0x9dff7a, plaza: [.8, 1.0, .65], lmAng: 140, lmR: 100, lmH: 52, lm: 'oak', lmTint: null }
+    Ymiria: { name: 'Ymiria', wall: 'wall', H: 9, col: [.42, .52, .78], tcol: [.36, .46, .72], flame: 0x9fdcff, halo: 0x8fd8ff, plaza: [.85, .95, 1.15], lmAng: 235, lmR: 104, lmH: 50, lm: 'defense', lmTint: null },
+    Zahar: { name: 'Zahar', wall: 'wall', H: 8, col: [1, .78, .45], tcol: [1, .8, .5], flame: 0xffc25a, halo: 0xffd27a, plaza: [1.5, 1.2, .8], lmAng: 320, lmR: 104, lmH: 48, lm: 'defense', lmTint: null },
+    Thalor: { name: 'Thalor', wall: 'wall', H: 9, col: [1, .98, .92], tcol: [1, .97, .9], flame: 0xfff0c8, halo: 0xfff4d8, plaza: [1.4, 1.4, 1.4], lmAng: 200, lmR: 128, lmH: 46, lm: 'defense', lmTint: null },
+    Urdan: { name: 'Urdan', wall: 'palisade', H: 7.5, col: [.62, .46, .34], tcol: [.5, .3, .28], flame: 0xff7a2a, halo: 0xff5a1a, plaza: [.8, .7, .65], lmAng: 50, lmR: 104, lmH: 46, lm: 'defense', lmTint: null },
+    Verden: { name: 'Verden', wall: 'palisade', H: 8, col: [.5, .7, .32], tcol: [.5, .68, .38], flame: 0xb8ff7a, halo: 0x9dff7a, plaza: [.8, 1.0, .65], lmAng: 140, lmR: 100, lmH: 52, lm: 'oak', lmTint: null }
   };
 
   /* ---------- utilidades ---------- */
@@ -89,26 +89,53 @@
     return plazaTex[k] = t;
   }
 
+  /* contexto da capital em construção: tocha no lugar do lampião, pedra/paliçada pintada pelo bioma, neblina leve */
+  let CTX = null;
   const dimCache = new Map();
-  function dim(m) {
-    if (Array.isArray(m)) return m.map(dim);
-    let r = dimCache.get(m); if (r) return r;
-    r = m.clone(); r.emissive.multiplyScalar(.28); r.onBeforeCompile = m.onBeforeCompile;
-    const k0 = m.customProgramCacheKey ? m.customProgramCacheKey() : ''; r.customProgramCacheKey = () => k0 + '-cap501';
-    dimCache.set(m, r); return r;
+  function dim(m, S, role) {
+    if (Array.isArray(m)) return m.map(x => dim(x, S, role));
+    const key = S.name + role; let c = dimCache.get(m); if (!c) dimCache.set(m, c = {}); if (c[key]) return c[key];
+    const r = m.clone(), col = role === 'tower' ? S.tcol : role === 'wall' ? S.col : null;
+    if (col) r.emissive.multiplyScalar(.12);
+    r.onBeforeCompile = (sh, rd) => {
+      if (m.onBeforeCompile) m.onBeforeCompile(sh, rd);
+      let f = sh.fragmentShader;
+      if (col) { sh.uniforms.capTint = { value: new T.Color(col[0], col[1], col[2]) }; f = 'uniform vec3 capTint;\n' + f.replace('#include <map_fragment>', '#include <map_fragment>\n{float l=dot(diffuseColor.rgb,vec3(.3,.59,.11));diffuseColor.rgb=mix(diffuseColor.rgb,vec3(l)*capTint*3.1,.92);}'); }
+      /* neblina reduzida: a silhueta da muralha e das torres aparece de longe */
+      f = f.replace('#include <fog_fragment>', '#ifdef USE_FOG\nfloat ff504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ff504*.28);\n#endif');
+      sh.fragmentShader = f;
+    };
+    const k0 = m.customProgramCacheKey ? m.customProgramCacheKey() : ''; r.customProgramCacheKey = () => k0 + '-cap504-' + key;
+    return c[key] = r;
   }
+  function recolor(group, S) {
+    group.traverse(o => {
+      const id = o.isInstancedMesh && o.userData.tripo153; if (!id) return;
+      const role = id === 'defense' ? 'tower' : (id === 'wall' || id === 'palisade') ? 'wall' : ['oak', 'willow', 'fir'].includes(id) ? 'tree' : null;
+      if (role) o.material = dim(o.material, S, role);
+    });
+  }
+  const eh0 = EH, mesh0 = EnvBatch.prototype.mesh, add0 = EnvBatch.prototype.add;
+  EH = function (batch, key, x, y, z, ry, height, tint) {
+    if (CTX && key === 'lantern') { CTX.lamps.push({ x, z }); return eh0.call(this, batch, 'post_skull', x, y, z, ry, 3.3, tint); }
+    return eh0.apply(this, arguments);
+  };
+  EnvBatch.prototype.mesh = function () { const g = mesh0.apply(this, arguments); if (CTX && g) { try { recolor(g, CTX.S); } catch (e) { console.warn('capitais504 recolor', e); } } return g; };
+  EnvBatch.prototype.add = function (k, x, y, z, ry, sx, sy, sz, tint) { /* Urdan/Verden: o muro da cidade interna também vira paliçada */
+    if (CTX && CTX.S.wall === 'palisade' && k === 'wall_straight') { const m = ENV.m[k]; return add0.call(this, 'palisade154', x, y, z, ry, (m.max[0] - m.min[0]) * (sx || 1), 1, 1, tint); }
+    return add0.apply(this, arguments);
+  };
 
   /* ---------- a capital ---------- */
   function capital(c, g, addCol) {
     const S = STYLE[c.name], X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.id + c.name));
     const b = new EnvBatch(); b.tripo153 = [];
-    const flames = [], embers = [], solids = [];
+    const flames = [], embers = [], solids = [], big = [];
     const col = (x, z, r) => { addCol({ x, z, r }); };
     const push = (id, x, z, ry, sc, sy, sz, tint, y) => { b.tripo153.push({ id, x, y: y || 0, z, ry, scale: sc, sy, sz, tint }); };
-    const segTint = (x, z) => {
-      if (c.name !== 'Urdan') return S.tint;
-      const w = Math.min(1, Math.max(0, (z - Z + 20) / 60)); /* norte: madeira do pântano · sul: carvão do vulcão */
-      return S.tint.map((v, i) => v + ([.34, .26, .26][i] - v) * w);
+    const segTint = (x, z) => { /* Urdan: madeira do pântano ao norte, carvão do vulcão ao sul */
+      if (c.name !== 'Urdan') return null;
+      const w = Math.min(1, Math.max(0, (z - Z + 20) / 60)); return [1 - .5 * w, 1 - .58 * w, 1 - .55 * w];
     };
 
     /* muralha: segmentos de ~6 m, com vãos nos 4 portões */
@@ -127,7 +154,7 @@
       for (const q of [PI / 4, PI * .75, PI * 1.25, PI * 1.75]) tws.push(q);
       for (const a of tws) {
         const x = X + Math.cos(a) * RC, z = Z + Math.sin(a) * RC, hh = (gateDist(a) < .2 ? 17 : 14), sc = hh / tm.h;
-        push('defense', x, z, Math.atan2(X - x, Z - z), sc, sc, sc, S.tower); col(x, z, 4.2);
+        push('defense', x, z, Math.atan2(X - x, Z - z), sc, sc, sc, null); col(x, z, 4.2);
         flames.push({ x: x + Math.cos(a) * -2.2, y: hh * .62, z: z + Math.sin(a) * -2.2, size: 5.5 });
       }
     }
@@ -136,12 +163,12 @@
     for (let i = 0; i < 40; i++) {
       const a = i / 40 * TAU + .04; if (gateDist(a) < gapA + .01) continue;
       const r = RC - 3.5, x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
-      EH(b, 'lantern', x, 0, z, -a, 3.3); col(x, z, .35); flames.push({ x, y: 3.1, z, size: 2.6 });
+      EH(b, 'campfire_stones', x, 0, z, -a, 1.5); col(x, z, .8); flames.push({ x, y: 1.5, z, size: 4.2 });
     }
     /* avenidas dos portões ao centro: lanternas dos dois lados */
     for (const q of [0, PI / 2, PI, PI * 1.5]) for (let d = 70; d < RC - 12; d += 14) for (const sd of [-1, 1]) {
       const px = -Math.sin(q) * sd * 7.5, pz = Math.cos(q) * sd * 7.5, x = X + Math.cos(q) * d + px, z = Z + Math.sin(q) * d + pz;
-      EH(b, 'lantern', x, 0, z, 0, 3.3); col(x, z, .35); flames.push({ x, y: 3.1, z, size: 2.4 });
+      EH(b, 'lantern', x, 0, z, 0, 3.3); col(x, z, .4);
     }
 
     /* marco: visível de longe */
@@ -149,10 +176,10 @@
       const a = S.lmAng * PI / 180, x = X + Math.cos(a) * S.lmR, z = Z + Math.sin(a) * S.lmR;
       const mm = M[S.lm];
       if (mm) {
-        const sc = S.lmH / mm.h; push(S.lm, x, z, Math.atan2(X - x, Z - z), sc, sc, sc, S.lmTint); col(x, z, S.lm === 'oak' ? 3 : 9);
+        const sc = S.lmH / mm.h; if (S.lm === 'oak') big.push({ x, z, ry: 0, sc }); else push(S.lm, x, z, Math.atan2(X - x, Z - z), sc, sc, sc, null); col(x, z, S.lm === 'oak' ? 3 : 9);
         const halo = new T.Sprite(new T.SpriteMaterial({ map: soft(), color: S.halo, opacity: .5, transparent: true, depthWrite: false, blending: T.AdditiveBlending, fog: false }));
-        halo.scale.setScalar(S.lmH * .75); halo.position.set(x, S.lmH * (S.lm === 'oak' ? .62 : .93), z); halo.renderOrder = 9; g.add(halo);
-        flames.push({ x, y: S.lmH * .93, z, size: 26 });
+        halo.scale.setScalar(S.lmH * (S.lm === 'oak' ? .45 : .75)); halo.position.set(x, S.lmH * (S.lm === 'oak' ? 1.05 : .93), z); halo.renderOrder = 9; g.add(halo);
+        flames.push({ x, y: S.lmH * (S.lm === 'oak' ? 1.05 : .93), z, size: S.lm === 'oak' ? 14 : 26 });
         for (let k = 0; k < 4; k++) { const aa = k * PI / 2 + .6; flames.push({ x: x + Math.cos(aa) * 6, y: 1.6, z: z + Math.sin(aa) * 6, size: 3 }); }
       }
     }
@@ -186,7 +213,7 @@
     } else if (c.name === 'Verden') {
       for (let i = 0; i < 9; i++) {
         const p = spot(72, RC - 16); if (!p || solids.some(q => Math.hypot(q.x - p.x, q.z - p.z) < 26)) continue;
-        solids.push(p); const h = 20 + R() * 8, sc = h / M.oak.h; push('oak', p.x, p.z, R() * TAU, sc, sc, sc, null); col(p.x, p.z, 3.4);
+        solids.push(p); const h = 20 + R() * 8, sc = h / M.oak.h; big.push({ x: p.x, z: p.z, ry: R() * TAU, sc }); col(p.x, p.z, 3.4);
       }
       for (let i = 0; i < 14; i++) { const p = spot(72, RC - 14); if (!p) continue; EH(b, 'tree_oak', p.x, 0, p.z, R() * TAU, 5 + R() * 2); col(p.x, p.z, 1); }
     }
@@ -198,7 +225,6 @@
       for (const e of b.tripo153) (byId[e.id] || (byId[e.id] = [])).push(e);
       group.traverse(o => {
         const id = o.isInstancedMesh && o.userData.tripo153, list = id && byId[id];
-        if (id && id !== 'oak' && id !== 'willow' && id !== 'fir') o.material = dim(o.material); /* sem a luz própria forte da textura, a cor por instância tinge de verdade */
         if (!list || !list.some(e => e.tint) || o.count !== list.length) return;
         const cc = new T.Color();
         list.forEach((e, i) => { const t = e.tint || [1, 1, 1]; cc.setRGB(t[0], t[1], t[2]); o.setColorAt(i, cc); });
@@ -207,6 +233,15 @@
       envOwn(g, group);
     }
 
+    /* carvalhos gigantes: malha própria (sem o recorte de 90 m das árvores comuns), opacos e com as cores do modelo */
+    if (big.length && M.oak) {
+      const mx = new T.Matrix4(), q = new T.Quaternion(), ax = new T.Vector3(0, 1, 0), cc = new T.Color(), lf = TripoEnvironment153.leaf154('oak', X, Z);
+      for (const part of M.oak.parts) {
+        const im = new T.InstancedMesh(part.geometry, dim(part.material, S, 'tree'), big.length);
+        big.forEach((e, i) => { mx.compose(new T.Vector3(e.x, 0, e.z), q.setFromAxisAngle(ax, e.ry), new T.Vector3(e.sc, e.sc, e.sc)); im.setMatrixAt(i, mx); cc.setRGB(...(lf || [1, 1, 1])); im.setColorAt(i, cc); });
+        im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.frustumCulled = false; im.castShadow = true; g.add(im);
+      }
+    }
     /* praça */
     {
       const pl = new T.Mesh(new T.CircleGeometry(30, 64), new T.MeshBasicMaterial({ map: paving(S.plaza), color: 0xffffff, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
@@ -252,21 +287,35 @@
   /* ---------- gancho na construção da cidade ---------- */
   const bc0 = buildCity;
   buildCity = function (c, g, addCol, R) {
-    const r = bc0.apply(this, arguments);
+    const S = c && c.capital && STYLE[c.name] && !cityFallen(c) && window.TripoEnvironment153 ? STYLE[c.name] : null;
+    if (S) CTX = { S, lamps: [] };
+    let r;
     try {
-      if (c && c.capital && STYLE[c.name] && !cityFallen(c) && window.TripoEnvironment153) {
+      r = bc0.apply(this, arguments);
+      if (S) {
         if (TripoEnvironment153.models.wall) capital(c, g, addCol);
-        else TripoEnvironment153.ready.then(() => { if (g.parent) capital(c, g, addCol); });
+        else TripoEnvironment153.ready.then(() => { if (g.parent) { CTX = { S, lamps: [] }; try { capital(c, g, addCol); } finally { CTX = null; } } });
+        const lp = points(CTX.lamps.map(l => ({ x: l.x, y: 3.55, z: l.z, size: 3.2 })), S.flame, 1.1); if (lp) g.add(lp);
       }
-    } catch (e) { console.warn('capitais501', e); }
+    } catch (e) { console.warn('capitais504', e); } finally { CTX = null; }
     return r;
   };
   /* o chunk central da Capital (onde a muralha é montada) fica carregado até 430 m do jogador */
   const near = (c, P, r) => Math.hypot(c.x - P.x, c.z - P.z) < r;
   const caps = () => { const out = []; try { for (const n in STYLE) { const c = Mapa500.capital(n); if (c) out.push(c); } } catch (_) {} return out; };
+  /* o plano de corte da câmera (260 m) apagava a muralha longe: perto de uma Capital ele sobe para 950 m */
+  let far0 = 0;
+  setInterval(() => {
+    try {
+      if (typeof camera === 'undefined' || !camera || typeof player === 'undefined' || !player) return;
+      if (!far0) far0 = camera.far;
+      const want = L.mode === 'world' && caps().some(c => near(c, player, 900)) ? 950 : far0;
+      if (camera.far !== want) { camera.far = want; camera.updateProjectionMatrix(); }
+    } catch (_) {}
+  }, 400);
   window.Capitais501 = {
     STYLE, RC,
-    want(P, list) { if (L.mode !== 'world') return; for (const c of caps()) if (near(c, P, 430)) list.push([c.cx, c.cz, 99]); },
-    keep(ch, P) { return L.mode === 'world' && ch.city && STYLE[ch.city.name] && near(ch.city, P, 520); }
+    want(P, list) { if (L.mode !== 'world') return; for (const c of caps()) if (near(c, P, 700)) list.push([c.cx, c.cz, 99]); },
+    keep(ch, P) { return L.mode === 'world' && ch.city && STYLE[ch.city.name] && near(ch.city, P, 820); }
   };
 })();
