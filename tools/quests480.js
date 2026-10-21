@@ -306,9 +306,10 @@
 
   // Conclui uma missão secundária com recompensas completas
   function completeQuest(qid) {
-    const qdef = QUEST_CATALOG[qid];
     const S = getState();
+    const qdef = QUEST_CATALOG[qid] || S?.active?.[qid]?.def490;
     if (!qdef || !S || !S.active[qid]) return;
+    cleanupQuestSpawn(qid);
 
     delete S.active[qid];
     S.completed[qid] = Date.now();
@@ -920,6 +921,205 @@
     }
   ];
 
+  // Objetos interativos e de tesouro gerados no local do contrato (Skyrim style)
+  const QUEST_OBJECTS = {
+    emergent_deserter_stash: {
+      kind: 'chest',
+      name: 'ARCA DAS ROCHAS ALTAS',
+      label: 'F · ABRIR ARCA DAS ROCHAS ALTAS',
+      hintDefeat: 'Derrote a Monstruosidade com Chifres e as feras guardiãs para abrir a Arca!',
+      hintReady: 'As feras do covil foram derrotadas! Pressione [F] para abrir a Arca de Cristais!',
+      winTitle: 'ARCA CONQUISTADA',
+      winMsg: 'Você abriu a Arca das Rochas Altas e resgatou os cristais abissais!'
+    },
+    emergent_stolen_cargo: {
+      kind: 'cargo',
+      name: 'CARGA ROUBADA DE DORAN',
+      label: 'F · RECUPERAR FARDOS DE MERCADORIAS',
+      hintDefeat: 'Elimine os saqueadores renegados para recuperar os fardos!',
+      hintReady: 'Os saqueadores foram derrotados! Pressione [F] para resgatar a carga!',
+      winTitle: 'CARGA RECUPERADA',
+      winMsg: 'Você resgatou a carga refinada do mercador Doran!'
+    },
+    emergent_monolith_trial: {
+      kind: 'monolith',
+      name: 'MONÓLITO ANCESTRAL',
+      label: 'F · TOCAR MONÓLITO RÚNICO',
+      hintDefeat: 'Derrote a Aparição do Guardião para liberar o segredo do Monólito!',
+      hintReady: 'A Provação foi superada! Pressione [F] para tocar o Monólito!',
+      winTitle: 'PROVAÇÃO CUMPRIDA',
+      winMsg: 'O Monólito ressoou e revelou seus tesouros ancestrais!'
+    },
+    emergent_shipwreck_salvage: {
+      kind: 'cargo',
+      name: 'FARDOS DO NÁUFRAGO BRAN',
+      label: 'F · RESGATAR BARRIS DE PÉROLAS',
+      hintDefeat: 'Destrua as criaturas das marés para recuperar os barris!',
+      hintReady: 'As marés se acalmaram! Pressione [F] para recuperar os barris de Bran!',
+      winTitle: 'BARRIS RESGATADOS',
+      winMsg: 'Você recuperou os barris de pérolas do náufrago Bran!'
+    },
+    emergent_leviathan_spoils: {
+      kind: 'chest',
+      name: 'ESPÓLIOS DO LEVIATÃ',
+      label: 'F · SAQUEAR ESPÓLIOS DO LEVIATÃ',
+      hintDefeat: 'Derrote o Capitão Corsário para reivindicar os espólios!',
+      hintReady: 'Os corsários caíram! Pressione [F] para abrir o baú do Leviatã!',
+      winTitle: 'ESPÓLIOS REIVINDICADOS',
+      winMsg: 'Você conquistou os espólios lendários do Leviatã!'
+    },
+    emergent_eternal_flame: {
+      kind: 'altar',
+      name: 'CHAMA ETERNA DE SKADI',
+      label: 'F · ACENDER CHAMA SAGRADA',
+      hintDefeat: 'Derrote o Cavaleiro Espectral do Gelo para reacender o fogo sagrado!',
+      hintReady: 'O espectro se dissipou! Pressione [F] para acender a Chama Eterna!',
+      winTitle: 'CHAMA SAGRADA ACESA',
+      winMsg: 'A Chama Eterna de Skadi voltou a arder contra o frio!'
+    },
+    emergent_pharaoh_tomb: {
+      kind: 'sarcophagus',
+      name: 'SARCÓFAGO DAS DUNAS',
+      label: 'F · ABRIR SARCÓFAGO ANCESTRAL',
+      hintDefeat: 'Destrua o Faraó Esquelético antes de abrir o sarcófago!',
+      hintReady: 'O Faraó ruiu em pó! Pressione [F] para saquear o sarcófago!',
+      winTitle: 'TÚMULO CONQUISTADO',
+      winMsg: 'Você violou os tesouros de ouro do sarcófago das areias!'
+    },
+    emergent_sunken_tomb: {
+      kind: 'altar',
+      name: 'RELICÁRIO DA CRIPTA SUBMERSA',
+      label: 'F · PURIFICAR RELICÁRIO SUBMERSO',
+      hintDefeat: 'Derrote o Cavaleiro Espectral do charco primeiro!',
+      hintReady: 'A cripta submersa silenciou! Pressione [F] para purificar o relicário!',
+      winTitle: 'CRIPTA PURIFICADA',
+      winMsg: 'A cripta do pântano foi purificada da maldição espectral!'
+    },
+    emergent_magma_forge: {
+      kind: 'altar',
+      name: 'FORJA DE OBSIDIANA',
+      label: 'F · RECLAMAR FORJA VULCÂNICA',
+      hintDefeat: 'Esmague os Colossos de Rocha Ardente antes de usar a forja!',
+      hintReady: 'Os colossos ardentes tombaram! Pressione [F] para ativar a forja!',
+      winTitle: 'FORJA RECLAMADA',
+      winMsg: 'A forja vulcânica foi reativada com poder primordial!'
+    },
+    emergent_corrupted_grove: {
+      kind: 'altar',
+      name: 'CORAÇÃO FÚNGICO DA FLORESTA',
+      label: 'F · PURIFICAR BOSQUE SAGRADO',
+      hintDefeat: 'Destrua o Fungo Primordial antes de purificar as raízes!',
+      hintReady: 'O fungo corrupto foi destruído! Pressione [F] para purificar a clareira!',
+      winTitle: 'BOSQUE PURIFICADO',
+      winMsg: 'O bosque de Silvanus foi purificado de toda corrupção!'
+    }
+  };
+
+  // Popula todas as missões de EMERGENT_DEFS no QUEST_CATALOG global imediatamente
+  EMERGENT_DEFS.forEach(enc => {
+    if (enc.quest && enc.quest.id) {
+      QUEST_CATALOG[enc.quest.id] = {
+        ...enc.quest,
+        region: 'mundo_aberto',
+        type: 'emergent',
+        encType: enc.type,
+        biome: (enc.biomes && enc.biomes[0]) || 'campos',
+        offset: { dx: 110, dz: -90 }
+      };
+    }
+  });
+
+  function createQuestObjectMesh(kind) {
+    const g = new THREE.Group();
+    let lid = null;
+
+    if (kind === 'chest') {
+      if (typeof envChest === 'function' && typeof ENV !== 'undefined' && ENV.ok) {
+        try {
+          const o = envChest(true);
+          g.add(o.g);
+          lid = o.lid;
+        } catch (_) {}
+      }
+      if (!g.children.length) {
+        const bodyGeo = new THREE.BoxGeometry(1.5, 0.85, 1.1);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x54321d, roughness: 0.8 });
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.position.y = 0.42;
+        g.add(bodyMesh);
+
+        lid = new THREE.Group();
+        lid.position.set(0, 0.85, -0.55);
+        const lidMesh = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.38, 1.15), new THREE.MeshStandardMaterial({ color: 0x824e2d, roughness: 0.7 }));
+        lidMesh.position.set(0, 0.19, 0.55);
+        lid.add(lidMesh);
+        g.add(lid);
+
+        const goldBand = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.14, 1.2), new THREE.MeshStandardMaterial({ color: 0xffd070, roughness: 0.3, metalness: 0.8 }));
+        goldBand.position.y = 0.85;
+        g.add(goldBand);
+      }
+      const cry = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: false }));
+      cry.position.set(0, 1.45, 0);
+      cry.scale.set(0.7, 1.4, 0.7);
+      g.add(cry);
+      g.userData.crystal = cry;
+
+    } else if (kind === 'cargo') {
+      const c1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x6e4a2e, roughness: 0.85 }));
+      c1.position.set(0, 0.55, 0);
+      g.add(c1);
+      const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.85, 0.85), new THREE.MeshStandardMaterial({ color: 0x8a5d3b, roughness: 0.85 }));
+      c2.position.set(0.6, 0.42, 0.5);
+      g.add(c2);
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.2, 12), new THREE.MeshStandardMaterial({ color: 0x4a321f, roughness: 0.9 }));
+      bar.position.set(-0.7, 0.6, 0.3);
+      g.add(bar);
+
+    } else if (kind === 'monolith') {
+      const base = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.4, 1.8), new THREE.MeshStandardMaterial({ color: 0x3d3f45, roughness: 0.9 }));
+      base.position.y = 0.2;
+      g.add(base);
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.2, 0.7), new THREE.MeshStandardMaterial({ color: 0x5a5d66, roughness: 0.8 }));
+      pillar.position.y = 1.8;
+      g.add(pillar);
+      const rune = new THREE.Mesh(new THREE.OctahedronGeometry(0.3, 0), new THREE.MeshBasicMaterial({ color: 0x7fd8ff }));
+      rune.position.set(0, 2.5, 0.37);
+      g.add(rune);
+
+    } else if (kind === 'altar') {
+      const aBase = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 0.8, 8), new THREE.MeshStandardMaterial({ color: 0x444450, roughness: 0.9 }));
+      aBase.position.y = 0.4;
+      g.add(aBase);
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.5, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0x22222a, roughness: 0.7 }));
+      bowl.position.y = 0.95;
+      g.add(bowl);
+      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff6a00 }));
+      flame.position.y = 1.35;
+      g.add(flame);
+      g.userData.flame = flame;
+
+    } else if (kind === 'sarcophagus') {
+      const sBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 2.4), new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.9 }));
+      sBase.position.y = 0.4;
+      g.add(sBase);
+      const sLid = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.3, 2.5), new THREE.MeshStandardMaterial({ color: 0xfaedcd, roughness: 0.8 }));
+      sLid.position.y = 0.95;
+      g.add(sLid);
+      lid = sLid;
+    }
+
+    const aura = new THREE.Mesh(
+      new THREE.RingGeometry(1.8, 2.1, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffd070, transparent: true, opacity: 0.6, side: THREE.DoubleSide })
+    );
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.06;
+    g.add(aura);
+
+    return { group: g, lid };
+  }
+
   function openEmergentDialogue(encDef, npc) {
     /* v520: árvore de diálogo com escolhas e memória (tools/dialogo520.js) */
     if (global.Dialogo520 && global.Dialogo520.open) { try { global.Dialogo520.open(encDef, npc || currentEmergentNpc); return; } catch (_) {} }
@@ -1061,6 +1261,20 @@
     }
   }
 
+  const activeSpawns = {}; // { [qid]: { group, chestIt, boss, minions: [], readyNotified: false } }
+
+  function cleanupQuestSpawn(qid) {
+    const sp = activeSpawns[qid];
+    if (!sp) return;
+    if (sp.group && sp.group.parent) {
+      try { sp.group.parent.remove(sp.group); } catch (_) {}
+    }
+    if (sp.chestIt && typeof L !== 'undefined' && L && Array.isArray(L.inter)) {
+      L.inter = L.inter.filter(i => i !== sp.chestIt);
+    }
+    delete activeSpawns[qid];
+  }
+
   function tick(dt) {
     if (typeof paused !== 'undefined' && paused) return;
     if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
@@ -1097,26 +1311,99 @@
     if (!S || !Object.keys(S.active).length) return;
 
     for (const [qid, act] of Object.entries(S.active)) {
-      const qdef = QUEST_CATALOG[qid];
+      const qdef = QUEST_CATALOG[qid] || act.def490;
       if (!qdef || !act.targetPos) continue;
+      if (!QUEST_CATALOG[qid]) QUEST_CATALOG[qid] = qdef;
       if (qdef.custom508) continue; // v508: missões de "ir até lá" são resolvidas por tools/gatilhos508.js
 
       const dist = Math.hypot(player.x - act.targetPos.x, player.z - act.targetPos.z);
 
-      // Spawna o encontro quando o jogador se aproxima (dist < 45m)
-      if (!act.spawned && dist < 45) {
-        act.spawned = true;
-        if (typeof toast === 'function') {
-          toast(`<b>[OBJETIVO DE MISSÃO]</b> Você encontrou o local do contrato: <b>${qdef.title}</b>!`, 6000);
-        }
-        if (typeof bigText === 'function') bigText('ÁREA DA MISSÃO', 1400);
+      // Limpeza se o jogador se afastar muito (> 160m)
+      if (dist > 160 && activeSpawns[qid]) {
+        cleanupQuestSpawn(qid);
+        act.spawned = false;
+      }
 
-        // Spawna os inimigos / alvo do contrato
+      // Verifica se as entidades deste contrato estão atualmente ativas na cena
+      const sp = activeSpawns[qid];
+      const liveBoss = typeof enemies !== 'undefined' ? enemies.some(e => e.questBoss480 === qid && !e.dead) : false;
+      const liveMinions = typeof enemies !== 'undefined' ? enemies.some(e => e.questLethal480 === qid && !e.dead) : false;
+      const liveChest = typeof L !== 'undefined' && L && Array.isArray(L.inter) ? L.inter.some(i => i.questChest480 === qid && !i.opened) : false;
+      const isLive = liveBoss || liveMinions || liveChest || !!sp;
+
+      // Spawna o encontro e o objeto físico quando o jogador se aproxima (dist < 55m)
+      // OU se o jogador já está no local (< 55m) mas a cena atual não tem as entidades vivas (ex: pós-recarregamento)
+      if (!isLive && dist < 55) {
+        act.spawned = true;
+        saveState();
+
+        const objDef = QUEST_OBJECTS[qid];
+        if (typeof toast === 'function') {
+          toast(`<b>[ÁREA DO CONTRATO]</b> Você encontrou o local: <b>${qdef.title}</b>!`, 6000);
+        }
+        if (typeof bigText === 'function') bigText(objDef ? objDef.name : 'ÁREA DA MISSÃO', 1400);
+        if (typeof sfx === 'function') sfx('quest');
+
+        let chestIt = null;
+        let groupObj = null;
+
+        // Spawna objeto físico 3D no centro do objetivo (Arca / Monólito / Carga / Altar / Sarcófago)
+        if (objDef && typeof THREE !== 'undefined' && typeof scene !== 'undefined') {
+          try {
+            const { group, lid } = createQuestObjectMesh(objDef.kind);
+            const gy = typeof terrH === 'function' ? terrH(act.targetPos.x, act.targetPos.z) : 0;
+            group.position.set(act.targetPos.x, gy, act.targetPos.z);
+            scene.add(group);
+            groupObj = group;
+
+            chestIt = {
+              type: 'quest_chest',
+              questChest480: qid,
+              x: act.targetPos.x,
+              z: act.targetPos.z,
+              r: 3.5,
+              label: objDef.label,
+              opened: false,
+              use: () => {
+                if (chestIt.opened) return;
+                const remB = typeof enemies !== 'undefined' ? enemies.some(e => e.questBoss480 === qid && !e.dead) : false;
+                const remM = typeof enemies !== 'undefined' ? enemies.some(e => e.questLethal480 === qid && !e.dead) : false;
+                if (remB || remM) {
+                  if (typeof toast === 'function') toast(`<b>[GUARDIÕES PRESENTES]</b> ${objDef.hintDefeat}`, 4000);
+                  if (typeof sfx === 'function') sfx('hit');
+                  if (typeof fxRing === 'function') fxRing(chestIt.x, chestIt.z, 0xff4d6a, 3.5);
+                  return;
+                }
+                chestIt.opened = true;
+                chestIt.hidden = true;
+                if (lid) {
+                  if (lid.isMesh) lid.position.x += 0.8;
+                  else lid.rotation.x = -1.9;
+                }
+                if (typeof fxBurst === 'function') fxBurst(chestIt.x, gy + 1, chestIt.z, 0x00f0ff, 35, 7);
+                if (typeof fxRing === 'function') fxRing(chestIt.x, chestIt.z, 0xffd700, 4, 1.2);
+                if (typeof sfx === 'function') sfx('gong');
+                if (typeof bigText === 'function') bigText(objDef.winTitle, 1800);
+                if (typeof toast === 'function') toast(`<b>[${objDef.winTitle}]</b> ${objDef.winMsg}`, 6000);
+                completeQuest(qid);
+              }
+            };
+            if (typeof L !== 'undefined' && L && Array.isArray(L.inter)) {
+              L.inter.push(chestIt);
+            }
+          } catch (_) {}
+        }
+
+        // Spawna os inimigos / guardiões do contrato
+        let spawnedBoss = null;
+        const spawnedMinions = [];
         if (typeof spawnKind === 'function' && typeof enemies !== 'undefined') {
           const gr = qdef.rank || 1;
           const kBoss = qdef.bossKind || 'orcinho';
           try {
-            const b = spawnKind(kBoss, act.targetPos.x, act.targetPos.z, gr, { wild: true });
+            const bx = act.targetPos.x + 3.0;
+            const bz = act.targetPos.z + 1.5;
+            const b = spawnKind(kBoss, bx, bz, gr, { wild: true, breaker: true });
             if (b) {
               b.questBoss480 = qid;
               b.questTarget480 = true;
@@ -1127,33 +1414,53 @@
               b.aggro = true;
               if (b.m && b.m.root) b.m.root.scale.setScalar(qdef.bossScale || 1.5);
               if (typeof fxRing === 'function') fxRing(b.x, b.z, 0xff4d6a, 2.5);
+              spawnedBoss = b;
             }
           } catch (_) {}
 
-          // Spawna os lacaios da emboscada / bando
           const nMinions = qdef.minions || 3;
           for (let i = 0; i < nMinions; i++) {
-            const a = (i / nMinions) * TAU + Math.random() * 0.5;
-            const mx = act.targetPos.x + Math.cos(a) * (4 + Math.random() * 5);
-            const mz = act.targetPos.z + Math.sin(a) * (4 + Math.random() * 5);
-            const kMinion = (qdef.minionKinds && qdef.minionKinds[i % qdef.minionKinds.length]) || 'slime';
+            const a = (i / nMinions) * TAU + 0.35;
+            const mx = act.targetPos.x + Math.cos(a) * (4.5 + Math.random() * 2.5);
+            const mz = act.targetPos.z + Math.sin(a) * (4.5 + Math.random() * 2.5);
+            const kMinion = (qdef.minionKinds && qdef.minionKinds[i % qdef.minionKinds.length]) || 'cogu';
             try {
-              const m = spawnKind(kMinion, mx, mz, gr, { wild: true });
+              const m = spawnKind(kMinion, mx, mz, gr, { wild: true, breaker: true });
               if (m) {
                 m.questLethal480 = qid;
                 m.aggro = true;
+                spawnedMinions.push(m);
               }
             } catch (_) {}
           }
         }
+        activeSpawns[qid] = { group: groupObj, chestIt, boss: spawnedBoss, minions: spawnedMinions, readyNotified: false };
       }
 
-      // Verifica se o chefe / alvos foram abatidos
-      if (act.spawned) {
+      // Anima cristais dos objetos de contrato ativos
+      if (sp && sp.group && sp.group.userData && sp.group.userData.crystal) {
+        sp.group.userData.crystal.rotation.y += dt * 1.6;
+      }
+
+      // Verifica se o chefe / guardiões foram abatidos
+      if (isLive || act.spawned) {
         const remainingBoss = typeof enemies !== 'undefined' ? enemies.some(e => e.questBoss480 === qid && !e.dead) : false;
         const remainingMinions = typeof enemies !== 'undefined' ? enemies.some(e => e.questLethal480 === qid && !e.dead) : false;
+        const objDef = QUEST_OBJECTS[qid];
+
         if (!remainingBoss && !remainingMinions) {
-          completeQuest(qid);
+          if (objDef && sp && sp.chestIt && !sp.chestIt.opened) {
+            // Há um objeto interativo (Arca/Monólito/etc). Alerta o jogador para pressionar [F]!
+            if (!sp.readyNotified) {
+              sp.readyNotified = true;
+              if (typeof toast === 'function') toast(`<b>[GUARDIÕES DERROTADOS]</b> ${objDef.hintReady}`, 6000);
+              if (typeof bigText === 'function') bigText('OBJETIVO DESIMPEDIDO', 1500);
+              if (typeof sfx === 'function') sfx('quest');
+            }
+          } else if (!objDef) {
+            // Missão de pura caçada: abate de todos os alvos conclui o contrato
+            completeQuest(qid);
+          }
         }
       }
     }
@@ -1317,9 +1624,25 @@
     if (!qdef || !act || !act.targetPos || typeof player === 'undefined' || !player) return null;
 
     const d = Math.round(Math.hypot(player.x - act.targetPos.x, player.z - act.targetPos.z));
+    const objDef = QUEST_OBJECTS[qid];
+    const liveBoss = typeof enemies !== 'undefined' ? enemies.filter(e => e.questBoss480 === qid && !e.dead).length : 0;
+    const liveMinions = typeof enemies !== 'undefined' ? enemies.filter(e => e.questLethal480 === qid && !e.dead).length : 0;
+    const totalFoes = liveBoss + liveMinions;
+
+    let detail = '';
+    if (d > 45) {
+      detail = `${d}m · ${qdef.giver}`;
+    } else if (totalFoes > 0) {
+      detail = `⚔ Derrote os guardiões (${totalFoes} restantes)`;
+    } else if (objDef) {
+      detail = `★ Interaja com: ${objDef.name} [F]!`;
+    } else {
+      detail = `Objetivo concluído!`;
+    }
+
     return {
       title: qdef.title,
-      detail: `Distância: ${d}m · ${qdef.giver}`
+      detail: detail
     };
   }
 

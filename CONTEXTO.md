@@ -1,3 +1,25 @@
+## v525 (21/10/2026) — Correção do covil secreto / arca das rochas altas e encontros emergentes
+- Pedido de Ian (print e mensagem): "to aqui mas não aparece oq fazer nem nada" (no local do contrato "Covil Secreto: A Arca das Rochas Altas").
+- Diagnóstico:
+  1) `EMERGENT_DEFS` não era registrado em `QUEST_CATALOG` na inicialização do script, tornando `QUEST_CATALOG[qid]` nulo após recarregar a página e travando o tick da missão.
+  2) Não existia objeto físico 3D nem item de interação `[F]` para a Arca ou tesouros em missões de covil/baú.
+  3) O check `!act.spawned && dist < 45` só rodava uma vez e gravava no localStorage; se o jogador recarregava ou chegava no local, não havia entidades vivas na cena e nada acontecia.
+  4) O HUD apenas mostrava "Distância: 1m", sem indicar o que fazer.
+- Correções aplicadas:
+  - `tools/quests480.js`:
+    - Registro de todas as 17 missões de `EMERGENT_DEFS` no `QUEST_CATALOG` no carregamento.
+    - Criação de `QUEST_OBJECTS` com geração de malhas 3D (arcas com aura, monólitos rúnicos, fardos de carga, altares e sarcófagos) e itens em `L.inter`.
+    - Spawning reativo (< 55m): se a cena atual não tiver os guardiões nem a arca ativos, spawna imediatamente (inclusive se o jogador já estiver parado a 1m do local).
+    - Inimigos recebem `breaker: true` e `wild: true` para não serem repelidos por cidades ou limites de chunk.
+    - Se o jogador tentar abrir a Arca antes de matar as feras, o jogo avisa com anel vermelho e som de impacto.
+    - Ao eliminar todas as feras, aviso com bigText e toast para abrir a Arca com [F].
+    - Abrir a Arca entrega ouro, XP, partículas e conclui o contrato.
+    - `getHudTrackText()` dinâmico: indica "⚔ Derrote os guardiões (N restantes)" ou "★ Interaja com: Arca [F]!".
+  - `src/core/410-overlay-e-hud.js`:
+    - Marcador 3D flutuante no mundo exibe o objetivo atualizado conforme a proximidade e o combate.
+  - `sw.js`:
+    - Cache atualizado para `pds-v525`.
+
 ## v524 (21/10/2026) — HUD de diálogo Skyrim, correção de banco/lojas e missões no minimapa/mapa
 - Pedido de Ian (áudios e print):
   1) "O HUD de falar ali tem que mudar, tem que ser que nem no Skyrim, que tem as escolhas ali, não assim como tá agora."
