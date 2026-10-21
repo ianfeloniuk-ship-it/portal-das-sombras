@@ -1,3 +1,12 @@
+## v494 (21/10/2026) — Machado e escudo do Tanque (Tripo), escudo só quando equipado
+- Pedido de Ian: "o cara tem um escudo e um machado, e o machado não tá nem encaixado direito no tanque… quando eu coloco o escudo, não aparece".
+- Machado: o jogo usava o modelo da MAÇA como machado (`W171.axe`). Novo `models/armas155/machado-tanque490.glb` (Tripo texto, 30 cr; reduzido no Blender de 1,4 mi para 12 mil triângulos, textura 1024 JPEG, 0,7 MB), cor original (`make428`, sRGB), sem tinta de rank.
+- Escudo: novo `models/armas155/escudo-tanque490.glb` (Tripo texto, 30 cr), girado −90° no Blender para a face ficar como a do escudo antigo. Preso em pé com a face para fora do braço esquerdo, medido contra o corpo (antes seguia o giro da mão e ficava deitado como bandeja).
+- Escudo só aparece com o slot Escudo equipado (`SHIELD171={}`): Tanque e Paladino não levam mais escudo grudado.
+- Bugs que escondiam o escudo: (1) a assinatura do visual não incluía o slot `sh`, então equipar escudo não remontava o personagem; (2) a fila `wait171` era apagada quando o PRIMEIRO modelo carregava, e o segundo (escudo) nunca entrava. Ambos corrigidos em `tools/warrior-player127.js`.
+- Ainda com modelo provisório: varinha do Paladino usa a maça; tomo/cajado de ossos usam o cajado comum. Modelos Blender para todas as classes no Drive (Projetos/Portal-das-Sombras/Armas-Blender-v490), não integrados.
+- Teste: navegador local, machado + escudo equipados, sem escudo = nada na mão esquerda, com escudo = em pé no braço; golpe com o machado na mão. Sem erros. Não testado: pose de guarda com escudo (shield473).
+
 ## v493 (21/10/2026) — Povo novo (NPCs Tripo + rig no Blender), 5 dragões estilo Skyrim, mina e viajantes de carroça
 - Pedido de Ian (20/10): NPCs do Tripo com rig no Blender (não pagar rig no Tripo), do tamanho do Viajante, anões e elfos, 5 dragões animalescos estilo Skyrim com movimento fluido, moradores sem arma/armadura (só caçadores lutam), magos sem armadura.
 - `models/povo482/`: 24 bases humanas (14 caçadores m/f de 7 famílias, 6 moradores, 2 anões, 2 elfos) rigadas por `tools/blender482/rig_humanoid.py` (esqueleto Mixamo, máscara `_NPC_MASK` roupa/cabelo/pele), 5 dragões por `tools/blender482/rig_dragon.py` (69 ossos, 14 clipes no lugar e ciclos fechados), `anim-povo482.glb` (36 animações grátis do Tripo, só esqueleto), `mina482.glb`. Índice: `python tools/povo482-index.py`.
