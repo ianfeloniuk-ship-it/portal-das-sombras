@@ -1,3 +1,9 @@
+## v530 (21/10/2026) — Diálogo só com letras, Vael fala em 1ª pessoa, aviso da arca
+- Pedido de Ian (áudios + prints): o painel do diálogo tapava a tela, quer só as letras como no Skyrim; Vael falava de si na 3ª pessoa; a arca «faz uma luzinha e não aparece nada».
+- `tools/dialogo520.js`: sem fundo escuro, sem caixas e sem bordas (letras com contorno preto); escolha marcada fica dourada. Novo `FALA520`: fala em 1ª pessoa para as 17 missões de encontro (a descrição do diário continua em 3ª pessoa).
+- `tools/quests480.js`: abrir a arca com guardiões vivos agora mostra na tela «DERROTE OS GUARDIÕES ANTES (N)» (antes só um anel vermelho e um aviso pequeno).
+- Teste: só sintaxe (node --check) e build; não abri no navegador.
+
 ## v529 (21/10/2026) — Constelações viram um céu estilo Skyrim
 - Pedido de Ian (aprovado no protótipo: «Ficou bom. Pode levar essa tela de constelações para o jogo»): a lista de Constelações com ★ vira um céu em 3D, visto do chão de Aster, como no Skyrim. Figuras e frases tiradas do Livro Oficial (Ed. 05) e do Manuscrito Completo.
 - `tools/constel523.js` (novo, `window.Cons523`): substitui `consView()`. As 6 constelações reais de `CONS` com figura própria — Fúria = O Dragão Rubro, Arcano = O Olho da Fenda, Caçador = A Arraia do Vazio, Vento = O Lobo de Mana, Sangue = O Cálice Partido, Sombra = A Mão do Arquiteto — e A Estrela (rank secreto, só aparece bloqueada). Cada uma tem 10 estrelas + Ápice; acende em ordem, 1 ponto de `run.cpts` por estrela, o Ápice acende sozinho no 10 (regra do jogo mantida). Painel mostra o texto de `CONS` e um exemplo em números inteiros. Nexo de Aster aparece como estrela azul acima da serra. Botão de converter pontos aparece quando tudo está cheio (usa `consconv`). Pausa o jogo enquanto aberto; Esc volta ao céu e fecha.

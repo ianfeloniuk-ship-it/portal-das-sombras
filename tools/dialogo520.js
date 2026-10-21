@@ -48,6 +48,7 @@
   }
 
   /* --- HUD ESTILO SKYRIM --- */
+  const FALA520 = {"emergent_alpha_beast": "Uma fera alfa abissal emboscou minha patrulha nas colinas. Derrote-a e ajude a devolver a honra dos meus caçadores.", "emergent_stolen_cargo": "Saqueadores renegados emboscaram minha carroça. Elimine-os e recupere o baú de mercadorias refinadas.", "emergent_monolith_trial": "Toque o monólito rúnico antigo e derrote a aparição do Guardião Ancestral. Só assim os segredos dele se abrem.", "emergent_deserter_stash": "Siga as coordenadas que vou lhe passar até o covil oculto nas pedras e conquiste o tesouro das feras.", "emergent_corrupted_grove": "Destrua o fungo primordial que infecta este bosque sagrado. Eu sozinho não consigo.", "emergent_shipwreck_salvage": "Derrote os monstros de carapaça nas pedras da costa e recupere as pérolas da minha jangada naufragada.", "emergent_leviathan_spoils": "Expulse os corsários que tentam roubar a carcaça do leviatã encalhado na costa.", "emergent_frozen_expedition": "Quebre o cerco dos golens de gelo ao redor da minha tenda de expedição.", "emergent_avalanche_ambush": "Extermine a alcateia de lobos da nevasca que cerca meu trenó soterrado pela avalanche.", "emergent_eternal_flame": "Proteja a fogueira eterna contra os cavaleiros espectrais do gelo.", "emergent_dune_beetles": "Esmague a rainha dos escaravelhos que cerca minha caravana encalhada.", "emergent_sand_mirage": "Derrote a aparição do Djinn e dissipe a miragem mortal no meio do deserto.", "emergent_pharaoh_tomb": "Entre na tumba soterrada e derrote o guardião esquelético das dunas.", "emergent_swamp_slime": "Derrote a Gosma Matriarca no coração do pântano. Preciso dela para o meu caldeirão.", "emergent_sunken_tomb": "Encontre a cripta submersa que o fogo-fátuo indica e derrote o cavaleiro espectral do lodo.", "emergent_magma_forge": "Elimine os golens de magma que cercaram minha bigorna na ravina vulcânica.", "emergent_thunder_storm": "Neutralize os golens elétricos atraídos pelo meu cajado durante a tempestade."};
   function ensureSkyrimUI() {
     let el = document.getElementById('skyrim-dialog');
     if (!el) {
@@ -58,7 +59,7 @@
           #skyrim-dialog {
             position: fixed; inset: 0; z-index: 120; pointer-events: none; display: none;
             font-family: "Chakra Petch", sans-serif; user-select: none;
-            background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(3,7,14,0.45) 75%, rgba(2,4,8,0.78) 100%);
+            background: none;
           }
           .skyrim-dialog-subtitles {
             position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
@@ -71,9 +72,7 @@
           }
           .skyrim-dialog-text {
             font-size: 15px; line-height: 1.5; color: #f5f8ff; font-weight: 500;
-            background: rgba(10, 16, 26, 0.78); padding: 10px 22px; border-radius: 4px;
-            border: 1px solid rgba(255, 208, 112, 0.28); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(6px); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+            padding: 0 12px; text-shadow: 0 0 3px #000, 0 0 6px #000, 0 1px 8px rgba(0,0,0,0.95);
           }
           .skyrim-dialog-choices {
             position: absolute; bottom: 125px; right: 44px; width: min(440px, 92vw);
@@ -90,18 +89,15 @@
           }
           .skyrim-choice-item {
             display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-            background: rgba(14, 20, 30, 0.82); border: 1px solid rgba(255, 208, 112, 0.22);
+            background: none; border: none; padding: 4px 8px;
             border-radius: 3px; color: #dce7f5; font-size: 14px; font-weight: 600; cursor: pointer;
-            transition: all 0.12s ease-out; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+            transition: all 0.12s ease-out; text-shadow: 0 0 3px #000, 0 0 6px #000, 0 1px 8px rgba(0,0,0,0.95);
           }
           .skyrim-choice-item:hover, .skyrim-choice-item.selected {
-            background: rgba(28, 40, 60, 0.94); border-color: rgba(255, 208, 112, 0.9);
-            color: #ffffff; transform: translateX(-4px); box-shadow: 0 0 16px rgba(255, 208, 112, 0.4);
+            color: #ffd070; transform: translateX(-4px);
           }
           .skyrim-choice-num {
-            font-size: 11px; color: #ffd070; background: rgba(255,208,112,0.15);
-            padding: 2px 6px; border-radius: 2px; border: 1px solid rgba(255,208,112,0.3);
+            font-size: 11px; color: #ffd070; padding: 0 2px;
           }
           .skyrim-choice-icon {
             color: rgba(255, 208, 112, 0.6); font-size: 11px; transition: color 0.12s ease-out;
@@ -250,7 +246,7 @@
       ]
     };
     N.saber = {
-      t: 'Escute: ' + q.desc + ' Quem vai lá precisa estar preparado. Os lacaios vêm primeiro e o chefe aparece depois.',
+      t: 'Escute: ' + (FALA520[q.id] || q.desc) + ' Quem vai lá precisa estar preparado. Os lacaios vêm primeiro e o chefe aparece depois.',
       o: [
         { l: 'Entendi. Aceito, já sabendo o que esperar', fn: () => { f.soube = 1; return accept({ minions: Math.max(1, (q.minions || 3) - 1), xp: Math.round(q.xp * 1.1) }); } },
         { l: 'Prefiro pensar mais um pouco', fn: () => { f.soube = 1; f.recusou = 1; save(); return 'fim'; } }

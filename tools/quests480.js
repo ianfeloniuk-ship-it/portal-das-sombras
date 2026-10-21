@@ -1369,6 +1369,7 @@
                 const remB = typeof enemies !== 'undefined' ? enemies.some(e => e.questBoss480 === qid && !e.dead) : false;
                 const remM = typeof enemies !== 'undefined' ? enemies.some(e => e.questLethal480 === qid && !e.dead) : false;
                 if (remB || remM) {
+                  if (typeof bigText === 'function') bigText('DERROTE OS GUARDIÕES ANTES (' + ((typeof enemies !== 'undefined' ? enemies.filter(e => (e.questBoss480 === qid || e.questLethal480 === qid) && !e.dead).length : 0)) + ')', 1800);
                   if (typeof toast === 'function') toast(`<b>[GUARDIÕES PRESENTES]</b> ${objDef.hintDefeat}`, 4000);
                   if (typeof sfx === 'function') sfx('hit');
                   if (typeof fxRing === 'function') fxRing(chestIt.x, chestIt.z, 0xff4d6a, 3.5);
