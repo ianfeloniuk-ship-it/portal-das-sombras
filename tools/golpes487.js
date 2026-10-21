@@ -7,18 +7,20 @@ if(typeof THREE==='undefined'||typeof scene==='undefined')return;
 const T=THREE,lite=()=>GFX267.lite;
 const API=window.Golpes487={on:true,bloomOn:true,legacyDepth:0,stats:{basics:0,skills:0,hits:0,peak:0},errors:[]};
 const supported=new Set(['0:0','1:3','2:0']);
-API.handles=sk=>!!(API.on&&sk&&sk.t==='kit111'&&supported.has(sk.skillId));
-API.basic=ci=>API.on&&[0,1,2].includes(ci);
+API.providers=[];API.provider=sk=>API.providers.find(p=>p.handles(sk));
+API.handles=sk=>!!(API.on&&sk&&sk.t==='kit111'&&(supported.has(sk.skillId)||!!API.provider(sk)));
+API.basic=ci=>API.on&&([0,1,2].includes(ci)||API.providers.some(p=>p.basic(ci)));
+API.projectile=p=>API.on&&!!p?.fx487;
 API.legacy=function(fn,sk=activeSkill){const prev=API.legacySkill;API.legacySkill=sk;API.legacyDepth++;try{return fn()}finally{API.legacyDepth--;API.legacySkill=prev}};
 API.bindLegacy=fn=>{if(!API.legacyDepth)return fn;const sk=API.legacySkill;return function(){const a=arguments,t=this;return API.legacy(()=>fn.apply(t,a),sk)}};
 const sceneAdd=scene.add;
-scene.add=function(...objs){if(API.legacyDepth)for(const o of objs){o.userData.gate487=API.castState?API.castState(API.legacySkill):null;o.traverse(c=>c.layers.set(31));}return sceneAdd.apply(this,objs)};
+scene.add=function(...objs){if(API.legacyDepth)for(const o of objs){o.userData.gate487=API.castState?API.castState(API.legacySkill):null;o.traverse(c=>c.layers.set(31));}else if(currentCtx){for(const o of objs)addFX(o);return this}return sceneAdd.apply(this,objs)};
 function addFX(o){o.userData.ctx487=currentCtx;o.traverse(c=>{if(c.material)for(const m of [].concat(c.material)){m.toneMapped=false;m.fog=false}});o.userData.terrainAbsolute245=true;o.userData.golpes487=true;sceneAdd.call(scene,o)}
 const ground=(x,z)=>typeof terrH==='function'?terrH(x,z):0;
 const pos=(x,z,y=0)=>new T.Vector3(x,ground(x,z)+y,z);
 const rng=seed=>{let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
-let rand=rng(487),currentCtx=null,hero=null,F=null,S={};
-function inContext(c,fn){const prev=[currentCtx,hero,F,S];if(c){currentCtx=c;hero=c.hero;F=c.foe;S=c.S}try{return fn()}finally{[currentCtx,hero,F,S]=prev}}
+let rand=rng(487),currentCtx=null,hero=null,F=null,S={},foes=[];
+function inContext(c,fn){const prev=[currentCtx,hero,F,S,foes];if(c){currentCtx=c;hero=c.hero;F=c.foe;S=c.S;foes=c.foes||[F]}try{return fn()}finally{[currentCtx,hero,F,S,foes]=prev}}
 function radialTex(stops,size=256){const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');const g=x.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);for(const [o,col] of stops)g.addColorStop(o,col);x.fillStyle=g;x.fillRect(0,0,size,size);return new T.CanvasTexture(c)}
 const glowTex=radialTex([[0,'rgba(255,255,255,1)'],[.18,'rgba(255,255,255,.9)'],[.45,'rgba(255,255,255,.3)'],[1,'rgba(255,255,255,0)']]);
 const softTex=radialTex([[0,'rgba(255,255,255,.55)'],[.6,'rgba(255,255,255,.15)'],[1,'rgba(255,255,255,0)']]);
@@ -87,9 +89,10 @@ void main(){vec2 p=abs(vUv*2.-1.);float d=max(p.x*.866+p.y*.5,p.y);float border=
  float scan=.5+.5*sin(vUv.y*40.-uTime*9.);vec3 c=uB*(.18+.12*scan)+uA*border*1.5;gl_FragColor=vec4(c,(.35+border)*uFade*(1.-step(1.,d)));}`;
 
 /* ---- vida dos objetos ---- */
+const activeEntries=new Set();
 let live=[],time=0,seqT=0,shakeT=0,flashV=0,bloomKick=0,speed=1;
-function spawn(obj,update){const cap=lite()?180:360;if(live.length>=cap){kill(obj);return obj}live.push({obj,update,t:0,ctx:currentCtx});API.stats.peak=Math.max(API.stats.peak,live.length);return obj}
-function at(delay,fn){spawn(null,(o,dt,t)=>{if(t>=delay){fn();return false}return true})}
+function spawn(obj,update){const cap=lite()?500:900;if(live.length>=cap){kill(obj);return obj}const entry={obj,update,t:0,ctx:currentCtx};live.push(entry);activeEntries.add(entry);API.stats.peak=Math.max(API.stats.peak,live.length);return obj}
+function at(delay,fn){if(currentCtx?.recipeChain&&((currentCtx.chainCount<2&&Math.abs(delay-.46)<1e-7)||(currentCtx.chainCount<3&&Math.abs(delay-.6)<1e-7)))return;spawn(null,(o,dt,t)=>{if(t>=delay){fn();return false}return true})}
 function kill(o){if(!o||o.userData.dead487)return;if(o.userData.pool487){o.userData.pool487.entries.delete(o);o.material.dispose();if(o.parent)o.parent.remove(o);o.userData.dead487=true;return;}o.userData.dead487=true;if(o.parent)o.parent.remove(o);const mats=new Set(),geos=new Set();o.traverse(m=>{if(m.material)[].concat(m.material).forEach(a=>mats.add(a));if(m.geometry&&!GEOS.includes(m.geometry)&&m.geometry!==BLADE)geos.add(m.geometry)});mats.forEach(m=>{if(!m.userData.warm487)m.dispose()});geos.forEach(g=>g.dispose())}
 function sprite(tex,pos,size,o={}){const m=new T.SpriteMaterial({map:tex,color:o.color??0xffffff,transparent:true,depthWrite:false,blending:o.normal?T.NormalBlending:T.AdditiveBlending,opacity:o.op??1});const s=new T.Sprite(m);s.position.copy(pos);s.scale.setScalar(size);if(tex===starTex||tex===glowTex){const pool=getSpritePool(tex);pool.entries.add(s);s.userData.pool487=pool;s.userData.ctx487=currentCtx;pool.holder.add(s)}else addFX(s);return s}
 const easeOutBack=x=>{const c1=2.2,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
@@ -143,7 +146,7 @@ function shot(a,b,spd,make,hit,o={}){const head=make(a);const d=b.clone().sub(a)
  if(o.trail)trail(()=>done?null:pos,o.trail[0],o.trail[1],o.trailOpt||{});
  spawn(head,(ob,dt,t)=>{const s=Math.min(len,t*spd);pos=a.clone().addScaledVector(dir,s);if(o.arcH)pos.y+=Math.sin(Math.PI*s/len)*o.arcH;ob.position.copy(pos);if(ob.isMesh&&ob.material.uniforms&&ob.material.uniforms.uTime){ob.material.uniforms.uTime.value=time;if(o.face!==false&&ob.geometry.type==='PlaneGeometry')faceCam(ob)}
   if(o.align){ob.quaternion.setFromUnitVectors(UP,dir);if(o.spinAxis)ob.rotateY(t*20)}if(o.tumble){ob.rotation.x+=dt*9;ob.rotation.z+=dt*7}
-  if(s>=len){done=true;kill(ob);hit&&hit(b.clone(),dir);return false}return true});}
+  if(s>=len){done=true;kill(ob);if(currentCtx?.skill)API.provider(currentCtx.skill)?.onShotImpact?.(currentCtx,b);hit&&hit(b.clone(),dir);return false}return true});}
 /* cristais */
 function shardGeo(r){const k=5+Math.floor(r()*2),rad=.17+r()*.05,tip=[(r()-.5)*.1,1,(r()-.5)*.1],bot=[],mid=[];
  for(let i=0;i<k;i++){const a=i/k*6.283+r()*.5,rr=rad*(.7+r()*.55);bot.push([Math.cos(a)*rr*.9,-.3,Math.sin(a)*rr*.9]);mid.push([Math.cos(a)*rr*.82,.48+r()*.14,Math.sin(a)*rr*.82])}
@@ -299,7 +302,11 @@ const RECIPES=[
 
 
 API.referenceRecipes=RECIPES;
-API.animationPlan=sk=>API.handles(sk)?{clip:null,overlay:({0:'giro487',1:'cortes487',2:'escudo487'})[sk.sourceClass],duration:({0:.86,1:1.04,2:.96})[sk.sourceClass]}:null;
+API.fx={T,UP,GEOS,BLADE,PAL,crystalMat,ribMat,orb,bolt,shot,slash,trail,stripGeo,sparks,embers,smoke,chunk,bits,crystal,ringFlat,ringFace,ringDir,rune,crack,flash,knock,sprite,fade,glowTex,starTex,softTex,spawn,at,kill,add:addFX,pos:gp,ground,context,actor,inContext,faceCam};
+API.releaseCast=impactCast;
+API.releaseTarget=(c,e)=>{if(!c||c.cancelled)return;c.ready=true;const keep=[];for(const h of c.hits){if(h[0]===e)releaseHit({e:h[0],d:h[1],sk:h[2],region:c.region});else keep.push(h)}c.hits=keep;};
+
+API.animationPlan=sk=>(API.on&&API.provider(sk)?.animationPlan?.(sk))||(API.handles(sk)?{clip:null,overlay:({0:'giro487',1:'cortes487',2:'escudo487'})[sk.sourceClass],duration:({0:.86,1:1.04,2:.96})[sk.sourceClass]}:null);
 let activeSkill=null,lastRegion=null,trackedClass=null;
 let castStates=new WeakMap(),statesById=new Map();
 API.castState=sk=>sk&&(castStates.get(sk)||statesById.get(sk.skillId));
@@ -308,30 +315,30 @@ function impactCast(c){if(!c||c.cancelled||c.ready)return;c.ready=true;c.releasi
 
 API.withSkill=function(sk,fn){const prev=activeSkill,hs=window.hitstop,sh=window.shake;activeSkill=sk;try{if(API.handles(sk)){window.hitstop=()=>{};window.shake=()=>{}}return fn()}finally{activeSkill=prev;window.hitstop=hs;window.shake=sh}};
 API.delayFor=sk=>!API.handles(sk)?0:sk.sourceClass===0?.27:sk.sourceClass===2?.44:.06;
-API.pulseTimes=sk=>API.handles(sk)&&sk.sourceClass===1?[.16,.26,.36,.46,.56,.8]:null;
+API.pulseTimes=sk=>API.on?(API.provider(sk)?.pulseTimes?.(sk)||(API.handles(sk)&&sk.sourceClass===1?[.16,.26,.36,.46,.56,.8]:null)):null;
 const originalPlay=VFX302.play;
 // The entire old presentation is collision-only. The recipes above own the visible presentation.
 VFX302.play=function(sk){if(API.handles(sk))return API.legacy(()=>originalPlay.apply(this,arguments),sk);return originalPlay.apply(this,arguments)};
 const oldFluid=castFluid139;castFluid139=function(sk){return API.handles(sk)?API.legacy(()=>oldFluid.apply(this,arguments),sk):oldFluid.apply(this,arguments)};
 const kitHit0=kitHit111;
-kitHit111=function(e,d,sk){const old=activeSkill;activeSkill=API.handles(sk)?sk:null;try{if(API.handles(sk)&&activeCast&&!activeCast.releasing){activeCast.hits.push([e,d,{...sk}]);return d}return kitHit0.apply(this,arguments)}finally{activeSkill=old}};
+kitHit111=function(e,d,sk){const old=activeSkill;activeSkill=API.handles(sk)?sk:null;try{if(API.handles(sk)&&activeCast&&!activeCast.ready&&!activeCast.releasing){activeCast.hits.push([e,d,{...sk}]);return d}return kitHit0.apply(this,arguments)}finally{activeSkill=old}};
 let activeCast=null;const hitEvents=[];
 function releaseHit(q){if(q.region!==L||!q.e||q.e.dead||!player||player.dead)return;const old=activeSkill;activeSkill=q.sk;try{const hp=q.e.hp;kitHit0(q.e,q.d,q.sk);API.stats.hits+=q.e.hp<hp?1:0}finally{activeSkill=old}}
-function skillStart(sk,K,cast){const ci=sk.sourceClass,targets=K.list.slice(),recipe=RECIPES.find(c=>c.id===ci);API.stats.skills++;if(ci===1){const list=targets.length?targets:[null];for(const e of list){const ctx=skillContext(ci,e,K.pt,cast);ctx.follow=e;ctx.followAt=e?{x:e.x,z:e.z}:null;inContext(ctx,()=>recipe.s())}}else inContext(skillContext(ci,targets[0]||null,K.pt,cast),()=>recipe.s())}
+function skillStart(sk,K,cast){const provider=API.provider(sk);if(provider){API.stats.skills++;return provider.start(sk,K,cast)}const ci=sk.sourceClass,targets=K.list.slice(),recipe=RECIPES.find(c=>c.id===ci);API.stats.skills++;if(ci===1){const list=targets.length?targets:[null];for(const e of list){const ctx=skillContext(ci,e,K.pt,cast);ctx.follow=e;ctx.followAt=e?{x:e.x,z:e.z}:null;inContext(ctx,()=>recipe.s())}}else inContext(skillContext(ci,targets[0]||null,K.pt,cast),()=>recipe.s())}
 const originalKit=kitRun111;
-kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,arguments);const K=VFX328.truth(sk);if(!K)return originalKit.apply(this,arguments);const cast={hits:[],region:L,releasing:false,ready:false,cancelled:false},prev=activeCast;castStates.set(sk,cast);statesById.set(sk.skillId,cast);activeCast=cast;activeSkill=sk;let result;try{result=API.legacy(()=>originalKit.apply(this,arguments))}finally{activeCast=prev;activeSkill=null}
+kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,arguments);const K=VFX328.truth(sk);if(!K)return originalKit.apply(this,arguments);const cast={hits:[],region:L,releasing:false,ready:!!API.provider(sk)?.immediate?.(sk),cancelled:false},prev=activeCast;castStates.set(sk,cast);statesById.set(sk.skillId,cast);activeCast=cast;activeSkill=sk;let result;try{result=API.legacy(()=>originalKit.apply(this,arguments))}finally{activeCast=prev;activeSkill=null}
  skillStart(sk,{...K,list:cast.hits.length?[...new Set(cast.hits.map(h=>h[0]))]:K.list},cast);return result};
-API.replacesHit=o=>!!(API.on&&o&&o.fromPlayer&&!o.pet&&!o.passive&&!o.dot&&!o.tick&&(o.skillHit?API.handles(activeSkill):API.basic(o.basicClass??profile.cls)));
+API.replacesHit=o=>!!(API.on&&o&&o.fromPlayer&&!o.pet&&!o.passive&&!o.dot&&!o.tick&&(o.skillHit?API.handles(activeSkill||o.skillVfx487||o.fx487?.sk):([0,1,2].includes(o.basicClass??profile.cls)||API.providers.some(p=>p.basic(o.basicClass)))));
 const H=hurtEnemy;
-hurtEnemy=function(e,amt,sx,sz,o){const hp=e&&e.hp,owns=API.replacesHit(o),hs=window.hitstop,sh=window.shake;let r;try{if(owns){window.hitstop=()=>{};window.shake=()=>{}}r=H.apply(this,arguments)}finally{window.hitstop=hs;window.shake=sh}if(API.replacesHit(o)&&!o.skillHit&&e&&e.hp<hp){const ci=o.basicClass??profile.cls,c=COLORS[ci],ctx=context(ci,e);inContext(ctx,()=>{if(ci===1){const p=tgt();sparks(p,10,0xff3050,3.5,7,.14);sparks(p,6,c[1],4);slash(p.clone(),S.yaw,{col:c,r:.45,w:.3,arc:2,tilt:.8,dur:.08,fade:.12});knock(F,.2)}else{meleeHit(c,PALS[ci],!!o.third);if(ci===2&&o.third){ringFlat(F.position,c[1],.5,4,.4);for(let k=0;k<8;k++)chunk('steel',F.position,1.4)}}});API.stats.hits++}return r};
+hurtEnemy=function(e,amt,sx,sz,o){const hp=e&&e.hp,owns=API.replacesHit(o),hs=window.hitstop,sh=window.shake;let r;try{if(owns){window.hitstop=()=>{};window.shake=()=>{}}r=H.apply(this,arguments)}finally{window.hitstop=hs;window.shake=sh}if(API.replacesHit(o)&&!o.skillHit&&[0,1,2].includes(o.basicClass??profile.cls)&&e&&e.hp<hp){const ci=o.basicClass??profile.cls,c=COLORS[ci],ctx=context(ci,e);inContext(ctx,()=>{if(ci===1){const p=tgt();sparks(p,10,0xff3050,3.5,7,.14);sparks(p,6,c[1],4);slash(p.clone(),S.yaw,{col:c,r:.45,w:.3,arc:2,tilt:.8,dur:.08,fade:.12});knock(F,.2)}else{meleeHit(c,PALS[ci],!!o.third);if(ci===2&&o.third){ringFlat(F.position,c[1],.5,4,.4);for(let k=0;k<8;k++)chunk('steel',F.position,1.4)}}});API.stats.hits++}return r};
 const oldSlash=fxSlash;
-fxSlash=function(x,z,a,c,r,big,ci,footY){if(!API.basic(ci))return oldSlash.apply(this,arguments);const ctx=context(ci,null,{x,z}),i=big?2:Math.max(0,(player.combo||1)-1)%3;ctx.hero.position=gp(x,z,footY||0);ctx.S={dir:new T.Vector3(Math.sin(a),0,Math.cos(a)),yaw:a};inContext(ctx,()=>{lunge(ci===2?.3:.35,S.dir,ci===2?.22:.18);slash(hero.position.clone().setY(ci===2?1.2:big?1.1:.95),S.yaw,{col:COLORS[ci],r:ci===2?1.25:1.35,w:ci===2?(big?.85:.65):(big?.7:.5),arc:ci===2?2:2.5,tilt:ci===2?1.5:i===0?.35:i===1?-.4:1.45,rev:i===1,dur:ci===2?.17:.15})});API.stats.basics++};
+fxSlash=function(x,z,a,c,r,big,ci,footY){if(!API.on||![0,1,2].includes(ci))return oldSlash.apply(this,arguments);const ctx=context(ci,null,{x,z}),i=big?2:Math.max(0,(player.combo||1)-1)%3;ctx.hero.position=gp(x,z,footY||0);ctx.S={dir:new T.Vector3(Math.sin(a),0,Math.cos(a)),yaw:a};inContext(ctx,()=>{lunge(ci===2?.3:.35,S.dir,ci===2?.22:.18);slash(hero.position.clone().setY(ci===2?1.2:big?1.1:.95),S.yaw,{col:COLORS[ci],r:ci===2?1.25:1.35,w:ci===2?(big?.85:.65):(big?.7:.5),arc:ci===2?2:2.5,tilt:ci===2?1.5:i===0?.35:i===1?-.4:1.45,rev:i===1,dur:ci===2?.17:.15})});API.stats.basics++};
 // Replace each real dagger's drawing, never its physics or its collision mesh/radius.
 const tracked=new Map();
-function projectiles(){for(const p of projs){if(p.team!=='player'||p.skillHit||!API.basic(p.basicClass??profile.cls)||p.ptype!=='tdagger'||tracked.has(p))continue;const ci=p.basicClass??profile.cls,m=new T.Mesh(BLADE,crystalMat(PALS[ci]));m.scale.setScalar(.95);addFX(m);p.mesh.layers.set(31);p.mesh.traverse(o=>o.layers.set(31));tracked.set(p,m);trail(()=>projs.includes(p)?new T.Vector3(p.x,p.y,p.z):null,.18,COLORS[ci]);spawn(m,(o,dt,t)=>{if(!projs.includes(p)||t>3){tracked.delete(p);kill(o);return false}o.position.set(p.x,p.y,p.z);o.quaternion.setFromUnitVectors(UP,new T.Vector3(p.vx,p.vy||0,p.vz).normalize());o.material.uniforms.uTime.value=time;return true})}}
-function clear(){if(/^(giro|cortes|escudo)487$/.test(window.Anim303?.active?.()||''))Anim303.stop();for(const [p,m]of tracked){if(p.mesh)p.mesh.traverse(o=>o.layers.set(0))}for(const l of live)kill(l.obj);live=[];tracked.clear();poses.clear();for(const c of statesById.values()){c.cancelled=true;c.ready=true;c.hits.length=0}castStates=new WeakMap();statesById=new Map();hitEvents.length=0;rand=rng((profile?.cls||0)+1);shakeT=0;flashV=bloomKick=0;API.errors.length=0}
+function projectiles(){for(const p of projs){if(p.team!=='player'||p.skillHit||![0,1,2].includes(p.basicClass??profile.cls)||p.ptype!=='tdagger'||tracked.has(p))continue;const ci=p.basicClass??profile.cls,m=new T.Mesh(BLADE,crystalMat(PALS[ci]));m.scale.setScalar(.95);addFX(m);p.mesh.layers.set(31);p.mesh.traverse(o=>o.layers.set(31));tracked.set(p,m);trail(()=>projs.includes(p)?new T.Vector3(p.x,p.y,p.z):null,.18,COLORS[ci]);spawn(m,(o,dt,t)=>{if(!projs.includes(p)||t>3){tracked.delete(p);kill(o);return false}o.position.set(p.x,p.y,p.z);o.quaternion.setFromUnitVectors(UP,new T.Vector3(p.vx,p.vy||0,p.vz).normalize());o.material.uniforms.uTime.value=time;return true})}}
+function clear(){for(const p of API.providers)p.clear?.();if(window.Anim303?.A?.[Anim303.active()]?.mage488)Anim303.stop();if(/^(giro|cortes|escudo)487$/.test(window.Anim303?.active?.()||''))Anim303.stop();for(const [p,m]of tracked){if(p.mesh)p.mesh.traverse(o=>o.layers.set(0))}for(const l of live)kill(l.obj);live=[];activeEntries.clear();tracked.clear();poses.clear();for(const c of statesById.values()){c.cancelled=true;c.ready=true;c.hits.length=0}castStates=new WeakMap();statesById=new Map();hitEvents.length=0;rand=rng((profile?.cls||0)+1);shakeT=0;flashV=bloomKick=0;API.errors.length=0}
 API.clear=clear;Object.defineProperty(API,'live',{get:()=>live.length});
-function step(dt){if(lastRegion!==L||trackedClass!==profile?.cls){clear();lastRegion=L;trackedClass=profile?.cls}if(!API.on){if(live.length)clear();return}time+=dt;for(let i=hitEvents.length-1;i>=0;i--){const q=hitEvents[i];q.left-=dt;if(q.left<=1e-8){hitEvents.splice(i,1);releaseHit(q)}}projectiles();const batch=live.slice().reverse();for(const l of batch){if(!live.includes(l))continue;l.t+=dt;try{if(l.obj?.userData.dead487||l.t>8||inContext(l.ctx,()=>l.update(l.obj,dt,l.t))===false){kill(l.obj);live.splice(live.indexOf(l),1)}}catch(e){API.errors.push(String(e));console.error('golpes487',e);kill(l.obj);live.splice(live.indexOf(l),1)}}for(const [e,p]of poses)if((!e?.m?.root)||(p.offset.lengthSq()<1e-12&&Math.abs(p.rot.x)+Math.abs(p.rot.z)<1e-12))poses.delete(e);shakeT=Math.max(0,shakeT-dt);flashV=Math.max(0,flashV-dt*6);bloomKick=Math.max(0,bloomKick-dt*5)}
+function step(dt){if(lastRegion!==L||trackedClass!==profile?.cls){clear();lastRegion=L;trackedClass=profile?.cls}if(!API.on){if(live.length)clear();return}time+=dt;for(const p of API.providers)p.update?.(dt);for(let i=hitEvents.length-1;i>=0;i--){const q=hitEvents[i];q.left-=dt;if(q.left<=1e-8){hitEvents.splice(i,1);releaseHit(q)}}projectiles();const batch=live.slice().reverse();for(const l of batch){if(!activeEntries.has(l))continue;l.t+=dt;try{if(l.obj?.userData.dead487||l.t>8||inContext(l.ctx,()=>l.update(l.obj,dt,l.t))===false){kill(l.obj);activeEntries.delete(l)}}catch(e){API.errors.push(String(e));console.error('golpes487',e);kill(l.obj);activeEntries.delete(l)}}live=live.filter(l=>activeEntries.has(l));for(const [e,p]of poses)if((!e?.m?.root)||(p.offset.lengthSq()<1e-12&&Math.abs(p.rot.x)+Math.abs(p.rot.z)<1e-12))poses.delete(e);shakeT=Math.max(0,shakeT-dt);flashV=Math.max(0,flashV-dt*6);bloomKick=Math.max(0,bloomKick-dt*5)}
 API.update=step;
 const cam0=camUpdate;camUpdate=function(){step(typeof ADT==='number'?ADT:0);return cam0.apply(this,arguments)};
 // All legacy asynchronous callbacks created inside a migrated recipe retain the collision-only layer.
@@ -358,9 +365,10 @@ const flashEl=document.createElement('div');flashEl.style.cssText='position:fixe
 API.render=function(){const restore=[],cp=camera.position.clone(),cq=camera.quaternion.clone();const fxRestore=[];for(const l of live){const o=l.obj;if(o?.parent===scene&&l.ctx?.follow){fxRestore.push([o,o.position.clone()]);o.position.add(followOffset(l.ctx));o.updateMatrixWorld(true)}}for(const [e,p]of poses){const root=e?.m?.root;if(!root)continue;restore.push([root,root.position.clone(),root.rotation.clone()]);root.position.add(p.offset);root.rotation.x+=p.rot.x;root.rotation.z+=p.rot.z;root.updateMatrixWorld(true)}if(shakeT>0){const aim=cp.clone().add(camera.getWorldDirection(new T.Vector3()).multiplyScalar(10));camera.position.x+=(Math.random()-.5)*shakeT*.5;camera.position.y+=(Math.random()-.5)*shakeT*.5;camera.lookAt(aim)}flashEl.style.opacity=matchMedia('(prefers-reduced-motion: reduce)').matches?'0':String(flashV*.45);try{return draw0()}finally{for(const [o,p]of fxRestore){o.position.copy(p);o.updateMatrixWorld(true)}for(const [root,p,r]of restore){root.position.copy(p);root.rotation.copy(r);root.updateMatrixWorld(true)}camera.position.copy(cp);camera.quaternion.copy(cq)}};
 // Compile the visual programs while entering the world, not during the first attack.
 const warmMaterials=new Set();let warmed=false;
-API.prewarm=function(){if(warmed||lite()||!API.on)return;warmed=true;lastRegion=L;trackedClass=profile.cls;
+API.prewarm=function(){if(warmed||!API.on)return;warmed=true;lastRegion=L;trackedClass=profile.cls;
  const saved={...API.stats},p=pos(player.x,player.z),c=COLORS[0];
  slash(p.clone().add(new T.Vector3(0,1,0)),0,{col:c,r:1,w:.4});crystal('gold',p,.4,.4,0,UP,{chunks:0,bits:false});hexShield(p,new T.Vector3(0,0,1),COLORS[2],.2,null);sparks(p,1,c[1]);
+ for(const provider of API.providers)provider.prewarm?.();
  for(const l of live)if(l.obj)l.obj.traverse(o=>{if(o.material)for(const m of [].concat(o.material)){m.userData.warm487=true;warmMaterials.add(m)}});
  step(.1);try{API.render()}finally{clear();Object.assign(API.stats,saved);renderer.render(scene,camera)}
 };

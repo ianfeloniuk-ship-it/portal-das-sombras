@@ -6,7 +6,7 @@
 function create405(ctx=null){
 const T=THREE,live=[];
 const scene405=ctx?ctx.scene:scene,player405=()=>ctx?ctx.player:player,camera405=()=>ctx?ctx.camera:camera;
-const defer405=(fn,ms)=>ctx?ctx.defer(fn,ms):setTimeout(fn,ms),point405=(...a)=>ctx?ctx.point(...a):skillGroundPoint(...a),shake405=a=>{if(!ctx)shake(a)};
+const defer405=(fn,ms)=>ctx?ctx.defer(fn,ms):setTimeout(window.Golpes487?Golpes487.bindLegacy(fn):fn,ms),point405=(...a)=>ctx?ctx.point(...a):skillGroundPoint(...a),shake405=a=>{if(!ctx)shake(a)};
 function release405(o){scene405.remove(o);const gs=new Set(),ms=new Set();o.traverse(c=>{if(c.geometry&&!c.geometry.userData?.shared)gs.add(c.geometry);if(ctx&&c.material)[].concat(c.material).filter(m=>!m.userData?.shared).forEach(m=>ms.add(m))});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose())}
 function clear405(){for(const L of live)release405(L.o);live.length=0}
 function update405(dt){for(let i=live.length-1;i>=0;i--){const L=live[i];if(!ctx&&L.o.userData.gate487&&!L.o.userData.gate487.ready)continue;L.t+=dt;const k=Math.min(1,L.t/L.dur);try{L.fn&&L.fn(k,L.t,L.o)}catch(e){if(ctx)throw e}if(k>=1){release405(L.o);live.splice(i,1)}}}

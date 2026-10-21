@@ -132,7 +132,7 @@ function projectileImpact253(p){if(window.Golpes487&&!Golpes487.legacyDepth&&p.t
   if(window.Flip470){const elem=p.elem300||(p.ptype==='fire'?'fogo':p.ptype==='spark'?'raio':p.ptype==='ice'?'gelo':p.ptype==='soul'?'trevas':p.ptype==='holy'?'luz':null);if(elem==='fogo')Flip470.spawn('explosion',p.x,p.y,p.z,2.2,{grow:.3});else if(elem==='raio')Flip470.spawn('lightning',p.x,p.y+.2,p.z,2.2,{grow:.15});else if(elem==='gelo')Flip470.spawn('water',p.x,p.y,p.z,2.0,{grow:.25});else if(elem==='trevas')Flip470.spawn('smoke',p.x,p.y,p.z,1.8,{tint:0x4c1d95,grow:.3});else if(elem==='luz')Flip470.spawn('rune',p.x,p.y,p.z,1.6,{grow:.1});else if(p.ptype==='arrow'||p.ptype==='sarrow'||p.ptype==='tspear')Flip470.spawn('dust',p.x,p.y,p.z,1.6,{grow:.3,op:.7});}
 }
 function updateProjectiles253(dt){
-  for(let i=projs.length-1;i>=0;i--){const p=projs[i],pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
+  for(let i=projs.length-1;i>=0;i--){const p=projs[i],lease487=window.Golpes487&&Golpes487.projectile(p),priorSkill487=window.Golpes487?.legacySkill;if(lease487){Golpes487.legacyDepth++;Golpes487.legacySkill=p.fx487.sk}try{const pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
     p.life-=pdt;p.x+=p.vx*pdt;p.y=before.y+(p.vy||0)*pdt;p.z+=p.vz*pdt;
     const after={x:p.x,y:p.y,z:p.z},terrain=Projectiles253.terrainHit(before,after,terrH),limit=terrain?.t??1;
     let done=p.life<=0,bounced=false;
@@ -141,7 +141,7 @@ function updateProjectiles253(dt){
     for(const e of targets){if(e.dead||p.hit.has(e))continue;const body=projectileBody253(e),hit=Projectiles253.segmentCapsule(before,after,body,body.r+p.r,body.hitHeight);if(hit.hit&&hit.t<limit)hits.push({e,hit});}
     hits.sort((a,b)=>a.hit.t-b.hit.t);
     for(const {e,hit} of hits){p.x=hit.p.x;p.y=hit.p.y;p.z=hit.p.z;p.hit.add(e);
-      if(p.team==='player'){hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,ptype300:p.ptype,elem300:p.elem300,basicClass:p.basicClass,skillHit:p.skillHit,third:p.third,dtype281:p.dtype281});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3);}projectileImpact253(p);if(bounceBasic(p)){bounced=true;break;}if(!p.pierce){done=true;break;}}
+      if(p.team==='player'){hurtEnemy(e,p.dmg,p.x-p.vx*.05,p.z-p.vz*.05,{longshot:p.longshot,originX:p.originX,originZ:p.originZ,kb:p.kb,stun:p.stun,slow:p.slow,fromPlayer:p.fromPlayer,ptype300:p.ptype,elem300:p.elem300,basicClass:p.basicClass,skillHit:p.skillHit,skillVfx487:p.fx487?.sk,third:p.third,dtype281:p.dtype281});if(p.burn){e.dotT=3;e.dotD=Math.max(e.dotD||0,p.dmg*p.burn/3);}projectileImpact253(p);if(bounceBasic(p)){bounced=true;break;}if(!p.pierce){done=true;break;}}
       else{if(e===player){window.projOwner333=p.owner333||null;inDType281=MAGIC_PT281.test(p.ptype||'')?'mag':'phy';hurtPlayer(p.dmg,!p.fromBoss111);inDType281='phy';window.projOwner333=null}else hurtAlly(e,p.dmg);projectileImpact253(p);done=true;break;}
     }
     if(!done&&!bounced){p.x=after.x;p.y=after.y;p.z=after.z;if(terrain){p.x=terrain.x;p.y=terrain.y;p.z=terrain.z;done=true;projectileImpact253(p);}}
@@ -151,6 +151,7 @@ function updateProjectiles253(dt){
     else if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;
     if(!done){p.tt=(p.tt||0)-dt;if(p.tt<=0){p.tt=.05;if(p.ptype==='fire'||p.elem300==='fogo'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('flame',p.x,p.y,p.z,.7,{grow:.1,dur:.12,op:.85})}else if(p.ptype==='spark'||p.elem300==='raio'){if(window.Flip470&&Math.random()<.55)Flip470.spawn('lightning',p.x,p.y,p.z,.65,{grow:.1,dur:.1,op:.9})}else if(p.ptype==='ice'||p.elem300==='gelo'){if(window.Flip470&&Math.random()<.45)Flip470.spawn('water',p.x,p.y,p.z,.65,{grow:.1,dur:.12,op:.75})}else if(p.ptype==='soul'||p.elem300==='trevas'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('smoke',p.x,p.y,p.z,.6,{tint:0x4c1d95,grow:.15,dur:.15,op:.6})}else if(p.ptype==='sarrow'||p.ptype==='arrow'){trailFx(p)}}}
     if(done){scene.remove(p.mesh);projs.splice(i,1);}
+    }finally{if(lease487){Golpes487.legacyDepth--;Golpes487.legacySkill=priorSkill487}}
   }
 }
 /* Recarga da esquiva: 1,50 s ÷ (1 + 1% por ponto de Agilidade), sem limite. */
