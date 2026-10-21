@@ -17,6 +17,13 @@
 - `tools/environment128.js` + `src/core/200-bloco-environment128.js`: rocha com facetas angulares (distorção pequena e rápida) no lugar do padrão ondulado.
 - Teste: Edge sem tela; portão, trecho a 150–230 m e vista alta olhados: pinheiros e rocha aparecem. Tochas e névoa continuam sem aparecer nas capturas (não confirmados). Pontes: a v513 já adaptou o cruzamento (não visto). Cidades maiores: não feito (mexe em muralha, colisão, povo e lojas).
 
+## v531 (21/10/2026) — Crianças com modelo de criança de verdade (Low Poly Kid, CC BY 4.0)
+- Pedido de Ian: as crianças da v527 eram o boneco de adulto reduzido a 60%; ele quis modelo grátis de criança, no estilo do jogo (sem blocos geométricos), e pediu o crédito.
+- `models/criancas527/crianca.glb` (novo, 600 KB): «Low Poly Kid» de **malekith97 (Nitin Chowdary)**, OpenGameArt, **CC BY 4.0** (https://opengameart.org/content/lowpolykid). Convertido do .blend no Blender 5.2 (rig Rigify, animação assada nos ossos de deformação). Crédito em `models/criancas527/LICENSE-LowPolyKid.md` e no jogo (menu da criança: «Ver o crédito do modelo desta criança»).
+- `tools/vida527.js`: a criança agora é o GLB, escala 0,55, com cores por altura do corpo (cabelo, pele, camisa, bermuda, sapatos; 4 tons de pele, 4 de cabelo, 5 de camisa e 4 de bermuda sorteados), e animação por velocidade: parado (quadros 1 a 68), andando (91 a 119) e correndo (74 a 90) do clipe original, sem os clipes com lanterna. Um boneco de chibi escondido continua só para o motor de NPCs andar; o modelo acompanha ele (`n.kid527`). À noite some com a criança que dorme.
+- Teste: modelo visto no Blender (poses de andar e correr e as cores por região); lógica no Node com THREE simulado (2 crianças, troca de clipe, some quando dorme). Não visto no navegador do jogo. Trechos dos clipes (andar 91 a 119, correr 74 a 90) foram escolhidos por contato visual e podem ter um pequeno salto no ciclo.
+- Pendente: as cores ficam com transição suave nas bordas (cor por vértice); o rosto não tem olhos.
+
 ## v527 (21/10/2026) — Mundo vivo, parte 3: crianças, brigas e notícias que mudam
 - Pedido de Ian («faz ai», depois da lista de pendências da v523).
 - `tools/vida527.js` (novo): 2 crianças por cidade de dia, correm entre pontos da praça e falam frases soltas; à noite vão dormir (somem). Brigas: no máximo uma a cada 150 s, de dia, a menos de 60 m do jogador, dois moradores discutem no meio da rua por 25 s; depois de 10 s o guarda mais próximo vai até lá e separa.

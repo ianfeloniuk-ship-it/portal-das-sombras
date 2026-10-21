@@ -382,6 +382,7 @@
         { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
         { l: 'Pedir um agrado', go: 'agrado', if: () => n.role523 !== 'crianca' },
         { l: 'Provocar: "Você não vale nada"', go: 'provoca', if: () => n.role523 !== 'crianca' },
+        { l: 'Ver o crédito do modelo desta criança', if: () => n.role523 === 'crianca', fn: () => { say('<b>Crédito:</b> modelo "Low Poly Kid" de malekith97 (Nitin Chowdary), licença CC BY 4.0, do OpenGameArt.'); return 'raiz'; } },
         { l: 'Até logo', fn: () => 'fim' }
       ]
     };
