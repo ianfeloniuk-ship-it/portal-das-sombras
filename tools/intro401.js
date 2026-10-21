@@ -25,6 +25,7 @@ API.dialog=(name,lines,done)=>{
  if(API.conversation||API.reclaiming())return;
  const target=name==='Edran'?edran():vendor(name);
  API.conversation={name,lines,done,target,index:0,count:0,elapsed:0,paused,focus:document.activeElement,position:camera.position.clone(),quaternion:camera.quaternion.clone()};
+ if(typeof narratorSilence513==='function')narratorSilence513();
  paused=true;W377.releaseAll();overlay.hidden=false;document.body.classList.add('story401');overlay.querySelector('h2').textContent=name.toUpperCase()+' · '+(name==='Edran'?'GUARDA DA ORDEM':name==='Lyra'?'ORDEM DA FENDA':'FERREIRO');overlay.querySelector('p').textContent='';overlay.querySelector('button').focus();
 };
 function next(){const c=API.conversation;if(!c)return;const text=c.lines[c.index];if(c.count<text.length){c.count=text.length;overlay.querySelector('p').textContent=text;return}if(++c.index<c.lines.length){c.count=0;c.elapsed=0;overlay.querySelector('p').textContent='';return}API.conversation=null;overlay.hidden=true;document.body.classList.remove('story401');paused=c.paused;W377.releaseAll();window._cinematicGrace451=performance.now()+2500;if(typeof player!=='undefined'&&player)player.iT=Math.max(player.iT||0,2.5);c.focus?.focus?.();c.done();refresh()}

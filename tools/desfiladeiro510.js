@@ -2,7 +2,7 @@
    - Transforma a primeira parte do mapa (onde o jogador desperta após o sonho com o Arquiteto)
      em uma garganta montanhosa majestosa inspirada em Skyrim:
      1. Flancos em desfiladeiro (oeste: x = -15..-25; leste: x = +15..+25, de z = 88 a 260):
-        Paredões maciços de rocha lascada (tripo-rochedo154 e tripo-rocha-musgo154) com 14 a 24 m de altura,
+        Paredões maciços de rocha lascada (tripo-rocha-musgo154 (sem o antigo elmo rotulado como rochedo)) com 14 a 24 m de altura,
         degraus geológicos e quinas angulares (anti-primitivas). Colisão sólida via addCol / HASH.
      2. Coníferas Nórdicas Gigantes (tripo-conifera153):
         Pinheiros monumentais de 18 a 24 m de altura (escala 3x) empoleirados nas cristas e saliências das rochas,
@@ -225,7 +225,7 @@
     API.grp = g;
 
     Promise.all([
-      glb('tripo-rochedo154'),
+      Promise.resolve(null), // slot legado do elmo removido; usa mMoss abaixo
       glb('tripo-rocha-musgo154'),
       glb('tripo-conifera153'),
       glb('tripo-muro154'),

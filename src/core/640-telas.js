@@ -112,6 +112,7 @@ function narratorEnter105(g){g.narratorExit105=false;const m=narratorMemory105()
 function narratorDeath105(){const m=narratorMemory105();const g=L.special?L.gate?.ref:L.gate;if(L.mode==='dungeon'&&g&&Number.isInteger(g.rank))m.failed[g.rank]=Math.min(999,(m.failed[g.rank]||0)+1);narratorEvent105('death',{rank:g?.rank})}
 function narratorContext105(e){if(['stairs_up','stairs_down'].includes(e.kind))return L.mode==='dungeon'&&L.floors?.current===e.data.floor&&L.gate&&[L.gate.id,L.gate.seed].join(':')===e.data.gate;if(e.kind==='core_fail')return L.mode==='dungeon'&&!!L.defense?.failed;if(['rain','snow'].includes(e.kind))return L.mode==='world'&&WX.type===e.kind;if(e.kind==='night'||e.kind==='dawn')return L.mode==='world'&&isNight()===(e.kind==='night');if(['red','higher'].includes(e.kind))return L.mode==='dungeon'&&L.gate&&[L.gate.id,L.gate.seed].join(':')===e.data.gate;if(e.kind==='city')return !!inCity(player.x,player.z);if(e.kind==='explore')return L.mode==='world'&&!inCity(player.x,player.z);if(e.kind==='narrow')return player.hp/player.maxhp<.5;if(e.kind==='fissure')return !!profile.awakening103?.pending;return true}
 function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.dead)return;const m=narratorMemory105();m.clock+=Math.max(0,Math.min(dt,1));NR105.quietFor=Math.max(0,NR105.quietFor-dt);NR105.tick=(NR105.tick||0)+dt;if(NR105.tick<1)return;NR105.tick=0;
+ if(narratorStoryBusy513()){narratorSilence513();return;}
  if(L.mode==='world'){
  const city=inCity(player.x,player.z),key=city?String(nearestCity(player.x,player.z).c.id):null;
  if(key&&key!==NR105.city)narratorEvent105('city');NR105.city=key;
@@ -119,17 +120,13 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
  }else NR105.city=null;
  NR105.queue=NR105.queue.filter(e=>e.expires>=m.clock&&narratorContext105(e));
  if(CFG.narrator105==='off'){NR105.queue=[];return}
- const interval=CFG.narrator105==='quiet'?150:CFG.narrator105==='chatty'?45:90;
+ const interval=CFG.narrator105==='quiet'?300:CFG.narrator105==='chatty'?120:240;
  if(modalOpen||NR105.quietFor>0||m.clock-m.lastSpoke<interval||nearestEnemy(player.x,player.z,18)||AR103.trial)return;
  for(let i=0;i<NR105.queue.length;i++){const e=NR105.queue[i];if(m.clock-e.at<6||m.clock-(m.last['said:'+e.kind]??-1000)<600)continue;const line=narratorChoose105(e,m);if(!line)continue;
  m.seen[line.id]=m.clock;m.last['said:'+e.kind]=m.clock;m.lastSpoke=m.clock;NR105.queue.splice(i,1);
  narratorSayTop(line.text);return;
  }
- if(!NR105.queue.length&&m.clock-m.lastSpoke>=interval){
-  const ambientKind=L.mode==='world'?(inCity(player.x,player.z)?'city':'explore'):'fenda';
-  const line=narratorChoose105({kind:ambientKind},m);
-  if(line){m.seen[line.id]=m.clock;m.last['said:'+ambientKind]=m.clock;m.lastSpoke=m.clock;narratorSayTop(line.text);return}
- }
+
 }
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Liga ou desliga comentários no histórico. Avisos importantes continuam ativos.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}
 function narratorView105(){const m=narratorMemory105();if(!m)return;view=narratorView105;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa.</p></div>';

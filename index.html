@@ -5669,7 +5669,16 @@ function historyEntry95(html,kind='event'){return {h:String(html),t:new Date().t
 function appendHistory95(list,entry){const last=list[0];if(last&&last.h===entry.h&&entry.at-(last.at||0)<5000){last.n=(last.n||1)+1;last.at=entry.at;last.t=entry.t;return true}list.unshift(entry);if(list.length>200)list.length=200;return false}
 
 /* v488 (Ian): o Narrador aparece no topo da tela com banner elegante e som suave, visível mesmo com o histórico fechado. */
+function narratorStoryBusy513(){
+  return !!(window.Dream488?.active || document.getElementById('pds_skyrim_wake') || window.Intro401?.conversation || window.Intro401?.guided?.() || document.body.classList.contains('story401'));
+}
+function narratorSilence513(){
+  NR105.queue=[];NR105.quietFor=Math.max(NR105.quietFor,30);
+  clearTimeout(narratorSayTop._timer);
+  const box=document.getElementById('narratorTopBar');if(box){box.style.opacity='0';box.style.transform='translateX(-50%) translateY(-10px)';}
+}
 function narratorSayTop(text, ms = 7500){
+  if(narratorStoryBusy513()){narratorSilence513();return;}
   if(!text)return;
   const clean = String(text).replace(/^<b>\[NARRADOR\]<\/b>\s*/i, '').replace(/<[^>]*>/g, '').trim();
   if(!clean)return;
@@ -8979,6 +8988,7 @@ function narratorEnter105(g){g.narratorExit105=false;const m=narratorMemory105()
 function narratorDeath105(){const m=narratorMemory105();const g=L.special?L.gate?.ref:L.gate;if(L.mode==='dungeon'&&g&&Number.isInteger(g.rank))m.failed[g.rank]=Math.min(999,(m.failed[g.rank]||0)+1);narratorEvent105('death',{rank:g?.rank})}
 function narratorContext105(e){if(['stairs_up','stairs_down'].includes(e.kind))return L.mode==='dungeon'&&L.floors?.current===e.data.floor&&L.gate&&[L.gate.id,L.gate.seed].join(':')===e.data.gate;if(e.kind==='core_fail')return L.mode==='dungeon'&&!!L.defense?.failed;if(['rain','snow'].includes(e.kind))return L.mode==='world'&&WX.type===e.kind;if(e.kind==='night'||e.kind==='dawn')return L.mode==='world'&&isNight()===(e.kind==='night');if(['red','higher'].includes(e.kind))return L.mode==='dungeon'&&L.gate&&[L.gate.id,L.gate.seed].join(':')===e.data.gate;if(e.kind==='city')return !!inCity(player.x,player.z);if(e.kind==='explore')return L.mode==='world'&&!inCity(player.x,player.z);if(e.kind==='narrow')return player.hp/player.maxhp<.5;if(e.kind==='fissure')return !!profile.awakening103?.pending;return true}
 function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.dead)return;const m=narratorMemory105();m.clock+=Math.max(0,Math.min(dt,1));NR105.quietFor=Math.max(0,NR105.quietFor-dt);NR105.tick=(NR105.tick||0)+dt;if(NR105.tick<1)return;NR105.tick=0;
+ if(narratorStoryBusy513()){narratorSilence513();return;}
  if(L.mode==='world'){
  const city=inCity(player.x,player.z),key=city?String(nearestCity(player.x,player.z).c.id):null;
  if(key&&key!==NR105.city)narratorEvent105('city');NR105.city=key;
@@ -8986,17 +8996,13 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
  }else NR105.city=null;
  NR105.queue=NR105.queue.filter(e=>e.expires>=m.clock&&narratorContext105(e));
  if(CFG.narrator105==='off'){NR105.queue=[];return}
- const interval=CFG.narrator105==='quiet'?150:CFG.narrator105==='chatty'?45:90;
+ const interval=CFG.narrator105==='quiet'?300:CFG.narrator105==='chatty'?120:240;
  if(modalOpen||NR105.quietFor>0||m.clock-m.lastSpoke<interval||nearestEnemy(player.x,player.z,18)||AR103.trial)return;
  for(let i=0;i<NR105.queue.length;i++){const e=NR105.queue[i];if(m.clock-e.at<6||m.clock-(m.last['said:'+e.kind]??-1000)<600)continue;const line=narratorChoose105(e,m);if(!line)continue;
  m.seen[line.id]=m.clock;m.last['said:'+e.kind]=m.clock;m.lastSpoke=m.clock;NR105.queue.splice(i,1);
  narratorSayTop(line.text);return;
  }
- if(!NR105.queue.length&&m.clock-m.lastSpoke>=interval){
-  const ambientKind=L.mode==='world'?(inCity(player.x,player.z)?'city':'explore'):'fenda';
-  const line=narratorChoose105({kind:ambientKind},m);
-  if(line){m.seen[line.id]=m.clock;m.last['said:'+ambientKind]=m.clock;m.lastSpoke=m.clock;narratorSayTop(line.text);return}
- }
+
 }
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Liga ou desliga comentários no histórico. Avisos importantes continuam ativos.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}
 function narratorView105(){const m=narratorMemory105();if(!m)return;view=narratorView105;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa.</p></div>';
@@ -9324,7 +9330,7 @@ const rareStatus103=document.createElement('div');rareStatus103.id='rare-status1
 /* Textured Tripo scenery. Shared geometry/materials, instanced per streamed chunk. */
 const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
-  const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',boulder:'tripo-rochedo154.glb',stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
+  const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
   const HEIGHT={guild:12,defense:13,forge:7,inn:10,church:13,potion:8,mill:12,well:3.2,bank:3.4,market:3.4,bankhall:10},KEYHEIGHT={building_tower_A_blue:11,building_tower_B_blue:11};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
@@ -9400,7 +9406,7 @@ const TripoEnvironment153 = (() => {
     if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}
       /* v180: versão leve (Blender, ~3 mil triângulos) para árvores longe da câmera */
-      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',boulder:'tripo-rochedo154-lod.glb',cacto1:'tripo-cacto446a-lod.glb',cacto2:'tripo-cacto446b-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
+      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',cacto1:'tripo-cacto446a-lod.glb',cacto2:'tripo-cacto446b-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
       if(lod&&models[id])loader.load('models/'+lod,g2=>{const full=models[id];try{prepare(g2,id);full.liteParts=models[id].parts}catch(e){}models[id]=full;resolve()},undefined,()=>resolve());else resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
   })));
   /* v446 (Ian: refazer cacto e pedras): os cactos e pedras antigos do cenário viram modelos Tripo (cactos novos, monte de pedras e rochedo) */
@@ -9548,7 +9554,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=458"></script>
 <script src="tools/npc456.js?v=457"></script>
-<script src="tools/campaign327.js?v=505"></script>
+<script src="tools/campaign327.js?v=513"></script>
 <script src="tools/ecology410.js?v=493"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9575,7 +9581,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=456"></script>
+<script src="tools/intro401.js?v=513"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -9627,17 +9633,17 @@ requestAnimationFrame(frame);
 <script src="tools/invocador497.js?v=498r1"></script>
 <script src="tools/fisicos500.js?v=503r1"></script>
 <script src="tools/marciais-rest504.js?v=509r1"></script>
-<script src="tools/dream488.js?v=498"></script>
+<script src="tools/dream488.js?v=513"></script>
 <script src="tools/mapa500.js?v=500b"></script>
 <script src="tools/mapa501.js?v=501b"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
 <script src="tools/capitais504.js?v=508"></script>
-<script src="tools/desfiladeiro510.js?v=510"></script>
+<script src="tools/desfiladeiro510.js?v=513"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v512</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v513</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=512;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=513;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

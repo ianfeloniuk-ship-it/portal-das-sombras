@@ -534,6 +534,7 @@
   D.play = async function(opts = {}) {
     if (D.active) return;
     D.active = true;
+    if(typeof narratorSilence513==='function')narratorSilence513();
     D.t = 0;
     D.struck = false;
     currentLineIndex = -1;

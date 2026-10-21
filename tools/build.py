@@ -4,6 +4,11 @@ root=pathlib.Path(__file__).resolve().parent.parent
 # v388: o script principal mora em src/core/ (partes). Junta as partes no game.html antes dos syncs
 # e, depois deles, re-divide para as partes ficarem com o que os syncs gravaram.
 sys.path.insert(0,str(root/'tools'));import core_parts
+# Asset de equipamento erroneamente cadastrado como rocha: nunca voltar ao cenário.
+for source in [*(root/'src'/'core').glob('*.js'), *(root/'tools').glob('*.js')]:
+    text=source.read_text(encoding='utf-8')
+    if 'tripo-rochedo154' in text:
+        raise ValueError(f'Elmo do Metamorfo não é cenário: {source.relative_to(root)}')
 print('src/core:',core_parts.assemble())
 subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-kit111.py')],check=True)

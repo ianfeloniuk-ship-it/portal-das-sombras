@@ -16,7 +16,16 @@ function historyEntry95(html,kind='event'){return {h:String(html),t:new Date().t
 function appendHistory95(list,entry){const last=list[0];if(last&&last.h===entry.h&&entry.at-(last.at||0)<5000){last.n=(last.n||1)+1;last.at=entry.at;last.t=entry.t;return true}list.unshift(entry);if(list.length>200)list.length=200;return false}
 
 /* v488 (Ian): o Narrador aparece no topo da tela com banner elegante e som suave, visível mesmo com o histórico fechado. */
+function narratorStoryBusy513(){
+  return !!(window.Dream488?.active || document.getElementById('pds_skyrim_wake') || window.Intro401?.conversation || window.Intro401?.guided?.() || document.body.classList.contains('story401'));
+}
+function narratorSilence513(){
+  NR105.queue=[];NR105.quietFor=Math.max(NR105.quietFor,30);
+  clearTimeout(narratorSayTop._timer);
+  const box=document.getElementById('narratorTopBar');if(box){box.style.opacity='0';box.style.transform='translateX(-50%) translateY(-10px)';}
+}
 function narratorSayTop(text, ms = 7500){
+  if(narratorStoryBusy513()){narratorSilence513();return;}
   if(!text)return;
   const clean = String(text).replace(/^<b>\[NARRADOR\]<\/b>\s*/i, '').replace(/<[^>]*>/g, '').trim();
   if(!clean)return;
