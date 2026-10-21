@@ -3,7 +3,7 @@
    A lógica do jogo continua em y=0; a câmera, a mira e os rótulos somam terrH(x,z). */
 (function(){const T=THREE;
  const TER=window.TER245={TF:{value:Array.from({length:48},()=>new T.Vector4(0,0,0,0))},TFN:{value:0},on:{value:0},MT:{value:new T.Vector4(40,1,0,0)},D:{value:Array.from({length:16},()=>new T.Vector4(0,0,-1,0))},R:{value:Array.from({length:24},()=>new T.Vector4(0,0,0,0))},OW:{value:new T.Vector4(0,185,7,0)},OWB:{value:new T.Vector4(0,0,0,0)}};
- const P=30*64*2,H0=30*64*.5,RW=11;const SEAX=-9750,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
+ const P=30*64*2,H0=30*64*.5,RW=11;const SEAX=-4100,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
  const GL=`uniform float uTerOn;uniform float uTerHeight245;uniform vec2 uTerAnchor245;uniform float uTerBatch245;uniform float uTerAbsolute245;attribute vec2 terrainAnchor245;uniform vec4 uTerD[16];uniform vec4 uTerR[24];uniform vec4 uMt383;uniform vec4 uTF444[48];uniform float uTFN444;uniform vec4 uOW460;uniform vec4 uOWB460;
 /* v461 (Ian): relevo do Outro Mundo dentro da Fenda — infinito, sem borda: colinas + cordilheiras em crista; chegada e Cidadela planas. Igual ao TER.owH460 do CPU. */
 float owH460(vec2 p){float s=uOW460.w,A=uOW460.z,M=uOW460.y;
@@ -16,7 +16,9 @@ float mt383(vec2 p){if(uMt383.x<=0.)return 0.;vec2 q=p*uMt383.y;float m=smoothst
  float r1=1.-abs(sin(q.x*.012+sin(q.y*.009)*1.6)*sin(q.y*.013-q.x*.004));float r2=1.-abs(sin(q.x*.031+q.y*.008)*sin(q.y*.027-q.x*.011));float r3=1.-abs(sin(q.x*.071-q.y*.02)*sin(q.y*.063+q.x*.017));
  return uMt383.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08);}
 /* v439 (Ian): o mar a oeste de Thalor — praia, recifes, alto-mar e fossas. Igual ao seaD439/seaBed439 do CPU. */
-float seaD439(vec2 p){return ${SEAX.toFixed(1)}+150.*sin(p.y*.0009)+60.*sin(p.y*.0031+1.3)+20.*sin(p.y*.011)-p.x;}
+/* v500 (Ian): mapa finito de 10 km — mar no oeste (Thalor), no leste (além de Zahar) e no sul (além de Urdan); cordilheira de gelo no norte. Igual ao CPU. */
+float seaD439(vec2 p){float w=${SEAX.toFixed(1)}+150.*sin(p.y*.0009)+60.*sin(p.y*.0031+1.3)+20.*sin(p.y*.011)-p.x;float e=p.x-4250.-140.*sin(p.y*.0011+2.)-50.*sin(p.y*.0037);float s=p.y-4300.-150.*sin(p.x*.0010+.7)-55.*sin(p.x*.0029+1.9);return max(w,max(e,s));}
+float ice500(vec2 p){float k=1.-smoothstep(-4550.,-3950.,p.y+90.*sin(p.x*.0013));if(k<=0.)return 0.;float r1=1.-abs(sin(p.x*.0061+sin(p.y*.004)*1.6)*sin(p.y*.0072-p.x*.002)),r2=1.-abs(sin(p.x*.019+p.y*.006)*sin(p.y*.017-p.x*.008));return k*(70.+150.*(r1*r1*.7+r2*r2*.3));}
 float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?mix(-3.,-7.,(d-60.)/390.):mix(-7.,-22.,clamp((d-450.)/1200.,0.,1.));
  b+=2.6*max(0.,sin(p.x*.06+sin(p.y*.05)*2.)*sin(p.y*.055+sin(p.x*.04)*1.5)-.2)*smoothstep(40.,120.,d)*(1.-smoothstep(380.,500.,d));
  if(d>800.){float t=1.-abs(sin(p.x*.0042+sin(p.y*.0027)*2.1)*sin(p.y*.0036-p.x*.0011));b-=42.*smoothstep(.86,.97,t)*smoothstep(800.,1000.,d);}
@@ -25,7 +27,7 @@ float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?m
 float terra444(vec2 p,float h){return h;}
 float path444(vec2 p){return 0.;}
 float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);float m=.62+.38*sin(p.x*.0021+1.)*sin(p.y*.0017+.4);
- float h=(15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)+5.*sin(p.x*.031+p.y*.017)*sin(p.y*.027-p.x*.012)+1.2*sin(p.x*.09+p.y*.05))*m+mt383(p);
+ float h=(15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)+5.*sin(p.x*.031+p.y*.017)*sin(p.y*.027-p.x*.012)+1.2*sin(p.x*.09+p.y*.05))*m+mt383(p)+ice500(p);
  float b=floor((p.x-${H0.toFixed(1)})/${P.toFixed(1)}+.5),c=b*${P.toFixed(1)}+${H0.toFixed(1)}+sin(p.y*.0043+b*1.7)*95.+sin(p.y*.011+b)*28.+sin(p.y*.035+b*2.3)*18.+sin(p.y*.079+b*3.1)*5.;
  float rw=5.5*(1.+.22*sin(p.y*.047+b*1.3)+.12*sin(p.y*.113+b*2.7));float rdx=abs(p.x-c);h=mix(h,-2.4,1.-smoothstep(rw,rw+7.,rdx));if(rdx<rw)h-=2.2*(1.-rdx*rdx/(rw*rw));
  float sd=seaD439(p);if(sd>-60.)h=mix(h,seaBed439(p,sd),smoothstep(-60.,30.,sd));float rk439=1.-smoothstep(300.,600.,sd);
@@ -41,7 +43,9 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);fl
  TER.mt383=mt383;
  function terra444cpu(x,z,h){return h}
  TER.path444=function(){return 0};
- function seaD439(x,z){const S=Math.sin;return SEAX+150*S(z*.0009)+60*S(z*.0031+1.3)+20*S(z*.011)-x}
+ function seaD439(x,z){const S=Math.sin,w=SEAX+150*S(z*.0009)+60*S(z*.0031+1.3)+20*S(z*.011)-x,e=x-4250-140*S(z*.0011+2)-50*S(z*.0037),s=z-4300-150*S(x*.0010+.7)-55*S(x*.0029+1.9);return Math.max(w,e,s)}
+ function ice500(x,z){const S=Math.sin,t=Math.min(1,Math.max(0,(z+90*S(x*.0013)+4550)/600)),k=1-t*t*(3-2*t);if(k<=0)return 0;const r1=1-Math.abs(S(x*.0061+S(z*.004)*1.6)*S(z*.0072-x*.002)),r2=1-Math.abs(S(x*.019+z*.006)*S(z*.017-x*.008));return k*(70+150*(r1*r1*.7+r2*r2*.3))}
+ TER.ice500=ice500;
  function seaBed439(x,z,d){const S=Math.sin,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   let b=d<60?mix(1.2,-3,(d+60)/120):d<450?mix(-3,-7,(d-60)/390):mix(-7,-22,Math.min(1,Math.max(0,(d-450)/1200)));
   b+=2.6*Math.max(0,S(x*.06+S(z*.05)*2)*S(z*.055+S(x*.04)*1.5)-.2)*ss(40,120,d)*(1-ss(380,500,d));
@@ -54,7 +58,7 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);fl
   h+=M*m*(r1*r1*.7+r2*r2*.3);
   return h*ss(6,22,Math.hypot(x-B.x,z-B.y))*ss(26,50,Math.hypot(x-B.z,z-B.w))};
  window.terrH=function(x,z){if(!TER.on.value)return 0;if(TER.OW.value.x>.5)return TER.owH460(x,z);const S=Math.sin,m=.62+.38*S(x*.0021+1)*S(z*.0017+.4);
-  let h=(15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)+5*S(x*.031+z*.017)*S(z*.027-x*.012)+1.2*S(x*.09+z*.05))*m+mt383(x,z);
+  let h=(15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)+5*S(x*.031+z*.017)*S(z*.027-x*.012)+1.2*S(x*.09+z*.05))*m+mt383(x,z)+ice500(x,z);
   const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   const b=Math.floor((x-H0)/P+.5),c=b*P+H0+S(z*.0043+b*1.7)*95+S(z*.011+b)*28+S(z*.035+b*2.3)*18+S(z*.079+b*3.1)*5;{const rw=(RW*(1+.22*S(z*.047+b*1.3)+.12*S(z*.113+b*2.7)))/2,rdx=Math.abs(x-c);h=mix(h,-2.4,1-ss(rw,rw+7,rdx));if(rdx<rw)h-=2.2*(1-rdx*rdx/(rw*rw))}
   const sd=seaD439(x,z);if(sd>-60)h=mix(h,seaBed439(x,z,sd),ss(-60,30,sd));const rk439=1-ss(300,600,sd);
@@ -72,7 +76,7 @@ float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);fl
  const sphere245=new T.Sphere(),intersectsObject245=T.Frustum.prototype.intersectsObject,intersectsSprite245=T.Frustum.prototype.intersectsSprite;
  T.Frustum.prototype.intersectsObject=function(o){if(!TER.on.value||!o.geometry)return intersectsObject245.call(this,o);const r=TER.rootFor(o);if(o.userData.terrainAbsolute245||r.userData.terrainAbsolute245)return intersectsObject245.call(this,o);
   const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();sphere245.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
-  if(g.attributes.terrainAnchor245||g.attributes.terrainRoad128||g.attributes.terrainBio131)sphere245.radius+=24;else sphere245.center.y+=TER.heightFor(o);
+  if(g.attributes.terrainAnchor245||g.attributes.terrainRoad128||g.attributes.terrainBio131){const ic=TER.ice500(sphere245.center.x,sphere245.center.z);sphere245.radius+=24+ic*.7;sphere245.center.y+=ic*.5}/* v500: cordilheira de gelo passa de 200 m */else sphere245.center.y+=TER.heightFor(o);
   return this.intersectsSphere(sphere245);
  };
  T.Frustum.prototype.intersectsSprite=function(o){if(!TER.on.value)return intersectsSprite245.call(this,o);const r=TER.rootFor(o);if(o.userData.terrainAbsolute245||r.userData.terrainAbsolute245)return intersectsSprite245.call(this,o);sphere245.center.set(0,0,0);sphere245.radius=.7071067811865476;sphere245.applyMatrix4(o.matrixWorld);sphere245.center.y+=TER.heightFor(o);return this.intersectsSphere(sphere245)};

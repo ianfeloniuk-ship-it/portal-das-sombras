@@ -1,3 +1,11 @@
+## v500 (21/10/2026) — Mapa finito de 10 km × 10 km: bordas, biomas e as 5 Capitais
+- Pedido de Ian: montar o mapa finito (x e z de −5000 a +5000) com Aster no centro e as 5 Capitais em volta.
+- `tools/mapa500.js`: só existem as regiões −2..2 (25 cidades, nomes sem repetir em ordem fixa). Capitais fixas: Ymiria (0, −3400) na neve, Zahar (3400, 0) no deserto, Thalor (−3850, 0) na costa oeste, Urdan (0, 3400) com pântano ao norte e vulcão ao sul, Verden (2300, 2300) na floresta. Aster fica em campos temperados. Os biomas são forçados por `biomeSample317`, então o chão, a vegetação e os efeitos mudam juntos. Cidades comuns ficam dentro de 3,7 km. Estradas para fora do mapa somem. Ninguém passa de ±4920 m (toast "Cordilheira de gelo" ou "Mar sem fim").
+- `tools/terrain245.js` (CPU e GLSL iguais): `seaD439` passa a ter mar no oeste (costa em −4100), no leste (+4250) e no sul (+4300). `ice500` cria a cordilheira de gelo do norte (de −3950 a −4550, com até ~220 m). O teste de visibilidade do chão considera a altura da cordilheira (antes o chão sumia).
+- Partes ligadas: `biomes295` (Zahar e Ymiria em 2,0 e 0,−2), `mechanics434` (Thalor −2,0), `deep447` (destinos da Corrente Abissal dentro do mar novo), `test-living372`.
+- Teste: navegador local, as 6 cidades nos lugares certos, biomas certos, mar e praia a oeste, cordilheira ao norte (chão aparece), deserto em Zahar, limite segura o jogador. Sem erro novo (o 404 de `pedra-lasca.glb` já existia).
+- Pendente (outras conversas): densidade de segredos a cada ~150 m, muralhas e visual de cada Capital, mapa-múndi finito no `map393`.
+
 ## v499 (21/10/2026) — Armas próprias para Paladino, Invocador, Necromante e cada mago (Blender)
 - Pedido de Ian: encaixar as armas feitas no Blender (Drive: Projetos/Portal-das-Sombras/Armas-Blender-v490) nas classes.
 - `models/armas155/*-490.glb` (9 arquivos, 652 KB juntos): varinha do Paladino (antes usava a maça), tomo do Invocador e cajado de ossos do Necromante (antes o cajado comum), e um cajado por mago: fogo, gelo, terra, raio, tempo e fendas.

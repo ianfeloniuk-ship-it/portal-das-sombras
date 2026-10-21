@@ -645,7 +645,7 @@
     }
   }
   function enterAbyssalDungeon441(thalorCity) {
-    const tc = thalorCity || (typeof regionCity === 'function' ? regionCity(-5, 0) : nearestCity(player.x, player.z).c);
+    const tc = thalorCity || (typeof regionCity === 'function' ? regionCity(-2, 0) : nearestCity(player.x, player.z).c);
     const ret = { x: tc.x, z: tc.z + 8 };
     const gr = Math.min(9, rankOf());
     clearCapStaging441();
@@ -844,7 +844,7 @@
   function aquaPortal(it) {
     const nearC = nearestCity(player.x, player.z).c;
     if (nearC?.name === 'Thalor' || !Water.portal?.open) {
-      enterAbyssalDungeon441(nearC?.name === 'Thalor' ? nearC : (typeof regionCity === 'function' ? regionCity(-5, 0) : nearC));
+      enterAbyssalDungeon441(nearC?.name === 'Thalor' ? nearC : (typeof regionCity === 'function' ? regionCity(-2, 0) : nearC));
       return;
     }
   }

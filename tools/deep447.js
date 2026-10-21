@@ -137,14 +137,14 @@
     try { Anim303?.play('palma', 1.2); } catch (_) {}
     s.picked[n.id] = (U().S().clock || 0) + 1440; drop(n); U().save();
   }
-  const SEAS = [['Mar de Thalor — Norte', 0, 5200], ['Mar de Thalor — Sul', 0, -5200], ['Arquipélago das Ilhas-Cidade', -1500, 900]];
+  const SEAS = [['Mar de Thalor — Norte', 0, -2400], ['Mar de Thalor — Sul', 0, 2400], ['Arquipélago das Ilhas-Cidade', -400, 900]];
   function travel(n) {
     const s0 = SE(); let h = '<p>A corrente abissal puxa para longe. Para onde?</p><div style="display:flex;gap:8px;flex-wrap:wrap">';
     SEAS.forEach((q, i) => { h += '<button class="btn" data-i="' + i + '">' + q[0] + '</button>'; });
     openModal('CORRENTE ABISSAL', h + '</div>');
     document.querySelectorAll('#modal [data-i]').forEach(b => b.onclick = () => {
       const q = SEAS[+b.dataset.i]; closeModal();
-      let x = n.x + q[1], z = n.z + q[2]; // procura água funda no destino
+      let x = n.x + q[1], z = Math.max(-4600, Math.min(4600, n.z + q[2])); // procura água funda no destino
       for (let k = 0; k < 40 && depthAt(x, z) < 4; k++) x -= 40;
       try { fxRing(player.x, player.z, 0x40e0ff, 2, .8); } catch (_) {}
       player.x = x; player.z = z; if (W()) W().dive = 0;

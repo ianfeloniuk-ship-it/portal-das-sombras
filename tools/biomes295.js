@@ -9,7 +9,7 @@ if(typeof biomeAt==='function'&&!biomeAt.cap441){
  biomeAt=function(x,z){
   try{
    if(typeof regionCity==='function'){
-    const zah=regionCity(5,0),ymi=regionCity(0,-5);
+    const zah=regionCity(2,0),ymi=regionCity(0,-2) /* v500: mapa finito */;
     if(zah&&Math.hypot(x-zah.x,z-zah.z)<560)return 'deserto';
     if(ymi&&Math.hypot(x-ymi.x,z-ymi.z)<560)return 'neve';
    }
