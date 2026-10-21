@@ -246,7 +246,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/wagon369.js?v=369"></script>
-<script src="tools/terrain245.js?v=514"></script>
+<script src="tools/terrain245.js?v=522"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=499"></script>
@@ -4011,8 +4011,21 @@ const Environment128=(()=>{
   s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;attribute float terrainSnow154;attribute vec3 terrainMix154;varying float snow154;varying vec3 mix154;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;snow154=terrainSnow154;mix154=terrainMix154;');
   s.fragmentShader=`varying float snow154;varying vec3 mix154;varying float road128;varying float biome131;varying vec3 terrainWorld128;
   float hash128(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  uniform vec4 uTerR[24];
   float noise128(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash128(i),hash128(i+vec2(1,0)),f.x),mix(hash128(i+vec2(0,1)),hash128(i+vec2(1,1)),f.x),f.y);}
   `+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+   {/* v512 (Ian): trilha de terra estreita (3-4 m) pelo segmento real da estrada + rocha lascada nas encostas */
+    vec2 tp=terrainWorld128.xz;float dmin=1e9;
+    for(int i=0;i<24;i++){vec4 R=uTerR[i];vec2 ab=R.zw-R.xy;vec2 qq=R.xy+ab*clamp(dot(tp-R.xy,ab)/max(dot(ab,ab),1e-4),0.,1.);dmin=min(dmin,length(tp-qq));}
+    float trail=(1.-smoothstep(1.2,2.5,dmin+(noise128(tp*.9)-.5)*1.3));
+    vec3 dirt=vec3(.40,.31,.21)*(.78+noise128(tp*3.1)*.3+noise128(tp*13.)*.18);
+    float rut=smoothstep(.55,.95,noise128(vec2(tp.x*.8+tp.y*.8,dmin*2.4)));
+    diffuseColor.rgb=mix(diffuseColor.rgb,dirt*(1.-rut*.18),trail*.94);
+    mat3 Rt=transpose(mat3(viewMatrix));vec3 wn=normalize(Rt*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));float steep=smoothstep(.90,.66,abs(wn.y));
+    vec3 pw=cameraPosition-Rt*vViewPosition;float lay=noise128(vec2((pw.x+pw.z)*.11,pw.y*.75));vec2 cu=vec2((pw.x+pw.z)*.38,pw.y*.8);cu+=(vec2(noise128(pw.xz*.31+pw.y*.4),noise128(pw.zx*.29+pw.y*.5))-.5)*4.;cu.x+=floor(cu.y)*.43;vec2 ci=floor(cu),cf=fract(cu);float blk=hash128(ci);float edgeL=min(min(cf.x,1.-cf.x),min(cf.y,1.-cf.y));float crackL=1.-smoothstep(.02,.11,edgeL+noise128(pw.xz*3.+pw.y*3.)*.05);
+    vec3 rock=mix(vec3(.17,.16,.15),vec3(.58,.56,.52),blk*.75+lay*.25)*(1.-crackL*.45)*(.85+noise128(pw.xz*7.+pw.y*7.)*.3);
+    rock=mix(rock,vec3(.30,.38,.20),smoothstep(.5,.92,abs(wn.y))*.3*noise128(pw.xz*.6));
+    diffuseColor.rgb=mix(diffuseColor.rgb,rock,steep*(1.-trail));}
    vec2 q=terrainWorld128.xz;float broad=noise128(q*.22),grain=noise128(q*17.);vec2 cell=q*1.55;cell.x+=floor(cell.y)*.43;
    vec2 f=fract(cell);float edge=min(min(f.x,1.-f.x),min(f.y,1.-f.y));float crack=1.-smoothstep(.014,.056,edge+noise128(q*5.)*.035);
    float stone=smoothstep(.65,.80,noise128(q*.48));float detail=mix(.85+grain*.22+noise128(q*2.7)*.09, .98-crack*.28+grain*.07,road128);
@@ -4054,7 +4067,7 @@ envGroundColors=function(pg,near){
  environmentGroundColors128(pg,near);const pos=pg.attributes.position,col=pg.attributes.color,season=seasonI();
  const palette={campos:0x58a94b,floresta:0x39854c,flores:0x83bf55,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
  const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),biomes=new Float32Array(pos.count),snows=new Float32Array(pos.count),mixes=new Float32Array(pos.count*3),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
- for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=onRoad(segs,x,z)||near.some(city=>{const cl=cityL(city),maxWallR=(cl>=8?130:cl>=6?100:70);return (Math.abs(x-city.x)<5.5||Math.abs(z-city.z)<5.5)&&Math.hypot(x-city.x,z-city.z)<maxWallR});
+ for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=near.some(city=>{const cl=cityL(city),maxWallR=(cl>=8?130:cl>=6?100:70);return (Math.abs(x-city.x)<5.5||Math.abs(z-city.z)<5.5)&&Math.hypot(x-city.x,z-city.z)<maxWallR});
   color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x70bc58),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
   color.multiplyScalar(.85+WN(x*.065,z*.065)*.25);
   if(road)color.setHex(season===3&&!['deserto','vulcao'].includes(bio)?0xa2aaa8:0x827866);
@@ -9587,7 +9600,7 @@ requestAnimationFrame(frame);
 <script src="tools/terra444.js?v=458"></script>
 <script src="tools/clear445.js?v=458"></script>
 <script src="tools/ground446.js?v=447"></script>
-<script src="tools/grass446.js?v=502"></script>
+<script src="tools/grass446.js?v=522"></script>
 <script src="tools/deep447.js?v=500"></script>
 <script src="tools/impact459.js?v=492r1"></script>
 <script src="tools/juice468.js?v=492r1"></script>
@@ -9619,7 +9632,7 @@ requestAnimationFrame(frame);
 <script src="tools/marciais-rest504.js?v=509r1"></script>
 <script src="tools/dream488.js?v=513"></script>
 <script src="tools/mapa500.js?v=500b"></script>
-<script src="tools/mundo513.js?v=514"></script>
+<script src="tools/mundo513.js?v=522"></script>
 <script src="tools/mapa501.js?v=516b"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>

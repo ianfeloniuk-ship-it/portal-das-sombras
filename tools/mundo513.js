@@ -2,7 +2,7 @@
    - As 19 vilas ficam em lugares escolhidos (costa, beira de rio, pé da serra, oásis), não no centro de cada quadrado.
    - Estradas sinuosas (curva suave entre pontos de controle) que contornam o relevo e passam pelas passagens das serras.
    - Serras (tools/terrain245.js: ridge513) dividem o mapa em regiões; cada uma tem uma passagem onde a estrada cruza.
-   - A estrada de Aster para o sul continua reta no desfiladeiro do marco zero (x = 0, z de 88 a 280). */
+   - A estrada de Aster para o sul sai reta do portão (z até 88) e depois serpenteia pelo desfiladeiro do marco zero (z de 88 a 520), na mesma curva da garganta de terrain245.js (gc510): mude os dois juntos. */
 (function(){
   /* vilas: região → posição (x, z) */
   const TOWN={
@@ -23,7 +23,7 @@
     ['0,0',[0,-260],[-130,-700],[150,-1150],'0,-1',[60,-1850],[0,-2150],[-150,-2600],[80,-3000],'0,-2'],
     ['0,0',[260,0],[600,-120],[950,120],'1,0',[1600,100],[1820,0],[2300,-150],[2800,120],'2,0'],
     ['0,0',[-260,0],[-700,150],'-1,0',[-1950,120],[-2400,0],[-3000,-150],'-2,0'],
-    ['0,0',[0,88],[0,280],[150,700],'0,1',[-80,1700],[0,2050],[200,2500],[-100,2950],'0,2'],
+    ['0,0',[0,88],[5,120],[42,160],[101,200],[136,240],[103,280],[62,320],[52,360],[67,400],[73,440],[55,480],[36,520],[150,700],'0,1',[-80,1700],[0,2050],[200,2500],[-100,2950],'0,2'],
     ['0,0',[190,190],[700,600],[1200,1100],[1650,1450],[2000,1900],'1,1'],
     [[150,-1150],[700,-1000],'1,-1'],
     [[-700,150],[-900,-400],'-1,-1'],

@@ -1,3 +1,11 @@
+## v522 (21/10/2026) — Estrada Sul sinuosa, trilha de terra e rocha nas encostas
+- Pedido de Ian: a estrada de Aster parecia reta e de pedra larga; no Skyrim é uma trilha de terra estreita que serpenteia, com paredões de rocha. Aprovado por Ian nas capturas do clone de teste.
+- `tools/mundo513.js`: a rota Aster→sul sai reta do portão (z até 88) e serpenteia até z 520 (meandros de até 136 m para o lado, pontos de controle tirados da curva `gc510`).
+- `tools/terrain245.js`: garganta do Marco Zero acompanha a curva (centro `gc510` = mesma conta do `mundo513.js`, mude os dois juntos); paredões abrem e fecham (trechos estreitos e vales abertos); z de 78 a 560. GLSL e CPU iguais.
+- `tools/environment128.js` + `src/core/200-bloco-environment128.js` (sombreador do chão): estrada fora das cidades deixa de ser calçada de pedra e vira trilha de terra de 3 a 4 m, desenhada pelo segmento real (`uTerR`, só nos 24 segmentos mais próximos do jogador); encostas íngremes ganham rocha em camadas, com a inclinação tirada da posição na tela (`vViewPosition`). `environment-bridge128.js`/núcleo: só as praças das cidades continuam como pedra. `tools/grass446.js`: sem grama só a 2,6 m do eixo.
+- Teste: Edge sem tela (Playwright) num clone; capturas olhadas ao longo do trecho. Rocha em vista alta tem padrão ondulado; sem pinheiros gigantes nem névoa de vale; pontes e ruínas perto de estrada fora do trecho sem teste.
+- Combinado com a v513/v514 de outra sessão: o `roadSegs/onRoad` dessa sessão vale (a minha versão em `250-mundo-infinito.js` foi descartada).
+
 ## v521 (21/10/2026) — Diálogo com escolhas nos NPCs de cidade e vilas
 - Pedido de Ian: levar o diálogo com escolhas para os NPCs de cidade e vilas.
 - `tools/dialogo520.js`: vendedores e caçadores (kind `vendor` e `hunter`, inclusive Povo482) ganham menu ao apertar F: ver mercadorias / ouvir o NPC (abre o que já existia), perguntar da cidade, elogiar (afeto de 0 a 5), pedir um agrado (só com afeto 3: 100 de ouro uma vez, depois 25) e provocar (-10 de reputação; ele recusa loja e conversa até você pedir desculpas por 100 de ouro). Memória em `profile.dialogo520["cidade:Nome"]`. O módulo troca o `use` dos NPCs a cada 1,5 s; o que o NPC já fazia (loja, fala de caçador, passos da campanha) continua pela primeira opção.

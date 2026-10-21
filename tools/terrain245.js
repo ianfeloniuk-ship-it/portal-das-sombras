@@ -44,6 +44,8 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
  float sd=seaD439(p);if(sd>-60.)h=mix(h,seaBed439(p,sd),smoothstep(-60.,30.,sd));float rk439=1.-smoothstep(300.,600.,sd);
  for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);h=mix(h,D.w,1.-smoothstep(D.z,D.z+38.,dd));if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
  for(int i=0;i<24;i++){vec4 R=uTerR[i];h=mix(h,0.,(1.-smoothstep(5.,22.,sd513(p,R.xy,R.zw)))*rk439);}
+ float gc510=smoothstep(100.,260.,p.y)*(130.*sin(p.y*.0057120)+52.*sin(p.y*.013369)+18.*sin(p.y*.033069));float gx510=abs(p.x-gc510);float gz510=smoothstep(78.,118.,p.y)*(1.-smoothstep(500.,560.,p.y));float gm510=.3+.7*smoothstep(-.2,.55,sin(p.y*.011+1.));float ga510=smoothstep(8.,23.,gx510);
+ h+=gz510*gm510*ga510*(17.+4.*sin(p.y*.045+sign(p.x)*1.3))*(1.+.16*sin(p.y*.21+p.x*.11)+.09*sin(p.y*.47-p.x*.23)+.05*sin(p.y*.97+p.x*.41));
  return h;}
 `;
  /* v391 (Ian): rios e lagos têm leito cavado (fundo em U de 2,2 m / bacia de 2,5 m) e margens mais íngremes. */
@@ -80,6 +82,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
   const sd=seaD439(x,z);if(sd>-60)h=mix(h,seaBed439(x,z,sd),ss(-60,30,sd));const rk439=1-ss(300,600,sd);
   for(const D of TER.D.value){if(D.z<0)continue;const dd=Math.hypot(x-D.x,z-D.y);h=mix(h,D.w,1-ss(D.z,D.z+38,dd));if(D.w<0){const rr=D.z-3;if(dd<rr)h-=2.5*(1-dd*dd/(rr*rr))}}
   for(const R of TER.R.value){h=mix(h,0,(1-ss(5,22,sdc513(x,z,R.x,R.y,R.z,R.w)))*rk439)}
+  {/* v520: desfiladeiro do Marco Zero, segue a estrada sinuosa (mundo513.js) e abre/fecha; igual ao GLSL */const gc=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069)),gx=Math.abs(x-gc),gz=ss(78,118,z)*(1-ss(500,560,z)),gm=.3+.7*ss(-.2,.55,S(z*.011+1)),ga=ss(8,23,gx);h+=gz*gm*ga*(17+4*S(z*.045+Math.sign(x)*1.3))*(1+.16*S(z*.21+x*.11)+.09*S(z*.47-x*.23)+.05*S(z*.97+x*.41))}
   return terra444cpu(x,z,h)};
 
  const C=T.ShaderChunk;

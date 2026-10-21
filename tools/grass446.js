@@ -88,7 +88,7 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
       const dens = Math.max(0, Math.min(1, (n + .32) * 2.1)) * B[0]; // manchas: campo cheio onde o ruído sobe, clareiras onde desce
       if (hash(gx + 31, gz - 17) > dens) continue;
       if (blocked(x, z)) continue;
-      if (segs && typeof onRoad === 'function' && onRoad(segs, x, z, 4)) continue;
+      if (segs && typeof onRoad === 'function' && onRoad(segs, x, z, 2.6)) continue;
       if (sites.some(b => Math.hypot(b.x - x, b.z - z) < 3)) continue;
       const s = (.75 + hash(gx * 3, gz * 5) * .6) * (bio === 'deserto' ? .8 : 1) * (.85 + .35 * Math.max(0, n));
       const tone = .85 + .3 * hash(gx, gz * 7) + .25 * n;
