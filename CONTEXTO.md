@@ -1,3 +1,14 @@
+## v489 (20/10/2026) — Segundo Despertar por Armaduras de Chefes e Narrador no topo da tela
+- Pedido de Ian:
+  1. Segundo Despertar: confirmar e garantir a regra real. O jogador entra em um portal que se torna vermelho, derrota o chefe de classe rara e obtém partes da armadura dele (cada uma com passiva exclusiva). Ao reunir e equipar as 5 peças do conjunto completo, abre-se a prova para despertar a classe daquele chefe. Removido do código todo e qualquer resquício antigo de "investigações de fissuras com o Narrador" e "afinidades".
+  2. Narrador: como o histórico de conversas fica recolhido, o Narrador estava invisível. Implementado banner elegante no topo da tela (`narratorSayTop` / `#narratorTopBar`) com título dourado, tipografia em destaque e som suave. O Narrador agora aparece no alto mesmo com o histórico fechado, tanto em eventos importantes quanto em observações periódicas do mundo.
+- Modificados:
+  - `src/core/330-efeitos.js`: adicionada `narratorSayTop` com banner dinâmico e integração com `toast`.
+  - `src/core/640-telas.js`: `narratorUpdate105` agora exibe as falas no topo da tela e aciona observações ambientais quando a fila estiver livre.
+  - `src/core/440-instancias-especiais.js`: tela do Segundo Despertar (`awakeningView103`) atualizada com a regra oficial dos conjuntos de armadura em Fendas Vermelhas.
+  - `src/core/660-bloco-runtime111-cont.js` e `680-bloco-journey113-cont.js`: eliminadas funções e ações mortas do sistema antigo (`awakeningViewOld103`, `rareLearn103`, `rareAttune103`).
+- Testes: montagem e build ok; node --check em todos os scripts e blocos inline; asserções de verificação aprovadas.
+
 ## v488 (20/10/2026) — Cutscene de sonho com a Mão do Arquiteto e despertar estilo Skyrim
 - Pedido de Ian: adicionar na cutscene de abertura de Novo Jogo (logo no início, antes de despertar da queda da Fenda) a cena de sonho em 1ª pessoa com a Mão do Arquiteto:
   1. Cena em 1ª pessoa no vazio escuro/violeta da Fenda: a Mão do Arquiteto (`arquiteto246.glb`) desce lentamente da escuridão em direção à câmera/rosto do jogador com tremor de câmera e pulso de luz púrpura.
