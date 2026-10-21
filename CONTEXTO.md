@@ -1,3 +1,9 @@
+## v519 (21/10/2026) — NPCs de encontro chamam o jogador como no Skyrim
+- Pedido de Ian: os NPCs têm que chamar o jogador quando ele passa perto, como no Skyrim.
+- `tools/quests480.js`: o NPC de encontro (Doran, Ignis, Zephyr etc.) guarda a fala (`speech`); quando o jogador chega entre 13 e 4 m, ele vira para o jogador, mostra a fala em balão (`speech153`) com um sinal sonoro e a dica «F para falar». Repete a cada 14 s, no máximo 4 vezes, e para quando o jogador fala com ele. O balão aparece só até 14 m (limite do `speech153`).
+- Teste: navegador local, encontro «Doran, Mercador Ambulante» gerado, jogador a 10 m: balão com a fala e NPC virado para o jogador, sem erro novo. Contagem de chamadas passou de 1 em 3 s (provável quadro duplicado do teste), cap de 4 mantido.
+- Pendente: NPCs de cidade e vilas ainda não chamam; só os de encontro. Bugs da v517 (rocha, Meteoro, mar, relógio).
+
 ## v518 (21/10/2026) — NPCs de encontro com modelo do Povo482
 - Pedido de Ian (print do Ignis): o Ignis era um boneco de caixas, não um NPC de verdade.
 - `tools/npc482.js`: NPCs `emergent_skyrim` (Ignis, Zephyr etc., criados em `quests480.js` com `makeChibi`) entram no Povo482 como civis (sexo pelo nome: lista, senão final «a» = f, senão m). Perto de 60 m viram o modelo rigado e animado; longe voltam ao boneco.

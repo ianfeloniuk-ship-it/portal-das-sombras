@@ -1030,7 +1030,10 @@
           col: '#6fe39a',
           sign: encDef.sign,
           label: `F · FALAR COM ${encDef.name.toUpperCase()}`,
-          use: () => openEmergentDialogue(encDef)
+          speech: encDef.speech,
+          calls: 0,
+          nextCall: 0,
+          use: () => { npcObj.talked = true; openEmergentDialogue(encDef); }
         };
         const interEntry = {
           type: 'emergent_npc',
@@ -1059,6 +1062,18 @@
     if (typeof paused !== 'undefined' && paused) return;
     if (typeof L === 'undefined' || !L || L.mode !== 'world' || typeof player === 'undefined' || !player || player.dead) return;
     try { checkEmergentSpawns(); } catch (_) {}
+
+    /* v519 (Ian): como no Skyrim, o NPC de encontro chama o jogador ao ver ele chegar perto (13 a 4 m), até 4 vezes */
+    const cn = currentEmergentNpc;
+    if (cn && !cn.gone && !cn.talked && cn.speech && cn.calls < 4 && typeof speech153 === 'function') {
+      const dc = Math.hypot(player.x - cn.x, player.z - cn.z), nowc = performance.now();
+      if (dc < 13 && dc > 4 && nowc >= cn.nextCall) {
+        cn.calls++; cn.nextCall = nowc + 14000;
+        cn.face = Math.atan2(player.x - cn.x, player.z - cn.z);
+        try { speech153(cn, cn.speech, cn.calls === 1 ? 'F para falar' : ''); } catch (_) {}
+        try { if (typeof beep === 'function') beep(520, .12, .05, 'triangle'); } catch (_) {}
+      }
+    }
 
     // Limpeza de NPC emergente distante (> 160m)
     if (currentEmergentNpc && !currentEmergentNpc.gone) {
