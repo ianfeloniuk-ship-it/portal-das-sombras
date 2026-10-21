@@ -1,3 +1,11 @@
+## v527 (21/10/2026) — Mundo vivo, parte 3: crianças, brigas e notícias que mudam
+- Pedido de Ian («faz ai», depois da lista de pendências da v523).
+- `tools/vida527.js` (novo): 2 crianças por cidade de dia, correm entre pontos da praça e falam frases soltas; à noite vão dormir (somem). Brigas: no máximo uma a cada 150 s, de dia, a menos de 60 m do jogador, dois moradores discutem no meio da rua por 25 s; depois de 10 s o guarda mais próximo vai até lá e separa.
+- `tools/dialogo520.js`: menu da briga (separar = +3 de reputação, tomar o partido de um muda o afeto dos dois, ou deixar). Crianças não têm «pedir agrado» nem «provocar». Notícias dos NPCs mudam com a fama do jogador (`profile.fama523`: bondade = esmolas e briga separada, maldade = ameaçar, expulsar e provocar, ladrões = ladrão pego), com multa pendente e com contratos concluídos; 65% das vezes que há algo a comentar. `tools/vida523.js`: moradores em briga vão ao ponto da discussão; ladrão pego conta na fama.
+- Ao subir, as v524 a v526 de outra sessão já estavam na main (HUD de diálogo estilo Skyrim, arca do covil, marcos do mundo); reaplicado por cima, sem mexer no que elas fizeram.
+- Teste: só simulação em Node (2 crianças, 3 moradores, briga começa, guarda vai e separa, crianças dormem à noite, fama gravada). O menu da briga no HUD novo e o jogo no navegador não foram testados.
+- Pendente (mundo vivo): modelo Povo482 nos moradores, andar sentado e deitado, NPCs que mudam de cidade, comércio entre moradores.
+
 ## v526 (21/10/2026) — Marcos do mundo: Acampamentos com carroças, Ruínas de Mármore e Estátua Gigantesca da Colina
 - Pedido de Ian: "Coloca no jogo acampamentos que a gente precisa, pedras de mármore que vão fazer construções jogadas. Sabe aquela estátua gigantesca que tem lá no topo de uma colina que tem coisas dentro? Eu quero também no jogo."
 - Implementação:

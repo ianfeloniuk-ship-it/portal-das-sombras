@@ -27,6 +27,18 @@
   function questDone(def) { const S = global.Quests480 && Quests480.getState(); return !!(S && S.completed[def.quest.id]); }
   function questActive(def) { const S = global.Quests480 && Quests480.getState(); return !!(S && S.active[def.quest.id]); }
 
+  /* v527: fama do jogador e notícias que mudam com o que ele fez */
+  function fama(k) { if (typeof profile === 'undefined' || !profile) return {}; const F = profile.fama523 = profile.fama523 || {}; if (k) { F[k] = (F[k] || 0) + 1; } return F; }
+  function news(n, fb) {
+    const F = fama() || {}, L2 = [];
+    if (F.bondade >= 2) L2.push('Dizem que um viajante anda dando esmola aos pobres da cidade. Gente boa.');
+    if (F.maldade >= 2) L2.push('Andam falando de um viajante de mau gênio. A fama dele não é boa.');
+    if (F.ladroes >= 1) L2.push('Todo mundo comenta que alguém pegou o ladrão da cidade.');
+    if (typeof profile !== 'undefined' && profile && profile.multa523) L2.push('Ouvi dizer que um viajante arrumou confusão com a guarda e ainda não pagou a multa.');
+    try { const S = global.Quests480 && Quests480.getState(), k = S ? Object.keys(S.completed || {}).length : 0; if (k >= 1) L2.push('Contam que um viajante já cumpriu ' + k + ' contrato' + (k > 1 ? 's' : '') + ' da Ordem por aí.'); } catch (_) {}
+    if (L2.length && Math.random() < .65) return L2[Math.floor(Math.random() * L2.length)];
+    try { return (typeof regionLine116 === 'function' && n && n.home && regionLine116(n.home)) || fb; } catch (_) { return fb; }
+  }
   function dismissNpc() {
     const n = ctx && ctx.npc;
     if (!n || n.gone) return;
@@ -270,7 +282,7 @@
       t: 'Você não faria isso... não com alguém que só pediu ajuda!',
       o: [
         { l: 'Levar a bolsa e deixar o ' + nome + ' fugir (+' + Math.round(g / 10) + ' de ouro, -20 de reputação)', fn: () => {
-          addGold(Math.round(g / 10)); subRep(20); f.ameacado = 1; f.aceitou = 0; save(); dismissNpc();
+          addGold(Math.round(g / 10)); subRep(20); fama('maldade'); f.ameacado = 1; f.aceitou = 0; save(); dismissNpc();
           say('<b>' + nome + '</b> larga a bolsa e foge. Ele não vai esquecer o que você fez.'); return 'fim';
         } },
         { l: 'Recuar. Foi só um teste', go: 'raiz' }
@@ -334,7 +346,7 @@
     const isVendor = n.kind === 'vendor';
 
     const N = {};
-    const news = () => { try { return (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Anda tudo calmo por aqui.'; } catch (_) { return 'Anda tudo calmo por aqui.'; } };
+    const news0 = () => news(n, 'Anda tudo calmo por aqui.');
     
     let defaultGreeting = 'Olá, viajante. Em que posso ajudar?';
     if (isBank) defaultGreeting = 'Bem-vindo ao Banco de Aster. Seu ouro e seus bens estão sempre protegidos aqui.';
@@ -372,8 +384,8 @@
         ...(isPot ? [{ l: 'Qual poção você mais recomenda?', go: 'dica_pocao' }] : []),
         { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
         { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
-        { l: 'Pedir um agrado', go: 'agrado' },
-        { l: 'Provocar: "Você não vale nada"', go: 'provoca' },
+        { l: 'Pedir um agrado', go: 'agrado', if: () => n.role523 !== 'crianca' },
+        { l: 'Provocar: "Você não vale nada"', go: 'provoca', if: () => n.role523 !== 'crianca' },
         { l: 'Até logo', fn: () => 'fim' }
       ]
     };
@@ -391,7 +403,7 @@
       o: [{ l: 'Boa dica', go: 'raiz' }]
     };
     N.noticias = {
-      t: news(),
+      t: news0(),
       o: [{ l: 'Obrigado pela informação', fn: () => { if (!f.noticias) { f.noticias = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
     };
     N.elogio = {
@@ -406,7 +418,7 @@
     N.provoca = {
       t: 'O que foi que você disse?!',
       o: [
-        { l: 'Repetir e ir embora (-10 de reputação)', fn: () => { f.ofendido = 1; m.bond = 0; subRep(10); save(); say('<b>' + nome + '</b> vira as costas. Ele não vai tratar com você tão cedo.'); return 'fim'; } },
+        { l: 'Repetir e ir embora (-10 de reputação)', fn: () => { f.ofendido = 1; fama('maldade'); m.bond = 0; subRep(10); save(); say('<b>' + nome + '</b> vira as costas. Ele não vai tratar com você tão cedo.'); return 'fim'; } },
         { l: 'Rir: "Brincadeira!"', go: 'raiz' }
       ]
     };
@@ -437,16 +449,16 @@
         : m.bond >= 2 ? 'Você de novo... Que a luz lhe pague pelo que já fez.'
         : 'Uma moedinha, nobre viajante? Faz dois dias que não como.',
       o: [
-        { l: 'Dar 1 de ouro', if: () => gold() >= 1, fn: () => { addGold(-1); m.bond = Math.min(5, m.bond + 1); f.expulso = 0; save(); say('<b>' + nome + ':</b> "Obrigado, de coração."'); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
-        { l: 'Dar 10 de ouro', if: () => gold() >= 10, fn: () => { addGold(-10); m.bond = Math.min(5, m.bond + 2); f.expulso = 0; save(); return m.bond >= 3 && !f.presente ? 'presente' : 'noticia'; } },
+        { l: 'Dar 1 de ouro', if: () => gold() >= 1, fn: () => { addGold(-1); fama('bondade'); m.bond = Math.min(5, m.bond + 1); f.expulso = 0; save(); say('<b>' + nome + ':</b> "Obrigado, de coração."'); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
+        { l: 'Dar 10 de ouro', if: () => gold() >= 10, fn: () => { addGold(-10); fama('bondade'); m.bond = Math.min(5, m.bond + 2); f.expulso = 0; save(); return m.bond >= 3 && !f.presente ? 'presente' : 'noticia'; } },
         { l: 'Dar 50 de ouro', if: () => gold() >= 50 && !f.deu50, fn: () => { addGold(-50); f.deu50 = 1; f.expulso = 0; m.bond = 5; if (typeof addOrderRep === 'function') addOrderRep(5, 'A Ordem soube da sua bondade'); save(); return m.bond >= 3 && !f.presente ? 'presente' : 'raiz'; } },
         { l: 'Perguntar o que aconteceu com ele', go: 'passado' },
-        { l: 'Expulsar: "Saia daqui, vagabundo" (-15 de reputação)', fn: () => { f.expulso = 1; m.bond = 0; subRep(15); save(); dismissNpc(); say('<b>' + nome + '</b> sai arrastando os pés. Quem viu não gostou.'); return 'fim'; } },
+        { l: 'Expulsar: "Saia daqui, vagabundo" (-15 de reputação)', fn: () => { f.expulso = 1; fama('maldade'); m.bond = 0; subRep(15); save(); dismissNpc(); say('<b>' + nome + '</b> sai arrastando os pés. Quem viu não gostou.'); return 'fim'; } },
         { l: 'Ignorar e seguir', fn: () => 'fim' }
       ]
     };
     N.passado = { t: PASSADO[h], o: [{ l: 'Sinto muito', go: 'raiz' }] };
-    N.noticia = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'A cidade anda calma.', o: [{ l: 'Obrigado pela notícia', go: 'raiz' }] };
+    N.noticia = { t: news(n, 'A cidade anda calma.'), o: [{ l: 'Obrigado pela notícia', go: 'raiz' }] };
     N.presente = {
       t: 'Espere... guardei isto escondido dos saqueadores. Você foi o único que me tratou como gente. Fique com isto.',
       o: [{ l: 'Aceitar (150 de ouro)', fn: () => { f.presente = 1; addGold(150); save(); say('<b>' + nome + '</b> entrega 150 de ouro escondidos.'); return 'raiz'; } },
@@ -462,7 +474,7 @@
   }
 
   /* --- MORADORES COM ROTINA, GUARDAS E BÊBADOS (v523) --- */
-  function actTxt(n) { return ({ trabalho: 'Estou no meio do trabalho.', almoco: 'É hora do almoço, deixe eu comer em paz.', taverna: 'Depois do serviço, nada como uma caneca na taverna.', casa: 'Estou indo para casa descansar.', patrulha: 'Estou de ronda.' })[n.act523] || 'Tenho muito o que fazer hoje.'; }
+  function actTxt(n) { return ({ trabalho: 'Estou no meio do trabalho.', almoco: 'É hora do almoço, deixe eu comer em paz.', taverna: 'Depois do serviço, nada como uma caneca na taverna.', casa: 'Estou indo para casa descansar.', patrulha: 'Estou de ronda.', brincar: 'Pega eu! Você não me pega!', briga: 'Saia daqui, isso não é da sua conta!' })[n.act523] || 'Tenho muito o que fazer hoje.'; }
   function buildGuard(n) {
     const m = tmem(n), f = m.flags, nome = n.short || n.name;
     const multa = () => profile && profile.multa523;
@@ -479,7 +491,7 @@
       ]
     };
     N.ladroes = { t: n.home && n.home.ladrao523 ? 'Sim! Um ladrão anda rondando. Se ele roubar você, grite que eu corro atrás dele.' : 'Por enquanto está tudo calmo. Eles aparecem mais à noite.', o: [{ l: 'Obrigado', go: 'raiz' }] };
-    N.noticias = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Tudo calmo.', o: [{ l: 'Obrigado', fn: () => { if (!f.n) { f.n = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
+    N.noticias = { t: news(n, 'Tudo calmo.'), o: [{ l: 'Obrigado', fn: () => { if (!f.n) { f.n = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
     N.provoca = { t: 'Repita isso e vai passar a noite na cela.', o: [
       { l: 'Repetir (multa de 50 e -10 de reputação)', fn: () => { profile.multa523 = 1; m.bond = 0; subRep(10); save(); return 'raiz'; } },
       { l: 'Recuar', go: 'raiz' }] };
@@ -497,10 +509,27 @@
         { l: 'Seguir', fn: () => 'fim' }
       ]
     };
-    N.rumor = { t: (typeof regionLine116 === 'function' && n.home && regionLine116(n.home)) || 'Hic... a cidade é boa, só tem muito ladrão à noite.', o: [{ l: 'Saúde!', go: 'raiz' }] };
+    N.rumor = { t: news(n, 'Hic... a cidade é boa, só tem muito ladrão à noite.'), o: [{ l: 'Saúde!', go: 'raiz' }] };
     return N;
   }
+  function buildBrawl(n) {
+    const o = n.briga523, nome = n.short || n.name, on = o && (o.short || o.name), m = tmem(n), mo = o ? tmem(o) : null;
+    const end = () => { n.brigaT523 = 0; n.act523 = 'trabalho'; if (o) { o.brigaT523 = 0; o.act523 = 'trabalho'; } };
+    return { raiz: {
+      t: nome + ' e ' + on + ' estão aos gritos. "Ele me deve dinheiro!" "Mentira, ele quebrou minha banca!"',
+      o: [
+        { l: 'Separar a briga', fn: () => { end(); if (typeof addOrderRep === 'function') addOrderRep(3, 'Separou uma briga'); fama('bondade'); save(); say('Os dois se acalmam e agradecem.'); return 'fim'; } },
+        { l: 'Tomar o partido de ' + nome, fn: () => { end(); m.bond = Math.min(5, m.bond + 1); if (mo) mo.bond = Math.max(0, mo.bond - 1); save(); say('<b>' + on + '</b> te olha torto e vai embora.'); return 'fim'; } },
+        { l: 'Tomar o partido de ' + on, fn: () => { end(); if (mo) mo.bond = Math.min(5, mo.bond + 1); m.bond = Math.max(0, m.bond - 1); save(); say('<b>' + nome + '</b> te olha torto e vai embora.'); return 'fim'; } },
+        { l: 'Deixar para lá', fn: () => 'fim' }
+      ] } };
+  }
   function vida(n, orig) {
+    if (n.brigaT523 && n.brigaT523 > performance.now() && n.briga523) {
+      const def = { name: n.name, title: 'BRIGA', type: 'cidade:' + n.name };
+      ctx = { def, npc: n, builder: () => buildBrawl(n), tree: buildBrawl(n), node: 'raiz' };
+      render(); return;
+    }
     if (n.role523 === 'guarda' || n.role523 === 'bebado') {
       const b = n.role523 === 'guarda' ? buildGuard : buildDrunk, m = tmem(n); m.meets++;
       const def = { name: n.name, title: n.short || n.name, type: 'cidade:' + n.name };
@@ -524,5 +553,5 @@
   }
   setInterval(wrapTownNpcs, 1500);
 
-  global.Dialogo520 = { open, pick, town, mendigo, vida, close: closeSkyrimDialog };
+  global.Dialogo520 = { open, pick, town, mendigo, vida, fama, close: closeSkyrimDialog };
 })(typeof window !== 'undefined' ? window : globalThis);

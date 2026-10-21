@@ -56,6 +56,7 @@
 
   function routine(n, p, nightNow) {
     const c = n.home;
+    if (n.brigaT523 && n.brigaT523 > performance.now() && n.brigaPt523) { n.act523 = 'briga'; goto(n, n.brigaPt523, 1.8); return; }
     if (n.role523 === 'guarda') {
       if (n.chase523 && !n.chase523.gone) { n.act523 = 'patrulha'; goto(n, { x: n.chase523.x, z: n.chase523.z }, 1.6); return; }
       if (goto(n, patrolPt(c, n.wp523 || 0), 3)) n.wp523 = ((n.wp523 || 0) + 1) % 8;
@@ -91,7 +92,7 @@
         if (typeof run !== 'undefined' && run) run.gold = (run.gold || 0) + n.loot523;
         if (typeof toast === 'function') toast('<b>[LADRÃO]</b> Você pegou o ladrão e recuperou ' + n.loot523 + ' de ouro.');
         if (typeof addOrderRep === 'function') addOrderRep(3, 'Pegou um ladrão');
-        n.loot523 = 0; drop(n);
+        n.loot523 = 0; if (global.Dialogo520) Dialogo520.fama('ladroes'); drop(n);
       } else if (typeof speech153 === 'function') speech153(n, 'Só estou passando...', '');
     };
     n.label = 'F · VULTO ENCAPUZADO';
@@ -104,7 +105,7 @@
         if (dist(g, n) < 2.2) {
           if (typeof run !== 'undefined' && run) run.gold = (run.gold || 0) + n.loot523;
           if (typeof toast === 'function') toast('<b>[GUARDA]</b> ' + g.name + ' pegou o ladrão e devolveu ' + n.loot523 + ' de ouro.');
-          n.loot523 = 0; g.chase523 = null; drop(n);
+          n.loot523 = 0; g.chase523 = null; if (global.Dialogo520) Dialogo520.fama('ladroes'); drop(n);
         }
       }
       return;
