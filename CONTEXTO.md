@@ -1,3 +1,10 @@
+## v520 (21/10/2026) — Diálogo com escolhas e consequências (como Skyrim)
+- Pedido de Ian (áudio): as respostas do diálogo com NPCs têm que levar a coisas, e o jogo muda conforme o que você faz.
+- `tools/dialogo520.js` (novo): árvore de diálogo para todos os NPCs de encontro. Respostas: aceitar (pelo ouro ou de graça por honra, com o dobro de reputação e confiança), perguntar o que acontece (um lacaio a menos e 10% a mais de XP), pedir mais pagamento (+25%, só com 200 de reputação da Ordem), ameaçar (ele foge e deixa 10% do ouro, -20 de reputação, e passa a recusar falar até você pedir desculpas por 200 de ouro) e seguir viagem (ele lembra e fala «você voltou»). Depois de concluir a missão, agradece uma vez com ouro. A memória fica em `profile.dialogo520[tipo]`.
+- `tools/quests480.js`: `openEmergentDialogue` chama `Dialogo520.open`; `acceptEmergent(tipo, over)` aceita ajustes de recompensa. `game.html`: script novo, `?v=520`; `sw.js` pds-v520.
+- Teste: só simulação em Node (fluxo ameaçar → desculpas → perguntar → aceitar, ouro e flags certos). Não testado no navegador (o painel recusou abrir localhost). Falas são genéricas; falas próprias por NPC ainda não.
+- Pendente: NPCs de cidade e vilas ainda sem esse diálogo; consequências no mundo (local muda se o NPC morrer).
+
 ## v519 (21/10/2026) — NPCs de encontro chamam o jogador como no Skyrim
 - Pedido de Ian: os NPCs têm que chamar o jogador quando ele passa perto, como no Skyrim.
 - `tools/quests480.js`: o NPC de encontro (Doran, Ignis, Zephyr etc.) guarda a fala (`speech`); quando o jogador chega entre 13 e 4 m, ele vira para o jogador, mostra a fala em balão (`speech153`) com um sinal sonoro e a dica «F para falar». Repete a cada 14 s, no máximo 4 vezes, e para quando o jogador fala com ele. O balão aparece só até 14 m (limite do `speech153`).

@@ -920,7 +920,9 @@
     }
   ];
 
-  function openEmergentDialogue(encDef) {
+  function openEmergentDialogue(encDef, npc) {
+    /* v520: árvore de diálogo com escolhas e memória (tools/dialogo520.js) */
+    if (global.Dialogo520 && global.Dialogo520.open) { try { global.Dialogo520.open(encDef, npc || currentEmergentNpc); return; } catch (_) {} }
     let h = `<div class="guide93">`;
     h += `<strong>${encDef.name}</strong>`;
     h += `<p style="font-size:13px;line-height:1.45;margin-top:6px;color:#dbe8f2">${encDef.desc}</p>`;
@@ -937,13 +939,14 @@
     }
   }
 
-  function acceptEmergent(encType) {
+  function acceptEmergent(encType, over) {
     const encDef = EMERGENT_DEFS.find(e => e.type === encType);
     if (!encDef) return;
     const qid = encDef.quest.id;
     // Registra quest dinamicamente no catálogo se não existir
     QUEST_CATALOG[qid] = {
       ...encDef.quest,
+      ...(over || {}),
       region: 'mundo_aberto',
       type: 'emergent',
       biome: (encDef.biomes && encDef.biomes[0]) || 'campos',
@@ -1033,7 +1036,7 @@
           speech: encDef.speech,
           calls: 0,
           nextCall: 0,
-          use: () => { npcObj.talked = true; openEmergentDialogue(encDef); }
+          use: () => { npcObj.talked = true; openEmergentDialogue(encDef, npcObj); }
         };
         const interEntry = {
           type: 'emergent_npc',
