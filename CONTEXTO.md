@@ -1,3 +1,9 @@
+## v491 (20/10/2026) — NPCs da cidade desviam da fonte, bancas e casas
+- Pedido de Ian (print da fonte roxa em Aster): "os NPCs batem nas coisas como se não enxergassem que tem coisas na frente".
+- Causa: `updNpc` (src/core/390-ia.js) andava reto até o destino; a colisão só empurrava para fora, então esfregavam no obstáculo. O destino sorteado também podia cair dentro da fonte.
+- Agora: `steerNpc490` olha 2,4 m à frente e vira para o lado livre mais perto do destino (mantém o lado por um instante); destino só em lugar livre; chegou perto de um destino bloqueado = chegou; preso por mais de 1 s escolhe outro destino.
+- Teste (5 caçadores cruzando a praça pela fonte, 10 s): encostados 20% → 0%. Sem erros.
+
 ## v490 (20/10/2026) — Aceitar missão de encontro, mira no Lobo Fendido, relatório do cerco
 - Pedido de Ian (áudios 20/10): "aperto nas missões e não acontece nada"; mira de longe desce para o chão no Lobo Fendido; abrir o relatório do cerco contava o tempo da Fenda de novo.
 - `tools/quests480.js` (?v=490): `acceptEmergent`/`openEmergentDialogue` não estavam exportados — o botão "Aceitar: …" dos encontros (ex.: Vael, Batedor Renegado) dava erro e não fazia nada. Exportados; contrato de encontro guarda a definição no save (volta depois de recarregar) e marca o alvo perto de onde foi aceito.
