@@ -1,3 +1,10 @@
+## v499 (21/10/2026) — Armas próprias para Paladino, Invocador, Necromante e cada mago (Blender)
+- Pedido de Ian: encaixar as armas feitas no Blender (Drive: Projetos/Portal-das-Sombras/Armas-Blender-v490) nas classes.
+- `models/armas155/*-490.glb` (9 arquivos, 652 KB juntos): varinha do Paladino (antes usava a maça), tomo do Invocador e cajado de ossos do Necromante (antes o cajado comum), e um cajado por mago: fogo, gelo, terra, raio, tempo e fendas.
+- `tools/warrior-player127.js`: `STAFF495`/`staffFile495` escolhe o cajado pelo elemento no nome do item (Brasa/Geada/Raiz/Centelha/Tempo/Fenda) e, sem isso, pela classe do jogador (Mago Elemental pelo elemento escolhido). Cor original (`make428`). Modelos `-490` não passam pela adivinhação de lado da cabeça (`fixed490`).
+- Guardados nas costas: cajado, cajado de ossos e varinha ficam com a cabeça para cima, saindo por cima do ombro (antes a regra das espadas deixava o cristal perto da cintura). Espada, machado e adaga continuam como estavam.
+- Teste: navegador local, as 9 armas carregam e aparecem (classes 5–13), na mão durante o ataque e nas costas. Sem erros. Não mexe nos ataques/efeitos (GPT). Reaplicado por cima da v498.
+
 ## v498 (21/10/2026) — Invocador: esfera arcana e lobo de cristal vivo
 - Continuação automática autorizada por Ian. `tools/invocador497.js` usa a esfera com três brilhos orbitando, runa no alvo e o lobo de cristal arcano da demo aprovada. O desenho corresponde somente ao Lobo Espiritual aliado permanente; lobos inimigos do mundo mantêm seu modelo. Este lote cobre básico e Lobo Espiritual; outras ativas do Invocador seguem pendentes.
 - O mesmo aliado real conserva IA, vida, dano, alcance, recarga e colisão. Modelo aprovado acompanha posição/direção reais, com ciclo de patas por distância, respiração, cauda, cabeça ao morder, reação curta ao dano e dissolução ao morrer. A mordida desenha três cortes no acerto confirmado. O corpo anterior fica escondido só durante a renderização, com visibilidade restaurada ao final; não se muda o modelo usado na lógica de combate.
