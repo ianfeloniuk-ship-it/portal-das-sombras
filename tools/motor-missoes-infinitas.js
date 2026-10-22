@@ -332,7 +332,7 @@
     "trigger": "Despertar após o sonho com a Mão do Arquiteto",
     "description": "Você desperta na lama da Estrada Sul sem classe e sem ouro diante da carroça tombada. Edran está ferido no ombro e dois civis estão presos sob a madeira enquanto uma Gosma Fendida avança do matagal.",
     "choicesText": "Empurrar a carroça imediatamente para salvar os dois sobreviventes antes de lutar no braço, ou atacar a Gosma Fendida primeiro para proteger Edran.",
-    "worldConsequence": "Salvar os civis primeiro faz o casal se mudar para o primeiro anel de Aster e abrir uma banca de bandagens (+5 de Confiança em Aster); atacar o monstro primeiro preserva o escudo de Edran, que lhe entrega 1 Poção de Vida Menor extra no portão."
+    "worldConsequence": "Salvar os civis primeiro faz o casal se mudar para o primeiro anel de Aster e abrir uma banca de ataduras (+5 de Confiança em Aster); atacar o monstro primeiro preserva o escudo de Edran, que lhe entrega 1 Poção de Vida extra no portão."
   },
   {
     "id": "primeva_q002",

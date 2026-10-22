@@ -633,5 +633,7 @@
   }
   setInterval(wrapTownNpcs, 1500);
 
-  global.Dialogo520 = { open, pick, town, mendigo, vida, fama, close: closeSkyrimDialog };
+  /* v546: conversa com árvore própria (usada pelas missões fixas, ex.: banca de ataduras do casal da Estrada Sul) */
+  function custom(def, npc, builder, node) { ctx = { def, npc, builder: () => builder(), tree: builder(), node: node || 'raiz' }; render(); }
+  global.Dialogo520 = { open, pick, town, mendigo, vida, fama, custom, close: closeSkyrimDialog };
 })(typeof window !== 'undefined' ? window : globalThis);

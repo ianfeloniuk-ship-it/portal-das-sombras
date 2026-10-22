@@ -13,7 +13,7 @@
      ev (evento contado do jogo) · tower (andar da Torre; rel = andares acima do recorde ao começar) · city · caps · diary */
   const ACTS = [
     { id: 'a1', act: 1, title: 'I — O Chamado', steps: [
-      { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 1, kinds: ['slime', 'gosma', 'goblin'] },
+      { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 1, kinds: ['gosma_f'] }, /* v546: missão fixa #1 — Gosma Fendida */
         done: 'Edran: — Procure Lyra e Kael em Aster.' },
       { t: 'city', d: 'Alcance a muralha de {cidade}.', done: 'Uma voz, perto demais: — A muralha. Continue.' },
       { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Transmigradores; em troca, você caça as Fendas.', 'Sem moedas? Ninguém que cai da Fenda tem. Fale com Kael, na loja de equipamentos: ele troca uma arma de treino por escambo.'] },
@@ -642,7 +642,7 @@
         if(k>=1){f.down=false;f.m.root.rotation.z=0;}
       });
       if(u<1){requestAnimationFrame(animate);return}
-      scene.remove(dustGroup);for(const d of motes){d.geometry.dispose();d.material.dispose()}w.rescuing=false;s.cartRescued401=true;paused=false;useMarker(m,i);
+      scene.remove(dustGroup);for(const d of motes){d.geometry.dispose();d.material.dispose()}w.rescuing=false;s.cartRescued401=true;if(s.choice545==='civis'&&w.inters[0])w.inters[0].label='F · FALAR COM EDRAN';paused=false;useMarker(m,i);
     }requestAnimationFrame(animate);
   }
   /* despertar no chão: anéis que se expandem + luz que sobe */
@@ -714,7 +714,9 @@
   function foesLeft(m) { const w = W.get(m.id); return w ? w.foes.filter(e => !e.dead && enemies.includes(e)).length : 0; }
   function useMarker(m, i, read406 = false) {
     const s = state(m.id), sp = m.steps[s.s]; if (!sp || sp.t !== 'go') return;
-    if(m.id==='a1'&&s.s===0&&!s.helped401&&!s.fightDone&&!s.killed&&window.Intro401){Intro401.dialog('Edran',['A carroça… Ela veio da Fenda. Cuidado, está logo ali!'],()=>{s.helped401=true;save();tick()});return}
+    if(m.id==='a1'&&s.s===0&&!s.helped401&&!s.fightDone&&!s.killed&&window.Intro401){Intro401.dialog('Edran',['A carroça… Ela veio da Fenda. Tem dois presos debaixo da madeira!','E a gosma está saindo do mato. Empurre a carroça agora e tire os dois de lá, ou derrube a criatura primeiro. Você escolhe.'],()=>{s.helped401=true;const w=W.get(m.id),it=w&&w.inters[0];if(it&&w.cart){it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA'}save();tick()});return}
+    /* v546 (missão fixa #1): empurrar a carroça antes da luta salva os dois primeiro */
+    if(m.id==='a1'&&s.s===0&&s.helped401&&!s.fightDone&&!s.cartRescued401){s.choice545='civis';save();rescueCart(m,i);return}
     if (!s.fightDone) { toast('<b>[HISTÓRIA]</b> Derrote a criatura primeiro (' + Math.max(1, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + ' restante).', 3500); return; }
     if (s.hit.includes(i)) return;
     if (m.id === 'a8' && s.s === 0 && !s.gorgeCleared441) {
@@ -779,9 +781,15 @@
       try { bigText('MARCO DA RECONSTRUÇÃO ERGUIDO', 2000); } catch (_) {}
     }
     if(!read406&&window.Scenes406){const w=W.get(m.id),step=s.s;if(Scenes406.read(m,s,w,()=>{if(W.get(m.id)===w&&state(m.id)===s&&s.s===step&&!s.done)useMarker(m,i,true)}))return}
+    if(m.id==='a1'&&s.s===0&&s.cartRescued401&&!s.edranHelp401){
+      /* v546 (missão fixa #1): salvou os civis antes de lutar — o escudo de Edran rachou segurando a gosma */
+      s.edranHelp401=true;if(typeof player!=='undefined'&&player){player.hp=player.maxhp;try{floater(player.x,player.z,'VIDA RESTAURADA','#6bff8d',true);sfx('level')}catch(_){}}save();
+      if(window.Intro401){Intro401.dialog('Edran',['Você tirou os dois de lá antes de tudo. A gosma acertou meu escudo enquanto você empurrava: rachou de ponta a ponta.','Eles são um casal de Aster. Disseram que vão abrir uma banca de ataduras no primeiro anel da cidade.','Beba este bálsamo da minha bolsa. Ele restaura toda a sua vida. Agora vamos.'],()=>useMarker(m,i,true));return}
+    }
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
       const w=W.get(m.id);if(!w)return;
-      if(!s.edranHelp401){s.edranHelp401=true;if(typeof player!=='undefined'&&player){player.hp=player.maxhp;player.iT=Math.max(player.iT||0,3);try{floater(player.x,player.z,'VIDA RESTAURADA','#6bff8d',true);sfx('level')}catch(_){}}const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu. A criatura deixou um cristal; use F para recolher os recursos.','Ele desaparece em dez segundos. O ouro do abate já está com você.','Beba este bálsamo revigorante da minha bolsa para restaurar toda sua vida antes de seguir.','Agora ajude-me a levantar a carroça. Há sobreviventes presos debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Beba o bálsamo da bolsa e ajude-me a levantar a carroça.',6000);return}
+      if(!s.choice545)s.choice545='luta';
+      if(!s.edranHelp401){s.edranHelp401=true;if(typeof player!=='undefined'&&player){player.hp=player.maxhp;player.iT=Math.max(player.iT||0,3);try{floater(player.x,player.z,'VIDA RESTAURADA','#6bff8d',true);sfx('level')}catch(_){}}const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu. A criatura deixou um cristal; use F para recolher os recursos.','Ele desaparece em dez segundos. O ouro do abate já está com você.','Beba este bálsamo revigorante da minha bolsa para restaurar toda sua vida antes de seguir.','Meu escudo aguentou inteiro porque você foi direto na criatura.','Agora ajude-me a levantar a carroça. Há sobreviventes presos debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Beba o bálsamo da bolsa e ajude-me a levantar a carroça.',6000);return}
       rescueCart(m,i);return;
     }
     s.hit.push(i);
@@ -791,6 +799,7 @@
       const gi = w.inters.findIndex(x => x.idx === i); if (gi >= 0 && w.grps[gi]) { w.grps[gi].userData.taken = true; scene.remove(w.grps[gi]); } }
     try { fxRing(player.x, player.z, isSide(m) ? 0x7fe8ff : 0xffc457, 2.2, .6); sfx('coin'); } catch (_) {}
     const n = sp.pts || 1;
+    if (m.id === 'a1' && s.s === 0 && s.hit.length >= n) window.Fixas545?.done1(s.choice545 || 'luta');
     if (s.hit.length >= n) advance(m, sp.done); else { save(); toast('<b>[HISTÓRIA]</b> ' + s.hit.length + ' de ' + n + '.', 2500); }
   }
   function spawnFight(m) {
@@ -848,7 +857,7 @@
       if (sp.t === 'tower' && (profile.towerBest || 0) >= s.base) { advance(m); continue; }
       if (sp.t === 'caps' && capsVisited() >= sp.n) { advance(m); continue; }
       if (sp.t === 'barter') { if (!profile.classless) advance(m, sp.done); continue; }
-      if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < entryRadius(c.c) - 3) { s.city = c.c.name; if(m.id==='a1'){s.cityCheckpoint401=true;save()} advance(m, sp.done); continue; } }
+      if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < entryRadius(c.c) - 3) { s.city = c.c.name; if(m.id==='a1'){s.cityCheckpoint401=true;save();window.Fixas545?.gate1()} advance(m, sp.done); continue; } }
       if (sp.t !== 'go') { clearWorld(m.id); continue; }
       let w = W.get(m.id);
       if (w && (w.L !== L || w.step !== s.s || w.grps.some(g => !g.parent && !g.userData.taken))) { // mundo foi refeito: recria
