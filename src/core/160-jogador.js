@@ -171,7 +171,7 @@ let AFFC=null,AFFK='';function affB(){const items=equippedItems().filter(special
 function makePlayer(){kitMigrate111();kitArchive111();migrateInitialSkill259();normalizeStyleWeapon259();const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
-    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
+    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};window.player=player;try{gearLook()}catch(e){}
 }
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 /* Visual do equipamento (pedido do Irror): a arma e a roupa mudam com o que você usa.

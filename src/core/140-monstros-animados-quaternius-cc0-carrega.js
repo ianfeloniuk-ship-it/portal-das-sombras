@@ -173,6 +173,7 @@ function animGlb(m,st){
   else if((st.move>.1||m.hold413>0)&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.userRig&&m.gait413&&m.spd413!=null&&st.speed!=null?clamp(m.spd413/m.gait413,.6,2.2):m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.fadeOut(.25);m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);
+  try{if(window.Anim547&&Anim547.postMobGlb)Anim547.postMobGlb(m,st,ADT)}catch(_){}
 }
 
 function animDraconico318(m,st,t){
@@ -206,9 +207,10 @@ function animChibi(m,st,t){
   }
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
-  if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
+  if(m.quadruped){if(window.Anim547&&Anim547.animQuadruped){Anim547.animQuadruped(m,st,t);return}const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
   if(m.mon==='draconico318'&&!m.userRig){animDraconico318(m,st,t);return}
   if(m.glb){animGlb(m,st);return}
+  if(window.Anim547&&Anim547.animChibi){Anim547.animChibi(m,st,t);return}
   const sw=Math.sin(t*11)*.7*st.move;
   m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;
   if(st.wind>0){m.armR.rotation.x=-2.6*st.wind;m.body.rotation.x=-.15*st.wind}

@@ -1,3 +1,22 @@
+## v549 (22/10/2026) — Biomecânica orgânica Skyrim × Primeva (IK real no relevo, inclinação e curvas do Viajante, dinâmica de voo dos dragões e articulação)
+- **Pedido de Ian (Estúdio de Animação Orgânica e Cinemática)**: Acabar definitivamente com o visual de boneco rígido em dragões, Viajante, monstros e NPCs, trazendo a física, peso corporal e apoio no relevo de Skyrim.
+- **Viajante & Humanoides (Foot IK e Terreno)** (	ools/anim547.js, src/core/400-loop.js, 	ools/warrior-player127.js):
+  - Foot IK analítico de 2 ossos integrado diretamente ao relevo 	errH(x, z): a pelve rebaixa dinamicamente até alcançar a cota mais baixa do terreno, enquanto a perna mais alta flexiona o joelho (shin_l/shin_r) e ajusta a coxa (	high_l/	high_r), apoiando as solas firmemente no solo rochoso sem flutuação nem afundamento.
+  - Inclinação anatômica em ladeiras (*pitch* frontal suave) e inclinação lateral no relevo (*roll*).
+  - Inclinação nas curvas (*banking*): corpo inclina para dentro nas mudanças de direção em proporção à velocidade de deslocamento. Olhar/cabeça com contra-rotação compensatória no horizonte.
+- **Dragões e Criaturas Aladas** (	ools/anim547.js, 	ools/dragoes510.js, src/core/580-bloco-b-economia-caravanas-chefes-errant.js):
+  - Curva com inclinação aerodinâmica real (*roll* de até 40° em manobras fechadas), arfagem (*pitch*) sincronizada à taxa de subida e descida vertical.
+  - Peso corporal e impulso de voo: deslocamento vertical (*bobbing* de 0,75 m) sincronizado com a fase de empuxo das batidas de asa.
+  - Propagação em onda com atraso de fase no pescoço (cadeia de 6 juntas) e na cauda, chicoteando e acompanhando as curvas.
+  - Asas de 3 juntas articuladas (ombro -> cotovelo -> pulso/vela) com ciclo aerodinâmico que recolhe os membros na subida para cortar o ar e abre com impulso máximo na descida.
+  - Pouso adaptado ao relevo: dragão no chão orienta o corpo de acordo com a normal do solo sob suas patas.
+- **Monstros GLB e Quadrúpedes** (	ools/anim547.js, src/core/140-monstros-animados-quaternius-cc0-carrega.js, src/core/300-entidades.js):
+  - Monstros GLB orientam a caixa torácica e coluna na inclinação do terreno em tempo real.
+  - Lobo Espiritual construído com pernas articuladas de 2 juntas (coxa + joelho/canela) com marcha diagonal (trote), flexão de joelho na fase de balanço (*swing*) e firmeza na fase de apoio (*stance*), além de cauda segmentada em 3 partes ondulando com atraso de fase.
+- **Validação e Testes**:
+  - Teste automatizado com Edge headless via CDP no jogo ativo: 594 ciclos de Player IK, 250 cálculos dinâmicos de dragão em voo e 4276 atualizações de relevo em monstros.
+  - Sincronização e empacotamento validados via 	ools/core_parts.py check e 	ools/build.py.
+
 ## v548 (22/10/2026) — Proporção nórdica 1:7.5, câmera nos olhos e escala Skyrim
 - Pedido de Ian: Corrigir definitivamente a percepção de escala e proporção entre o Viajante (2,00 m–2,05 m), os NPCs e o mundo com os 5 Especialistas do Estúdio Visual Primeva × Skyrim sem quebrar colisões (HASH / ddCol), missões ou saves.
 - **Câmera na linha dos olhos e FOV Skyrim** (src/core/070-three.js, src/core/400-loop.js, 	ools/witcher377.js):

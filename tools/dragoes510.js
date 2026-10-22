@@ -64,9 +64,9 @@ updEnemy=function(e,dt){const D=e.drake510;
   if(D.phase!=='pousa'&&D.phase!=='decola')D.alt+=(24+Math.sin(D.t*1.3)*2-D.alt)*Math.min(1,dt*2);
   setFly(e,true);e.act=null;e.cd=Math.max(e.cd||0,.5);
   try{animChibi(e.m,{move:1,atk:0,dead:0,wind:0},e.t=(e.t||0)+dt)}catch(_){}
-  e.m.root.position.set(e.x,terrH(e.x,e.z)+D.alt,e.z);e.m.root.rotation.y=e.face;return}
+  try{if(window.Anim547&&Anim547.postDragon)Anim547.postDragon(e,dt);else{e.m.root.position.set(e.x,terrH(e.x,e.z)+D.alt,e.z);e.m.root.rotation.y=e.face;}}catch(_){e.m.root.position.set(e.x,terrH(e.x,e.z)+D.alt,e.z);e.m.root.rotation.y=e.face;}return}
  /* no chão: luta normal de chefe; depois de um tempo levanta voo de novo (mais cedo se estiver ferido) */
- const r=baseUpd.apply(this,arguments);
+ const r=baseUpd.apply(this,arguments);try{if(window.Anim547&&Anim547.postDragon)Anim547.postDragon(e,dt)}catch(_){}
  if(D.t>(e.hp<e.maxhp*.5?12:20)&&!e.act){D.phase='decola';D.t=0;setFly(e,true);try{sfx('gong')}catch(_){}}
  return r};
 /* mais frequente: o laço principal recarrega o Errante em 1200 s; aqui cortamos para ~600 s */

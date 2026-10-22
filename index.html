@@ -3544,6 +3544,7 @@ function animGlb(m,st){
   else if((st.move>.1||m.hold413>0)&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.userRig&&m.gait413&&m.spd413!=null&&st.speed!=null?clamp(m.spd413/m.gait413,.6,2.2):m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.fadeOut(.25);m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
   m.mixer.update(ADT);
+  try{if(window.Anim547&&Anim547.postMobGlb)Anim547.postMobGlb(m,st,ADT)}catch(_){}
 }
 
 function animDraconico318(m,st,t){
@@ -3577,9 +3578,10 @@ function animChibi(m,st,t){
   }
   if(m.warrior127&&window.Warrior127){Warrior127.animate(m,st,t,ADT);return}
   if(m.goblin118){animGoblin118(m,st,t);return}
-  if(m.quadruped){const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
+  if(m.quadruped){if(window.Anim547&&Anim547.animQuadruped){Anim547.animQuadruped(m,st,t);return}const sw=Math.sin(t*11)*.65*st.move;m.paws.forEach((p,i)=>p.rotation.x=(i===0||i===3?sw:-sw));m.tail.rotation.y=Math.sin(t*5)*.15;m.body.position.y=Math.abs(Math.sin(t*11))*.035*st.move;m.body.rotation.x=st.wind>0?-.12:st.atk>0?Math.sin(st.atk*Math.PI)*.2:0;if(st.dead>0)m.body.rotation.z=st.dead*Math.PI/2;return}
   if(m.mon==='draconico318'&&!m.userRig){animDraconico318(m,st,t);return}
   if(m.glb){animGlb(m,st);return}
+  if(window.Anim547&&Anim547.animChibi){Anim547.animChibi(m,st,t);return}
   const sw=Math.sin(t*11)*.7*st.move;
   m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;
   if(st.wind>0){m.armR.rotation.x=-2.6*st.wind;m.body.rotation.x=-.15*st.wind}
@@ -3592,7 +3594,7 @@ function flashMats(m,v,col=0xffffff){for(const mt of m.mats||[]){if(!mt||!mt.emi
 
 /* ================= ESTADO ================= */
 let L={mode:'none',group:new THREE.Group(),inter:[]};scene.add(L.group);
-let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[],bossE=null,gates=[],curGate=null,gateSeq=0,WL=null;
+let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[],bossE=null,gates=[],curGate=null,gateSeq=0,WL=null;window.enemies=enemies;
 let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,dlgT=0,view=null;
 const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
 let modalRoute118='';
@@ -3797,7 +3799,7 @@ let AFFC=null,AFFK='';function affB(){const items=equippedItems().filter(special
 function makePlayer(){kitMigrate111();kitArchive111();migrateInitialSkill259();normalizeStyleWeapon259();const c=CLASSES[profile.cls];const {m,aura}=playerModel();
   const st=statsFor();
   player={m,aura,x:0,z:6,face:Math.PI,hp:st.maxhp,mp:st.maxmp,...st,combo:0,comboT:0,atkT:0,atkCd:0,dodgeT:0,iT:0,dodgeCd:0,dir:{x:0,z:-1},
-    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};try{gearLook()}catch(e){}
+    shield:st.maxsh,shT:0,buff:0,buffMul:1,guard:0,guardVal:1,stealth:0,skills:pSkills(),dead:false,r:.5,team:'player',ghostT:0};window.player=player;try{gearLook()}catch(e){}
 }
 /* Visual do equipamento: arma brilha na cor da raridade e cresce com o rank; armadura dá brilho na roupa. */
 /* Visual do equipamento (pedido do Irror): a arma e a roupa mudam com o que você usa.
@@ -9711,11 +9713,11 @@ requestAnimationFrame(frame);
 <script src="tools/fixas545.js?v=546"></script>
 <script src="tools/conversa539.js?v=543"></script>
 <script src="tools/explorar539.js?v=543"></script>
-<script src="tools/anim547.js?v=547"></script>
+<script src="tools/anim547.js?v=549"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v548</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v549</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=548;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=549;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /* ================= ESTADO ================= */
 let L={mode:'none',group:new THREE.Group(),inter:[]};scene.add(L.group);
-let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[],bossE=null,gates=[],curGate=null,gateSeq=0,WL=null;
+let player=null,enemies=[],allies=[],projs=[],hazards=[],fxs=[],floats=[],npcs=[],bossE=null,gates=[],curGate=null,gateSeq=0,WL=null;window.enemies=enemies;
 let run=null,started=false,paused=true,modalOpen=false,freeze=0,shakeA=0,time=0,dlgT=0,view=null;
 const CHAR_UI118={route:'status',scroll:{},details:{},filters:{}};
 let modalRoute118='';
