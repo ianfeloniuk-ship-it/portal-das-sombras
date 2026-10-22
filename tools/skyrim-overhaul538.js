@@ -691,6 +691,30 @@
       ctx.shadowBlur = 0;
     });
 
+    // v542: missões aceitas aparecem no mapa 3D (losango dourado = a que você acompanha)
+    try {
+      const QS = global.Quests480 && global.Quests480.getState();
+      if (QS) for (const qid in QS.active) {
+        const qa = QS.active[qid], qd = global.Quests480.CATALOG[qid] || qa.def490;
+        if (!qa || !qa.targetPos || !qd) continue;
+        const qp = project3D(qa.targetPos.x, qa.targetPos.z, gy(qa.targetPos.x, qa.targetPos.z) + 20);
+        if (qp.x < 20 || qp.x > W - 20 || qp.y < 20 || qp.y > H - 20) continue;
+        const tr = QS.tracked === qid, s = tr ? 9 : 7;
+        ctx.fillStyle = tr ? '#ffd070' : '#4ade80';
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(qp.x, qp.y - s); ctx.lineTo(qp.x + s, qp.y); ctx.lineTo(qp.x, qp.y + s); ctx.lineTo(qp.x - s, qp.y);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.font = '700 11px "Chakra Petch",sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#000000';
+        ctx.shadowBlur = 4;
+        ctx.fillText((tr ? '★ ' : '') + qd.title, qp.x, qp.y - 13);
+        ctx.shadowBlur = 0;
+      }
+    } catch (_) {}
+
     const ph = gy(P.x, P.z) + 18;
     const pp = project3D(P.x, P.z, ph);
     ctx.fillStyle = '#38bdf8';
@@ -782,10 +806,7 @@
   function installHooks() {
     injectStylesAndHUD();
 
-    if (global.RadiantPrimeva && global.Quests480 && global.Quests480.CATALOG) {
-      (global.RadiantPrimeva.FIXED_300_QUESTS || []).forEach(q => { global.Quests480.CATALOG[q.id] = q; });
-      global.RadiantPrimeva.generateBoard().forEach(q => { global.Quests480.CATALOG[q.id] = q; });
-    }
+    /* v542: os contratos do motor entram no mural pelo tools/contratos541.js (alvo, abates, mapa, pagamento) */
 
     if (typeof window !== 'undefined' && !window._skyrim538WheelBound) {
       window._skyrim538WheelBound = true;

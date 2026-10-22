@@ -232,6 +232,9 @@
 
   // Retorna as coordenadas da cidade / capital
   function getCityPos(regionKey) {
+    // v541: mural aberto pela cidade ("rx,rz") ou pelo nome da capital usa a posição real da cidade
+    const c541 = window.Contratos541 && Contratos541.cityOf(regionKey);
+    if (c541) return { x: c541.x, z: c541.z };
     if (typeof CITIES !== 'undefined' && Array.isArray(CITIES)) {
       const match = CITIES.find(c => (c.name || '').toLowerCase().includes(regionKey.toLowerCase()) || (c.id || '').includes(regionKey));
       if (match) return { x: match.x, z: match.z };
@@ -269,10 +272,10 @@
       id: qid,
       acceptedAt: Date.now(),
       progress: 0,
-      max: 1,
+      max: qdef.count541 ? qdef.minions : 1,
       targetPos: { x: targetX, z: targetZ },
       spawned: false,
-      def490: qdef.type === 'emergent' ? qdef : undefined
+      def490: (qdef.type === 'emergent' || qdef.count541) ? qdef : undefined
     };
     S.tracked = qid;
 
@@ -300,6 +303,7 @@
     if (!S || !S.active[qid]) return;
     delete S.active[qid];
     if (S.tracked === qid) S.tracked = Object.keys(S.active)[0] || null;
+    try { cleanupQuestSpawn(qid); } catch (_) {}
     if (typeof toast === 'function') toast('Contrato abandonado.');
     saveState();
   }
@@ -314,6 +318,16 @@
     delete S.active[qid];
     S.completed[qid] = Date.now();
     if (S.tracked === qid) S.tracked = Object.keys(S.active)[0] || null;
+
+    // v541: contrato vivo paga o que a escolha prometeu, só agora no fim
+    if (qdef.pay541 && window.Contratos541) {
+      const txt = Contratos541.pay(qdef);
+      if (typeof bigText === 'function') bigText('CONTRATO CUMPRIDO', 2400);
+      if (typeof sfx === 'function') { sfx('level'); sfx('coin'); }
+      if (typeof toast === 'function') toast(`<b>[CONTRATO CUMPRIDO]</b> <b>${qdef.title}</b><br>${txt}`, 9000);
+      saveState();
+      return;
+    }
 
     // Entrega recompensas
     const curRun = (typeof run !== 'undefined' && run) ? run : (typeof window !== 'undefined' ? window.run : null);
@@ -359,7 +373,8 @@
     h += `<p>Escolha contratos para caçar feras lendárias, resgatar caravanas ou explorar criptas com total liberdade pelo mundo aberto.</p>`;
     h += `</div>`;
 
-    const quests = Object.values(QUEST_CATALOG).filter(q => q.region === regionKey || regionKey === 'all');
+    const fixKey541 = window.Contratos541 ? Contratos541.boardKey(regionKey) : regionKey;
+    const quests = Object.values(QUEST_CATALOG).filter(q => !q.count541 && (q.region === fixKey541 || regionKey === 'all'));
     h += `<div class="sec">CONTRATOS DISPONÍVEIS NA REGIÃO</div>`;
 
     if (!quests.length) {
@@ -393,6 +408,8 @@
         actHtml
       );
     }
+
+    if (window.Contratos541) h += Contratos541.boardHtml(regionKey);
 
     // Seletor de Capitais
     h += `<div class="sec">VER MURAIS DE OUTRAS REGIÕES</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
@@ -1411,7 +1428,7 @@
         if (typeof spawnKind === 'function' && typeof enemies !== 'undefined') {
           const gr = qdef.rank || 1;
           const kBoss = qdef.bossKind || 'orcinho';
-          try {
+          if (!qdef.noBoss) try {
             const bx = act.targetPos.x + 3.0;
             const bz = act.targetPos.z + 1.5;
             const b = spawnKind(kBoss, bx, bz, gr, { wild: true, breaker: true });
@@ -1429,7 +1446,7 @@
             }
           } catch (_) {}
 
-          const nMinions = qdef.minions || 3;
+          const nMinions = qdef.count541 ? Math.max(0, qdef.minions - (act.progress || 0)) : (qdef.minions || 3);
           for (let i = 0; i < nMinions; i++) {
             const a = (i / nMinions) * TAU + 0.35;
             const mx = act.targetPos.x + Math.cos(a) * (4.5 + Math.random() * 2.5);
@@ -1464,6 +1481,19 @@
             if (e.m && e.m.root) e.m.root.position.set(e.x, e.m.root.position.y, e.z);
           }
         }
+      }
+
+      // v541: contrato vivo conta cada abate e só conclui quando a conta fecha
+      if (qdef.count541) {
+        if (sp && sp.minions) for (const m of sp.minions) {
+          if (!m.dead || m.counted541) continue;
+          m.counted541 = true;
+          act.progress = Math.min(act.max, (act.progress || 0) + 1);
+          if (typeof floater === 'function') floater(m.x, m.z, act.progress + '/' + act.max, '#ffd070', true);
+          saveState();
+        }
+        if ((act.progress || 0) >= act.max) completeQuest(qid);
+        continue;
       }
 
       // Verifica se o chefe / guardiões foram abatidos
@@ -1654,6 +1684,10 @@
     const totalFoes = liveBoss + liveMinions;
 
     let detail = '';
+    if (qdef.count541) {
+      const cnt = `${qdef.mobName541}: ${act.progress || 0}/${act.max}`;
+      return { title: qdef.title, detail: d > 45 ? `${d} m · ${cnt}` : `⚔ ${cnt}` };
+    }
     if (d > 45) {
       detail = `${d}m · ${qdef.giver}`;
     } else if (totalFoes > 0) {

@@ -282,6 +282,8 @@
 
   // 5. Aplicação Real de Consequências no Save do Jogador e no Simulador de Mundo
   function applyWorldChange(regionId, delta) {
+    // v541: Contratos541 lê o efeito de cada escolha sem aplicar (paga só no fim do contrato)
+    if (API._capture) { API._capture.push(Object.assign({}, delta)); return; }
     const prof = global.profile || {};
     const r = global.run || {};
 
@@ -3921,6 +3923,9 @@
     "worldConsequence": "Conecta permanentemente as 300 missões fixas ao **Motor Procedural de Missões Infinitas (`Radiant Primeva Engine`)**, garantindo que Primeva nunca fique sem histórias inéditas para viver."
   }
 ];
+
+  // v541: peças expostas para tools/contratos541.js montar contratos de verdade no mundo
+  Object.assign(API, { REGIONS, CLANS, MARGIN_NPCS, CREATURES_BY_BIOME, TRIGGERS, ARCHETYPES, mulberry32 });
 
   // 6. Gerador de Nova Missão Infinita Contextualizada
   API.generateQuest = function (seedOffset) {
