@@ -810,8 +810,7 @@
       window._skyrim538WheelBound = true;
       window.addEventListener('keydown', e => {
         if (global.modalOpen && e.code !== 'Escape') return;
-        if (e.code === 'KeyV' && !e.ctrlKey && !e.altKey) API.toggleFirstPerson();
-        else if (e.code === 'KeyH' && !e.ctrlKey && !e.altKey) API.useDeluminator();
+        if (e.code === 'KeyH' && !e.ctrlKey && !e.altKey) API.useDeluminator();
         else if (e.code === 'KeyK' && !e.ctrlKey && !e.altKey) API.openSkillTreeModal();
       });
     }

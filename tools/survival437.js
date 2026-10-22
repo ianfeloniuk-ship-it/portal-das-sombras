@@ -626,55 +626,90 @@
     return best;
   }
 
-  function chopTree(tr) {
-    const s = S(); if (!s || !tr) return;
-    if (tr.ecoStage === 1 || tr.ecoStage === 2) {
-      add('galho', 2, true);
-      floater(tr.x, tr.z, '+2 Brotos e Folhas (Árvore Jovem em crescimento)', '#98f5a4', true);
-      try { if (window.Anim303) Anim303.play('palma', 1.1); sfx('step'); } catch (_) {}
-      return;
+  function findNearestStump() {
+    if (!ready() || L.mode !== 'world') return null;
+    let best = null, bd = 3.2;
+    for (const [key, g] of stumps456.entries()) {
+      const d = Math.hypot(g.position.x - player.x, g.position.z - player.z);
+      if (d < bd) {
+        bd = d;
+        best = { key, x: g.position.x, z: g.position.z, group: g };
+      }
     }
-    if (!count('machado')) {
-      add('galho', 2, true);
-      if (Math.random() < 0.5) add('resina', 1, true);
-      floater(tr.x, tr.z, '+2 Galhos (use Machado para Toras/Lenha)', '#d8c39e', true);
-      try { if (window.Anim303) Anim303.play('palma', 1.1); sfx('step'); } catch (_) {}
-      return;
-    }
-    tr. hits = (tr.hits || 0) + 1;
-    try { if (window.Anim303) Anim303.play('machado', 1.15); sfx('hit'); shake(0.1); } catch (_) {}
-    useTool('machado', 1);
+    return best;
+  }
 
-    // Notificar EcoGrid: estado da célula muda para Toco (biomassa = 50)
+  function gatherTreeLitter(tr) {
+    const s = S(); if (!s || !tr) return;
+    s.foraged = s.foraged || {};
+    if (s.foraged[tr.key] && s.foraged[tr.key] > s.clock) {
+      floater(tr.x, tr.z, 'Sem gravetos caídos por aqui agora.', '#c8b89a', true);
+      return;
+    }
+    s.foraged[tr.key] = s.clock + 60;
+    try { if (window.Anim303) Anim303.play('palma', 1.1); sfx('step'); } catch (_) {}
+
+    if (tr.ecoStage === 4) {
+      add('galho', 3, true);
+      if (Math.random() < 0.75) add('resina', 1, true);
+      floater(tr.x, tr.z, '+3 Gravetos Firmes · +1 Resina Anciã (Chão)', '#98f5a4', true);
+    } else if (tr.ecoStage === 3) {
+      add('galho', 2, true);
+      if (Math.random() < 0.45) add('resina', 1, true);
+      floater(tr.x, tr.z, '+2 Gravetos e Galhos Caídos (Chão)', '#d8c39e', true);
+    } else {
+      add('galho', 1, true);
+      floater(tr.x, tr.z, '+1 Graveto Fino (Solo)', '#b0dfa0', true);
+    }
+    // Ian: o jogador NUNCA derruba árvore, permanece viva e de pé!
+    save();
+  }
+
+  function gatherStumpWood(st) {
+    const s = S(); if (!s || !st) return;
+    s.stumpGathered = s.stumpGathered || {};
+    if (s.stumpGathered[st.key] && s.stumpGathered[st.key] > s.clock) {
+      floater(st.x, st.z, 'Sem mais lenha solta neste tronco por enquanto.', '#c8b89a', true);
+      return;
+    }
+    s.stumpGathered[st.key] = s.clock + 180;
+    try { if (window.Anim303) Anim303.play('palma', 1.1); sfx('step'); } catch (_) {}
+    add('lenha', 1, true);
+    add('galho', 2, true);
+    floater(st.x, st.z, '+1 Lenha · +2 Gravetos (Tronco Largado)', '#ffd76a', true);
+    save();
+  }
+
+  // Ian: só quem pode derrubar árvore são os NPCs (lenhadores/trabalhadores)
+  function npcFellTree(wx, wz) {
+    const s = S(); if (!s) return null;
+    let target = null, bd = 6.0;
+    scene.traverse(o => {
+      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'].includes(o.userData?.tripo153)) return;
+      for (let i = 0; i < o.count; i++) {
+        o.getMatrixAt(i, _mat4);
+        _pos.setFromMatrixPosition(_mat4);
+        _scl.setFromMatrixScale(_mat4);
+        if (_scl.y < 0.05) continue;
+        const d = Math.hypot(_pos.x - wx, _pos.z - wz);
+        if (d < bd) {
+          bd = d;
+          target = { mesh: o, idx: i, x: _pos.x, z: _pos.z, key: Math.round(_pos.x) + ':' + Math.round(_pos.z) };
+        }
+      }
+    });
+    if (!target) return null;
+
     let ecoResult = null;
     if (window.EcoGrid && typeof window.EcoGrid.onTreeChopped === 'function') {
-      ecoResult = window.EcoGrid.onTreeChopped(tr.x, tr.z);
+      ecoResult = window.EcoGrid.onTreeChopped(target.x, target.z);
     }
-
-    // Toco regenera naturalmente pelo ecoTick e passagem do tempo
-    s.felled[tr.key] = s.clock + DAY();
-    tr.mesh.setMatrixAt(tr.idx, new T.Matrix4().makeScale(0, 0, 0));
-    tr.mesh.instanceMatrix.needsUpdate = true;
-    spawnStumpVisual(tr.key, tr.x, tr.z);
-
-    const isAncient = (ecoResult && ecoResult.stage === 4) || tr.ecoStage === 4;
-    if (isAncient) {
-      add('tora', 2, true);
-      add('lenha', 4, true);
-      add('galho', 3, true);
-      add('resina', 2, true);
-      floater(tr.x, tr.z, 'Árvore Anciã Derrubada! (+2 Toras · +4 Lenhas · Resinas Raras)', '#98f5a4', true);
-    } else {
-      add('tora', 1, true);
-      add('lenha', 2, true);
-      if (Math.random() < A('chopExtra')) { add('lenha', 1, true); floater(tr.x, tr.z, '+1 Lenha (Força)', '#ffd76a'); }
-      TR('for');
-      add('galho', 2, true);
-      if (Math.random() < 0.65) add('resina', 1, true);
-      floater(tr.x, tr.z, '+1 Tora · +2 Lenhas · +2 Galhos (Toco em regeneração)', '#d8b37a', true);
-    }
-    if (treeInter) { const k = L.inter.indexOf(treeInter); if (k >= 0) L.inter.splice(k, 1); treeInter = null; }
+    s.felled[target.key] = s.clock + DAY();
+    target.mesh.setMatrixAt(target.idx, new T.Matrix4().makeScale(0, 0, 0));
+    target.mesh.instanceMatrix.needsUpdate = true;
+    spawnStumpVisual(target.key, target.x, target.z);
     save();
+    return target;
   }
 
   /* ---------- Água, Pesca, Temperatura e Cantis ---------- */
@@ -1144,20 +1179,30 @@
         }
         for (const id of [...nodes.keys()]) if (!keep.has(id)) removeNode(id);
       }
-      // Interação com árvore próxima
+      // Interação com gravetos de árvores e troncos largados (Ian: jogador não derruba árvore)
       const tr = findNearestTree();
+      const st = !tr ? findNearestStump() : null;
       if (tr) {
-        let lbl = count('machado') ? 'F · CORTAR ÁRVORE (Machado)' : 'F · COLHER GALHOS E RESINA';
+        let lbl = 'F · CATAR GRAVETOS (Chão da Árvore)';
         if (tr.ecoStage === 4) {
-          lbl = count('machado') ? 'F · DERRUBAR ÁRVORE ANCIÃ (Machado)' : 'F · COLHER RESINA ANCIÃ';
+          lbl = 'F · CATAR GRAVETOS E RESINA ANCIÃ (Chão)';
         } else if (tr.ecoStage === 1 || tr.ecoStage === 2) {
-          lbl = 'F · COLHER BROTOS E FOLHAS (Árvore Jovem)';
+          lbl = 'F · CATAR PEQUENOS GRAVETOS (Chão)';
         }
         if (!treeInter) {
-          treeInter = { type: 'tree437', x: tr.x, z: tr.z, r: 3.4, label: lbl, use: () => chopTree(tr) };
+          treeInter = { type: 'tree437', x: tr.x, z: tr.z, r: 3.4, label: lbl, use: () => gatherTreeLitter(tr) };
           L.inter.push(treeInter);
         } else {
-          treeInter.x = tr.x; treeInter.z = tr.z; treeInter.label = lbl; treeInter.use = () => chopTree(tr);
+          treeInter.x = tr.x; treeInter.z = tr.z; treeInter.label = lbl; treeInter.use = () => gatherTreeLitter(tr);
+          if (!L.inter.includes(treeInter)) L.inter.push(treeInter);
+        }
+      } else if (st) {
+        const lbl = 'F · RECOLHER LENHA (Tronco Largado)';
+        if (!treeInter) {
+          treeInter = { type: 'stump437', x: st.x, z: st.z, r: 3.0, label: lbl, use: () => gatherStumpWood(st) };
+          L.inter.push(treeInter);
+        } else {
+          treeInter.x = st.x; treeInter.z = st.z; treeInter.label = lbl; treeInter.use = () => gatherStumpWood(st);
           if (!L.inter.includes(treeInter)) L.inter.push(treeInter);
         }
       } else if (treeInter) {
@@ -1396,10 +1441,7 @@
   addEventListener('keydown', e => {
     if (e.repeat || !ready()) return;
     const t = e.target; if (t && ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)) return;
-    if (e.code === 'KeyV' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
-      e.preventDefault();
-      open('inv');
-    } else if (e.code === 'KeyG' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
+    if (e.code === 'KeyG' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
       const flaskOrder = ['frasco_fogo', 'frasco_veneno', 'frasco_acido', 'frasco_paralisia', 'frasco_fumaca'];
       const flask = flaskOrder.find(k => count(k) > 0);
       if (flask && window.Alchemy470) {
@@ -1457,7 +1499,7 @@
     craft, eat, drinkCanteen, fillCanteen, boilCanteen, distillSeaWater, useTool,
     open, nearFire, nearCamp456, glb, fit, save, nodes, give, levelTerrain,
     freshnessPct, freshStage, sealBundle, unsealBundle, throwBait,
-    canteenTier, canteenMaxSips, spoilMult
+    canteenTier, canteenMaxSips, spoilMult, npcFellTree
   };
   window.Survival437 = window.Surv437;
 })();

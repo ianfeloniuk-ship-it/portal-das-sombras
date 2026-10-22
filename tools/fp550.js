@@ -5,12 +5,13 @@
  * Revisão Estúdio Visual: 5 Especialistas (Skyrim × Primeva)
  *
  * 1. Câmera nos olhos do Viajante (1,86 m de altura, normalizado 2,02 m, avanço 0,10 m).
- * 2. Viewmodel 3D em Three.js com manoplas de ferro forjado e couro nórdico
- *    empunhando a arma real (espada, machado, maça, adaga, cajado, arco) e escudo em 3D.
- * 3. Balanço orgânico de respiração (idle), passada física (walk/run bobbing),
- *    arco inercial de corte (attack swing), guarda/bloqueio elevado e escudada.
- * 4. Mira central minimalista Skyrim (< · >) perfeitamente alinhada ao aimPoint().
- * 5. Alternância fluida com tecla V, scroll do mouse e Pointer Lock no canvas.
+ * 2. Viewmodel 3D calibrado para FOV 48: mãos, manoplas nórdicas e armas SEMPRE
+ *    visíveis em idle com balanço orgânico de respiração (nunca somem da tela).
+ * 3. Suporte completo para Espada, Machado, Maça, Cajado/Lança de Gelo, Adaga, Arco e Escudo.
+ * 4. Passada física (walk/run bobbing), corte fluido em arco inercial (slash) que
+ *    retorna suavemente à postura de guarda, e bloqueio elevado com escudo/parada.
+ * 5. Mira central minimalista Skyrim (< · >) alinhada ao retículo.
+ * 6. Alternância fluida com tecla V (toque único sem conflito com inventário) e rodinha do mouse.
  * ============================================================================ */
 (function(global){
   'use strict';
@@ -132,7 +133,7 @@
     }, 1200);
   }
 
-  /* ---------- Viewmodel 3D em Three.js ---------- */
+  /* ---------- Viewmodel 3D em Three.js (Calibrado para FOV 48) ---------- */
   function buildViewmodel(){
     if(typeof THREE === 'undefined' || typeof camera === 'undefined' || !camera) return null;
     const T = THREE;
@@ -141,14 +142,21 @@
     group.name = 'viewmodel_firstperson_550';
     group.renderOrder = 999;
 
-    // Materiais PBR nórdicos recomendados pelos Especialistas
-    const matIron = new T.MeshStandardMaterial({ color: 0x4a4947, roughness: 0.38, metalness: 0.65 });
-    const matLeather = new T.MeshStandardMaterial({ color: 0x382417, roughness: 0.75, metalness: 0.05 });
-    const matSteel = new T.MeshStandardMaterial({ color: 0xc2c6cc, roughness: 0.22, metalness: 0.88 });
-    const matWood = new T.MeshStandardMaterial({ color: 0x442e1d, roughness: 0.82, metalness: 0.04 });
+    // Materiais PBR nórdicos
+    const matIron = new T.MeshStandardMaterial({ color: 0x4a4947, roughness: 0.35, metalness: 0.70 });
+    const matLeather = new T.MeshStandardMaterial({ color: 0x3a2518, roughness: 0.75, metalness: 0.05 });
+    const matSteel = new T.MeshStandardMaterial({ color: 0xd8dde6, roughness: 0.18, metalness: 0.90 });
+    const matWood = new T.MeshStandardMaterial({ color: 0x442e1d, roughness: 0.85, metalness: 0.04 });
     const matBrass = new T.MeshStandardMaterial({ color: 0xc89832, roughness: 0.35, metalness: 0.80 });
+    const matCrystal = new T.MeshStandardMaterial({
+      color: 0x70c0ff,
+      emissive: 0x2277ee,
+      emissiveIntensity: 2.2,
+      roughness: 0.15,
+      metalness: 0.2
+    });
 
-    for(const m of [matIron, matLeather, matSteel, matWood, matBrass]){
+    for(const m of [matIron, matLeather, matSteel, matWood, matBrass, matCrystal]){
       m.depthTest = true;
       m.depthWrite = true;
     }
@@ -158,61 +166,68 @@
       const arm = new T.Group();
       arm.name = isRight ? 'fp_arm_r' : 'fp_arm_l';
 
-      // Antebraço chanfrado assimétrico (7 faces, quebrando cilindro puro)
-      const foreGeom = new T.CylinderGeometry(0.042, 0.052, 0.26, 7);
+      // Antebraço chanfrado (entra a partir da borda inferior)
+      const foreGeom = new T.CylinderGeometry(0.038, 0.048, 0.22, 7);
       foreGeom.rotateX(Math.PI / 2);
       const forearm = new T.Mesh(foreGeom, matLeather);
-      forearm.position.set(0, 0, 0.12);
+      forearm.position.set(0, -0.015, 0.10);
       arm.add(forearm);
 
-      // Placa dorsal de ferro forjado reforçada
-      const plateGeom = new T.BoxGeometry(0.058, 0.024, 0.18);
+      // Placa dorsal de ferro forjado reforçada na manopla
+      const plateGeom = new T.BoxGeometry(0.052, 0.020, 0.15);
       const plate = new T.Mesh(plateGeom, matIron);
-      plate.position.set(0, 0.038, 0.12);
+      plate.position.set(0, 0.022, 0.10);
       arm.add(plate);
 
       // Correias e rebites de latão
-      const strapGeom = new T.CylinderGeometry(0.048, 0.050, 0.03, 8);
+      const strapGeom = new T.CylinderGeometry(0.042, 0.044, 0.024, 8);
       strapGeom.rotateX(Math.PI / 2);
-      const strap1 = new T.Mesh(strapGeom, matBrass);
-      strap1.position.set(0, 0, 0.06);
-      arm.add(strap1);
+      const strap = new T.Mesh(strapGeom, matBrass);
+      strap.position.set(0, -0.015, 0.05);
+      arm.add(strap);
 
-      // Punho / Manopla articulada
-      const fistGeom = new T.BoxGeometry(0.065, 0.056, 0.075);
+      // Punho / Manopla articulada (nórdica de ferro forjado)
+      const fistGeom = new T.BoxGeometry(0.058, 0.052, 0.070);
       const fist = new T.Mesh(fistGeom, matIron);
-      fist.position.set(0, 0.005, -0.015);
+      fist.position.set(0, 0.0, 0.0);
       arm.add(fist);
+
+      // Dedos encurvados segurando a empunhadura
+      const fingersGeom = new T.BoxGeometry(0.054, 0.042, 0.046);
+      const fingers = new T.Mesh(fingersGeom, matLeather);
+      fingers.position.set(isRight ? -0.015 : 0.015, -0.01, -0.015);
+      arm.add(fingers);
 
       return arm;
     }
 
+    // Posições base calibradas para FOV 48 (Z = -0.32, Y = -0.095: visíveis no terço inferior sem sumir)
     const armR = createArm(true);
-    armR.position.set(0.24, -0.22, -0.42);
-    armR.rotation.set(0.12, -0.18, 0.08);
+    armR.position.set(0.14, -0.095, -0.32);
+    armR.rotation.set(0.18, -0.16, 0.10);
     group.add(armR);
 
     const armL = createArm(false);
-    armL.position.set(-0.24, -0.22, -0.42);
-    armL.rotation.set(0.12, 0.18, -0.08);
+    armL.position.set(-0.14, -0.095, -0.32);
+    armL.rotation.set(0.18, 0.16, -0.10);
     group.add(armL);
 
     // Soquete da arma na mão direita
     const wepHolder = new T.Group();
     wepHolder.name = 'fp_weapon_holder';
-    wepHolder.position.set(0, 0.01, -0.04);
+    wepHolder.position.set(0, 0.01, -0.01);
     armR.add(wepHolder);
 
     // Soquete do escudo na mão esquerda
     const shHolder = new T.Group();
     shHolder.name = 'fp_shield_holder';
-    shHolder.position.set(-0.02, 0.02, -0.02);
+    shHolder.position.set(-0.02, 0.01, -0.01);
     armL.add(shHolder);
 
     // Efeito mágico na mão esquerda
     const magHolder = new T.Group();
     magHolder.name = 'fp_magic_holder';
-    magHolder.position.set(0, 0.02, -0.05);
+    magHolder.position.set(0, 0.02, -0.03);
     armL.add(magHolder);
 
     camera.add(group);
@@ -224,12 +239,12 @@
     FP.weaponHolder = wepHolder;
     FP.shieldHolder = shHolder;
     FP.magicHolder = magHolder;
-    FP.materials = { matIron, matLeather, matSteel, matWood, matBrass };
+    FP.materials = { matIron, matLeather, matSteel, matWood, matBrass, matCrystal };
 
     return group;
   }
 
-  /* ---------- Visual das Armas 3D em Primeiro Plano ---------- */
+  /* ---------- Visual das Armas 3D em Primeiro Plano (Skyrim Style) ---------- */
   function updateWeaponVisual(){
     if(!FP.weaponHolder || typeof THREE === 'undefined') return;
     const T = THREE, mats = FP.materials;
@@ -252,89 +267,99 @@
 
     if(kind === 'axe'){
       // Machado de Batalha Nórdico
-      const shaft = new T.Mesh(new T.CylinderGeometry(0.018, 0.020, 0.65, 6), mats.matWood);
-      shaft.position.set(0, 0.16, -0.15);
-      shaft.rotation.x = Math.PI / 2.3;
+      const shaft = new T.Mesh(new T.CylinderGeometry(0.016, 0.018, 0.55, 6), mats.matWood);
+      shaft.position.set(0, 0.16, 0);
       g.add(shaft);
 
-      const head = new T.Mesh(new T.BoxGeometry(0.024, 0.22, 0.16), mats.matIron);
-      head.position.set(0, 0.36, -0.36);
-      head.rotation.x = Math.PI / 2.3;
+      const head = new T.Mesh(new T.BoxGeometry(0.022, 0.18, 0.13), mats.matIron);
+      head.position.set(0, 0.35, -0.06);
       g.add(head);
 
-      const edge = new T.Mesh(new T.BoxGeometry(0.008, 0.24, 0.04), mats.matSteel);
-      edge.position.set(0, 0.38, -0.44);
-      edge.rotation.x = Math.PI / 2.3;
+      const edge = new T.Mesh(new T.BoxGeometry(0.007, 0.20, 0.035), mats.matSteel);
+      edge.position.set(0, 0.35, -0.12);
       g.add(edge);
+
+      // Angulação Skyrim: erguido diagonalmente para cima e à frente
+      g.rotation.set(-0.45, -0.22, 0.12);
     } else if(kind === 'mace' || kind === 'hammer'){
-      // Maça de Flanges
-      const shaft = new T.Mesh(new T.CylinderGeometry(0.018, 0.020, 0.60, 6), mats.matIron);
-      shaft.position.set(0, 0.16, -0.15);
-      shaft.rotation.x = Math.PI / 2.3;
+      // Maça de Flanges Nórdica
+      const shaft = new T.Mesh(new T.CylinderGeometry(0.016, 0.018, 0.52, 6), mats.matIron);
+      shaft.position.set(0, 0.16, 0);
       g.add(shaft);
 
-      const head = new T.Mesh(new T.CylinderGeometry(0.06, 0.06, 0.16, 6), mats.matSteel);
-      head.position.set(0, 0.38, -0.38);
-      head.rotation.x = Math.PI / 2.3;
+      const head = new T.Mesh(new T.CylinderGeometry(0.05, 0.05, 0.14, 6), mats.matSteel);
+      head.position.set(0, 0.35, 0);
       g.add(head);
+
+      g.rotation.set(-0.42, -0.20, 0.10);
     } else if(kind === 'staff' || kind === 'wand'){
-      // Cajado Arcano
-      const shaft = new T.Mesh(new T.CylinderGeometry(0.020, 0.024, 0.95, 6), mats.matWood);
-      shaft.position.set(0, 0.22, -0.22);
-      shaft.rotation.x = Math.PI / 2.3;
+      // Cajado Arcano / Lança de Gelo (Ian: Lança de Gelo como na imagem)
+      const shaft = new T.Mesh(new T.CylinderGeometry(0.018, 0.022, 0.78, 6), mats.matWood);
+      shaft.position.set(0, 0.20, 0);
       g.add(shaft);
 
-      const headMat = new T.MeshStandardMaterial({ color: 0x64b4ff, emissive: 0x2266dd, emissiveIntensity: 1.5, roughness: 0.15, metalness: 0.2 });
-      const crystal = new T.Mesh(new T.OctahedronGeometry(0.065), headMat);
-      crystal.position.set(0, 0.58, -0.58);
+      // Engaste de bronze no topo
+      const collar = new T.Mesh(new T.CylinderGeometry(0.026, 0.020, 0.06, 6), mats.matBrass);
+      collar.position.set(0, 0.52, 0);
+      g.add(collar);
+
+      // Cristal Arcano de Gelo no topo (gira e brilha)
+      const crystal = new T.Mesh(new T.OctahedronGeometry(0.055), mats.matCrystal);
+      crystal.position.set(0, 0.58, 0);
       g.add(crystal);
 
-      const pl = new T.PointLight(0x60b0ff, 0.85, 3.5);
-      pl.position.set(0, 0.58, -0.58);
+      // Luz pontual sutil do cajado
+      const pl = new T.PointLight(0x70c0ff, 0.75, 2.5);
+      pl.position.set(0, 0.58, 0);
       g.add(pl);
+
+      // Cajado projetado suavemente à frente no quadrante superior direito
+      g.rotation.set(-0.48, -0.24, 0.12);
     } else if(kind === 'dagger'){
       // Adaga Furtiva
-      const blade = new T.Mesh(new T.BoxGeometry(0.038, 0.010, 0.42), mats.matSteel);
-      blade.position.set(0, 0.12, -0.22);
-      blade.rotation.x = Math.PI / 2.3;
+      const blade = new T.Mesh(new T.BoxGeometry(0.032, 0.36, 0.009), mats.matSteel);
+      blade.position.set(0, 0.20, 0);
       g.add(blade);
 
-      const guard = new T.Mesh(new T.BoxGeometry(0.10, 0.022, 0.024), mats.matIron);
-      guard.position.set(0, 0.02, -0.04);
-      guard.rotation.x = Math.PI / 2.3;
+      const guard = new T.Mesh(new T.BoxGeometry(0.09, 0.018, 0.022), mats.matIron);
+      guard.position.set(0, 0.03, 0);
       g.add(guard);
+
+      g.rotation.set(-0.35, -0.15, 0.08);
     } else if(kind === 'bow'){
-      // Arco Recurvo
-      const limb = new T.Mesh(new T.TorusGeometry(0.38, 0.016, 6, 16, Math.PI * 0.7), mats.matWood);
-      limb.position.set(0, 0.10, -0.25);
-      limb.rotation.y = Math.PI / 2;
-      limb.rotation.z = Math.PI / 1.4;
+      // Arco Recurvo Nórdico
+      const limb = new T.Mesh(new T.TorusGeometry(0.32, 0.014, 6, 16, Math.PI * 0.7), mats.matWood);
+      limb.position.set(-0.05, 0.12, -0.10);
+      limb.rotation.set(0, Math.PI / 2, Math.PI / 1.3);
       g.add(limb);
+
+      g.rotation.set(-0.30, 0.10, 0.0);
+    } else if(kind === 'fist'){
+      // Desarmado / Mãos Vazias (nenhum modelo adicional no soquete)
     } else {
       // Espada Nórdica Clássica (Default)
-      const grip = new T.Mesh(new T.CylinderGeometry(0.016, 0.018, 0.12, 6), mats.matLeather);
-      grip.position.set(0, 0.02, -0.02);
-      grip.rotation.x = Math.PI / 2.3;
+      const grip = new T.Mesh(new T.CylinderGeometry(0.015, 0.017, 0.12, 6), mats.matLeather);
+      grip.position.set(0, 0.0, 0);
       g.add(grip);
 
-      const guard = new T.Mesh(new T.BoxGeometry(0.14, 0.024, 0.032), mats.matIron);
-      guard.position.set(0, 0.06, -0.07);
-      guard.rotation.x = Math.PI / 2.3;
+      const pommel = new T.Mesh(new T.DodecahedronGeometry(0.022), mats.matIron);
+      pommel.position.set(0, -0.065, 0);
+      g.add(pommel);
+
+      const guard = new T.Mesh(new T.BoxGeometry(0.13, 0.020, 0.028), mats.matIron);
+      guard.position.set(0, 0.055, 0);
       g.add(guard);
 
-      const blade = new T.Mesh(new T.BoxGeometry(0.048, 0.012, 0.75), mats.matSteel);
-      blade.position.set(0, 0.36, -0.38);
-      blade.rotation.x = Math.PI / 2.3;
+      const blade = new T.Mesh(new T.BoxGeometry(0.044, 0.54, 0.011), mats.matSteel);
+      blade.position.set(0, 0.32, 0);
       g.add(blade);
 
-      const fuller = new T.Mesh(new T.BoxGeometry(0.014, 0.014, 0.55), mats.matIron);
-      fuller.position.set(0, 0.30, -0.32);
-      fuller.rotation.x = Math.PI / 2.3;
+      const fuller = new T.Mesh(new T.BoxGeometry(0.012, 0.42, 0.013), mats.matIron);
+      fuller.position.set(0, 0.28, 0);
       g.add(fuller);
 
-      const pommel = new T.Mesh(new T.DodecahedronGeometry(0.024), mats.matIron);
-      pommel.position.set(0, -0.04, 0.04);
-      g.add(pommel);
+      // Postura nobre de guarda Skyrim: lâmina apontando diagonalmente para cima e centro
+      g.rotation.set(-0.45, -0.22, 0.12);
     }
 
     FP.weaponHolder.add(g);
@@ -357,22 +382,23 @@
 
     if(hasShield){
       const g = new T.Group();
-      // Corpo do escudo redondo nórdico de madeira
-      const body = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.032, 16), mats.matWood);
+      // Corpo do escudo redondo nórdico de tábuas de madeira
+      const body = new T.Mesh(new T.CylinderGeometry(0.18, 0.18, 0.024, 16), mats.matWood);
       body.rotation.x = Math.PI / 2;
       g.add(body);
 
       // Borda de ferro batido rebitada
-      const rim = new T.Mesh(new T.TorusGeometry(0.24, 0.015, 6, 20), mats.matIron);
+      const rim = new T.Mesh(new T.TorusGeometry(0.18, 0.012, 6, 20), mats.matIron);
       g.add(rim);
 
-      // Umbo central cônico/hemisférico
-      const boss = new T.Mesh(new T.SphereGeometry(0.065, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2), mats.matIron);
+      // Umbo central cônico de ferro
+      const boss = new T.Mesh(new T.SphereGeometry(0.050, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2), mats.matIron);
       boss.rotation.x = -Math.PI / 2;
-      boss.position.z = 0.02;
+      boss.position.z = 0.018;
       g.add(boss);
 
-      g.scale.set(0.9, 0.9, 0.9);
+      g.position.set(0, 0.02, 0);
+      g.rotation.set(-0.25, 0.32, -0.10);
       FP.shieldHolder.add(g);
       FP.shieldHolder.visible = true;
     } else {
@@ -440,26 +466,24 @@
       if(typeof cameraLook373 === 'function'){
         cameraLook373(e.movementX, e.movementY);
       }
-      FP.swayX += e.movementX * 0.0006;
-      FP.swayY += e.movementY * 0.0006;
+      FP.swayX += e.movementX * 0.0004;
+      FP.swayY += e.movementY * 0.0004;
     });
 
     // Zoom da rodinha do mouse: rolar para trás sai para 3ª pessoa, rolar para frente entra
     c.addEventListener('wheel', e => {
       if(!global.started || global.paused || global.modalOpen) return;
       if(FP.active && e.deltaY > 50){
-        // Rolar para trás em 1ª pessoa volta para 3ª pessoa
         e.preventDefault();
         FP.set(false);
       } else if(!FP.active && (e.altKey || (global.pcCam && global.pcCam.distance <= 1.2)) && e.deltaY < -50){
-        // Rolar para frente próximo do jogador entra em 1ª pessoa
         e.preventDefault();
         FP.set(true);
       }
     }, { passive: false });
   }
 
-  /* ---------- Animações e Tick a Cada Frame ---------- */
+  /* ---------- Animações e Tick a Cada Frame (Skyrim Style) ---------- */
   FP.tick = function(dt){
     const P = global.player;
     if(!P || P.dead || !FP.active || global.run?.mounted){
@@ -475,75 +499,123 @@
     updateShieldVisual();
 
     const t = (typeof time === 'number' ? time : performance.now() * 0.001);
-    const isMoving = Math.hypot(P.vx || 0, P.vz || 0) > 0.15;
-    const isSprinting = Math.hypot(P.vx || 0, P.vz || 0) > 4.5;
+    const speed = Math.hypot(P.vx || 0, P.vz || 0);
+    const isMoving = speed > 0.15;
+    const isSprinting = speed > 4.5;
     const isBlocking = !!(global.Guard472 && typeof global.Guard472.blocking === 'function' && global.Guard472.blocking());
     const isAttacking = (P.atkCd || 0) > 0.02;
 
-    // 1. Passada física e respiração
+    // 1. Respiração contínua e passada rítmica
     if(isMoving){
-      FP.bobPhase += dt * (isSprinting ? 12.0 : 7.5);
+      FP.bobPhase += dt * (isSprinting ? 11.5 : 7.2);
     } else {
-      FP.bobPhase += dt * 2.0;
+      FP.bobPhase += dt * 1.8;
     }
 
-    const breatheY = Math.sin(t * 1.6) * 0.004;
-    const breatheX = Math.cos(t * 0.8) * 0.003;
-    const walkBobX = isMoving ? Math.sin(FP.bobPhase) * 0.015 : 0;
-    const walkBobY = isMoving ? Math.abs(Math.cos(FP.bobPhase)) * 0.020 : 0;
-    FP.bobY = isMoving ? Math.sin(FP.bobPhase) * 0.012 : 0;
+    const breatheY = Math.sin(t * 1.5) * 0.003;
+    const breatheX = Math.cos(t * 0.75) * 0.002;
+    const walkBobX = isMoving ? Math.sin(FP.bobPhase) * 0.008 : 0;
+    const walkBobY = isMoving ? Math.abs(Math.cos(FP.bobPhase)) * 0.010 : 0;
+    FP.bobY = isMoving ? Math.sin(FP.bobPhase) * 0.007 : 0;
 
-    // 2. Amortecimento do mouse sway
+    // 2. Mouse sway orgânico
     FP.swayX += (0 - FP.swayX) * (1 - Math.exp(-12 * dt));
     FP.swayY += (0 - FP.swayY) * (1 - Math.exp(-12 * dt));
-    const sx = Math.max(-0.06, Math.min(0.06, FP.swayX));
-    const sy = Math.max(-0.06, Math.min(0.06, FP.swayY));
+    const sx = Math.max(-0.04, Math.min(0.04, FP.swayX));
+    const sy = Math.max(-0.04, Math.min(0.04, FP.swayY));
 
-    // 3. Golpe de ataque (swing inercial 3D)
-    let swingRotX = 0, swingRotY = 0, swingPosZ = 0;
+    // 3. Golpe de ataque Skyrim: arco dinâmico que corta e retorna à guarda
+    let swingPosX = 0, swingPosY = 0, swingPosZ = 0;
+    let swingRotX = 0, swingRotY = 0, swingRotZ = 0;
+
     if(isAttacking){
-      FP.swingTimer = Math.min(1, FP.swingTimer + dt * 10);
-      const s = Math.sin(FP.swingTimer * Math.PI);
-      swingRotX = -s * 0.75;
-      swingRotY = -s * 0.45;
-      swingPosZ = -s * 0.16;
+      FP.swingTimer = Math.min(1.0, FP.swingTimer + dt * 4.5);
+      const p = FP.swingTimer;
+      if(p < 0.25){
+        // Preparação (Windup): puxa levemente para trás e ergue
+        const w = p / 0.25;
+        swingPosY = 0.025 * w;
+        swingPosZ = 0.035 * w;
+        swingRotX = 0.22 * w;
+        swingRotY = -0.15 * w;
+      } else if(p < 0.70){
+        // Corte (Slash): golpe diagonal rápido cortando o ar à frente
+        const s = (p - 0.25) / 0.45;
+        const curve = Math.sin(s * Math.PI);
+        swingPosX = -0.06 * curve;
+        swingPosY = 0.025 - 0.045 * s;
+        swingPosZ = 0.035 - 0.055 * curve;
+        swingRotX = 0.22 - 0.65 * s;
+        swingRotY = -0.15 + 0.35 * curve;
+        swingRotZ = -0.28 * curve;
+      } else {
+        // Recuperação (Recovery): retorna suavemente à postura de guarda
+        const r = (p - 0.70) / 0.30;
+        const ease = 1 - r;
+        swingPosX = -0.01 * ease;
+        swingPosY = -0.02 * ease;
+        swingRotX = -0.43 * ease;
+        swingRotZ = -0.10 * ease;
+      }
     } else {
       FP.swingTimer = 0;
     }
 
-    // 4. Bloqueio e guarda
+    // 4. Bloqueio e guarda com escudo/parada
     const wantBlock = isBlocking ? 1 : 0;
     FP.blockWeight += (wantBlock - FP.blockWeight) * (1 - Math.exp(-14 * dt));
 
-    // Posicionamento final do Braço Direito (Arma)
+    // Posicionamento do Braço Direito (Arma Principal):
+    // Base Y calibrada em -0.095: SEMPRE visível em idle no terço inferior direito!
     if(FP.armR){
+      const blockTiltX = FP.blockWeight * -0.25;
+      const blockTiltY = FP.blockWeight * 0.30;
+      const blockRaiseY = FP.blockWeight * 0.04;
+      const blockPushX = FP.blockWeight * -0.05;
+
       FP.armR.position.set(
-        0.24 + breatheX + walkBobX + sx,
-        -0.22 + breatheY - walkBobY + sy,
-        -0.42 + swingPosZ
+        0.14 + breatheX + walkBobX + sx + swingPosX + blockPushX,
+        -0.095 + breatheY - walkBobY + sy + swingPosY + blockRaiseY,
+        -0.32 + swingPosZ
       );
       FP.armR.rotation.set(
-        0.12 + swingRotX,
-        -0.18 + swingRotY,
-        0.08 - (isMoving ? Math.sin(FP.bobPhase) * 0.02 : 0)
+        0.18 + swingRotX + blockTiltX,
+        -0.16 + swingRotY + blockTiltY,
+        0.10 + swingRotZ - (isMoving ? Math.sin(FP.bobPhase) * 0.015 : 0)
       );
     }
 
-    // Posicionamento final do Braço Esquerdo (Escudo / Mão Secundária)
+    // Posicionamento do Braço Esquerdo (Escudo ou Mão Secundária):
     if(FP.armL){
-      const blockLiftX = FP.blockWeight * 0.16;
-      const blockLiftY = FP.blockWeight * 0.14;
-      const blockLiftZ = -FP.blockWeight * 0.08;
+      const hasShield = (global.Guard472 && typeof global.Guard472.hasShield === 'function' ? global.Guard472.hasShield() : false) || !!(global.run && global.run.equip && global.run.equip.sh);
+      const isStaff = FP.currentWeaponKey.includes(':staff') || FP.currentWeaponKey.includes(':wand');
+
+      let baseLX = -0.14, baseLY = -0.095, baseLZ = -0.32;
+      let baseRotX = 0.18, baseRotY = 0.16, baseRotZ = -0.10;
+
+      if(isStaff && !hasShield){
+        // Com cajado/lança sem escudo: mão esquerda apoia a haste em postura bimanual
+        baseLX = 0.04;
+        baseLY = -0.11;
+        baseLZ = -0.28;
+        baseRotX = 0.25;
+        baseRotY = -0.15;
+        baseRotZ = 0.10;
+      }
+
+      const blockLiftX = FP.blockWeight * 0.08;
+      const blockLiftY = FP.blockWeight * 0.06;
+      const blockLiftZ = -FP.blockWeight * 0.04;
 
       FP.armL.position.set(
-        -0.24 - breatheX - walkBobX + sx + blockLiftX,
-        -0.22 + breatheY - walkBobY + sy + blockLiftY,
-        -0.42 + blockLiftZ
+        baseLX - breatheX - walkBobX + sx + blockLiftX,
+        baseLY + breatheY - walkBobY + sy + blockLiftY,
+        baseLZ + blockLiftZ
       );
       FP.armL.rotation.set(
-        0.12 + (FP.blockWeight * 0.25),
-        0.18 + (FP.blockWeight * 0.35),
-        -0.08 - (FP.blockWeight * 0.15)
+        baseRotX + (FP.blockWeight * 0.20),
+        baseRotY + (FP.blockWeight * 0.25),
+        baseRotZ - (FP.blockWeight * 0.10)
       );
     }
 
@@ -566,13 +638,11 @@
     setupDOM();
     setupPointerLock();
 
-    // Restaura preferência salva (padrão 3ª pessoa na primeira vez, respeita save)
     try {
       const saved = localStorage.getItem('pds_pov');
       if(saved === 'fp') FP.set(true);
     } catch(_) {}
 
-    // Desativa wrappers antigos conflitantes
     if(global.SkyrimOverhaul538){
       global.SkyrimOverhaul538.toggleFirstPerson = () => FP.toggle();
       Object.defineProperty(global.SkyrimOverhaul538, 'firstPerson', {

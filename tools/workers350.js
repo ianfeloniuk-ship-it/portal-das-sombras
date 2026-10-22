@@ -21,7 +21,7 @@
   n.panic348=false;n.t+=dt;let moving=0;
   if(!n.workRoute348)route(n,n.workPhase348==='volta'?{x:n.home.x+5,z:n.home.z+9}:n.workSite348);
   const p=n.workRoute348[0];if(p){const dx=p.x-n.x,dz=p.z-n.z,d=Math.hypot(dx,dz);if(d<1.3)n.workRoute348.shift();else{const a=Math.atan2(dx,dz),step=Math.min(d,dt*2.4);let chosen=a;for(const off of [0,.65,-.65,1.2,-1.2]){const q=a+off;if(worldFree(n.x+Math.sin(q)*(step+.6),n.z+Math.cos(q)*(step+.6),n.r)){chosen=q;break}}turnTo(n,chosen,dt,6);moveEnt(n,Math.sin(chosen)*step,Math.cos(chosen)*step);moving=1}}
-  else {n.workWait348+=dt;if(n.workWait348>= (n.workPhase348==='volta'?3:8)){n.workWait348=0;if(n.workPhase348==='volta'){n.workPhase348='ida';n.deliveries348=(n.deliveries348||0)+1;n.cargo348.visible=false;route(n,n.workSite348)}else{n.workPhase348='volta';n.cargo348.visible=true;route(n,{x:n.home.x+5,z:n.home.z+9})}}}
+  else {n.workWait348+=dt;if(n.workWait348>= (n.workPhase348==='volta'?3:8)){n.workWait348=0;if(n.workPhase348==='volta'){n.workPhase348='ida';n.deliveries348=(n.deliveries348||0)+1;n.cargo348.visible=false;route(n,n.workSite348)}else{n.workPhase348='volta';n.cargo348.visible=true;if(n.job348===1&&n.workSite348){if(window.Surv437&&typeof Surv437.npcFellTree==='function')Surv437.npcFellTree(n.workSite348.x,n.workSite348.z);else if(window.EcoGrid&&typeof EcoGrid.onTreeChopped==='function')EcoGrid.onTreeChopped(n.workSite348.x,n.workSite348.z);}route(n,{x:n.home.x+5,z:n.home.z+9})}}}
   animChibi(n.m,{move:moving,atk:!moving&&n.workPhase348==='ida'&&n.job348!==0?Math.max(0,Math.sin(n.t*3)):0,dead:0,wind:0},n.t);n.m.root.position.set(n.x,0,n.z);n.m.root.rotation.y=n.face;
  };
  // Small fishing boats are attached to streamed water chunks and vanish with them.
