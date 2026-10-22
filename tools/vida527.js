@@ -57,7 +57,7 @@
   }
   function loadKidModel(cb) {
     const T = global.THREE; if (!T || !T.GLTFLoader) return;
-    new T.GLTFLoader().load('models/criancas527/crianca.glb?v=532', g => { try { cb(g, T); } catch (e) { console.warn('Crianças', e); } }, undefined, () => {});
+    new T.GLTFLoader().load('models/criancas527/crianca.glb?v=534', g => { try { cb(g, T); } catch (e) { console.warn('Crianças', e); } }, undefined, () => {});
   }
   function spawnKid(c) {
     if (pendKids.has(c) || typeof makeChibi !== 'function') return;
@@ -75,7 +75,7 @@
       root.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.geometry = paintKid(o.geometry, pal, T); o.material = new T.MeshLambertMaterial({ vertexColors: true, skinning: !!o.isSkinnedMesh }); } });
       try { addEyes(root, T); } catch (_) {}
       const src = g.animations[0], mixer = new T.AnimationMixer(root), mk = (name, f0, f1) => mixer.clipAction(T.AnimationUtils.subclip(src, name, f0, f1, 24));
-      const acts = { idle: mk('idle', 0, 67), walk: mk('walk', 90, 118), run: mk('run', 73, 89) };
+      const acts = { idle: mk('idle', 0, 67), walk: mk('walk', 89, 111), run: mk('run', 72, 83) };
       acts.idle.play();
       const n = { kind: 'morador', vida527: true, role523: 'crianca', job523: 'Criança', act523: 'brincar', home: c, m: dummy, x, z, face: rnd(0, 6.28), r: .35, t: Math.random() * 9, tx: x, tz: z, wait: 0, path: [], name: nm, short: nm, col: '#ffe08a', seed523: Math.floor(rnd(0, 360)), label: 'F · FALAR COM ' + nm.toUpperCase(), kid527: { root, mixer, acts, cur: 'idle', px: x, pz: z, v: 0 } };
       n.use = () => { if (global.Dialogo520) Dialogo520.vida(n); };

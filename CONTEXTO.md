@@ -1,3 +1,8 @@
+## v534 (21/10/2026) — Crianças: ciclo de andar e correr sem salto
+- Pedido de Ian: corrigir o possível salto quando o ciclo de andar/correr reinicia.
+- `tools/vida527.js`: os trechos antigos (andar 91 a 119, correr 74 a 90) incluíam o começo e o fim do movimento original (parado e braço da lanterna), por isso davam salto. Medi a diferença de pose no GLB e conferi as poses no Blender: andar agora usa os quadros 90 a 111 (o 112 repete o 91) e correr os quadros 73 a 83 (o 84 repete o 73).
+- Teste: poses vistas no Blender; o ciclo em si não foi visto rodando no jogo.
+
 ## v532 (21/10/2026) — Tela simples: conversa não tapa nada
 - Pedido de Ian: muita coisa na tela; conversas ficavam em cima dos botões de habilidade; «as coisas não podem tapar umas às outras».
 - `tools/dialogo520.js`: durante a conversa somem botões de habilidade, aviso «F», minimapa, lista de missão e menu (classe `dlg520` no body). A caixa de texto do canto inferior direito (`#obj`: região, missão, portal) fica sempre escondida.
