@@ -26,24 +26,38 @@
   const pendKids = new Set();
   let lastF = 0;
 
-  function paintKid(geo, pal, T) {
+  function paintKid(geo0, pal, T) {
+    const geo = geo0.index ? geo0.toNonIndexed() : geo0; // cor por triângulo: bordas nítidas entre camisa, bermuda e pele
     const pos = geo.attributes.position, n = pos.count, col = new Float32Array(n * 3);
     const lc = hex => new T.Color(hex).convertSRGBToLinear();
     const cs = { skin: lc(pal.skin), hair: lc(pal.hair), shirt: lc(pal.shirt), shorts: lc(pal.shorts), shoe: lc(0x3a2a1a) };
-    for (let i = 0; i < n; i++) {
-      const ax = Math.abs(pos.getX(i)), h = pos.getY(i); let c = cs.skin;
+    for (let i = 0; i + 2 < n; i += 3) {
+      const ax = (Math.abs(pos.getX(i)) + Math.abs(pos.getX(i + 1)) + Math.abs(pos.getX(i + 2))) / 3, h = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3;
+      let c = cs.skin;
       if (h > 1.74 || (h > 1.62 && ax > .17)) c = cs.hair;
       else if (h > 1.47) c = cs.skin;
       else if (h >= .78 && ax < .38) c = cs.shirt;
       else if (h >= .48 && h < .78 && ax < .3) c = cs.shorts;
       else if (h < .15) c = cs.shoe;
-      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+      for (let k = 0; k < 3; k++) { col[(i + k) * 3] = c.r; col[(i + k) * 3 + 1] = c.g; col[(i + k) * 3 + 2] = c.b; }
     }
     geo.setAttribute('color', new T.BufferAttribute(col, 3));
+    return geo;
+  }
+  function addEyes(root, T) { // dois olhinhos pretos presos no osso da cabeça (rosto vira para +Z)
+    let head = null; root.traverse(o => { if (o.isBone && /head/i.test(o.name) && /DEF/i.test(o.name)) head = o; });
+    if (!head) root.traverse(o => { if (!head && o.isBone && /head/i.test(o.name)) head = o; });
+    if (!head || !T.SphereGeometry || !T.MeshBasicMaterial) return;
+    root.updateMatrixWorld(true);
+    const geo = new T.SphereGeometry(.028, 8, 6), mat = new T.MeshBasicMaterial({ color: 0x14100c });
+    for (const sx of [-1, 1]) {
+      const e = new T.Mesh(geo, mat), w = root.localToWorld(new T.Vector3(sx * .085, 1.64, .135));
+      head.add(e); e.position.copy(head.worldToLocal(w));
+    }
   }
   function loadKidModel(cb) {
     const T = global.THREE; if (!T || !T.GLTFLoader) return;
-    new T.GLTFLoader().load('models/criancas527/crianca.glb?v=531', g => { try { cb(g, T); } catch (e) { console.warn('Crianças', e); } }, undefined, () => {});
+    new T.GLTFLoader().load('models/criancas527/crianca.glb?v=532', g => { try { cb(g, T); } catch (e) { console.warn('Crianças', e); } }, undefined, () => {});
   }
   function spawnKid(c) {
     if (pendKids.has(c) || typeof makeChibi !== 'function') return;
@@ -58,7 +72,8 @@
       dummy.root.position.set(x, 0, z); dummy.root.visible = false; scene.add(dummy.root);
       const root = g.scene; root.scale.setScalar(KID_SCALE); root.position.set(x, 0, z); scene.add(root);
       const pal = { skin: R(SKINS), hair: R(HAIRS), shirt: R(SHIRTS), shorts: R(SHORTS) };
-      root.traverse(o => { if (o.isMesh) { o.frustumCulled = false; paintKid(o.geometry, pal, T); o.material = new T.MeshLambertMaterial({ vertexColors: true, skinning: !!o.isSkinnedMesh }); } });
+      root.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.geometry = paintKid(o.geometry, pal, T); o.material = new T.MeshLambertMaterial({ vertexColors: true, skinning: !!o.isSkinnedMesh }); } });
+      try { addEyes(root, T); } catch (_) {}
       const src = g.animations[0], mixer = new T.AnimationMixer(root), mk = (name, f0, f1) => mixer.clipAction(T.AnimationUtils.subclip(src, name, f0, f1, 24));
       const acts = { idle: mk('idle', 0, 67), walk: mk('walk', 90, 118), run: mk('run', 73, 89) };
       acts.idle.play();

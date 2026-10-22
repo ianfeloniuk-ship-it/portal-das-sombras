@@ -1,3 +1,8 @@
+## v532 (21/10/2026) — Crianças: olhos e cores com borda nítida
+- Pedido de Ian («cuida disso», sobre os pontos que ficaram imperfeitos na criança nova).
+- `tools/vida527.js`: cor agora por triângulo (camisa, bermuda, pele, cabelo e sapatos com borda nítida, sem a transição borrada) e dois olhos pretos presos no osso da cabeça (z 0,135, a superfície do rosto fica em 0,147).
+- Teste: Node com THREE simulado (olhos criados, cor uniforme por triângulo). Não visto no jogo. Não mexi nos trechos de andar e correr (possível salto no reinício do ciclo).
+
 ## v530 (21/10/2026) — Diálogo só com letras, Vael fala em 1ª pessoa, aviso da arca
 - Pedido de Ian (áudios + prints): o painel do diálogo tapava a tela, quer só as letras como no Skyrim; Vael falava de si na 3ª pessoa; a arca «faz uma luzinha e não aparece nada».
 - `tools/dialogo520.js`: sem fundo escuro, sem caixas e sem bordas (letras com contorno preto); escolha marcada fica dourada. Novo `FALA520`: fala em 1ª pessoa para as 17 missões de encontro (a descrição do diário continua em 3ª pessoa).
