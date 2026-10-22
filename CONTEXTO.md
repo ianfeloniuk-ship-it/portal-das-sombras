@@ -1,3 +1,7 @@
+﻿## v553 (22/10/2026) - Hitboxes 3D compostas do dragao
+- **Pedido de Ian**: dano do dragao (inclui Dragao Ancião Errante) pelo corpo real, nao pela projecao no chao.
+- tools/hitbox-dragao551.js: 21 esferas (tronco, pescoco, cabeca, asas, cauda, patas) seguindo o modelo; substitui a capsula unica em Projectiles253.segmentCapsule/intersectRayCapsule quando o alvo e dragao (Lanca de Gelo, flechas, mira). Golpe corpo a corpo basico (380-acoes.js) usa Dragao551.melee em 3D: de baixo, com o dragao a 24 m, nao acerta.
+- Teste (navegador): dragao no ar - cabeca/asa/cauda acertam por cima, tiro rente ao chao e golpe por baixo nao; Lanca de Gelo tira vida; morte ok. Habilidades de area ainda usam distancia no chao (nao alteradas).
 ## v552 (22/10/2026) — Crash ao fechar o mapa + painel de portais recolhível
 - **Pedido de Ian**: corrigir o crash ao fechar o mapa 3D e permitir recolher/reabrir o painel lateral de portais.
 - **Causa (medida no console)**: `tools/mapa3d544.js` deixava um 2º contexto WebGL vivo (antialias, canvas de marcas 2048, ~120 malhas) por cima do jogo; a GPU estourava (`GL_OUT_OF_MEMORY` → `CONTEXT_LOST_WEBGL` → "Error creating WebGL context").

@@ -6342,7 +6342,7 @@ function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
   else if(shootsNow){faceTarget(16);const col=c.sk[0].col;const n=1+rankTalent('volley');const dirs=[0,...(rankTalent('mirror')>=1?[Math.PI]:[]),...(rankTalent('mirror')>=2?[Math.PI/2,-Math.PI/2]:[])];for(const da of dirs)for(let i=0;i<n;i++){const f=player.face+da,side=i===0?0:(i%2?-1:1)*Math.ceil(i/2)*.55;shoot(player.x+Math.cos(f)*side,player.z-Math.sin(f)*side,f,22*(1+.15*rankTalent('reach')),dmg,'player',col,c.wep==='bow'?'arrow':c.wep==='spear'?'tspear':c.pt?c.pt:c.n==='Mago Elemental'?'fire':c.n==='Paladino'?'holy':c.n==='Necromante'?'soul':'orb',{basicAim365:true,basicClass:ci,third,pierce:!!rankTalent('piercing')||(ci===4&&third),bounces:rankTalent('bounce')})}beep(440,.05,.03,'triangle')}
   else{faceTarget(6);const reach=(third?3.1:2.6)*(styleOff()?.85:1)*(1+.04*pb('area'))*(1+.25*rankTalent('sweep')),arc=(third?1.3:1.0)+rankTalent('sweep')*Math.PI/9;moveEnt(player,Math.sin(player.face)*.45,Math.cos(player.face)*.45);
     fxSlash(player.x,player.z,player.face,third?0xffe070:0xffd08a,reach,third,effectClass,player.jy||0);sfx('swing');
-    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2&&!(rankTalent('backstrike')&&Math.PI-Math.abs(da)<arc))continue;hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:effectClass});hit=true}
+    let hit=false;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz);if(e.drake510&&window.Dragao551){/* v551: dragão = esferas 3D (tronco, cabeça, asas, cauda, patas); chão vazio embaixo não conta */if(!Dragao551.melee(e,player,reach,arc,player.face)&&!(rankTalent('backstrike')&&Dragao551.melee(e,player,reach,arc,player.face+Math.PI)))continue}else{if(d>reach+e.r)continue;let da=Math.atan2(dx,dz)-player.face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>arc&&d>1.2&&!(rankTalent('backstrike')&&Math.PI-Math.abs(da)<arc))continue}hurtEnemy(e,dmg,player.x,player.z,{kb:third?4:1.5,fromPlayer:true,stun:third?.5:.22,third,basicClass:effectClass});hit=true}
     if(rankTalent('backstrike'))fxSlash(player.x,player.z,player.face+Math.PI,0xffd08a,reach,third,effectClass,player.jy||0);
     if(third&&rankTalent('wave')){/* v178: Onda de choque */const f=player.face;for(let k=0;k<rankTalent('wave');k++)later181(()=>{if(player.dead)return;shoot(player.x,player.z,f,16,dmg,'player',0xffd08a,'orb',{basicClass:ci,pierce:true,kb:2,fromPlayer:true,staffCast:false})},120*k)}
     if(hit){hitstop(third?.09:.06);shake(third?.28:.12)}}
@@ -9697,6 +9697,7 @@ requestAnimationFrame(frame);
 <script src="tools/npc482.js?v=518"></script>
 <script src="tools/vida486.js?v=493"></script>
 <script src="tools/dragoes510.js?v=511"></script>
+<script src="tools/hitbox-dragao551.js?v=553"></script>
 <script src="tools/bloom487/CopyShader.js?v=487"></script>
 <script src="tools/bloom487/LuminosityHighPassShader.js?v=487"></script>
 <script src="tools/bloom487/EffectComposer.js?v=487"></script>
@@ -9737,9 +9738,9 @@ requestAnimationFrame(frame);
 <script src="tools/ecossistema550.js?v=550"></script>
 <script src="tools/fp550.js?v=550r1"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v552</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v553</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=552;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=553;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
