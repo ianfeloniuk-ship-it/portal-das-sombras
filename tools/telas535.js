@@ -118,7 +118,7 @@ function showFor(text,entry,color,desc){
   put(part(w,color?new T.Color(color).getHex():0),null,rim)}
 
 /* ===== janela: decide o tipo pelo título e monta lista + palco + cartão ===== */
-function kind(title){if(/^MERCADO DE RECURSOS/.test(title))return 'mkt';if(/^PERSONAGEM/.test(title))return 'char';if(/^BANCO DE /.test(title))return 'bank';if(/^SAQUE · /.test(title))return 'loot';
+function kind(title){if(/^MERCADO DE RECURSOS/.test(title))return 'mkt';if(/^PERSONAGEM/.test(title))return 'char';if(/^BANCO DE /.test(title))return 'bank';if(/^SAQUE · /.test(title))return 'loot';if(/^(FORJA|ALQUIMIA) · /.test(title))return 'shop';
   if(/^PRIMEIRA ARMA · KAEL/.test(title)||(typeof SHOPS!=='undefined'&&SHOPS.some(s=>s.id!=='guild'&&s.n===title)))return 'shop';return ''}
 function rowName(it){if(it.classList.contains('kael405-item'))return (it.querySelector('b')?.textContent||'').trim();const d=it.querySelector('.d');if(!d)return '';const c=d.cloneNode(true);c.querySelector('small')?.remove();return c.textContent.trim()}
 function rowColor(it){const r=it.querySelector('.rl');return r?getComputedStyle(r).color:''}
@@ -127,7 +127,7 @@ function select(it,k,entries,rows){
   rows.forEach(r=>r.classList.toggle('t535-on',r===it));
   const name=rowName(it),desc=(it.querySelector('.d small')||it.querySelector('small'))?.textContent||'',col=rowColor(it)||'#9b6bff';
   const price=[...it.querySelectorAll('.btn')].map(b=>b.textContent).find(t=>/ouro/i.test(t));
-  card('<small>'+(k==='loot'?'Saque':k==='mkt'?'Dorian · recursos':'À venda')+'</small><h3>'+safeText(name)+'</h3><p>'+safeText(desc)+'</p>'+(price?'<div class="t535-big"><div><span>Preço</span><b>'+safeText(price.replace(/\s*ouro/i,''))+'</b></div><div><span>Seu ouro</span><b>'+fmt(run.gold)+'</b></div></div>':''));
+  card('<small>'+(k==='loot'?'Saque':k==='mkt'?'Dorian · recursos':/^(FORJA|ALQUIMIA) · /.test($('mt').textContent)?'Selecionado':'À venda')+'</small><h3>'+safeText(name)+'</h3><p>'+safeText(desc)+'</p>'+(price?'<div class="t535-big"><div><span>Preço</span><b>'+safeText(price.replace(/\s*ouro/i,''))+'</b></div><div><span>Seu ouro</span><b>'+fmt(run.gold)+'</b></div></div>':''));
   if(isItem(it,k))showFor(name,entries?entries[rows.indexOf(it)]:null,col,desc)}
 function isItem(it,k){const n=rowName(it);return k==='loot'||[...it.querySelectorAll('.btn')].some(b=>/ouro|comprar|vender|pegar/i.test(b.textContent)&&!/presentear|doar/i.test(b.textContent))||GLB.some(([re])=>re.test(n))||PARTS.some(p=>new RegExp(p,'i').test(n))}
 function bankCard(){card('<small>Cofre de Selene</small><h3>Ouro guardado</h3><p>O que fica aqui não se perde, nem se você morrer lá fora.</p><div class="t535-big"><div><span>Com você</span><b>'+fmt(run.gold)+'</b></div><div><span>No banco</span><b>'+fmt(profile.bank||0)+'</b></div></div>')}

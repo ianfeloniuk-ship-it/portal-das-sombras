@@ -1,3 +1,10 @@
+## v559 (22/10/2026) — Forja da Ordem e Laboratório de Alquimia
+- **Pedido de Ian**: criação em forja/refino por rank da Fenda, aprimoramento de ataque/defesa, alquimia por experimentação (descobrir efeitos e receitas, elixires permanentes), no HUD novo.
+- `tools/forja551.js`: janela FORJA · ORDEM DOS ARTÍFICES (Criar = regra `forge` já existente, núcleos+cristais por rank F…★; Refinar = regra de aprimoramento existente +8%/nível, agora também para peças na bolsa). Janela ALQUIMIA · LABORATÓRIO: mistura 2–4 ingredientes (plantas, sais, Essências = cristais da Fenda), resultado pelas propriedades (cheiro dá pista), Diário de receitas com Repetir, sal estabilizador dobra a quantidade. Essência + bebida = Elixir Eterno (+0,4%×(rank+1) de Vida/Ataque/Mana/Velocidade/Escudo, teto 12% por atributo; já no teto, nada é gasto). Salvo em `profile.fa551`; bônus entra em `statsFor`.
+- Entradas: lojas do Kael/Brann (Forja da Ordem) e da Mira (Laboratório). `telas535.js`: títulos FORJA/ALQUIMIA usam o visual aprovado com 3D.
+- Partes ligadas: receitas fixas do caldeirão (alchemy470) e Kael/aprimorar continuam como estavam.
+- Teste: Edge headless com o jogo real (30 checagens: misturas, consumo atômico, borra não gasta, elixir+teto, save, forjar, refinar peça da bolsa, janelas, 0 erros). Não testado: som, celular.
+
 ﻿## v557 (22/10/2026) — Ficha Personagem no novo HUD + Primeira Arma Kael corrigida
 - **Pedido de Ian**: adaptar a ficha (Status, Habilidades, Passivas, Títulos, Build) ao novo HUD, centralizada e responsiva; corrigir a Primeira Arma · Kael (nomes cortados, imagens de Paladino/Invocador, baú 3D encobrindo a direita).
 - `tools/telas535.js`: janela PERSONAGEM usa o fundo/estilo do novo HUD, conteúdo centralizado (máx. 1100px), abas quebram linha em tela estreita. Kael: baú 3D removido dessa tela, cartões em grade com nome completo e botão inteiro.
