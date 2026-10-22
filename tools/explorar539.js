@@ -50,7 +50,7 @@ function found(city){profile.found539=profile.found539||{};const first=!profile.
   const f=q('.found');f.classList.add('show');clearTimeout(foundT);foundT=setTimeout(()=>f.classList.remove('show'),4500)}
 function tick(){
   try{
-    const stat=document.getElementById('stat'),show=typeof started!=='undefined'&&started&&player&&stat&&!stat.hidden&&!document.body.classList.contains('conv539');
+    const stat=document.getElementById('stat'),show=typeof started!=='undefined'&&started&&player&&stat&&!stat.hidden&&!/(conv539|dlg520|story401)/.test(document.body.className);
     root.hidden=!show;if(!show)return;const P=player;
     const ms=typeof martialState260==='function'?martialState260():{vigor:100},vm=typeof vigorMaxR260==='function'?vigorMaxR260():100;
     const hp=Math.max(0,P.hp)/(P.maxhp||1),mp=(P.mp||0)/(P.maxmp||1),sp=(ms.vigor||0)/(vm||100);

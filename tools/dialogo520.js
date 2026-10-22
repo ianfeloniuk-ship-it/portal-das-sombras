@@ -390,6 +390,11 @@
     const isArm = shop === 'arm' || shop === 'defense' || sign.includes('DEFESA') || nome === 'Brann';
     const isGuild = shop === 'guild' || sign.includes('ORDEM') || nome === 'Lyra';
     const isVendor = n.kind === 'vendor';
+    const aster541 = isVendor && typeof NPCTALK !== 'undefined' && NPCTALK[nome] && typeof NPCQ !== 'undefined' && NPCQ[nome] && n.home && n.home.name === 'Aster';
+    const affL541 = () => { try { return typeof affL === 'function' ? affL(nome) : 0; } catch (_) { return 0; } };
+    const npcHas541 = () => { try { return typeof npcHas === 'function' && npcHas(nome); } catch (_) { return false; } };
+    const giftC541 = () => { try { return typeof servicePrice265 === 'function' ? servicePrice265('gift', { affinityLevel: affL541() }) : 0; } catch (_) { return 0; } };
+    const act541 = (a, v) => { try { const r = (typeof extraActions === 'function' && extraActions(a, v)) || (typeof extraActions2 === 'function' && extraActions2(a, v)) || (typeof extraActions3 === 'function' && extraActions3(a, v)); save(); return r; } catch (e) { console.warn('dialogo541', e); } };
 
     const N = {};
     const news0 = () => news(n, 'Anda tudo calmo por aqui.');
@@ -428,6 +433,12 @@
         ...(isBank ? [{ l: 'Como funciona a segurança do Banco?', go: 'sobre_banco' }] : []),
         ...(isWep ? [{ l: 'Como funciona o aprimoramento de armas?', go: 'dica_forja' }] : []),
         ...(isPot ? [{ l: 'Qual poção você mais recomenda?', go: 'dica_pocao' }] : []),
+        /* v543: em Aster, conversa, missão pessoal e presente do jogo (NPCTALK, NPCQ, afinidade) */
+        ...(aster541 ? [
+          { l: '● Como estão as coisas?', go: 'fala541' },
+          { l: (npcHas541() ? 'Sobre o que você me ensinou' : affL541() >= 3 ? '◆ Missão pessoal: ' + NPCQ[nome].d : '⌂ Missão pessoal (3 corações)'), go: 'missao541' },
+          { l: '♥ Trouxe um presente (' + giftC541() + ' de ouro)', if: () => typeof AFF_PERK !== 'undefined' && AFF_PERK[nome] && affL541() < 10 && gold() >= giftC541(), fn: () => { const b = affL541(); act541('gift', nome); return affL541() > b ? 'presente541' : 'raiz'; } },
+        ] : []),
         { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
         { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
         { l: 'Pedir um agrado', go: 'agrado', if: () => n.role523 !== 'crianca' },
@@ -437,6 +448,15 @@
       ]
     };
 
+    if (aster541) {
+      const qq = NPCQ[nome], st541 = () => (profile.npcq || {})[nome] || { got: 0 };
+      N.fala541 = { t: String(NPCTALK[nome][Math.min(NPCTALK[nome].length - 1, Math.floor(affL541() / 2))]).replace(/\{nome\}/g, (profile && profile.name) || 'Viajante'), o: [{ l: 'Entendi', go: 'raiz' }] };
+      N.missao541 = npcHas541() ? { t: 'Você já carrega ' + qq.sk + '. Use bem.', o: [{ l: 'Voltar', go: 'raiz' }] }
+        : affL541() < 3 ? { t: 'Ainda não confio em você para isso. Volte quando a gente se conhecer melhor.', o: [{ l: 'Entendi', go: 'raiz' }] }
+        : st541().got >= qq.n ? { t: 'Você fez o que eu pedi. Leve isto: ' + qq.sk + '.', o: [{ l: '◆ Aceitar', fn: () => { act541('npcdone', nome); return 'raiz'; } }] }
+        : { t: qq.d + '. Até agora: ' + Math.min(st541().got, qq.n) + ' de ' + qq.n + '. Recompensa: 25 de reputação da Ordem e ' + qq.sk + '.', o: [{ l: 'Vou cuidar disso', go: 'raiz' }] };
+      N.presente541 = { t: 'Hm. Não precisava. Mas não vou recusar.', o: [{ l: 'De nada', go: 'raiz' }] };
+    }
     N.sobre_banco = {
       t: 'O que fica no banco não se perde, mesmo se você cair lá fora. E o seu ouro guardado rende juros diários todos os dias.',
       o: [{ l: 'Entendi, obrigado', go: 'raiz' }]
