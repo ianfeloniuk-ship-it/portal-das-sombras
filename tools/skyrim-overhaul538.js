@@ -18,7 +18,7 @@
     activeSlot: 0,
     manaDrainAcc: 0,
     deluminatorOrbs: [],
-    map3DActive: true,
+    map3DActive: false, /* v544: o mapa 3D de verdade fica em tools/mapa3d544.js */
     map3DAngle: 0,
     map3DZoom: 1,
     map3DPanX: 0,

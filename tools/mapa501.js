@@ -86,5 +86,5 @@
   drawMap=function(ctx,S,full){
     if(!full||L.mode!=='world'||L.special||!window.Mapa500||!window.TER245)return d1(ctx,S,full);
     try{ensure();place(ctx,S)}catch(e){console.warn('mapa501',e);return d1(ctx,S,full)}};
-  window.Mapa501={C,HALF};
+  window.Mapa501={C,HALF,sample,ensure};/* v544: o mapa 3D (tools/mapa3d544.js) usa as mesmas cores e listas */
 })();
