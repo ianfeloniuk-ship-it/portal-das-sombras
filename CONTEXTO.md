@@ -23,6 +23,12 @@
 - **IA de Navegação e Fendas**:
   - Animais e NPCs fora da estrada principal ganham bônus de custo menor (-35%) ao caminhar sobre células com pisoteio > 120, reforçando naturalmente as trilhas abertas.
   - Fendas ativas degradam fertilidade e biomassa no raio de miasma; fendas seladas pelo Viajante regeneram a vegetação sob a chuva, fazendo a floresta renascer.
+- **Visão em 1ª Pessoa 3D Estilo Skyrim (Viewmodel e Câmera)** (tools/fp550.js, src/core/400-loop.js, src/core/630-controles.js, tools/skyrim-overhaul538.js, tools/witcher377.js):
+  - Câmera física nos olhos do Viajante (1,86 m de altura, normalizado 2,02 m, avanço 0,10 m, pitch amplo -1.45 a +1.45).
+  - Alternância fluida entre 1ª e 3ª pessoa pela tecla V (ou comando rápido no combate/exploração).
+  - Viewmodel 3D em Three.js com manoplas nórdicas empunhando armas reais (espadas, machados, maças, cajados, arco) e escudo em 3D.
+  - Balanço orgânico de respiração (idle), passada física (walk/run bobbing), arco inercial de corte (swing), guarda/bloqueio elevado e escudada.
+  - Retículo minimalista estilo Skyrim (< · >) alinhado ao ponto de mira central.
 - **Validação e Testes**:
   - Testes unitários de arquitetura, Liebig, trilhas por pisoteio e os 4 estágios executados com sucesso em tools/test-ecossistema550.cjs.
   - Verificação de carregamento e inicialização em navegador real Edge headless via CDP (tools/test-edge-cdp.cjs).

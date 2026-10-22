@@ -81,7 +81,7 @@
         pcCam.yaw+=angDiff(want,pcCam.yaw)*(1-Math.exp(-8*dt));
         pcCam.pitch+=(.03-pcCam.pitch)*(1-Math.exp(-4*dt));
         if(!(P.dodgeT>0)&&!P.dead)P.face=Math.atan2(t.x-P.x,t.z-P.z);
-      }else if(!pcCam.active&&!P.dead){
+      }else if(!pcCam.firstPerson&&!pcCam.active&&!P.dead){
         /* como no Witcher: andando, a câmera vai voltando devagar para trás do personagem */
         const mv=Math.hypot(P.x-W377.lastX,P.z-W377.lastZ)/dt;
         const want=P.face+Math.PI,off=angDiff(want,pcCam.yaw);

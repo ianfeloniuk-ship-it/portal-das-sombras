@@ -169,9 +169,10 @@ function updDungeon(dt){
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
 /* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. */
-const pcCam={yaw:0,pitch:.03,distance:2.25,active:false};
+const pcCam={yaw:0,pitch:.03,distance:2.25,active:false,firstPerson:false};
+window.pcCam=pcCam;
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
-function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
+function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pcCam.pitch=clamp(pcCam.pitch+dy*.003,fp?-1.45:-.85,fp?1.45:1.10)}
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
@@ -190,24 +191,40 @@ function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*(1-Math.exp(-14*dt));cam.z+=(P.z-cam.z)*(1-Math.exp(-14*dt));
   if((paused||modalOpen||!$('gameMenu95').hidden)&&pcCam.active)releaseCamera373();
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
-  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding()),pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.60),cam.z);
-  /* v377 (Ian): câmera estilo The Witcher 3 — perto, sobre o ombro direito, personagem um pouco à esquerda. */
-  const distance=mounted?4.2:2.25,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
-  const [ox,oz]=camRot(mounted?.35:.45,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
-  offset.y=Math.max(offset.y,terrH(pivot.x+ox,pivot.z+oz)+.30-pivot.y);
-  // Sweep a camera-sized sphere against terrain and the same solid world geometry as movement.
-  let safe=distance;
-  const steps=Math.ceil(distance/.10),q=new THREE.Vector3();
-  for(let i=1;i<=steps;i++){
-    q.copy(pivot).addScaledVector(offset,i/steps);
-    const blocked=q.y<terrH(q.x,q.z)+.22||(L.grid?!freeAt(q.x,q.z,.23):!worldFree(q.x,q.z,.23,q.y-.22));
-    if(blocked){safe=Math.max(.85,distance*(i-1)/steps);break}
+  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding());
+  const isFP=!!(pcCam.firstPerson&&!mounted&&!P.dead);
+  if(isFP){
+    /* v550 (Ian): Primeira pessoa igual Skyrim — olhos a 1.86 m, avanço frontal 0.10 m, pitch amplo. */
+    const eyeY=terrH(P.x,P.z)+(P.jy||0)+1.86+(window.FP550?.bobY||0);
+    const [fx,fz]=camRot(0,-.10);
+    camera.position.set(P.x+fx,eyeY,P.z+fz);
+    camera.position.x+=rnd(-s,s);camera.position.y+=rnd(-s,s);
+    const [vx,vz]=camRot(0,-Math.cos(pcCam.pitch));
+    camera.lookAt(camera.position.clone().add(new THREE.Vector3(vx,-Math.sin(pcCam.pitch),vz)));
+    if(!P.dead)P.face=Math.atan2(vx,vz);
+    if(P.m?.bones?.head)P.m.bones.head.scale.set(.001,.001,.001);
+  }else{
+    if(P.m?.bones?.head&&P.m.bones.head.scale.x<.1)P.m.bones.head.scale.set(.88,.88,.88);
+    const pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.60),cam.z);
+    /* v377 (Ian): câmera estilo The Witcher 3 — perto, sobre o ombro direito, personagem um pouco à esquerda. */
+    const distance=mounted?4.2:2.25,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
+    const [ox,oz]=camRot(mounted?.35:.45,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
+    offset.y=Math.max(offset.y,terrH(pivot.x+ox,pivot.z+oz)+.30-pivot.y);
+    // Sweep a camera-sized sphere against terrain and the same solid world geometry as movement.
+    let safe=distance;
+    const steps=Math.ceil(distance/.10),q=new THREE.Vector3();
+    for(let i=1;i<=steps;i++){
+      q.copy(pivot).addScaledVector(offset,i/steps);
+      const blocked=q.y<terrH(q.x,q.z)+.22||(L.grid?!freeAt(q.x,q.z,.23):!worldFree(q.x,q.z,.23,q.y-.22));
+      if(blocked){safe=Math.max(.85,distance*(i-1)/steps);break}
+    }
+    pcCam.distance=safe<pcCam.distance?safe:Math.min(safe,pcCam.distance+dt*5);
+    camera.position.copy(pivot).addScaledVector(offset,pcCam.distance/distance);
+    camera.position.x+=rnd(-s,s);camera.position.y+=rnd(-s,s);
+    const [vx,vz]=camRot(0,-Math.cos(pcCam.pitch));
+    camera.lookAt(camera.position.clone().add(new THREE.Vector3(vx,-Math.sin(pcCam.pitch),vz)));
   }
-  pcCam.distance=safe<pcCam.distance?safe:Math.min(safe,pcCam.distance+dt*5);
-  camera.position.copy(pivot).addScaledVector(offset,pcCam.distance/distance);
-  camera.position.x+=rnd(-s,s);camera.position.y+=rnd(-s,s);
-  const [vx,vz]=camRot(0,-Math.cos(pcCam.pitch));
-  camera.lookAt(camera.position.clone().add(new THREE.Vector3(vx,-Math.sin(pcCam.pitch),vz)));
+  if(window.FP550?.tick)FP550.tick(dt);
   {const C=window.CINE231;if(C){C.t+=Math.min(.05,Math.max(0,dt||0));const a=C.t*.35;const ch245=terrH(C.x,C.z);camera.position.set(C.x+Math.cos(a)*22+rnd(-s,s),11+ch245+rnd(-s,s),C.z+Math.sin(a)*22);camera.lookAt(C.x,4+ch245,C.z);if(C.t>C.dur){window.CINE231=null;/* v455 (Ian): ao fim da âncora/junção, 3 s sem dano nem aggro para se posicionar */window._cinematicGrace451=performance.now()+3000;if(player&&!player.dead)player.iT=Math.max(player.iT||0,3)}}}
 }
 

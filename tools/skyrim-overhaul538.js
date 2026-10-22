@@ -224,12 +224,8 @@
 
   // ===== 1ª / 3ª pessoa =====
   API.toggleFirstPerson = function () {
+    if (global.FP550) return global.FP550.toggle();
     API.firstPerson = !API.firstPerson;
-    const fpCanvas = typeof document !== 'undefined' ? document.getElementById('skyrim538-fp-canvas') : null;
-    if (fpCanvas) fpCanvas.style.display = API.firstPerson ? 'block' : 'none';
-    if (global.player && global.player.m && global.player.m.root) global.player.m.root.visible = !API.firstPerson;
-    renderQuickBar();
-    showSkyrimBanner(API.firstPerson ? 'Visão em 1ª Pessoa (Mãos e Luvas Ativas)' : 'Visão em 3ª Pessoa');
     return API.firstPerson;
   };
 
@@ -820,7 +816,7 @@
       });
     }
 
-    if (typeof global.camUpdate === 'function' && !global.camUpdate._skyrim538Wrapped) {
+    if (false && typeof global.camUpdate === 'function' && !global.camUpdate._skyrim538Wrapped) {
       const origCamUpdate = global.camUpdate;
       const wrappedCam = function (dt) {
         const res = origCamUpdate.apply(this, arguments);
