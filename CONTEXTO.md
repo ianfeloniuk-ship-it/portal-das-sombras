@@ -1,3 +1,9 @@
+## v560 (22/10/2026) — Carroças das estradas: seguem a estrada, no chão, mais lentas
+- **Pedido de Ian**: depois da mudança de escala/relevo, muitas carroças ficaram bugadas e rápidas demais.
+- `tools/civic343.js`: a carroça civil andava a 14,5 m/s (o sprint agora é 5,8) e ficava em y=0 (enterrada/flutuando no relevo) num caminho em L reto que atravessava serra. Agora: 6,4 m/s (rodas a 12,8 rad/s), altura = `terrH` com inclinação pela subida, e o caminho é a estrada sinuosa real (`Mundo513.segs`), com o antigo caminho em L só como reserva. Destruída fica no chão (`terrH`-0,25).
+- Teste: Edge headless com o jogo real; carroça na Estrada Sul seguiu a garganta (48 pontos), altura = `terrH`, inclinada na subida, sem erro. Não testado: carroças entrando em cidade grande, som.
+- **Não feito**: "pontos do mapa que parecem chão e não são" (sem local exato) e cidades grandes nas capitais (decisão de Ian: capitais, não mover a garganta).
+
 ## v559 (22/10/2026) — Forja da Ordem e Laboratório de Alquimia
 - **Pedido de Ian**: criação em forja/refino por rank da Fenda, aprimoramento de ataque/defesa, alquimia por experimentação (descobrir efeitos e receitas, elixires permanentes), no HUD novo.
 - `tools/forja551.js`: janela FORJA · ORDEM DOS ARTÍFICES (Criar = regra `forge` já existente, núcleos+cristais por rank F…★; Refinar = regra de aprimoramento existente +8%/nível, agora também para peças na bolsa). Janela ALQUIMIA · LABORATÓRIO: mistura 2–4 ingredientes (plantas, sais, Essências = cristais da Fenda), resultado pelas propriedades (cheiro dá pista), Diário de receitas com Repetir, sal estabilizador dobra a quantidade. Essência + bebida = Elixir Eterno (+0,4%×(rank+1) de Vida/Ataque/Mana/Velocidade/Escudo, teto 12% por atributo; já no teto, nada é gasto). Salvo em `profile.fa551`; bônus entra em `statsFor`.
