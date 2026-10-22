@@ -1,3 +1,8 @@
+## v532 (21/10/2026) — Tela simples: conversa não tapa nada
+- Pedido de Ian: muita coisa na tela; conversas ficavam em cima dos botões de habilidade; «as coisas não podem tapar umas às outras».
+- `tools/dialogo520.js`: durante a conversa somem botões de habilidade, aviso «F», minimapa, lista de missão e menu (classe `dlg520` no body). A caixa de texto do canto inferior direito (`#obj`: região, missão, portal) fica sempre escondida.
+- Teste: estilos conferidos no navegador (todos `display:none` com a conversa aberta); a captura de tela do painel escondido não atualizou, então o visual final não foi visto.
+
 ## v533 (21/10/2026) — Revisão do relevo: serras visíveis de longe, passagens largas, paredes limpas, portais espaçados
 - Pedido de Ian: análise completa do relevo e do mapa; corrigir os 5 problemas mais graves.
 - Vista longe: `tools/terrain245.js` deixa a neblina do chão bem mais fraca (fator .02 no FOG_EXP2, só no chão), e `tools/capitais504.js` põe o plano de corte da câmera em 1.300 m em todo o mundo aberto (antes 260 m, ou 950 m só perto de Capital). As serras e o chão distante (1,1 km) aparecem no horizonte. Custo medido: 8,8 → 9,3 ms por quadro.

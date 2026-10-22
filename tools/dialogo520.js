@@ -47,6 +47,13 @@
     try { if (typeof L !== 'undefined' && L && Array.isArray(L.inter) && n.interRef) L.inter = L.inter.filter(i => i !== n.interRef); } catch (_) {}
   }
 
+  /* v532: tela simples. Durante a conversa nada fica por cima de nada; fora dela some a caixa de texto do canto */
+  (function () {
+    const st = document.createElement('style');
+    st.textContent = 'body.dlg520 #btns, body.dlg520 #bF, body.dlg520 #mm, body.dlg520 #obj, body.dlg520 #quest401, body.dlg520 #tb { display: none !important; } #obj { display: none !important; }';
+    document.head.appendChild(st);
+  })();
+
   /* --- HUD ESTILO SKYRIM --- */
   const FALA520 = {"emergent_alpha_beast": "Uma fera alfa abissal emboscou minha patrulha nas colinas. Derrote-a e ajude a devolver a honra dos meus caçadores.", "emergent_stolen_cargo": "Saqueadores renegados emboscaram minha carroça. Elimine-os e recupere o baú de mercadorias refinadas.", "emergent_monolith_trial": "Toque o monólito rúnico antigo e derrote a aparição do Guardião Ancestral. Só assim os segredos dele se abrem.", "emergent_deserter_stash": "Siga as coordenadas que vou lhe passar até o covil oculto nas pedras e conquiste o tesouro das feras.", "emergent_corrupted_grove": "Destrua o fungo primordial que infecta este bosque sagrado. Eu sozinho não consigo.", "emergent_shipwreck_salvage": "Derrote os monstros de carapaça nas pedras da costa e recupere as pérolas da minha jangada naufragada.", "emergent_leviathan_spoils": "Expulse os corsários que tentam roubar a carcaça do leviatã encalhado na costa.", "emergent_frozen_expedition": "Quebre o cerco dos golens de gelo ao redor da minha tenda de expedição.", "emergent_avalanche_ambush": "Extermine a alcateia de lobos da nevasca que cerca meu trenó soterrado pela avalanche.", "emergent_eternal_flame": "Proteja a fogueira eterna contra os cavaleiros espectrais do gelo.", "emergent_dune_beetles": "Esmague a rainha dos escaravelhos que cerca minha caravana encalhada.", "emergent_sand_mirage": "Derrote a aparição do Djinn e dissipe a miragem mortal no meio do deserto.", "emergent_pharaoh_tomb": "Entre na tumba soterrada e derrote o guardião esquelético das dunas.", "emergent_swamp_slime": "Derrote a Gosma Matriarca no coração do pântano. Preciso dela para o meu caldeirão.", "emergent_sunken_tomb": "Encontre a cripta submersa que o fogo-fátuo indica e derrote o cavaleiro espectral do lodo.", "emergent_magma_forge": "Elimine os golens de magma que cercaram minha bigorna na ravina vulcânica.", "emergent_thunder_storm": "Neutralize os golens elétricos atraídos pelo meu cajado durante a tempestade."};
   function ensureSkyrimUI() {
@@ -75,7 +82,7 @@
             padding: 0 12px; text-shadow: 0 0 3px #000, 0 0 6px #000, 0 1px 8px rgba(0,0,0,0.95);
           }
           .skyrim-dialog-choices {
-            position: absolute; bottom: 125px; right: 44px; width: min(440px, 92vw);
+            position: absolute; bottom: 130px; right: 44px; width: min(440px, 92vw); max-height: 60vh; overflow: auto;
             display: flex; flex-direction: column; gap: 7px; pointer-events: auto;
             animation: skyrimSlideIn 0.2s ease-out;
           }
@@ -159,6 +166,7 @@
     activeOptions = [];
     const el = document.getElementById('skyrim-dialog');
     if (el) el.style.display = 'none';
+    document.body.classList.remove('dlg520');
     if (keyHandlerAttached) {
       if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('keydown', onKeyDown, true);
       keyHandlerAttached = false;
@@ -192,6 +200,7 @@
     }
 
     el.style.display = 'block';
+    document.body.classList.add('dlg520');
 
     if (!keyHandlerAttached) {
       if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('keydown', onKeyDown, true);
