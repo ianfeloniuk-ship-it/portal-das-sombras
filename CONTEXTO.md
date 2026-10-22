@@ -1,3 +1,13 @@
+## v535 (21/10/2026) — Revisão do relevo, parte 2: encostas lisas, clima por região, acampamento sem primitivas, legenda, árvore perto da câmera
+- Pedido de Ian: corrigir os itens 6 a 11 da análise do relevo e do mapa.
+- Facetas (6): o chão passa a inclinação lisa do relevo (`vNy534`, calculada no vértice por `terrH245`) para a rocha de encosta (`environment128`) e para a textura vista de cima (`biome-materials132`); antes cada triângulo tinha a sua inclinação e apareciam remendos.
+- Clima (7): `tools/mapa500.js` puxa o bioma para o clima da região — norte frio, sul quente (mais fraco), leste um pouco mais seco. Não há mais manchas de neve no meio do mapa.
+- Acampamento de clã (8, `tools/living372.js`): barraca, fogueira e totem são modelos do env.glb (`tent_detailedOpen`, `campfire_stones`, `post_skull`); o fogo é um brilho suave. Antes eram pirâmide, cones e dodecaedros.
+- Vila nível 0 (9): falso alarme — a vila existe inteira; no print da análise a câmera olhava para o outro lado.
+- Triângulos pretos (10): eram tronco/copa de árvore quando a câmera passava por dentro. Agora todo cenário instanciado (árvore, pedra) e as árvores pintadas somem em pontilhado a menos de ~2,6 m da câmera (`terrain245`, `biome-materials132`).
+- Legenda (11, `tools/map393.js`): compacta em 2 colunas no canto de cima (gelo/mar); não tampa mais nenhuma vila.
+- Teste: navegador local (cópia própria, porta 8784) com prints do oeste sem neve, vila de pé, árvore perto da câmera, acampamento e mapa. Sem erro novo.
+
 ## v534 (21/10/2026) — Crianças: ciclo de andar e correr sem salto
 - Pedido de Ian: corrigir o possível salto quando o ciclo de andar/correr reinicia.
 - `tools/vida527.js`: os trechos antigos (andar 91 a 119, correr 74 a 90) incluíam o começo e o fim do movimento original (parado e braço da lanterna), por isso davam salto. Medi a diferença de pose no GLB e conferi as poses no Blender: andar agora usa os quadros 90 a 111 (o 112 repete o 91) e correr os quadros 73 a 83 (o 84 repete o 73).

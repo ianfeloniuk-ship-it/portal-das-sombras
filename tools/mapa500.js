@@ -37,6 +37,8 @@
   const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};
   const bs0=biomeSample317;
   biomeSample317=function(x,z){const r=bs0(x,z);let b=r.b,b2=r.b2;
+    /* v534 (Ian): clima por região, como Skyrim — norte frio, sul quente, leste mais seco; sem neve no meio do mapa */
+    {const cl=v=>Math.max(-1,Math.min(1,v));b=.5+(b-.5)*.45+(z<0?.28:.17)*cl(z/3400)+.12*Math.max(0,cl(x/3400));}
     for(const k in CAP){const q=CAP[k],w=1-ss(1000,1700,Math.hypot(x-q.x,z-q.z));if(w<=0)continue;
       const tb=q.b==null?.5+.34*ss(-250,250,z-q.z):q.b;b+=(tb-b)*w;b2+=(q.b2-b2)*w}
     {const w=1-ss(700,1300,Math.hypot(x,z));if(w>0){b+=(ASTER.b-b)*w;b2+=(ASTER.b2-b2)*w}}

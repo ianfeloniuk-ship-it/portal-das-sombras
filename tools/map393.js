@@ -73,8 +73,8 @@
       ctx.fillStyle='#fff';ctx.font='700 12px "Russo One",sans-serif';ctx.textAlign='center';ctx.fillText('N',0,-34);ctx.setTransform(1,0,0,1,0,0);
       // legenda
       const items=[['tent','Acampamento'],['tower','Posto avançado'],['city','Cidade'],['gate','Portal'],['road','Estrada'],['water','Rio / lago'],['mob','Monstro']];
-      const lx=14,ly=S-14-items.length*17;ctx.fillStyle='rgba(30,18,6,.72)';ctx.fillRect(lx-6,ly-14,150,items.length*17+12);ctx.font='600 11px "Chakra Petch",sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
-      items.forEach(([t,n],i)=>{const y=ly+i*17,x=lx+7;
+      /* v534: legenda compacta em 2 colunas no canto de cima (gelo/mar), sem tampar vila */const lx=14,ly=20;ctx.fillStyle='rgba(30,18,6,.72)';ctx.fillRect(lx-6,ly-11,214,4*15+6);ctx.font='600 10px "Chakra Petch",sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+      items.forEach(([t,n],i)=>{const y=ly+(i%4)*15,x=lx+7+Math.floor(i/4)*104;
         if(t==='tent')tent(ctx,x,y,6,'#e0a85a');else if(t==='tower')tower(ctx,x,y,5);
         else if(t==='city'){ctx.fillStyle='rgba(255,179,71,.3)';ctx.strokeStyle='#ffb347';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.fill();ctx.stroke()}
         else if(t==='gate'){ctx.strokeStyle='#7ce6cf';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.stroke()}

@@ -40,10 +40,13 @@ function spawn(p){
  if(points.some(q=>KINDS[q.k]?.mon&&!MON.list[KINDS[q.k].mon]))return null;
  const c={...p,npcs:[],props:[],inter:[],talk:0};
  const g=new THREE.Group();ground(g,p.x,p.z);scene.add(g);c.props.push(g);
- for(let i=0;i<7;i++){const a=i/7*Math.PI*2,m=new THREE.Mesh(new THREE.DodecahedronGeometry(.3),toonS(0x655951));m.position.set(Math.sin(a)*1.1,.15,Math.cos(a)*1.1);g.add(m)}
- const fire=new THREE.Mesh(new THREE.ConeGeometry(.45,1.2,7),glowS(0xff8433,.8));fire.position.y=.65;g.add(fire);c.fire=fire;
- const tent=new THREE.Mesh(new THREE.ConeGeometry(2,2.8,4),toonS(c.clan.id==='manto'?0xddd8cb:0x947653));tent.position.set(-5,1.4,-4);tent.rotation.y=Math.PI/4;g.add(tent);const opening=new THREE.Mesh(new THREE.ConeGeometry(.7,1.8,3),toonS(0x30271e));opening.position.set(-5,.9,-2.57);opening.scale.z=.06;g.add(opening);
- if(c.clan.totem){const post=new THREE.Mesh(new THREE.CylinderGeometry(.24,.35,3,7),toonS(0x72513b));post.position.set(-1,1.5,-1);g.add(post);const mask=new THREE.Mesh(new THREE.DodecahedronGeometry(.6),toonS(0xd5ba7a));mask.position.set(-1,2.6,-1);g.add(mask)}
+ /* v534 (Ian, lei anti-primitivas): fogueira, barraca e totem do acampamento são modelos do env.glb (antes cone/pirâmide/dodecaedro) */
+ const envH=(k,H)=>{if(typeof envMesh!=='function'||typeof ENV==='undefined'||!ENV.m[k])return null;const m=envMesh(k),s=H/(ENV.m[k].h||1);m.scale.setScalar(s);return m};
+ {const cf=envH('campfire_stones',.55);if(cf)g.add(cf)}
+ if(!window.FLAME534){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d'),gr=x.createRadialGradient(32,40,2,32,36,30);gr.addColorStop(0,'rgba(255,240,190,1)');gr.addColorStop(.35,'rgba(255,150,50,.85)');gr.addColorStop(1,'rgba(255,80,20,0)');x.fillStyle=gr;x.fillRect(0,0,64,64);window.FLAME534=new THREE.CanvasTexture(cv)}
+ const fire=new THREE.Sprite(new THREE.SpriteMaterial({map:FLAME534,color:0xffb070,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}));fire.scale.set(1.1,1.5,1);fire.position.y=.75;g.add(fire);c.fire=fire;
+ {const t=envH('tent_detailedOpen',2.8);if(t){t.position.set(-5,0,-4);t.rotation.y=Math.PI*.15;if(c.clan.id==='manto')t.traverse(o=>{if(o.material&&o.material.color){o.material=o.material.clone();o.material.color.multiplyScalar(1.25)}});g.add(t)}}
+ if(c.clan.totem){const post=envH('post_skull',3);if(post){post.position.set(-1,0,-1);g.add(post)}}
  /* v429 (Ian): barraca, fogueira e totem do acampamento têm colisão */if(window.Solid429)Solid429.prop(g,[{x:-5,z:-4,r:1.85},{x:0,z:0,r:.85},...(c.clan.totem?[{x:-1,z:-1,r:.45}]:[])]);
  const sign=makeCitySign(c.clan.n,'#e5c796',.5);ground(sign,p.x,p.z,3.7);scene.add(sign);c.props.push(sign);
  for(const [i,q] of points.entries()){

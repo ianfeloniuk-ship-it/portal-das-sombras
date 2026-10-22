@@ -48,7 +48,7 @@ const Environment128=(()=>{
  #include <emissivemap_fragment>`)};return m}
  function groundMaterial0(bio='campos'){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96});m.defaultAttributeValues={...m.defaultAttributeValues,terrainRoad128:[0],terrainSnow154:[bio==='neve'||bio==='cristal'?1:0],terrainMix154:[bio==='deserto'?1:0,bio==='vulcao'?1:0,bio==='pantano'?1:0],terrainBio131:[['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'].indexOf(bio)]};m.onBeforeCompile=s=>{
   s.vertexShader='attribute float terrainRoad128;attribute float terrainBio131;attribute float terrainSnow154;attribute vec3 terrainMix154;varying float snow154;varying vec3 mix154;varying float biome131;varying float road128;varying vec3 terrainWorld128;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nterrainWorld128=(modelMatrix*vec4(position,1.)).xyz;road128=terrainRoad128;biome131=terrainBio131;snow154=terrainSnow154;mix154=terrainMix154;');
-  s.fragmentShader=`varying float snow154;varying vec3 mix154;varying float road128;varying float biome131;varying vec3 terrainWorld128;
+  s.fragmentShader=`varying float vNy534;varying float snow154;varying vec3 mix154;varying float road128;varying float biome131;varying vec3 terrainWorld128;
   float hash128(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
   uniform vec4 uTerR[24];
   float noise128(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash128(i),hash128(i+vec2(1,0)),f.x),mix(hash128(i+vec2(0,1)),hash128(i+vec2(1,1)),f.x),f.y);}
@@ -60,7 +60,7 @@ const Environment128=(()=>{
     vec3 dirt=vec3(.40,.31,.21)*(.78+noise128(tp*3.1)*.3+noise128(tp*13.)*.18);
     float rut=smoothstep(.55,.95,noise128(vec2(tp.x*.8+tp.y*.8,dmin*2.4)));
     diffuseColor.rgb=mix(diffuseColor.rgb,dirt*(1.-rut*.18),trail*.94);
-    mat3 Rt=transpose(mat3(viewMatrix));vec3 wn=normalize(Rt*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));float steep=smoothstep(.90,.66,abs(wn.y));
+    mat3 Rt=transpose(mat3(viewMatrix));vec3 wn=normalize(Rt*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));wn.y=vNy534;/* v534: inclinação lisa do relevo, não do triângulo (facetas) */float steep=smoothstep(.90,.66,vNy534);
     vec3 pw=cameraPosition-Rt*vViewPosition;float lay=noise128(vec2((pw.x+pw.z)*.11,pw.y*.75));vec2 cu=vec2((pw.x+pw.z)*.95,pw.y*1.7);/* v529: blocos menores, sem cara de curva de nível */cu+=(vec2(noise128(pw.xz*.8+pw.y*.9),noise128(pw.zx*.77+pw.y*1.1))-.5)*1.1;cu.x+=floor(cu.y)*.43;vec2 ci=floor(cu),cf=fract(cu);float blk=hash128(ci);float edgeL=min(min(cf.x,1.-cf.x),min(cf.y,1.-cf.y));float crackL=1.-smoothstep(.02,.11,edgeL+noise128(pw.xz*3.+pw.y*3.)*.05);
     vec3 rock=mix(vec3(.17,.16,.15),vec3(.58,.56,.52),blk*.5+lay*.08+noise128(pw.xz*2.3+pw.y*2.1)*.32)*(1.-crackL*.35)*(.8+noise128(pw.xz*7.+pw.y*7.)*.3)*(.86+.24*noise128(vec2((pw.x+pw.z)*3.1,pw.y*.22)));
     rock=mix(rock,vec3(.30,.38,.20),smoothstep(.5,.92,abs(wn.y))*.3*noise128(pw.xz*.6));

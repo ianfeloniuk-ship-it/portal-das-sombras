@@ -15,6 +15,7 @@ window.BiomeMaterials132=(()=>{
  vec3 leaves132=tri132(surfaceP132*.58,surfaceN132,vec2(.5,.5));
  vec3 tint132=mix(leaves132/max(vec3(.25,.30,.17),vec3(.01)),painted132/vec3(.36,.25,.16),bark132);
  diffuseColor.rgb*=mix(vec3(1.),clamp(tint132,vec3(.32),vec3(2.15)),.36*(1.-snow132));
+ {/* v534: árvore some em pontilhado perto da câmera (antes a câmera entrava no tronco/copa e aparecia um triângulo preto) */float cd534=length(surfaceP132-cameraPosition);if(cd534<3.2){float th534=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);if(th534>(cd534-.6)/2.6)discard;}}
  `);
  }else{
  s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -22,7 +23,7 @@ window.BiomeMaterials132=(()=>{
  vec3 soil132=tile132(terrainWorld128.xz*.24,vec2(0.,0.));vec3 sandtex132=tile132(terrainWorld128.xz*.22,vec2(.5,0.));
  vec3 detail132=mix(soil132/vec3(.29,.25,.15),sandtex132/vec3(.66,.49,.29),sand132);
  float mono132=dot(detail132,vec3(.299,.587,.114));detail132=mix(detail132,vec3(mono132),max(snow132,ash132));
- float st529=0.;{mat3 Rt529=transpose(mat3(viewMatrix));vec3 wn529=normalize(Rt529*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));st529=smoothstep(.88,.62,abs(wn529.y));} /* v529: textura vista de cima não estica na parede (virava mancha marrom) */
+ float st529=0.;{mat3 Rt529=transpose(mat3(viewMatrix));vec3 wn529=normalize(Rt529*normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition))));st529=smoothstep(.88,.62,vNy534);} /* v529: textura vista de cima não estica na parede (virava mancha marrom) */
  diffuseColor.rgb*=mix(vec3(1.),clamp(detail132,vec3(.38),vec3(1.85)),(1.-road132)*(1.-st529)*mix(.22+.12*noise128(terrainWorld128.xz*.11),.14,snow132));
  `);
  }
