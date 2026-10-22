@@ -1,3 +1,7 @@
+## v561 (22/10/2026) — Correção da v560: carroça de volta em y=0
+- O relevo do jogo é aplicado pelo shader (a lógica fica em y=0); a v560 pôs a carroça em `terrH` e ela subiu duas vezes (flutuava). `tools/civic343.js` volta a y=0 (inclinação na subida mantida). Visto em captura do jogo real: carroça na estrada, na encosta, assentada.
+- Lição: nunca somar `terrH` à posição y de um objeto de cena; só em lógica/câmera/mira.
+
 ## v561 (22/10/2026) — Mão do Arquiteto volta a pegar só chefões (correção de regressão)
 - Pedido de Ian: a Mão pegou um bicho comum depois de morto; já tinha sido corrigido na v515.
 - Causa: a v551 (missão fixa #2, outra sessão) reintroduziu em `Reclaim372.claimEnemy` a exceção `isIntroTutorial` (herdada da v402), que chamava a Mão para o mob do tutorial, contra o «tutorial sem mão» da v515. Não foi rebase nem conflito: foi edição nova na mesma linha. O teste `test-coleta513.cjs` já pegava isso, mas não era rodado no build.

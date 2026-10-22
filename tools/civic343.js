@@ -125,7 +125,7 @@ window.Civic343=(()=>{
  function wagonSpawn(force){const P=player,cand=[];for(const r of routesNear(P)){if(cityFallen(r.a)||cityFallen(r.b))continue;for(let s=0;s<r.pts.length-1;s++){const[x1,z1]=r.pts[s],[x2,z2]=r.pts[s+1],len=Math.hypot(x2-x1,z2-z1);if(len<1)continue;for(let d=0;d<=len;d+=12){const x=x1+(x2-x1)*d/len,z=z1+(z2-z1)*d/len,pd=Math.hypot(x-P.x,z-P.z);if(pd<(force?16:55)||pd>(force?30:95)||nearestCity(x,z).d<82)continue;if(wagons.some(o=>!o.gone&&Math.hypot(o.x-x,o.z-z)<30))continue;cand.push({r,s,x,z})}}}
   if(!cand.length)return null;const k=cand[Math.floor(Math.random()*cand.length)],fwd=Math.random()<.5,M=wagonModel();
   const w={...M,x:k.x,z:k.z,face:0,pts:k.r.pts,s:k.s,fwd,from:fwd?k.r.a:k.r.b,dest:fwd?k.r.b:k.r.a,hp:100,amb:null,told:false,wait:0,t:0,gone:false};
-  w.n={x:w.x,z:w.z,short:'Mercador',name:'Mercador',m:{root:w.g}};w.g.position.set(w.x,terrH(w.x,w.z),w.z);scene.add(w.g);wagons.push(w);
+  w.n={x:w.x,z:w.z,short:'Mercador',name:'Mercador',m:{root:w.g}};w.g.position.set(w.x,0,w.z);scene.add(w.g);wagons.push(w);
   if(force==='ambush'||(!force&&Math.random()<.34&&nearestCity(w.x,w.z).d>120))ambush(w);return w}
  function ambush(w){const gr=clamp(Math.max(danger(w.x,w.z),rankOf()-2),0,9),n=3+(gr>=3?1:0),foes=[];
   for(let i=0;i<n;i++){const a=i/n*TAU+Math.random()*.5,x=w.x+Math.cos(a)*3.6,z=w.z+Math.sin(a)*3.6;try{const e=spawnKind(wpick(worldKinds124(gr,x,z)).k,x,z,gr,{wild:true});e.wagon343=1;e.face=Math.atan2(w.x-x,w.z-z);foes.push(e)}catch(_){}}
@@ -154,7 +154,7 @@ window.Civic343=(()=>{
      if(A.hitT<=0&&pd<90){A.hitT=1.1;fxRing(w.x,w.z,0xff6a4d,1.6,.3);floater(w.x,w.z,'−','#ff8a6a',false,2.6);for(const e of alive)if(!e.aggro){e.face=Math.atan2(w.x-e.x,w.z-e.z);if(e.m&&e.m.root)e.m.root.rotation.y=e.face}}
      if(!w.told&&pd<75){w.told=true;toast('<b>[ESTRADA]</b> Uma carroça de suprimentos para <b>'+safeText(w.dest.name)+'</b> está sendo atacada. Derrote os monstros antes que ela seja destruída.',7000);sfx('gong')}
      if(pd<13&&w.t>(w.cryT||0)){w.cryT=w.t+9;speech153(w.n,pick(['Socorro! Eles vão levar tudo!','Aqui! Tire esses bichos de cima da carroça!','Ajude, por favor!']),'Mercador')}
-     if(w.hp<=0){w.amb=null;w.wreck=25;w.g.rotation.z=.5;w.g.position.y=terrH(w.x,w.z)-.25;if(w.ox)w.ox.visible=false;if(w.driver)w.driver.root.visible=false;fxRing(w.x,w.z,0xff3a2a,4,.7);for(const e of alive)e.aggro=true;
+     if(w.hp<=0){w.amb=null;w.wreck=25;w.g.rotation.z=.5;w.g.position.y=-.25;if(w.ox)w.ox.visible=false;if(w.driver)w.driver.root.visible=false;fxRing(w.x,w.z,0xff3a2a,4,.7);for(const e of alive)e.aggro=true;
       if(w.told){regionEvent116(w.dest,0,2,'Uma carroça de suprimentos foi destruída na estrada. A escassez aumentou.');toast('<b>[ESTRADA]</b> A carroça foi destruída. Os suprimentos não chegam a '+safeText(w.dest.name)+'.',6000)}}}}
    else if(w.wait>0)w.wait-=dt;
    else if(w.arr429){const A=w.arr429;
@@ -170,7 +170,7 @@ window.Civic343=(()=>{
     else if(!blocked){/* v480: carroca mais rapida que sprint */ const sp=6.4*dt;w.x+=dx/d*Math.min(d,sp);w.z+=dz/d*Math.min(d,sp);w.face=Math.atan2(dx,dz);moving=true;
      /* puxa a carroça para a própria faixa (1,7 m à direita do centro) */const ux=(seg1[0]-seg0[0])/sl,uz=(seg1[1]-seg0[1])/sl,lat=(w.x-seg0[0])*-uz+(w.z-seg0[1])*ux,want=1.7,k=Math.min(1,dt*1.5)*(want-lat);w.x+=-uz*k;w.z+=ux*k}
     {const nc=nearestCity(w.x,w.z);if(nc.c===w.dest&&!cityFallen(nc.c)&&nc.d<cityWall429(nc.c)+28)w.arr429=arrival429(w,nc.c);else if(nc.d<70&&w.t>6){wagonRemove(w);continue}}}
-   w.n.x=w.x;w.n.z=w.z;if(!w.wreck){const gy=(x,z)=>{try{return terrH(x,z)}catch(_){return 0}},fx=Math.sin(w.face),fz=Math.cos(w.face),y0=gy(w.x,w.z);w.g.position.set(w.x,y0,w.z);w.g.rotation.y=w.face;w.g.rotation.x=-Math.atan2(gy(w.x+fx*1.6,w.z+fz*1.6)-gy(w.x-fx*1.6,w.z-fz*1.6),3.2)*.9}
+   w.n.x=w.x;w.n.z=w.z;if(!w.wreck){const gy=(x,z)=>{try{return terrH(x,z)}catch(_){return 0}},fx=Math.sin(w.face),fz=Math.cos(w.face);w.g.position.set(w.x,0,w.z);w.g.rotation.y=w.face;w.g.rotation.x=-Math.atan2(gy(w.x+fx*1.6,w.z+fz*1.6)-gy(w.x-fx*1.6,w.z-fz*1.6),3.2)*.9}
    if(w.detailed369){Wagon369.animate(w,dt,Math.hypot(w.x-prevX,w.z-prevZ),Math.atan2(Math.sin(w.face-prevFace),Math.cos(w.face-prevFace)))}else if(moving){for(const wh of w.wheels)wh.rotation.x+=dt*12.8;w.legs.forEach((l,i)=>{l.rotation.x=Math.sin(w.t*6+(i%3?Math.PI:0))*.5})}
    if(w.driver&&!w.detailed369&&pd<60)try{animChibi(w.driver,{move:0,atk:0,dead:0,wind:0},time)}catch(_){}}}
  function clearWagons(){for(const w of[...wagons])wagonRemove(w)}
