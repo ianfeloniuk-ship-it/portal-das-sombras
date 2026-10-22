@@ -34,6 +34,22 @@ const css=`@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;4
 #mbox.t535 .btn.on{color:#fff;border-color:#fff}
 #mbox.t535 .tabs{gap:14px}
 #mbox.t535 .loot513{display:none!important}
+#mbox.t535.t535-kael{grid-template-columns:minmax(0,1fr)}
+#mbox.t535-kael .t535-show{display:none}
+#mbox.t535-char #mb{max-width:min(1100px,100%);width:100%;margin:0 auto;font-size:14px}
+#mbox.t535-char #mhead{max-width:min(1100px,100%);width:100%;margin:0 auto}
+#mbox.t535-char .tabs{flex-wrap:wrap;justify-content:center}
+#mbox.t535-kael #mb{grid-column:1;border-left:0;padding:0 12px 0 0;overflow:auto}
+#mbox.t535-kael .kael405-intro{display:block;padding:8px 14px;margin:0 0 12px;border-left:2px solid #e9c46a88;background:#e9c46a10}
+#mbox.t535-kael .kael405-intro b{display:block;font:400 18px var(--jf);letter-spacing:.2em;text-transform:uppercase;color:#ece8df}
+#mbox.t535-kael .kael405-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:12px}
+#mbox.t535-kael .kael405-card{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;align-items:center;text-align:center;gap:8px;padding:12px 10px;min-width:0;border:1px solid #ffffff24;border-radius:0;background:#ffffff08}
+#mbox.t535-kael .kael405-card .item-art405{display:flex!important;align-items:center;justify-content:center;width:100%!important;height:150px;overflow:hidden}
+#mbox.t535-kael .kael405-card .item-art405 img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+#mbox.t535-kael .kael405-card>div{width:100%;min-width:0}
+#mbox.t535-kael .kael405-card b{display:block;font:400 16px/1.25 var(--jf);letter-spacing:.06em;color:#ece8df;white-space:normal;overflow-wrap:anywhere}
+#mbox.t535-kael .kael405-card small{white-space:normal;overflow-wrap:anywhere;letter-spacing:.03em;margin-top:2px}
+#mbox.t535-kael .kael405-card .btn{width:100%}
 @media(max-width:820px){
  #mbox.t535,#mbox.t535.panel{display:flex!important;flex-direction:column;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px}
  #mbox.t535 #mhead{order:0;flex:none}#mbox.t535 #modalNotice95{order:1}
@@ -102,7 +118,7 @@ function showFor(text,entry,color,desc){
   put(part(w,color?new T.Color(color).getHex():0),null,rim)}
 
 /* ===== janela: decide o tipo pelo título e monta lista + palco + cartão ===== */
-function kind(title){if(/^MERCADO DE RECURSOS/.test(title))return 'mkt';if(/^BANCO DE /.test(title))return 'bank';if(/^SAQUE · /.test(title))return 'loot';
+function kind(title){if(/^MERCADO DE RECURSOS/.test(title))return 'mkt';if(/^PERSONAGEM/.test(title))return 'char';if(/^BANCO DE /.test(title))return 'bank';if(/^SAQUE · /.test(title))return 'loot';
   if(/^PRIMEIRA ARMA · KAEL/.test(title)||(typeof SHOPS!=='undefined'&&SHOPS.some(s=>s.id!=='guild'&&s.n===title)))return 'shop';return ''}
 function rowName(it){if(it.classList.contains('kael405-item'))return (it.querySelector('b')?.textContent||'').trim();const d=it.querySelector('.d');if(!d)return '';const c=d.cloneNode(true);c.querySelector('small')?.remove();return c.textContent.trim()}
 function rowColor(it){const r=it.querySelector('.rl');return r?getComputedStyle(r).color:''}
@@ -117,8 +133,8 @@ function isItem(it,k){const n=rowName(it);return k==='loot'||[...it.querySelecto
 function bankCard(){card('<small>Cofre de Selene</small><h3>Ouro guardado</h3><p>O que fica aqui não se perde, nem se você morrer lá fora.</p><div class="t535-big"><div><span>Com você</span><b>'+fmt(run.gold)+'</b></div><div><span>No banco</span><b>'+fmt(profile.bank||0)+'</b></div></div>')}
 function skin(title){
   const box=$('mbox'),modal=$('modal'),k=kind(title||'');
-  if(!k){box.classList.remove('t535');modal.classList.remove('t535');box.querySelector('.t535-show')?.remove();box.style.removeProperty('--t535c');return}
-  box.classList.add('t535');modal.classList.add('t535');
+  if(!k){box.classList.remove('t535','t535-kael','t535-char');modal.classList.remove('t535');box.querySelector('.t535-show')?.remove();box.style.removeProperty('--t535c');return}
+  box.classList.add('t535');modal.classList.add('t535');box.classList.toggle('t535-kael',/^PRIMEIRA ARMA · KAEL/.test(title||'')||k==='char');box.classList.toggle('t535-char',k==='char');if(k==='char'){box.querySelector('.t535-show')?.remove();return}
   let show=box.querySelector('.t535-show');if(!show){show=document.createElement('div');show.className='t535-show';show.innerHTML='<div class="t535-stage" aria-label="Item em 3D. Arraste para girar."></div><div class="t535-card"></div>';box.appendChild(show)}
   stage(show.querySelector('.t535-stage'));
   box.querySelector('.loot513')?.remove();
@@ -132,6 +148,6 @@ function skin(title){
 const _open=openModal;
 openModal=function(title,html,route){const r=_open.apply(this,arguments);try{skin(title);setTimeout(()=>{try{if($('mbox').classList.contains('t535'))$('mbox').querySelector('.loot513')?.remove()}catch(e){}},0)}catch(e){console.warn('Telas535',e)}return r};
 const _close=closeModal;
-closeModal=function(){const r=_close.apply(this,arguments);try{$('mbox').classList.remove('t535');$('modal').classList.remove('t535');$('mbox').querySelector('.t535-show')?.remove()}catch(e){}return r};
+closeModal=function(){const r=_close.apply(this,arguments);try{$('mbox').classList.remove('t535','t535-kael','t535-char');$('modal').classList.remove('t535');$('mbox').querySelector('.t535-show')?.remove()}catch(e){}return r};
 window.Telas535={kind,showFor,part};
 })();

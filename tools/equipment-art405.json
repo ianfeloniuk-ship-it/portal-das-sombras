@@ -6970,11 +6970,49 @@
         512
       ],
       "sha256": "1e675197882886b8c11a5fc2ca9ad6a20d300c65cf33a57c56b44ad110b0a392"
+    },
+    {
+      "key": "class:5",
+      "kind": "wand",
+      "scope": "class",
+      "classId": 5,
+      "layout": "isolated",
+      "source": {
+        "name": "varinha-paladino-490.glb",
+        "path": "models/armas155/varinha-paladino-490.glb",
+        "note": "render do GLB oficial do jogo"
+      },
+      "src": "assets/equipment405/class-5.webp",
+      "bytes": 5342,
+      "dimensions": [
+        410,
+        512
+      ],
+      "sha256": "827a7fe492e8ac68711c4d36b67fcee3e91c96a9152b5b31f482bf30afe001d1"
+    },
+    {
+      "key": "class:6",
+      "kind": "tome",
+      "scope": "class",
+      "classId": 6,
+      "layout": "isolated",
+      "source": {
+        "name": "tomo-invocador-490.glb",
+        "path": "models/armas155/tomo-invocador-490.glb",
+        "note": "render do GLB oficial do jogo"
+      },
+      "src": "assets/equipment405/class-6.webp",
+      "bytes": 7736,
+      "dimensions": [
+        410,
+        512
+      ],
+      "sha256": "7de4f246086618a6ae514259b4489099d95c1c31d16bca1ae3ac570de90de181"
     }
   ],
   "coverage": {
     "exact": 207,
-    "classReferences": 6,
+    "classReferences": 8,
     "bytes": 32604272,
     "missingWeaponKinds": [
       "staff",

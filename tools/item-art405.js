@@ -121,7 +121,7 @@ function observe(){
  }).observe(target,{childList:true,subtree:true});
 }
 if(doc){if(doc.body||doc.documentElement)observe();else doc.addEventListener('DOMContentLoaded',observe,{once:true});}
-const ready=(typeof fetch==='function'?fetch('tools/equipment-art405.json?v=405').then(response=>{
+const ready=(typeof fetch==='function'?fetch('tools/equipment-art405.json?v=555').then(response=>{
  if(!response.ok)throw new Error('Equipment catalog unavailable');return response.json();
 }).then(ingest):Promise.reject(new Error('Fetch unavailable'))).catch(()=>{failed=true;catalog=null;}).then(()=>{
  hydrate(doc);return catalog;

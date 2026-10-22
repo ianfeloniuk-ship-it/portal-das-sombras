@@ -1,4 +1,10 @@
-﻿## v554 (22/10/2026) - NPCs da cidade reagem a ameacas
+﻿## v557 (22/10/2026) — Ficha Personagem no novo HUD + Primeira Arma Kael corrigida
+- **Pedido de Ian**: adaptar a ficha (Status, Habilidades, Passivas, Títulos, Build) ao novo HUD, centralizada e responsiva; corrigir a Primeira Arma · Kael (nomes cortados, imagens de Paladino/Invocador, baú 3D encobrindo a direita).
+- `tools/telas535.js`: janela PERSONAGEM usa o fundo/estilo do novo HUD, conteúdo centralizado (máx. 1100px), abas quebram linha em tela estreita. Kael: baú 3D removido dessa tela, cartões em grade com nome completo e botão inteiro.
+- Imagens novas `assets/equipment405/class-5.webp` (Paladino, Maça da Aurora) e `class-6.webp` (Invocador, Tomo), renderizadas dos GLB oficiais `models/armas155/varinha-paladino-490.glb` e `tomo-invocador-490.glb`; registradas em `tools/equipment-art405.json`.
+- Testado no Edge headless 1280×720 (ficha Status/Build e Kael). Cache: telas535 ?v=557, catálogo ?v=555, sw pds-v557.
+
+## v554 (22/10/2026) - NPCs da cidade reagem a ameacas
 - **Pedido de Ian**: Idle dos NPCs (Banco, Forja, Lojas, Guilda) e guardas, HUD nome/vida ao foco/dano, e deteccao de ameacas: guardas/cacadores (Marcos, Kallan) combatem, civis fogem e voltam a rotina. Preserva NPCs essenciais e interacao.
 - `tools/ameaca554.js` (novo, `window.Ameaca554`): vendedores nomeados (Citizens133 = malha sem esqueleto, ficavam parados) ganham respiracao, troca de apoio, olhar em volta e encolhem de medo; continuam no posto. Guardas (role523) e cacadores da cidade sacam a arma, correm ate o monstro agressivo/invasor a menos de 40 m e batem a cada ~1 s com `hurtEnemy` (`guard343`, passa a muralha); o monstro revida e o defensor cai 10 s (nunca morre); fim da ameaca: guardam a arma e voltam a ronda. Moradores/cidadaos fogem a 22 m e retomam a rotina 4 s depois. HUD de nome+vida ao mirar (12 m) ou 4 s apos apanhar. Um unico varrer de inimigos a cada 0,4 s.
 - Teste (navegador): lobo invasor em Aster: Marcos, Ruy, Kallan e Voss em luta, lobo morreu (24 golpes), 3 moradores fugiram e voltaram a trabalhar, armas guardadas, HUD "Selene - BANCO"; varredura ~0,004 ms. Nao testado: hitbox do dragao (outra sessao), som.
