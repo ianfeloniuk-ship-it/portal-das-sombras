@@ -611,7 +611,15 @@
         const d = Math.hypot(_pos.x - player.x, _pos.z - player.z);
         if (d < bd && !nearAnyCity(_pos.x, _pos.z, 18)) {
           bd = d;
-          best = { mesh: o, idx: i, x: _pos.x, z: _pos.z, key };
+          let ecoStage = 3, ecoBio = 215;
+          if (window.EcoGrid && typeof window.EcoGrid.getCellAt === 'function') {
+            const cell = window.EcoGrid.getCellAt(_pos.x, _pos.z);
+            if (cell) {
+              ecoBio = cell.biomassa;
+              ecoStage = ecoBio <= 60 ? 0 : ecoBio <= 150 ? 1 : ecoBio <= 200 ? 2 : ecoBio <= 240 ? 3 : 4;
+            }
+          }
+          best = { mesh: o, idx: i, x: _pos.x, z: _pos.z, key, ecoStage, ecoBio };
         }
       }
     });
@@ -620,6 +628,12 @@
 
   function chopTree(tr) {
     const s = S(); if (!s || !tr) return;
+    if (tr.ecoStage === 1 || tr.ecoStage === 2) {
+      add('galho', 2, true);
+      floater(tr.x, tr.z, '+2 Brotos e Folhas (Árvore Jovem em crescimento)', '#98f5a4', true);
+      try { if (window.Anim303) Anim303.play('palma', 1.1); sfx('step'); } catch (_) {}
+      return;
+    }
     if (!count('machado')) {
       add('galho', 2, true);
       if (Math.random() < 0.5) add('resina', 1, true);
@@ -630,18 +644,35 @@
     tr. hits = (tr.hits || 0) + 1;
     try { if (window.Anim303) Anim303.play('machado', 1.15); sfx('hit'); shake(0.1); } catch (_) {}
     useTool('machado', 1);
-    // Toco regenera naturalmente após 1 dia de jogo (sem desmatar permanentemente!)
+
+    // Notificar EcoGrid: estado da célula muda para Toco (biomassa = 50)
+    let ecoResult = null;
+    if (window.EcoGrid && typeof window.EcoGrid.onTreeChopped === 'function') {
+      ecoResult = window.EcoGrid.onTreeChopped(tr.x, tr.z);
+    }
+
+    // Toco regenera naturalmente pelo ecoTick e passagem do tempo
     s.felled[tr.key] = s.clock + DAY();
     tr.mesh.setMatrixAt(tr.idx, new T.Matrix4().makeScale(0, 0, 0));
     tr.mesh.instanceMatrix.needsUpdate = true;
     spawnStumpVisual(tr.key, tr.x, tr.z);
-    add('tora', 1, true);
-    add('lenha', 2, true);
-    if (Math.random() < A('chopExtra')) { add('lenha', 1, true); floater(tr.x, tr.z, '+1 Lenha (Força)', '#ffd76a'); }
-    TR('for');
-    add('galho', 2, true);
-    if (Math.random() < 0.65) add('resina', 1, true);
-    floater(tr.x, tr.z, '+1 Tora · +2 Lenhas · +2 Galhos (regenera em 1 dia)', '#d8b37a', true);
+
+    const isAncient = (ecoResult && ecoResult.stage === 4) || tr.ecoStage === 4;
+    if (isAncient) {
+      add('tora', 2, true);
+      add('lenha', 4, true);
+      add('galho', 3, true);
+      add('resina', 2, true);
+      floater(tr.x, tr.z, 'Árvore Anciã Derrubada! (+2 Toras · +4 Lenhas · Resinas Raras)', '#98f5a4', true);
+    } else {
+      add('tora', 1, true);
+      add('lenha', 2, true);
+      if (Math.random() < A('chopExtra')) { add('lenha', 1, true); floater(tr.x, tr.z, '+1 Lenha (Força)', '#ffd76a'); }
+      TR('for');
+      add('galho', 2, true);
+      if (Math.random() < 0.65) add('resina', 1, true);
+      floater(tr.x, tr.z, '+1 Tora · +2 Lenhas · +2 Galhos (Toco em regeneração)', '#d8b37a', true);
+    }
     if (treeInter) { const k = L.inter.indexOf(treeInter); if (k >= 0) L.inter.splice(k, 1); treeInter = null; }
     save();
   }
@@ -1116,7 +1147,12 @@
       // Interação com árvore próxima
       const tr = findNearestTree();
       if (tr) {
-        const lbl = count('machado') ? 'F · CORTAR ÁRVORE (Machado)' : 'F · COLHER GALHOS E RESINA';
+        let lbl = count('machado') ? 'F · CORTAR ÁRVORE (Machado)' : 'F · COLHER GALHOS E RESINA';
+        if (tr.ecoStage === 4) {
+          lbl = count('machado') ? 'F · DERRUBAR ÁRVORE ANCIÃ (Machado)' : 'F · COLHER RESINA ANCIÃ';
+        } else if (tr.ecoStage === 1 || tr.ecoStage === 2) {
+          lbl = 'F · COLHER BROTOS E FOLHAS (Árvore Jovem)';
+        }
         if (!treeInter) {
           treeInter = { type: 'tree437', x: tr.x, z: tr.z, r: 3.4, label: lbl, use: () => chopTree(tr) };
           L.inter.push(treeInter);

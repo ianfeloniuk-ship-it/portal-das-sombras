@@ -1,3 +1,33 @@
+## v550 (22/10/2026) — Solo Vivo, EcoGrid e Trilhas por Pisoteio (Desire Paths)
+- **Missão de Ian**: Implementar o sistema de Solo Vivo, Crescimento Progressivo de Grama/Arbustos/Árvores e Trilhas por Pisoteio (Desire Paths) integrado ao relevo (terrH em terrain245.js), biomas/clima (biomes295.js) e águas (lakeAt239), mantendo 60 FPS cravados.
+- **Grade Celular Leve por Chunk (EcoGrid)** (tools/ecossistema550.js):
+  - Cada chunk ativo (64m × 64m) dividido em grade 32×32 de células de 2.0m × 2.0m armazenado em um único Uint8Array(32 * 32 * 4) (exatos 4 KB de RAM por chunk).
+  - Canal 0 = Umidade (0–255): calculado pela proximidade de lakeAt239, rios e mar, amortecido pela inclinação da normal de terrH (vales retêm água, encostas drenam) e precipitação climática de biomes295.js.
+  - Canal 1 = Fertilidade (0–255): matéria orgânica/serrapilheira; sobe +2 por tick perto de árvores adultas (6m) e várzeas/margens de água; cai -3 se exposto/desmatado ou sob fenda ativa.
+  - Canal 2 = Pisoteio (0–255): compactação do solo por Viajante (+6 a pé, +10 sprint), Carrinho de Carga (+12), Moradores/Guardas (+4), Carroças (+18) e Manadas/Montarias (+14). Sem tráfego, o solo descompacta (-1 por tick).
+  - Canal 3 = Biomassa (0–255): estágio acumulado de cobertura vegetal da célula.
+- **Lei do Fator Limitante (Liebig) em Background Tick Assíncrono** (tools/ecossistema550.js):
+  - Simulação biológica executada assincronamente a cada 500 ms (1 a 2 chunks por segundo), garantindo 60 FPS cravados sem engasgos no loop de renderização.
+  - fatorCrescimento = Math.min(umidade, fertilidade) * (1.0 - pisoteio / 255.0).
+  - Pisoteio > 180: capim morre rapidamente (-14 biomassa/tick), abrindo a trilha de terra batida.
+  - Pisoteio < 80 e fatorCrescimento > 60: biomassa se desenvolve gradualmente até o teto do bioma e da fertilidade.
+- **Transição Visual 3D Contínua e Shaders**:
+  - Fragment Shader do Terreno: textura THREE.DataTexture(32, 32) com filtro bilinear contínuo; interpolação suave da vegetação para terra batida/lama via smoothstep(0.45, 0.75, pisoteio) e escurecimento orgânico do solo conforme fertilidade e umidade.
+  - Vertex Shader da Grama (grass446.js): altura das folhas modulada por clamp((biomassa / 100.0) * (1.0 - pisoteio * 0.85), 0.0, 1.4), com inclinação física lateral ao passar o jogador.
+- **Ciclo de Vida de Árvores e Arbustos em 4 Estágios Reais + Toco** (tools/survival437.js, tools/ecossistema550.js):
+  - Árvore cortada pelo jogador não some: estado muda para Toco (biomassa = 50, modelo de toco).
+  - Estágio 1 (Muda/Brote, biomassa 120–150): scale 0.25 a 0.50.
+  - Estágio 2 (Árvore Jovem, biomassa 151–200): malha de árvore fina, scale 0.55 a 0.85.
+  - Estágio 3 (Árvore Adulta, biomassa 201–240): árvore completa, scale 0.90 a 1.15, gera serrapilheira (+fertilidade em 6m) e pode ser cortada para Toras e Lenha.
+  - Estágio 4 (Árvore Anciã, biomassa 241–255): surge em várzeas e solos de altíssima fertilidade intocados, scale 1.20 a 1.45, fornecendo madeira nobre dobrada e resinas raras.
+- **IA de Navegação e Fendas**:
+  - Animais e NPCs fora da estrada principal ganham bônus de custo menor (-35%) ao caminhar sobre células com pisoteio > 120, reforçando naturalmente as trilhas abertas.
+  - Fendas ativas degradam fertilidade e biomassa no raio de miasma; fendas seladas pelo Viajante regeneram a vegetação sob a chuva, fazendo a floresta renascer.
+- **Validação e Testes**:
+  - Testes unitários de arquitetura, Liebig, trilhas por pisoteio e os 4 estágios executados com sucesso em tools/test-ecossistema550.cjs.
+  - Verificação de carregamento e inicialização em navegador real Edge headless via CDP (tools/test-edge-cdp.cjs).
+  - Sincronização via tools/build.py e validação tools/core_parts.py check (ok).
+
 ## v549 (22/10/2026) — Biomecânica orgânica Skyrim × Primeva (IK real no relevo, inclinação e curvas do Viajante, dinâmica de voo dos dragões e articulação)
 - **Pedido de Ian (Estúdio de Animação Orgânica e Cinemática)**: Acabar definitivamente com o visual de boneco rígido em dragões, Viajante, monstros e NPCs, trazendo a física, peso corporal e apoio no relevo de Skyrim.
 - **Viajante & Humanoides (Foot IK e Terreno)** (	ools/anim547.js, src/core/400-loop.js, 	ools/warrior-player127.js):
