@@ -214,6 +214,38 @@
     render();
   }
 
+  const ABERT520 = [
+    n => 'Ei, viajante! Chegue mais perto, ' + n + ' não morde... quase nunca.',
+    n => 'Pelos deuses, finalmente alguém aparece. Pare um instante, por favor.',
+    n => 'Você tem cara de quem sabe lutar. Posso tomar um minuto do seu tempo?',
+    n => 'Não precisa sacar a arma. Só quero conversar.',
+    n => 'Que sorte a minha cruzar com você neste fim de mundo.',
+    n => 'Shh. Fale baixo, tem coisa rondando por aqui.',
+    n => 'Olhe só, um Transmigrador. Dizem que vocês nunca recusam um bom pedido.',
+    n => 'Ainda bem que você veio. Eu já estava sem opção.'
+  ];
+  const ADEUS520 = [
+    'Se mudar de ideia, estarei por aqui.',
+    'Entendo. Cuide-se na estrada.',
+    'Tudo bem. Mas não demore, o tempo está contra nós.',
+    'Sem rancor. Que os ventos lhe sejam favoráveis.',
+    'Vá com cuidado. Esta região não perdoa.',
+    'Quando precisar, é só voltar aqui.'
+  ];
+  const BOATO520 = [
+    'Ouvi dizer que as Fendas estão ficando maiores a cada lua.',
+    'Os guardas das cidades andam nervosos. Há feras rondando mais perto das muralhas.',
+    'Um mercador jurou ter visto uma estátua gigante no alto de uma colina, com uma câmara dentro.',
+    'À noite os monstros ficam mais fortes. Eu só viajo de dia.',
+    'Se a chuva apertar, procure abrigo. Raios caem nas colinas abertas.',
+    'Dizem que há ruínas de mármore espalhadas por aí, com relíquias escondidas.',
+    'Os acampamentos de estrada vendem bom mantimento, mas cobram caro de quem tem fama ruim.',
+    'Nas montanhas, tem gente que paga bem por quem limpa os covis das feras.',
+    'Eu vi um dragão cruzando o céu no mês passado. Nunca mais dormi direito.',
+    'Quem tem boa fama nas cidades recebe descontos e pedidos melhores.'
+  ];
+  const sorteio520 = a => a[Math.floor(Math.random() * a.length)];
+
   /* Cada nó de encontro: { t: texto do NPC, o: [ { l: rótulo, if?: ()=>bool, go?: nó, fn?: ()=>nó|null|'fim' } ] } */
   function build(def) {
     const q = def.quest, m = mem(def.type), f = m.flags, g = q.gold;
@@ -227,13 +259,22 @@
     const N = {};
 
     N.raiz = {
-      t: def.desc,
+      t: sorteio520(ABERT520)(nome) + ' ' + def.desc,
       o: [
         { l: 'Aceitar o pedido', go: 'aceitar' },
         { l: 'Perguntar o que está acontecendo de verdade', go: 'saber', if: () => !f.soube },
         { l: 'Pedir um pagamento maior (' + pay + ' de ouro)', go: 'barganha', if: () => !f.barganhou },
+        { l: 'Perguntar sobre as redondezas', go: 'boato' },
         { l: 'Ameaçar: "Entregue o que tem e suma"', go: 'ameaca' },
-        { l: 'Seguir viagem', fn: () => { f.recusou = 1; save(); say('<b>' + nome + ':</b> "Se mudar de ideia, estarei por aqui."'); return 'fim'; } }
+        { l: 'Seguir viagem', fn: () => { f.recusou = 1; save(); say('<b>' + nome + ':</b> "' + sorteio520(ADEUS520) + '"'); return 'fim'; } }
+      ]
+    };
+    N.boato = {
+      t: sorteio520(BOATO520),
+      o: [
+        { l: 'Outra notícia?', go: 'boato' },
+        { l: 'Voltar ao pedido', go: 'raiz' },
+        { l: 'Seguir viagem', fn: () => 'fim' }
       ]
     };
     N.volta = {

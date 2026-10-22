@@ -1,3 +1,10 @@
+## v531 (21/10/2026) — Arca no chão plano, guardiões que não fogem, mais falas
+- Pedido de Ian: «o baú tá voando, não tem monstros pra lutar, tudo tem que ser arrumado, tem que ter mais fala».
+- `tools/quests480.js`: a arca escolhe o chão mais plano num raio de 18 m do objetivo (o ponto do objetivo se move junto, minimapa inclui); guardiões e chefe que passam de 16 m do objetivo voltam para perto (os Cogus fugiam e sumiam, dando «N restantes» sem ninguém à vista).
+- `tools/dialogo520.js`: 8 aberturas, 6 despedidas e 10 notícias sorteadas; nova opção «Perguntar sobre as redondezas».
+- Teste no navegador: missão do Vael aceita, arca em chão plano (inclinação 0,1–0,3), 4 guardiões em volta, chefe jogado a 60 m voltou para 12 m, arca abre e conclui depois de matar os guardiões; diálogo só com letras.
+- Pendente: falas próprias por personagem (hoje só a primeira fala de cada um e as 17 pitches são específicas).
+
 ## v532 (21/10/2026) — Crianças: olhos e cores com borda nítida
 - Pedido de Ian («cuida disso», sobre os pontos que ficaram imperfeitos na criança nova).
 - `tools/vida527.js`: cor agora por triângulo (camisa, bermuda, pele, cabelo e sapatos com borda nítida, sem a transição borrada) e dois olhos pretos presos no osso da cabeça (z 0,135, a superfície do rosto fica em 0,147).

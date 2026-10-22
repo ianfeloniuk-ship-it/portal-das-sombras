@@ -1351,8 +1351,18 @@
         if (objDef && typeof THREE !== 'undefined' && typeof scene !== 'undefined') {
           try {
             const { group, lid } = createQuestObjectMesh(objDef.kind);
-            const gy = typeof terrH === 'function' ? terrH(act.targetPos.x, act.targetPos.z) : 0;
-            group.position.set(act.targetPos.x, gy, act.targetPos.z);
+            // Escolhe o chão mais plano perto do objetivo para a arca não ficar torta nem pendurada
+            const flat = (x, z) => { const t = typeof terrH === 'function' ? terrH : () => 0; const v = [t(x, z), t(x - 2.4, z), t(x + 2.4, z), t(x, z - 2.4), t(x, z + 2.4)]; return Math.max(...v) - Math.min(...v); };
+            let bx0 = act.targetPos.x, bz0 = act.targetPos.z, bs = flat(bx0, bz0);
+            for (const r of [5, 9, 13, 18]) for (let k = 0; k < 10 && bs > 0.25; k++) {
+              const cx = act.targetPos.x + Math.cos(k * 0.628 + r) * r, cz = act.targetPos.z + Math.sin(k * 0.628 + r) * r;
+              const sl = flat(cx, cz);
+              if (sl < bs) { bs = sl; bx0 = cx; bz0 = cz; }
+            }
+            act.targetPos.x = bx0; act.targetPos.z = bz0; saveState();
+            const tx0 = bx0, tz0 = bz0;
+            const gy = (typeof terrH === 'function' ? terrH(tx0, tz0) : 0) - 0.05;
+            group.position.set(tx0, gy, tz0);
             scene.add(group);
             groupObj = group;
 
@@ -1441,6 +1451,19 @@
       // Anima cristais dos objetos de contrato ativos
       if (sp && sp.group && sp.group.userData && sp.group.userData.crystal) {
         sp.group.userData.crystal.rotation.y += dt * 1.6;
+      }
+
+      // Guardiões não fogem nem se perdem: se passarem de 16 m do objetivo, voltam para perto da arca
+      if (typeof enemies !== 'undefined' && act.spawned) {
+        for (const e of enemies) {
+          if (e.dead || (e.questBoss480 !== qid && e.questLethal480 !== qid)) continue;
+          const dx = e.x - act.targetPos.x, dz = e.z - act.targetPos.z, dd = Math.hypot(dx, dz);
+          if (dd > 16) {
+            const k = 12 / dd;
+            e.x = act.targetPos.x + dx * k; e.z = act.targetPos.z + dz * k;
+            if (e.m && e.m.root) e.m.root.position.set(e.x, e.m.root.position.y, e.z);
+          }
+        }
       }
 
       // Verifica se o chefe / guardiões foram abatidos
