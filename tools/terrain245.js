@@ -9,12 +9,12 @@
   [[2000,-1900],[1750,-1100],[1850,-400],[1820,0],[1700,500],[1800,1000]],
   [[-3100,2550],[-2200,2250],[-1300,2150],[-500,2050],[0,2050],[500,2100],[1300,2550]],
   [[-2600,-1900],[-2350,-1100],[-2400,-400],[-2400,0],[-2450,500],[-2650,1200],[-2900,1800]]];
- const GAP513=[[0,-2150,220],[1820,0,220],[0,2050,220],[-2400,0,240]],RH513=170,RW513=230;
+ const GAP513=[[40,-1880,-120,-2480,230],[1500,90,2200,-120,230],[-60,1760,160,2420,230],[-2000,110,-2850,-110,240]] /* v529: passagem = vale largo ao longo da estrada (cápsula), não um ponto */,RH513=170,RW513=230;
  const RSEG513=[];for(const L of RIDGE513)for(let i=1;i<L.length;i++)RSEG513.push([L[i-1][0],L[i-1][1],L[i][0],L[i][1]]);
  const f1=v=>v.toFixed(1);
  const GL513='float sd513(vec2 p,vec2 a,vec2 b){vec2 pa=p-a,ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.,1.);return length(pa-ba*h);}\nfloat ridge513(vec2 p){float d=1e9;'+RSEG513.map(r=>'d=min(d,sd513(p,vec2('+f1(r[0])+','+f1(r[1])+'),vec2('+f1(r[2])+','+f1(r[3])+')));').join('')+
   'float t=d/'+f1(RW513)+';if(t>=1.)return 0.;float f=1.-smoothstep(.35,1.,t);float n=.72+.28*sin(p.x*.004+sin(p.y*.003)*2.)*sin(p.y*.0047+p.x*.001);float cr=1.-abs(sin(p.x*.013+sin(p.y*.009)*1.7)*sin(p.y*.012-p.x*.005));float h='+f1(RH513)+'*f*n*(.8+.2*cr*cr);'+
-  GAP513.map(g=>'h*=smoothstep('+f1(g[2]*.36)+','+f1(g[2])+',length(p-vec2('+f1(g[0])+','+f1(g[1])+')));').join('')+'return h;}\n';const SEAX=-4100,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
+  GAP513.map(g=>'h*=smoothstep('+f1(g[4]*.36)+','+f1(g[4])+',sd513(p,vec2('+f1(g[0])+','+f1(g[1])+'),vec2('+f1(g[2])+','+f1(g[3])+')));').join('')+'return h;}\n';const SEAX=-4100,SEAY=-.9; /* v439: costa do mar (x) e nível do mar (y absoluto) */
  const GL=`uniform float uTerOn;uniform float uTerHeight245;uniform vec2 uTerAnchor245;uniform float uTerBatch245;uniform float uTerAbsolute245;attribute vec2 terrainAnchor245;uniform vec4 uTerD[16];uniform vec4 uTerR[24];uniform vec4 uMt383;uniform vec4 uTF444[48];uniform float uTFN444;uniform vec4 uOW460;uniform vec4 uOWB460;
 /* v461 (Ian): relevo do Outro Mundo dentro da Fenda — infinito, sem borda: colinas + cordilheiras em crista; chegada e Cidadela planas. Igual ao TER.owH460 do CPU. */
 float owH460(vec2 p){float s=uOW460.w,A=uOW460.z,M=uOW460.y;
@@ -38,12 +38,13 @@ float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?m
 float terra444(vec2 p,float h){return h;}
 float path444(vec2 p){return 0.;}
 ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH460(p);float m=.62+.38*sin(p.x*.0021+1.)*sin(p.y*.0017+.4);
+ float hl529=15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)*m;
  float h=(15.*sin(p.x*.011+sin(p.y*.0061)*1.7)*sin(p.y*.0093+sin(p.x*.0047)*1.3)+5.*sin(p.x*.031+p.y*.017)*sin(p.y*.027-p.x*.012)+1.2*sin(p.x*.09+p.y*.05))*m+mt383(p)+ice500(p)+ridge513(p);
  float b=floor((p.x-${H0.toFixed(1)})/${P.toFixed(1)}+.5),c=b*${P.toFixed(1)}+${H0.toFixed(1)}+sin(p.y*.0043+b*1.7)*95.+sin(p.y*.011+b)*28.+sin(p.y*.035+b*2.3)*18.+sin(p.y*.079+b*3.1)*5.;
  float rw=5.5*(1.+.22*sin(p.y*.047+b*1.3)+.12*sin(p.y*.113+b*2.7));float rdx=abs(p.x-c);h=mix(h,-2.4,1.-smoothstep(rw,rw+7.,rdx));if(rdx<rw)h-=2.2*(1.-rdx*rdx/(rw*rw));
  float sd=seaD439(p);if(sd>-60.)h=mix(h,seaBed439(p,sd),smoothstep(-60.,30.,sd));float rk439=1.-smoothstep(300.,600.,sd);
- for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);h=mix(h,D.w,1.-smoothstep(D.z,D.z+38.,dd));if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
- for(int i=0;i<24;i++){vec4 R=uTerR[i];h=mix(h,0.,(1.-smoothstep(5.,22.,sd513(p,R.xy,R.zw)))*rk439);}
+ for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);float wd529=1.-smoothstep(D.z,D.z+38.,dd);h=mix(h,D.w,wd529);hl529=mix(hl529,D.w,wd529);if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
+ for(int i=0;i<24;i++){vec4 R=uTerR[i];h=mix(h,hl529,(1.-smoothstep(5.,22.,sd513(p,R.xy,R.zw)))*rk439);}
  float gc510=smoothstep(100.,260.,p.y)*(130.*sin(p.y*.0057120)+52.*sin(p.y*.013369)+18.*sin(p.y*.033069));float gx510=abs(p.x-gc510);float gz510=smoothstep(78.,118.,p.y)*(1.-smoothstep(500.,560.,p.y));float gm510=.3+.7*smoothstep(-.2,.55,sin(p.y*.011+1.));float ga510=smoothstep(8.,23.,gx510);
  h+=gz510*gm510*ga510*(17.+4.*sin(p.y*.045+sign(p.x)*1.3))*(1.+.16*sin(p.y*.21+p.x*.11)+.09*sin(p.y*.47-p.x*.23)+.05*sin(p.y*.97+p.x*.41));
  return h;}
@@ -62,7 +63,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
  const sdc513=(x,z,ax,az,bx,bz)=>{const px=x-ax,pz=z-az,dx=bx-ax,dz=bz-az,l=dx*dx+dz*dz,h=l?Math.min(1,Math.max(0,(px*dx+pz*dz)/l)):0;return Math.hypot(px-dx*h,pz-dz*h)};
  function ridge513(x,z){let d=1e9;for(const r of RSEG513){const v=sdc513(x,z,r[0],r[1],r[2],r[3]);if(v<d)d=v}const t=d/RW513;if(t>=1)return 0;const S=Math.sin,ss=(a,b,v)=>{const q=Math.min(1,Math.max(0,(v-a)/(b-a)));return q*q*(3-2*q)};
   const f=1-ss(.35,1,t),n=.72+.28*S(x*.004+S(z*.003)*2)*S(z*.0047+x*.001),cr=1-Math.abs(S(x*.013+S(z*.009)*1.7)*S(z*.012-x*.005));let h=RH513*f*n*(.8+.2*cr*cr);
-  for(const g of GAP513)h*=ss(g[2]*.36,g[2],Math.hypot(x-g[0],z-g[1]));return h}
+  for(const g of GAP513)h*=ss(g[4]*.36,g[4],sdc513(x,z,g[0],g[1],g[2],g[3]));return h}
  TER.ridge513=ridge513;TER.RIDGE513=RIDGE513;TER.GAP513=GAP513;TER.sd513=sdc513;
  function seaBed439(x,z,d){const S=Math.sin,ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   let b=d<60?mix(1.2,-3,(d+60)/120):d<450?mix(-3,-7,(d-60)/390):mix(-7,-22,Math.min(1,Math.max(0,(d-450)/1200)));
@@ -76,12 +77,13 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
   h+=M*m*(r1*r1*.7+r2*r2*.3);
   return h*ss(6,22,Math.hypot(x-B.x,z-B.y))*ss(26,50,Math.hypot(x-B.z,z-B.w))};
  window.terrH=function(x,z){if(!TER.on.value)return 0;if(TER.OW.value.x>.5)return TER.owH460(x,z);const S=Math.sin,m=.62+.38*S(x*.0021+1)*S(z*.0017+.4);
+  let hl529=15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)*m;
   let h=(15*S(x*.011+S(z*.0061)*1.7)*S(z*.0093+S(x*.0047)*1.3)+5*S(x*.031+z*.017)*S(z*.027-x*.012)+1.2*S(x*.09+z*.05))*m+mt383(x,z)+ice500(x,z)+ridge513(x,z);
   const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)},mix=(a,b,k)=>a+(b-a)*k;
   const b=Math.floor((x-H0)/P+.5),c=b*P+H0+S(z*.0043+b*1.7)*95+S(z*.011+b)*28+S(z*.035+b*2.3)*18+S(z*.079+b*3.1)*5;{const rw=(RW*(1+.22*S(z*.047+b*1.3)+.12*S(z*.113+b*2.7)))/2,rdx=Math.abs(x-c);h=mix(h,-2.4,1-ss(rw,rw+7,rdx));if(rdx<rw)h-=2.2*(1-rdx*rdx/(rw*rw))}
   const sd=seaD439(x,z);if(sd>-60)h=mix(h,seaBed439(x,z,sd),ss(-60,30,sd));const rk439=1-ss(300,600,sd);
-  for(const D of TER.D.value){if(D.z<0)continue;const dd=Math.hypot(x-D.x,z-D.y);h=mix(h,D.w,1-ss(D.z,D.z+38,dd));if(D.w<0){const rr=D.z-3;if(dd<rr)h-=2.5*(1-dd*dd/(rr*rr))}}
-  for(const R of TER.R.value){h=mix(h,0,(1-ss(5,22,sdc513(x,z,R.x,R.y,R.z,R.w)))*rk439)}
+  for(const D of TER.D.value){if(D.z<0)continue;const dd=Math.hypot(x-D.x,z-D.y),wd=1-ss(D.z,D.z+38,dd);h=mix(h,D.w,wd);hl529=mix(hl529,D.w,wd);if(D.w<0){const rr=D.z-3;if(dd<rr)h-=2.5*(1-dd*dd/(rr*rr))}}
+  for(const R of TER.R.value){h=mix(h,hl529,(1-ss(5,22,sdc513(x,z,R.x,R.y,R.z,R.w)))*rk439)}
   {/* v520: desfiladeiro do Marco Zero, segue a estrada sinuosa (mundo513.js) e abre/fecha; igual ao GLSL */const gc=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069)),gx=Math.abs(x-gc),gz=ss(78,118,z)*(1-ss(500,560,z)),gm=.3+.7*ss(-.2,.55,S(z*.011+1)),ga=ss(8,23,gx);h+=gz*gm*ga*(17+4*S(z*.045+Math.sign(x)*1.3))*(1+.16*S(z*.21+x*.11)+.09*S(z*.47-x*.23)+.05*S(z*.97+x*.41))}
   return terra444cpu(x,z,h)};
 
@@ -156,8 +158,10 @@ W245=instanceMatrix*W245;
 #endif
 W245=modelMatrix*W245;gl_Position+=projectionMatrix*viewMatrix*vec4(0.,terrainLift245(W245.xyz),0.,0.);}
 `+v.slice(i)}
-  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));float th446=terrH245(pw444.xz),sm446=step(-60.,seaD439(pw444.xz));sea446=sm446*(clamp(-.9-th446,0.,1.)+clamp((-.9-th446)*.04,0.,1.));}\n'+v.slice(k);v='varying float sea446;\n'+v} /* v444: trilha e calcamento usam o visual de estrada */
+  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));{float e529=2.,gx529=terrH245(pw444.xz+vec2(e529,0.))-terrH245(pw444.xz-vec2(e529,0.)),gz529=terrH245(pw444.xz+vec2(0.,e529))-terrH245(pw444.xz-vec2(0.,e529));road128*=1.-smoothstep(.35,.75,length(vec2(gx529,gz529))/(2.*e529));}float th446=terrH245(pw444.xz),sm446=step(-60.,seaD439(pw444.xz));sea446=sm446*(clamp(-.9-th446,0.,1.)+clamp((-.9-th446)*.04,0.,1.));}\n'+v.slice(k);v='varying float sea446;\n'+v} /* v444: trilha e calcamento usam o visual de estrada */
   sh.vertexShader=(ground?'#define TER_GROUND245\n':'')+GL+lift+v;
+  /* v529 (Ian): o relevo aparece longe (serras no horizonte, como Skyrim): no chão a neblina pesa bem menos */
+  if(ground&&sh.fragmentShader.includes('#include <fog_fragment>'))sh.fragmentShader=sh.fragmentShader.replace('#include <fog_fragment>','#ifdef USE_FOG\n#ifdef FOG_EXP2\nfloat ff529=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth*.02);\n#else\nfloat ff529=smoothstep(fogNear,fogFar*3.,fogDepth);\n#endif\ngl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ff529);\n#endif');
  };
  const DEF=function(sh){add.call(this,sh)};DEF.toString=()=>'terrain252';
  Object.defineProperty(T.Material.prototype,'onBeforeCompile',{configurable:true,get(){return this._obc245||DEF},set(f){if(!f||f===DEF){this._obc245=null;return}if(f._w245){this._obc245=f;return}const w=function(sh,r){f.call(this,sh,r);add.call(this,sh)};w._w245=1;w.inner=f;w.toString=()=>f.toString()+'terrain252';this._obc245=w}});

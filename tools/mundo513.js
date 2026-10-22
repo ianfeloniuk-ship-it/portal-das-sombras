@@ -59,5 +59,11 @@
   const sd=(x,z,ax,az,bx,bz)=>{const px=x-ax,pz=z-az,dx=bx-ax,dz=bz-az,l=dx*dx+dz*dz,h=l?Math.min(1,Math.max(0,(px*dx+pz*dz)/l)):0;return Math.hypot(px-dx*h,pz-dz*h)};
   onRoad=function(S,x,z,w=4.5){for(const s of S){if(Math.abs(x-s[0])>60+w&&Math.abs(x-s[2])>60+w)continue;if(sd(x,z,s[0],s[1],s[2],s[3])<w)return true}return false};
 
-  window.Mundo513={TOWN,ROUTES,segs,sd};
+  /* v529: planta, flor e arbusto não nascem em parede/encosta íngreme */
+  const PLANT=/plant|flower|bush|grass|mushroom|fern|shrub|flor|arbust|cogu|erva|frut/i;
+  /* mede com o relevo ligado (o cenário às vezes é montado antes de ligar, e aí terrH dá 0) */
+  const steep=(x,z,lim=.8)=>{try{if(!window.TER245)return false;const o=TER245.on.value;TER245.on.value=1;const s=Math.hypot(terrH(x+1.5,z)-terrH(x-1.5,z),terrH(x,z+1.5)-terrH(x,z-1.5))/3;TER245.on.value=o;return s>lim}catch(_){return false}};
+  if(typeof EH==='function'){const eh0=EH;EH=function(b,key,x,y,z){if(PLANT.test(key||'')&&steep(x,z))return 0;return eh0.apply(this,arguments)}}
+  if(typeof EW==='function'){const ew0=EW;EW=function(b,key,x,y,z){if(PLANT.test(key||'')&&steep(x,z))return 0;return ew0.apply(this,arguments)}}
+  window.Mundo513={TOWN,ROUTES,segs,sd,steep};
 })();

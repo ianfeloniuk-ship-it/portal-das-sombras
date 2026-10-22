@@ -69,7 +69,8 @@
         label(c.name.toUpperCase(),X,Z+20,'700 14px "Russo One",sans-serif','#ffe6a8')}
       else{ctx.fillStyle=fall?'rgba(255,45,85,.55)':'rgba(255,179,71,.65)';ctx.strokeStyle=fall?'#ff4d6a':'#3a2406';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(X,Z,4,0,7);ctx.fill();ctx.stroke();
         label(c.name,X,Z+11,'600 10px "Chakra Petch",sans-serif','#fff1d4')}}
-    for(const g of gates){if(g.dead)continue;const col=g.secret?'#ffd070':g.red?'#ff2030':RANKS[g.rank].c;ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(tx(g.x),tz(g.z),5,0,7);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke()}
+    {/* v529: portais próximos viram um ícone só com o número (antes empilhavam e tampavam os nomes) */const gs=[];for(const g of gates){if(g.dead)continue;const X=tx(g.x),Z=tz(g.z),q=gs.find(o=>Math.hypot(o.X-X,o.Z-Z)<12);if(q){q.n++;if(g.secret||g.red||g.rank>q.g.rank)q.g=g}else gs.push({X,Z,g,n:1})}
+     for(const o of gs){const g=o.g,col=g.secret?'#ffd070':g.red?'#ff2030':RANKS[g.rank].c;ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(o.X,o.Z,5,0,7);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();if(o.n>1){ctx.font='700 9px "Chakra Petch",sans-serif';ctx.fillStyle='#fff';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(o.n,o.X+5,o.Z-4);ctx.fillText(o.n,o.X+5,o.Z-4)}}}
     for(const e of enemies)if(!e.dead&&(e.legend||e.world)){ctx.fillStyle=e.legend?'#ffd54f':'#ff5a1e';ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tx(e.x),tz(e.z),4,0,7);ctx.fill();ctx.stroke()}
     if(run.tmap){ctx.strokeStyle='#ffd54f';ctx.lineWidth=3;const X=tx(run.tmap.x),Z=tz(run.tmap.z);ctx.beginPath();ctx.moveTo(X-6,Z-6);ctx.lineTo(X+6,Z+6);ctx.moveTo(X+6,Z-6);ctx.lineTo(X-6,Z+6);ctx.stroke()}
     try{if(window.Civic343)Civic343.map(ctx,tx,tz,false)}catch(_){}

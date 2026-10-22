@@ -1,3 +1,12 @@
+## v533 (21/10/2026) — Revisão do relevo: serras visíveis de longe, passagens largas, paredes limpas, portais espaçados
+- Pedido de Ian: análise completa do relevo e do mapa; corrigir os 5 problemas mais graves.
+- Vista longe: `tools/terrain245.js` deixa a neblina do chão bem mais fraca (fator .02 no FOG_EXP2, só no chão), e `tools/capitais504.js` põe o plano de corte da câmera em 1.300 m em todo o mundo aberto (antes 260 m, ou 950 m só perto de Capital). As serras e o chão distante (1,1 km) aparecem no horizonte. Custo medido: 8,8 → 9,3 ms por quadro.
+- Passagens: as passagens das 4 serras viraram cápsulas ao longo da estrada (vale largo, não um corredor). A estrada achata para as colinas grandes (`hl529`) e não mais para y = 0, então não cava vala nos morros. Também vale perto da cidade (mistura com a altura do disco).
+- Paredes: a cor de estrada desliga em encosta (vértice do chão); a textura vista de cima (`biome-materials132`) não estica mais em parede (antes virava mancha marrom); a rocha de encosta (`environment128`) ganhou blocos menores e menos faixas (antes parecia curva de nível); sem grama (`grass446`) nem planta/flor/arbusto (`mundo513`, EH/EW) em encosta íngreme. A inclinação é medida com o relevo ligado (`Mundo513.steep`), porque o cenário às vezes é montado antes de o relevo ligar.
+- Portais: nascem a pelo menos 90 m um do outro (antes 30 m, em montes de 6 a 11). No mapa-múndi, portais próximos viram um ícone só com o número.
+- Teste: navegador local (cópia própria `%TEMP%\prim-diretor`, porta 8784), prints da passagem norte (vale aberto com montanhas ao fundo), leste, desfiladeiro do marco zero (paredes sem grama) e mapa com portais agrupados. Sem erro novo.
+- Pendente (da análise): facetas grandes no relevo das serras, neve no meio do mapa (falta clima por região), tenda de clã em pirâmide (`living372`), vila nível 0 que parece sumida, triângulos pretos no chão, legenda do mapa tampando "Ardent".
+
 ## v531 (21/10/2026) — Arca no chão plano, guardiões que não fogem, mais falas
 - Pedido de Ian: «o baú tá voando, não tem monstros pra lutar, tudo tem que ser arrumado, tem que ter mais fala».
 - `tools/quests480.js`: a arca escolhe o chão mais plano num raio de 18 m do objetivo (o ponto do objetivo se move junto, minimapa inclui); guardiões e chefe que passam de 16 m do objetivo voltam para perto (os Cogus fugiam e sumiam, dando «N restantes» sem ninguém à vista).

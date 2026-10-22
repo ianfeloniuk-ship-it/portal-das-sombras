@@ -321,7 +321,7 @@
     try {
       if (typeof camera === 'undefined' || !camera || typeof player === 'undefined' || !player) return;
       if (!far0) far0 = camera.far;
-      const want = L.mode === 'world' && caps().some(c => near(c, player, 900)) ? 950 : far0;
+      const want = L.mode === 'world' ? 1300 : far0; /* v529: o chão distante (1,1 km) e as serras aparecem em todo o mapa, não só perto de Capital */
       if (camera.far !== want) { camera.far = want; camera.updateProjectionMatrix(); }
     } catch (_) {}
   }, 400);
