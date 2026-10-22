@@ -12,7 +12,7 @@ API.handles=sk=>!!(API.on&&sk&&((sk.t==='kit111'&&supported.has(sk.skillId))||!!
 API.basic=ci=>API.on&&([0,1,2].includes(ci)||API.providers.some(p=>p.basic(ci)));
 API.projectile=p=>API.on&&!!p?.fx487;
 API.legacy=function(fn,sk=activeSkill){const prev=API.legacySkill;API.legacySkill=sk;API.legacyDepth++;try{return fn()}finally{API.legacyDepth--;API.legacySkill=prev}};
-API.bindLegacy=fn=>{if(!API.legacyDepth)return fn;const sk=API.legacySkill;return function(){const a=arguments,t=this;return API.legacy(()=>fn.apply(t,a),sk)}};
+API.bindLegacy=fn=>{if(!API.legacyDepth)return fn;const sk=API.legacySkill;return function(){const a=arguments,t=this;return API.on?API.legacy(()=>fn.apply(t,a),sk):fn.apply(t,a)}};
 const legacyRoots504=new Set();
 function pruneLegacy504(mask=false){for(const o of legacyRoots504){if(!o.parent||(o.layers.mask>>>0)!==0x80000000){legacyRoots504.delete(o);continue}if(mask)o.traverse(c=>c.layers.set(31))}}
 API.legacyCount504=()=>legacyRoots504.size;
@@ -335,6 +335,7 @@ kitRun111=function(sk){if(!API.handles(sk))return originalKit.apply(this,argumen
 API.replacesHit=o=>{
  if(!API.on||!o)return false;
  if(o.summonVfx487)return true;
+ const summon=(o.skillVfx487||o.fx487?.sk);if(summon?.summonVfx510&&API.handles(summon))return true;
  if(!o.fromPlayer||o.pet||o.passive||o.dot||o.tick)return false;
  if(o.skillHit)return API.handles(activeSkill||o.skillVfx487||o.fx487?.sk);
  const ci=o.basicClass??o.basicVfx487??o.fx487?.ci??profile.cls;

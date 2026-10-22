@@ -5,16 +5,16 @@ const point=(p,y=0)=>new T.Vector3(p.x,X.ground(p.x,p.z)+y,p.z),world=p=>new T.V
 let activeWolf=null,hidden=[];
 function restore(){for(const [root,visible]of hidden)root.visible=visible;hidden=[]}
 function crystalWolf(a){if(wolves.has(a))return wolves.get(a);if(G.live>=(GFX267.lite?490:890))return null;const c=X.context(6,null,a);let w;
- X.inContext(c,()=>{const g=new T.Group(),mat=X.crystalMat('arcane');g.name='LoboCristal497';g.position.copy(point(a));
-  const body=new T.Mesh(new T.SphereGeometry(.42,24,16),mat);body.scale.set(1.5,.75,.75);body.position.y=.6;g.add(body);
-  const head=new T.Mesh(new T.SphereGeometry(.26,20,14),mat);head.position.set(.62,.85,0);head.scale.set(1.3,.85,.85);g.add(head);
-  for(const z of [-.1,.1]){const ear=new T.Mesh(X.GEOS[1],mat);ear.scale.set(.35,.35,.35);ear.position.set(.58,1.02,z);g.add(ear)}
-  const tail=new T.Mesh(X.GEOS[4],mat);tail.scale.set(.3,.8,.3);tail.position.set(-.6,.75,0);tail.rotation.z=1.1;g.add(tail);
-  const legs=[];for(const [x,z]of [[.4,-.18],[.4,.18],[-.35,-.18],[-.35,.18]]){const joint=new T.Group();joint.position.set(x,.5,z);const leg=new T.Mesh(X.GEOS[2],mat);leg.scale.set(.22,.45,.22);leg.position.y=-.38;joint.add(leg);g.add(joint);legs.push(joint)}
-  const glow=X.orb(new T.Vector3(),.9,rs.col,{noise:1});g.add(glow);glow.position.y=.7;X.add(g);w={a,g,body,head,tail,legs,mat,glow,last:{x:a.x,z:a.z},phase:0,death:0};wolves.set(a,w);
+ X.inContext(c,()=>{const g=new T.Group(),mat=X.crystalMat('arcane');g.name='LoboCristal497';g.position.copy(point(a));const visual=new T.Group();g.add(visual);
+  const body=new T.Mesh(new T.SphereGeometry(.42,24,16),mat);body.scale.set(1.5,.75,.75);body.position.y=.6;visual.add(body);
+  const head=new T.Mesh(new T.SphereGeometry(.26,20,14),mat);head.position.set(.62,.85,0);head.scale.set(1.3,.85,.85);visual.add(head);
+  for(const z of [-.1,.1]){const ear=new T.Mesh(X.GEOS[1],mat);ear.scale.set(.35,.35,.35);ear.position.set(.58,1.02,z);visual.add(ear)}
+  const tail=new T.Mesh(X.GEOS[4],mat);tail.scale.set(.3,.8,.3);tail.position.set(-.6,.75,0);tail.rotation.z=1.1;visual.add(tail);
+  const legs=[];for(const [x,z]of [[.4,-.18],[.4,.18],[-.35,-.18],[-.35,.18]]){const joint=new T.Group();joint.position.set(x,.5,z);const leg=new T.Mesh(X.GEOS[2],mat);leg.scale.set(.22,.45,.22);leg.position.y=-.38;joint.add(leg);visual.add(joint);legs.push(joint)}
+  const glow=X.orb(new T.Vector3(),.9,rs.col,{noise:1});visual.add(glow);glow.position.y=.7;X.add(g);w={a,g,visual,body,head,tail,legs,mat,glow,last:{x:a.x,z:a.z},phase:0,death:0};wolves.set(a,w);
   X.spawn(g,(o,dt,t)=>{if(a.dead||!allies.includes(a)){w.state='death';w.death+=dt;o.visible=true;mat.uniforms.uFade.value=Math.max(0,1-w.death/.45);mat.uniforms.uMelt.value=Math.min(1,w.death/.45);glow.material.uniforms.uFade.value=mat.uniforms.uFade.value;o.rotation.z=Math.min(1,w.death/.45)*.65;if(w.death>=.45){wolves.delete(a);return false}return true}
    const distance=Math.hypot(a.x-w.last.x,a.z-w.last.z),speed=dt>0?distance/dt:0;w.last={x:a.x,z:a.z};w.phase+=distance*5.2;const moving=Math.min(1,speed/3),attack=a.act?Math.sin(Math.min(1,a.act.t/.3)*Math.PI):0,born=births.get(a),fade=born?Math.min(1,Math.max(0,(time-born.at)/.55)):1;
-   w.state=a.flash>0?'hit':a.act?'attack':speed>.1?'run':'idle';o.visible=a.m.root.visible;o.position.copy(point(a));o.position.y+=moving*.025*Math.sin(w.phase*2);o.rotation.set(0,(a.face||0)-Math.PI/2,0);o.scale.setScalar(a.act?1:.35+.65*fade);
+   w.state=a.flash>0?'hit':a.act?'attack':speed>.1?'run':'idle';o.visible=a.m.root.visible;o.position.copy(point(a));o.position.y+=moving*.025*Math.sin(w.phase*2);o.rotation.set(0,(a.face||0)-Math.PI/2,0);const pack=allies.filter(b=>spirit(b)&&!b.dead&&Math.hypot(a.x-b.x,a.z-b.z)<.45),slot=pack.indexOf(a),offset=new T.Vector3();if(pack.length>1){const angle=slot*Math.PI*2/pack.length;offset.set(Math.sin(angle)*.55,0,Math.cos(angle)*.55).applyQuaternion(o.quaternion.clone().invert())}visual.position.lerp(offset,1-Math.exp(-dt*10));o.scale.setScalar(a.act?1:.35+.65*fade);
    mat.uniforms.uTime.value=time;mat.uniforms.uFade.value=a.act?1:fade;mat.uniforms.uFlash.value=Math.min(.8,Math.max(0,a.flash||0)*5);mat.uniforms.uMelt.value=0;
    body.scale.y=.75*(1+.025*Math.sin(time*3));head.position.x=.62+attack*.12;head.position.y=.85-attack*.05;head.rotation.z=-attack*.2;tail.rotation.z=1.1+.12*Math.sin(time*4+w.phase);
    for(let i=0;i<4;i++){const target=moving*.65*Math.sin(w.phase+(i===0||i===3?0:Math.PI));legs[i].rotation.z+=(target-legs[i].rotation.z)*(1-Math.exp(-dt*14))}

@@ -13,7 +13,7 @@ function update405(dt){for(let i=live.length-1;i>=0;i--){const L=live[i];if(!ctx
 
 /* o jogo já ergue sozinho tudo que está no mundo até o relevo (como fxRing); aqui a altura é relativa ao chão */
 function H(x,z){return 0}
-function add(o,dur,fn){if(ctx)ctx.prepareObject?.(o);scene405.add(o);live.push({o,t:0,dur,fn})}
+function add(o,dur,fn){if(ctx)ctx.prepareObject?.(o);if(!ctx&&fn&&window.Golpes487)fn=Golpes487.bindLegacy(fn);scene405.add(o);live.push({o,t:0,dur,fn})}
 function loop(){requestAnimationFrame(loop);update405(1/60)}
 if(!ctx)loop();
 /* v312: energia com shader (fluxo + borda) no lugar do brilho chapado */

@@ -19,7 +19,7 @@ Regras: ler primeva-golpes-vfx e primeva-codigo; usar as peças/código da demo;
 - Invocações reais não são VFX descartáveis: restaurar a camada visível do modelo que nasceu durante a execução legada. Conferido golem com 25 malhas visíveis e escudos sumindo ao perder proteção. Na gravação, limpar aliados entre casos; manter invocações do caso anterior contamina a prévia.
 
 ## Ordem pendente
-1. Demais habilidades das classes normais, Arqueiro/Paladino/Invocador e as quatro marciais.
+1. Demais habilidades das quatro classes marciais: Monge, Lâmina Arcana, Lanceiro e Berserker.
 2. Básicos e todas as habilidades das classes raras.
 
 ## Identidade dos vídeos / ids internos
@@ -41,3 +41,11 @@ O gravador precisa atribuir ADT antes de update; caso contrário os clipes ficam
 - Dano, alcance, recarga, deslocamento, marcas, recursos e defesas mantidos. Impactos legados e filhos adicionados depois ficam invisíveis; os objetos reais do mundo, inclusive cadáver e marcador de saque, continuam visíveis. Impactos dos projéteis migrados usam a apresentação nova.
 - Entrega e evidências: https://drive.google.com/drive/folders/1Z0-TGo6xs_yj8kfRH9QXOMU09kfvLWdL
 - As 54 gravações foram feitas sobre v503; a integração preserva v504–v508 das capitais, encontros, horizonte e remoção da sede. Controles repetidos sobre a base integrada; desempenho por software é amostra controlada, sem garantia de FPS no aparelho de Ian.
+
+## Lote v537
+- Outras 27 habilidades de Arqueiro, Paladino e Invocador. Com as três referências anteriores, todas as 30 dessas classes estão cobertas. Dez classes normais completas (100 ativas), 14 básicos e as referências das quatro marciais; demais ativas marciais e raras continuam pendentes.
+- Oito movimentos de arco, carga, preparo de armadilha, percepção, bênção, comando, lança e passo; flechas reais, zonas reais e proteção dos aliados. Matilha reutiliza os lobos cristalinos e separa somente os desenhos quando se sobrepõem; raiz e AI permanecem no ponto real. Sentinela facetada com respiração, giro e recuo do tiro real.
+- O teste manual precisa executar rareUpdate103(dt) antes de update(dt), como o loop real. update sozinho não processa later181 nem kitUpdate111: uma prévia assim perde rajadas, armadilhas e pulsos de cura. Comparação em limites de segundo deve amostrar depois do pulso para não confundir arredondamento com mudança mecânica.
+- Fonte, testes e prévias: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
+
+- Callback de animação em VFX302.add também precisa de bindLegacy: esconder só o objeto inicial não esconde um impacto novo criado pelo callback. O modo de prévia ctx fica independente; ao desligar o visual novo, callbacks voltam ao desenho antigo sem alterar a mecânica.

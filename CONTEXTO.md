@@ -2949,3 +2949,8 @@ Continuam pendentes as outras habilidades de Arqueiro, Paladino, Invocador, Mong
   4. Nós de Encontros Aleatórios (World Encounter Nodes): 80 a 120 pontos invisíveis nas 6 Rotas Reais sorteando eventos por nível/semente com carroça e a pé (encontros502.js).
   5. Efeito Blackreach: Abóbada Primordial (Cap. 27 do Manuscrito) como subsolo colossal de coral branco sob o continente.
   6. Quadro Técnico dos 5 Especialistas (Arte, Geometria, Shaders/PBR, Biomas e Performance) consolidado como diretriz de execução obrigatória.
+
+
+## v537 — habilidades de Arqueiro, Paladino e Invocador — 21/10/2026
+Mais 27 ativas com peças da demo aprovada, movimento próprio e efeito ligado a alvo/projétil/aliado/zona reais. Completadas as 30 dessas classes e as 100 ativas das dez classes já migradas por inteiro. A Matilha respeita as vagas reais e só separa desenhos sobrepostos; Sentinela preserva AI imóvel e tiros, com forma cristalina animada. Carga da Flecha Perfurante preservada nos três níveis. Dano, cura, recursos, alcance, recargas e colisão mantidos nos controles normal/leve. Autorização de publicação automática já dada por Ian. Entrega: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
+Pendentes: demais habilidades de Monge, Lâmina Arcana, Lanceiro e Berserker; básicos e habilidades das classes raras.
