@@ -194,16 +194,18 @@ function camUpdate(dt){
   const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding());
   const isFP=!!(pcCam.firstPerson&&!mounted&&!P.dead);
   if(isFP){
-    /* v550 (Ian): Primeira pessoa igual Skyrim — olhos a 1.86 m, avanço frontal 0.10 m, pitch amplo. */
-    const eyeY=terrH(P.x,P.z)+(P.jy||0)+1.86+(window.FP550?.bobY||0);
-    const [fx,fz]=camRot(0,-.10);
+    /* 1ª Pessoa Skyrim: Câmera na linha dos olhos (1.68m, alinhada à 3ª pessoa), corpo de 3ª pessoa oculto para não clipar. */
+    if(P.m?.root&&P.m.root.visible)P.m.root.visible=false;
+    const eyeY=terrH(P.x,P.z)+(P.jy||0)+1.68+(window.FP550?.bobY||0);
+    const [fx,fz]=camRot(0,-.08);
     camera.position.set(P.x+fx,eyeY,P.z+fz);
     camera.position.x+=rnd(-s,s);camera.position.y+=rnd(-s,s);
     const [vx,vz]=camRot(0,-Math.cos(pcCam.pitch));
     camera.lookAt(camera.position.clone().add(new THREE.Vector3(vx,-Math.sin(pcCam.pitch),vz)));
     if(!P.dead)P.face=Math.atan2(vx,vz);
-    if(P.m?.bones?.head)P.m.bones.head.scale.set(.001,.001,.001);
   }else{
+    /* 3ª Pessoa Witcher/Skyrim: Modelo 100% visível, câmera over-the-shoulder a 1.60m/2.25m, altura inalterada. */
+    if(P.m?.root&&!P.m.root.visible)P.m.root.visible=true;
     if(P.m?.bones?.head&&P.m.bones.head.scale.x<.1)P.m.bones.head.scale.set(.88,.88,.88);
     const pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.60),cam.z);
     /* v377 (Ian): câmera estilo The Witcher 3 — perto, sobre o ombro direito, personagem um pouco à esquerda. */

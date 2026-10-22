@@ -136,6 +136,9 @@
   /* ---------- Viewmodel 3D em Three.js (Calibrado para FOV 48) ---------- */
   function buildViewmodel(){
     if(typeof THREE === 'undefined' || typeof camera === 'undefined' || !camera) return null;
+    if(global.scene && camera.parent !== global.scene){
+      global.scene.add(camera);
+    }
     const T = THREE;
 
     const group = new T.Group();
@@ -230,6 +233,11 @@
     magHolder.position.set(0, 0.02, -0.03);
     armL.add(magHolder);
 
+    // Luz de preenchimento própria do viewmodel para iluminação nítida das armas e mãos
+    const fpLight = new T.PointLight(0xffeedd, 0.55, 3.0);
+    fpLight.position.set(0, 0.12, -0.15);
+    group.add(fpLight);
+
     camera.add(group);
     group.visible = false;
 
@@ -242,6 +250,26 @@
     FP.materials = { matIron, matLeather, matSteel, matWood, matBrass, matCrystal };
 
     return group;
+  }
+
+  /* ---------- Visual das Manoplas e Braços (Reativo ao Equipamento) ---------- */
+  function updateArmVisual(){
+    if(!FP.materials) return;
+    const b = global.run?.equip?.b;
+    const name = (b?.name || '').toLowerCase();
+    if(name.includes('mithril')){
+      FP.materials.matIron.color.setHex(0x9ec5e8);
+      FP.materials.matLeather.color.setHex(0x1e293b);
+    } else if(name.includes('estrela') || name.includes('primeva')){
+      FP.materials.matIron.color.setHex(0xeab308);
+      FP.materials.matLeather.color.setHex(0x451a03);
+    } else if(name.includes('aço') || name.includes('aco') || name.includes('ferro')){
+      FP.materials.matIron.color.setHex(0x525866);
+      FP.materials.matLeather.color.setHex(0x27272a);
+    } else {
+      FP.materials.matIron.color.setHex(0x4a4947);
+      FP.materials.matLeather.color.setHex(0x3a2518);
+    }
   }
 
   /* ---------- Visual das Armas 3D em Primeiro Plano (Skyrim Style) ---------- */
@@ -418,15 +446,29 @@
     const ch = document.getElementById('skyrim-crosshair-550');
     if(ch) ch.style.display = FP.active ? 'flex' : 'none';
 
+    // Garante que a câmera seja nó da cena para que o viewmodel 3D renderize
+    if(global.scene && global.camera && global.camera.parent !== global.scene){
+      global.scene.add(global.camera);
+    }
+
+    if(!FP.viewmodel && FP.active) buildViewmodel();
     if(FP.viewmodel) FP.viewmodel.visible = FP.active;
 
     const P = global.player;
-    if(P && P.m && P.m.bones && P.m.bones.head){
-      if(FP.active){
-        P.m.bones.head.scale.set(0.001, 0.001, 0.001);
-      } else {
+    if(P && P.m){
+      // 1ª Pessoa: modelo de 3ª pessoa 100% oculto (sem clipar no viewport e sem deformação)
+      // 3ª Pessoa: modelo de 3ª pessoa 100% visível
+      if(P.m.root) P.m.root.visible = !FP.active;
+
+      // Preserva integridade anatômica: restaura escala do osso da cabeça se alterada
+      if(P.m.bones && P.m.bones.head && P.m.bones.head.scale.x < 0.1){
         P.m.bones.head.scale.set(0.88, 0.88, 0.88);
       }
+    }
+
+    // Ao sair para 3ª pessoa, mantém pitch em limites confortáveis
+    if(!FP.active && global.pcCam){
+      global.pcCam.pitch = Math.max(-0.85, Math.min(1.10, global.pcCam.pitch));
     }
 
     if(FP.active !== was){
@@ -495,6 +537,7 @@
     if(!FP.viewmodel) buildViewmodel();
     if(FP.viewmodel && !FP.viewmodel.visible) FP.viewmodel.visible = true;
 
+    updateArmVisual();
     updateWeaponVisual();
     updateShieldVisual();
 
