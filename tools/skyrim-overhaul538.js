@@ -468,7 +468,9 @@
     return false;
   }
 
-  API.checkNpcHitFromAttack = function () {
+  /* v545: ataque a NPC, recompensa e guardas ficam em tools/crime545.js; esta versão nunca rodava (usava window.npcs). */
+  API.checkNpcHitFromAttack = function () { return; };
+  API.checkNpcHitFromAttack538 = function () {
     const P = global.player;
     const list = global.npcs || [];
     if (!P || P.dead || !list.length) return;

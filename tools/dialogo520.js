@@ -545,7 +545,20 @@
   function buildGuard(n) {
     const m = tmem(n), f = m.flags, nome = n.short || n.name;
     const multa = () => profile && profile.multa523;
+    /* v545: recompensa por crime nesta cidade (tools/crime545.js) */
+    const cr = () => (window.Crime545 && n.home ? Crime545.bounty(n.home) : 0), cn = n.home && n.home.name || 'esta cidade';
     const N = {};
+    if (cr()) {
+      N.raiz = {
+        t: 'Pare, criminoso! Você tem ' + cr() + ' de recompensa em ' + cn + '. Pague agora ou enfrente a guarda.',
+        o: [
+          { l: 'Pagar a recompensa (' + cr() + ' de ouro)', if: () => gold() >= cr(), fn: () => { Crime545.pay(n.home); say('<b>' + nome + ':</b> "Pago. Agora ande na linha."'); return 'fim'; } },
+          { l: 'Não tenho o ouro', if: () => gold() < cr(), fn: () => { say('<b>' + nome + ':</b> "Então volte com ' + cr() + ' de ouro. Até lá, estou de olho em você."'); return 'fim'; } },
+          { l: 'Resistir à prisão', fn: () => { Crime545.resist(n.home); return 'fim'; } }
+        ]
+      };
+      return N;
+    }
     N.raiz = {
       t: multa() ? 'Alto lá. Você me deve uma multa por desordem.' : m.bond >= 3 ? 'Cidadão de bem! Ando de olho nos ladrões, pode andar tranquilo.' : 'Mantenha a ordem e não teremos problema.',
       o: [
