@@ -1,3 +1,9 @@
+## v538 (22/10/2026) — Mercado, banco e coleta voltam ao visual aprovado
+- Correção de Ian: «eu marquei errado, era só o HUD que não ficou com minha cara» / «o mercado, o banco e a coleta que tu tinha feito estavam perfeitos». A v536 tinha trocado o visual aprovado por outro (bordas da Fenda, cantos chanfrados).
+- `tools/telas535.js`: só CSS, luzes e escolha do modelo. Volta ao visual da proposta aprovada (https://claude.ai/artifact/KayJAsWizQBUJCcec3Ycga): faixa preta translúcida sobre o jogo desfocado, linha branca fina, letra fina em maiúsculas (Jost), seleção clara, preço e ouro em dourado, cartão do item centralizado embaixo do 3D. Núcleos e cristais do Mercado usam o modelo do `Loot513` na cor do rank. Celular em coluna (3D, cartão, lista). Regras, botões e modelos próprios de Couro/Presa seguem iguais.
+- Teste: Edge headless com o jogo real (Kael, Mercado, Banco com depósito 12.480→12.380, Saque com pegar 3→4, fechar volta ao normal, celular 390 px).
+- Pendente: HUD de exploração (nome do lugar/«Descoberto», barras de vida etc.) — Ian não gostou dessa parte; precisa de proposta nova com a cara dele.
+
 ## v537 — habilidades de Arqueiro, Paladino e Invocador — 21/10/2026
 Mais 27 ativas com peças da demo aprovada, movimento próprio e efeito ligado a alvo/projétil/aliado/zona reais. Completadas as 30 dessas classes e as 100 ativas das dez classes já migradas por inteiro. A Matilha respeita as vagas reais e só separa desenhos sobrepostos; Sentinela preserva AI imóvel e tiros, com forma cristalina animada. Carga da Flecha Perfurante preservada nos três níveis. Dano, cura, recursos, alcance, recargas e colisão mantidos nos controles normal/leve. Autorização de publicação automática já dada por Ian. Entrega: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
 Pendentes: demais habilidades de Monge, Lâmina Arcana, Lanceiro e Berserker; básicos e habilidades das classes raras.
