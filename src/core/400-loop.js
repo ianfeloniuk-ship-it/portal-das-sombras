@@ -142,7 +142,7 @@ function updWorld(dt){updEcon(dt);
   if(L.spawnT<=0){
     const inAto1=window.Intro401?.guided?.()||(profile?.classless&&!Campaign327?.state?.('a1')?.done);
     const lv455=run.level||1;L.spawnT=inAto1?7.5:lv455<=12?3.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;/* v455 (Ian: muito monstro): menos selvagens juntos até o nível 12 */const cap455=inAto1?3:lv455<=5?5:lv455<=12?7:10;
-    const safeBuffer=(nc.c&&nc.c.name==='Aster'&&inAto1&&nc.d<170);
+    const safeBuffer=inAto1&&((nc.c&&nc.c.name==='Aster'&&nc.d<430)||!!window.Fronteira551?.active());
     if(!safeBuffer&&wild<cap455&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
       const rk455=rankOf(),dg455=danger(x,z);/* v455 (Ian: morro rápido): selvagem aleatório nasce no máximo no rank do jogador (25% de chance de rank +1); região mais perigosa segue perigosa pelos portais, elites, chefes e masmorras */const gr=clamp(Math.max(Math.min(dg455,rk455+(Math.random()<.25?1:0)),rk455-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}

@@ -246,7 +246,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/wagon369.js?v=369"></script>
-<script src="tools/terrain245.js?v=535"></script>
+<script src="tools/terrain245.js?v=551"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=499"></script>
@@ -4498,7 +4498,7 @@ function loadChunk(cx,cz){
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
   const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?120:cl>=6?90:60)*CITYK;if(d-gw<m)m=d-gw;const maxWallR=(cl>=8?130:cl>=6?100:70);if((Math.abs(dx)<5.5||Math.abs(dz)<5.5)&&d<maxWallR)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
+  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?120:cl>=6?90:60)*CITYK;if(d-gw<m)m=d-gw;const maxWallR=(cl>=8?130:cl>=6?100:70);if((Math.abs(dx)<5.5||Math.abs(dz)<5.5)&&d<maxWallR)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:!!window.Fronteira551?.clearSite(x,z)||camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -6869,7 +6869,7 @@ function updWorld(dt){updEcon(dt);
   if(L.spawnT<=0){
     const inAto1=window.Intro401?.guided?.()||(profile?.classless&&!Campaign327?.state?.('a1')?.done);
     const lv455=run.level||1;L.spawnT=inAto1?7.5:lv455<=12?3.5:2.5;const wild=enemies.filter(e=>e.wild&&!e.breaker&&!e.dead).length;/* v455 (Ian: muito monstro): menos selvagens juntos até o nível 12 */const cap455=inAto1?3:lv455<=5?5:lv455<=12?7:10;
-    const safeBuffer=(nc.c&&nc.c.name==='Aster'&&inAto1&&nc.d<170);
+    const safeBuffer=inAto1&&((nc.c&&nc.c.name==='Aster'&&nc.d<430)||!!window.Fronteira551?.active());
     if(!safeBuffer&&wild<cap455&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
       const rk455=rankOf(),dg455=danger(x,z);/* v455 (Ian: morro rápido): selvagem aleatório nasce no máximo no rank do jogador (25% de chance de rank +1); região mais perigosa segue perigosa pelos portais, elites, chefes e masmorras */const gr=clamp(Math.max(Math.min(dg455,rk455+(Math.random()<.25?1:0)),rk455-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
       for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
@@ -9610,7 +9610,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=458"></script>
 <script src="tools/npc456.js?v=457"></script>
-<script src="tools/campaign327.js?v=546"></script>
+<script src="tools/campaign327.js?v=551"></script>
 <script src="tools/ecology410.js?v=493"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9620,7 +9620,7 @@ requestAnimationFrame(frame);
 <script src="tools/performance350.js?v=351"></script>
 <script src="tools/boat371.js?v=371"></script><script src="tools/workers350.js?v=371"></script>
 
-<script src="tools/loot513.js?v=515"></script><script src="tools/reclaim372.js?v=515"></script><script src="tools/loot353.js?v=515"></script>
+<script src="tools/loot513.js?v=515"></script><script src="tools/reclaim372.js?v=551"></script><script src="tools/loot353.js?v=515"></script>
 
 <script src="tools/hud356.js?v=356"></script>
 
@@ -9637,7 +9637,7 @@ requestAnimationFrame(frame);
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=546"></script>
+<script src="tools/intro401.js?v=551"></script>
 
 <script src="tools/item-art405.js?v=405"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -9713,6 +9713,7 @@ requestAnimationFrame(frame);
 <script src="tools/crime545.js?v=545"></script>
 <script src="tools/contratos541.js?v=542"></script>
 <script src="tools/fixas545.js?v=546"></script>
+<script src="tools/fronteira551.js?v=551"></script>
 <script src="tools/conversa539.js?v=543"></script>
 <script src="tools/explorar539.js?v=543"></script>
 <script src="tools/anim547.js?v=549"></script>

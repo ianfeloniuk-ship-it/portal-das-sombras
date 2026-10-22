@@ -106,6 +106,6 @@ function claimEnemy(e){if(!e?.m?.root||e.m.root.userData.reclaimed372)return fal
 // A single loot record owns both the corpse and the residue. Never reattach the original body.
 if(!e.corpse353){e.loot353=e.loot353||[];Loot353.create(e)}
 const r=Loot353.records().find(r=>r.id===e.corpse353),a=Loot353.active.get(e.corpse353);if(!r||!a)return false;
-if(!e.isBoss){Loot353.settle(r);saveRun();return true;}r.boss513=true;
+if(!e.isBoss&&!e.isIntroTutorial){Loot353.settle(r);saveRun();return true;}r.boss513=true;if(e.isIntroTutorial){r.introCrystal402=true;a.boss=true;}
 try{const job=start(a,r);if(job){try{sfx('gong');shake(.35)}catch(_){}}return !!job||!!a.waiting402}catch(err){console.warn('Reclaim372.claimEnemy',err);return false}}
 return{start,tick,clear,jobs,apply,claimEnemy,attachCrystal,crystals,pending,cachedHand,poseHand404,handRig404};})();

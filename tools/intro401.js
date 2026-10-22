@@ -20,7 +20,7 @@ API.showQuest=()=>{const q=qui();q.closed=false;q.min=false;qsave()};
 (function menuBtn(){const ref=document.getElementById('bDiary');if(!ref){setTimeout(menuBtn,500);return}if(document.getElementById('bQuest410'))return;const b=document.createElement('button');b.className='mini';b.id='bQuest410';b.textContent='OBJETIVO DO ATO';b.onclick=()=>{const q=qui();if(q.closed||q.min)API.showQuest();else{q.closed=true;qsave()}};ref.after(b)})();
 const overlay=document.createElement('section');overlay.id='dialog401';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Diálogo da história');overlay.innerHTML='<article><h2></h2><p></p><footer><span>F / Enter · avançar</span><button>Continuar</button></footer></article>';document.body.append(overlay);
 function vendor(name){return npcs.filter(n=>!n.gone&&(n.short===name||n.name===name||({guild:'Lyra',wep:'Kael'})[n.shop]===name)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]}
-function edran(){return Campaign327.W.get('a1')?.figs.find(f=>f?.name==='Edran')}
+function edran(){return Campaign327.W.get('a1')?.figs.find(f=>f?.name==='Edran')||window.Fronteira551?.actors.find(f=>f.name==='Edran')}
 API.dialog=(name,lines,done)=>{
  if(API.conversation||API.reclaiming())return;
  const target=name==='Edran'?edran():vendor(name);
@@ -40,6 +40,7 @@ function targetAndText(){
    if(API.reclaiming())return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:'Recolha o cristal deixado pela criatura [F]',target:null};
    if(!s1.fightDone)return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:s1.cartRescued401?'Derrote a criatura da Fenda com os punhos':'Empurre a carroça para salvar os dois [F] ou derrote a criatura primeiro',target:w?.foes.find(e=>!e.dead)};
    return {actTitle:'ATO I · O CHAMADO',step:3,totalSteps:6,text:s1.edranHelp401?'Ajude Edran a empurrar a carroça [F]':'Fale com Edran [F]',target:s1.edranHelp401?Campaign327.target():edran()};}
+  if(s1.s===1&&window.Fronteira551?.active())return Fronteira551.objective();
   if(s1.s===1){const c=nearestCity(player.x,player.z).c;return {actTitle:'ATO I · O CHAMADO',step:4,totalSteps:6,text:'Siga pela estrada até o Portão de Aster',target:GATES341.filter(g=>g.c.name===c.name).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]};}
   if(s1.s===2)return {actTitle:'ATO I · O CHAMADO',step:5,totalSteps:6,text:'Registre sua chegada com Lyra na Ordem da Fenda [F]',target:vendor('Lyra')};
   return {actTitle:'ATO I · O CHAMADO',step:6,totalSteps:6,text:'Faça o escambo da sua primeira arma com Kael para despertar sua Classe [F]',target:vendor('Kael')};

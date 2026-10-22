@@ -267,7 +267,7 @@
       return [s.pos[0] + 8 * i, s.pos[1]];
     }
     const c = nearestCity(player.x, player.z).c, wall = wallOf(c); s.city = c.name;
-    if (mId === 'a1') return [c.x, c.z + wall + 22];
+    if (mId === 'a1') return window.Fronteira551 ? [Fronteira551.cx(334),334] : [c.x,c.z+334];
     if (mId === 'a8') {
       if (s.s === 0) return [c.x - (wall + 28), c.z];
       if (s.s === 1) return [c.x - (wall + 58), c.z - 8];
@@ -403,6 +403,7 @@
     const w = W.get(id); if (!w) return;
     w.disposed498 = true;
     window.Scenes406?.dispose(w);
+    if(id==='a1'&&state(id)?.s===0&&state(id)?.cartRescued401&&window.Fronteira551){ Fronteira551.begin(w.figs); w.figs=[]; }
     for (const g of w.grps) {
       if (g === w.cart && state(id)?.cartRescued401 && w.L === L) {
         /* Convoy follows road towards Aster gate */
@@ -684,7 +685,7 @@
     try {
       const m = ACTS[0], c = nearestCity(player.x, player.z).c, wall = wallOf(c); let P = null;
       // Aster's south gate: the road and wall share the initial camera axis.
-      P = [c.x, c.z + wall + 20];
+      P = window.Fronteira551 ? [Fronteira551.cx(334),334] : [c.x,c.z+334];
       begin(m); const s = state(m.id); s.pos = P.slice(); s.helped401 = false; s.extra = []; s.extraStep = 0; save();
       const px = P[0] + 1.8, pz = P[1] + 3;
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
@@ -857,6 +858,7 @@
       if (sp.t === 'tower' && (profile.towerBest || 0) >= s.base) { advance(m); continue; }
       if (sp.t === 'caps' && capsVisited() >= sp.n) { advance(m); continue; }
       if (sp.t === 'barter') { if (!profile.classless) advance(m, sp.done); continue; }
+      if(m.id==='a1'&&s.s===1&&window.Fronteira551?.active())continue;
       if (sp.t === 'city' && world) { const c = nearestCity(player.x, player.z); if (c.d < entryRadius(c.c) - 3) { s.city = c.c.name; if(m.id==='a1'){s.cityCheckpoint401=true;save();window.Fixas545?.gate1()} advance(m, sp.done); continue; } }
       if (sp.t !== 'go') { clearWorld(m.id); continue; }
       let w = W.get(m.id);
@@ -1021,6 +1023,7 @@
       const it=w?.inters.find(it=>!s.hit.includes(it.idx));if(it)return {x:it.x,z:it.z};
       if(s.pos)return {x:s.pos[0],z:s.pos[1]};
     }
+    if(m.id==='a1'&&s.s===1&&window.Fronteira551?.active())return Fronteira551.objective()?.target;
     if(sp.t==='city')return GATES341.filter(g=>g.c.name===cityName(s)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]||null;
     const shop=sp.t==='barter'?'wep':Object.keys(SHOP_NPC).find(k=>SHOP_NPC[k]===sp.npc);
     return shop?npcs.find(n=>n.shop===shop&&n.home?.name===cityName(s)):null;
