@@ -1,3 +1,6 @@
+## v547 (22/10/2026) — animação anti-boneco rígido
+Pedido de Ian: Viajante, NPCs, mobs e dragões sem cara de boneco rígido. Novo tools/anim547.js roda depois de todo AnimationMixer.update: pé no relevo (IK de 2 ossos com terrH, pelve desce até o pé mais baixo, corpo inclina na ladeira), cauda/pescoço/asas em onda com atraso de fase e inércia no giro, quadril inclina nas curvas. LOD: IK até 24 m, ondas até 45 m; desliga com Anim547.on=false. 140-monstros: troca de animação com mistura (0,22 s) no dracônico, na volta ao parado dos clipes próprios e na corrida. Teste: node (pé na ladeira bate com terrH) e navegador (28 rigs, sem erro novo). Não cobre modelos estáticos sem ossos (balançam inteiros, como antes).
+
 ## v546 (22/10/2026) — Missão fixa #1 «O Céu Rasgado na Estrada Sul» no jogo
 - Pedido de Ian: «uma por uma e publica cada uma que tu criar» — as 300 missões fixas do motor (`RadiantPrimeva.FIXED_300_QUESTS`) entram fiéis ao texto, uma por versão.
 - `tools/fixas545.js` (novo, `window.Fixas545`): guarda as escolhas das missões fixas (`profile.fixas545`) e o que elas mudam no mundo. `LIVE` lista as que já acontecem no jogo.
