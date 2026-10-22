@@ -49,3 +49,5 @@ O gravador precisa atribuir ADT antes de update; caso contrário os clipes ficam
 - Fonte, testes e prévias: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
 
 - Callback de animação em VFX302.add também precisa de bindLegacy: esconder só o objeto inicial não esconde um impacto novo criado pelo callback. O modo de prévia ctx fica independente; ao desligar o visual novo, callbacks voltam ao desenho antigo sem alterar a mecânica.
+
+- Ao integrar v536, EH recebia em Marcos526 um objeto sem add. Substituído por EnvBatch real e a malha resultante ligada ao grupo absoluto da câmara, preservando as peças e posições; evita a exceção assíncrona durante o carregamento do mundo.

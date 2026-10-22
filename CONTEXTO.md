@@ -2954,3 +2954,5 @@ Continuam pendentes as outras habilidades de Arqueiro, Paladino, Invocador, Mong
 ## v537 — habilidades de Arqueiro, Paladino e Invocador — 21/10/2026
 Mais 27 ativas com peças da demo aprovada, movimento próprio e efeito ligado a alvo/projétil/aliado/zona reais. Completadas as 30 dessas classes e as 100 ativas das dez classes já migradas por inteiro. A Matilha respeita as vagas reais e só separa desenhos sobrepostos; Sentinela preserva AI imóvel e tiros, com forma cristalina animada. Carga da Flecha Perfurante preservada nos três níveis. Dano, cura, recursos, alcance, recargas e colisão mantidos nos controles normal/leve. Autorização de publicação automática já dada por Ian. Entrega: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
 Pendentes: demais habilidades de Monge, Lâmina Arcana, Lanceiro e Berserker; básicos e habilidades das classes raras.
+
+A integração v537 preserva v510–v536 de mundo/telas. Corrigida a chamada EH da câmara da estátua: EnvBatch verdadeiro e resultado anexado ao cenário, sem mudar recompensas ou colisões.

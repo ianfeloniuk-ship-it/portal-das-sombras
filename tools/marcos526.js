@@ -135,7 +135,7 @@
 
       // Adiciona peças do env.glb dentro da câmara: velas, tochas e altar
       if (typeof EH === 'function') {
-        const dummyB = { tripo153: [] };
+        const dummyB = new EnvBatch();
         // Altar central esculpido
         EH(dummyB, 'statue_block', sx, sy, sz, HILL_STATUE.ry, 1.4, 0xf0ece1);
         registerCol(sx, sz, 1.2);
@@ -149,6 +149,8 @@
         const chestX = sx + Math.sin(HILL_STATUE.ry + Math.PI) * 2.8;
         const chestZ = sz + Math.cos(HILL_STATUE.ry + Math.PI) * 2.8;
         EH(dummyB, 'chest_gold', chestX, sy, chestZ, HILL_STATUE.ry, 1.2);
+        const interior = dummyB.mesh(ENVMAT);
+        if (interior) { interior.name = 'InteriorEstatua537'; interior.userData.terrainAbsolute245 = true; g.add(interior); }
 
         // Registro de interação (F para vasculhar/abrir)
         const it = {
