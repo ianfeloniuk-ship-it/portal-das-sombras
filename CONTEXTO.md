@@ -1,4 +1,9 @@
-﻿## v553 (22/10/2026) - Hitboxes 3D compostas do dragao
+﻿## v554 (22/10/2026) - NPCs da cidade reagem a ameacas
+- **Pedido de Ian**: Idle dos NPCs (Banco, Forja, Lojas, Guilda) e guardas, HUD nome/vida ao foco/dano, e deteccao de ameacas: guardas/cacadores (Marcos, Kallan) combatem, civis fogem e voltam a rotina. Preserva NPCs essenciais e interacao.
+- `tools/ameaca554.js` (novo, `window.Ameaca554`): vendedores nomeados (Citizens133 = malha sem esqueleto, ficavam parados) ganham respiracao, troca de apoio, olhar em volta e encolhem de medo; continuam no posto. Guardas (role523) e cacadores da cidade sacam a arma, correm ate o monstro agressivo/invasor a menos de 40 m e batem a cada ~1 s com `hurtEnemy` (`guard343`, passa a muralha); o monstro revida e o defensor cai 10 s (nunca morre); fim da ameaca: guardam a arma e voltam a ronda. Moradores/cidadaos fogem a 22 m e retomam a rotina 4 s depois. HUD de nome+vida ao mirar (12 m) ou 4 s apos apanhar. Um unico varrer de inimigos a cada 0,4 s.
+- Teste (navegador): lobo invasor em Aster: Marcos, Ruy, Kallan e Voss em luta, lobo morreu (24 golpes), 3 moradores fugiram e voltaram a trabalhar, armas guardadas, HUD "Selene - BANCO"; varredura ~0,004 ms. Nao testado: hitbox do dragao (outra sessao), som.
+- Limite: vendedores seguem sem esqueleto (Idle e procedural no corpo todo); esqueleto de verdade exige rig no Blender.
+## v553 (22/10/2026) - Hitboxes 3D compostas do dragao
 - **Pedido de Ian**: dano do dragao (inclui Dragao Ancião Errante) pelo corpo real, nao pela projecao no chao.
 - tools/hitbox-dragao551.js: 21 esferas (tronco, pescoco, cabeca, asas, cauda, patas) seguindo o modelo; substitui a capsula unica em Projectiles253.segmentCapsule/intersectRayCapsule quando o alvo e dragao (Lanca de Gelo, flechas, mira). Golpe corpo a corpo basico (380-acoes.js) usa Dragao551.melee em 3D: de baixo, com o dragao a 24 m, nao acerta.
 - Teste (navegador): dragao no ar - cabeca/asa/cauda acertam por cima, tiro rente ao chao e golpe por baixo nao; Lanca de Gelo tira vida; morte ok. Habilidades de area ainda usam distancia no chao (nao alteradas).
