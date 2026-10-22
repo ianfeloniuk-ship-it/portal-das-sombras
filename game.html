@@ -8060,7 +8060,7 @@ function demandKill(e){const d=run.demand;if(!d||!questEnemyEligible262(d,e))ret
 function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){const lost=d.got;d.got=0;/* v277 (Ian): falha do desafio só no Histórico/aba de missões, sem pop-up */logNews('<b>[NARRADOR]</b> Exigência: <b>'+d.d+'</b>. Você '+({nododge:'esquivou',nopot:'usou poção'}[t]||'quebrou a regra')+' e perdeu o progresso ('+lost+' → 0/'+d.n+'). Termine para ganhar XP, a Bênção da Fenda e ouro.')}}
 /* fusão (classe híbrida) */
 function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div class="sec">FUSÃO SECRETA</div>';
-  if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla 4 / botão ★)','');
+  if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla − / botão ★)','');
   const t=Math.min(9,rankOf()),cost=50;
   if(profile.cls!==7)h+=row('Fundir com as Ecos','Sua classe ganha poder de necromante: invoca 3 soldados mortos · custa 100 cristais '+GR[t].id+' + 5 núcleos',btn('Fundir','fuseshadow',0,run.res.cry[t]>=100&&run.res.core[t]>=5));
   else if(run.shadows.length)run.shadows.forEach((r,i)=>{h+=row('Fundir com o eco '+(r.nick||r.n),'Ela vira parte de você e pode ser chamada gigante · custa 100 cristais '+GR[t].id,btn('Fundir','fuseshadow',i,run.res.cry[t]>=100))});
@@ -8541,10 +8541,10 @@ const tipAttr154=t=>cap154(String(t??'').replace(/<br\s*\/?>/gi,'\n').replace(/<
 const cap154=t=>String(t??'').replace(/^((?:<[^>]+>|\s)*)([a-zà-ú])/,(m,a,b)=>a+b.toUpperCase());
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+cap154(name)+'<small>'+cap154(desc)+'</small></div><div class="acts">'+btns+'</div></div>';
 const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" data-v="'+v+'" '+(en?'':'disabled')+'>'+txt+'</button>';
-/* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 1–3). Caros de propósito. */
+/* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 8, 9 e 0 desde a v541). Caros de propósito. */
 function bookList(){const pr=rankOf();const pool=[...BOSSES,...(pr>=5?BOSSES_HIGH:[])];const seen=new Set();const out=[];
   for(const b of pool){if(!b.skill||seen.has(b.skill.n))continue;seen.add(b.skill.n);out.push({sk:b.skill,price:servicePrice265('book',{high:BOSSES_HIGH.includes(b)})})}return out.slice(0,6)}
-/* BIBLIOTECA DE PODERES: todo poder aprendido fica guardado; 3 ficam ativos nas teclas 1–3 (escolha na aba Poderes). */
+/* BIBLIOTECA DE PODERES: todo poder aprendido fica guardado; 3 ficam ativos nas teclas 8, 9 e 0 (escolha na aba Poderes). */
 function powLib(){const key=s=>s.n+'|'+(kitCanonical111(s)?'class':'power');run.lib=(run.lib||[]).filter((x,i,a)=>a.findIndex(y=>key(y)===key(x))===i);run.stolen=run.stolen.filter((x,i,a)=>a.findIndex(y=>key(y)===key(x))===i);for(const s of run.stolen)if(!run.lib.some(x=>key(x)===key(s)))run.lib.push({...s,cdT:0});return run.lib.filter(s=>!kitCanonical111(s))}
 function learnPower(sk){const lib=powLib();
   /* Repetido: sobe 1 nível do poder (ideia do Irror); no máximo, vira 2 pontos de habilidade. */
@@ -8552,7 +8552,7 @@ function learnPower(sk){const lib=powLib();
   lib.push({...sk,cdT:0});
   if(run.stolen.length<3&&!run.stolen.some(x=>x.n===sk.n)){run.stolen.push({...sk,cdT:0});buildSteal()}
   else toast('<b>[NARRADOR]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
-function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 1–3). Escolha qual vai em cada tecla.</div>';
+function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 8, 9 e 0). Escolha qual vai em cada tecla.</div>';
   lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,true,slot===k?'on165" data-tip154="Clique de novo para tirar da tecla '+(k+1):'')).join(''))});return h}
 function sellMonsterLoot(){const gold=lootTotal();if(gold<=0)return false;run.loot={};run.gold+=gold;toast('<b>[MERCADO]</b> Espólios vendidos: +'+fmt(gold)+' ouro. Cristais e núcleos preservados.');beep(990,.15,.05);return true}
 function mktView(){
@@ -8733,7 +8733,7 @@ $('stat').style.cursor='pointer';$('stat').style.pointerEvents='auto';$('stat').
 
 /* ================= CONTROLES ================= */
 /* Teclas configuráveis (PC): cada ação pode ganhar outra tecla. */
-const KEYACT=[['jump','Pular','Space'],['sprint','Correr (segurar)','ShiftLeft'],['dodge','Esquiva','AltLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL'],['character','Personagem','KeyP'],['bestiary','Bestiário','KeyJ'],['news','Notícias','KeyN'],['orders','Ordens dos ecos','KeyO'],['style','Estilo físico/arcano','KeyX'],['mount','Montar / desmontar','KeyV'],['absorbed0','Poder absorvido 1','Digit1'],['absorbed1','Poder absorvido 2','Digit2'],['absorbed2','Poder absorvido 3','Digit3'],['fusion','Poder fundido','Digit4'],['combo261','Combinação de técnicas','Digit6'],['lock377','Travar câmera no alvo','CapsLock']];
+const KEYACT=[['jump','Pular','Space'],['sprint','Correr (segurar)','ShiftLeft'],['dodge','Esquiva','AltLeft'],['sk0','Habilidade 1','KeyQ'],['sk1','Habilidade 2','KeyR'],['sk2','Habilidade 3','KeyT'],['sk3','Habilidade de evolução','KeyG'],['sk4','Habilidade 4','KeyY'],['sk5','Habilidade 5','KeyU'],['sk6','Habilidade 6','Digit5'],['sovereign','Domínio Absoluto','KeyZ'],['pot','Poção','KeyH'],['use','Interagir','KeyF'],['status','Status','KeyC'],['map','Mapa','KeyM'],['bag','Bolsa','KeyI'],['album','Coleção de ecos','KeyK'],['journey','Diário de jornada','KeyL'],['character','Personagem','KeyP'],['bestiary','Bestiário','KeyJ'],['news','Notícias','KeyN'],['orders','Ordens dos ecos','KeyO'],['style','Estilo físico/arcano','KeyX'],['mount','Montar / desmontar','KeyV'],['lote0','Arma 1 do lote','Digit1'],['lote1','Arma 2 do lote','Digit2'],['lote2','Arma 3 do lote','Digit3'],['lote3','Arma 4 do lote','Digit4'],['absorbed0','Poder absorvido 1','Digit8'],['absorbed1','Poder absorvido 2','Digit9'],['absorbed2','Poder absorvido 3','Digit0'],['fusion','Poder fundido','Minus'],['combo261','Combinação de técnicas','Digit6'],['lock377','Travar câmera no alvo','CapsLock']];
 const KEYRES=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape']);
 let KEYMAP={};try{KEYMAP=JSON.parse(localStorage.getItem('pds_keys'))||{}}catch(e){}
 if(/^Shift(Left|Right)$/.test(KEYMAP.dodge||''))delete KEYMAP.dodge;
@@ -8764,7 +8764,7 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
   if(e.code==='AltLeft'){e.preventDefault();dodge()}
   if(e.code==='ShiftLeft'||e.code==='ShiftRight')e.preventDefault();
   if(e.code==='KeyQ')useSkill(player.skills[0]);if(e.code==='KeyR')useSkill(player.skills[1]);if(e.code==='KeyT')useSkill(player.skills[2]);if(e.code==='KeyG')useSkill(player.skills[3]);if(e.code==='KeyY')useSkill(player.skills[4]);if(e.code==='KeyU')useSkill(player.skills[5]);if(e.code==='Digit5')useSkill(player.skills[6]);
-  if(e.code==='Digit1')useSkill(run.stolen[0]);if(e.code==='Digit2')useSkill(run.stolen[1]);if(e.code==='Digit3')useSkill(run.stolen[2]);if(e.code==='Digit4')useSkill(run.fused);if(e.code==='Digit6')useCombo261();
+  if(e.code==='Digit8')useSkill(run.stolen[0]);if(e.code==='Digit9')useSkill(run.stolen[1]);if(e.code==='Digit0')useSkill(run.stolen[2]);if(e.code==='Minus')useSkill(run.fused);{const n=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);if(n>=0)window.Lote541?.select(n)}if(e.code==='Digit6')useCombo261();
   if(e.code==='KeyH')usePot();if(e.code==='KeyV'&&run.mount)setMount(!run.mounted);if(e.code==='KeyF'||e.code==='KeyE'||e.code==='Enter')interact()});
 addEventListener('keyup',e=>{keys[e.code]=false});
 /* Segurar o botão do mouse ou a tecla de ataque continua atacando (PC). */
@@ -9664,6 +9664,7 @@ requestAnimationFrame(frame);
 <script src="tools/constel523.js?v=529"></script>
 <script src="tools/telas535.js?v=538"></script>
 <script src="tools/motor-missoes-infinitas.js?v=539"></script>
-<script src="tools/skyrim-overhaul538.js?v=539"></script>
+<script src="tools/skyrim-overhaul538.js?v=541"></script>
+<script src="tools/lote541.js?v=541"></script>
 <script src="tools/conversa539.js?v=540"></script>
 <script src="tools/explorar539.js?v=540"></script>

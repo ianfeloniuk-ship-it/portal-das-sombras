@@ -6,10 +6,10 @@ const tipAttr154=t=>cap154(String(t??'').replace(/<br\s*\/?>/gi,'\n').replace(/<
 const cap154=t=>String(t??'').replace(/^((?:<[^>]+>|\s)*)([a-zà-ú])/,(m,a,b)=>a+b.toUpperCase());
 const row=(name,desc,btns)=>'<div class="it"><div class="d">'+cap154(name)+'<small>'+cap154(desc)+'</small></div><div class="acts">'+btns+'</div></div>';
 const btn=(txt,a,v,en=true,cls='')=>'<button class="btn '+cls+'" data-a="'+a+'" data-v="'+v+'" '+(en?'':'disabled')+'>'+txt+'</button>';
-/* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 1–3). Caros de propósito. */
+/* GRIMÓRIOS: ensinam poderes de guardiões (vão para os espaços de poder absorvido, teclas 8, 9 e 0 desde a v541). Caros de propósito. */
 function bookList(){const pr=rankOf();const pool=[...BOSSES,...(pr>=5?BOSSES_HIGH:[])];const seen=new Set();const out=[];
   for(const b of pool){if(!b.skill||seen.has(b.skill.n))continue;seen.add(b.skill.n);out.push({sk:b.skill,price:servicePrice265('book',{high:BOSSES_HIGH.includes(b)})})}return out.slice(0,6)}
-/* BIBLIOTECA DE PODERES: todo poder aprendido fica guardado; 3 ficam ativos nas teclas 1–3 (escolha na aba Poderes). */
+/* BIBLIOTECA DE PODERES: todo poder aprendido fica guardado; 3 ficam ativos nas teclas 8, 9 e 0 (escolha na aba Poderes). */
 function powLib(){const key=s=>s.n+'|'+(kitCanonical111(s)?'class':'power');run.lib=(run.lib||[]).filter((x,i,a)=>a.findIndex(y=>key(y)===key(x))===i);run.stolen=run.stolen.filter((x,i,a)=>a.findIndex(y=>key(y)===key(x))===i);for(const s of run.stolen)if(!run.lib.some(x=>key(x)===key(s)))run.lib.push({...s,cdT:0});return run.lib.filter(s=>!kitCanonical111(s))}
 function learnPower(sk){const lib=powLib();
   /* Repetido: sobe 1 nível do poder (ideia do Irror); no máximo, vira 2 pontos de habilidade. */
@@ -17,7 +17,7 @@ function learnPower(sk){const lib=powLib();
   lib.push({...sk,cdT:0});
   if(run.stolen.length<3&&!run.stolen.some(x=>x.n===sk.n)){run.stolen.push({...sk,cdT:0});buildSteal()}
   else toast('<b>[NARRADOR]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
-function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 1–3). Escolha qual vai em cada tecla.</div>';
+function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 8, 9 e 0). Escolha qual vai em cada tecla.</div>';
   lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,true,slot===k?'on165" data-tip154="Clique de novo para tirar da tecla '+(k+1):'')).join(''))});return h}
 function sellMonsterLoot(){const gold=lootTotal();if(gold<=0)return false;run.loot={};run.gold+=gold;toast('<b>[MERCADO]</b> Espólios vendidos: +'+fmt(gold)+' ouro. Cristais e núcleos preservados.');beep(990,.15,.05);return true}
 function mktView(){

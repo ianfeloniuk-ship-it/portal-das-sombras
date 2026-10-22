@@ -86,10 +86,7 @@
     fpCanvas.height = 540;
     document.body.appendChild(fpCanvas);
 
-    const qbar = document.createElement('div');
-    qbar.id = 'skyrim538-quickbar';
-    renderQuickBar(qbar);
-    document.body.appendChild(qbar);
+    /* v541 (Ian): «esses botões não é pra aparecer … é intrínseco». Sem barra na tela; a troca de arma fica em tools/lote541.js. */
   }
 
   function renderQuickBar(container) {
@@ -143,12 +140,12 @@
   API.showSkyrimSubtitle = showSkyrimSubtitle;
 
   // ===== Roda do mouse + dreno de mana =====
-  API.selectQuickSlot = function (idx) {
+  /* v541: a troca usa as armas reais do jogador (tools/lote541.js). A versão abaixo trocava o nome e o modelo da arma equipada. */
+  API.selectQuickSlot = function (idx) { return global.Lote541 ? global.Lote541.select(idx) : false; };
+  API.selectQuickSlot538 = function (idx) {
     const slotIdx = ((idx % QUICK_SLOTS.length) + QUICK_SLOTS.length) % QUICK_SLOTS.length;
     API.activeSlot = slotIdx;
     const chosen = QUICK_SLOTS[slotIdx];
-
-    if (global.profile) global.profile.classless = true;
 
     if (global.run) {
       global.run.equip = global.run.equip || {};
@@ -785,8 +782,6 @@
   function installHooks() {
     injectStylesAndHUD();
 
-    if (global.profile) global.profile.classless = true;
-
     if (global.RadiantPrimeva && global.Quests480 && global.Quests480.CATALOG) {
       (global.RadiantPrimeva.FIXED_300_QUESTS || []).forEach(q => { global.Quests480.CATALOG[q.id] = q; });
       global.RadiantPrimeva.generateBoard().forEach(q => { global.Quests480.CATALOG[q.id] = q; });
@@ -794,18 +789,9 @@
 
     if (typeof window !== 'undefined' && !window._skyrim538WheelBound) {
       window._skyrim538WheelBound = true;
-      window.addEventListener('wheel', e => {
-        if (global.paused || global.modalOpen) return;
-        API.selectQuickSlot(API.activeSlot + (e.deltaY > 0 ? 1 : -1));
-      }, { passive: true });
-
       window.addEventListener('keydown', e => {
         if (global.modalOpen && e.code !== 'Escape') return;
-        if (e.code === 'Digit1') API.selectQuickSlot(0);
-        else if (e.code === 'Digit2') API.selectQuickSlot(1);
-        else if (e.code === 'Digit3') API.selectQuickSlot(2);
-        else if (e.code === 'Digit4') API.selectQuickSlot(3);
-        else if (e.code === 'KeyV' && !e.ctrlKey && !e.altKey) API.toggleFirstPerson();
+        if (e.code === 'KeyV' && !e.ctrlKey && !e.altKey) API.toggleFirstPerson();
         else if (e.code === 'KeyH' && !e.ctrlKey && !e.altKey) API.useDeluminator();
         else if (e.code === 'KeyK' && !e.ctrlKey && !e.altKey) API.openSkillTreeModal();
       });
@@ -842,7 +828,7 @@
       const wrappedUpdate = function (dt) {
         const res = origUpdate.apply(this, arguments);
         try {
-          tickManaDrainAndSkills(dt || 0.016);
+          /* v541: o gasto de mana do ataque mágico fica em tools/lote541.js (usava player.mana, que não existe). */
           const P = global.player;
           if (P && !P.dead) {
             WORLD_SPELLS.forEach(sp => {

@@ -36,7 +36,7 @@ function demandKill(e){const d=run.demand;if(!d||!questEnemyEligible262(d,e))ret
 function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){const lost=d.got;d.got=0;/* v277 (Ian): falha do desafio só no Histórico/aba de missões, sem pop-up */logNews('<b>[NARRADOR]</b> Exigência: <b>'+d.d+'</b>. Você '+({nododge:'esquivou',nopot:'usou poção'}[t]||'quebrou a regra')+' e perdeu o progresso ('+lost+' → 0/'+d.n+'). Termine para ganhar XP, a Bênção da Fenda e ouro.')}}
 /* fusão (classe híbrida) */
 function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div class="sec">FUSÃO SECRETA</div>';
-  if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla 4 / botão ★)','');
+  if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla − / botão ★)','');
   const t=Math.min(9,rankOf()),cost=50;
   if(profile.cls!==7)h+=row('Fundir com as Ecos','Sua classe ganha poder de necromante: invoca 3 soldados mortos · custa 100 cristais '+GR[t].id+' + 5 núcleos',btn('Fundir','fuseshadow',0,run.res.cry[t]>=100&&run.res.core[t]>=5));
   else if(run.shadows.length)run.shadows.forEach((r,i)=>{h+=row('Fundir com o eco '+(r.nick||r.n),'Ela vira parte de você e pode ser chamada gigante · custa 100 cristais '+GR[t].id,btn('Fundir','fuseshadow',i,run.res.cry[t]>=100))});
