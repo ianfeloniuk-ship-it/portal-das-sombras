@@ -1,3 +1,26 @@
+## v548 (22/10/2026) — Proporção nórdica 1:7.5, câmera nos olhos e escala Skyrim
+- Pedido de Ian: Corrigir definitivamente a percepção de escala e proporção entre o Viajante (2,00 m–2,05 m), os NPCs e o mundo com os 5 Especialistas do Estúdio Visual Primeva × Skyrim sem quebrar colisões (HASH / ddCol), missões ou saves.
+- **Câmera na linha dos olhos e FOV Skyrim** (src/core/070-three.js, src/core/400-loop.js, 	ools/witcher377.js):
+  - Em 
+esize(), camera.fov configurado para 48 no PC (60 mantido apenas em mobile portrait).
+  - Em pcCam e camUpdate(), distância a pé alterada de 3.9 m para 2.25 m (montado 4.2 m), pivô vertical pivot.y de 1.72 m para 1.60 m, offset lateral camRot de 0.62 para 0.45, pitch inicial de 0.16 para 0.03 (câmera alinhada aos olhos/ombro a ~1,67 m do chão, com visada no horizonte, eliminando a perspectiva de maquete).
+- **Proporção humana 1:7,5 e fim dos bonecos chibi** (	ools/warrior-player127.js, 	ools/citizens133.js, 	ools/npc482.js, 	ools/vida522.js, 	ools/vida523.js):
+  - Todos os makeChibi eliminados de 	ools/vida522.js (mendigos) e 	ools/vida523.js (moradores, guardas, ladrões), substituídos pelos corpos e malhas humanoides do Povo482 (	ools/npc482.js). Raio de LOD do Povo482 expandido de 60 m para 140 m (FAR = 140, DROP = 160, CAP = 48).
+  - Em warrior-player127.js, citizens133.js e 
+pc482.js, medição e normalização de altura realizada pela posição mundial do osso head + 0.12 m (evitando distorções por cristas, elmos e elmos altos), com aplicação de scale.setScalar(0.88) no osso da cabeça para proporção áurea de 7,5 a 8 cabeças (Viajante = 2.02 m, homens = 1.84 m–1.95 m, mulheres = 1.72 m–1.82 m).
+- **Escala vertical de árvores, casas, portas e muralhas** (src/core/210-bloco-environment128-cont.js, src/core/680-bloco-journey113-cont.js, 	ools/encontros502.js):
+  - Gerador de chunks do mundo (EH) e árvores de cidades ampliados de 5.2–7.5 m para 15.5 m–23 m ((dead ? 11.5 : 15.5) + R() * 7.5), com raio de projeção de sombra expandido para 5.8 m, integrando a floresta do continente ao padrão do desfiladeiro.
+  - Em TripoEnvironment153.HEIGHT: guild: 16 m, defense: 16 m, forge: 9.5 m, inn: 13.5 m, church: 18 m, potion: 10.5 m, mill: 16 m, well: 2.8 m, bank: 3.2 m, market: 3.4 m, bankhall: 14 m, house: 8.5 m–10.5 m (com vãos de porta livres de 2.5 m–2.8 m).
+  - Muralhas internas de cidades elevadas para 7.0 m (eram 3.1 m), portões cityGates341 para 6.2 m (eram 3.5 m). Barris reduzidos para 0.78 m e caixotes para 0.85 m.
+- **Velocidade física e cadência de passada** (src/core/160-jogador.js, src/core/400-loop.js, 	ools/sprint373.js, 	ools/character405.js, 	ools/warrior-player127.js):
+  - Velocidade base em statsFor() reescalada para 4.2 m/s (caminhada 1.85 m/s, corrida 4.2 m/s, sprint 5.8 m/s).
+  - Sincronização do AnimationMixer.timeScale com a velocidade física real (speed / refSpeed), eliminando o deslizamento dos pés e conferindo peso nórdico ao deslocamento.
+- **Testes e validação:**
+  - uild.py e core_parts.py check executados com sucesso (checksums e sincronia de src/core/ para game.html e index.html).
+  - Sintaxe JS verificada com 
+ode --check em todos os módulos alterados.
+  - 4 capturas no navegador geradas e validadas comprovando proporção ao lado de NPC, diante de porta/casa, ao lado da muralha e sob árvores gigantes.
+
 ## v547 (22/10/2026) — animação anti-boneco rígido
 Pedido de Ian: Viajante, NPCs, mobs e dragões sem cara de boneco rígido. Novo tools/anim547.js roda depois de todo AnimationMixer.update: pé no relevo (IK de 2 ossos com terrH, pelve desce até o pé mais baixo, corpo inclina na ladeira), cauda/pescoço/asas em onda com atraso de fase e inércia no giro, quadril inclina nas curvas. LOD: IK até 24 m, ondas até 45 m; desliga com Anim547.on=false. 140-monstros: troca de animação com mistura (0,22 s) no dracônico, na volta ao parado dos clipes próprios e na corrida. Teste: node (pé na ladeira bate com terrH) e navegador (28 rigs, sem erro novo). Não cobre modelos estáticos sem ossos (balançam inteiros, como antes).
 

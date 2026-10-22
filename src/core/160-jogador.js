@@ -94,7 +94,7 @@ function statsFor(){
   const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(classBaseStats().mp+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
-  const spd=6.4*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
+  const spd=4.2*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
   return{maxhp:Math.max(1,Math.round(maxhp)),maxmp:Math.max(0,Math.round(maxmp)),maxsh:Math.max(0,Math.round(maxsh)),dmg,def,spd:Math.max(0,spd)}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};

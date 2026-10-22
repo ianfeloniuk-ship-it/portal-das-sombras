@@ -79,7 +79,7 @@
       if(alive(W377.target)){
         const t=W377.target,want=Math.atan2(t.x-P.x,t.z-P.z)+Math.PI;
         pcCam.yaw+=angDiff(want,pcCam.yaw)*(1-Math.exp(-8*dt));
-        pcCam.pitch+=(.22-pcCam.pitch)*(1-Math.exp(-4*dt));
+        pcCam.pitch+=(.03-pcCam.pitch)*(1-Math.exp(-4*dt));
         if(!(P.dodgeT>0)&&!P.dead)P.face=Math.atan2(t.x-P.x,t.z-P.z);
       }else if(!pcCam.active&&!P.dead){
         /* como no Witcher: andando, a câmera vai voltando devagar para trás do personagem */

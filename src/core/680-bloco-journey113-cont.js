@@ -55,7 +55,7 @@ const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
   const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
-  const HEIGHT={guild:12,defense:13,forge:7,inn:10,church:13,potion:8,mill:12,well:3.2,bank:3.4,market:3.4,bankhall:10},KEYHEIGHT={building_tower_A_blue:11,building_tower_B_blue:11};
+  const HEIGHT={guild:16,defense:16,forge:9.5,inn:13.5,church:18,potion:10.5,mill:16,well:2.8,bank:3.2,market:3.4,bankhall:14,house:9.5},KEYHEIGHT={building_tower_A_blue:16,building_tower_B_blue:16};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
   const CITY={building_barracks_blue:'guild',building_blacksmith_blue:'forge',building_home_B_red:'potion',building_tavern_blue:'inn',building_church_blue:'church',building_windmill_blue:'mill',building_well_blue:'well',building_tower_A_blue:'defense',building_tower_B_blue:'defense',building_market_blue:'defense',wall_straight:'wall','stall-red':'market','stall-green':'bank',tripo_bank_building:'bankhall',palisade154:'palisade',outerwall154:'wall'};
   function prepare(gltf, id) {
@@ -188,7 +188,7 @@ const TripoEnvironment153 = (() => {
     const kind=Village129.classify(key),m=models.house;
     if(!m||!['home-a','home-b'].includes(kind))return oldEW(batch,key,x,y,z,ry,width,tint);
     // Two-storey homes ~6.6-7.4 m; the requested width only adds a little variety.
-    const scale=(6.6+Math.max(0,width-5.4)*.6)/m.h;add(batch,'house',x,y,z,ry+Math.PI/2,scale);return scale;/* v188: porta da casa Tripo fica na lateral do modelo */
+    const houseH=9.2+Math.max(0,width-5.4)*.4;const scale=houseH/m.h;add(batch,'house',x,y,z,ry+Math.PI/2,scale);return scale;/* v188/v548: casas 8.5m-10.5m com portas de 2.5m-2.8m livres */
   };
   EnvBatch.prototype.mesh=function(material){
     const base=oldMesh.call(this,material),entries=this.tripo153;
@@ -231,7 +231,7 @@ const TripoEnvironment153 = (() => {
   MODELS.ready=Promise.all([MODELS.ready,ready]).then(([ok])=>ok);
   const treeOk=(k,x,z)=>!k.startsWith('tree_')||!models.oak||!!models[tree(k,x,z)];
   function dimensions(key,width=6){const id=CITY[key],kind=Village129.classify(key),home=!id&&['home-a','home-b'].includes(kind),t=models[home?'house':id];
-    if(t){const h=home?6.6+Math.max(0,width-5.4)*.6:KEYHEIGHT[key]||HEIGHT[id],s=h/t.h;return {w:(home?t.sz:t.sx)*s,d:(home?t.sx:t.sz)*s,h};}
+    if(t){const h=home?(9.2+Math.max(0,width-5.4)*.4):KEYHEIGHT[key]||HEIGHT[id],s=h/t.h;return {w:(home?t.sz:t.sx)*s,d:(home?t.sx:t.sz)*s,h};}
     const m=ENV.m[key];if(!m)return null;const scale=width/m.w,w=(m.max[0]-m.min[0])*scale,d=(m.max[2]-m.min[2])*scale,ry=doorRot188(key);return {w:Math.abs(Math.cos(ry))*w+Math.abs(Math.sin(ry))*d,d:Math.abs(Math.sin(ry))*w+Math.abs(Math.cos(ry))*d,h:m.h*scale};
   }
   return {models,errors,ready,files,treeOk,leaf154,dimensions};

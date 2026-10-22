@@ -12,7 +12,7 @@
 (function(global){
 'use strict';
 const T=global.THREE;if(!T||!T.GLTFLoader)return;
-const V='493',DIR='models/povo482/',CAP=24,NEAR=30,FAR=60,DROP=75;
+const V='493',DIR='models/povo482/',CAP=48,NEAR=45,FAR=140,DROP=160;
 const API={V,CAP,bases:[],byId:{},ready:false,live:new Set(),reg:new Set(),stats:{made:0,freed:0}};
 
 /* ---------- utilidades determinísticas ---------- */
@@ -94,8 +94,11 @@ function create(base,g,o){
   npcSkin:{value:new T.Vector3(...['r','g','b'].map(c=>Math.max(.3,Math.min(2.2,skinT[c]/Math.max(.01,ref.skin[c])))))},npcRef:{value:new T.Vector3(ref.hairL,0,0)},npcAmt:{value:new T.Vector3(.85,1,1)}};
  for(const mat of m.baseMaterials)paint(mat,U);m.npcU482=U;m.look482=lk;
  /* porte: altura 0,92–1,08 × heightScale da base; peito/ombros 0,94–1,15 (osso do peito com escala uniforme e pescoço/ombros compensados) */
- const h=(Number(base.heightScale)||1)*lerp(.92,1.08,R()),ch=lerp(.94,1.15,R());m.root.scale.setScalar(h);m.height482=h;
- const B=m.bones;if(B.chest){B.chest.scale.setScalar(ch);m.model.traverse(b=>{if(b.isBone&&b.parent===B.chest)b.scale.setScalar(1/ch)})}m.chest482=ch;
+ const targetH=(base.sex==='f')?lerp(1.72,1.82,R()):lerp(1.84,1.95,R());
+ const raceMul=(base.race==='dwarf'||base.race==='anao')?0.72:(base.race==='elf'||base.race==='elfo')?1.02:1.0;
+ const h=(targetH/2.02)*raceMul,ch=lerp(.94,1.15,R());m.root.scale.setScalar(h);m.height482=h;
+ const B=m.bones;if(B.head)B.head.scale.setScalar(0.88);
+ if(B.chest){B.chest.scale.setScalar(ch);m.model.traverse(b=>{if(b.isBone&&b.parent===B.chest)b.scale.setScalar(1/ch)})}m.chest482=ch;
  m.spd482=lerp(.88,1.12,R());m.phase482=R()*3;m.wep482='fist';
  if(o.role==='hunter'&&o.weaponKind&&typeof makeItem==='function'){try{const it=makeItem('w',Math.max(0,Math.min(9,o.rank|0)),0,o.weaponKind);Warrior127.gear(m,{w:it},{tierColors:typeof TIER_COL!=='undefined'?TIER_COL:undefined});m.wep482=o.weaponKind}catch(e){console.warn('Povo482 arma',e)}}
  API.stats.made++;return m}
@@ -248,6 +251,31 @@ const Dragons=(()=>{
     const bio=typeof biomeAt==='function'?biomeAt(x,z):null,opts=Object.keys(NEW).filter(d=>ready[d]&&NEW[d].bio.includes(bio)&&(gr||0)>=NEW[d].K.rk-1);
     if(opts.length)return sk0.call(this,opts[Math.floor(Math.random()*opts.length)],x,z,gr,{...(extra||{}),noFendido:true,noInedita:true,noDragon482:true})}}catch(_){}return sk0.apply(this,arguments)}}
  return {init,NEW,IDS,ready,aliases}})();
+
+/* Proporção nórdica 1:7.5 a 1:8 para todo NPC humano — substitui definitivamente o makeChibi */
+function makeHuman(o){
+  o=o||{};
+  const root=new T.Group(),body=new T.Group();root.add(body);
+  const isF=o.sex==='f',targetH=isF?1.76:1.88;
+  const col=o.body||o.cloth||0x554433,skinCol=o.skin||0xd4a57a,hairCol=o.hair||0x261d15;
+  const matCloth=new T.MeshStandardMaterial({color:col,roughness:.8,metalness:0});
+  const matSkin=new T.MeshStandardMaterial({color:skinCol,roughness:.7,metalness:0});
+  const matHair=new T.MeshStandardMaterial({color:hairCol,roughness:.9,metalness:0});
+  const head=new T.Mesh(new T.CylinderGeometry(.09,.08,.22,10),matSkin);head.position.y=targetH-.12;body.add(head);
+  const hair=new T.Mesh(new T.CylinderGeometry(.095,.095,.12,10),matHair);hair.position.y=targetH-.07;body.add(hair);
+  const torso=new T.Mesh(new T.BoxGeometry(isF?.32:.40,.62,isF?.18:.22),matCloth);torso.position.y=targetH*.65;body.add(torso);
+  const legGeo=new T.BoxGeometry(.13,.82,.14);
+  const legL=new T.Mesh(legGeo,matCloth);legL.position.set(-.10,.41,0);body.add(legL);
+  const legR=new T.Mesh(legGeo,matCloth);legR.position.set(.10,.41,0);body.add(legR);
+  const armGeo=new T.BoxGeometry(.10,.60,.11);
+  const armL=new T.Mesh(armGeo,matCloth);armL.position.set(isF?-.22:-.26,targetH*.65,0);body.add(armL);
+  const armR=new T.Mesh(armGeo,matCloth);armR.position.set(isF?.22:.26,targetH*.65,0);body.add(armR);
+  if(o.wep&&o.wep!=='none'){const w=new T.Mesh(new T.BoxGeometry(.04,.68,.02),new T.MeshStandardMaterial({color:o.wcol||0x888888,metalness:.4,roughness:.5}));w.position.set(0,-.25,.1);armR.add(w);}
+  const shadow=new T.Mesh(new T.CircleGeometry(.36,16),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.25,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.02;root.add(shadow);
+  return {root,body,head,armL,armR,legL,legR,mats:[matCloth,matSkin,matHair],humanPlaceholder482:true};
+}
+API.makeHuman=makeHuman;API.upgrade=upgrade;API.create=create;API.loadBase=loadBase;API.sexOfName=sexOfName;
+
 API.Dragons=Dragons;API.regionOf=regionOf;API.familyOf=familyOf;API.register=register;API.tick=tick;API.spawnNamed=spawnNamed;API.NAMED=NAMED;API.PAL=PAL;
 global.Povo482=API;
 API.load();

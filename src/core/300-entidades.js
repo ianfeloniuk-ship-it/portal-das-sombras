@@ -121,9 +121,23 @@ function makeSpiritWolf(){
   part(.56,.52,1.12,0,.74,0);part(.65,.58,.46,0,.88,.43);
   part(.46,.45,.48,0,1.15,.65);part(.3,.22,.4,0,1.05,.99);part(.27,.16,.09,0,1.07,1.22,dark);
   for(const x of[-.17,.17]){const ear=mesh(new THREE.ConeGeometry(.15,.35,4),fur);ear.position.set(x,1.5,.6);body.add(ear);part(.04,.075,.1,x*1.4,1.23,.87,dark)}
-  const paws=[];for(const x of[-.22,.22])for(const z of[-.4,.4]){const leg=new THREE.Group();leg.position.set(x,.65,z);const foot=mesh(new THREE.BoxGeometry(.17,.6,.23),fur);foot.position.y=-.3;leg.add(foot);body.add(leg);paws.push(leg)}
-  const tail=part(.22,.22,.75,0,.8,-.84);tail.rotation.x=-.5;
-  return{root,body,mats,paws,tail,quadruped:true,sc:1};
+  const paws=[],articulatedLegs=[];
+  for(const x of[-.22,.22])for(const z of[-.4,.4]){
+    const hip=new THREE.Group();hip.position.set(x,.65,z);
+    const thigh=mesh(new THREE.BoxGeometry(.16,.32,.20),fur);thigh.position.y=-.16;hip.add(thigh);
+    const knee=new THREE.Group();knee.position.set(0,-.32,0);hip.add(knee);
+    const shin=mesh(new THREE.BoxGeometry(.13,.30,.17),fur);shin.position.y=-.15;knee.add(shin);
+    const foot=mesh(new THREE.BoxGeometry(.16,.11,.22),dark);foot.position.set(0,-.30,.03);knee.add(foot);
+    body.add(hip);paws.push(hip);articulatedLegs.push({thigh:hip,knee,paw:foot});
+  }
+  const tailSegments=[];let prevTail=body;
+  for(let i=0;i<3;i++){
+    const ts=new THREE.Group();
+    if(i===0){ts.position.set(0,.78,-.55);ts.rotation.x=-.45;}else{ts.position.set(0,-.04,-.25);ts.rotation.x=.1;}
+    const tm=mesh(new THREE.BoxGeometry(.18-i*.04,.18-i*.04,.28),fur);tm.position.z=-.14;ts.add(tm);
+    prevTail.add(ts);tailSegments.push(ts);prevTail=ts;
+  }
+  return{root,body,mats,paws,tail:tailSegments[0],tailSegments,articulatedLegs,quadruped:true,sc:1};
 }
 function makeStoneColossus(){const m=makeChibi({body:0x766c5a,skin:0x8e8068,eye:0xffd070,scale:1.25,wep:'none'}),stone=toon(0x766c5a);for(const part of m.body.children)if(part.isMesh&&part.position.y>1.5&&part.geometry.type==='SphereGeometry')part.geometry=geo('colossusHead',()=>new THREE.DodecahedronGeometry(.46,0));for(const arm of [m.armL,m.armR]){for(const y of [0,-.55]){const rock=mesh(geo('colossusFist',()=>new THREE.DodecahedronGeometry(.3,0)),stone);rock.position.y=y;arm.add(rock)}}const core=mesh(geo('colossusCore',()=>new THREE.OctahedronGeometry(.17)),glowS(0xffd070,.8));core.position.set(0,.95,.38);m.body.add(core);m.mats.push(stone);return m}
 function spawnSummon(kind,x,z,life){

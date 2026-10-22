@@ -15,7 +15,7 @@ function caravanUpd(a,dt){a.t+=dt;if(a.flash>0){a.flash-=dt;flashMats(a.m,a.flas
   animChibi(a.m,{move:mv,atk:0,dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face}
 const WBOSS={n:'Dragão Errante',types:['fury','soulrain'],body:0x8a1a1a,scale:3.2,skill:S('Sopro do Dragão','rain',10,35,3,0xff5a1e)};
 function spawnWorldBoss(){const P=player,a=rnd(0,TAU),x=P.x+Math.cos(a)*70,z=P.z+Math.sin(a)*70;const b=spawnBoss(x,z,clamp(rankOf()+1,0,9),WBOSS);b.wild=true;b.breaker=true;b.world=true;b.hp*=4;b.maxhp*=4;b.gold*=5;b.roam={x,z};
-  for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
+  if(window.Anim547&&Anim547.createDragonWings){b.drakeWings547=Anim547.createDragonWings(b.m.body,0x8a1a1a);if(b.drake510)b.drake510.proceduralWings=b.drakeWings547;}else{for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}}
   toast('<b>[MUNDO]</b> Um DRAGÃO ERRANTE sobrevoa a região. Ele aparece no mapa.',6000);bigText('DRAGÃO ERRANTE',1300)}
 function worldBossDeath(b){if(b.siege){siegeWin(b);storyEv('siege')}hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
 /* v217 (Ian): mundo em camadas. Cidades a ~1,9 km; capitais a cada 5×5 regiões (~9,6 km);

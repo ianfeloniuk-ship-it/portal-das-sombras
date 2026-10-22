@@ -97,14 +97,14 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     if(P.dodgeT>0){const before372=P.dodgeT,step372=Math.min(dt,before372);P.dodgeT-=dt;const u0=1-before372/.32,u1=1-Math.max(0,P.dodgeT)/.32,envelope372=P.dashSpd?1:.4+.3*(Math.cos(Math.PI*u0)-Math.cos(Math.PI*u1))/Math.max(1e-6,u1-u0);const sp=(P.dashSpd||8.5)*envelope372;moveEnt(P,P.dir.x*sp*step372,P.dir.z*sp*step372);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{execute:P.dashDmg.execute,kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted?1:sprintState372.running?Sprint373.runFactor:Sprint373.walkFactor);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
+    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted?1:sprintState372.running?Sprint373.runFactor:(keys.KeyC||keys.AltLeft||(il>0&&il<.55))?Sprint373.walkFactor:(Sprint373.normalFactor||1.0));dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
     const moved372=Math.hypot(P.x-motionX372,P.z-motionZ372);Sprint373.spend(sprintState372,martialState260(),dt,moved372>.002,resourceWait263('vigor'));
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     {stepVertical357(P,dt);COLY344=0}
-    animChibi(P.m,{move:mv,sprint:sprintState372.running,speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
+    animChibi(P.m,{move:mv,sprint:sprintState372.running,walking:!!(keys.KeyC||keys.AltLeft||(il>0&&il<.55)),speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
-  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);if(P.jy!==0&&Number.isFinite(P.jy)){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
+  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);try{if(window.Anim547&&Anim547.postPlayer)Anim547.postPlayer(P.m,{move:mv,speed:dt>0?moved372/dt:0},dt)}catch(_){}if(P.jy!==0&&Number.isFinite(P.jy)){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
   tickGates(dt);
   if(window.Gosma347)Gosma347.update(dt);for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
@@ -169,7 +169,7 @@ function updDungeon(dt){
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
 /* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. */
-const pcCam={yaw:0,pitch:.16,distance:3.9,active:false};
+const pcCam={yaw:0,pitch:.03,distance:2.25,active:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
@@ -190,10 +190,10 @@ function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*(1-Math.exp(-14*dt));cam.z+=(P.z-cam.z)*(1-Math.exp(-14*dt));
   if((paused||modalOpen||!$('gameMenu95').hidden)&&pcCam.active)releaseCamera373();
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
-  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding()),pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.72),cam.z);
+  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding()),pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.60),cam.z);
   /* v377 (Ian): câmera estilo The Witcher 3 — perto, sobre o ombro direito, personagem um pouco à esquerda. */
-  const distance=mounted?5.4:3.9,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
-  const [ox,oz]=camRot(mounted?.35:.62,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
+  const distance=mounted?4.2:2.25,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
+  const [ox,oz]=camRot(mounted?.35:.45,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
   offset.y=Math.max(offset.y,terrH(pivot.x+ox,pivot.z+oz)+.30-pivot.y);
   // Sweep a camera-sized sphere against terrain and the same solid world geometry as movement.
   let safe=distance;

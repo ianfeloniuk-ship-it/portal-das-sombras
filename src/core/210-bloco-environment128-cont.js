@@ -9,7 +9,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
     else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
-      EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
+      EH(tr,k,px,0,pz,R()*TAU,(dead?11.5:15.5)+R()*7.5,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?3.5:5.8,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();const rk344=pk(R,ROCKS),sc344=EW(so,rk344,px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s,h:envTop344(rk344,sc344,-.08)});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
   if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK||biomeAt(px,pz)!=='flores')continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
   if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<44*CITYK)continue;at(px,pz);const s2=.7+R()*.9;const rk344=pk(R,['rock_tallA','rock_tallB','stone_tallA']),sc344=EW(so,rk344,px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2,h:envTop344(rk344,sc344,-.05)})}
@@ -56,11 +56,11 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   const layout=c.layout253=City253.plan({radius:CITYR,level:cLv,dimensions:cityDim253,random:R,homeKeys:HOMES154,shopEntries:SHOPS.map(s=>({key:SHOPM[s.id][0],width:SHOPM[s.id][1],x:s.x,z:s.z,ry:Math.atan2(-s.x,-s.z)}))});
   const emit=e=>{if(!e)return;const x=X+e.x,z=Z+e.z;EW(b,fallen?'building_destroyed':e.key,x,0,z,e.ry,e.width,fallen?.8:1);cityCollider253(addCol,x,z,e.ry,e.dim);ENV.cast.push({x:x+.8,z:z-.6,r:Math.max(e.dim.w,e.dim.d)*.6,k:.5});};
   for(let a=TAU/152;a<TAU;a+=TAU/76){if(gate(a)<.18)continue;const x=X+Math.cos(a)*CITYR,z=Z+Math.sin(a)*CITYR;
-    const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),(TAU*CITYR/76*1.04)/(m.max[0]-m.min[0]),3.1/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
-    if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
+    const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),(TAU*CITYR/76*1.04)/(m.max[0]-m.min[0]),7.0/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
+    if(cLv>=3&&!fallen)glowL.push({x,y:7.3,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/180){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.8})}
-  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);
+  cityGates341(c,g,fallen,CITYR,.18*CITYR,6.2);
   /* v481 (Ian): 3 MURALHAS CONCÊNTRICAS ESTILO ATTACK ON TITAN (SINA 60m, ROSE 85m, MARIA 115m) */
   if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
     // 2ª Muralha (Muralha Rose / Intermediária - 85m)
@@ -83,13 +83,13 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   /* Trees stay outside residential roofs and the four main streets. */
   for(const a of[45,135,225,315]){const r=a*Math.PI/180,x=X+Math.cos(r)*31,z=Z+Math.sin(r)*31;
     const treeBox=City253.bounds({w:12,d:12},x-X,z-Z,0);if(layout.footprints.some(e=>City253.clearance(treeBox,e.footprint)<1))continue;
-    const k=fallen?pk(R,TREES.dead):pk(R,TREES.leaf);if(!window.TripoEnvironment153||TripoEnvironment153.treeOk(k,x,z)){EH(tr,k,x,0,z,R()*TAU,5.4+R()*1.8,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:2.6,k:.4});}}
+    const k=fallen?pk(R,TREES.dead):pk(R,TREES.leaf);if(!window.TripoEnvironment153||TripoEnvironment153.treeOk(k,x,z)){EH(tr,k,x,0,z,R()*TAU,(fallen?11.5:15.5)+R()*7.5,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:fallen?3.5:5.8,k:.4});}}
   for(let k=0,n=ENV.lite?50:150;k<n;k++){const a=R()*TAU,d=CITYR-3.4+R()*2.6;if(gate(a)<.15)continue;EH(fl,k%9?'blades':pk(R,['plant_bush','grass_leafs','plant_flatShort']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,fallen?.6:tintB(0xffffff,.85+R()*.15))}
   const shopH={};
   for(const sp of SHOPS){const sx=X+sp.x,sz=Z+sp.z,ry=Math.atan2(-sp.x,-sp.z),[k,W]=SHOPM[sp.id]||['building_home_A_blue',7];
     const s=EW(b,fallen?'building_destroyed':k,sx,0,sz,ry,W,fallen?.8:1);ENV.cast.push({x:sx+.9,z:sz-.7,r:W*.72,k:.5});shopH[sp.id]=cityDim253(k,W).h;
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
-    if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
+    if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,0.78);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,0.85);
       const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1);addCol({x:p3.x,z:p3.z,r:sp.id==='guild'?.65:.55})/* v429: não se atravessa mais */}}
   const fs=0;/* v236: fonte própria do selo (seal231) */if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}

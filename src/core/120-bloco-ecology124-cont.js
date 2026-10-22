@@ -13,12 +13,20 @@ function makeChibi(o){
   if(o.helm){const h=mesh(geo('helm',()=>new THREE.CylinderGeometry(.5,.48,.5,10)),bm);h.position.y=1.7;body.add(h);const c=mesh(geo('crest',()=>new THREE.ConeGeometry(.14,.5,6)),toonS(0xffd070));c.position.set(0,2.05,0);body.add(c)}
   const em=new THREE.MeshBasicMaterial({color:o.eye??0x111111});
   for(const s of[-1,1]){const e=new THREE.Mesh(geo('eye',()=>new THREE.BoxGeometry(.1,.16,.04)),em);e.position.set(.15*s,1.56,.42);body.add(e)}
-  const limb=(x,y,k,h,m)=>{const p=new THREE.Group();p.position.set(x,y,0);const l=mesh(geo(k,()=>new THREE.BoxGeometry(k==='arm'?.17:.21,h,k==='arm'?.17:.21)),m);l.position.y=-h/2;p.add(l);body.add(p);return p};
+  const limb=(x,y,k,h,m)=>{
+    const p=new THREE.Group();p.position.set(x,y,0);
+    const uh=h*0.52,lh=h*0.48,w=k==='arm'?.17:.21;
+    const u=mesh(geo(k+'_up',()=>new THREE.BoxGeometry(w,uh,w)),m);u.position.y=-uh/2;p.add(u);
+    const j=new THREE.Group();j.position.set(0,-uh,0);p.add(j);
+    const lo=mesh(geo(k+'_lo',()=>new THREE.BoxGeometry(w*.92,lh,w*.92)),m);lo.position.y=-lh/2;j.add(lo);
+    body.add(p);return {root:p,joint:j};
+  };
   const lm=o.legMat||toonS(0x1c1c28);
-  const armL=limb(-.47,1.12,'arm',.55,bm),armR=limb(.47,1.12,'arm',.55,bm),legL=limb(-.17,.52,'leg',.52,lm),legR=limb(.17,.52,'leg',.52,lm);
+  const aL=limb(-.47,1.12,'arm',.55,bm),aR=limb(.47,1.12,'arm',.55,bm),lL=limb(-.17,.52,'leg',.52,lm),lR=limb(.17,.52,'leg',.52,lm);
+  const armL=aL.root,armR=aR.root,legL=lL.root,legR=lR.root,forearmL=aL.joint,forearmR=aR.joint,shinL=lL.joint,shinR=lR.joint;
   if(o.wep&&o.wep!=='none'){const w=weapon(o.wep,o.wcol);w.position.y=-.5;armR.add(w);if(o.wep==='dagger'){const w2=weapon('dagger');w2.position.y=-.5;armL.add(w2)}}
   if(o.shield){const s=mesh(geo('shield',()=>new THREE.BoxGeometry(.08,.6,.5)),toonS(0x6a4a2a));s.position.set(-.1,-.45,.1);armL.add(s)}
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
   const mats=[];body.traverse(m=>{if(m.isMesh&&m.material.isMeshToonMaterial&&!m.material.userData.shared&&!mats.includes(m.material))mats.push(m.material)});
-  return {root,body,armL,armR,legL,legR,mats,sc,eyeMat:em};
+  return {root,body,armL,armR,legL,legR,forearmL,forearmR,shinL,shinR,mats,sc,eyeMat:em};
 }

@@ -11,7 +11,7 @@
   let lastThief = 0, lastFine = 0;
 
   const ready = () => typeof L !== 'undefined' && L && L.mode === 'world' && typeof player !== 'undefined' && player && !player.dead
-    && typeof npcs !== 'undefined' && typeof makeChibi === 'function' && typeof scene !== 'undefined' && typeof chunks !== 'undefined';
+    && typeof npcs !== 'undefined' && typeof scene !== 'undefined' && typeof chunks !== 'undefined';
   const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
   const dlen = () => (typeof DAYLEN !== 'undefined' ? DAYLEN : 3600);
   const phase = () => ((typeof dayT !== 'undefined' ? dayT : 0) % dlen()) / dlen();
@@ -24,23 +24,36 @@
   function patrolPt(c, i) { const a = i * Math.PI / 4; return { x: c.x + Math.cos(a) * 14, z: c.z + Math.sin(a) * 14 }; }
 
   function mk(c, o) {
-    const m = makeChibi(o.look); const p = o.pos; m.root.position.set(p.x, 0, p.z); scene.add(m.root);
+    const p = o.pos;
+    const sex = o.sex || (global.Povo482 && Povo482.sexOfName && Povo482.sexOfName(o.n && o.n.name)) || (/a$/i.test(o.n && o.n.name || '') ? 'f' : 'm');
+    const m = (global.Povo482 && Povo482.makeHuman)
+      ? Povo482.makeHuman({ ...(o.look || {}), sex })
+      : (typeof makeChibi === 'function' ? makeChibi(o.look) : { root: new THREE.Group() });
+    m.root.position.set(p.x, 0, p.z); scene.add(m.root);
     const n = Object.assign({ kind: 'morador', vida523: true, home: c, m, x: p.x, z: p.z, face: rnd(0, 6.28), r: .45, t: Math.random() * 9, tx: p.x, tz: p.z, wait: 0, path: [], col: '#c9d3de' }, o.n);
     n.short = n.name; n.label = 'F · FALAR COM ' + n.name.toUpperCase();
     n.use = () => { if (global.Dialogo520) Dialogo520.vida(n); };
-    npcs.push(n); return n;
+    npcs.push(n);
+    if (global.Povo482 && o.reg482) {
+      Povo482.register(n, o.reg482);
+      if (Povo482.upgrade) Povo482.upgrade(n);
+    }
+    return n;
   }
   function spawnMorador(c) {
     const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = MN.filter(x => !used.has(x)), nm = free[Math.floor(Math.random() * free.length)] || MN[0];
     const seed = Math.floor(Math.random() * 360), job = JOBS[seed % JOBS.length];
+    const sex = (global.Povo482 && Povo482.sexOfName && Povo482.sexOfName(nm)) || (/a$/i.test(nm) ? 'f' : 'm');
     const pick = a => a[Math.floor(Math.random() * a.length)];
-    mk(c, { pos: houseSpot(c, seed), look: { body: pick([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a]), hair: pick([0x222222, 0xc85a1e, 0x6b4a2a, 0xd8b060]), wep: 'none', gk: pick(['Knight', 'Mage', 'Rogue']), tint: 0xffffff, scale: .9 },
-      n: { name: nm, role523: 'morador', job523: job, seed523: seed, beber523: seed % 3 === 0 } });
+    mk(c, { pos: houseSpot(c, seed), sex, look: { body: pick([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a]), hair: pick([0x222222, 0xc85a1e, 0x6b4a2a, 0xd8b060]), wep: 'none' },
+      n: { name: nm, role523: 'morador', job523: job, seed523: seed, beber523: seed % 3 === 0 },
+      reg482: { role: 'civil', sex, seed: seed + 101, region: global.Povo482 ? Povo482.regionOf(c) : 'aster', priority: true } });
   }
   function spawnGuarda(c) {
     const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = GN.filter(x => !used.has(x)), nm = free[0] || GN[0], i = Math.floor(Math.random() * 8);
-    mk(c, { pos: patrolPt(c, i), look: { body: 0x2a3f6a, hair: 0x333333, wep: 'sword', wcol: 0xcfd8e3, gk: 'Knight', tint: 0xd0e0ff, scale: 1 },
-      n: { name: nm, role523: 'guarda', job523: 'Guarda da cidade', wp523: i, act523: 'patrulha' } });
+    mk(c, { pos: patrolPt(c, i), sex: 'm', look: { body: 0x2a3f6a, hair: 0x333333, wep: 'sword', wcol: 0xcfd8e3 },
+      n: { name: nm, role523: 'guarda', job523: 'Guarda da cidade', wp523: i, act523: 'patrulha' },
+      reg482: { role: 'hunter', family: 'soldado', cls: 0, rank: 3, sex: 'm', weaponKind: 'sword', seed: (c.id ? (c.cx * 17 + c.cz * 31) : 1) + i * 37, region: global.Povo482 ? Povo482.regionOf(c) : 'aster', priority: true } });
   }
   function drop(n) { n.gone = true; try { scene.remove(n.m.root); } catch (_) {} }
 
@@ -86,7 +99,8 @@
   function thief(c) {
     if (npcs.some(x => x.role523 === 'ladrao' && !x.gone && x.home === c)) return;
     const a = rnd(0, 6.28), pos = { x: player.x + Math.cos(a) * 22, z: player.z + Math.sin(a) * 22 };
-    const n = mk(c, { pos, look: { body: 0x1a1a22, hair: 0x222222, wep: 'dagger', wcol: 0x888888, gk: 'Rogue', tint: 0x9aa0b0, scale: .9 }, n: { name: 'Vulto Encapuzado', role523: 'ladrao', job523: 'Ladrão', act523: 'espreita' } });
+    const n = mk(c, { pos, sex: 'm', look: { body: 0x1a1a22, hair: 0x222222, wep: 'dagger', wcol: 0x888888 }, n: { name: 'Vulto Encapuzado', role523: 'ladrao', job523: 'Ladrão', act523: 'espreita' },
+      reg482: { role: 'hunter', family: 'sombra', cls: 1, rank: 2, sex: 'm', weaponKind: 'dagger', seed: Math.floor(Math.random() * 10000), region: global.Povo482 ? Povo482.regionOf(c) : 'aster', priority: true } });
     n.use = () => {
       if (n.loot523 > 0) {
         if (typeof run !== 'undefined' && run) run.gold = (run.gold || 0) + n.loot523;

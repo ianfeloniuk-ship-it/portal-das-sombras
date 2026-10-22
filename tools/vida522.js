@@ -12,18 +12,26 @@
   function spot(c, night, seed) { const L = night ? NIGHT : DAY, s = L[Math.abs(seed) % L.length]; return { x: c.x + s[0], z: c.z + s[1] }; }
 
   function spawn(c) {
-    if (typeof makeChibi !== 'function' || typeof scene === 'undefined' || typeof npcs === 'undefined') return;
+    if (typeof scene === 'undefined' || typeof npcs === 'undefined') return;
     const used = new Set(npcs.filter(n => n.mendigo522 && !n.gone).map(n => n.name));
     const free = NAMES.filter(x => !used.has(x));
     const nm = free[Math.floor(Math.random() * free.length)] || NAMES[0];
     const night = typeof isNight === 'function' && isNight();
     const seed = Math.floor(Math.random() * 100), p = spot(c, night, seed);
-    const m = makeChibi({ body: 0x4a3f35, hair: 0x8a8a8a, wep: 'none', gk: 'Barbarian', tint: 0xbba88a, scale: .85 });
+    const sex = /a$/i.test(nm) ? 'f' : 'm';
+    const m = (global.Povo482 && Povo482.makeHuman)
+      ? Povo482.makeHuman({ body: 0x4a3f35, hair: 0x8a8a8a, skin: 0xbba88a, sex })
+      : (typeof makeChibi === 'function' ? makeChibi({ body: 0x4a3f35, hair: 0x8a8a8a, wep: 'none', gk: 'Barbarian', tint: 0xbba88a, scale: .85 }) : null);
+    if (!m) return;
     m.root.position.set(p.x, 0, p.z); scene.add(m.root);
     const n = { kind: 'traveler', mendigo522: true, home: c, m, x: p.x, z: p.z, face: Math.random() * 6.28, r: .45, name: nm, short: nm, col: '#bba88a',
       t: Math.random() * 9, seed522: seed, night522: night, label: 'F · FALAR COM ' + nm.toUpperCase() };
     n.use = () => { if (global.Dialogo520) Dialogo520.mendigo(n); };
     npcs.push(n);
+    if (global.Povo482) {
+      Povo482.register(n, { role: 'civil', family: 'civil_sobrevivente', sex, seed: seed + 77, region: Povo482.regionOf(c), priority: true });
+      if (Povo482.upgrade) Povo482.upgrade(n);
+    }
   }
 
   function tick() {

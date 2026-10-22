@@ -33,8 +33,17 @@
   API.create=function(options){
     const model=T.SkeletonUtils.clone(options.modelScene||asset.scene),root=new T.Group(),body=new T.Group();root.add(body);body.add(model);
     let mix153=false;model.traverse(o=>{if(o.isMesh&&/^tripo_part/.test(o.name))mix153=true;if(o.isBone&&/^mixamorig:?/.test(o.name)){mix153=true;const k=o.name.replace(/^mixamorig:?/,'');o.userData.mixName=k;if(MIX153[k])o.name=MIX153[k]}});
-    if(mix153){model.updateMatrixWorld(true);const box=new T.Box3().setFromObject(model),s=2.05/(box.max.y-box.min.y);model.scale.setScalar(s);model.position.y=-box.min.y*s;}
-    else{model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;}
+    if(mix153){
+      model.updateMatrixWorld(true);
+      const box=new T.Box3().setFromObject(model);
+      let headBone=null;
+      model.traverse(o=>{if(o.isBone&&(o.name==='head'||o.name==='Head'||/head$/i.test(o.name)))headBone=o;});
+      let totalH=box.max.y-box.min.y;
+      if(headBone){const hp=headBone.getWorldPosition(new T.Vector3());const h=(hp.y+0.12)-box.min.y;if(h>0.5)totalH=h;}
+      const s=2.02/totalH;
+      model.scale.setScalar(s);model.position.y=-box.min.y*s;
+      if(headBone)headBone.scale.setScalar(0.88);
+    }else{model.scale.setScalar(SCALE);model.position.y=.501893*SCALE;}
     // v156: a malha do Viajante tem triângulos-fio (luvas e botas) que vão do centro do corpo até além da mão ou do chão à canela,
     // aparecendo como uma linha. Remove triângulos com aresta acima de 12 cm (na escala do arquivo); os normais têm até ~3,5 cm.
     if(mix153)model.traverse(o=>{if(!o.isSkinnedMesh||!o.geometry.index||o.geometry.userData.sliver156!=null)return;const g=o.geometry,P=g.attributes.position,I=g.index.array,keep=[],a=new T.Vector3(),b=new T.Vector3(),c=new T.Vector3();let cut=0;
@@ -193,7 +202,7 @@
     m.body.position.y=step*.025*move+Math.sin(t*2)*.006;
     if(st.atk>0){const phase=clamp(st.atk,0,1);for(const [name,keys] of Object.entries(attack))b[name].rotation.set(...curve(keys,phase));b.head.rotation.y=-b.chest.rotation.y*.65;b.cape_tail.rotation.z=-Math.sin(phase*Math.PI)*.06;m.attackPhase=phase;}else m.attackPhase=0;
     if(st.dead>0){m.body.rotation.x=-1.48*st.dead;m.body.position.y=.2*st.dead;}
-    modelMatrices(m);
+    modelMatrices(m);try{if(global.Anim547&&global.Anim547.postPlayer)global.Anim547.postPlayer(m,st,dt)}catch(_){}
   };
   // T-pose → relaxed arms, applied in model space before the animation deltas.
   const REST153={upperarm_r:new T.Euler(0,0,1.25),upperarm_l:new T.Euler(0,0,-1.25),forearm_r:new T.Euler(0,0,.15),forearm_l:new T.Euler(0,0,-.15)};
@@ -312,9 +321,9 @@
       let name=st.clip486&&A.act[st.clip486]?st.clip486:null,a;
       if(st.dead>0&&A.act.defeat_02)a=play155(A,'defeat_02',.15,true);
       else if(name){a=play155(A,name,st.fade486||.3,!!st.once486);a.timeScale=st.rate486||1}
-      else if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const run=st.sprint!==false&&(st.speed||0)>4&&A.act.run;a=play155(A,run?'run':'walk',.25);a.timeScale=st.speed==null?1:clamp(st.speed/(run?6:1.6),.5,1.6)}
+      else if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const run=st.sprint!==false&&(st.speed||0)>3.0&&A.act.run;a=play155(A,run?'run':'walk',.25);a.timeScale=st.speed==null?1:clamp(st.speed/(run?4.2:1.85),.4,1.8)}
       else{a=play155(A,'idle',.3);a.timeScale=st.rate486||1}
-      apply486(m,A,st,dt);return}
+      apply486(m,A,st,dt);try{if(global.Anim547&&global.Anim547.postPlayer)global.Anim547.postPlayer(m,st,dt)}catch(_){}return}
     if(!m.a155)setup155(m);const A=m.a155;let a;
     if(st.dead>0)play155(A,'morte',.12,true);
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
@@ -324,8 +333,8 @@
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
       const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
     else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
-    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const walking=st.sprint===false&&A.act.caminhar;a=play155(A,walking?'caminhar':'correr',.16);a.timeScale=st.speed==null?1:clamp(st.speed/(walking?3.2:6.5),.45,1.8)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
-    apply486(m,A,st,dt);
+    else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const speed=st.speed||(st.sprint?5.8:st.walking?1.85:4.2);const walking=st.walking||speed<2.5||(st.sprint===false&&speed<3.2&&A.act.caminhar);a=play155(A,walking&&A.act.caminhar?'caminhar':'correr',.16);const refSpeed=walking?1.85:(st.sprint?5.8:4.2);a.timeScale=clamp(speed/refSpeed,.4,2.0)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
+    apply486(m,A,st,dt);try{if(global.Anim547&&global.Anim547.postPlayer)global.Anim547.postPlayer(m,st,dt)}catch(_){}
     if(m.bowHolder155&&(/^arco/.test(A.state||'')||st.atk>0&&/^bow/.test(st.wep||''))){aimPose168(m);const bh2=m.bowHolder155,rq=m.root.getWorldQuaternion(new T.Quaternion()),want=rq.multiply(new T.Quaternion().setFromEuler(new T.Euler(...BOWAIM168)));bh2.parent.updateWorldMatrix(true,false);bh2.quaternion.copy(bh2.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(want));bh2.position.set(0,0,0);bh2.userData.idle155=false;bh2.userData.aim168=true}
     // v174 (Ian): cajado parado fica em pé na mão (como bastão), não atravessado; no golpe segue a animação de cajado.
     {const sw=visibleStaff251(m);if(sw){const casting=performance.now()<(m.staffCast251||0)||(st.atk>0&&/^cajado/.test(A.state||''));

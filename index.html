@@ -2654,10 +2654,10 @@ if(ULTRA){GFX267.ultra=true;GFX267.apply();renderer.toneMapping=THREE.ACESFilmic
 const scene=new THREE.Scene();
 const riftLight131=window.RIFT131_ENABLE?new THREE.PointLight(0x9566ed,0,13,2):null;if(riftLight131)scene.add(riftLight131);
 let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(document.hidden&&riftSound131)riftSound131.silence()});addEventListener('pagehide',()=>{if(riftSound131)riftSound131.dispose()});
-const camera=new THREE.PerspectiveCamera(60,1,.08,260);
+const camera=new THREE.PerspectiveCamera(48,1,.08,260);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
-function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?62:60;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
+function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?60:48;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
 if(!touch)document.body.classList.add('pc');
 const gmap=new THREE.DataTexture(new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]),3,1,THREE.RGBAFormat);
@@ -3269,14 +3269,22 @@ function makeChibi(o){
   if(o.helm){const h=mesh(geo('helm',()=>new THREE.CylinderGeometry(.5,.48,.5,10)),bm);h.position.y=1.7;body.add(h);const c=mesh(geo('crest',()=>new THREE.ConeGeometry(.14,.5,6)),toonS(0xffd070));c.position.set(0,2.05,0);body.add(c)}
   const em=new THREE.MeshBasicMaterial({color:o.eye??0x111111});
   for(const s of[-1,1]){const e=new THREE.Mesh(geo('eye',()=>new THREE.BoxGeometry(.1,.16,.04)),em);e.position.set(.15*s,1.56,.42);body.add(e)}
-  const limb=(x,y,k,h,m)=>{const p=new THREE.Group();p.position.set(x,y,0);const l=mesh(geo(k,()=>new THREE.BoxGeometry(k==='arm'?.17:.21,h,k==='arm'?.17:.21)),m);l.position.y=-h/2;p.add(l);body.add(p);return p};
+  const limb=(x,y,k,h,m)=>{
+    const p=new THREE.Group();p.position.set(x,y,0);
+    const uh=h*0.52,lh=h*0.48,w=k==='arm'?.17:.21;
+    const u=mesh(geo(k+'_up',()=>new THREE.BoxGeometry(w,uh,w)),m);u.position.y=-uh/2;p.add(u);
+    const j=new THREE.Group();j.position.set(0,-uh,0);p.add(j);
+    const lo=mesh(geo(k+'_lo',()=>new THREE.BoxGeometry(w*.92,lh,w*.92)),m);lo.position.y=-lh/2;j.add(lo);
+    body.add(p);return {root:p,joint:j};
+  };
   const lm=o.legMat||toonS(0x1c1c28);
-  const armL=limb(-.47,1.12,'arm',.55,bm),armR=limb(.47,1.12,'arm',.55,bm),legL=limb(-.17,.52,'leg',.52,lm),legR=limb(.17,.52,'leg',.52,lm);
+  const aL=limb(-.47,1.12,'arm',.55,bm),aR=limb(.47,1.12,'arm',.55,bm),lL=limb(-.17,.52,'leg',.52,lm),lR=limb(.17,.52,'leg',.52,lm);
+  const armL=aL.root,armR=aR.root,legL=lL.root,legR=lR.root,forearmL=aL.joint,forearmR=aR.joint,shinL=lL.joint,shinR=lR.joint;
   if(o.wep&&o.wep!=='none'){const w=weapon(o.wep,o.wcol);w.position.y=-.5;armR.add(w);if(o.wep==='dagger'){const w2=weapon('dagger');w2.position.y=-.5;armL.add(w2)}}
   if(o.shield){const s=mesh(geo('shield',()=>new THREE.BoxGeometry(.08,.6,.5)),toonS(0x6a4a2a));s.position.set(-.1,-.45,.1);armL.add(s)}
   const sh=new THREE.Mesh(geo('shadow',()=>new THREE.CircleGeometry(.55,16)),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.35,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;sh.scale.setScalar(sc);root.add(sh);
   const mats=[];body.traverse(m=>{if(m.isMesh&&m.material.isMeshToonMaterial&&!m.material.userData.shared&&!mats.includes(m.material))mats.push(m.material)});
-  return {root,body,armL,armR,legL,legR,mats,sc,eyeMat:em};
+  return {root,body,armL,armR,legL,legR,forearmL,forearmR,shinL,shinR,mats,sc,eyeMat:em};
 }
 /* ================= MODELOS 3D ANIMADOS (KayKit, CC0) ================= */
 const MODELS={ok:false,list:{},w:{},anims:[],clips:{},h:{},ready:null};
@@ -3712,7 +3720,7 @@ function statsFor(){
   const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(classBaseStats().mp+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
-  const spd=6.4*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
+  const spd=4.2*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
   return{maxhp:Math.max(1,Math.round(maxhp)),maxmp:Math.max(0,Math.round(maxmp)),maxsh:Math.max(0,Math.round(maxsh)),dmg,def,spd:Math.max(0,spd)}}
 function playerModel(){
   const c=CLASSES[profile.cls],lk=profile.look||{h:0,b:0};
@@ -4167,7 +4175,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
     else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
-      EH(tr,k,px,0,pz,R()*TAU,(dead?4.4:5.2)+R()*2.3,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?1.8:2.7,k:dead?.25:.42})}
+      EH(tr,k,px,0,pz,R()*TAU,(dead?11.5:15.5)+R()*7.5,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?3.5:5.8,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();const rk344=pk(R,ROCKS),sc344=EW(so,rk344,px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s,h:envTop344(rk344,sc344,-.08)});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
   if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK||biomeAt(px,pz)!=='flores')continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
   if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<44*CITYK)continue;at(px,pz);const s2=.7+R()*.9;const rk344=pk(R,['rock_tallA','rock_tallB','stone_tallA']),sc344=EW(so,rk344,px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2,h:envTop344(rk344,sc344,-.05)})}
@@ -4214,11 +4222,11 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   const layout=c.layout253=City253.plan({radius:CITYR,level:cLv,dimensions:cityDim253,random:R,homeKeys:HOMES154,shopEntries:SHOPS.map(s=>({key:SHOPM[s.id][0],width:SHOPM[s.id][1],x:s.x,z:s.z,ry:Math.atan2(-s.x,-s.z)}))});
   const emit=e=>{if(!e)return;const x=X+e.x,z=Z+e.z;EW(b,fallen?'building_destroyed':e.key,x,0,z,e.ry,e.width,fallen?.8:1);cityCollider253(addCol,x,z,e.ry,e.dim);ENV.cast.push({x:x+.8,z:z-.6,r:Math.max(e.dim.w,e.dim.d)*.6,k:.5});};
   for(let a=TAU/152;a<TAU;a+=TAU/76){if(gate(a)<.18)continue;const x=X+Math.cos(a)*CITYR,z=Z+Math.sin(a)*CITYR;
-    const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),(TAU*CITYR/76*1.04)/(m.max[0]-m.min[0]),3.1/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
-    if(cLv>=3&&!fallen)glowL.push({x,y:3.4,z,w:1});
+    const m=ENV.m.wall_straight;b.add('wall_straight',x,0,z,-(a+Math.PI/2),(TAU*CITYR/76*1.04)/(m.max[0]-m.min[0]),7.0/m.h,1.35/.8,fallen&&R()<.4?.45:dark);
+    if(cLv>=3&&!fallen)glowL.push({x,y:7.3,z,w:1});
     if(fallen&&R()<.25)EW(b,'rubble_half',x+Math.cos(a)*-2,0,z+Math.sin(a)*-2,R()*TAU,2.6,.7)}
   for(let a=0;a<TAU-.01;a+=TAU/180){if(gate(a)<.18)continue;addCol({x:X+Math.cos(a)*CITYR,z:Z+Math.sin(a)*CITYR,r:1.8})}
-  cityGates341(c,g,fallen,CITYR,.18*CITYR,3.5);
+  cityGates341(c,g,fallen,CITYR,.18*CITYR,6.2);
   /* v481 (Ian): 3 MURALHAS CONCÊNTRICAS ESTILO ATTACK ON TITAN (SINA 60m, ROSE 85m, MARIA 115m) */
   if(!fallen&&cLv>=6&&window.TripoEnvironment153&&TripoEnvironment153.models.wall){
     // 2ª Muralha (Muralha Rose / Intermediária - 85m)
@@ -4241,13 +4249,13 @@ function envCity(c,g,addCol,R,fallen,cLv){const X=c.x,Z=c.z,b=new EnvBatch(),fl=
   /* Trees stay outside residential roofs and the four main streets. */
   for(const a of[45,135,225,315]){const r=a*Math.PI/180,x=X+Math.cos(r)*31,z=Z+Math.sin(r)*31;
     const treeBox=City253.bounds({w:12,d:12},x-X,z-Z,0);if(layout.footprints.some(e=>City253.clearance(treeBox,e.footprint)<1))continue;
-    const k=fallen?pk(R,TREES.dead):pk(R,TREES.leaf);if(!window.TripoEnvironment153||TripoEnvironment153.treeOk(k,x,z)){EH(tr,k,x,0,z,R()*TAU,5.4+R()*1.8,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:2.6,k:.4});}}
+    const k=fallen?pk(R,TREES.dead):pk(R,TREES.leaf);if(!window.TripoEnvironment153||TripoEnvironment153.treeOk(k,x,z)){EH(tr,k,x,0,z,R()*TAU,(fallen?11.5:15.5)+R()*7.5,tintB(pk(R,TINTS),.86+R()*.14));addCol({x,z,r:.8});ENV.cast.push({x:x+.5,z:z-.4,r:fallen?3.5:5.8,k:.4});}}
   for(let k=0,n=ENV.lite?50:150;k<n;k++){const a=R()*TAU,d=CITYR-3.4+R()*2.6;if(gate(a)<.15)continue;EH(fl,k%9?'blades':pk(R,['plant_bush','grass_leafs','plant_flatShort']),X+Math.cos(a)*d,0,Z+Math.sin(a)*d,R()*TAU,.5+R()*.5,fallen?.6:tintB(0xffffff,.85+R()*.15))}
   const shopH={};
   for(const sp of SHOPS){const sx=X+sp.x,sz=Z+sp.z,ry=Math.atan2(-sp.x,-sp.z),[k,W]=SHOPM[sp.id]||['building_home_A_blue',7];
     const s=EW(b,fallen?'building_destroyed':k,sx,0,sz,ry,W,fallen?.8:1);ENV.cast.push({x:sx+.9,z:sz-.7,r:W*.72,k:.5});shopH[sp.id]=cityDim253(k,W).h;
     const cs=Math.cos(ry),sn=Math.sin(ry),side=(dx,dz)=>({x:sx+dx*cs+dz*sn,z:sz-dx*sn+dz*cs});
-    if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,1.05);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,1.1);
+    if(!fallen){const dim=cityDim253(k,W),p1=side(dim.w*.5+1,dim.d*.25),p2=side(-dim.w*.5-1,dim.d*.25);envSolidEW357(addCol,b,'barrel',p1.x,0,p1.z,R()*TAU,0.78);envSolidEW357(addCol,b,'crate_A_big',p2.x,0,p2.z,R()*TAU,0.85);
       const p3=side(dim.w*.5+1,dim.d*.25-1.3);EW(b,sp.id==='wep'?'weaponrack':sp.id==='guild'?'target':'crate_B_small',p3.x,0,p3.z,ry,sp.id==='guild'?1.4:1);addCol({x:p3.x,z:p3.z,r:sp.id==='guild'?.65:.55})/* v429: não se atravessa mais */}}
   const fs=0;/* v236: fonte própria do selo (seal231) */if(fallen)for(let i=0;i<7;i++){const a=i/7*TAU;EW(b,R()<.5?'rubble_half':'rock_smallA',X+Math.cos(a)*3.6,0,Z+Math.sin(a)*3.6,R()*TAU,1.4+R(),.7)}ENV.cast.push({x:X+.4,z:Z-.3,r:5.2,k:.18});addCol({x:X,z:Z,r:4.4});/* v231: obelisco virou a coluna do selo (buildCity); fonte quebrada na cidade caída */
   for(let i=0;i<8;i++){const a=i/8*TAU+TAU/16,x=X+Math.cos(a)*11,z=Z+Math.sin(a)*11;EH(b,'lantern',x,0,z,-a,3.3,dark);glowL.push({x,y:3.05,z,s:.75});addCol({x,z,r:.35})}
@@ -5549,9 +5557,23 @@ function makeSpiritWolf(){
   part(.56,.52,1.12,0,.74,0);part(.65,.58,.46,0,.88,.43);
   part(.46,.45,.48,0,1.15,.65);part(.3,.22,.4,0,1.05,.99);part(.27,.16,.09,0,1.07,1.22,dark);
   for(const x of[-.17,.17]){const ear=mesh(new THREE.ConeGeometry(.15,.35,4),fur);ear.position.set(x,1.5,.6);body.add(ear);part(.04,.075,.1,x*1.4,1.23,.87,dark)}
-  const paws=[];for(const x of[-.22,.22])for(const z of[-.4,.4]){const leg=new THREE.Group();leg.position.set(x,.65,z);const foot=mesh(new THREE.BoxGeometry(.17,.6,.23),fur);foot.position.y=-.3;leg.add(foot);body.add(leg);paws.push(leg)}
-  const tail=part(.22,.22,.75,0,.8,-.84);tail.rotation.x=-.5;
-  return{root,body,mats,paws,tail,quadruped:true,sc:1};
+  const paws=[],articulatedLegs=[];
+  for(const x of[-.22,.22])for(const z of[-.4,.4]){
+    const hip=new THREE.Group();hip.position.set(x,.65,z);
+    const thigh=mesh(new THREE.BoxGeometry(.16,.32,.20),fur);thigh.position.y=-.16;hip.add(thigh);
+    const knee=new THREE.Group();knee.position.set(0,-.32,0);hip.add(knee);
+    const shin=mesh(new THREE.BoxGeometry(.13,.30,.17),fur);shin.position.y=-.15;knee.add(shin);
+    const foot=mesh(new THREE.BoxGeometry(.16,.11,.22),dark);foot.position.set(0,-.30,.03);knee.add(foot);
+    body.add(hip);paws.push(hip);articulatedLegs.push({thigh:hip,knee,paw:foot});
+  }
+  const tailSegments=[];let prevTail=body;
+  for(let i=0;i<3;i++){
+    const ts=new THREE.Group();
+    if(i===0){ts.position.set(0,.78,-.55);ts.rotation.x=-.45;}else{ts.position.set(0,-.04,-.25);ts.rotation.x=.1;}
+    const tm=mesh(new THREE.BoxGeometry(.18-i*.04,.18-i*.04,.28),fur);tm.position.z=-.14;ts.add(tm);
+    prevTail.add(ts);tailSegments.push(ts);prevTail=ts;
+  }
+  return{root,body,mats,paws,tail:tailSegments[0],tailSegments,articulatedLegs,quadruped:true,sc:1};
 }
 function makeStoneColossus(){const m=makeChibi({body:0x766c5a,skin:0x8e8068,eye:0xffd070,scale:1.25,wep:'none'}),stone=toon(0x766c5a);for(const part of m.body.children)if(part.isMesh&&part.position.y>1.5&&part.geometry.type==='SphereGeometry')part.geometry=geo('colossusHead',()=>new THREE.DodecahedronGeometry(.46,0));for(const arm of [m.armL,m.armR]){for(const y of [0,-.55]){const rock=mesh(geo('colossusFist',()=>new THREE.DodecahedronGeometry(.3,0)),stone);rock.position.y=y;arm.add(rock)}}const core=mesh(geo('colossusCore',()=>new THREE.OctahedronGeometry(.17)),glowS(0xffd070,.8));core.position.set(0,.95,.38);m.body.add(core);m.mats.push(stone);return m}
 function spawnSummon(kind,x,z,life){
@@ -6817,14 +6839,14 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     if(P.dodgeT>0){const before372=P.dodgeT,step372=Math.min(dt,before372);P.dodgeT-=dt;const u0=1-before372/.32,u1=1-Math.max(0,P.dodgeT)/.32,envelope372=P.dashSpd?1:.4+.3*(Math.cos(Math.PI*u0)-Math.cos(Math.PI*u1))/Math.max(1e-6,u1-u0);const sp=(P.dashSpd||8.5)*envelope372;moveEnt(P,P.dir.x*sp*step372,P.dir.z*sp*step372);P.ghostT-=dt;if(P.ghostT<=0){P.ghostT=.04;fxGhost()}
       if(P.dashDmg){for(const e of enemies){if(e.dead||P.dashDmg.hit.has(e))continue;if(Math.hypot(e.x-P.x,e.z-P.z)<1.8+e.r){P.dashDmg.hit.add(e);hurtEnemy(e,P.dashDmg.dmg,P.x,P.z,{execute:P.dashDmg.execute,kb:3,fromPlayer:true,skillHit:true,stun:.6});hitstop(.05)}}}
       if(P.dodgeT<=0){P.dashDmg=null;P.dashSpd=0}mv=1}
-    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted?1:sprintState372.running?Sprint373.runFactor:Sprint373.walkFactor);dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
+    else if(il>.1){const sp=movementSpeed(P.spd*(run.mounted?1.8:1)*(setHas153('metamorfo','b')&&kitState111().form?1.12:1)*(kitState111().speed?.until>time?1+kitState111().speed.amount:1)*(uniqueHas183('swift')?1+.15*relicM204('swift'):1)*(1+.01*cons('vel'))*(boon184()?1.08:1))*(P.atkCd>.15&&!rankTalent('flow')?.45:1)*(P.slowT>0?.6:1)*(run.mounted?1:sprintState372.running?Sprint373.runFactor:(keys.KeyC||keys.AltLeft||(il>0&&il<.55))?Sprint373.walkFactor:(Sprint373.normalFactor||1.0));dprog('run',sp*dt*Math.min(1,il));const ox111=P.x,oz111=P.z;if(!iceMove240(P,ix*sp,iz*sp,dt))moveEnt(P,ix*sp*dt,iz*sp*dt);kitWalk111(Math.hypot(P.x-ox111,P.z-oz111));if(P.atkCd<=.15)turnTo(P,Math.atan2(ix,iz),dt,14);mv=Math.min(1,il)}else{try{iceMove240(P,0,0,dt)}catch(e){}}
     const moved372=Math.hypot(P.x-motionX372,P.z-motionZ372);Sprint373.spend(sprintState372,martialState260(),dt,moved372>.002,resourceWait263('vigor'));
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     {stepVertical357(P,dt);COLY344=0}
-    animChibi(P.m,{move:mv,sprint:sprintState372.running,speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
+    animChibi(P.m,{move:mv,sprint:sprintState372.running,walking:!!(keys.KeyC||keys.AltLeft||(il>0&&il<.55)),speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
-  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);if(P.jy!==0&&Number.isFinite(P.jy)){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
+  P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);try{if(window.Anim547&&Anim547.postPlayer)Anim547.postPlayer(P.m,{move:mv,speed:dt>0?moved372/dt:0},dt)}catch(_){}if(P.jy!==0&&Number.isFinite(P.jy)){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
   pLight.position.set(P.x,4,P.z);
   tickGates(dt);
   if(window.Gosma347)Gosma347.update(dt);for(const e of enemies)updEnemy(e,dt);curAtk=null;enemies=enemies.filter(e=>!e.gone);
@@ -6889,7 +6911,7 @@ function updDungeon(dt){
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
 /* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. */
-const pcCam={yaw:0,pitch:.16,distance:3.9,active:false};
+const pcCam={yaw:0,pitch:.03,distance:2.25,active:false};
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
 function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;pcCam.pitch=clamp(pcCam.pitch+dy*.003,-.85,1.10)}
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
@@ -6910,10 +6932,10 @@ function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*(1-Math.exp(-14*dt));cam.z+=(P.z-cam.z)*(1-Math.exp(-14*dt));
   if((paused||modalOpen||!$('gameMenu95').hidden)&&pcCam.active)releaseCamera373();
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
-  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding()),pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.72),cam.z);
+  const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding()),pivot=new THREE.Vector3(cam.x,terrH(cam.x,cam.z)+(P.jy||0)+(mounted?2.5:1.60),cam.z);
   /* v377 (Ian): câmera estilo The Witcher 3 — perto, sobre o ombro direito, personagem um pouco à esquerda. */
-  const distance=mounted?5.4:3.9,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
-  const [ox,oz]=camRot(mounted?.35:.62,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
+  const distance=mounted?4.2:2.25,cp=Math.cos(pcCam.pitch),sp=Math.sin(pcCam.pitch);
+  const [ox,oz]=camRot(mounted?.35:.45,distance*cp),offset=new THREE.Vector3(ox,distance*sp,oz);
   offset.y=Math.max(offset.y,terrH(pivot.x+ox,pivot.z+oz)+.30-pivot.y);
   // Sweep a camera-sized sphere against terrain and the same solid world geometry as movement.
   let safe=distance;
@@ -8226,7 +8248,7 @@ function caravanUpd(a,dt){a.t+=dt;if(a.flash>0){a.flash-=dt;flashMats(a.m,a.flas
   animChibi(a.m,{move:mv,atk:0,dead:0,wind:0},a.t);a.m.root.position.set(a.x,0,a.z);a.m.root.rotation.y=a.face}
 const WBOSS={n:'Dragão Errante',types:['fury','soulrain'],body:0x8a1a1a,scale:3.2,skill:S('Sopro do Dragão','rain',10,35,3,0xff5a1e)};
 function spawnWorldBoss(){const P=player,a=rnd(0,TAU),x=P.x+Math.cos(a)*70,z=P.z+Math.sin(a)*70;const b=spawnBoss(x,z,clamp(rankOf()+1,0,9),WBOSS);b.wild=true;b.breaker=true;b.world=true;b.hp*=4;b.maxhp*=4;b.gold*=5;b.roam={x,z};
-  for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
+  if(window.Anim547&&Anim547.createDragonWings){b.drakeWings547=Anim547.createDragonWings(b.m.body,0x8a1a1a);if(b.drake510)b.drake510.proceduralWings=b.drakeWings547;}else{for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}}
   toast('<b>[MUNDO]</b> Um DRAGÃO ERRANTE sobrevoa a região. Ele aparece no mapa.',6000);bigText('DRAGÃO ERRANTE',1300)}
 function worldBossDeath(b){if(b.siege){siegeWin(b);storyEv('siege')}hitstop(.25);shake(.8);sfx('boom');sfx('gong');$('boss').hidden=true;profile.bossKills=(profile.bossKills||0)+1;addChest(b.x,b.z+3,b.gr,true);toast('<b>[MUNDO]</b> O Dragão Errante caiu. Pegue o tesouro dele.',5000)}
 /* v217 (Ian): mundo em camadas. Cidades a ~1,9 km; capitais a cada 5×5 regiões (~9,6 km);
@@ -9362,7 +9384,7 @@ const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
   const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
-  const HEIGHT={guild:12,defense:13,forge:7,inn:10,church:13,potion:8,mill:12,well:3.2,bank:3.4,market:3.4,bankhall:10},KEYHEIGHT={building_tower_A_blue:11,building_tower_B_blue:11};
+  const HEIGHT={guild:16,defense:16,forge:9.5,inn:13.5,church:18,potion:10.5,mill:16,well:2.8,bank:3.2,market:3.4,bankhall:14,house:9.5},KEYHEIGHT={building_tower_A_blue:16,building_tower_B_blue:16};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
   const CITY={building_barracks_blue:'guild',building_blacksmith_blue:'forge',building_home_B_red:'potion',building_tavern_blue:'inn',building_church_blue:'church',building_windmill_blue:'mill',building_well_blue:'well',building_tower_A_blue:'defense',building_tower_B_blue:'defense',building_market_blue:'defense',wall_straight:'wall','stall-red':'market','stall-green':'bank',tripo_bank_building:'bankhall',palisade154:'palisade',outerwall154:'wall'};
   function prepare(gltf, id) {
@@ -9495,7 +9517,7 @@ const TripoEnvironment153 = (() => {
     const kind=Village129.classify(key),m=models.house;
     if(!m||!['home-a','home-b'].includes(kind))return oldEW(batch,key,x,y,z,ry,width,tint);
     // Two-storey homes ~6.6-7.4 m; the requested width only adds a little variety.
-    const scale=(6.6+Math.max(0,width-5.4)*.6)/m.h;add(batch,'house',x,y,z,ry+Math.PI/2,scale);return scale;/* v188: porta da casa Tripo fica na lateral do modelo */
+    const houseH=9.2+Math.max(0,width-5.4)*.4;const scale=houseH/m.h;add(batch,'house',x,y,z,ry+Math.PI/2,scale);return scale;/* v188/v548: casas 8.5m-10.5m com portas de 2.5m-2.8m livres */
   };
   EnvBatch.prototype.mesh=function(material){
     const base=oldMesh.call(this,material),entries=this.tripo153;
@@ -9538,7 +9560,7 @@ const TripoEnvironment153 = (() => {
   MODELS.ready=Promise.all([MODELS.ready,ready]).then(([ok])=>ok);
   const treeOk=(k,x,z)=>!k.startsWith('tree_')||!models.oak||!!models[tree(k,x,z)];
   function dimensions(key,width=6){const id=CITY[key],kind=Village129.classify(key),home=!id&&['home-a','home-b'].includes(kind),t=models[home?'house':id];
-    if(t){const h=home?6.6+Math.max(0,width-5.4)*.6:KEYHEIGHT[key]||HEIGHT[id],s=h/t.h;return {w:(home?t.sz:t.sx)*s,d:(home?t.sx:t.sz)*s,h};}
+    if(t){const h=home?(9.2+Math.max(0,width-5.4)*.4):KEYHEIGHT[key]||HEIGHT[id],s=h/t.h;return {w:(home?t.sz:t.sx)*s,d:(home?t.sx:t.sz)*s,h};}
     const m=ENV.m[key];if(!m)return null;const scale=width/m.w,w=(m.max[0]-m.min[0])*scale,d=(m.max[2]-m.min[2])*scale,ry=doorRot188(key);return {w:Math.abs(Math.cos(ry))*w+Math.abs(Math.sin(ry))*d,d:Math.abs(Math.sin(ry))*w+Math.abs(Math.cos(ry))*d,h:m.h*scale};
   }
   return {models,errors,ready,files,treeOk,leaf154,dimensions};
@@ -9691,9 +9713,9 @@ requestAnimationFrame(frame);
 <script src="tools/explorar539.js?v=543"></script>
 <script src="tools/anim547.js?v=547"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v547</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v548</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=547;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=548;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

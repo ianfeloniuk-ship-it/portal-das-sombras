@@ -107,7 +107,7 @@
       if (k > .5) P('tent_detailedOpen', s.ry + 3.6, 7.5, R() * TAU, 2.4);
       if (s.r2 < .5) P('bone_A', s.ry + 5.2, 5.5, null, .4);
       /* carroça de suprimentos estacionada */
-      if (R() < .75) { P('cart', s.ry + 2.8, 8.2, s.ry + .3, 2.2); col(s.ry + 2.8, 8.2, 1.8); P('barrel', s.ry + 2.5, 9.4, null, 1); P('crate_A_big', s.ry + 3.1, 9.4, null, 1.1); }
+      if (R() < .75) { P('cart', s.ry + 2.8, 8.2, s.ry + .3, 2.2); col(s.ry + 2.8, 8.2, 1.8); P('barrel', s.ry + 2.5, 9.4, null, .78); P('crate_A_big', s.ry + 3.1, 9.4, null, .85); }
       /* paliçada rústica de retaguarda */
       if (R() < .6) { wall(s.ry + 3.2, 9.5, 5, 1.4, 0); }
       pile(s.ry + 5.5, 7 + R() * 2, R() * TAU, 2 + R() * 1.5);
@@ -173,7 +173,7 @@
       /* viajante parado junto a uma fogueira: peregrino, mercador ambulante ou caçador */
       const kind = s.r2 < .34 ? 'peregrino' : s.r2 < .67 ? 'mercador' : 'cacador';
       P('campfire_stones', s.ry, 2.6, 0, .45); P('log', s.ry + 1.4, 3.4, null, .5); P('sack', s.ry + 2.4, 3, null, .6);
-      if (kind === 'mercador') { P('cart', s.ry + 3.4, 5, s.ry, 1.6); col(s.ry + 3.4, 5, 1.5); P('barrel', s.ry + 4, 3.6, null, 1); }
+      if (kind === 'mercador') { P('cart', s.ry + 3.4, 5, s.ry, 1.6); col(s.ry + 3.4, 5, 1.5); P('barrel', s.ry + 4, 3.6, null, .78); }
       else if (kind === 'cacador') { P('tent_detailedOpen', s.ry + 3.4, 5.5, R() * TAU, 2.6); col(s.ry + 3.4, 5.5, 1.5); }
       else pile(s.ry + 3.4, 4.6, R() * TAU, 1.8);
       npc = kind; label = 'F · FALAR';
