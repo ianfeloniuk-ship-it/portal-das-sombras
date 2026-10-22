@@ -4,6 +4,12 @@
 - Imagens novas `assets/equipment405/class-5.webp` (Paladino, Maça da Aurora) e `class-6.webp` (Invocador, Tomo), renderizadas dos GLB oficiais `models/armas155/varinha-paladino-490.glb` e `tomo-invocador-490.glb`; registradas em `tools/equipment-art405.json`.
 - Testado no Edge headless 1280×720 (ficha Status/Build e Kael). Cache: telas535 ?v=557, catálogo ?v=555, sw pds-v557.
 
+## v558 (22/10/2026) — Mestre Lúcio e falas por região
+- Pedido de Ian (chat «capitais, vampiros e mundo»): corrigir o Mestre Lúcio falando como mendigo e dar diálogos por região. O mendigo agora se chama «Lúcio» (sem o título «Mestre»). `tools/vida522.js`.
+- `tools/dialogo520.js`: saudação e boatos próprios de cada capital (Aster, Solaria, Ymiria, Zahar, Thalor, Urdan & Verden) via `Povo482.regionOf`; 40% das notícias vêm do boato regional.
+- NÃO feito (precisa de decisão/arte): região vampírica gótica, espíritos noturnos, mais rotas de cidadãos, falas por raça/facção (não há orcs/vampiros como NPCs ainda).
+- Teste: `node --check`. Não testado no navegador.
+
 ## v554 (22/10/2026) - NPCs da cidade reagem a ameacas
 - **Pedido de Ian**: Idle dos NPCs (Banco, Forja, Lojas, Guilda) e guardas, HUD nome/vida ao foco/dano, e deteccao de ameacas: guardas/cacadores (Marcos, Kallan) combatem, civis fogem e voltam a rotina. Preserva NPCs essenciais e interacao.
 - `tools/ameaca554.js` (novo, `window.Ameaca554`): vendedores nomeados (Citizens133 = malha sem esqueleto, ficavam parados) ganham respiracao, troca de apoio, olhar em volta e encolhem de medo; continuam no posto. Guardas (role523) e cacadores da cidade sacam a arma, correm ate o monstro agressivo/invasor a menos de 40 m e batem a cada ~1 s com `hurtEnemy` (`guard343`, passa a muralha); o monstro revida e o defensor cai 10 s (nunca morre); fim da ameaca: guardam a arma e voltam a ronda. Moradores/cidadaos fogem a 22 m e retomam a rotina 4 s depois. HUD de nome+vida ao mirar (12 m) ou 4 s apos apanhar. Um unico varrer de inimigos a cada 0,4 s.

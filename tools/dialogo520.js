@@ -29,6 +29,16 @@
 
   /* v527: fama do jogador e notícias que mudam com o que ele fez */
   function fama(k) { if (typeof profile === 'undefined' || !profile) return {}; const F = profile.fama523 = profile.fama523 || {}; if (k) { F[k] = (F[k] || 0) + 1; } return F; }
+  /* v558: fala por região (cultura da cidade) — saudação e boato próprios de cada capital */
+  const REG558 = {
+    aster: { oi: 'Que a Ordem guarde seus passos, viajante.', boato: ['As forjas de Kael não apagam nem de noite: a Ordem quer muralhas novas.', 'Chegam caídos das Fendas toda semana. A Ordem os acolhe, mas as camas acabam.'] },
+    solaria: { oi: 'Que o sol lhe seja leve, viajante.', boato: ['Aqui o sol nunca se põe por inteiro, e os sacerdotes dizem que é sinal de bênção.', 'Os mercadores do sol pagam bem por ouro polido e por notícias de estrada.'] },
+    ymiria: { oi: 'Entre logo, o frio come quem fica parado.', boato: ['A geada chegou mais cedo e o gelo das minas rangeu a noite inteira.', 'Os caçadores do norte voltam calados. O que vem do gelo profundo não se comenta alto.'] },
+    zahar: { oi: 'Água e sombra para você, viajante das dunas.', boato: ['A tempestade vermelha cobriu a estrada dos caravaneiros por dois dias.', 'Em Zahar, quem guarda a água manda. E hoje o poço anda baixo.'] },
+    thalor: { oi: 'Vento em popa, viajante.', boato: ['O porto está cheio: três velas chegaram com a maré e uma não voltou.', 'Pescadores juram ter visto algo enorme sob o casco na noite sem lua.'] },
+    urdan_verden: { oi: 'Os ancestrais ouvem, viajante. Fale com respeito.', boato: ['Os anciãos do vale andam inquietos: as pedras dos antigos ficaram mornas.', 'Dizem que, nas noites de neblina, vultos caminham entre as árvores velhas do vale.'] }
+  };
+  function reg558(n) { try { const id = global.Povo482 && Povo482.regionOf ? Povo482.regionOf(n && n.home) : 'aster'; return REG558[id] || REG558.aster; } catch (_) { return REG558.aster; } }
   function news(n, fb) {
     const F = fama() || {}, L2 = [];
     if (F.bondade >= 2) L2.push('Dizem que um viajante anda dando esmola aos pobres da cidade. Gente boa.');
@@ -37,6 +47,7 @@
     if (typeof profile !== 'undefined' && profile && profile.multa523) L2.push('Ouvi dizer que um viajante arrumou confusão com a guarda e ainda não pagou a multa.');
     try { const S = global.Quests480 && Quests480.getState(), k = S ? Object.keys(S.completed || {}).length : 0; if (k >= 1) L2.push('Contam que um viajante já cumpriu ' + k + ' contrato' + (k > 1 ? 's' : '') + ' da Ordem por aí.'); } catch (_) {}
     if (L2.length && Math.random() < .65) return L2[Math.floor(Math.random() * L2.length)];
+    if (Math.random() < .4) { const B = reg558(n).boato; return B[Math.floor(Math.random() * B.length)]; }
     try { return (typeof regionLine116 === 'function' && n && n.home && regionLine116(n.home)) || fb; } catch (_) { return fb; }
   }
   function dismissNpc() {
@@ -399,7 +410,7 @@
     const N = {};
     const news0 = () => news(n, 'Anda tudo calmo por aqui.');
     
-    let defaultGreeting = 'Olá, viajante. Em que posso ajudar?';
+    let defaultGreeting = reg558(n).oi + ' Em que posso ajudar?';
     if (isBank) defaultGreeting = 'Bem-vindo ao Banco de Aster. Seu ouro e seus bens estão sempre protegidos aqui.';
     else if (isWep) defaultGreeting = 'Aço bom e corte afiado mantêm um guerreiro vivo. O que procura hoje?';
     else if (isMkt) defaultGreeting = 'Minérios, peixes e provisões do dia. Tenho de tudo um pouco.';

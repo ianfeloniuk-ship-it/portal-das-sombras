@@ -3,7 +3,7 @@
    Mudam de ponto da cidade (pátio de dia, perto da pousada à noite) só quando o jogador está longe (>40 m). */
 (function (global) {
   'use strict';
-  const NAMES = ['Zé', 'Tobias', 'Dona Marta', 'Velho Anselmo', 'Bento', 'Cora', 'Mestre Lúcio', 'Nico', 'Rute', 'Gaspar'];
+  const NAMES = ['Zé', 'Tobias', 'Dona Marta', 'Velho Anselmo', 'Bento', 'Cora', 'Lúcio', 'Nico', 'Rute', 'Gaspar'];
   const DAY = [[6, 6], [-7, 5], [2, -9], [-4, -6]];
   const NIGHT = [[9, -6], [-9, -5], [8, 8]];
   let last = 0;
