@@ -1,3 +1,9 @@
+## v561 (22/10/2026) — Mão do Arquiteto volta a pegar só chefões (correção de regressão)
+- Pedido de Ian: a Mão pegou um bicho comum depois de morto; já tinha sido corrigido na v515.
+- Causa: a v551 (missão fixa #2, outra sessão) reintroduziu em `Reclaim372.claimEnemy` a exceção `isIntroTutorial` (herdada da v402), que chamava a Mão para o mob do tutorial, contra o «tutorial sem mão» da v515. Não foi rebase nem conflito: foi edição nova na mesma linha. O teste `test-coleta513.cjs` já pegava isso, mas não era rodado no build.
+- Corrigido: `claimEnemy` só aciona a Mão se `e.isBoss`. Guarda nova `tools/test-mao-so-chefes.cjs` (roda no `build.py`, falha se a Mão voltar a aceitar não-chefe).
+- Revisão v527–v560: nenhuma outra correção aprovada desfeita (ver relatório).
+
 ## v560 (22/10/2026) — Carroças das estradas: seguem a estrada, no chão, mais lentas
 - **Pedido de Ian**: depois da mudança de escala/relevo, muitas carroças ficaram bugadas e rápidas demais.
 - `tools/civic343.js`: a carroça civil andava a 14,5 m/s (o sprint agora é 5,8) e ficava em y=0 (enterrada/flutuando no relevo) num caminho em L reto que atravessava serra. Agora: 6,4 m/s (rodas a 12,8 rad/s), altura = `terrH` com inclinação pela subida, e o caminho é a estrada sinuosa real (`Mundo513.segs`), com o antigo caminho em L só como reserva. Destruída fica no chão (`terrH`-0,25).

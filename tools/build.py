@@ -9,6 +9,7 @@ for source in [*(root/'src'/'core').glob('*.js'), *(root/'tools').glob('*.js')]:
     text=source.read_text(encoding='utf-8')
     if 'tripo-rochedo154' in text:
         raise ValueError(f'Elmo do Metamorfo não é cenário: {source.relative_to(root)}')
+subprocess.run(['node',str(root/'tools'/'test-mao-so-chefes.cjs')],check=True)
 print('src/core:',core_parts.assemble())
 subprocess.run([sys.executable,str(root/'tools'/'sync-goblins122.py')],check=True)
 subprocess.run([sys.executable,str(root/'tools'/'sync-kit111.py')],check=True)
