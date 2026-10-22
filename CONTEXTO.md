@@ -1,3 +1,10 @@
+## v552 (22/10/2026) — Crash ao fechar o mapa + painel de portais recolhível
+- **Pedido de Ian**: corrigir o crash ao fechar o mapa 3D e permitir recolher/reabrir o painel lateral de portais.
+- **Causa (medida no console)**: `tools/mapa3d544.js` deixava um 2º contexto WebGL vivo (antialias, canvas de marcas 2048, ~120 malhas) por cima do jogo; a GPU estourava (`GL_OUT_OF_MEMORY` → `CONTEXT_LOST_WEBGL` → "Error creating WebGL context").
+- **Correção**: `unmount()` agora chama `teardown()` (dispose de geometrias/materiais/texturas, `forceContextLoss`) e `mount()` refaz a cena; listeners voltam a ser ligados no canvas novo.
+- **Painel**: botão "PORTAIS ›/‹" (`.tg`) recolhe/reabre a lista; estado lembrado entre aberturas.
+- **Teste**: 4 ciclos abrir/recolher/reabrir/fechar: canvas volta a 5, `paused=false`, console sem erros.
+
 ## v550 (22/10/2026) — Solo Vivo, EcoGrid e Trilhas por Pisoteio (Desire Paths)
 - **Missão de Ian**: Implementar o sistema de Solo Vivo, Crescimento Progressivo de Grama/Arbustos/Árvores e Trilhas por Pisoteio (Desire Paths) integrado ao relevo (terrH em terrain245.js), biomas/clima (biomes295.js) e águas (lakeAt239), mantendo 60 FPS cravados.
 - **Grade Celular Leve por Chunk (EcoGrid)** (tools/ecossistema550.js):

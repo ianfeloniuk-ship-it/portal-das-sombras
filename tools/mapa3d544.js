@@ -154,6 +154,9 @@ function css(){if(document.getElementById('mapa3d544-css'))return;const st=docum
 #mapa3d544 .ttl{position:absolute;top:18px;left:0;right:0;text-align:center;pointer-events:none;font:300 22px "Jost","Chakra Petch",sans-serif;letter-spacing:8px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7)}
 #mapa3d544 .ttl:after{content:"";display:block;width:220px;height:1px;margin:8px auto 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent)}
 #mapa3d544 .hint{position:absolute;left:0;right:0;bottom:14px;text-align:center;pointer-events:none;font:400 12px "Jost","Chakra Petch",sans-serif;letter-spacing:2px;color:rgba(255,255,255,.82);text-shadow:0 1px 4px rgba(0,0,0,.8)}
+#mapa3d544 .side.off{display:none}
+#mapa3d544 .tg{position:absolute;top:58px;right:16px;z-index:2;padding:6px 12px;background:rgba(8,10,14,.82);border:1px solid rgba(255,255,255,.35);border-radius:6px;color:#fff;font:400 13px "Jost","Chakra Petch",sans-serif;letter-spacing:2px;cursor:pointer}
+#mapa3d544 .side:not(.off)~.tg{right:min(376px,calc(34vw + 16px))}
 #mapa3d544 .x{position:absolute;top:14px;right:16px;z-index:2;background:none;border:0;color:#fff;font:300 26px "Jost",sans-serif;cursor:pointer;opacity:.8}
 #mapa3d544 .wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font:300 15px "Jost","Chakra Petch",sans-serif;letter-spacing:4px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.7)}`;document.head.appendChild(st)}
 function mount(){
@@ -165,7 +168,9 @@ function mount(){
     S.lab=document.createElement('canvas');S.lab.className='lab';
     el.append(S.cv,S.lab);
     el.insertAdjacentHTML('beforeend','<div class="ttl">TERRAS DESPERTAS</div><div class="hint">ARRASTAR · MOVER &nbsp;&nbsp; RODINHA · APROXIMAR &nbsp;&nbsp; BOTÃO DIREITO · GIRAR &nbsp;&nbsp; M · FECHAR</div><button class="x" aria-label="Fechar">×</button><div class="wait">DESENHANDO O RELEVO…</div>');
-    S.panel=document.createElement('div');S.panel.className='side';el.appendChild(S.panel);
+    S.panel=document.createElement('div');S.panel.className='side'+(S.collapsed?' off':'');el.appendChild(S.panel);
+    const tg=document.createElement('button');tg.className='tg';tg.textContent=S.collapsed?'‹ PORTAIS':'PORTAIS ›';tg.setAttribute('aria-label','Recolher ou reabrir a lista');
+    tg.onclick=()=>{S.collapsed=!S.collapsed;S.panel.classList.toggle('off',S.collapsed);tg.textContent=S.collapsed?'‹ PORTAIS':'PORTAIS ›'};el.appendChild(tg);
     el.querySelector('.x').onclick=()=>closeModal();
     document.body.appendChild(el);if(!S.bound){bind();S.bound=true}
     S.tx=player.x;S.tz=player.z;S.dist=2600;S.yaw=0;S.last=0}
@@ -173,7 +178,13 @@ function mount(){
   const mb=$('mb');S.panel.innerHTML='';if(mb)for(const n of [...mb.childNodes])if(n.id!=='bigmap')S.panel.appendChild(n);
   if(!S.raf)S.raf=requestAnimationFrame(frame);waitMsg()}
 function waitMsg(){const w=S.el&&S.el.querySelector('.wait');if(!w)return;if(D.ready){w.remove();return}setTimeout(waitMsg,150)}
-function unmount(){if(S.el){S.el.remove()}if(S.raf){cancelAnimationFrame(S.raf);S.raf=0}}
+/* v551 (Ian): crash ao fechar o mapa — causa: o mapa mantinha um 2º contexto WebGL vivo (antialias, canvas 2048, ~120 malhas) por cima do jogo e a GPU ficava sem memória (GL_OUT_OF_MEMORY / CONTEXT_LOST). Agora fechar libera tudo e abrir refaz. */
+function teardown(){
+  const r=S.r;if(!r)return;
+  try{S.scene&&S.scene.traverse(o=>{if(o.geometry)o.geometry.dispose();const m=o.material;if(m)for(const x of (Array.isArray(m)?m:[m])){for(const k of ['map','normalMap'])if(x[k])x[k].dispose();x.dispose()}})}catch(e){console.warn('mapa3d544',e)}
+  try{S.mkTex&&S.mkTex.dispose();r.dispose();r.forceContextLoss()}catch(e){console.warn('mapa3d544',e)}
+  S.r=S.scene=S.cam=S.terrain=S.marks=S.mkCv=S.mkTex=S.water=S.player=S.ring=S.cv=S.lab=null;S.clouds=[];S.drag=null;S.bound=false}
+function unmount(){if(S.raf){cancelAnimationFrame(S.raf);S.raf=0}if(S.el){S.el.remove()}teardown()}
 M._S=S;M._D=D;M.mount=mount;M.unmount=unmount;M.state=()=>({ready:D.ready,hiTex:D.texDone,open:!!(S.el&&S.el.isConnected),dist:S.dist,tx:S.tx,tz:S.tz});
 M.view=o=>{Object.assign(S,o||{});return M.state()};
 M.snapshot=()=>{placeCam();S.r.render(S.scene,S.cam);labels();const c=document.createElement('canvas');c.width=S.cv.width;c.height=S.cv.height;const g=c.getContext('2d');g.drawImage(S.cv,0,0);g.drawImage(S.lab,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.85)};
