@@ -1,3 +1,11 @@
+## v537 — habilidades de Arqueiro, Paladino e Invocador — 21/10/2026
+Mais 27 ativas com peças da demo aprovada, movimento próprio e efeito ligado a alvo/projétil/aliado/zona reais. Completadas as 30 dessas classes e as 100 ativas das dez classes já migradas por inteiro. A Matilha respeita as vagas reais e só separa desenhos sobrepostos; Sentinela preserva AI imóvel e tiros, com forma cristalina animada. Carga da Flecha Perfurante preservada nos três níveis. Dano, cura, recursos, alcance, recargas e colisão mantidos nos controles normal/leve. Autorização de publicação automática já dada por Ian. Entrega: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
+Pendentes: demais habilidades de Monge, Lâmina Arcana, Lanceiro e Berserker; básicos e habilidades das classes raras.
+
+A integração v537 preserva v510–v536 de mundo/telas. Corrigida a chamada EH da câmara da estátua: EnvBatch verdadeiro e resultado anexado ao cenário, sem mudar recompensas ou colisões.
+
+Validação final: 108 controles pelo lançamento real, 26 de borda e 36 de regressão sem erro JavaScript capturado. A medição por software na cena atual ficou em 18–22 fps normal e 26–27,5 leve, com a apresentação antiga em 21,6–26,6 e 25,7–27; não comprova fluidez no aparelho de Ian. Testes e limitações completos no Drive.
+
 ## v536 (21/10/2026) — Mercado, lojas, banco e coleta com a cara do Primeva
 - Pedido de Ian (proposta aprovada com ajustes: «arruma e coloca no jogo»; escolheu levar mercado, banco e coleta; HUD fica para uma proposta nova): janelas largas com o jogo desfocado atrás, item girando em 3D num pedestal de cristal na cor do rank, título em Russo One com brilho, linha da Fenda animada (violeta→verde-água→dourado), linhas e botões com cantos chanfrados. Ian disse que a versão anterior estava «igual Skyrim»; esta usa as fontes, as cores de rank e a energia da Fenda do jogo.
 - `tools/telas535.js` (novo, `window.Telas535`): envolve `openModal`/`closeModal` e só muda a forma de Mercado de Recursos (Dorian), lojas do Kael/Brann/Mira (`SHOPS`, inclusive estoque `kael405-item`), Banco e Saque. Regras, preços e botões são os mesmos (cliques seguem pelo `#mb` original). Modelos: armas/armadura/baú do próprio jogo (`models/armas155`, `equipment431/aco-r3`, `m437/bau`); núcleo/cristal usam `Loot513.model` (o painel antigo do loot513 é removido na janela nova); peças de monstro ganharam modelo próprio feito em código — Presa, Couro, Osso, Garra, Escama, Gel, Pena, Chifre, Olho, Coração, Essência, Poção, Pergaminho (antes couro e presa caíam no baú).
@@ -2949,10 +2957,3 @@ Continuam pendentes as outras habilidades de Arqueiro, Paladino, Invocador, Mong
   4. Nós de Encontros Aleatórios (World Encounter Nodes): 80 a 120 pontos invisíveis nas 6 Rotas Reais sorteando eventos por nível/semente com carroça e a pé (encontros502.js).
   5. Efeito Blackreach: Abóbada Primordial (Cap. 27 do Manuscrito) como subsolo colossal de coral branco sob o continente.
   6. Quadro Técnico dos 5 Especialistas (Arte, Geometria, Shaders/PBR, Biomas e Performance) consolidado como diretriz de execução obrigatória.
-
-
-## v537 — habilidades de Arqueiro, Paladino e Invocador — 21/10/2026
-Mais 27 ativas com peças da demo aprovada, movimento próprio e efeito ligado a alvo/projétil/aliado/zona reais. Completadas as 30 dessas classes e as 100 ativas das dez classes já migradas por inteiro. A Matilha respeita as vagas reais e só separa desenhos sobrepostos; Sentinela preserva AI imóvel e tiros, com forma cristalina animada. Carga da Flecha Perfurante preservada nos três níveis. Dano, cura, recursos, alcance, recargas e colisão mantidos nos controles normal/leve. Autorização de publicação automática já dada por Ian. Entrega: https://drive.google.com/drive/folders/1SPQToYdxn6GLTOITmziOjVefjm-EkQ9L
-Pendentes: demais habilidades de Monge, Lâmina Arcana, Lanceiro e Berserker; básicos e habilidades das classes raras.
-
-A integração v537 preserva v510–v536 de mundo/telas. Corrigida a chamada EH da câmara da estátua: EnvBatch verdadeiro e resultado anexado ao cenário, sem mudar recompensas ou colisões.
