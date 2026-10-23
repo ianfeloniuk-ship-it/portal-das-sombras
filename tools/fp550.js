@@ -711,6 +711,34 @@
   };
 
   FP.handScale = { r: 0.72, l: 0.62 }; /* viewmodel estilo Skyrim: mão livre pequena no canto */
+
+  /* ---------- v588: efeitos de Skyrim na 1ª pessoa (flecha encaixada, brilho de magia) ---------- */
+  function fxUpdate(P){
+    const SK = global.Skyrim588; if(!SK || typeof camera === 'undefined') return;
+    if(!FP.arrow){
+      const T = THREE, g = new T.Group();
+      const shaft = new T.Mesh(new T.CylinderGeometry(0.008, 0.008, 1, 8), new T.MeshBasicMaterial({ color: 0xd9a35f }));
+      const head = new T.Mesh(new T.ConeGeometry(0.02, 0.07, 8), new T.MeshBasicMaterial({ color: 0xcfd6dd }));
+      shaft.rotation.x = Math.PI / 2; head.rotation.x = -Math.PI / 2;
+      g.add(shaft, head); g.userData.shaft = shaft; g.userData.head = head; g.visible = false; g.renderOrder = 5;
+      camera.add(g); FP.arrow = g;
+      FP.glow = new T.PointLight(0x88ccff, 0, 2.2); camera.add(FP.glow);
+    }
+    const isBow = !!(P.m.bowHolder155);
+    const show = FP.active && isBow && SK.draw > 0.02;
+    FP.arrow.visible = show;
+    if(show){
+      const e = SK.draw, e2 = e * e * (3 - 2 * e), a = [0.27 + (0.0 - 0.27) * e2, -0.26 + (-0.09 + 0.26) * e2, -0.52 + (-0.34 + 0.52) * e2], b = [-0.09 * e2 + -0.18 * (1 - e2), -0.07 * e2 + -0.12 * (1 - e2), -0.78 * e2 + -0.7 * (1 - e2)];
+      const A = new THREE.Vector3(a[0], a[1], a[2]), B = new THREE.Vector3(b[0], b[1], b[2] - 0.05), d = B.clone().sub(A), L = d.length();
+      FP.arrow.position.copy(A).addScaledVector(d, 0.5);
+      FP.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), d.normalize());
+      FP.arrow.userData.shaft.scale.set(1, L, 1); FP.arrow.userData.head.position.set(0, 0, -L / 2 - 0.035);
+    }
+    const c = SK.cast || 0;
+    FP.glow.color.setHex(SK.castCol || 0x88ccff); FP.glow.intensity = FP.active ? Math.min(1, c * 1.6) * 2.4 : 0;
+    FP.glow.position.set(-0.08, -0.06, -0.5);
+  }
+
   FP.pose = function(){
     const P = global.player;
     if(!P || !P.m || !P.m.bones || !global.THREE || typeof camera === 'undefined' || !camera) return;
@@ -728,8 +756,15 @@
       const side = s === 'r' ? 1 : -1;
       hd.scale.setScalar(FP.handScale[s]);
       const so3 = s === 'r' ? FP._off : [0,0,0];
-      const bowL = s === 'l' && P.m.bowHolder155;
-      const tgt = bowL ? V.t.set(-0.18, -0.12, -0.7) : (s === 'r' ? V.t.set(0.27 + so3[0], -0.26 + so3[1], -0.52 + so3[2]) : ((P.m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0])) ? V.t.set(-0.18, -0.12, -0.7) : V.t.set(-0.17, -0.16, -0.5))); camera.localToWorld(tgt);
+      /* alvos (espaço da câmera) com os estados de Skyrim: puxar o arco, preparar golpe forte, lançar magia */
+      const SK = global.Skyrim588 || {}, isBow = !!(P.m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0]));
+      const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+      const ez = t => t * t * (3 - 2 * t);
+      let tt = s === 'r' ? [0.27, -0.26, -0.52] : (isBow ? [-0.18, -0.12, -0.7] : [-0.17, -0.16, -0.5]);
+      if(isBow && SK.draw > 0) tt = s === 'r' ? lerp3(tt, [0.0, -0.09, -0.34], ez(SK.draw)) : lerp3(tt, [-0.09, -0.07, -0.78], ez(SK.draw));
+      if(!isBow && s === 'l' && SK.cast > 0) tt = lerp3(tt, [-0.06, -0.05, -0.56], ez(Math.min(1, SK.cast * 1.8)));
+      if(!isBow && s === 'r' && SK.wind > 0) tt = lerp3(tt, [0.36, -0.1, -0.36], ez(SK.wind));
+      const tgt = V.t.set(tt[0] + so3[0], tt[1] + so3[1], tt[2] + so3[2]); camera.localToWorld(tgt);
       tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
       delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);
       tgt.addScaledVector(delta, 0.8);
@@ -746,8 +781,9 @@
     }
     const hasW = !!(P.m.socket && P.m.socket.children[0]) || !!(HAND.rig.r && HAND.rig.r.anchor.children[0]);
     const hasB = !!P.m.bowHolder155 || !!(HAND.rig.l && HAND.rig.l.anchor.children[0]);
-    HAND.grip.r += ((hasW ? 1 : 0.25) - HAND.grip.r) * 0.25; HAND.grip.l += ((hasB ? 1 : 0.25) - HAND.grip.l) * 0.25;
+    HAND.grip.r += ((hasW ? 1 : 0.25) - HAND.grip.r) * 0.25; HAND.grip.l += ((hasB ? 1 : ((global.Skyrim588 && global.Skyrim588.cast > 0) ? 0 : 0.25)) - HAND.grip.l) * 0.25;
     for(const side of ['r', 'l']){ const R = HAND.rig[side]; if(R && R.on) curlHand(R, HAND.grip[side]); }
+    try { fxUpdate(P); } catch(_) {}
     P.m.root.updateMatrixWorld(true);
   };
 

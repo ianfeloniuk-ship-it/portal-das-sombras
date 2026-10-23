@@ -1,3 +1,9 @@
+## v588 (23/10/2026) — Ataque e magia no estilo Skyrim (só a mecânica)
+- **Pedido de Ian**: arco como no Skyrim (segurar puxa, soltar atira) e copiar a mecânica de ataques e lançamento de habilidades da vista em 1ª pessoa.
+- `tools/skyrim588.js` (novo, `window.Skyrim588`): **arco** — segurar o botão puxa a corda por ~1 s (zoom de mira de até 26% no FOV, flecha encaixada na mão da corda), soltar dispara; dano ×0,4→×1,5 e velocidade ×0,65→×1 pela puxada; menos de 20% cancela; botão direito/Esc cancela; vale em 1ª e 3ª pessoa. **Espada/machado/maça/martelo (só 1ª pessoa)** — clique rápido = golpe leve; segurar >0,4 s e soltar = golpe forte (dano ×2, recarga ×1,8, tremor de tela; o braço recua enquanto segura). **Habilidades (1ª pessoa)** — ao lançar, a mão livre sobe ao centro, abre a palma e brilha na cor do elemento (~0,5 s).
+- `tools/fp550.js`: poses (mão da corda puxa, bow no centro, recuo do golpe forte, palma da magia), flecha 3D e luz de magia presas à câmera.
+- Teste: jogo real — arco (puxada, zoom, tiro, FOV volta), golpe leve ×1 e forte ×2 com `player.dmg` restaurado, magia (pose/brilho, cor do elemento). **Não testado**: andando, cajado/lança, escudo/bloqueio (botão direito = ainda o do jogo), efeito sonoro da puxada.
+
 ## v587 (23/10/2026) — 1ª pessoa no enquadramento do Skyrim
 - **Pedido de Ian** (referência de captura do Skyrim): mão livre pequena no canto inferior esquerdo, arma entrando pela borda direita em diagonal, centro da tela livre.
 - `tools/fp550.js`: mãos escaladas pelo osso da mão (`FP.handScale`: arma 0,72 · livre 0,62; a arma compensa pelo âncora); alvos do IK: mão livre em (-0,17; -0,16; -0,5), mão da arma quase fora da tela (0,27; -0,26; -0,52); guarda da espada/machado/maça em diagonal (lâmina sobe, ponta levemente à esquerda); golpe curto à esquerda e volta. Arco: mão esquerda, pequeno.
