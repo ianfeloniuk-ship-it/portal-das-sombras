@@ -552,6 +552,7 @@
       if(m.bones['hand_' + side]) m.bones['hand_' + side].scale.setScalar(1);
       for(const c of R.anchor.children.slice()){
         const u = c.userData.fpOrig;
+        c.visible = true;
         if(u && u.parent){ u.parent.add(c); c.position.copy(u.pos); c.quaternion.copy(u.quat); if(u.scale) c.scale.copy(u.scale); c.userData.fpOrig = null; }
       }
     }
@@ -753,6 +754,7 @@
     FP._run = FP._run === undefined ? 0 : FP._run; FP._run += (runL - FP._run) * Math.min(1, dtL * 8);
     FP._ph = (FP._ph || 0) + dtL * (spdL > 4.5 ? 11 : spdL > 0.15 ? 7.5 : 1.6);
     const bobX = Math.sin(FP._ph) * 0.014 * mvL, bobY = Math.abs(Math.cos(FP._ph)) * 0.016 * mvL, breathe = Math.sin(nowL * 0.0015) * 0.004 * (1 - mvL);
+    { const S9 = global.Skyrim588; if(S9 && S9.blk > 0 && FP._dir) FP._dir = FP._dir.map((v, k) => v + ([-0.12, 0.95, -0.28][k] - v) * S9.blk); }
     if(FP._run > 0.01 && FP._dir && !(SK0() && SK0().draw > 0)) FP._dir = [FP._dir[0], FP._dir[1] * (1 - 0.5 * FP._run), FP._dir[2] - 0.35 * FP._run];
     for(const s of ['r','l']){
       const ua = b['upperarm_'+s], fa = b['forearm_'+s], hd = b['hand_'+s];
@@ -772,12 +774,16 @@
       if(isBow && SK.draw > 0) tt = s === 'r' ? lerp3(tt, [0.0, -0.09, -0.34], ez(SK.draw)) : lerp3(tt, [-0.09, -0.07, -0.78], ez(SK.draw));
       if(!isBow && s === 'l' && SK.cast > 0) tt = lerp3(tt, [-0.06, -0.05, -0.56], ez(Math.min(1, SK.cast * 1.8)));
       if(!isBow && s === 'r' && SK.wind > 0) tt = lerp3(tt, [0.36, -0.1, -0.36], ez(SK.wind));
+      const armed = isBow || !!(P.m.socket && P.m.socket.children[0]) || !!(HAND.rig.r && HAND.rig.r.anchor.children[0]);
+      const shth = armed ? 1 - (SK.dr === undefined ? 1 : SK.dr) : 0;   /* 0 = arma na mão · 1 = guardada */
+      if(shth > 0) tt = lerp3(tt, s === 'r' ? [0.2, -0.29, -0.42] : [-0.2, -0.29, -0.42], ez(shth));
+      if(!isBow && s === 'r' && SK.blk > 0) tt = lerp3(tt, [0.06, -0.03, -0.38], ez(SK.blk));
       tt[0] += (s === 'r' ? 1 : -1) * bobX * 0.7 + (s === 'r' ? 0.035 : 0) * FP._run;
       tt[1] += -bobY * (s === 'r' ? 1 : 0.8) + breathe * (s === 'r' ? 1 : -1) - 0.05 * FP._run;
       const tgt = V.t.set(tt[0] + so3[0], tt[1] + so3[1], tt[2] + so3[2]); camera.localToWorld(tgt);
       tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
       delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);
-      tgt.addScaledVector(delta, 0.8);
+      tgt.addScaledVector(delta, 0.8 * (1 - Math.max((global.Skyrim588 && global.Skyrim588.blk) || 0, (isBow && global.Skyrim588 && global.Skyrim588.draw) || 0, shth)));
       // 2 ossos: cotovelo no plano do alvo, curvando para baixo e para fora
       const dir = V.e.copy(tgt).sub(sh), dist = Math.min(dir.length(), (Lu + Lf) * 0.995); dir.normalize();
       const a = (Lu*Lu - Lf*Lf + dist*dist) / (2 * dist), hh = Math.sqrt(Math.max(0, Lu*Lu - a*a));
@@ -791,7 +797,8 @@
     }
     const hasW = !!(P.m.socket && P.m.socket.children[0]) || !!(HAND.rig.r && HAND.rig.r.anchor.children[0]);
     const hasB = !!P.m.bowHolder155 || !!(HAND.rig.l && HAND.rig.l.anchor.children[0]);
-    HAND.grip.r += ((hasW ? 1 : 0.25) - HAND.grip.r) * 0.25; HAND.grip.l += ((hasB ? 1 : ((global.Skyrim588 && global.Skyrim588.cast > 0) ? 0 : 0.25)) - HAND.grip.l) * 0.25;
+    { const S9 = global.Skyrim588, up = !S9 || S9.dr === undefined || S9.dr > 0.45; const wa = HAND.rig.r && HAND.rig.r.anchor.children[0], ba = HAND.rig.l && HAND.rig.l.anchor.children[0]; if(wa) wa.visible = up; if(ba) ba.visible = up; FP._up = up; }
+    HAND.grip.r += (((hasW && FP._up) ? 1 : 0.25) - HAND.grip.r) * 0.25; HAND.grip.l += (((hasB && FP._up) ? 1 : ((global.Skyrim588 && global.Skyrim588.cast > 0) ? 0 : 0.25)) - HAND.grip.l) * 0.25;
     for(const side of ['r', 'l']){ const R = HAND.rig[side]; if(R && R.on) curlHand(R, HAND.grip[side]); }
     try { fxUpdate(P); } catch(_) {}
     P.m.root.updateMatrixWorld(true);

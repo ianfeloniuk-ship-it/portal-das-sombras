@@ -1,3 +1,9 @@
+## v590 (23/10/2026) — 1ª pessoa: sacar/guardar arma e defesa no botão direito
+- **Pedido de Ian**: implementar os próximos passos do estilo Skyrim (sacar/guardar e bloquear).
+- `tools/skyrim588.js`: **sacar/guardar** — tecla "Sacar / guardar arma (1ª pessoa)" (padrão `` ` `` Backquote; aparece em Controles e dá para remapear). Começa guardada; atacar, puxar o arco ou defender saca sozinho. Guardada: mãos baixas nos cantos, arma/arco escondidos, dedos relaxados. **Defesa no botão direito** (só em 1ª pessoa, soma ao botão do meio que já existia; usa `Guard472`: mesmas regras de dano/aparar).
+- `tools/fp550.js`: pose de defesa (arma erguida na vertical à frente), pose guardada, transição suave; o balanço da animação some enquanto defende/puxa/guarda.
+- Teste: jogo real — guardada, tecla saca, botão direito defende (`Guard472.blocking()` e pose), soltar encerra, tecla guarda de novo. **Não testado**: arco guardado, escudo (a mão livre não levanta o escudo na 1ª pessoa), bloqueio andando.
+
 ## v589 (23/10/2026) — 1ª pessoa: movimento de mãos como no Skyrim
 - **Pedido de Ian**: conferir como o Skyrim deixa o personagem em 1ª pessoa e replicar.
 - `tools/fp550.js`: mãos respiram parado (oscilação lenta), balançam ao andar (passo alternado, mão da arma e livre em contrafase) e, correndo, a arma desce e inclina para a frente e a mão livre cai (como o sprint do Skyrim); velocidade medida pelo deslocamento real do jogador. Mantém: enquadramento v587 (mão livre pequena embaixo à esquerda, arma pela direita), arco/golpe forte/magia da v588.

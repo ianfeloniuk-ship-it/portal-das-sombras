@@ -10,7 +10,7 @@
  * ============================================================================ */
 (function(global){
   'use strict';
-  const SK = global.Skyrim588 = { drawing: false, draw: 0, winding: false, wind: 0, held: 0, cast: 0, castCol: 0x88ccff };
+  const SK = global.Skyrim588 = { drawing: false, draw: 0, winding: false, wind: 0, held: 0, cast: 0, castCol: 0x88ccff, drawn: false, dr: 0, blk: 0 };
   const DRAW_TIME = 0.9, POWER_TIME = 0.42, POWER_MUL = 2, MIN_DRAW = 0.2;
   let baseFov = null, last = 0;
 
@@ -44,6 +44,7 @@
     if(e.button === 2 && (SK.drawing || SK.winding)){ cancel(); e.preventDefault(); return; }
     if(e.button !== 0 || !ready()) return;
     const k = kind();
+    if(k && fpOn() && !SK.drawn) SK.drawn = true; /* atacar saca a arma, como no Skyrim */
     if(k === 'bow'){
       if(player.atkCd > 0 || player.dodgeT > 0) { e.stopImmediatePropagation(); return; }
       e.stopImmediatePropagation(); SK.drawing = true; SK.draw = 0; SK.held = 0;
@@ -58,6 +59,27 @@
   });
   addEventListener('blur', cancel);
   addEventListener('keydown', e => { if(e.key === 'Escape') cancel(); });
+
+  /* sacar / guardar a arma (1ª pessoa); a tecla fica em Controles ("Sacar / guardar arma") */
+  try { if(typeof KEYACT !== 'undefined' && !KEYACT.find(k => k[0] === 'sheathe')) KEYACT.push(['sheathe', 'Sacar / guardar arma (1ª pessoa)', 'Backquote']); } catch(_) {}
+  addEventListener('keydown', e => {
+    if(e.repeat || !ready() || !fpOn() || !kind()) return;
+    let code = 'Backquote'; try { code = keyOf('sheathe'); } catch(_) {}
+    if(e.code !== code) return;
+    cancel(); SK.drawn = !SK.drawn; e.preventDefault();
+    try { toast(SK.drawn ? 'Arma sacada' : 'Arma guardada', 900); } catch(_) {}
+  });
+  /* botão direito defende (como no Skyrim); o botão do meio continua defendendo também */
+  let rmbBlock = false;
+  cv.addEventListener('pointerdown', e => {
+    if(e.button !== 2 || e.pointerType === 'touch' || !ready() || !fpOn() || !kind() || SK.drawing) return;
+    SK.drawn = true; rmbBlock = true;
+    cv.dispatchEvent(new PointerEvent('pointerdown', { button: 1, buttons: 4, pointerType: 'mouse', bubbles: true, cancelable: true }));
+  }, true);
+  addEventListener('pointerup', e => {
+    if(e.button !== 2 || !rmbBlock) return;
+    rmbBlock = false; window.dispatchEvent(new PointerEvent('pointerup', { button: 1, buttons: 0, pointerType: 'mouse', bubbles: true }));
+  }, true);
 
   /* flecha: dano e velocidade pela puxada */
   (function wrapShoot(){
@@ -91,6 +113,10 @@
       else { SK.held += dt; SK.wind = Math.min(1, SK.held / POWER_TIME); }
     }
     if(SK.cast > 0) SK.cast = Math.max(0, SK.cast - dt / 0.55);
+    SK.dr += ((SK.drawn ? 1 : 0) - SK.dr) * Math.min(1, dt * 7);
+    const gb = global.Guard472 && Guard472.blocking && Guard472.blocking() && fpOn() ? 1 : 0;
+    if(gb && !SK.drawn) SK.drawn = true;
+    SK.blk += (gb - SK.blk) * Math.min(1, dt * 12);
     /* zoom de mira ao puxar o arco (e volta suave) */
     if(typeof camera !== 'undefined' && camera){
       if(SK.draw > 0.02){
