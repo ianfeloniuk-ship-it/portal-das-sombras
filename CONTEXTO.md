@@ -1,3 +1,9 @@
+## v563 (22/10/2026) — Mapa: lista de portais começa fechada
+- **Pedido de Ian**: no mapa (M) a lista "Cidades próximas / Portais abertos" cobria tudo.
+- `tools/mapa3d544.js`: o painel começa fechado; só abre no botão PORTAIS (e fecha no mesmo botão); a escolha fica salva (`pds_maplist`).
+- Teste: jogo real, mapa 3D aberto: painel `off` (display none) → clique abre → clique fecha, escolha gravada. Sem texto ligado a mudar.
+- **Não feito**: mãos de 1ª pessoa com a malha real do Viajante (tentativa parou: os pesos de pele do Tripo são ruidosos; rascunho em side-session-notes `fp563-maos-wip.diff`). Mãos continuam os blocos da v550.
+
 ## v562 (22/10/2026) — Chão distante não fura mais o chão real
 - **Pedido de Ian**: montanha reta, personagem enterrado em morro, relevo que não dá para atravessar.
 - Causa medida (profundidade do jogo real x `terrH`): o chão distante (`tools/capitais504.js`, malha de 30 m) subia acima do chão real em desfiladeiros e serras estreitas (374 pontos errados, até 25 m, na Estrada Sul). Agora a malha distante some a menos de 150 m do jogador e ficou mais fina (20 m). Pontos errados 374 → 40 (só na borda dos 150 m).

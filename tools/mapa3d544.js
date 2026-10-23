@@ -12,7 +12,7 @@ const HALF=5000,N=321,TEX=1024,EX=3,SEA_Y=-.9*EX-.6;
 const M=window.Mapa3D544={on:true};
 const D={seed:null,h:null,sea:null,tex:null,ready:false,job:null,texDone:0};
 const S={el:null,cv:null,lab:null,panel:null,r:null,scene:null,cam:null,terrain:null,marks:null,mkCv:null,mkTex:null,water:null,clouds:[],player:null,ring:null,
-  tx:0,tz:0,dist:2600,yaw:0,raf:0,last:0,mkT:0,drag:null};
+  tx:0,tz:0,dist:2600,yaw:0,raf:0,last:0,mkT:0,drag:null,collapsed:(()=>{try{return localStorage.getItem('pds_maplist')!=='open'}catch(_){return true}})()};
 const sleep=()=>new Promise(r=>setTimeout(r,0));
 const mix=(a,b,r)=>[a[0]+(b[0]-a[0])*r,a[1]+(b[1]-a[1])*r,a[2]+(b[2]-a[2])*r];
 const worldOk=()=>L.mode==='world'&&!L.special&&window.TER245&&TER245.on&&TER245.on.value;
@@ -170,7 +170,7 @@ function mount(){
     el.insertAdjacentHTML('beforeend','<div class="ttl">TERRAS DESPERTAS</div><div class="hint">ARRASTAR · MOVER &nbsp;&nbsp; RODINHA · APROXIMAR &nbsp;&nbsp; BOTÃO DIREITO · GIRAR &nbsp;&nbsp; M · FECHAR</div><button class="x" aria-label="Fechar">×</button><div class="wait">DESENHANDO O RELEVO…</div>');
     S.panel=document.createElement('div');S.panel.className='side'+(S.collapsed?' off':'');el.appendChild(S.panel);
     const tg=document.createElement('button');tg.className='tg';tg.textContent=S.collapsed?'‹ PORTAIS':'PORTAIS ›';tg.setAttribute('aria-label','Recolher ou reabrir a lista');
-    tg.onclick=()=>{S.collapsed=!S.collapsed;S.panel.classList.toggle('off',S.collapsed);tg.textContent=S.collapsed?'‹ PORTAIS':'PORTAIS ›'};el.appendChild(tg);
+    tg.onclick=()=>{S.collapsed=!S.collapsed;try{localStorage.setItem('pds_maplist',S.collapsed?'closed':'open')}catch(_){};S.panel.classList.toggle('off',S.collapsed);tg.textContent=S.collapsed?'‹ PORTAIS':'PORTAIS ›'};el.appendChild(tg);
     el.querySelector('.x').onclick=()=>closeModal();
     document.body.appendChild(el);if(!S.bound){bind();S.bound=true}
     S.tx=player.x;S.tz=player.z;S.dist=2600;S.yaw=0;S.last=0}
