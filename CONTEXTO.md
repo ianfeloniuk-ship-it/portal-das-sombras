@@ -1,3 +1,10 @@
+## v575 (23/10/2026) — Fase A: ponte da missão #2, conversa que segura o mundo, carroça da abertura
+- **Pedido de Ian** (jogou a v574): "ponte toda errada", NPC anda/inimigo bate durante a conversa, carroça do início sumida.
+- **Ponte** (`tools/fronteira551.js`, `tools/terrain245.js` GLSL e CPU): a estrada cruza z=150 na diagonal (~48°, curva da garganta), mas a ponte e a vala eram alinhadas ao eixo z, então as pontas entravam nas paredes do desfiladeiro. Agora ponte, vala, tabuleiro caminhável, escudos, colisão dos parapetos e salteadores seguem o eixo da estrada (u/v com sen/cos fixos 0,7429/0,6694). Vala some a 11 m (o tabuleiro termina em 12: sem degrau na ponta). O arco tinha o sinal da inclinação das aduelas trocado (parecia escada): corrigido.
+- **Conversa** (`tools/dialogo520.js`): enquanto a conversa está aberta o NPC fica parado no lugar e olha para o jogador, o jogador fica invulnerável (iT) e a conversa fecha sozinha se ele se afastar mais de 7 m. Vale para todas as conversas (open/custom/vida/mendigo/cidade).
+- **Carroça da abertura** (`tools/campaign327.js`): nascia antes do relevo ligar (terrH=0) e ficava enterrada em y=0 (a v561 não mexeu nela; só mostrou o problema). Agora é reassentada no chão a cada quadro até o resgate. As carroças da estrada (civic343 v560/v561) não foram tocadas.
+- Teste: navegador local (cópia própria, porta 8785), prints da ponte (frente e lateral com arco), cart visível no início, conversa simulada (invulnerável, NPC parado/virado, fecha ao afastar), salteadores na ponte. Não testado: andar a pé pela ponte inteira nem combate real com Edran.
+
 ## v574 (23/10/2026) — Reencarnação: +2% de XP
 - **Pedido de Ian**: cada reencarnação dá +2% de XP permanente (o +10% de dano e vida por reencarnação já existia em `bonusPool`).
 - `370-v281.js` (`xpReward253`), texto na janela de reencarnação (`610-bloco-regions116-cont.js`).

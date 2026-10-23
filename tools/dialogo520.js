@@ -172,7 +172,33 @@
     }
   }
 
+  /* v575 (Ian): como no Skyrim, a conversa segura o mundo. O NPC para no lugar, vira para o jogador e fica até o fim;
+     ninguém fere o jogador enquanto a conversa está aberta; ela fecha sozinha se o jogador se afastar. */
+  let hold575 = null, wrapped575 = false;
+  function startHold575() {
+    const n = ctx && ctx.npc;
+    if (!n || n.x == null || typeof player === 'undefined' || !player) { hold575 = null; return; }
+    if (!hold575 || hold575.n !== n) hold575 = { n, x: n.x, z: n.z };
+    if (!wrapped575 && typeof update === 'function') {
+      wrapped575 = true;
+      const U = update;
+      update = function () { const r = U.apply(this, arguments); try { holdStep575(); } catch (_) {} return r; };
+    }
+  }
+  function holdStep575() {
+    if (!ctx || !hold575) { hold575 = null; return; }
+    const n = hold575.n, P = player;
+    if (!P || P.dead || n.gone || (n.m && n.m.root && !n.m.root.parent)) { closeSkyrimDialog(); return; }
+    if (Math.hypot(P.x - hold575.x, P.z - hold575.z) > 7) { closeSkyrimDialog(); return; }
+    P.iT = Math.max(P.iT || 0, .3);
+    n.x = hold575.x; n.z = hold575.z; n.chase523 = null; n.talk575 = true;
+    const yaw = Math.atan2(P.x - n.x, P.z - n.z), r = n.m && n.m.root;
+    if (r) { r.position.x = n.x; r.position.z = n.z; if (!n.down) { n.face = yaw; r.rotation.y = yaw; } }
+  }
+
   function closeSkyrimDialog() {
+    if (hold575 && hold575.n) hold575.n.talk575 = false;
+    hold575 = null;
     ctx = null;
     activeOptions = [];
     const el = document.getElementById('skyrim-dialog');
@@ -188,6 +214,7 @@
     if (!ctx) return;
     const def = ctx.def, N = ctx.tree, nd = N[ctx.node];
     if (!nd) { closeSkyrimDialog(); return; }
+    startHold575();
 
     const el = ensureSkyrimUI();
     const speakerEl = document.getElementById('skyrim-speaker');

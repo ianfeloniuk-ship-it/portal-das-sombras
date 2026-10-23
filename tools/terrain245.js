@@ -50,7 +50,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
 
  float road551=.018*(p.y-72.);float rm551=smoothstep(65.,82.,p.y)*(1.-smoothstep(365.,395.,p.y));
  h=mix(h,road551,(1.-smoothstep(9.,19.,gx510))*rm551);
- float cut551=(1.-smoothstep(7.,15.,abs(p.y-150.)))*(1.-smoothstep(20.,43.,abs(p.x-29.679420774901278)));
+ float u551=(p.x-29.679420774901278)*.7428872431255049+(p.y-150.)*.6694165698586992,v551=(p.x-29.679420774901278)*.6694165698586992-(p.y-150.)*.7428872431255049;float cut551=(1.-smoothstep(6.,11.,abs(u551)))*(1.-smoothstep(20.,43.,abs(v551)));
  h-=4.8*cut551;
  return h;}
 `;
@@ -93,7 +93,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
 
   { const rx=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069));
     h=mix(h,.018*(z-72),(1-ss(9,19,Math.abs(x-rx)))*ss(65,82,z)*(1-ss(365,395,z)));
-    h-=4.8*(1-ss(7,15,Math.abs(z-150)))*(1-ss(20,43,Math.abs(x-29.679420774901278))); }
+    {const u=(x-29.679420774901278)*.7428872431255049+(z-150)*.6694165698586992,v=(x-29.679420774901278)*.6694165698586992-(z-150)*.7428872431255049;h-=4.8*(1-ss(6,11,Math.abs(u)))*(1-ss(20,43,Math.abs(v)));} }
   return terra444cpu(x,z,h)};
 
  const C=T.ShaderChunk;
@@ -140,7 +140,7 @@ if(uTerBatch245>.5){vec4 base=vec4(terrainAnchor245.x,0.,terrainAnchor245.y,1.);
 base=instanceMatrix*base;
 #endif
 anchor=(modelMatrix*base).xz;}
-float h551=terrH245(anchor);if(uOW460.x<.5&&abs(anchor.y-150.)<=12.&&abs(anchor.x-29.679420774901278)<=3.65)h551=.018*(anchor.y-72.)+.12;return h551;
+float h551=terrH245(anchor);float au551=(anchor.x-29.679420774901278)*.7428872431255049+(anchor.y-150.)*.6694165698586992,av551=(anchor.x-29.679420774901278)*.6694165698586992-(anchor.y-150.)*.7428872431255049;if(uOW460.x<.5&&abs(au551)<=12.&&abs(av551)<=3.65)h551=.018*(anchor.y-72.)+.12;return h551;
 #endif
 }
 `;

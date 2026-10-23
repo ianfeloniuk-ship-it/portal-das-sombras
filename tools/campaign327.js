@@ -853,6 +853,8 @@
     { const next = ACTS.find(m => !S.m[m.id]?.done); if (next && !S.m[next.id] && actOpen(next.act)) { begin(next); if (S.follow436 !== false && (!run.trackObj || !String(run.trackObj).startsWith('camp327:'))) { run.trackObj = 'camp327:' + next.id; saveRun(); toast('<b>[HISTÓRIA]</b> Novo ato liberado: <b>Ato ' + esc(next.title) + '</b>. Acompanhando no mapa.', 8000); } } }
     for (const m of SIDE) if (m.npc === 'Torvo' && !S.m[m.id] && sideOpen(m)) begin(m);
     const world = L.mode === 'world';
+    /* v575: a carroça da abertura nasce antes do relevo estar ligado (terrH=0) e ficava enterrada; reassenta no chão até o resgate */
+    for (const [id, cw] of W) { const cs = state(id); if (cw.cart && cw.L === L && world && !cw.rescuing && !(cs && cs.cartRescued401)) { const cy = gy(cw.cart.position.x, cw.cart.position.z); if (Math.abs(cw.cart.position.y - cy) > .02) cw.cart.position.y = cy; } }
     for (const m of active()) {
       const s = state(m.id), sp = m.steps[s.s]; if (!sp) continue;
       if (sp.t === 'tower' && (profile.towerBest || 0) >= s.base) { advance(m); continue; }

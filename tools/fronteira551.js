@@ -4,9 +4,11 @@
   const T = THREE, ss = (a,b,x) => { const t=Math.max(0,Math.min(1,(x-a)/(b-a))); return t*t*(3-2*t); };
   const cx = z => ss(100,260,z)*(130*Math.sin(z*.005712)+52*Math.sin(z*.013369)+18*Math.sin(z*.033069));
   const roadY = z => .018*(z-72), BR=150, START=334, VIL=211;
-  const B = { x:cx(BR), z:BR }, barn={x:cx(VIL)-22,z:VIL};
+  const B = { x:cx(BR), z:BR }, SN=.7428872431255049, CS=.6694165698586992 /* a estrada cruza a ponte na diagonal: eixo = tangente de cx em z=150 */, barn={x:cx(VIL)-22,z:VIL};
   let world=null, sceneGroup=null, actors=[], foes=[], last=0, lastSave=0, fireFx=null, interaction=null;
   const geoOwned=[], matOwned=[], texOwned=[];
+  const P=(u,v)=>({x:B.x+u*SN+v*CS,z:BR+u*CS-v*SN});
+  const bridgeUV=(x,z)=>[(x-B.x)*SN+(z-BR)*CS,(x-B.x)*CS-(z-BR)*SN];
   function state() { return profile?.fixas545?.q002; }
   function save() { store.set('pds2_profile',profile); if(typeof saveRun==='function')saveRun(); }
   function active() { const a=window.Campaign327?.state('a1'); return !!(a&&!a.done&&a.s===1&&state()&&!state().done); }
@@ -15,12 +17,12 @@
     const r=Math.abs(x-cx(z)), mask=ss(65,82,z)*(1-ss(365,395,z));
     h+=(roadY(z)-h)*(1-ss(9,19,r))*mask;
     // Vala seca sob o arco. O piso da ponte é uma superfície de colisão separada.
-    const cut=(1-ss(7,15,Math.abs(z-BR)))*(1-ss(20,43,Math.abs(x-B.x)));
+    const [u,v]=bridgeUV(x,z),cut=(1-ss(6,11,Math.abs(u)))*(1-ss(20,43,Math.abs(v)));
     return h-4.8*cut;
   }
   const terrainGround=terrH;
   // A função de relevo e o shader usam o mesmo solo; terrH inclui também o tabuleiro caminhável.
-  const surface=(x,z) => Math.abs(z-BR)<=12 && Math.abs(x-B.x)<=3.65 ? roadY(z)+.12 : null;
+  const surface=(x,z) => { const [u,v]=bridgeUV(x,z); return Math.abs(u)<=12 && Math.abs(v)<=3.65 ? roadY(z)+.12 : null; };
   terrH=function(x,z) { const h=terrainGround(x,z); if(!TER245.on.value||TER245.OW.value.x>.5)return h; const d=surface(x,z); return d===null?h:d; };
   function begin(figs) {
     if(!profile.fixas545)profile.fixas545={};
@@ -49,20 +51,19 @@
   }
   function block(parent,x,y,z,w,h,d,mat,seed) {const m=new T.Mesh(wornBox(w,h,d,seed),mat);m.position.set(x,y,z);m.castShadow=false;m.receiveShadow=true;parent.add(m);return m;}
   function bridge(g,stone) {
-    const root=new T.Group();root.position.set(B.x,roadY(BR),BR);g.add(root);
+    const root=new T.Group();root.position.set(B.x,roadY(BR),BR);root.rotation.y=Math.atan2(SN,CS);g.add(root);
     // Lajes e parapeitos de alvenaria irregular, com peças maiores nas cabeceiras.
-    for(let iz=0;iz<24;iz++)for(let ix=0;ix<5;ix++)block(root,(ix-2)*1.42,.018*(iz-11.5)-.12,iz-11.5,1.4,.45,.97,stone,ix*31+iz);
-    for(const s of [-1,1])for(let k=0;k<24;k++)block(root,s*3.85,.55+.018*(k-11.5),k-11.5,.62,1.25,.96,stone,k+s*101);
+    for(let iz=0;iz<24;iz++)for(let ix=0;ix<5;ix++)block(root,(ix-2)*1.42,.018*CS*(iz-11.5)-.12,iz-11.5,1.4,.45,.97,stone,ix*31+iz);
+    for(const s of [-1,1])for(let k=0;k<24;k++)block(root,s*3.85,.55+.018*CS*(k-11.5),k-11.5,.62,1.25,.96,stone,k+s*101);
     // Arco apontado: aduelas acompanhando duas curvas até a chave, vista nas duas faces.
     for(const s of [-1,1])for(const side of [-1,1])for(let k=0;k<12;k++) {
       const t=(k+.5)/12, z=side*(10*(1-t)), y=-4.3+3.65*Math.sin(t*Math.PI/2);
-      const m=block(root,s*3.7,y,z,.85,.72,1.08,stone,k+side*53+s*17);m.rotation.x=-side*Math.atan2(3.65*Math.PI/2*Math.cos(t*Math.PI/2),10);
+      const m=block(root,s*3.7,y,z,.85,.72,1.08,stone,k+side*53+s*17);m.rotation.x=side*Math.atan2(3.65*Math.PI/2*Math.cos(t*Math.PI/2),10);
     }
     for(const s of [-1,1])for(const end of [-1,1])for(let i=0;i<4;i++)block(root,s*3.75,-3.7+i*.85,end*10.8,1.2,.82,2.3,stone,i+s*3+end*7);
     // Escudos caídos: GLB do próprio jogo, sem introduzir um símbolo novo.
-    prop(g,'sword_shield',B.x+4.7,BR+13,1.15,.7);
-    prop(g,'sword_shield',B.x-4.9,BR-12,1.05,-.6);
-    const cols=[];for(const s of [-1,1])for(let z=-12;z<=12;z+=1.5)cols.push({x:B.x+s*3.85,z:BR+z,r:.38});
+    {const a=P(13,4.7),b=P(-12,-4.9);prop(g,'sword_shield',a.x,a.z,1.15,.7);prop(g,'sword_shield',b.x,b.z,1.05,-.6);}
+    const cols=[];for(const s of [-1,1])for(let z=-12;z<=12;z+=1.5){const q=P(z,s*3.85);cols.push({x:q.x,z:q.z,r:.38});}
     Solid429.prop(g,cols);
     // Fusão estática das aduelas/lajes: um desenho para toda a pedra, sem centenas de chamadas.
     root.updateMatrixWorld(true);const positions=[],normals=[],uvs=[];const inv=new T.Matrix4().copy(g.matrixWorld).invert();
@@ -127,7 +128,7 @@
   }
   function spawnFoes(q) {
     for(let i=0;i<3;i++)if(!q.hits.includes(i)&&!foes.some(e=>e.fronteiraIndex551===i&&!e.dead)) {
-      const z=BR+7-i*6,x=B.x+(i-1)*1.5;
+      const {x,z}=P(7-i*6,(i-1)*1.5);
       const e=spawnKind('invasor_f',x,z,0,{wild:true});e.name=e.short='Salteador Fendido';e.fronteira551=true;e.fronteiraIndex551=i;e.hp=e.maxhp=32;e.dmg=3;e.xp=0;e.gold=0;e.aggro=true;foes.push(e);
     }
   }
