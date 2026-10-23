@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   const T = THREE, TAU = Math.PI * 2;
-  const R = 34, CELL = .55, TILE = 8, MAX = 30000;
+  const R = 28, CELL = .34, TILE = 8, MAX = 30000; /* v567: tufos bem mais juntos (gramado contínuo) */
   const ready = () => typeof started !== 'undefined' && started && typeof player !== 'undefined' && player && run && L.mode === 'world' && !L.grid;
 
   /* ---------- ruído Perlin (gradiente) + fbm ---------- */

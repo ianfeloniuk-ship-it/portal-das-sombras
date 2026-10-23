@@ -1,3 +1,8 @@
+## v567 (23/10/2026) — Gramado contínuo
+- **Pedido de Ian**: a grama eram poucos tufos muito espaçados; queria um gramado de verdade, falhando só em trilha, terra, estrada, lama e água.
+- `tools/grass446.js`: tufos a cada 0,34 m (antes 0,55 m), raio 28 m (antes 34 m), cerca de 12 mil tufos ao redor do jogador. Regras de onde não nasce (água, estrada, trilha, cidade, EcoGrid pisoteado) intactas.
+- Teste (Edge, GPU Intel UHD): captura mostra capim contínuo; FPS 25–27, igual ao da v566. Não testado: celular.
+
 ## v566 (23/10/2026) — Solo Vivo (v550) conferido no jogo e consertado
 - **Pedido**: conferir no jogo real (com capturas) o EcoGrid da v550, que só tinha teste de lógica.
 - **Estava quebrado**: o EcoGrid tinha **0 chunks** (ganchos liam `global.chunks`/`gates`/`WX`/`npcs`/`run`/`WN`, que são `let/const` e não existem em `window`) — nada rodava: sem trilha, sem fenda, sem pisoteio de NPC/carrinho. Material do chão clonado perdia o `onBeforeCompile` do bioma. O gancho da grama mexia numa cópia de `rebuild` que o loop nunca chama. As árvores do EcoGrid eram ~2000 grupos (+1000 chamadas de desenho) duplicados e debaixo da terra.
