@@ -28,7 +28,7 @@
     if(!profile.fixas545)profile.fixas545={};
     if(!state())profile.fixas545.q002={phase:'estrada',z:START-8,hits:[],water:0,choice:null,done:false};
     actors=figs.filter(f=>f?.m&&(f.name==='Edran'||f.name==='Sobrevivente'));
-    for(const f of actors) { f.down=false; f.m.wounded401=false; }
+    for(const f of actors) { f.down=false; f.m.wounded401=false; f.noBlock551=true; }
     save();
   }
   function mkActor(id,name) {
@@ -135,7 +135,7 @@
   function updateActors(q,dt) {
     restoreActors();
     const offsets=[[-1,0],[1.4,2],[.3,4]];
-    actors.forEach((f,i)=>{const z=q.z+offsets[i][1],x=cx(z)+offsets[i][0];f.x=x;f.z=z;f.down=false;f.m.wounded401=false;f.m.root.position.set(x,terrH(x,z),z);f.m.root.rotation.y=Math.atan2(cx(z-1)-x,-1);});
+    actors.forEach((f,i)=>{f.noBlock551=true;const z=q.z+offsets[i][1],x=cx(z)+offsets[i][0];f.x=x;f.z=z;f.down=false;f.m.wounded401=false;f.m.root.position.set(x,terrH(x,z),z);f.m.root.rotation.y=Math.atan2(cx(z-1)-x,-1);});
     if(q.bleed&&q.phase==='combate')q.hpEdran=Math.max(60,q.hpEdran-dt*.3);
   }
   function complete(q) {
@@ -172,15 +172,15 @@
     if(q.phase==='combate'){
       spawnFoes(q);
       for(const e of foes)if(e.dead&&!q.hits.includes(e.fronteiraIndex551)){q.hits.push(e.fronteiraIndex551);save();}
-      // Edran segura os invasores na travessia; o jogador ainda precisa participar da luta.
-      for(const e of foes)if(!e.dead&&Math.hypot(e.x-B.x,e.z-BR)<15){e.hp=Math.max(1,e.hp-dt*(q.choice==='formacao'?1.5:.5));}
+      // v576: Edran não drena mais a vida dos salteadores; quem luta é o jogador.
+      
       if(q.hits.length===3&&(q.choice!=='paiol'||q.water===3)){q.phase='saida';setInter(q);save();note(q.choice==='paiol'?'Edran está ferido. Acompanhe o grupo até Aster.':'Ponte livre. Sigam juntos até Aster.');}
     }
     updateActors(q,dt);
     if(performance.now()-lastSave>2500){lastSave=performance.now();Campaign327.state('a1').roadSpawn401={x:cx(q.z)+2,z:q.z+3};save();}
   }
   const prev=update;update=function(dt){prev.apply(this,arguments);try{tick(Math.min(.1,dt||.016));}catch(e){console.warn('Fronteira551',e);}};
-  function clearSite(x,z){return (z>110&&z<360&&Math.abs(x-cx(z))<9)||[[barn.x,barn.z,7],[cx(228)+20,228,7],[cx(243)-17,243,7],[cx(START),START,11],[B.x,BR,8]].some(([a,b,r])=>Math.hypot(x-a,z-b)<r);}
+  function clearSite(x,z){return (z>110&&z<360&&Math.abs(x-cx(z))<16)||[[barn.x,barn.z,7],[cx(228)+20,228,7],[cx(243)-17,243,7],[cx(START),START,11],[B.x,BR,24]].some(([a,b,r])=>Math.hypot(x-a,z-b)<r);}
   window.Fronteira551={begin,active,objective,choose,water,tick,ground,groundHeight:terrainGround,surface,cx,roadY,B,barn,START,clearSite,get actors(){return actors;},get foes(){return foes;}};
   if(window.Fixas545)Fixas545.LIVE.primeva_q002='v551';
 })();

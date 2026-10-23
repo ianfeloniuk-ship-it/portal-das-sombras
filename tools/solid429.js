@@ -27,7 +27,7 @@ function tick(){
  for(const n of npcs){if(n.gone||n.critter||!n.m||!PEOPLE429[n.kind]||far(n.x,n.z,48))continue;person(n,PEOPLE429[n.kind],n.x,n.z)}
  if(typeof FRIENDS217!=='undefined')for(const e of FRIENDS217){if(e.gone||e.dead||!e.friendly217||!e.m||!e.m.root.parent||far(e.x,e.z,48))continue;person(e,Math.max(.35,Math.min(1.1,(e.r||.5)*.85)),e.x,e.z)}
  for(const a of allies){if(!a.caravan||a.dead||far(a.x,a.z,48))continue;person(a,.9,a.x,a.z);const k=a.cart429k||(a.cart429k={});person(k,.95,a.x-Math.sin(a.face)*1.6,a.z-Math.cos(a.face)*1.6)}
- for(const f of figs){const root=f.m&&f.m.root;if(!root||!alive(root)){figs.delete(f);continue}if(!root.visible||far(root.position.x,root.position.z,48))continue;person(f,f.down?.55:.4,root.position.x,root.position.z)}
+ for(const f of figs){const root=f.m&&f.m.root;if(!root||!alive(root)){figs.delete(f);continue}if(f.noBlock551||!root.visible||far(root.position.x,root.position.z,48))continue;person(f,f.down?.55:.4,root.position.x,root.position.z)}
  for(const [o,c] of people)if(!seen.has(o)){hrem(c);people.delete(o)}
  /* carroças da estrada */
  const list=window.Civic343?Civic343.wagons:[],seenW=new Set();

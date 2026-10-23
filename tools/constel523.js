@@ -177,7 +177,7 @@ function ui(){
   else if(c.locked)h='<h2>???</h2><p class="c5-st">Bloqueada</p><p class="c5-d">'+c.d+'</p>';
   else if(p.apex)h='<h2>Ápice de '+c.n+'</h2><p class="c5-st'+(isOn(c,p)?' ok':'')+'">'+(isOn(c,p)?'Aceso':'Acende com as 10 estrelas')+'</p><p class="c5-d">'+c.cap.replace('Ápice: ','')+'.</p>';
   else{const n=p.i+1,ex=c.ex(n);
-    h='<h2>'+c.n+' '+n+'</h2><p class="c5-st'+(isOn(c,p)?' ok':'')+'">'+(isOn(c,p)?'Aceso':canBuy(c,p)?'Disponível · 1 ponto':'Acenda a estrela '+p.i+' antes')+' · '+n+' de 10</p><p class="c5-d">'+c.d+'.</p><div class="c5-ex"><span>Com '+n+' estrela'+(n>1?'s':'')+'</span>'+ex[0]+' → '+ex[1]+'</div>'}
+    h='<h2>'+c.n+' '+n+'</h2><p class="c5-st'+(isOn(c,p)?' ok':'')+'">'+(isOn(c,p)?'Aceso':canBuy(c,p)?((run.cpts||0)>0?'Disponível · 1 ponto':'Sem pontos'):'Acenda a estrela '+p.i+' antes')+' · '+n+' de 10</p><p class="c5-d">'+c.d+'.</p><div class="c5-ex"><span>Com '+n+' estrela'+(n>1?'s':'')+'</span>'+ex[0]+' → '+ex[1]+'</div>'}
   el.innerHTML=h+'<p class="c5-lore">'+c.lore+'</p>';el.classList.add('show')}
 function glow(x,y,r,c,a){if(!(r>0))return;const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)}
 function dot(x,y,r,c,a){ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
@@ -237,7 +237,7 @@ function show(k){
   t0=last=performance.now();ui();cv.focus({preventScroll:true});
   const i=k?C.findIndex(c=>c.k===k):-1;
   if(i>=0){cur=i;setFocus(true);Object.assign(cam,tgt)}
-  else setTimeout(()=>{if(open&&cur<0){const j=C.findIndex(c=>!c.locked&&cons(c.k)<10);cur=j<0?0:j;setFocus(true)}},2600);
+  else setTimeout(()=>{if(open&&cur<0&&(run.cpts||0)>0){const j=C.findIndex(c=>!c.locked&&cons(c.k)<10);cur=j<0?0:j;setFocus(true)}},2600);
   cancelAnimationFrame(raf);raf=requestAnimationFrame(frame)}
 function close(){if(!open)return;open=false;root.hidden=true;cancelAnimationFrame(raf);
   try{if(!modalOpen&&player&&!player.dead&&$('dead').hidden)paused=false}catch(e){}}

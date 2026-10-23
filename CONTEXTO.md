@@ -1,3 +1,10 @@
+## v576 (23/10/2026) — Fase A, bloco 1 (lista de bugs do teste automático da v575)
+- **Ponte da missão #2** (`tools/fronteira551.js`): `clearSite` limpa 16 m de cada lado da estrada (era 9; o arbusto de coleta em (38,8; 165,3) ficava a 9,9 m e prendia jogador/câmera) e 24 m ao redor da ponte. O dreno de vida do Edran nos salteadores foi removido (chegavam a 1 HP sozinhos e "Invasor desistiu" aparecia sem o jogador agir).
+- **Edran e o casal** não bloqueiam mais o jogador na estrada estreita (`f.noBlock551`, lido em `tools/solid429.js`).
+- **Abertura** (`tools/campaign327.js`): o herói nasce olhando para a muralha (`face=π`); antes a câmera pegava o rosto de frente.
+- **Constelações** (`tools/constel523.js`): as 18 ativas + 5 apagadas já estavam na main desde a v570 (24 em `CONS`, 5 "em breve"; conferido no jogo). A tela só abre sozinha no detalhe de uma constelação se houver ponto; sem ponto não mostra "Disponível · 1 ponto" (mostra "Sem pontos").
+- Teste: jogo local (porta 8791): abertura (câmera atrás do herói), céu com 0 pontos, `clearSite` no arbusto. **Não testado a pé**: caminhada pela ponte com salteadores e Edran.
+
 ## v575 (23/10/2026) — Fase A: ponte da missão #2, conversa que segura o mundo, carroça da abertura
 - **Pedido de Ian** (jogou a v574): "ponte toda errada", NPC anda/inimigo bate durante a conversa, carroça do início sumida.
 - **Ponte** (`tools/fronteira551.js`, `tools/terrain245.js` GLSL e CPU): a estrada cruza z=150 na diagonal (~48°, curva da garganta), mas a ponte e a vala eram alinhadas ao eixo z, então as pontas entravam nas paredes do desfiladeiro. Agora ponte, vala, tabuleiro caminhável, escudos, colisão dos parapetos e salteadores seguem o eixo da estrada (u/v com sen/cos fixos 0,7429/0,6694). Vala some a 11 m (o tabuleiro termina em 12: sem degrau na ponta). O arco tinha o sinal da inclinação das aduelas trocado (parecia escada): corrigido.
