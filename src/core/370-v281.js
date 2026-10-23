@@ -218,7 +218,7 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   weaponXp(trainingXpBalance(e));if(e.isBoss){if(L.mode==='world')worldBossDeath(e);else onBossDeath(e)}
   else if(Math.random()<.06)corpseDrop353(e,{type:'potion',n:1});
   finishCorpse353(e);
-  if(e.isIntroTutorial||e.camp327==='a1'||e.architectClaim)try{window.Reclaim372?.claimEnemy(e)}catch(_){}
+  if(e.isBoss||e.isIntroTutorial||e.camp327==='a1'||e.architectClaim)try{window.Reclaim372?.claimEnemy(e)}catch(_){}
 }
 function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv('boss');if(b.boss&&b.boss.n){profile.trophies=profile.trophies||[];if(!profile.trophies.includes(b.boss.n))profile.trophies.push(b.boss.n)}profile.bossKills=(profile.bossKills||0)+1;
   hitstop(.25);shake(.8);sfx('boom');sfx('gong');bossLight.color.setHex(0xa26bff);bossLight.intensity=2.4;L.bossDead=true;if(L.gate?.inv343&&window.Living372)Living372.invasionWon(L.gate);$('boss').hidden=true;

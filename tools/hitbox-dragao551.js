@@ -18,7 +18,8 @@ function parts(e){const m=e.m,c=localBox(e);const gy=terrH(e.x,e.z);
  if(!m||!m.root||!c||c.bad){const r=Math.max(1.5,e.r||1.5),D=e.drake510;return[{x:e.x,y:gy+(m?.root?.position.y||D?.alt||0)+r,z:e.z,r:r*1.4,n:'corpo'}]}
  m.root.updateMatrixWorld(true);const b=c.b,sz=b.max.z-b.min.z,sx=b.max.x-b.min.x,sy=b.max.y-b.min.y,k=Math.max(c.L,1)/Math.max(sz,1e-3);
  const cx=(b.min.x+b.max.x)/2,L=c.L,W=c.W,out=[];
- const add=(fx,fy,fz,r,n)=>{const v=new THREE.Vector3(cx+fx*sx,b.min.y+fy*sy,b.min.z+fz*sz).applyMatrix4(m.root.matrixWorld);out.push({x:v.x,y:v.y,z:v.z,r:Math.max(.5,r),n})};
+ const yo=e.drake510?0:gy;/* v578: dragão de chão: o relevo é somado pelo shader, então a malha fica em y local; as esferas precisam do chão */
+ const add=(fx,fy,fz,r,n)=>{const v=new THREE.Vector3(cx+fx*sx,b.min.y+fy*sy,b.min.z+fz*sz).applyMatrix4(m.root.matrixWorld);out.push({x:v.x,y:v.y+yo,z:v.z,r:Math.max(.5,r),n})};
  const tr=L*.17;
  for(const fz of[.38,.5,.62])add(0,.5,fz,tr,'tronco');
  for(const[fz,fy]of[[.72,.62],[.8,.7]])add(0,fy,fz,L*.09,'pescoco');
@@ -27,16 +28,18 @@ function parts(e){const m=e.m,c=localBox(e);const gy=terrH(e.x,e.z);
  for(const s of[-1,1])for(const[fx,fy,r]of[[.14,.62,.07],[.28,.64,.065],[.42,.62,.06],[.5,.6,.05]])add(s*fx,fy,.5,Math.max(W*r*.9,.8),'asa');
  for(const s of[-1,1])for(const fz of[.42,.62])add(s*.1,.12,fz,L*.06+.3,'pata');
  return out}
+/* v578: dragões de chão (Ancião, Gélido, Musgo, Zahar...) também usam as esferas; antes só o dragão voador (drake510) usava e os outros acertavam por um raio de ~3 m */
+const isDrg=e=>!!(e&&(e.drake510||/^(drag|serpe_zahar)/.test(String(e.kind||''))));
 function segSphere(a,b,s,pad){return P3.segmentSphere(a,b,s,s.r+(pad||0))}
 function segHit(a,b,e,pad){let best=null;for(const s of parts(e)){const q=segSphere(a,b,s,pad);if(q.hit&&(!best||q.t<best.t))best=q}return best||{hit:false,t:Infinity,p:b}}
 /* segmentCapsule / intersectRayCapsule: se o alvo é dragão (c.entity.drake510) usa as esferas */
 const oldSeg=P3.segmentCapsule,oldRay=P3.intersectRayCapsule;
-P3.segmentCapsule=function(a,b,c,r,h){const e=c&&c.entity;if(e&&e.drake510&&e.m){const pad=Math.max(0,r-(c.r||0));return segHit(a,b,e,pad)}return oldSeg.apply(this,arguments)};
-P3.intersectRayCapsule=function(o,d,c,r,h,max=220){const e=c&&c.entity;if(e&&e.drake510&&e.m){const q=P3.segmentCapsule(o,{x:o.x+d.x*max,y:o.y+d.y*max,z:o.z+d.z*max},c,r,h);return q.hit?{...q,distance:q.t*max}:q}return oldRay.apply(this,arguments)};
+P3.segmentCapsule=function(a,b,c,r,h){const e=c&&c.entity;if(e&&isDrg(e)&&e.m){const pad=Math.max(0,r-(c.r||0));return segHit(a,b,e,pad)}return oldSeg.apply(this,arguments)};
+P3.intersectRayCapsule=function(o,d,c,r,h,max=220){const e=c&&c.entity;if(e&&isDrg(e)&&e.m){const q=P3.segmentCapsule(o,{x:o.x+d.x*max,y:o.y+d.y*max,z:o.z+d.z*max},c,r,h);return q.hit?{...q,distance:q.t*max}:q}return oldRay.apply(this,arguments)};
 /* golpe corpo a corpo: esfera do golpe à frente do jogador contra as esferas do dragão (altura conta) */
 function melee(e,pl,reach,arc,face){const gy=terrH(pl.x,pl.z)+(pl.jy||0),cy=gy+1.1;
  for(const s of parts(e)){const dx=s.x-pl.x,dz=s.z-pl.z,dy=s.y-cy,dh=Math.hypot(dx,dz);if(Math.hypot(dh,dy)>reach+s.r)continue;
   if(dh<s.r+.6)return true;let da=Math.atan2(dx,dz)-face;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)<=arc+Math.asin(Math.min(1,s.r/dh)))return true}
  return false}
-g.Dragao551={parts,segHit,melee,box:localBox};
+g.Dragao551={is:isDrg,parts,segHit,melee,box:localBox};
 })(window);

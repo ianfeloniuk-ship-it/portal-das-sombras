@@ -1,3 +1,9 @@
+## v578 (23/10/2026) — Fase A, bloco 3 (Mão no chefe, hitbox dos dragões, placa de nível)
+- **Mão × chefe** (`370-v281.js`): `claimEnemy` agora roda para todo `isBoss` (antes só tutorial/camp a1/architectClaim; chefe de Fenda comum nunca chamava). Mob comum continua sem Mão (`test-mao-so-chefes` ok). Testado: chefe morto fora da abertura → 1 trabalho da Mão. **Atenção:** `Reclaim372.start` ainda não age enquanto `Intro401.guided()` é verdadeiro (abertura guiada); o teste automático da v575 estava nesse estado. Se Ian quiser a Mão já na abertura, é decisão separada.
+- **Hitbox dos dragões** (`tools/hitbox-dragao551.js`, `380-acoes.js`): as esferas compostas (tronco, pescoço, cabeça, asas, cauda, patas) só valiam para o dragão voador (`drake510`); os dragões de chão (Ancião, Gélido, Musgo, Zahar...) usavam raio de ~3 m. Agora `Dragao551.is(e)` inclui `kind` que começa com `drag`/`serpe_zahar`, e as esferas somam o relevo (o shader soma o chão, a malha fica em y local). Medido: Ancião 15×14×15 m, 21 esferas, a maior r=2,5.
+- **Placa "Nv N"** (`410-overlay-e-hud.js`): lê `e.lvl||balanceLevel||nível do grau` sem gravar; antes `eLvl` gravava "Nv 1" no primeiro quadro. **Causa da reescala tardia não reproduzida** (spawnKind aplica `dunScale` na criação); revisar com repro real.
+- Teste: jogo local (porta 8792): melee x esferas do Ancião (acerta no tronco a 4 m), chefe lobo morto → Mão. Não testado em combate real com clique.
+
 ## v577 (23/10/2026) — Fase A, bloco 2
 - Texto "Marcador dourado" (`campaign327.js`); o HUD da ponte agora usa o mesmo título do Ato I ("ATO I · O CHAMADO", passo 4/6) em vez de "A PONTE DOS ESCUDOS CAÍDOS 4/6" (`fronteira551.js`). O painel "passo N/4" é outro sistema (`campaign327`) e não foi mexido.
 - Não corrigido: `boats440`/`deep447` chamam `Surv437.ready()`/`world()`, que não existem (os dois módulos nunca ativam; arrumar exige decidir a API).
