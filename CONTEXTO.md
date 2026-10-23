@@ -1,3 +1,6 @@
+## v586 (23/10/2026) — Fase A, bloco 9: primeira pessoa (item 11)
+- `tools/fp550.js`: as mãos ficam mais longe da câmera (direita z -0,62→-0,76, esquerda -0,5→-0,64): aparecem menores; o golpe é menos lateral (deslocamento -0,24→-0,14, direção final [-0,55; 0,35; -0,75]) para a arma não cruzar a tela. Testado em captura com o machado equipado (mãos menores, arma segura pelo cabo). Não testado: espada fina (modelo sem guarda continua sendo o do catálogo) nem combate real com clique.
+
 ## v585 (23/10/2026) — Fase A, bloco 8: prévia 3D das lojas (item 14)
 - `tools/telas535.js`: na Alquimia a prévia mostra um frasco de poção (antes ficava a armadura/modelo anterior preso, pois as linhas não são itens); na Forja, "Forjar arma …" mostra a espada (antes armadura, pelo texto "armadura" no resto da linha). Banco continua com o baú (é o cofre). Defesa mostra armadura. Testado no jogo (captura da Alquimia com o frasco; Forja com a espada).
 - Item 15 (mapa): o mapa atual (2D, v535+) não tem mais relevo; os ícones se aglomeram em volta de Aster, mas o nome continua legível — não alterado. Itens 16 e 17 não feitos nesta versão.

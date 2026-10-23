@@ -614,8 +614,8 @@
   /* arma na mão direita: mantém o cabo no punho (socket do jogo) e só gira a arma para a direção de guarda de 1ª pessoa */
   const GUARD = { sword:[-0.14,0.46,-0.88], axe:[-0.14,0.46,-0.88], mace:[-0.14,0.46,-0.88], hammer:[-0.14,0.46,-0.88], dagger:[0.12,0.5,-0.86], staff:[0.06,0.86,-0.5], wand:[0.06,0.86,-0.5], spear:[0.04,0.32,-0.95] };
   /* golpe de 1ª pessoa: o braço da arma faz preparo, corte e recuperação a cada ataque (gatilho: tempo de recarga do jogador) */
-  const SWK = [[0,[0,0,0],0],[0.28,[0.07,0.1,0.06],1],[0.68,[-0.24,-0.11,-0.2],2],[1,[0,0,0],0]];
-  const SWD = [null, [0.32,0.95,-0.12], [-0.8,0.12,-0.6]];
+  const SWK = [[0,[0,0,0],0],[0.28,[0.07,0.1,0.06],1],[0.68,[-0.14,-0.1,-0.14],2],[1,[0,0,0],0]];
+  const SWD = [null, [0.32,0.95,-0.12], [-0.55,0.35,-0.75]]; /* v586: golpe menos lateral (antes cruzava a tela) */
   FP.sw = { t: 1, last: 0, pa: 0 };
   FP.swingNow = function(P, base){
     const now = performance.now(), dt = Math.min(0.05, Math.max(0, (now - (FP.sw.last || now)) / 1000)); FP.sw.last = now;
@@ -726,7 +726,7 @@
       const side = s === 'r' ? 1 : -1;
       const so3 = s === 'r' ? FP._off : [0,0,0];
       const bowL = s === 'l' && P.m.bowHolder155;
-      const tgt = bowL ? V.t.set(-0.04, -0.1, -0.72) : (s === 'r' ? V.t.set(0.07 + so3[0], -0.06 + so3[1], -0.62 + so3[2]) : ((P.m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0])) ? V.t.set(-0.17, -0.1, -0.85) : V.t.set(-0.15, -0.14, -0.5))); camera.localToWorld(tgt);
+      const tgt = bowL ? V.t.set(-0.04, -0.1, -0.72) : (s === 'r' ? V.t.set(0.07 + so3[0], -0.07 + so3[1], -0.76 + so3[2]) : ((P.m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0])) ? V.t.set(-0.17, -0.1, -0.85) : V.t.set(-0.15, -0.15, -0.64))); camera.localToWorld(tgt);
       tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
       delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);
       tgt.addScaledVector(delta, 0.8);
