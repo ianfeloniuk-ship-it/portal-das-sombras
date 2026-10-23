@@ -279,7 +279,7 @@ function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyPro
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[NARRADOR]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
-function xpReward253(x,source){const base=Math.max(0,Number(x)||0),transmigrator=source==='monster'?transmigratorBonus():0,other=1+guildBonus()+(npcHas('Lyra')?.1:0)+restXp287()+((festival()||{}).xp||0)+.03*pb('xp');return {base,transmigrator,transmigratorLevel:transmigratorLevel253(),afterTransmigrator:base*(1+transmigrator),other,total:Math.round(base*(1+transmigrator)*other)};}
+function xpReward253(x,source){const base=Math.max(0,Number(x)||0),transmigrator=source==='monster'?transmigratorBonus():0,other=1+guildBonus()+(npcHas('Lyra')?.1:0)+restXp287()+((festival()||{}).xp||0)+.03*pb('xp');return {base,transmigrator,transmigratorLevel:transmigratorLevel253(),afterTransmigrator:base*(1+transmigrator),other,total:Math.round(base*(1+transmigrator)*other*(1+.02*(profile.rebirths||0)))}/* v574 (Ian): +2% de XP por reencarnação */;}
 function xpAwardAmount262(x,source){if(!Number.isFinite(x)||x<=0)return 0;const total=xpReward253(x,source).total;/* v332 (Ian): entrega de missão sobe no máximo 1 nível */return source==='quest'?RpgBalance.questXpCap(total,xpNeed(),run.xp):total}
 const LEVEL_MAX=777;/* v572 (Ian): nível máximo */
 function gainXp(x,source){

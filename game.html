@@ -6206,7 +6206,7 @@ function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyPro
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[NARRADOR]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}
-function xpReward253(x,source){const base=Math.max(0,Number(x)||0),transmigrator=source==='monster'?transmigratorBonus():0,other=1+guildBonus()+(npcHas('Lyra')?.1:0)+restXp287()+((festival()||{}).xp||0)+.03*pb('xp');return {base,transmigrator,transmigratorLevel:transmigratorLevel253(),afterTransmigrator:base*(1+transmigrator),other,total:Math.round(base*(1+transmigrator)*other)};}
+function xpReward253(x,source){const base=Math.max(0,Number(x)||0),transmigrator=source==='monster'?transmigratorBonus():0,other=1+guildBonus()+(npcHas('Lyra')?.1:0)+restXp287()+((festival()||{}).xp||0)+.03*pb('xp');return {base,transmigrator,transmigratorLevel:transmigratorLevel253(),afterTransmigrator:base*(1+transmigrator),other,total:Math.round(base*(1+transmigrator)*other*(1+.02*(profile.rebirths||0)))}/* v574 (Ian): +2% de XP por reencarnação */;}
 function xpAwardAmount262(x,source){if(!Number.isFinite(x)||x<=0)return 0;const total=xpReward253(x,source).total;/* v332 (Ian): entrega de missão sobe no máximo 1 nível */return source==='quest'?RpgBalance.questXpCap(total,xpNeed(),run.xp):total}
 const LEVEL_MAX=777;/* v572 (Ian): nível máximo */
 function gainXp(x,source){
@@ -8515,7 +8515,7 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla J)'),btn('Abrir','bestv',0));
     h+=row('Coleção de Ecos','Todos os ecos que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
-    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado e <b>treino 10% mais rápido</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
+    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>treino 10% mais rápido</b> e <b>+2% de XP</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
     h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Absorva essências de guardiões','');h+=libRows();
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Ordem','');

@@ -121,7 +121,7 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla J)'),btn('Abrir','bestv',0));
     h+=row('Coleção de Ecos','Todos os ecos que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
-    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado e <b>treino 10% mais rápido</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
+    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>treino 10% mais rápido</b> e <b>+2% de XP</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
     h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Absorva essências de guardiões','');h+=libRows();
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Ordem','');

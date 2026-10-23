@@ -1,3 +1,8 @@
+## v574 (23/10/2026) — Reencarnação: +2% de XP
+- **Pedido de Ian**: cada reencarnação dá +2% de XP permanente (o +10% de dano e vida por reencarnação já existia em `bonusPool`).
+- `370-v281.js` (`xpReward253`), texto na janela de reencarnação (`610-bloco-regions116-cont.js`).
+- Teste no jogo (navegador local): 1000 de XP viram 1060 com 3 reencarnações; nível 780 nos selvagens de grau 9; 776→777 trava; sem erro de script. Combate real não testado.
+
 ## v573 (23/10/2026) — Equilíbrio até o 777 (proposta aprovada por Ian)
 - **Aprovado por Ian**: XP achatado acima do 500 e monstros podendo passar do nível do jogador. Proposta: Doc "Primeva — Proposta de equilíbrio até o nível 777" no Drive.
 - `tools/balance-rpg.js` (`xpNeed`): até o 500 igual; do 500 ao 650 desce de 100% a 85%; do 650 ao 777 a 70%. Total 1→777 ≈ 167 milhões (era 189). Sempre crescente (teste de monotonia ok).
