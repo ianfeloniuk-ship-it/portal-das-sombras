@@ -153,7 +153,7 @@
     else if(q.phase==='combate'){text='Derrote os salteadores na ponte · '+q.hits.length+'/3';const e=foes.find(e=>!e.dead);target=e||B;}
     else {text='Acompanhe Edran e o casal até o Portão de Aster';target={x:0,z:72};}
     if(q.waiting)text='Espere o grupo ou volte até Edran';
-    return {actTitle:'A PONTE DOS ESCUDOS CAÍDOS',step:4,totalSteps:6,text,target};
+    return {actTitle:'ATO I · O CHAMADO',step:4,totalSteps:6,text,target};
   }
   function tick(dt) {
     if(typeof player==='undefined'||!player||typeof L==='undefined'||L.mode!=='world')return;

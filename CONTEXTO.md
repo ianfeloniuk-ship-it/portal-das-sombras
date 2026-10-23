@@ -1,3 +1,7 @@
+## v577 (23/10/2026) — Fase A, bloco 2
+- Texto "Marcador dourado" (`campaign327.js`); o HUD da ponte agora usa o mesmo título do Ato I ("ATO I · O CHAMADO", passo 4/6) em vez de "A PONTE DOS ESCUDOS CAÍDOS 4/6" (`fronteira551.js`). O painel "passo N/4" é outro sistema (`campaign327`) e não foi mexido.
+- Não corrigido: `boats440`/`deep447` chamam `Surv437.ready()`/`world()`, que não existem (os dois módulos nunca ativam; arrumar exige decidir a API).
+
 ## v576 (23/10/2026) — Fase A, bloco 1 (lista de bugs do teste automático da v575)
 - **Ponte da missão #2** (`tools/fronteira551.js`): `clearSite` limpa 16 m de cada lado da estrada (era 9; o arbusto de coleta em (38,8; 165,3) ficava a 9,9 m e prendia jogador/câmera) e 24 m ao redor da ponte. O dreno de vida do Edran nos salteadores foi removido (chegavam a 1 HP sozinhos e "Invasor desistiu" aparecia sem o jogador agir).
 - **Edran e o casal** não bloqueiam mais o jogador na estrada estreita (`f.noBlock551`, lido em `tools/solid429.js`).

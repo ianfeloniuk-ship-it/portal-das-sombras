@@ -958,7 +958,7 @@
     if (sp.t === 'go' && s.pos && L.mode === 'world') {
       const pts = pointsOf(m).filter((_, i) => !s.hit.includes(i)), p = pts[0] || s.pos, dx = p[0] - player.x, dz = p[1] - player.z, d = Math.round(Math.hypot(dx, dz));
       const dir = ['leste', 'sudeste', 'sul', 'sudoeste', 'oeste', 'noroeste', 'norte', 'nordeste'][(Math.round(Math.atan2(dz, dx) / (Math.PI / 4)) + 8) % 8];
-      where = ' Marcador ' + (isSide(m) ? 'azul' : 'dourada') + ' a ' + d + ' m, ' + dir + '.';
+      where = ' Marcador ' + (isSide(m) ? 'azul' : 'dourado') + ' a ' + d + ' m, ' + dir + '.';
       if (sp.fight&&!s.fightDone) where += ' Inimigos: ' + Math.max(0, (sp.fight.n + (sp.fight.el || 0)) * (sp.pts || 1) - s.killed) + '.';
     }
     if (sp.t === 'talk' && sp.npc !== 'Torvo') where = ' Fale com ' + sp.npc + ' numa cidade.';
