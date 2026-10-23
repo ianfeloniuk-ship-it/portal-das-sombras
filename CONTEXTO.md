@@ -1,3 +1,10 @@
+## v595 (23/10/2026) — Grama de fios (reação, vento e elementos)
+- **Pedido de Ian** (via outra sessão): grama como a do reel da PhysicsMorph — fios finos e densos, base escura e ponta clara, reagindo ao mundo, mantendo a relva baixa da v568.
+- `tools/grass446.js`: tufos de 9 fios finos com afinamento e degradê base→ponta; fios cheios até 18 m e LOD simples (3 fios largos, 1 em cada 4 tufos) de 18 a 44 m (`mesh2`). Altura continua do EcoGrid (`grassMul`: trilha baixa, biomassa alta mais alta).
+- **Reação:** até 12 amostras (jogador + 7 NPCs/monstros mais próximos, raio por entidade) vão ao vertex shader; os fios dobram e voltam em ~2,4 s. **Vento:** onda que atravessa o campo.
+- **Elementos** (`Grass446.element(kind,x,z,r)`, ligado ao `VFX302/328.play` pelo nome/cor da habilidade e ao `elemMul300` para projéteis de fogo/gelo): fogo escurece e encolhe os fios e derruba a biomassa/fertilidade das células (o Solo Vivo faz crescer de novo); gelo deixa os fios rígidos e azulados por 20 s; vento deita os fios por 5 s.
+- Teste (Edge, GPU Intel UHD): captura de perto, passando pelo campo, com fogo, gelo/vento e de longe; FPS 24–25 contra 22 da v594 (a grama custa ~1,7 FPS). Não testado: celular; golpe de fogo por habilidade real do jogador (testado por `Grass446.element`).
+
 ## v594 (23/10/2026) — Mapa (M) estilo Skyrim: ícones-brasão presos no relevo
 - **Pedido de Ian**: mapa como o do Skyrim — ícones nos lugares, nome + estado ao passar o mouse, seta do jogador, não descobertos escondidos, sem bolhas empilhadas.
 - `tools/mapa3d544.js`: ícones desenhados em canvas (sem Tripo) e presos na altura do relevo, tamanho fixo na tela, com pino. Tipos: capital, cidade, portal (marquinha com a cor do rank), Fenda, objetivo de missão, acampamento, posto da estrada (também prontos: masmorra, forja, mina — ainda sem dado no mundo).

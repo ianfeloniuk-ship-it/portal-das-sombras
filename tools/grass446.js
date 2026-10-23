@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   const T = THREE, TAU = Math.PI * 2;
-  const R = 28, CELL = .34, TILE = 8, MAX = 30000; /* v567: tufos bem mais juntos (gramado contínuo) */
+  const R = 44, NR = 18, CELL = .34, TILE = 8, MAX = 30000, MAX2 = 9000; /* v595: fios cheios até NR m, LOD simples até R */ /* v567: tufos bem mais juntos (gramado contínuo) */
   const ready = () => typeof started !== 'undefined' && started && typeof player !== 'undefined' && player && run && L.mode === 'world' && !L.grid;
 
   /* ---------- ruído Perlin (gradiente) + fbm ---------- */
@@ -21,13 +21,13 @@
   window.Perlin446 = { perlin, fbm };
 
   /* ---------- tufo de lâminas ---------- */
-  function tuft() {
+  function tuft(nb = 15, wm = 1, near = true) { /* v595: fios finos; longe, poucos fios mais largos */
     const pos = [], col = [], uv = [], idx = []; let v = 0;
-    for (let b = 0; b < 11; b++) {
-      const a = b / 11 * TAU + hash(b, 7) * .9, r = .03 + hash(b, 3) * .10, h = .13 + hash(b, 5) * .13, w = .02 + hash(b, 9) * .012, /* v568: capim fino e baixo, como relva */ lean = (hash(b, 11) - .5) * .5;
+    for (let b = 0; b < nb; b++) {
+      const a = b / nb * TAU + hash(b, 7) * .9, r = .03 + hash(b, 3) * .10, h = .13 + hash(b, 5) * .13, w = (.03 + hash(b, 9) * .018) * wm, /* v568: capim fino e baixo, como relva */ lean = (hash(b, 11) - .5) * .5;
       const ox = Math.cos(a) * r, oz = Math.sin(a) * r, dx = -Math.sin(a) * w, dz = Math.cos(a) * w, lx = Math.cos(a) * lean * h, lz = Math.sin(a) * lean * h;
       const pts = [[-1, 0], [1, 0], [-.7, .5], [.7, .5], [0, 1]];
-      for (const [s, t] of pts) { pos.push(ox + dx * s + lx * t * t, h * t, oz + dz * s + lz * t * t); const c = .45 + .55 * t; col.push(c, c, c); uv.push(t, t); }
+      for (const [s, t] of pts) { pos.push(ox + dx * s + lx * t * t, h * t, oz + dz * s + lz * t * t); const c = .38 + .62 * t * t; col.push(c, c, c); /* v595: base escura, ponta clara */ uv.push(t, t); }
       idx.push(v, v + 1, v + 2, v + 1, v + 3, v + 2, v + 2, v + 3, v + 4); v += 5;
     }
     const g = new T.BufferGeometry();
@@ -42,11 +42,12 @@
     for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI, c = Math.cos(a) * pr, s2 = Math.sin(a) * pr; quad([-c, h - .02, -s2], [c, h - .02, s2], [-c, h + .05, -s2], [c, h + .05, s2], [1, 1, 1], [1.15, 1.15, 1.15]); quad([-s2 * .7, h + .015, c * .7], [s2 * .7, h + .015, -c * .7], [-s2 * .7, h + .02, c * .7], [s2 * .7, h + .02, -c * .7], [1, 1, 1], [1, 1, 1]); }
     const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new T.Float32BufferAttribute(col, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
   }
-  const U = { uT: { value: 0 }, uP: { value: new T.Vector2() } };
+  const NI = 12, NZ = 6;
+  const U = { uT: { value: 0 }, uP: { value: new T.Vector2() }, uI: { value: Array.from({ length: NI }, () => new T.Vector4()) }, uZ: { value: Array.from({ length: NZ }, () => new T.Vector4()) }, uK: { value: new Array(NZ).fill(0) } };
   const mat = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide, roughness: .85, metalness: 0 });
   mat.onBeforeCompile = sh => {
-    sh.uniforms.uT446 = U.uT; sh.uniforms.uP446 = U.uP;
-    sh.vertexShader = 'uniform float uT446;uniform vec2 uP446;\n' + sh.vertexShader
+    sh.uniforms.uT446 = U.uT; sh.uniforms.uP446 = U.uP; sh.uniforms.uI446 = U.uI; sh.uniforms.uZ446 = U.uZ; sh.uniforms.uK446 = U.uK;
+    sh.vertexShader = 'uniform float uT446;uniform vec2 uP446;uniform vec4 uI446[' + NI + '];uniform vec4 uZ446[' + NZ + '];uniform float uK446[' + NZ + '];varying float vBurn446;varying float vIce446;\n' + sh.vertexShader
       .replace('#include <beginnormal_vertex>', 'vec3 objectNormal=vec3(0.,1.,0.);')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
 {float h=uv.y;vec3 ip=vec3(0.);
@@ -54,13 +55,24 @@
 ip=(modelMatrix*instanceMatrix*vec4(0.,0.,0.,1.)).xyz;
 #endif
 float g=sin(uT446*.6+ip.x*.05)*.5+.5;float sw=sin(uT446*1.9+ip.x*.37+ip.z*.29)*(.6+.6*g)+sin(uT446*3.3+ip.x*1.3)*.25;
-transformed.x+=sw*h*h*.14;transformed.z+=cos(uT446*1.4+ip.z*.41)*h*h*.08;
-vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=normalize(d)*(1.3-dist)*h*h*.55;transformed.y-=(1.3-dist)*h*.18;}}`);
+/* v595: ondas de vento atravessando o campo */
+float wave=sin(dot(ip.xz,vec2(.11,.06))-uT446*1.7)*.5+.5;sw+=wave*wave*.9;
+float brn=0.,frz=0.,fl=0.;
+for(int k=0;k<${NZ};k++){vec4 z=uZ446[k];if(z.z>0.){float w=1.-smoothstep(z.z*.55,z.z,distance(ip.xz,z.xy));float kd=uK446[k];if(kd<1.5)brn=max(brn,w*smoothstep(0.,1.5,z.w));else if(kd<2.5)frz=max(frz,w);else fl=max(fl,w);}}
+float st=1.-frz*.92;
+transformed.x+=sw*h*h*.14*st;transformed.z+=cos(uT446*1.4+ip.z*.41)*h*h*.08*st;
+for(int i=0;i<${NI};i++){vec4 q=uI446[i];if(q.w>.01){vec2 d=ip.xz-q.xy;float dist=length(d);if(dist<q.z&&dist>.001){float push=(1.-dist/q.z)*q.w*(1.-frz*.85);transformed.xz+=normalize(d)*push*h*.3;transformed.y-=push*h*.12;}}}
+transformed.xz+=vec2(.8,.35)*fl*h*.35;transformed.y*=(1.-brn*.97)*(1.-fl*.7);
+vBurn446=brn;vIce446=frz;}`);
+    sh.fragmentShader = 'varying float vBurn446;varying float vIce446;\n' + sh.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb*=1.-.88*vBurn446;diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.55,.8,1.),vIce446*.75);');
   };
   mat.customProgramCacheKey = () => 'grass446';
-  const mesh = new T.InstancedMesh(tuft(), mat, MAX);
+  const mesh = new T.InstancedMesh(tuft(9, 1), mat, MAX);
+  const mesh2 = new T.InstancedMesh(tuft(3, 2.8), mat, MAX2); /* LOD longe: 4 fios mais largos */
+  mesh2.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh2.count = 0; mesh2.frustumCulled = false; mesh2.receiveShadow = true; mesh2.castShadow = false; mesh2.name = 'Grass446far';
+  mesh2.instanceColor = new T.InstancedBufferAttribute(new Float32Array(MAX2 * 3).fill(1), 3); mesh2.instanceColor.setUsage(T.DynamicDrawUsage);
   mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.count = 0; mesh.frustumCulled = false; mesh.receiveShadow = true; mesh.castShadow = false; mesh.name = 'Grass446';
-  mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(MAX * 3).fill(1), 3); mesh.instanceColor.setUsage(T.DynamicDrawUsage); scene.add(mesh); // cor por instância já do tamanho máximo
+  mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(MAX * 3).fill(1), 3); mesh.instanceColor.setUsage(T.DynamicDrawUsage); scene.add(mesh); scene.add(mesh2); // cor por instância já do tamanho máximo
   const FMAX = 4000, fl = new T.InstancedMesh(flower(), mat, FMAX); fl.instanceMatrix.setUsage(T.DynamicDrawUsage); fl.count = 0; fl.frustumCulled = false; fl.instanceColor = new T.InstancedBufferAttribute(new Float32Array(FMAX * 3).fill(1), 3); fl.name = 'Flowers446'; scene.add(fl);
   const PETAL = [[1, .55, .75], [1, .85, .3], [.75, .55, 1], [1, 1, .95], [1, .45, .4]];
 
@@ -105,13 +117,15 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
     if (k === key) return; key = k;
     const ed = ((run.terra444?.st?.length) || 0) + ':' + ((run.build437 || []).length); if (ed !== rebuild.ed) { rebuild.ed = ed; tiles.clear(); } // trilha nova ou obra nova: refaz os ladrilhos
     const t0x = Math.floor((px - R) / TILE), t1x = Math.floor((px + R) / TILE), t0z = Math.floor((pz - R) / TILE), t1z = Math.floor((pz + R) / TILE);
-    const em = window.EcoGrid && EcoGrid.grassMul; const want = new Set(); let n = 0, nf = 0; const col = new T.Color(); let budget = 10; // no máx. 6 ladrilhos novos por vez (sem travar)
+    const em = window.EcoGrid && EcoGrid.grassMul; const want = new Set(); let n = 0, nf = 0, n2 = 0, far = 0; const col = new T.Color(); let budget = 10; // no máx. 6 ladrilhos novos por vez (sem travar)
     for (let tx = t0x; tx <= t1x; tx++) for (let tz = t0z; tz <= t1z; tz++) {
       const id = tx + ',' + tz; want.add(id);
       if (!tiles.has(id)) { if (budget-- <= 0) { key = ''; continue; } tiles.set(id, buildTile(tx, tz)); }
       for (const g of tiles.get(id)) {
         const dx = g[0] - px, dz = g[1] - pz; if (dx * dx + dz * dz > R * R) continue;
         const eh = em ? em(g[0], g[1]) : 1; if (eh < .12) continue; /* v566: trilha batida/solo pobre não tem capim */
+        const dd = dx * dx + dz * dz;
+        if (dd > NR * NR) { if (g[7] || (far++ % 4) || n2 >= MAX2) continue; Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.set(g[3] * 1.5, g[3] * 1.15 * eh, g[3] * 1.5); M.compose(V, Q, Sc); mesh2.setMatrixAt(n2, M); col.setRGB(g[4], g[5], g[6]); mesh2.setColorAt(n2, col); n2++; continue; }
         if (g[7]) { if (nf >= FMAX) continue; Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.setScalar(g[3]); M.compose(V, Q, Sc); fl.setMatrixAt(nf, M); col.setRGB(g[4], g[5], g[6]); fl.setColorAt(nf, col); nf++; continue; }
         if (n >= MAX) continue;
         Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.set(g[3], g[3] * (.9 + .2 * ((n * 7) % 5) / 5) * eh, g[3]); M.compose(V, Q, Sc); mesh.setMatrixAt(n, M);
@@ -120,21 +134,73 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
     }
     for (const id of tiles.keys()) if (!want.has(id)) tiles.delete(id);
     fl.count = nf; fl.instanceMatrix.needsUpdate = true; fl.instanceColor.needsUpdate = true;
+    mesh2.count = n2; mesh2.instanceMatrix.needsUpdate = true; if (mesh2.instanceColor) mesh2.instanceColor.needsUpdate = true;
     mesh.count = n; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true; fill = n;
   }
   /* as folhinhas antigas (plant_flat*) saem do cenário */
   if (typeof EH === 'function') { const eh0 = EH; EH = function (batch, k) { if (typeof k === 'string' && /^(plant_flat|grass|flower_)/.test(k)) return 0; return eh0.apply(this, arguments); }; }
+  /* ---------- v595: reação (jogador, NPCs, monstros) e elementos ---------- */
+  const samples = [], zones = []; let tick = 0;
+  function ents() {
+    const out = [{ e: player, r: 1.0 }], px = player.x, pz = player.z, near = [];
+    const add = (list, r0) => { try { for (const e of list) { if (!e || e.dead || e.gone || e === player) continue; const dx = e.x - px, dz = e.z - pz; if (dx * dx + dz * dz < 900) near.push({ e, r: Math.max(.6, Math.min(2.6, e.rad || e.r || r0)), d: dx * dx + dz * dz }); } } catch (_) {} };
+    if (typeof enemies !== 'undefined') add(enemies, .9);
+    if (typeof npcs !== 'undefined') add(npcs, .7);
+    near.sort((a, b) => a.d - b.d); return out.concat(near.slice(0, 7));
+  }
+  function stepReact(dt) {
+    if (++tick % 3 === 0) {
+      for (const { e, r } of ents()) {
+        const s0 = e._gs446;
+        if (s0 && Math.hypot(s0.x - e.x, s0.z - e.z) < .45) { s0.s = 1; s0.x = e.x; s0.z = e.z; continue; }
+        if (s0) s0.live = false;
+        const n = { x: e.x, z: e.z, r: r * 1.6, s: 1, live: true }; e._gs446 = n; samples.push(n);
+      }
+      while (samples.length > NI) { let k = 0; for (let i = 1; i < samples.length; i++) if (samples[i].s < samples[k].s && !samples[i].live) k = i; samples.splice(k, 1); }
+    }
+    for (let i = samples.length - 1; i >= 0; i--) { const q = samples[i]; if (!q.live) q.s -= dt / 2.4; if (q.s <= 0) samples.splice(i, 1); }
+    for (let i = 0; i < NI; i++) { const q = samples[i], v = U.uI.value[i]; if (q) v.set(q.x, q.z, q.r, Math.min(1, q.s)); else v.set(0, 0, 1, 0); }
+    for (let i = zones.length - 1; i >= 0; i--) { const z = zones[i]; z.t += dt; if (z.t > z.dur) zones.splice(i, 1); }
+    for (let i = 0; i < NZ; i++) { const z = zones[i], v = U.uZ.value[i]; if (z) { v.set(z.x, z.z, z.r, z.t); U.uK.value[i] = z.kind; } else { v.set(0, 0, 0, 0); U.uK.value[i] = 0; } }
+  }
+  /* fogo queima (fios escurecem e somem; biomassa cai e volta pelo Solo Vivo), gelo congela, vento derruba */
+  function element(kind, x, z, r) {
+    const K = { fire: 1, ice: 2, wind: 3 }[kind]; if (!K) return;
+    zones.push({ x, z, r: Math.max(1.5, r), t: 0, kind: K, dur: K === 1 ? 7 : K === 2 ? 20 : 5 }); if (zones.length > NZ) zones.shift();
+    if (K === 1 && window.EcoGrid && EcoGrid.getCellAt) {
+      for (let dx = -r; dx <= r; dx += 2) for (let dz = -r; dz <= r; dz += 2) { if (dx * dx + dz * dz > r * r) continue; const c = EcoGrid.getCellAt(x + dx, z + dz); if (c) { c.grid[c.idx + 3] = Math.min(c.grid[c.idx + 3], 18); c.grid[c.idx + 1] = Math.max(0, c.grid[c.idx + 1] - 25); } }
+      try { EcoGrid.rev++; } catch (_) {}
+    }
+  }
+  function elementOf(sk) {
+    const n = (sk && sk.n || '').toLowerCase(), c = sk && sk.col || 0;
+    if (/fogo|chama|meteor|inferno|brasa|lava|incêndio|incendi|explos|dragão rubro|ígneo/.test(n)) return 'fire';
+    if (/gelo|congel|frio|nevasca|glaci|geada|gélid/.test(n)) return 'ice';
+    if (/vento|tempestade|ciclone|furac|rajada|tornado|vendaval/.test(n)) return 'wind';
+    const r = c >> 16 & 255, g = c >> 8 & 255, b = c & 255;
+    if (r > 200 && g < 150 && b < 90) return 'fire'; if (b > 200 && r > 120 && r < 230 && g > 170) return 'ice'; return null;
+  }
+  function hookElements() {
+    for (const V of [window.VFX302, window.VFX328]) {
+      if (!V || !V.play || V._g446) continue; V._g446 = true; const old = V.play;
+      V.play = function (sk) {
+        try { const el = elementOf(sk); if (el && player) { const K = window.VFX328 && VFX328.truth ? VFX328.truth(sk) : null; const pt = K && K.pt || { x: player.x + Math.sin(player.face || 0) * 4, z: player.z + Math.cos(player.face || 0) * 4 }; element(el, pt.x, pt.z, K && K.r || sk.radius || 4); } } catch (_) {}
+        return old.apply(this, arguments);
+      };
+    }
+    if (typeof window.elemMul300 === 'function' && !window.elemMul300._g446) { const o = window.elemMul300; window.elemMul300 = function (e, amt, h) { try { const t = h && h.ptype300; const el = t === 'fire' || t === 'meteor' ? 'fire' : t === 'ice' ? 'ice' : null; if (el && e) element(el, e.x, e.z, 2.5); } catch (_) {} return o.apply(this, arguments); }; window.elemMul300._g446 = true; }
+  }
   function invalidate() { tiles.clear(); key = ''; }
 
   let last = performance.now(), slow = 0;
   function loop() {
     const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
     try {
-      const on = ready(); mesh.visible = fl.visible = on;
-      if (on) { U.uT.value += dt; U.uP.value.set(player.x, player.z); slow -= dt; if (slow <= 0) { slow = .25; rebuild(); } }
+      const on = ready(); mesh.visible = mesh2.visible = fl.visible = on;
+      if (on) { U.uT.value += dt; U.uP.value.set(player.x, player.z); stepReact(dt); if (!loop.h) { loop.h = 1; hookElements(); } slow -= dt; if (slow <= 0) { slow = .25; rebuild(); } }
     } catch (e) { if (!loop.err) { loop.err = 1; console.warn('grass446', e); } }
     setTimeout(loop, 33);
   }
   loop();
-  window.Grass446 = { mesh, rebuild, invalidate, count: () => fill, tiles };
+  window.Grass446 = { mesh, mesh2, element, zones, samples, rebuild, invalidate, count: () => fill, tiles };
 })();
