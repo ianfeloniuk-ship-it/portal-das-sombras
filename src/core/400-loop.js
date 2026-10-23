@@ -195,7 +195,7 @@ function camUpdate(dt){
   const isFP=!!(pcCam.firstPerson&&!mounted&&!P.dead);
   if(isFP){
     /* 1ª Pessoa Skyrim: Câmera na linha dos olhos (1.68m, alinhada à 3ª pessoa), corpo de 3ª pessoa oculto para não clipar. */
-    if(P.m?.root&&P.m.root.visible)P.m.root.visible=false;
+    if(window.FP550)FP550.body(true);
     const eyeY=terrH(P.x,P.z)+(P.jy||0)+1.68+(window.FP550?.bobY||0);
     const [fx,fz]=camRot(0,-.08);
     camera.position.set(P.x+fx,eyeY,P.z+fz);

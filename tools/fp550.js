@@ -434,6 +434,178 @@
     }
   }
 
+
+  /* ---------- v563: braços e mãos do próprio Viajante (mesma malha e ossos da 3ª pessoa) ---------- */
+  const ARM_RX = /^(upperarm|forearm|hand)_[lr]$/;
+  /* O Viajante é feito de peças soltas (tripo_part_N) na pose em T: braço/mão = peça longe do tronco e acima da cintura */
+  const ARM_PARTS = /^tripo_part_(1|2|7|8)$/;
+  function isArmPiece(o){ return ARM_PARTS.test(o.name); }
+  function fpKeep(o){
+    if(o.userData.fpKeep === undefined) o.userData.fpKeep = isArmPiece(o);
+    return o.userData.fpKeep;
+  }
+  FP.body = function(on){
+    const P = global.player;
+    if(!P || !P.m || !P.m.model) return;
+    const m = P.m;
+    if(m.root) m.root.visible = true;
+    if(!on && !m.fp563) return;
+    m.fp563 = !!on;
+    if(!on && m.bowHolder155 && m.bowHolder155.userData.fpPos0){ m.bowHolder155.position.copy(m.bowHolder155.userData.fpPos0); m.bowHolder155.quaternion.copy(m.bowHolder155.userData.fpQ0); }
+    if(!on && m.socket && m.socket.userData.fpPos0) m.socket.position.copy(m.socket.userData.fpPos0);
+    if(!on && m.socket && m.socket.children[0] && m.socket.children[0].userData.fpQ0) m.socket.children[0].quaternion.copy(m.socket.children[0].userData.fpQ0);
+    m.model.traverse(o => {
+      if(on && o.isMesh){
+        /* o jogo reabilita as peças ao trocar equipamento: reforça a cada quadro */
+        if(o.isSkinnedMesh){ if(!fpKeep(o)) o.visible = false; }
+        else { let k = false, p = o.parent; while(p && p !== m.model){ if(p.isBone && ARM_RX.test(p.name)){ k = true; break; } p = p.parent; } if(!k) o.visible = false; }
+      }
+      if(!!o.userData.fpOn === !!on) return;
+      if(o.isMesh) o.userData.fpOn = !!on;
+      if(o.isSkinnedMesh){
+        if(on){ o.userData.fpHid = o.visible; o.visible = fpKeep(o) && o.visible; o.frustumCulled = false; }
+        else { if(o.userData.fpHid !== undefined){ o.visible = ARM_PARTS.test(o.name) || o.userData.fpHid || /^tripo_part_/.test(o.name); o.userData.fpHid = undefined; } o.frustumCulled = true; }
+      } else if(o.isMesh){
+        let keep = false, p = o.parent;
+        while(p && p !== m.model){ if(p.isBone && ARM_RX.test(p.name)){ keep = true; break; } p = p.parent; }
+        if(!keep){
+          if(on){ o.userData.fpVis = o.visible; o.visible = false; }
+          else if(o.userData.fpVis !== undefined){ o.visible = o.userData.fpVis; o.userData.fpVis = undefined; }
+        }
+      }
+    });
+  };
+  /* pose de 1ª pessoa: os dois braços reais vão para a frente da câmera (IK de 2 ossos), somando o balanço da animação */
+  const V = {};
+  function aim(bone, child, dirW){
+    const T = THREE;
+    bone.updateWorldMatrix(true, false); child.updateWorldMatrix(true, false);
+    const bp = bone.getWorldPosition(V.a), cp = child.getWorldPosition(V.b);
+    const cur = V.c.copy(cp).sub(bp).normalize();
+    V.q.setFromUnitVectors(cur, dirW);
+    const wq = bone.getWorldQuaternion(V.w).premultiply(V.q);
+    const pq = bone.parent.getWorldQuaternion(V.p).invert();
+    bone.quaternion.copy(pq.multiply(wq));
+    bone.updateMatrixWorld(true);
+  }
+  /* arma na mão direita: mantém o cabo no punho (socket do jogo) e só gira a arma para a direção de guarda de 1ª pessoa */
+  const GUARD = { sword:[-0.14,0.46,-0.88], axe:[-0.14,0.46,-0.88], mace:[-0.14,0.46,-0.88], hammer:[-0.14,0.46,-0.88], dagger:[0.12,0.5,-0.86], staff:[0.06,0.86,-0.5], wand:[0.06,0.86,-0.5], spear:[0.04,0.32,-0.95] };
+  /* golpe de 1ª pessoa: o braço da arma faz preparo, corte e recuperação a cada ataque (gatilho: tempo de recarga do jogador) */
+  const SWK = [[0,[0,0,0],0],[0.28,[0.07,0.1,0.06],1],[0.68,[-0.24,-0.11,-0.2],2],[1,[0,0,0],0]];
+  const SWD = [null, [0.32,0.95,-0.12], [-0.8,0.12,-0.6]];
+  FP.sw = { t: 1, last: 0, pa: 0 };
+  FP.swingNow = function(P, base){
+    const now = performance.now(), dt = Math.min(0.05, Math.max(0, (now - (FP.sw.last || now)) / 1000)); FP.sw.last = now;
+    const atk = P.atkCd || 0;
+    if(atk > FP.sw.pa + 0.001) FP.sw.t = 0;
+    FP.sw.pa = atk;
+    if(FP.sw.t < 1) FP.sw.t = Math.min(1, FP.sw.t + dt / 0.34);
+    const t = FP.sw.t;
+    let off = [0,0,0], dir = base;
+    if(t < 1){
+      for(let i = 0; i < SWK.length - 1; i++){
+        const a = SWK[i], b = SWK[i+1];
+        if(t >= a[0] && t <= b[0]){
+          const u = (t - a[0]) / (b[0] - a[0]), e = u * u * (3 - 2 * u);
+          off = a[1].map((v, k) => v + (b[1][k] - v) * e);
+          const da = a[2] === 0 ? base : SWD[a[2]], db = b[2] === 0 ? base : SWD[b[2]];
+          dir = da.map((v, k) => v + (db[k] - v) * e);
+          break;
+        }
+      }
+    }
+    FP._off = off; FP._dir = dir;
+  };
+
+  /* arco: segurado na mão esquerda, na vertical à frente */
+  FP.gripBow = function(m){
+    const T = THREE, H = m.bowHolder155;
+    if(!H || !H.parent) return;
+    const hd = m.bones.hand_l;
+    hd.updateWorldMatrix(true, false);
+    const palm = hd.getWorldPosition(V.a);
+    if(!H.userData.fpPos0){ H.userData.fpPos0 = H.position.clone(); H.userData.fpQ0 = H.quaternion.clone();
+      H.updateWorldMatrix(true, true);
+      const bb = new T.Box3().setFromObject(H), sz = bb.getSize(new T.Vector3());
+      const ax = sz.x >= sz.y && sz.x >= sz.z ? new T.Vector3(1,0,0) : sz.y >= sz.z ? new T.Vector3(0,1,0) : new T.Vector3(0,0,1);
+      /* eixo longo no mundo -> local do suporte */
+      H.userData.fpAx = ax.transformDirection(H.matrixWorld.clone().invert());
+    }
+    const dw = V.d.set(0.04, 1, -0.16).transformDirection(camera.matrixWorld);
+    const qw = V.q.setFromUnitVectors(H.userData.fpAx, dw);
+    const pq = H.parent.getWorldQuaternion(V.w).invert();
+    H.quaternion.copy(pq.multiply(qw));
+    H.updateWorldMatrix(true, true);
+    const C = new T.Box3().setFromObject(H).getCenter(V.c);
+    H.position.add(H.parent.worldToLocal(V.e.copy(palm)).sub(H.parent.worldToLocal(V.f.copy(C))));
+    H.updateWorldMatrix(true, true);
+  };
+
+  function m_hasSock(m){ return !!(m.socket && m.socket.children[0]); }
+  FP.palm = 0.1; FP.hilt = -0.12;
+  FP.grip = function(m){
+    const T = THREE, so = m.socket, W = so && so.children[0];
+    if(!W) return;
+    /* o socket do jogo fica longe do punho quando o antebraço muda de ângulo: prende o cabo no centro da mão */
+    const hd = m.bones.hand_r, fa = m.bones.forearm_r;
+    hd.updateWorldMatrix(true, false);
+    const hp = hd.getWorldPosition(V.a), fp = fa.getWorldPosition(V.b);
+    const gd = FP._dir || GUARD[m.kind195] || GUARD.sword;
+    const gw = V.e.set(gd[0], gd[1], gd[2]).transformDirection(camera.matrixWorld);
+    const gp = V.c.copy(hp).sub(fp).normalize().multiplyScalar(FP.palm).add(hp).addScaledVector(gw, -FP.hilt);
+    if(!so.userData.fpPos0) so.userData.fpPos0 = so.position.clone();
+    so.position.copy(so.parent.worldToLocal(gp));
+    so.updateWorldMatrix(true, false);
+    if(!W.userData.fpAx){
+      W.userData.fpQ0 = W.quaternion.clone();
+      W.updateWorldMatrix(true, true);
+      const box = new T.Box3().setFromObject(W), c = box.getCenter(new T.Vector3());
+      const o = new T.Vector3().setFromMatrixPosition(W.matrixWorld);
+      W.userData.fpAx = c.sub(o).normalize().transformDirection(W.matrixWorld.clone().invert());
+    }
+    const g = FP._dir || GUARD[m.kind195] || GUARD.sword;
+    const dw = V.d.set(g[0], g[1], g[2]).transformDirection(camera.matrixWorld);
+    const qw = V.q.setFromUnitVectors(W.userData.fpAx, dw);
+    const sq = so.getWorldQuaternion(V.w).invert();
+    W.quaternion.copy(sq.multiply(qw));
+    W.updateMatrixWorld(true);
+  };
+
+  FP.pose = function(){
+    const P = global.player;
+    if(!P || !P.m || !P.m.bones || !global.THREE || typeof camera === 'undefined' || !camera) return;
+    const T = THREE, b = P.m.bones;
+    if(!V.a){ for(const k of ['a','b','c','d','e','f','g','h','sh','el','hd','t']) V[k] = new T.Vector3(); V.q = new T.Quaternion(); V.w = new T.Quaternion(); V.p = new T.Quaternion(); }
+    P.m.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
+    FP.swingNow(P, GUARD[P.m.kind195] || GUARD.sword);
+    for(const s of ['r','l']){
+      const ua = b['upperarm_'+s], fa = b['forearm_'+s], hd = b['hand_'+s];
+      if(!ua || !fa || !hd) continue;
+      const sh = ua.getWorldPosition(V.sh), el = fa.getWorldPosition(V.el), ha = hd.getWorldPosition(V.hd);
+      const Lu = el.distanceTo(sh), Lf = ha.distanceTo(el);
+      // desvio da animação (ataque/respiração) em relação à mão pendurada
+      const delta = V.d.copy(ha).sub(sh); delta.y += (Lu + Lf) * 0.97;
+      const side = s === 'r' ? 1 : -1;
+      const so3 = s === 'r' ? FP._off : [0,0,0];
+      const bowL = s === 'l' && P.m.bowHolder155;
+      const tgt = bowL ? V.t.set(-0.04, -0.1, -0.72) : V.t.set(side * 0.13 + so3[0], -0.14 + so3[1], -0.55 + so3[2]); camera.localToWorld(tgt);
+      tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
+      delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);
+      tgt.addScaledVector(delta, 0.8);
+      // 2 ossos: cotovelo no plano do alvo, curvando para baixo e para fora
+      const dir = V.e.copy(tgt).sub(sh), dist = Math.min(dir.length(), (Lu + Lf) * 0.995); dir.normalize();
+      const a = (Lu*Lu - Lf*Lf + dist*dist) / (2 * dist), hh = Math.sqrt(Math.max(0, Lu*Lu - a*a));
+      const pole = V.f.set(side * 0.5, -1, 0.15).transformDirection(camera.matrixWorld.clone().setPosition(0,0,0));
+      pole.addScaledVector(dir, -pole.dot(dir)).normalize();
+      const elbow = V.g.copy(sh).addScaledVector(dir, a).addScaledVector(pole, hh);
+      aim(ua, fa, V.h.copy(elbow).sub(sh).normalize());
+      aim(fa, hd, V.h.copy(sh).addScaledVector(dir, dist).sub(elbow).normalize());
+      if(s === 'r' && m_hasSock(P.m)) FP.grip(P.m);
+      if(s === 'l' && P.m.bowHolder155) FP.gripBow(P.m);
+    }
+    P.m.root.updateMatrixWorld(true);
+  };
+
   /* ---------- Alternância 1ª / 3ª Pessoa ---------- */
   FP.set = function(enable){
     const was = FP.active;
@@ -451,14 +623,14 @@
       global.scene.add(global.camera);
     }
 
-    if(!FP.viewmodel && FP.active) buildViewmodel();
-    if(FP.viewmodel) FP.viewmodel.visible = FP.active;
+    if(FP.viewmodel) FP.viewmodel.visible = false;
+    FP.body(FP.active);
 
     const P = global.player;
     if(P && P.m){
       // 1ª Pessoa: modelo de 3ª pessoa 100% oculto (sem clipar no viewport e sem deformação)
       // 3ª Pessoa: modelo de 3ª pessoa 100% visível
-      if(P.m.root) P.m.root.visible = !FP.active;
+      if(P.m.root) P.m.root.visible = true;
 
       // Preserva integridade anatômica: restaura escala do osso da cabeça se alterada
       if(P.m.bones && P.m.bones.head && P.m.bones.head.scale.x < 0.1){
@@ -529,17 +701,14 @@
   FP.tick = function(dt){
     const P = global.player;
     if(!P || P.dead || !FP.active || global.run?.mounted){
+      if(P && P.m && P.m.fp563) FP.body(false);
       if(FP.viewmodel && FP.viewmodel.visible) FP.viewmodel.visible = false;
       FP.bobY = 0;
       return;
     }
 
-    if(!FP.viewmodel) buildViewmodel();
-    if(FP.viewmodel && !FP.viewmodel.visible) FP.viewmodel.visible = true;
-
-    updateArmVisual();
-    updateWeaponVisual();
-    updateShieldVisual();
+    FP.body(true);
+    return;
 
     const t = (typeof time === 'number' ? time : performance.now() * 0.001);
     const speed = Math.hypot(P.vx || 0, P.vz || 0);
@@ -680,6 +849,18 @@
 
     setupDOM();
     setupPointerLock();
+
+    /* a animação roda depois da câmera: a pose de 1ª pessoa entra logo depois dela, no próprio Viajante */
+    const W = global.Warrior127;
+    if(W && typeof W.animate === 'function' && !W.animate._fp563){
+      const orig = W.animate;
+      W.animate = function(m){
+        const r = orig.apply(this, arguments);
+        try { if(FP.active && global.player && m === global.player.m && m.fp563) FP.pose(); } catch(_) {}
+        return r;
+      };
+      W.animate._fp563 = true;
+    }
 
     try {
       const saved = localStorage.getItem('pds_pov');

@@ -1,3 +1,8 @@
+## v569 (23/10/2026) — 1ª pessoa: braços e mãos reais do Viajante
+- **Pedido de Ian**: "mãos nada a ver" (blocos marrons/pretos em 1ª pessoa). Agora são os braços do próprio modelo do Viajante (mesma malha, ossos e luvas da 3ª pessoa).
+- `tools/fp550.js`: em 1ª pessoa só as peças `tripo_part_1/2/7/8` (braços) ficam visíveis (reforçado a cada quadro); a pose dos braços é um IK de 2 ossos até a frente da câmera, aplicado logo depois da animação (`Warrior127.animate`); o relevo (shader) é descontado do alvo. A arma segue o socket do jogo, mas o cabo é preso no centro do punho e a lâmina gira para a guarda de 1ª pessoa; golpe em 3 tempos (preparo, corte, recuperação) a cada ataque; espada/machado/maça/adaga/cajado/lança na direita, arco na esquerda. Ao sair da 1ª pessoa tudo volta ao original. `src/core/400-loop.js`: chama `FP550.body(true)` em vez de esconder o corpo.
+- Teste: Edge/pane do jogo real, espada (parada e em golpe), cajado, arco, e volta à 3ª pessoa. **Não testado**: lança, machado, escudo, armadura equipada nos antebraços, dedos fechando no cabo (a mão é um punho fixo; pedido de Ian de criar ossos nos dedos fica para depois).
+
 ## v568 (23/10/2026) — Capim fino e baixo
 - **Pedido de Ian**: a grama estava grossa e alta; queria algo mais real.
 - `tools/grass446.js`: lâminas ~metade da altura (0,13–0,26 m) e ~40% da largura, tufo mais compacto; flores menores para acompanhar (haste 0,28 m). Densidade da v567 mantida (~12 mil tufos).
