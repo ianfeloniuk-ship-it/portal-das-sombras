@@ -1,3 +1,7 @@
+## v585 (23/10/2026) — Fase A, bloco 8: prévia 3D das lojas (item 14)
+- `tools/telas535.js`: na Alquimia a prévia mostra um frasco de poção (antes ficava a armadura/modelo anterior preso, pois as linhas não são itens); na Forja, "Forjar arma …" mostra a espada (antes armadura, pelo texto "armadura" no resto da linha). Banco continua com o baú (é o cofre). Defesa mostra armadura. Testado no jogo (captura da Alquimia com o frasco; Forja com a espada).
+- Item 15 (mapa): o mapa atual (2D, v535+) não tem mais relevo; os ícones se aglomeram em volta de Aster, mas o nome continua legível — não alterado. Itens 16 e 17 não feitos nesta versão.
+
 ## v583 (23/10/2026) — Fase A, bloco 7: rótulos do céu de constelações
 - `tools/constel523.js`: os rótulos agora são coletados e desenhados depois, empilhando os que colidem em x (<150 px) e ficando acima do horizonte (antes todos grudavam em `hy-34`, sobrepostos e sob a colina). Captura do céu com as 24 constelações: sem sobreposição de texto. (Escalada ainda encosta no desenho da chave: é o desenho, não o texto.)
 - Item 11 (1ª pessoa) **não** feito: não consegui reproduzir a espada com o equipamento por código; mãos parecem grandes (alvo z=-0,62 em `fp550.js` pose).

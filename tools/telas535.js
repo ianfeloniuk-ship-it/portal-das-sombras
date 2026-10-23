@@ -112,7 +112,10 @@ function showFor(text,entry,color,desc){
   if(entry&&(entry.type==='core'||entry.type==='cry')&&window.Loot513?.model){const o=Loot513.model(entry);o.userData.keep=true;put(o,null,rim);return}
   if(!entry&&/núcleo|cristal|cristais/i.test(text)&&window.Loot513?.model){let rk=0;try{const c=new T.Color(color||'#fff');rk=Math.max(0,RANKS.findIndex(r=>{const d=new T.Color(r.c);return Math.abs(d.r-c.r)+Math.abs(d.g-c.g)+Math.abs(d.b-c.b)<.06}))}catch(e){}const o=Loot513.model({type:/núcleo/i.test(text)?'core':'cry',rank:rk,n:1});o.userData.keep=true;put(o,null,rim);return}
   if(entry&&entry.type==='equipment')text=(entry.item?.name||'')+' '+text;
-  const hit=GLB.find(([re])=>re.test(text));
+  /* v584: Alquimia mostrava armadura e "Forjar arma" também; agora poção na alquimia e espada na forja de arma */
+  const mt535=($('mt')?.textContent||'');
+  if(/^ALQUIMIA/.test(mt535)&&!entry){put(part('Poção',color?new T.Color(color).getHex():0x6bd6a0),null,rim);return}
+  const hit=/^FORJA/.test(mt535)&&/^forjar arma/i.test(text)?[0,'models/armas155/espada162.glb']:GLB.find(([re])=>re.test(text));
   if(hit){load(hit[1]).then(g=>{if(id!==V.want)return;const{o,b}=fromGlb(g);o.userData.keep=true;put(o,b,rim)}).catch(()=>{if(id===V.want)put(part('Fragmento',0x9b6bff),null,rim)});return}
   const w=PARTS.find(p=>new RegExp(p,'i').test(text))||PARTS.find(p=>new RegExp(p,'i').test(desc||''))||(/ouro/i.test(text)?'Essência':/lobo|montaria/i.test(text)?'Presa':/mapa/i.test(text)?'Pergaminho':/peixe|comer|comida/i.test(text)?'Coração':'Fragmento');
   put(part(w,color?new T.Color(color).getHex():0),null,rim)}
@@ -128,7 +131,7 @@ function select(it,k,entries,rows){
   const name=rowName(it),desc=(it.querySelector('.d small')||it.querySelector('small'))?.textContent||'',col=rowColor(it)||'#9b6bff';
   const price=[...it.querySelectorAll('.btn')].map(b=>b.textContent).find(t=>/ouro/i.test(t));
   card('<small>'+(k==='loot'?'Saque':k==='mkt'?'Dorian · recursos':/^(FORJA|ALQUIMIA) · /.test($('mt').textContent)?'Selecionado':'À venda')+'</small><h3>'+safeText(name)+'</h3><p>'+safeText(desc)+'</p>'+(price?'<div class="t535-big"><div><span>Preço</span><b>'+safeText(price.replace(/\s*ouro/i,''))+'</b></div><div><span>Seu ouro</span><b>'+fmt(run.gold)+'</b></div></div>':''));
-  if(isItem(it,k))showFor(name,entries?entries[rows.indexOf(it)]:null,col,desc)}
+  if(isItem(it,k)||/^ALQUIMIA/.test($('mt').textContent))showFor(name,entries?entries[rows.indexOf(it)]:null,col,desc)}
 function isItem(it,k){const n=rowName(it);return k==='loot'||[...it.querySelectorAll('.btn')].some(b=>/ouro|comprar|vender|pegar/i.test(b.textContent)&&!/presentear|doar/i.test(b.textContent))||GLB.some(([re])=>re.test(n))||PARTS.some(p=>new RegExp(p,'i').test(n))}
 function bankCard(){card('<small>Cofre de Selene</small><h3>Ouro guardado</h3><p>O que fica aqui não se perde, nem se você morrer lá fora.</p><div class="t535-big"><div><span>Com você</span><b>'+fmt(run.gold)+'</b></div><div><span>No banco</span><b>'+fmt(profile.bank||0)+'</b></div></div>')}
 function skin(title){
