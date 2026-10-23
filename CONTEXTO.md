@@ -1,3 +1,8 @@
+## v587 (23/10/2026) — 1ª pessoa no enquadramento do Skyrim
+- **Pedido de Ian** (referência de captura do Skyrim): mão livre pequena no canto inferior esquerdo, arma entrando pela borda direita em diagonal, centro da tela livre.
+- `tools/fp550.js`: mãos escaladas pelo osso da mão (`FP.handScale`: arma 0,72 · livre 0,62; a arma compensa pelo âncora); alvos do IK: mão livre em (-0,17; -0,16; -0,5), mão da arma quase fora da tela (0,27; -0,26; -0,52); guarda da espada/machado/maça em diagonal (lâmina sobe, ponta levemente à esquerda); golpe curto à esquerda e volta. Arco: mão esquerda, pequeno.
+- Teste: jogo real, espada parada e em golpe, arco. **Não testado**: andando (bobbing), cajado/lança, FOV próprio do viewmodel (não precisou).
+
 ## v586 (23/10/2026) — Fase A, bloco 9: primeira pessoa (item 11)
 - `tools/fp550.js`: as mãos ficam mais longe da câmera (direita z -0,62→-0,76, esquerda -0,5→-0,64): aparecem menores; o golpe é menos lateral (deslocamento -0,24→-0,14, direção final [-0,55; 0,35; -0,75]) para a arma não cruzar a tela. Testado em captura com o machado equipado (mãos menores, arma segura pelo cabo). Não testado: espada fina (modelo sem guarda continua sendo o do catálogo) nem combate real com clique.
 
