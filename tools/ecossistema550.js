@@ -55,6 +55,21 @@
     vulcao:   { rain: 15,  fert: 20,  maxB: 40,  name: 'Vulcão' }
   };
 
+  // v566: gates, WX, npcs, run e WN são let/const do jogo (não existem em window): ler pelo escopo global de scripts
+  function gv(n) {
+    try {
+      switch (n) {
+        case 'gates': return gates;
+        case 'WX': return WX;
+        case 'npcs': return npcs;
+        case 'run': return run;
+        case 'WN': return WN;
+        case 'scene': return scene;
+      }
+    } catch (_) {}
+    return undefined;
+  }
+
   const EcoGrid = global.EcoGrid = {
     version: 550,
     GRID_SIZE,
@@ -164,17 +179,23 @@
     const bioKey = typeof global.biomeAt === 'function' ? global.biomeAt(x0, z0) : 'campos';
     const cfg = BIOME_ECO_CONFIG[bioKey] || BIOME_ECO_CONFIG.campos;
 
-    // Verificar se há árvores instanciadas neste chunk
+    // Verificar se há árvores instanciadas neste chunk (v566: mesmos nomes que o survival437 usa; guarda as instâncias reais de cada árvore)
     const treePositions = [];
+    const treeIdx = new Map();
     if (ch.group) {
       ch.group.traverse(o => {
-        if (o.isInstancedMesh && /tree|pine|oak|willow|palm|cherry|leaf|dead/i.test(o.name || o.userData?.tripo153 || '')) {
+        if (o.isInstancedMesh && TREE_KINDS.includes(o.userData?.tripo153)) {
           const m4 = new T.Matrix4(), pos = new T.Vector3(), scl = new T.Vector3();
-          for (let i = 0; i < o.count; i++) {
+          const full = o.userData.count415 ?? o.count;
+          for (let i = 0; i < full; i++) {
             o.getMatrixAt(i, m4);
             pos.setFromMatrixPosition(m4);
             scl.setFromMatrixScale(m4);
-            if (scl.y > 0.1) treePositions.push({ x: pos.x, z: pos.z });
+            if (scl.y <= 0.1) continue;
+            const k = Math.round(pos.x / 1.5) + ':' + Math.round(pos.z / 1.5);
+            let tp = treeIdx.get(k);
+            if (!tp) { tp = { x: pos.x, z: pos.z, refs: [] }; treeIdx.set(k, tp); treePositions.push(tp); }
+            tp.refs.push({ o, i, m: m4.clone() });
           }
         }
       });
@@ -215,7 +236,7 @@
           biomass = 15;  // Estrada de terra batida (quase sem vegetação)
         } else {
           // Grama / mato natural baseado em fertilidade e ruído
-          const n = typeof global.WN === 'function' ? global.WN(wx * 0.05, wz * 0.05) : 0.5;
+          const n = typeof gv('WN') === 'function' ? gv('WN')(wx * 0.05, wz * 0.05) : 0.5;
           biomass = Math.max(30, Math.min(cfg.maxB, Math.round(fertility * 0.55 + n * 35)));
         }
         grid[cellIdx + 3] = biomass;
@@ -253,12 +274,11 @@
       try { ch.ecoTexture.dispose(); } catch (_) {}
       ch.ecoTexture = null;
     }
-    if (ch.ecoTrees) {
-      for (const tr of ch.ecoTrees) {
-        if (tr.mesh && tr.mesh.parent) tr.mesh.parent.remove(tr.mesh);
-      }
-      ch.ecoTrees = [];
+    if (ch.ecoTreeGroup) {
+      if (ch.ecoTreeGroup.parent) ch.ecoTreeGroup.parent.remove(ch.ecoTreeGroup);
+      ch.ecoTreeGroup = null;
     }
+    ch.ecoTrees = [];
     ch.ecoGrid = null;
     EcoGrid.chunks.delete(key);
     const qIdx = EcoGrid.queue.indexOf(key);
@@ -307,7 +327,7 @@ uniform vec2 uEcoOrigin;
     m.uniforms.uEcoTex = { value: ch.ecoTexture };
     m.uniforms.uEcoOrigin = { value: new T.Vector2(ch.ecoMinX, ch.ecoMinZ) };
 
-    const origOnBeforeCompile = m.onBeforeCompile;
+    const origOnBeforeCompile = baseMaterial.onBeforeCompile; // v566: clone() não copia onBeforeCompile (perdia o shader de bioma)
     const baseKey = typeof m.customProgramCacheKey === 'function' ? m.customProgramCacheKey() : 'groundMat';
 
     m.onBeforeCompile = function (shader, renderer) {
@@ -331,75 +351,28 @@ uniform vec2 uEcoOrigin;
    * 3. SHADER DA GRAMA (InstancedMesh em grass446.js): ALTURA E INCLINAÇÃO
    * ============================================================================ */
 
-  EcoGrid.hookGrass = function () {
-    const G446 = global.Grass446;
-    if (!G446 || !G446.mesh || G446._ecoHooked) return;
-    G446._ecoHooked = true;
-
-    const mat = G446.mesh.material;
-    if (mat) {
-      const origOnBefore = mat.onBeforeCompile;
-      mat.onBeforeCompile = function (sh, r) {
-        if (typeof origOnBefore === 'function') origOnBefore.call(this, sh, r);
-        // Garantir que a inclinação do jogador e a altura Y da biomassa/pisoteio estejam integradas
-        if (!sh.vertexShader.includes('ecoBiomassMod')) {
-          sh.vertexShader = sh.vertexShader.replace(
-            'vec2 d=ip.xz-uP446;',
-            `// v550: inclinação lateral suave ao passar o jogador
-vec2 d=ip.xz-uP446;float pdist=length(d);
-if(pdist<1.6&&pdist>.001){
-  float push=smoothstep(1.6,0.0,pdist);
-  transformed.xz+=normalize(d)*push*h*h*0.65;
-  transformed.y-=push*h*0.22;
-}
-`
-          );
-        }
-      };
-      mat.needsUpdate = true;
-    }
-
-    // Interceptar o rebuild de grass446 para modular instâncias pela biomassa e pisoteio reais
-    const origRebuild = G446.rebuild;
-    if (typeof origRebuild === 'function') {
-      G446.rebuild = function () {
-        origRebuild.apply(this, arguments);
-        const mesh = G446.mesh;
-        if (!mesh || !mesh.count) return;
-
-        const m4 = new T.Matrix4(), pos = new T.Vector3(), quat = new T.Quaternion(), scl = new T.Vector3();
-        let changed = false;
-
-        for (let i = 0; i < mesh.count; i++) {
-          mesh.getMatrixAt(i, m4);
-          pos.setFromMatrixPosition(m4);
-          scl.setFromMatrixScale(m4);
-
-          const cell = EcoGrid.getAt(pos.x, pos.z);
-          if (cell) {
-            const bio = cell.biomassa;
-            const tr = cell.pisoteio / 255.0;
-            // Lei visual da grama: altura proporcional à biomassa, suprimida por pisoteio
-            const ecoH = Math.max(0.0, Math.min(1.4, (bio / 100.0) * (1.0 - tr * 0.85)));
-            if (Math.abs(scl.y - ecoH) > 0.05) {
-              scl.y = Math.max(0.001, scl.x * ecoH);
-              if (ecoH <= 0.02) scl.set(0, 0, 0); // Trilha batida: capim morre
-              m4.compose(pos, quat.setFromRotationMatrix(m4), scl);
-              mesh.setMatrixAt(i, m4);
-              changed = true;
-            }
-          }
-        }
-        if (changed) mesh.instanceMatrix.needsUpdate = true;
-      };
-    }
+  // v566: a grama (grass446.js) consulta EcoGrid.grassMul no próprio rebuild; o hook antigo mexia numa cópia que o loop nem chama
+  EcoGrid.rev = 0;
+  let lastRev = 0;
+  EcoGrid.markGrass = function () {
+    const now = performance.now();
+    if (now - lastRev > 2000) { lastRev = now; EcoGrid.rev++; }
   };
+  // multiplicador da altura do capim: biomassa/100 suprimido por pisoteio (limite 1.4)
+  EcoGrid.grassMul = function (x, z) {
+    const c = EcoGrid.getCellAt(x, z);
+    if (!c) return 1;
+    return Math.max(0, Math.min(1.4, (c.biomassa / 100) * (1 - c.pisoteio / 255 * 0.85) * (c.pisoteio > 150 ? 0.4 : 1)));
+  };
+  EcoGrid.hookGrass = function () {};
 
   /* ============================================================================
    * 4. CAMADA DE ÁRVORES E ARBUSTOS: CRESCIMENTO PROGRESSIVO EM 4 ESTÁGIOS + TOCO
    * ============================================================================ */
 
   // Geometrias e materiais compartilhados dos estágios
+  const ZERO_M = new T.Matrix4().makeScale(0, 0, 0);
+  const TREE_KINDS = ['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'];
   let GEO_STUMP = null;
   let GEO_SPROUT_STEM = null, GEO_SPROUT_LEAF = null;
   let GEO_YOUNG_TRUNK = null, GEO_YOUNG_CONE1 = null, GEO_YOUNG_CONE2 = null;
@@ -477,7 +450,7 @@ if(pdist<1.6&&pdist>.001){
     aCrown2.position.set(1.5, 9.8, -0.8);
     const aCrown3 = new T.Mesh(GEO_ANCIENT_CROWN3, MAT_ANCIENT_LEAF);
     aCrown3.position.set(-1.4, 9.6, 1.1);
-    anc.add(aTrunk, aCrown1, aCrown2, aCrown3);
+    anc.add(aCrown1, aCrown2, aCrown3); // v566: o tronco é o da árvore real (a copa extra só engrossa a sombra)
     return anc;
   }
 
@@ -489,7 +462,10 @@ if(pdist<1.6&&pdist>.001){
     const treeGroup = new T.Group();
     treeGroup.name = 'EcoTrees_' + ch.key;
     treeGroup.userData.terrainAbsolute245 = true;
-    ch.group.add(treeGroup);
+    // v566: fora do grupo do chunk, em coordenadas absolutas (o relevo só levanta sozinho os materiais do cenário; estes Mesh ficavam debaixo da terra)
+    const sc = gv('scene');
+    if (sc) sc.add(treeGroup); else ch.group.add(treeGroup);
+    ch.ecoTreeGroup = treeGroup;
 
     for (const tp of treePositions) {
       const cell = EcoGrid.getCellAt(tp.x, tp.z);
@@ -507,9 +483,12 @@ if(pdist<1.6&&pdist>.001){
         key: Math.round(tp.x) + ':' + Math.round(tp.z),
         group: g,
         chunkKey: ch.key,
-        currentStage: 3, // Adulta por padrão
+        currentStage: 3, // Adulta por padrão (a árvore real do jogo)
         currentScale: 1.0,
-        currentVisual: null
+        currentVisual: null,
+        refs: tp.refs || [],
+        hidden: false,
+        felled: false
       };
       ch.ecoTrees.push(treeObj);
       EcoGrid.updateTreeVisual(treeObj, cell.biomassa, cell.fertilidade);
@@ -533,13 +512,13 @@ if(pdist<1.6&&pdist>.001){
       // Estágio 1: Brote / Muda (biomassa 120–150)
       stage = 1;
       const progress = Math.max(0, Math.min(1, (biomass - 120) / 30.0));
-      targetScale = 0.25 + progress * 0.25; // 0.25 a 0.50
+      targetScale = 0.15 + progress * 0.15; // 0.15 a 0.30 (v566: modelo real, pequeno)
       createVisual = makeSproutMesh;
     } else if (biomass <= 200) {
       // Estágio 2: Árvore Jovem (biomassa 151–200)
       stage = 2;
       const progress = Math.max(0, Math.min(1, (biomass - 151) / 49.0));
-      targetScale = 0.55 + progress * 0.30; // 0.55 a 0.85
+      targetScale = 0.35 + progress * 0.30; // 0.35 a 0.65 (v566)
       createVisual = makeYoungMesh;
     } else if (biomass <= 240 || fertility < 205) {
       // Estágio 3: Árvore Adulta (biomassa 201–240)
@@ -555,16 +534,42 @@ if(pdist<1.6&&pdist>.001){
       createVisual = makeAncientMesh;
     }
 
-    if (treeObj.currentStage !== stage || !treeObj.currentVisual) {
-      // Troca suave de modelo de estágio
-      if (treeObj.currentVisual) treeObj.group.remove(treeObj.currentVisual);
-      treeObj.currentVisual = createVisual();
-      treeObj.group.add(treeObj.currentVisual);
-      treeObj.currentStage = stage;
+    // v566 (Ian: sem formas geométricas): todos os estágios usam o modelo REAL da árvore do jogo, só muda a escala.
+    // Muda/Jovem = árvore real pequena; Adulta = tamanho normal; Anciã = um pouco maior; Toco = some (o survival437 desenha o toco do lenhador).
+    const k = stage === 0 ? 0 : stage === 3 ? 1 : stage === 4 ? Math.min(1.2, targetScale) : targetScale;
+    if (!(stage === 0 && treeObj.felled) && Math.abs(k - (treeObj.appliedK ?? 1)) > 0.02) {
+      if (!treeObj.scanned && k !== 1) {
+        // as instâncias mudam de malha (versão leve/perto): procura na cena, como o survival437 faz ao cortar
+        const refs = [], m4 = new T.Matrix4(), p3 = new T.Vector3(), s3 = new T.Vector3();
+        const sc = gv('scene') || null;
+        if (sc) sc.traverse(o => {
+          if (!o.isInstancedMesh || !TREE_KINDS.includes(o.userData?.tripo153)) return;
+          const full = Math.max(o.count, o.userData.count415 || 0); // a malha 'perto' só conta as instâncias próximas
+          for (let n = 0; n < full; n++) {
+            o.getMatrixAt(n, m4); p3.setFromMatrixPosition(m4); s3.setFromMatrixScale(m4);
+            if (s3.y < 0.05 || Math.hypot(p3.x - treeObj.x, p3.z - treeObj.z) > 1.6) continue;
+            refs.push({ o, i: n, m: m4.clone() });
+          }
+        });
+        treeObj.refs = refs;
+        treeObj.scanned = refs.length > 0;
+      }
+      const q4 = new T.Quaternion(), p4 = new T.Vector3(), s4 = new T.Vector3(), mk = new T.Matrix4();
+      for (const r of treeObj.refs) {
+        if (k === 1) r.o.setMatrixAt(r.i, r.m);
+        else {
+          r.m.decompose(p4, q4, s4);
+          // a escala encolhe em torno da base da árvore (y do tronco fica no chão)
+          mk.compose(p4, q4, s4.multiplyScalar(Math.max(k, 0.001)));
+          r.o.setMatrixAt(r.i, mk);
+        }
+        r.o.instanceMatrix.needsUpdate = true;
+      }
+      treeObj.appliedK = k;
     }
-
-    treeObj.currentScale = targetScale;
-    treeObj.group.scale.setScalar(targetScale);
+    if (stage >= 3) treeObj.felled = false;
+    treeObj.currentStage = stage;
+    treeObj.currentScale = k;
   };
 
   /* ============================================================================
@@ -591,6 +596,7 @@ if(pdist<1.6&&pdist>.001){
     ch.ecoTexture.needsUpdate = true;
 
     if (treeObj) {
+      treeObj.felled = true; // o survival437 já escondeu a árvore e desenhou o toco
       EcoGrid.updateTreeVisual(treeObj, 50, cell.fertilidade);
     }
 
@@ -625,6 +631,9 @@ if(pdist<1.6&&pdist>.001){
    * ============================================================================ */
 
   EcoGrid.ecoTick = function () {
+    // v566: descarrega chunks que o jogo já removeu por outro caminho (teleporte/continuar save)
+    const gc = gameChunks();
+    if (gc) for (const [k, c] of [...EcoGrid.chunks]) if (gc.get(k) !== c) EcoGrid.unloadChunk(c);
     if (!EcoGrid.queue.length) return;
 
     // Processa apenas 1 ou 2 chunks por ciclo (cravando 60 FPS no loop principal)
@@ -641,10 +650,10 @@ if(pdist<1.6&&pdist>.001){
       const minZ = ch.ecoMinZ;
       const bioKey = typeof global.biomeAt === 'function' ? global.biomeAt(ch.cx * CHUNK_SIZE, ch.cz * CHUNK_SIZE) : 'campos';
       const cfg = BIOME_ECO_CONFIG[bioKey] || BIOME_ECO_CONFIG.campos;
-      const isRaining = typeof global.WX !== 'undefined' && global.WX.type === 'rain';
+      const isRaining = gv('WX')?.type === 'rain';
 
       // Posição de fendas ativas
-      const activeRifts = (typeof global.gates !== 'undefined' ? global.gates : []).filter(g => !g.dead && !g.cleared);
+      const activeRifts = (gv('gates') || []).filter(g => !g.dead && !g.cleared && !g.closed372);
 
       let gridChanged = false;
 
@@ -731,6 +740,7 @@ if(pdist<1.6&&pdist>.001){
 
       if (gridChanged) {
         ch.ecoTexture.needsUpdate = true;
+        EcoGrid.markGrass();
       }
 
       // Atualizar o crescimento das árvores deste chunk
@@ -798,7 +808,7 @@ if(pdist<1.6&&pdist>.001){
     }
 
     // 2. Carrinho de Carga (cart437): +12
-    const cart = global.run?.cart437;
+    const cart = gv('run')?.cart437;
     if (cart && cart.built && cart.pulling) {
       EcoGrid.stamp(cart.x, cart.z, 12);
     }
@@ -818,8 +828,9 @@ if(pdist<1.6&&pdist>.001){
     }
 
     // 5. Moradores e Guardas (vida523, npc482): +4
-    if (Array.isArray(global.npcs)) {
-      for (const n of global.npcs) {
+    const npcList = gv('npcs');
+    if (Array.isArray(npcList)) {
+      for (const n of npcList) {
         if (!n.gone && n.m && (n.vida523 || n.role482) && Math.hypot(n.x - P.x, n.z - P.z) < 65) {
           EcoGrid.stamp(n.x, n.z, 4);
         }
@@ -831,6 +842,7 @@ if(pdist<1.6&&pdist>.001){
       if (ch.ecoDirty && ch.ecoTexture) {
         ch.ecoTexture.needsUpdate = true;
         ch.ecoDirty = false;
+        EcoGrid.markGrass();
       }
     }
   };
@@ -962,24 +974,25 @@ if(pdist<1.6&&pdist>.001){
    * 11. WRAPPERS DE INTEGRAÇÃO COM MUNDO INFINITO (loadChunk / unloadChunk)
    * ============================================================================ */
 
+  // v566: `chunks` do jogo é let (não existe em window): ler pelo escopo global de scripts
+  function gameChunks() { try { return typeof chunks !== 'undefined' ? chunks : null; } catch (_) { return null; } }
+
+  EcoGrid.attachChunk = function (ch) {
+    if (!ch || ch.ecoGrid) return;
+    EcoGrid.initChunk(ch);
+    if (!ch.group) return;
+    const groundMesh = ch.group.children.find(o => o.isMesh && o.geometry && o.geometry.parameters && o.geometry.parameters.width === CHUNK_SIZE) || ch.group.children[0];
+    if (groundMesh && groundMesh.isMesh && groundMesh.material) {
+      groundMesh.material = EcoGrid.createGroundMaterial(groundMesh.material, ch);
+    }
+  };
+
   EcoGrid.hookWorld = function () {
     if (typeof global.loadChunk === 'function' && !global.loadChunk._ecoHooked) {
       const origLoadChunk = global.loadChunk;
       global.loadChunk = function (cx, cz) {
         origLoadChunk.apply(this, arguments);
-        const key = cx + ',' + cz;
-        const ch = global.chunks?.get(key);
-        if (ch && !ch.ecoGrid) {
-          EcoGrid.initChunk(ch);
-
-          // Customizar o material do plano de relevo do chunk
-          if (ch.group) {
-            const groundMesh = ch.group.children.find(o => o.isMesh && o.geometry && o.geometry.parameters && o.geometry.parameters.width === CHUNK_SIZE) || ch.group.children[0];
-            if (groundMesh && groundMesh.isMesh && groundMesh.material) {
-              groundMesh.material = EcoGrid.createGroundMaterial(groundMesh.material, ch);
-            }
-          }
-        }
+        EcoGrid.attachChunk(gameChunks()?.get(cx + ',' + cz));
       };
       global.loadChunk._ecoHooked = true;
     }
@@ -1003,6 +1016,7 @@ if(pdist<1.6&&pdist>.001){
     EcoGrid.initialized = true;
 
     EcoGrid.hookWorld();
+    { const gc = gameChunks(); if (gc) for (const ch of gc.values()) EcoGrid.attachChunk(ch); }
     EcoGrid.hookGrass();
     EcoGrid.hookSurvival();
     EcoGrid.hookNpcSteering();

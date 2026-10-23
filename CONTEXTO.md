@@ -1,3 +1,10 @@
+## v566 (23/10/2026) — Solo Vivo (v550) conferido no jogo e consertado
+- **Pedido**: conferir no jogo real (com capturas) o EcoGrid da v550, que só tinha teste de lógica.
+- **Estava quebrado**: o EcoGrid tinha **0 chunks** (ganchos liam `global.chunks`/`gates`/`WX`/`npcs`/`run`/`WN`, que são `let/const` e não existem em `window`) — nada rodava: sem trilha, sem fenda, sem pisoteio de NPC/carrinho. Material do chão clonado perdia o `onBeforeCompile` do bioma. O gancho da grama mexia numa cópia de `rebuild` que o loop nunca chama. As árvores do EcoGrid eram ~2000 grupos (+1000 chamadas de desenho) duplicados e debaixo da terra.
+- **Corrigido** (`tools/ecossistema550.js`, `tools/grass446.js`, `tools/survival437.js`): leitura dos globais pelo escopo de scripts (`gv()`), `attachChunk` (inclui os chunks já carregados), descarga de chunks removidos; grama lê `EcoGrid.grassMul` no próprio rebuild (altura = biomassa × pisoteio; trilha sem capim) e refaz quando o solo muda; estágios de árvore usam o **modelo real** da árvore do jogo em escala (muda 0,15–0,30, jovem 0,35–0,65, adulta 1, anciã até 1,2), sem cones/cilindros (pedido de Ian: sem formas geométricas); jogador continua sem derrubar árvore; lenhador deixa toco; `npcFellTree` agora acha a árvore mesmo na malha 'perto'. **Grama mais uniforme** (gramado; só falha em trilha, terra, estrada, água).
+- **Teste (Edge, GPU Intel UHD)**: trilha após 22 passadas: terra batida visível e capim sumindo; fenda ativa: fertilidade 150→108, biomassa 104→85 (longe, intacto); FPS 23–27 com e sem o sistema (a GPU integrada do teste não chega a 60 nem sem o EcoGrid).
+- **Pendente**: modelos Tripo de árvore medieval para muda/jovem (pedido de Ian) no lugar da árvore real encolhida.
+
 ## v565 (22/10/2026) — Constelações fáceis de achar
 - **Pedido de Ian**: não sabia onde fica o céu de constelações.
 - Tecla **7** (`cons` em `KEYACT`, remapeável; abre/fecha), entrada **✦ CONSTELAÇÕES [7]** no MENU, aviso "Novo ponto — 7 Constelações" (clicável, 12 s) quando `run.cpts` sobe. `tools/constel523.js`, `src/core/630-controles.js`, menu em `game.html`.

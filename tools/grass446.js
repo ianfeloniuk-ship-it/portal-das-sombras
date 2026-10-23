@@ -85,7 +85,7 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
       const gx = Math.floor((x0 + i * CELL) / CELL), gz = Math.floor((z0 + j * CELL) / CELL);
       const x = (gx + hash(gx, gz)) * CELL, z = (gz + hash(gz, gx + 9)) * CELL;
       const n = fbm(x * .045, z * .045) + .35 * perlin(x * .21, z * .21);
-      const dens = Math.max(0, Math.min(1, (n + .32) * 2.1)) * B[0]; // manchas: campo cheio onde o ruído sobe, clareiras onde desce
+      const dens = (.9 + .1 * Math.max(0, Math.min(1, (n + .32) * 2.1))) * B[0]; /* v566 (Ian): gramado uniforme; só falha onde é trilha, terra, lama, água ou estrada */ // manchas: campo cheio onde o ruído sobe, clareiras onde desce
       if (hash(gx + 31, gz - 17) > dens) continue;
       if (blocked(x, z)) continue;
       if (window.Mundo513 && Mundo513.steep(x, z, .7)) continue; /* v529: sem grama em encosta íngreme/parede */
@@ -101,19 +101,20 @@ vec2 d=ip.xz-uP446;float dist=length(d);if(dist<1.3&&dist>.001){transformed.xz+=
   }
   let key = '', fill = 0;
   function rebuild() {
-    const px = player.x, pz = player.z, k = Math.round(px / 6) + ',' + Math.round(pz / 6) + ',' + ((run.terra444?.st?.length) || 0) + ',' + ((run.build437 || []).length);
+    const px = player.x, pz = player.z, k = Math.round(px / 6) + ',' + Math.round(pz / 6) + ',' + ((run.terra444?.st?.length) || 0) + ',' + ((run.build437 || []).length) + ',' + ((window.EcoGrid && EcoGrid.rev) | 0); /* v566: biomassa/pisoteio do EcoGrid mudaram */
     if (k === key) return; key = k;
     const ed = ((run.terra444?.st?.length) || 0) + ':' + ((run.build437 || []).length); if (ed !== rebuild.ed) { rebuild.ed = ed; tiles.clear(); } // trilha nova ou obra nova: refaz os ladrilhos
     const t0x = Math.floor((px - R) / TILE), t1x = Math.floor((px + R) / TILE), t0z = Math.floor((pz - R) / TILE), t1z = Math.floor((pz + R) / TILE);
-    const want = new Set(); let n = 0, nf = 0; const col = new T.Color(); let budget = 10; // no máx. 6 ladrilhos novos por vez (sem travar)
+    const em = window.EcoGrid && EcoGrid.grassMul; const want = new Set(); let n = 0, nf = 0; const col = new T.Color(); let budget = 10; // no máx. 6 ladrilhos novos por vez (sem travar)
     for (let tx = t0x; tx <= t1x; tx++) for (let tz = t0z; tz <= t1z; tz++) {
       const id = tx + ',' + tz; want.add(id);
       if (!tiles.has(id)) { if (budget-- <= 0) { key = ''; continue; } tiles.set(id, buildTile(tx, tz)); }
       for (const g of tiles.get(id)) {
         const dx = g[0] - px, dz = g[1] - pz; if (dx * dx + dz * dz > R * R) continue;
+        const eh = em ? em(g[0], g[1]) : 1; if (eh < .12) continue; /* v566: trilha batida/solo pobre não tem capim */
         if (g[7]) { if (nf >= FMAX) continue; Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.setScalar(g[3]); M.compose(V, Q, Sc); fl.setMatrixAt(nf, M); col.setRGB(g[4], g[5], g[6]); fl.setColorAt(nf, col); nf++; continue; }
         if (n >= MAX) continue;
-        Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.set(g[3], g[3] * (.9 + .2 * ((n * 7) % 5) / 5), g[3]); M.compose(V, Q, Sc); mesh.setMatrixAt(n, M);
+        Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.set(g[3], g[3] * (.9 + .2 * ((n * 7) % 5) / 5) * eh, g[3]); M.compose(V, Q, Sc); mesh.setMatrixAt(n, M);
         col.setRGB(g[4], g[5], g[6]); mesh.setColorAt(n, col); n++;
       }
     }

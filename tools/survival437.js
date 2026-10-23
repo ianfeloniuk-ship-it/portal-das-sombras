@@ -686,7 +686,7 @@
     let target = null, bd = 6.0;
     scene.traverse(o => {
       if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'].includes(o.userData?.tripo153)) return;
-      for (let i = 0; i < o.count; i++) {
+      for (let i = 0, full = Math.max(o.count, o.userData.count415 || 0); i < full; i++) { /* v566: malha 'perto' só conta as próximas */
         o.getMatrixAt(i, _mat4);
         _pos.setFromMatrixPosition(_mat4);
         _scl.setFromMatrixScale(_mat4);
