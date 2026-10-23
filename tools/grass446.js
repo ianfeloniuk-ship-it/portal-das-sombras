@@ -24,7 +24,7 @@
   function tuft() {
     const pos = [], col = [], uv = [], idx = []; let v = 0;
     for (let b = 0; b < 11; b++) {
-      const a = b / 11 * TAU + hash(b, 7) * .9, r = .04 + hash(b, 3) * .16, h = .26 + hash(b, 5) * .26, w = .05 + hash(b, 9) * .03, lean = (hash(b, 11) - .5) * .5;
+      const a = b / 11 * TAU + hash(b, 7) * .9, r = .03 + hash(b, 3) * .10, h = .13 + hash(b, 5) * .13, w = .02 + hash(b, 9) * .012, /* v568: capim fino e baixo, como relva */ lean = (hash(b, 11) - .5) * .5;
       const ox = Math.cos(a) * r, oz = Math.sin(a) * r, dx = -Math.sin(a) * w, dz = Math.cos(a) * w, lx = Math.cos(a) * lean * h, lz = Math.sin(a) * lean * h;
       const pts = [[-1, 0], [1, 0], [-.7, .5], [.7, .5], [0, 1]];
       for (const [s, t] of pts) { pos.push(ox + dx * s + lx * t * t, h * t, oz + dz * s + lz * t * t); const c = .45 + .55 * t; col.push(c, c, c); uv.push(t, t); }
@@ -35,7 +35,7 @@
     g.setIndex(idx); g.computeVertexNormals(); return g;
   }
   function flower() { // haste fina e um disco de pétalas em cruz (a cor vem da instância)
-    const pos = [], col = [], uv = [], idx = []; let v = 0; const h = .5, w = .02, pr = .17;
+    const pos = [], col = [], uv = [], idx = []; let v = 0; const h = .28, w = .015, pr = .1;
     const quad = (a, b2, c, d, ca, cb) => { pos.push(...a, ...b2, ...c, ...d); col.push(...ca, ...ca, ...cb, ...cb); uv.push(0, a[1] / h, 0, b2[1] / h, 0, c[1] / h, 0, d[1] / h); idx.push(v, v + 1, v + 2, v + 1, v + 3, v + 2); v += 4; };
     const G = [.25, .5, .2], G2 = [.35, .65, .3];
     quad([-w, 0, 0], [w, 0, 0], [-w, h, 0], [w, h, 0], G, G2); quad([0, 0, -w], [0, 0, w], [0, h, -w], [0, h, w], G, G2);

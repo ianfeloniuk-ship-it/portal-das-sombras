@@ -1,3 +1,8 @@
+## v568 (23/10/2026) — Capim fino e baixo
+- **Pedido de Ian**: a grama estava grossa e alta; queria algo mais real.
+- `tools/grass446.js`: lâminas ~metade da altura (0,13–0,26 m) e ~40% da largura, tufo mais compacto; flores menores para acompanhar (haste 0,28 m). Densidade da v567 mantida (~12 mil tufos).
+- Teste (Edge, GPU Intel UHD): captura mostra relva baixa e contínua; FPS 32. Não testado: celular.
+
 ## v567 (23/10/2026) — Gramado contínuo
 - **Pedido de Ian**: a grama eram poucos tufos muito espaçados; queria um gramado de verdade, falhando só em trilha, terra, estrada, lama e água.
 - `tools/grass446.js`: tufos a cada 0,34 m (antes 0,55 m), raio 28 m (antes 34 m), cerca de 12 mil tufos ao redor do jogador. Regras de onde não nasce (água, estrada, trilha, cidade, EcoGrid pisoteado) intactas.
