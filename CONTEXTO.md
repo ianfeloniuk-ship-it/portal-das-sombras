@@ -1,3 +1,8 @@
+## v598 (23/10/2026) — Paredão da garganta não cobre mais o mapa inteiro
+- **Pedido de Ian**: "montanha reta" e relevo que não dá para atravessar.
+- Causa: o paredão do Desfiladeiro (`terrain245.js`, +17 m em z 78–560) valia para QUALQUER x: uma faixa de serra reta atravessando o mapa de ponta a ponta (ex.: Zahar tinha 23 m ao sul do centro, onde o chão devia ser plano). Agora o paredão some entre 70 e 170 m da estrada (GLSL e CPU iguais).
+- Teste: alturas em 6 linhas z × 6 x (faixa sumiu), Zahar plano até 250 m, paredes da garganta mantidas perto da estrada.
+
 ## v597 (23/10/2026) — Capitais grandes (bloco 1: muralha de 250 m e bairros)
 - **Pedido de Ian**: cidades maiores e vivas estilo Skyrim nas 5 Capitais (Aster fica como está; garganta e missões #1/#2 intactas).
 - `tools/capitais504.js`: muralha das Capitais de 150 → 250 m (RC), 70 tochas. `tools/capitais597.js` (novo): bairros do anel da cidade antiga (106 m) até a muralha — 4 avenidas, vielas tortas, casas coladas de frente para a rua, praça do mercado com poço e barracas, pousada/ferreiros/mercado/igreja/quartel, adereços e árvores, piso de pedra; cada capital com cores e peças próprias (Ymiria gelada com igrejas, Urdan com ferreiros e pedra, Verden árvores, Thalor barris/caixas, Zahar areia e cactos). Só visual: a raça guardiã é da Fase C.

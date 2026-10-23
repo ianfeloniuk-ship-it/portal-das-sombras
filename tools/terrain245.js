@@ -46,7 +46,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
  for(int i=0;i<16;i++){vec4 D=uTerD[i];if(D.z<0.)continue;float dd=length(p-D.xy);float wd529=1.-smoothstep(D.z,D.z+38.,dd);h=mix(h,D.w,wd529);hl529=mix(hl529,D.w,wd529);if(D.w<0.){float rr=D.z-3.;if(dd<rr)h-=2.5*(1.-dd*dd/(rr*rr));}}
  for(int i=0;i<24;i++){vec4 R=uTerR[i];h=mix(h,hl529,(1.-smoothstep(5.,22.,sd513(p,R.xy,R.zw)))*rk439);}
  float gc510=smoothstep(100.,260.,p.y)*(130.*sin(p.y*.0057120)+52.*sin(p.y*.013369)+18.*sin(p.y*.033069));float gx510=abs(p.x-gc510);float gz510=smoothstep(78.,118.,p.y)*(1.-smoothstep(500.,560.,p.y));float gm510=.3+.7*smoothstep(-.2,.55,sin(p.y*.011+1.));float ga510=smoothstep(8.,23.,gx510);
- h+=gz510*gm510*ga510*(17.+4.*sin(p.y*.045+sign(p.x)*1.3))*(1.+.16*sin(p.y*.21+p.x*.11)+.09*sin(p.y*.47-p.x*.23)+.05*sin(p.y*.97+p.x*.41));
+ h+=gz510*gm510*ga510*(1.-smoothstep(70.,170.,gx510))*(17.+4.*sin(p.y*.045+sign(p.x)*1.3))*(1.+.16*sin(p.y*.21+p.x*.11)+.09*sin(p.y*.47-p.x*.23)+.05*sin(p.y*.97+p.x*.41));
 
  float road551=.018*(p.y-72.);float rm551=smoothstep(65.,82.,p.y)*(1.-smoothstep(365.,395.,p.y));
  h=mix(h,road551,(1.-smoothstep(9.,19.,gx510))*rm551);
@@ -89,7 +89,7 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
   const sd=seaD439(x,z);if(sd>-60)h=mix(h,seaBed439(x,z,sd),ss(-60,30,sd));const rk439=1-ss(300,600,sd);
   for(const D of TER.D.value){if(D.z<0)continue;const dd=Math.hypot(x-D.x,z-D.y),wd=1-ss(D.z,D.z+38,dd);h=mix(h,D.w,wd);hl529=mix(hl529,D.w,wd);if(D.w<0){const rr=D.z-3;if(dd<rr)h-=2.5*(1-dd*dd/(rr*rr))}}
   for(const R of TER.R.value){h=mix(h,hl529,(1-ss(5,22,sdc513(x,z,R.x,R.y,R.z,R.w)))*rk439)}
-  {/* v520: desfiladeiro do Marco Zero, segue a estrada sinuosa (mundo513.js) e abre/fecha; igual ao GLSL */const gc=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069)),gx=Math.abs(x-gc),gz=ss(78,118,z)*(1-ss(500,560,z)),gm=.3+.7*ss(-.2,.55,S(z*.011+1)),ga=ss(8,23,gx);h+=gz*gm*ga*(17+4*S(z*.045+Math.sign(x)*1.3))*(1+.16*S(z*.21+x*.11)+.09*S(z*.47-x*.23)+.05*S(z*.97+x*.41))}
+  {/* v520: desfiladeiro do Marco Zero, segue a estrada sinuosa (mundo513.js) e abre/fecha; igual ao GLSL */const gc=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069)),gx=Math.abs(x-gc),gz=ss(78,118,z)*(1-ss(500,560,z)),gm=.3+.7*ss(-.2,.55,S(z*.011+1)),ga=ss(8,23,gx);h+=gz*gm*ga*(1-ss(70,170,gx))*(17+4*S(z*.045+Math.sign(x)*1.3))*(1+.16*S(z*.21+x*.11)+.09*S(z*.47-x*.23)+.05*S(z*.97+x*.41))}
 
   { const rx=ss(100,260,z)*(130*S(z*.005712)+52*S(z*.013369)+18*S(z*.033069));
     h=mix(h,.018*(z-72),(1-ss(9,19,Math.abs(x-rx)))*ss(65,82,z)*(1-ss(365,395,z)));
