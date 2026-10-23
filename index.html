@@ -3866,7 +3866,9 @@ function attackTiming(third){const factor=statsBonus().atk,desired=(third?.46:.3
 function movementSettings(){return '<div class="sec">VELOCIDADE DE MOVIMENTO</div><label><input id="moveLimit" type="checkbox" '+(CFG.moveLimit?'checked':'')+' onchange="CFG.moveLimit=this.checked;applyCfg();cfgView()"> <span class="tipi" style="cursor:help" data-tip154="Limita a corrida e a montaria. 100% é a velocidade inicial.">Limitar minha velocidade de movimento</span></label><label for="moveCap">Limite: <span id="moveCapValue">'+CFG.moveCap+'%</span></label><input id="moveCap" aria-label="Limite de velocidade de movimento" type="range" min="50" max="400" step="10" value="'+CFG.moveCap+'" '+(!CFG.moveLimit?'disabled':'')+' oninput="CFG.moveCap=+this.value;document.getElementById(&quot;moveCapValue&quot;).textContent=this.value+&quot;%&quot;;applyCfg()" style="width:100%">'}
 
 function los(x1,z1,x2,z2){if(!L.grid)return true;const n=Math.ceil(Math.hypot(x2-x1,z2-z1));for(let i=1;i<n;i++){const t=i/n;if(!gfree(x1+(x2-x1)*t,z1+(z2-z1)*t))return false}return true}
-const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);const cl=cityL(n.c),cr=cl>=8?125:cl>=6?95:65;return n.d<cr&&!cityFallen(n.c)};/* v486 (Ian): cr já está em metros (muralha 60/85/115 m + folga); o ×CITYK fazia a "cidade" ir até 220 m e bloqueava dano longe dela */
+/* v533 (Ian): as 5 Capitais ganham cidade grande (muralha de 250 m): cityBig533 = raio de dentro da muralha nova, 0 nas outras */
+const cityBig533=c=>(c&&c.capital&&c.name!=='Aster'&&window.Capitais501)?265:0;
+const inCity=(x,z)=>{if(L.mode!=='world')return false;const n=nearestCity(x,z);const cl=cityL(n.c),cr=cityBig533(n.c)||(cl>=8?125:cl>=6?95:65);return n.d<cr&&!cityFallen(n.c)};/* v486 (Ian): cr já está em metros (muralha 60/85/115 m + folga); o ×CITYK fazia a "cidade" ir até 220 m e bloqueava dano longe dela */
 
 /* ================= NÍVEL: LIMPEZA ================= */
 function clearLevel(){if(window.TER245&&TER245.OW)TER245.OW.value.x=0;/* v460: relevo do Outro Mundo só vale dentro da Fenda */if(window.Loot353)Loot353.clear();FX2.inv=0;riftPrevious131=null;riftArrival131=performance.now()+700;
@@ -4094,7 +4096,7 @@ envGroundColors=function(pg,near){
  environmentGroundColors128(pg,near);const pos=pg.attributes.position,col=pg.attributes.color,season=seasonI();
  const palette={campos:0x58a94b,floresta:0x39854c,flores:0x83bf55,pantano:0x3a4b40,deserto:0xb4986d,neve:0xc8d9df,cristal:0x91adb9,vulcao:0x494044},color=new THREE.Color(),other=new THREE.Color();
  const segs=roadSegs(pos.getX(0),pos.getZ(0),2),surfaces=new Float32Array(pos.count),biomes=new Float32Array(pos.count),snows=new Float32Array(pos.count),mixes=new Float32Array(pos.count*3),biomeIds=['campos','floresta','flores','pantano','neve','cristal','deserto','vulcao'];
- for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=near.some(city=>{const cl=cityL(city),maxWallR=(cl>=8?130:cl>=6?100:70);return (Math.abs(x-city.x)<5.5||Math.abs(z-city.z)<5.5)&&Math.hypot(x-city.x,z-city.z)<maxWallR});
+ for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),bio=biomeAt(x,z);let d=1e9;for(const city of near)d=Math.min(d,Math.hypot(x-city.x,z-city.z));const road=near.some(city=>{const cl=cityL(city),maxWallR=cityBig533(city)||(cl>=8?130:cl>=6?100:70);return (Math.abs(x-city.x)<5.5||Math.abs(z-city.z)<5.5)&&Math.hypot(x-city.x,z-city.z)<maxWallR});
   color.setHex(palette[bio]);if(!['neve','cristal','deserto','vulcao'].includes(bio)){if(season===0)color.lerp(other.setHex(0x70bc58),.18);if(season===2)color.lerp(other.setHex(0x896542),.38);if(season===3)color.lerp(other.setHex(0xd6e1e2),.88)}
   color.multiplyScalar(.85+WN(x*.065,z*.065)*.25);
   if(road)color.setHex(season===3&&!['deserto','vulcao'].includes(bio)?0xa2aaa8:0x827866);
@@ -4514,8 +4516,8 @@ function loadChunk(cx,cz){
   const key=cx+','+cz;if(chunks.has(key))return;
   const R=mulberry32(rh(cx,cz,1)),g=new THREE.Group(),ch={key,cx,cz,group:g,cols:[],city:null},x0=cx*CH,z0=cz*CH;
   const addCol=c=>{hadd(HASH,c);ch.cols.push(c)};
-  const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);if(Math.abs(c.cx-cx)<=2&&Math.abs(c.cz-cz)<=2)near.push(c)}
-  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=(cl>=8?120:cl>=6?90:60)*CITYK;if(d-gw<m)m=d-gw;const maxWallR=(cl>=8?130:cl>=6?100:70);if((Math.abs(dx)<5.5||Math.abs(dz)<5.5)&&d<maxWallR)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:!!window.Fronteira551?.clearSite(x,z)||camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
+  const near=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=regionCity(Math.floor(cx/REG)+i,Math.floor(cz/REG)+j);const nr533=cityBig533(c)?4:2;if(Math.abs(c.cx-cx)<=nr533&&Math.abs(c.cz-cz)<=nr533)near.push(c)}
+  const RSEG=roadSegs(x0,z0,2);const op217=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const p=outpostPoint361(cx+i,cz+j);if(p)op217.push(p)}const lk239=lakeAt239(cx,cz),ruin253=ruinAt(cx,cz),camps372=window.Living372?Living372.nearbySites(x0,z0):[];const cityD=(x,z)=>{let m=1e9,road=onRoad(RSEG,x,z);for(const c of near){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),cl=cityL(c),gw=cityBig533(c)?cityBig533(c)-70:(cl>=8?120:cl>=6?90:60)*CITYK;if(d-gw<m)m=d-gw;const maxWallR=cityBig533(c)||(cl>=8?130:cl>=6?100:70);if((Math.abs(dx)<5.5||Math.abs(dz)<5.5)&&d<maxWallR)road=true;if(Math.hypot(dx-44,dz-12)<8)road=true}return{d:m,road,clear:!!window.Fronteira551?.clearSite(x,z)||camps372.some(p=>Math.hypot(x-p.x,z-p.z)<16)||road||onRoad(RSEG,x,z,10.5)||(ruin253&&Math.hypot(x-x0,z-z0)<11)||op217.some(p=>Math.hypot(x-p.x,z-p.z)<17)||(lk239&&Math.hypot(x-lk239.x,z-lk239.z)<lk239.r+2.5)||riverClear239(x,z)}};
   if(ENV.ok){ENV.cast=[];const pg=new THREE.PlaneGeometry(CH,CH,32,32);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);envGroundColors(pg,near);ch.pg=pg;envOwn(g,new THREE.Mesh(pg,envGroundMat()));envChunk(g,R,x0,z0,cityD,addCol)}else{
   const pg=new THREE.PlaneGeometry(CH,CH,12,12);pg.rotateX(-Math.PI/2);pg.translate(x0,0,z0);const pos=pg.attributes.position,cols=[];
   const ca=new THREE.Color(0x10284f),cb=new THREE.Color(0x1d4272),cc=new THREE.Color(0x2c3e60),cd=new THREE.Color(0x3a4a6a),red=new THREE.Color(0x2a0c22),tmp=new THREE.Color();
@@ -4642,7 +4644,7 @@ function newGate(){
   // v267 (Ian): cada ranque acima do seu nasce mais longe das cidades (+25 m por ranque, até +100 m).
   // Fica a menos de GATE_NEAR155 do jogador, senão a reposição o ignora e cria portais sem parar.
   const far267=Math.min(100,25*Math.max(0,rank-pr));
-  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;const _nc=nearestCity(x,z),_cl=cityL(_nc.c),_minD=(_cl>=8?135:_cl>=6?105:72)*CITYK;if(_nc.d<_minD+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<90))continue;/* v529: portais espaçados (antes nasciam em montes de 6 a 11) */if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
+  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;const _nc=nearestCity(x,z),_cl=cityL(_nc.c),_minD=Math.max((_cl>=8?135:_cl>=6?105:72)*CITYK,cityBig533(_nc.c)?cityBig533(_nc.c)+20:0);if(_nc.d<_minD+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<90))continue;/* v529: portais espaçados (antes nasciam em montes de 6 a 11) */if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
   const set153=null;
   if(rank===9&&Math.random()<(pr>=9?.3:danger(x,z)>=9?.5:.8))rank=8;
   const life=rnd(420,900);
@@ -6581,7 +6583,7 @@ function updEnemy(e,dt){if(e.friendly217){e.t=(e.t||0)+dt;if(!e.dead)animChibi(e
   if(e.dotT>0){e.dotT-=dt;e.dotAcc=(e.dotAcc||0)+dt;if(e.dotAcc>=1){e.dotAcc=0;hurtEnemy(e,e.dotD,e.x,e.z,{kb:0,stun:0,pierce:true})}if(e.dead)return}
   if(window.Gosma347&&Gosma347.beforeAI(e,dt))return;
   if(Math.abs(e.kb.x)+Math.abs(e.kb.z)>.05){moveEnt(e,e.kb.x*dt,e.kb.z*dt);e.kb.x*=.86;e.kb.z*=.86}
-  if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
+  if(L.mode==='world'&&!e.raid155){const nc=nearestCity(e.x,e.z);{const cl=cityL(nc.c),R2=38+(cl>=8?30:cl>=7?22:cl>=6?16:0);/* v341: monstro comum fica do lado de fora do portão */const R341=cityRaider341(e)?R2:Math.max(R2,36*CITYK+.6,cityBig533(nc.c)+.6),d341=nc.d||1;if(nc.d<R341&&!cityFallen(nc.c)){e.x=nc.c.x+(nc.d?(e.x-nc.c.x)/d341:1)*R341;e.z=nc.c.z+(e.z-nc.c.z)/d341*R341;e.aggro=false}}}
   if(expHuntMove(e,dt))return;
   if(window.Eco410&&Eco410.beforeAI(e,dt))return;/* v410: ecologia do Bestiário (fuga, rendição, moeda, moral) */
   if(window.Cogu348&&Cogu348.beforeAI(e,dt))return;
@@ -6815,7 +6817,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const ow460=L.mode==='dungeon'&&!!L.ow460;if(T.OW)T.OW.value.x=ow460?1:0;const on=(L.mode==='world'||ow460)&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player||ow460)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
  if(run&&run.surv437&&run.surv437.leveled&&run.surv437.leveled.length)run.surv437.leveled=[];
- for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65,cap501=c.capital&&c.name!=='Aster'&&window.Capitais501;D.push([c.x,c.z,cap501?175:cr+20,0]);}/* v504: Capitais com muralha de 150 m ficam planas até 175 m */
+ for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65,cap501=c.capital&&c.name!=='Aster'&&window.Capitais501;D.push([c.x,c.z,cityBig533(c)?285:cap501?175:cr+20,0]);}/* v504: Capitais com muralha de 150 m ficam planas até 175 m */
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
  const sd=r=>Math.hypot(P.x-clamp(P.x,Math.min(r[0],r[2]),Math.max(r[0],r[2])),P.z-clamp(P.z,Math.min(r[1],r[3]),Math.max(r[1],r[3]))),R=roadSegs(P.x,P.z,1).sort((a,b)=>sd(a)-sd(b));T.R.value.forEach((v,i)=>{const r=R[i];if(r)v.set(r[0],r[1],r[2],r[3]);else v.set(1e7,1e7,1e7,1e7)})}
@@ -6872,7 +6874,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
   if(dlgT>0){dlgT-=dt;if(dlgT<=0){$('dlg').hidden=true;dlgT=0}}
 }
 function updWorld(dt){updEcon(dt);
-  const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<36*CITYK&&!fal;
+  const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<Math.max(36*CITYK,cityBig533(nc.c))&&!fal;
   if(fal&&nc.d<45*CITYK&&!(profile.raided155||{})[nc.c.id]){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,9);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(worldKinds124(gr,nc.c.x,nc.c.z)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[NARRADOR]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);updGates341(dt);
   if(L.car){L.carT-=dt;if(L.carT<=0){L.carT=18;const c=L.car;for(let i=0;i<3;i++){const a=rnd(0,TAU),x=c.x+Math.cos(a)*14,z=c.z+Math.sin(a)*14;if(nearestCity(x,z).d<40*CITYK)continue;const e=spawnKind(wpick(worldKinds124(danger(x,z),x,z)).k,x,z,Math.max(danger(x,z),rankOf()-2),{wild:true});e.aggro=true}toast('<b>[CARAVANA]</b> Emboscada!',1500)}if(L.car.dead)L.car=null}
   if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}
@@ -9725,7 +9727,8 @@ requestAnimationFrame(frame);
 <script src="tools/mapa501.js?v=544"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
-<script src="tools/capitais504.js?v=562"></script>
+<script src="tools/capitais504.js?v=597"></script>
+<script src="tools/capitais597.js?v=597"></script>
 <script src="tools/desfiladeiro510.js?v=528"></script>
 <script src="tools/marcos526.js?v=537r1"></script>
 <script src="tools/agua517.js?v=517"></script>
@@ -9750,9 +9753,9 @@ requestAnimationFrame(frame);
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v596</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v597</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=596;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=597;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

@@ -88,7 +88,7 @@ function newGate(){
   // v267 (Ian): cada ranque acima do seu nasce mais longe das cidades (+25 m por ranque, até +100 m).
   // Fica a menos de GATE_NEAR155 do jogador, senão a reposição o ignora e cria portais sem parar.
   const far267=Math.min(100,25*Math.max(0,rank-pr));
-  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;const _nc=nearestCity(x,z),_cl=cityL(_nc.c),_minD=(_cl>=8?135:_cl>=6?105:72)*CITYK;if(_nc.d<_minD+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<90))continue;/* v529: portais espaçados (antes nasciam em montes de 6 a 11) */if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
+  for(let t=0;t<80;t++){const a=rnd(0,TAU),d=Math.min(GATE_NEAR155-5,rnd(55,170)+far267);x=P.x+Math.cos(a)*d;z=P.z+Math.sin(a)*d;const _nc=nearestCity(x,z),_cl=cityL(_nc.c),_minD=Math.max((_cl>=8?135:_cl>=6?105:72)*CITYK,cityBig533(_nc.c)?cityBig533(_nc.c)+20:0);if(_nc.d<_minD+far267)continue;if(gates.some(g=>!g.dead&&Math.hypot(g.x-x,g.z-z)<90))continue;/* v529: portais espaçados (antes nasciam em montes de 6 a 11) */if(!worldFree(x,z,3.5))continue;if(onRoad(roadSegs(x,z,1),x,z,10))continue;break}
   const set153=null;
   if(rank===9&&Math.random()<(pr>=9?.3:danger(x,z)>=9?.5:.8))rank=8;
   const life=rnd(420,900);

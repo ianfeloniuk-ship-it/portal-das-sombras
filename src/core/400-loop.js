@@ -68,7 +68,7 @@ function life244(dt){if(!LIFE243.g||!player)return;const g=LIFE243.g;
 function ter245tick(){const T=window.TER245;if(!T)return;if(L.group)L.group.userData.terrainContainer245=true;const ow460=L.mode==='dungeon'&&!!L.ow460;if(T.OW)T.OW.value.x=ow460?1:0;const on=(L.mode==='world'||ow460)&&!(typeof window.TER245OFF!=='undefined'&&window.TER245OFF);T.on.value=on?1:0;if(!on||!player||ow460)return;
  const P=player;if(T.lx!=null&&Math.hypot(P.x-T.lx,P.z-T.lz)<24)return;T.lx=P.x;T.lz=P.z;const D=[];
  if(run&&run.surv437&&run.surv437.leveled&&run.surv437.leveled.length)run.surv437.leveled=[];
- for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65,cap501=c.capital&&c.name!=='Aster'&&window.Capitais501;D.push([c.x,c.z,cap501?175:cr+20,0]);}/* v504: Capitais com muralha de 150 m ficam planas até 175 m */
+ for(const c of citiesAround(P.x,P.z,1800)){const cl=cityL(c),cr=cl>=8?125:cl>=6?95:65,cap501=c.capital&&c.name!=='Aster'&&window.Capitais501;D.push([c.x,c.z,cityBig533(c)?285:cap501?175:cr+20,0]);}/* v504: Capitais com muralha de 150 m ficam planas até 175 m */
  const cx=Math.round(P.x/CH),cz=Math.round(P.z/CH);for(let i=-8;i<=8;i++)for(let j=-8;j<=8;j++){const lk=lakeAt239(cx+i,cz+j);if(lk)D.push([lk.x,lk.z,lk.r+3,-1.8])}
  D.sort((a,b)=>Math.hypot(a[0]-P.x,a[1]-P.z)-Math.hypot(b[0]-P.x,b[1]-P.z));T.D.value.forEach((v,i)=>{const d=D[i];if(d)v.set(d[0],d[1],d[2],d[3]);else v.set(0,0,-1,0)});
  const sd=r=>Math.hypot(P.x-clamp(P.x,Math.min(r[0],r[2]),Math.max(r[0],r[2])),P.z-clamp(P.z,Math.min(r[1],r[3]),Math.max(r[1],r[3]))),R=roadSegs(P.x,P.z,1).sort((a,b)=>sd(a)-sd(b));T.R.value.forEach((v,i)=>{const r=R[i];if(r)v.set(r[0],r[1],r[2],r[3]);else v.set(1e7,1e7,1e7,1e7)})}
@@ -125,7 +125,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
   if(dlgT>0){dlgT-=dt;if(dlgT<=0){$('dlg').hidden=true;dlgT=0}}
 }
 function updWorld(dt){updEcon(dt);
-  const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<36*CITYK&&!fal;
+  const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<Math.max(36*CITYK,cityBig533(nc.c))&&!fal;
   if(fal&&nc.d<45*CITYK&&!(profile.raided155||{})[nc.c.id]){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,9);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(worldKinds124(gr,nc.c.x,nc.c.z)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[NARRADOR]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);updGates341(dt);
   if(L.car){L.carT-=dt;if(L.carT<=0){L.carT=18;const c=L.car;for(let i=0;i<3;i++){const a=rnd(0,TAU),x=c.x+Math.cos(a)*14,z=c.z+Math.sin(a)*14;if(nearestCity(x,z).d<40*CITYK)continue;const e=spawnKind(wpick(worldKinds124(danger(x,z),x,z)).k,x,z,Math.max(danger(x,z),rankOf()-2),{wild:true});e.aggro=true}toast('<b>[CARAVANA]</b> Emboscada!',1500)}if(L.car.dead)L.car=null}
   if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}

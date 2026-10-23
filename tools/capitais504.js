@@ -7,7 +7,7 @@
    O chão fica plano até 195 m do centro (loop de relevo em 400-loop.js) e todas as peças têm colisão. */
 (function () {
   'use strict';
-  const T = THREE, TAU = Math.PI * 2, RC = 150, PI = Math.PI;
+  const T = THREE, TAU = Math.PI * 2, RC = 250, PI = Math.PI;
   const hex = h => { const c = new T.Color(h); return [c.r, c.g, c.b]; };
   /* tint = multiplica a textura do modelo (1 = original). halo/flame = cores do farol e das tochas */
   const STYLE = {
@@ -171,8 +171,8 @@
     }
     cityGates341(c, g, false, RC, 9, 7);
     /* tochas ao longo da muralha, por dentro */
-    for (let i = 0; i < 40; i++) {
-      const a = i / 40 * TAU + .04; if (gateDist(a) < gapA + .01) continue;
+    for (let i = 0; i < 70; i++) {
+      const a = i / 70 * TAU + .04; if (gateDist(a) < gapA + .01) continue;
       const r = RC - 3.5, x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
       EH(b, 'campfire_stones', x, 0, z, -a, 1.5); col(x, z, .8); flames.push({ x, y: 1.5, z, size: 4.2 });
     }

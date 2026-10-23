@@ -1,3 +1,10 @@
+## v597 (23/10/2026) — Capitais grandes (bloco 1: muralha de 250 m e bairros)
+- **Pedido de Ian**: cidades maiores e vivas estilo Skyrim nas 5 Capitais (Aster fica como está; garganta e missões #1/#2 intactas).
+- `tools/capitais504.js`: muralha das Capitais de 150 → 250 m (RC), 70 tochas. `tools/capitais597.js` (novo): bairros do anel da cidade antiga (106 m) até a muralha — 4 avenidas, vielas tortas, casas coladas de frente para a rua, praça do mercado com poço e barracas, pousada/ferreiros/mercado/igreja/quartel, adereços e árvores, piso de pedra; cada capital com cores e peças próprias (Ymiria gelada com igrejas, Urdan com ferreiros e pedra, Verden árvores, Thalor barris/caixas, Zahar areia e cactos). Só visual: a raça guardiã é da Fase C.
+- Ligações (raio grande por `cityBig533(c)` em `170-colisao.js`, 265 m): `inCity`, estrada/limpeza (`200`, `250`, `environment-bridge128`), portais fora da cidade (`260`), monstros fora (`390`), zona segura e chão plano até 285 m (`400-loop`).
+- Teste: Edge headless, Urdan/Verden/Ymiria: 166–181 casas, 330–875 chamadas de desenho, 5–22 ms por quadro em software; vista da rua com casas, lanternas e calçada; 0 erro. Não testado: Zahar e Thalor por captura, NPCs/carroças andando nas ruas novas, FPS em máquina real, celular.
+- Pendente: mais vida (NPCs e rotina espalhados pelos bairros), toque visual mais forte por capital.
+
 ## v596 (23/10/2026) — Grama de fios: habilidades reais e dobra visível
 - `tools/grass446.js`: o fogo/gelo/vento da grama agora é disparado por habilidade REAL: área/pulsos/empurrão pelo ponto da conjuração (`VFX302/328.play`), projéteis e golpes pelo acerto (`hurtEnemy` com `elem300` fogo/gelo, `kitHit111`, `elemMul300`). Projétil não queima mais no ponto de lançamento.
 - Dobra em volta do jogador mais forte (empurrão ×1,8, raio ×2 por entidade): captura parada no meio do capim mostra os fios abertos ao redor dos pés.
