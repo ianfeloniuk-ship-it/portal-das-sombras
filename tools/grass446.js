@@ -61,7 +61,7 @@ float brn=0.,frz=0.,fl=0.;
 for(int k=0;k<${NZ};k++){vec4 z=uZ446[k];if(z.z>0.){float w=1.-smoothstep(z.z*.55,z.z,distance(ip.xz,z.xy));float kd=uK446[k];if(kd<1.5)brn=max(brn,w*smoothstep(0.,1.5,z.w));else if(kd<2.5)frz=max(frz,w);else fl=max(fl,w);}}
 float st=1.-frz*.92;
 transformed.x+=sw*h*h*.14*st;transformed.z+=cos(uT446*1.4+ip.z*.41)*h*h*.08*st;
-for(int i=0;i<${NI};i++){vec4 q=uI446[i];if(q.w>.01){vec2 d=ip.xz-q.xy;float dist=length(d);if(dist<q.z&&dist>.001){float push=(1.-dist/q.z)*q.w*(1.-frz*.85);transformed.xz+=normalize(d)*push*h*.3;transformed.y-=push*h*.12;}}}
+for(int i=0;i<${NI};i++){vec4 q=uI446[i];if(q.w>.01){vec2 d=ip.xz-q.xy;float dist=length(d);if(dist<q.z&&dist>.001){float push=(1.-dist/q.z)*q.w*(1.-frz*.85);transformed.xz+=normalize(d)*push*h*.55;transformed.y-=push*h*.2;}}}
 transformed.xz+=vec2(.8,.35)*fl*h*.35;transformed.y*=(1.-brn*.97)*(1.-fl*.7);
 vBurn446=brn;vIce446=frz;}`);
     sh.fragmentShader = 'varying float vBurn446;varying float vIce446;\n' + sh.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb*=1.-.88*vBurn446;diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.55,.8,1.),vIce446*.75);');
@@ -154,7 +154,7 @@ vBurn446=brn;vIce446=frz;}`);
         const s0 = e._gs446;
         if (s0 && Math.hypot(s0.x - e.x, s0.z - e.z) < .45) { s0.s = 1; s0.x = e.x; s0.z = e.z; continue; }
         if (s0) s0.live = false;
-        const n = { x: e.x, z: e.z, r: r * 1.6, s: 1, live: true }; e._gs446 = n; samples.push(n);
+        const n = { x: e.x, z: e.z, r: r * 2.0, s: 1, live: true }; e._gs446 = n; samples.push(n);
       }
       while (samples.length > NI) { let k = 0; for (let i = 1; i < samples.length; i++) if (samples[i].s < samples[k].s && !samples[i].live) k = i; samples.splice(k, 1); }
     }
@@ -173,21 +173,31 @@ vBurn446=brn;vIce446=frz;}`);
     }
   }
   function elementOf(sk) {
-    const n = (sk && sk.n || '').toLowerCase(), c = sk && sk.col || 0;
-    if (/fogo|chama|meteor|inferno|brasa|lava|incêndio|incendi|explos|dragão rubro|ígneo/.test(n)) return 'fire';
+    if (!sk) return null;
+    const n = (sk.n || '').toLowerCase(), eff = sk.t === 'kit111' ? sk.effect : (sk.effect || sk.t);
+    if (/^(ward|guard|speed|move)$/.test(eff)) return null; /* armadura/escudo/velocidade não queimam nem congelam o chão */
+    if (/fogo|chama|meteor|inferno|brasa|lava|incêndio|incendi|explos|rubro|ígneo/.test(n)) return 'fire';
     if (/gelo|congel|frio|nevasca|glaci|geada|gélid/.test(n)) return 'ice';
-    if (/vento|tempestade|ciclone|furac|rajada|tornado|vendaval/.test(n)) return 'wind';
-    const r = c >> 16 & 255, g = c >> 8 & 255, b = c & 255;
-    if (r > 200 && g < 150 && b < 90) return 'fire'; if (b > 200 && r > 120 && r < 230 && g > 170) return 'ice'; return null;
+    if (/vento|tempestade de vento|ciclone|furac|rajada|tornado|vendaval/.test(n)) return 'wind';
+    const t = sk.ptype300; if (t === 'fire' || t === 'meteor') return 'fire'; if (t === 'ice') return 'ice';
+    const c = sk.col || 0, r = c >> 16 & 255, g = c >> 8 & 255, b = c & 255;
+    if (r > 200 && g < 150 && b < 90) return 'fire'; if (b > 220 && g > 170 && r < 235) return 'ice'; return null;
+  }
+  /* impacto real: não repete a mesma zona enquanto ela é nova */
+  function impact(el, x, z, r) {
+    for (const q of zones) if ((q.kind === 1 ? 'fire' : q.kind === 2 ? 'ice' : 'wind') === el && Math.hypot(q.x - x, q.z - z) < q.r * .6 && q.t < 1.2) return;
+    element(el, x, z, r);
   }
   function hookElements() {
     for (const V of [window.VFX302, window.VFX328]) {
       if (!V || !V.play || V._g446) continue; V._g446 = true; const old = V.play;
       V.play = function (sk) {
-        try { const el = elementOf(sk); if (el && player) { const K = window.VFX328 && VFX328.truth ? VFX328.truth(sk) : null; const pt = K && K.pt || { x: player.x + Math.sin(player.face || 0) * 4, z: player.z + Math.cos(player.face || 0) * 4 }; element(el, pt.x, pt.z, K && K.r || sk.radius || 4); } } catch (_) {}
+        try { const eff = sk && (sk.t === 'kit111' ? sk.effect : (sk.effect || sk.t)); const el = /^(bolt|line|chain|fan|release|target|execute|burn|counter)$/.test(eff) ? null : elementOf(sk); /* projétil queima onde acerta (kitHit111) */ if (el && player) { const K = window.VFX328 && VFX328.truth ? VFX328.truth(sk) : null; const pt = K && K.pt || { x: player.x + Math.sin(player.face || 0) * 4, z: player.z + Math.cos(player.face || 0) * 4 }; element(el, pt.x, pt.z, K && K.r || sk.radius || 4); } } catch (_) {}
         return old.apply(this, arguments);
       };
     }
+    if (typeof window.kitHit111 === 'function' && !window.kitHit111._g446) { const o = window.kitHit111; window.kitHit111 = function (e, d, sk) { try { const el = elementOf(sk); if (el && e) impact(el, e.x, e.z, el === 'wind' ? 3 : 2.6); } catch (_) {} return o.apply(this, arguments); }; window.kitHit111._g446 = true; }
+    if (typeof window.hurtEnemy === 'function' && !window.hurtEnemy._g446) { const o = window.hurtEnemy; window.hurtEnemy = function (e, amt, sx, sz, h) { try { if (e && h && h.fromPlayer && h.skillHit) { const el = h.elem300 === 'fogo' ? 'fire' : h.elem300 === 'gelo' ? 'ice' : null; if (el) impact(el, e.x, e.z, 2.6); } } catch (_) {} return o.apply(this, arguments); }; window.hurtEnemy._g446 = true; }
     if (typeof window.elemMul300 === 'function' && !window.elemMul300._g446) { const o = window.elemMul300; window.elemMul300 = function (e, amt, h) { try { const t = h && h.ptype300; const el = t === 'fire' || t === 'meteor' ? 'fire' : t === 'ice' ? 'ice' : null; if (el && e) element(el, e.x, e.z, 2.5); } catch (_) {} return o.apply(this, arguments); }; window.elemMul300._g446 = true; }
   }
   function invalidate() { tiles.clear(); key = ''; }

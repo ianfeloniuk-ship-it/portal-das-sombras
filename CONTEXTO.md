@@ -1,3 +1,8 @@
+## v596 (23/10/2026) — Grama de fios: habilidades reais e dobra visível
+- `tools/grass446.js`: o fogo/gelo/vento da grama agora é disparado por habilidade REAL: área/pulsos/empurrão pelo ponto da conjuração (`VFX302/328.play`), projéteis e golpes pelo acerto (`hurtEnemy` com `elem300` fogo/gelo, `kitHit111`, `elemMul300`). Projétil não queima mais no ponto de lançamento.
+- Dobra em volta do jogador mais forte (empurrão ×1,8, raio ×2 por entidade): captura parada no meio do capim mostra os fios abertos ao redor dos pés.
+- Teste (Edge): `useSkill` com Bola de Fogo (classe 8), Nova de Gelo (9) e Rajada de Vento (11) criam a zona certa; fogo no ponto do acerto no lobo. Não testado: celular.
+
 ## v595 (23/10/2026) — Grama de fios (reação, vento e elementos)
 - **Pedido de Ian** (via outra sessão): grama como a do reel da PhysicsMorph — fios finos e densos, base escura e ponta clara, reagindo ao mundo, mantendo a relva baixa da v568.
 - `tools/grass446.js`: tufos de 9 fios finos com afinamento e degradê base→ponta; fios cheios até 18 m e LOD simples (3 fios largos, 1 em cada 4 tufos) de 18 a 44 m (`mesh2`). Altura continua do EcoGrid (`grassMul`: trilha baixa, biomassa alta mais alta).
