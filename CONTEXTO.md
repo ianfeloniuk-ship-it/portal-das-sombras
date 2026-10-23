@@ -1,3 +1,8 @@
+## v564 (22/10/2026) — Bússola estilo Skyrim
+- **Pedido de Ian**: a bússola do topo só mostrava N/NE/L... e nada marcado.
+- `tools/explorar539.js`: objetivo da missão ativo (◆ dourado, preso à borda se fora de vista; `Campaign327.target()` e missão rastreada de `Quests480`), cidades (⌂) e capitais (♛) descobertas, portais (◉, cor do rank), com opacidade caindo com a distância; lugares não descobertos por perto aparecem apagados em cinza e viram normais ao chegar a 130 m (`profile.cmp564`; cidade já visitada/registrada conta como descoberta, Aster desde o início); inimigos em combate a menos de 38 m viram ponto vermelho. Olhando para um marcador (±7°) aparece nome e distância sob a barra. Sem botões novos.
+- Teste: jogo real no navegador (sem erro de script); marcador, nome «Aster · 700 m», quest, cinza dos não descobertos. Não testado: celular, inimigo vermelho em combate real.
+
 ## v563 (22/10/2026) — Mapa: lista de portais começa fechada
 - **Pedido de Ian**: no mapa (M) a lista "Cidades próximas / Portais abertos" cobria tudo.
 - `tools/mapa3d544.js`: o painel começa fechado; só abre no botão PORTAIS (e fecha no mesmo botão); a escolha fica salva (`pds_maplist`).
