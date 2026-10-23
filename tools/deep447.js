@@ -10,7 +10,7 @@
   const T = THREE, TAU = Math.PI * 2;
   const U = () => window.Surv437, W = () => window.Mech423 && Mech423.Water;
   const SE = () => window.TER245 && TER245.SEA439;
-  const ready = () => U() && U().ready() && U().world();
+  const ready = () => U() && typeof U().ready === 'function' && U().ready() && U().world();
   const S = () => (run.deep447 = run.deep447 || { picked: {}, buffs: {} });
   const depthAt = (x, z) => window.Sea439 ? Sea439.depth(x, z) : 0;
 

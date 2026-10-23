@@ -133,7 +133,7 @@
   function loop() {
     const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
     try {
-      const ok = U() && U().ready();
+      const ok = U() && typeof U().ready === 'function' && U().ready();
       if (!ok || !U().world()) { for (const id of [...live.keys()]) drop(id); if (ok && run.aboard440 && L.mode !== 'world') run.aboard440 = null; }
       else if (!paused) {
         const b = aboard();

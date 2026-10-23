@@ -1,3 +1,8 @@
+## v579 (23/10/2026) — Fase A, bloco 4
+- **Praça de Aster lavanda (bug 13):** (0,0) é o centro da fonte (sólido); quem aparecia ali (teleporte, queda) ficava com a câmera dentro do objeto. Novo `tools/saida579.js`: se o jogador fica 1 s dentro de um sólido, vai ao ponto livre mais próximo (raio até 24 m). Testado com captura: de (0,0) vai para (5,0) e a praça aparece.
+- `boats440`/`deep447`: o aviso `U(...).ready is not a function` sumiu (guarda `typeof`); os dois módulos continuam inativos porque `Surv437` não expõe `ready()`/`world()` — falta definir essa API.
+- Não feitos nesta versão: 6 (ordem das ações da missão #1), 12 (copas), 14–17, 19 (nome Gosma).
+
 ## v578 (23/10/2026) — Fase A, bloco 3 (Mão no chefe, hitbox dos dragões, placa de nível)
 - **Mão × chefe** (`370-v281.js`): `claimEnemy` agora roda para todo `isBoss` (antes só tutorial/camp a1/architectClaim; chefe de Fenda comum nunca chamava). Mob comum continua sem Mão (`test-mao-so-chefes` ok). Testado: chefe morto fora da abertura → 1 trabalho da Mão. **Atenção:** `Reclaim372.start` ainda não age enquanto `Intro401.guided()` é verdadeiro (abertura guiada); o teste automático da v575 estava nesse estado. Se Ian quiser a Mão já na abertura, é decisão separada.
 - **Hitbox dos dragões** (`tools/hitbox-dragao551.js`, `380-acoes.js`): as esferas compostas (tronco, pescoço, cabeça, asas, cauda, patas) só valiam para o dragão voador (`drake510`); os dragões de chão (Ancião, Gélido, Musgo, Zahar...) usavam raio de ~3 m. Agora `Dragao551.is(e)` inclui `kind` que começa com `drag`/`serpe_zahar`, e as esferas somam o relevo (o shader soma o chão, a malha fica em y local). Medido: Ancião 15×14×15 m, 21 esferas, a maior r=2,5.
