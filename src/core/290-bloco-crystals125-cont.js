@@ -8,7 +8,7 @@ function addVein(x,z,rank,charges,col){
   if(!attachCrystal125(g,rank))crystalReady125.then(ok=>{if(ok&&!it.hidden&&L.group===owner&&g.parent===owner)attachCrystal125(g,rank)});return it;
 }
 function mine(it,rank){
-  if(it.hidden||it.charges<=0||(it.cd||0)>time)return;it.cd=time+.35;let n=1+(Math.random()<.4?1:0);if(Math.random()<Math.min(1,profLv('mine')*.05))n++;if(hasT('miner'))n++;run.res.cry[rank]+=n;profXp('mine',n);storyEv('mine',n);
+  if(it.hidden||it.charges<=0||(it.cd||0)>time)return;it.cd=time+.35;let n=1+(Math.random()<.4?1:0);if(Math.random()<Math.min(1,profLv('mine')*.05))n++;if(hasT('miner'))n++;if(Math.random()<.03*cons('min')+(cons('min')>=10?.1:0))n++;run.res.cry[rank]+=n;profXp('mine',n);storyEv('mine',n);
   player.face=Math.atan2(it.x-player.x,it.z-player.z);player.atkT=.001;
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,RANKS[rank].c);fxBurst(it.x,1,it.z,crystalColor125(rank).getHex(),6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}

@@ -55,7 +55,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){if(!e||e.friendly217||e.ally||!Number.isFin
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
-  if(player.stealth>0&&o.fromPlayer){if(!player.kitStealth111){amt*=3;o.sneak=true}player.stealth=0;player.kitStealth111=false;setStealth(false)}
+  if(player.stealth>0&&o.fromPlayer){if(!player.kitStealth111){amt*=3*(1+.02*cons('fts'));o.sneak=true}player.stealth=0;player.kitStealth111=false;setStealth(false)}
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance()+((o.crit154||(e.snare154>time)||(!blocked&&passiveCrit327(o)))?1:0):.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn*(o.fromPlayer?1+pCritDmg281():1);if(e.res)amt*=1-e.res;amt=Math.max(0,amt-Math.max(0,mobDefVal296(e,o.dtype281||(o.fromPlayer?curDType281:'phy'))-passiveShred327(e,o)-(o.fromPlayer?pPenVal296():0)));

@@ -91,7 +91,7 @@ function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=(!profile.classless&&CLS_BAL[profile.cls])||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
   const maxhp=(classBaseStats().hp+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
-  const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
+  const maxsh=equipmentShield()*(1+.03*cons('mur')+.02*cons('blo')+(cons('blo')>=10?.1:0)+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(classBaseStats().mp+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
   const spd=4.2*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));

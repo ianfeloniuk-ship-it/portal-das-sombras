@@ -3702,7 +3702,7 @@ function statsFor(){
   const a=run.equip.a,s=run.stats||{},cb=curseB(),fb=foodB(),tb=titleB(),stb=setB(),bp=bonusPool(),cb2=(!profile.classless&&CLS_BAL[profile.cls])||{hp:1,dmg:1,def:0};
   const dmg=atkOf(isMagic()?'mag':'phy')*(1+bp.edmg)*cb2.dmg;
   const maxhp=(classBaseStats().hp+hpPer(run.level)*(s.vit||0))*(1+bp.ehp)*cb2.hp;
-  const maxsh=equipmentShield()*(1+.03*cons('mur')+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
+  const maxsh=equipmentShield()*(1+.03*cons('mur')+.02*cons('blo')+(cons('blo')>=10?.1:0)+(innB()>=5?.25:0)+.04*pb('sh')+.08*gearRuneCount('shell'));
   const maxmp=(classBaseStats().mp+mpPer(run.level)*(s.int||0))*(1+affB().mp/100+(tb.mp||0)+(cb.mp||0)+(fb.mp||0)+(stb.mp||0)+.05*gearRuneCount('vigor'));
   const def=Math.min(.7,cb2.def+(npcHas('Brann')?.08:0));
   const spd=4.2*(1+.01*Math.floor((s.agi||0)/2)+affB().spd/100+(cb.spd||0)+.03*gearRuneCount('stride'));
@@ -5347,7 +5347,7 @@ function addVein(x,z,rank,charges,col){
   if(!attachCrystal125(g,rank))crystalReady125.then(ok=>{if(ok&&!it.hidden&&L.group===owner&&g.parent===owner)attachCrystal125(g,rank)});return it;
 }
 function mine(it,rank){
-  if(it.hidden||it.charges<=0||(it.cd||0)>time)return;it.cd=time+.35;let n=1+(Math.random()<.4?1:0);if(Math.random()<Math.min(1,profLv('mine')*.05))n++;if(hasT('miner'))n++;run.res.cry[rank]+=n;profXp('mine',n);storyEv('mine',n);
+  if(it.hidden||it.charges<=0||(it.cd||0)>time)return;it.cd=time+.35;let n=1+(Math.random()<.4?1:0);if(Math.random()<Math.min(1,profLv('mine')*.05))n++;if(hasT('miner'))n++;if(Math.random()<.03*cons('min')+(cons('min')>=10?.1:0))n++;run.res.cry[rank]+=n;profXp('mine',n);storyEv('mine',n);
   player.face=Math.atan2(it.x-player.x,it.z-player.z);player.atkT=.001;
   floater(it.x,it.z,'+'+n+' cristal '+GR[rank].id,RANKS[rank].c);fxBurst(it.x,1,it.z,crystalColor125(rank).getHex(),6,3);sfx('mine');shake(.08);
   npcEv('mine',n);it.charges--;it.g.scale.setScalar(.7+.3*Math.min(1,it.charges/4));if(it.charges<=0){it.hidden=true;L.group.remove(it.g);toast('<b>[NARRADOR]</b> Veio de mana esgotado.')}
@@ -5982,7 +5982,7 @@ function hurtEnemy(e,amt,sx,sz,o={}){if(!e||e.friendly217||e.ally||!Number.isFin
   if(e.mech==='barreira'&&e.barrier>0){amt*=.08;if(Math.random()<.25)floater(e.x,e.z,'BARREIRA','#7fd8ff')}
   if(e.mech==='costas'){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>-.2){amt*=.2;if(o.fromPlayer&&(e.hintT||0)<time){e.hintT=time+2;floater(e.x,e.z,'ATAQUE PELAS COSTAS!','#ffd54f',true,4)}}else if(o.fromPlayer&&Math.random()<.3)floater(e.x,e.z,'PONTO FRACO!','#6fe39a')}
   if(e.shield&&e.stun<=0&&!o.pierce){const ax=sx-e.x,az=sz-e.z,l=Math.hypot(ax,az)||1;if((ax*Math.sin(e.face)+az*Math.cos(e.face))/l>.35&&Math.random()<.65){amt*=.25;blocked=true}}
-  if(player.stealth>0&&o.fromPlayer){if(!player.kitStealth111){amt*=3;o.sneak=true}player.stealth=0;player.kitStealth111=false;setStealth(false)}
+  if(player.stealth>0&&o.fromPlayer){if(!player.kitStealth111){amt*=3*(1+.02*cons('fts'));o.sneak=true}player.stealth=0;player.kitStealth111=false;setStealth(false)}
   if(o.fromPlayer&&hasClassPassive(4)&&!o.passive)amt*=1+Math.min(.3,.02*Math.hypot(e.x-player.x,e.z-player.z));
   if(e.trait==='blind')amt*=.6;
   const cc=o.fromPlayer?critChance()+((o.crit154||(e.snare154>time)||(!blocked&&passiveCrit327(o)))?1:0):.05,cn=blocked?0:Math.floor(cc)+(Math.random()<cc-Math.floor(cc)?1:0),crit=cn>0,crit3=cn>=2;if(crit)amt*=1+cn*(o.fromPlayer?1+pCritDmg281():1);if(e.res)amt*=1-e.res;amt=Math.max(0,amt-Math.max(0,mobDefVal296(e,o.dtype281||(o.fromPlayer?curDType281:'phy'))-passiveShred327(e,o)-(o.fromPlayer?pPenVal296():0)));
@@ -9705,7 +9705,8 @@ requestAnimationFrame(frame);
 <script src="tools/desfiladeiro510.js?v=528"></script>
 <script src="tools/marcos526.js?v=537r1"></script>
 <script src="tools/agua517.js?v=517"></script>
-<script src="tools/constel523.js?v=565"></script>
+<script src="tools/constel569.js?v=570"></script>
+<script src="tools/constel523.js?v=570"></script>
 <script src="tools/telas535.js?v=557"></script>
 <script src="tools/motor-missoes-infinitas.js?v=546"></script>
 <script src="tools/skyrim-overhaul538.js?v=545"></script>

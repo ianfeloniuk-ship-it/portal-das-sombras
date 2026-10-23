@@ -68,13 +68,14 @@ const FIG={
   art:[['+',hand()]],
   pts:[[300,28],[300,200],[218,300],[192,538],[256,564],[304,580],[350,562],[404,528],[384,300],[516,330],[300,252]]}
 };
+Object.assign(FIG,(window.CONS569||{}).fig||{});
 const STAR={k:'est',n:'A Estrela',fig:'Rank secreto',hue:[255,232,180],locked:true,d:'Revela-se depois do Segundo Despertar.',
   lore:'Há um rank acima de todos os outros. Ninguém em Aster sabe dizer que estrela é essa.',
   art:[['+',star8(240,70)],['-',star8(150,44)],['+',circ(300,300,40)]],
   pts:[[300,60],[470,130],[540,300],[470,470],[300,540],[130,470],[60,300],[130,130],[300,190],[300,410],[300,300]]};
 
 let C=null,root=null,cv=null,ctx=null,raf=0,open=false,W=0,H=0,DPR=1;
-const S=.00125;
+const S=.0007;
 let cur=-1,focused=false,hover=null,sel=null,parts=[],t0=0,last=0,lit=null,sway={x:0,y:0},swayT={x:0,y:0},down=null;
 const cam={y:-.4,p:.3,f:1.8},tgt={y:0,p:.3,f:1.8};
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -100,13 +101,13 @@ function build(c,i){
   c.tex=tx}
 function setup(){
   if(C)return;
-  C=CONS.map(([k,n,d,cap])=>({k,n,d,cap,...(FIG[k]||FIG.fur)})).concat([STAR]);
+  C=CONS.map(([k,n,d,cap])=>({k,n,d,cap,...(FIG[k]||FIG.fur)})).concat(((window.CONS569||{}).soon||[]).map(([k,n])=>({k,n,cap:'',...FIG[k],d:FIG[k].soon,locked:true,soon:true}))).concat([STAR]);
   const R=mulberry(11);
   for(let i=0;i<1800;i++)sky.push({d:dir((R()*2-1)*Math.PI,Math.asin(R())*1.02-.04),s:.4+R()*1.3,ph:R()*6.28,l:.25+R()*.75});
   const cols=[[60,80,170],[110,60,160],[30,110,150],[150,90,140],[90,60,120]];for(let i=0;i<110;i++){const y=(R()*2-1)*Math.PI;neb.push({d:dir(y,.25+Math.sin(y*1.3)*.25+R()*.5),r:.1+R()*.34,c:cols[i%5],a:.03+R()*.05})}
   C.forEach((c,i)=>{
     c.p=c.pts.map(([x,y],j)=>({i:j,x:x-300,y:y-300,apex:j===10}));
-    c.yaw=i*2*Math.PI/C.length;c.pc=i%2?.92:.55;c.roll=(((i*5)%7)-3)*.09;
+    c.yaw=i*2*Math.PI/C.length;c.pc=[.28,.7,1.12][i%3];c.roll=(((i*5)%7)-3)*.09;
     const b0=basis(c.yaw,c.pc),cr=Math.cos(c.roll),sr=Math.sin(c.roll),cb={f:b0.f,r:[0,1,2].map(k=>b0.r[k]*cr+b0.u[k]*sr),u:[0,1,2].map(k=>b0.u[k]*cr-b0.r[k]*sr)};
     const m=(x,y)=>{const v=[0,1,2].map(k=>cb.f[k]+(x*cb.r[k]-y*cb.u[k])*S),l=Math.hypot(...v);return v.map(q=>q/l)};
     c.m=m;c.center=cb.f;c.labelD=m(0,350);build(c,i);c.dust.forEach(q=>q.d=m(q.x,q.y));c.p.forEach(p=>p.v=m(p.x,p.y))});
@@ -146,7 +147,7 @@ function toScreen(p){return proj(p.v)||[-999,-999,0]}
 function pick(mx,my){if(!focused)return null;const c=C[cur];let best=null,bd=28;for(const p of c.p){const[x,y]=toScreen(p),d=Math.hypot(x-mx,y-my);if(d<bd){bd=d;best=p}}return best}
 function pickSky(mx,my){let bi=-1,bd=1e9;C.forEach((c,i)=>{const q=dot3(c.center,B.f)>.2&&proj(c.center);if(!q)return;const d=Math.hypot(q[0]-mx,q[1]-my);if(d<bd){bd=d;bi=i}});return bd<Math.max(170,F*.32)?bi:-1}
 function buy(p){const c=C[cur];
-  if(c.locked){toast('Revela-se depois do Segundo Despertar');return}
+  if(c.locked){toast(c.soon?'Desperta em breve':'Revela-se depois do Segundo Despertar');return}
   if(isOn(c,p)){toast(p.apex?'Ápice aceso':'Já aceso');return}
   if(p.apex){toast('O Ápice acende sozinho com as 10 estrelas');return}
   if(!canBuy(c,p)){toast('Acenda as estrelas em ordem');return}
@@ -163,7 +164,7 @@ let tt;function toast(m){const e=root.querySelector('.c5-toast');e.textContent=m
 function ui(){
   const c=cur<0?null:C[cur],q=s=>root.querySelector(s);
   q('h1').textContent=c?c.n:'O Céu de Aster';
-  q('.c5-sub').textContent=c?(c.locked?'???':c.fig+' · '+lv(c)+'/10'+(lv(c)>=10?' · Ápice':'')):'Constelações';
+  q('.c5-sub').textContent=c?(c.soon?c.fig+' · desperta em breve':c.locked?'???':c.fig+' · '+lv(c)+'/10'+(lv(c)>=10?' · Ápice':'')):'Constelações';
   q('.c5-q').style.opacity=focused?0:1;
   q('.c5-pts b').textContent=run.cpts||0;
   const cb=q('.c5-conv');const full=typeof consFull==='function'&&consFull()&&(run.cpts||0)>0;cb.hidden=!full;if(full)cb.textContent='Converter '+run.cpts+' em status';
@@ -171,7 +172,8 @@ function ui(){
   const p=focused?(hover||sel):null,el=q('.c5-panel');
   if(!p||!c){el.classList.remove('show');return}
   let h;
-  if(c.locked)h='<h2>???</h2><p class="c5-st">Bloqueada</p><p class="c5-d">'+c.d+'</p>';
+  if(c.soon)h='<h2>'+c.n+'</h2><p class="c5-st">Desperta em breve</p><p class="c5-d">'+c.d+'</p>';
+  else if(c.locked)h='<h2>???</h2><p class="c5-st">Bloqueada</p><p class="c5-d">'+c.d+'</p>';
   else if(p.apex)h='<h2>Ápice de '+c.n+'</h2><p class="c5-st'+(isOn(c,p)?' ok':'')+'">'+(isOn(c,p)?'Aceso':'Acende com as 10 estrelas')+'</p><p class="c5-d">'+c.cap.replace('Ápice: ','')+'.</p>';
   else{const n=p.i+1,ex=c.ex(n);
     h='<h2>'+c.n+' '+n+'</h2><p class="c5-st'+(isOn(c,p)?' ok':'')+'">'+(isOn(c,p)?'Aceso':canBuy(c,p)?'Disponível · 1 ponto':'Acenda a estrela '+p.i+' antes')+' · '+n+' de 10</p><p class="c5-d">'+c.d+'.</p><div class="c5-ex"><span>Com '+n+' estrela'+(n>1?'s':'')+'</span>'+ex[0]+' → '+ex[1]+'</div>'}
@@ -212,7 +214,7 @@ function frame(now){
       else{glow(x,y,18*zz*big,[r,g,b],.18*fa);dot(x,y,2*big,[210,220,240],.6*fa)}
       if(p.apex&&!c.locked){ctx.lineWidth=1;ctx.strokeStyle=`rgba(${r},${g},${b},${.35*fa})`;ctx.beginPath();ctx.arc(x,y,22*zz,0,7);ctx.stroke()}
       if(hv){ctx.lineWidth=1;ctx.strokeStyle='rgba(255,255,255,.65)';ctx.beginPath();ctx.arc(x,y,17*big+pulse*2,0,7);ctx.stroke()}}
-    if(!focused){const l=proj(c.labelD);if(l){ctx.globalCompositeOperation='source-over';ctx.textAlign='center';ctx.font='400 14px Jost, "Chakra Petch", sans-serif';ctx.fillStyle=`rgba(236,232,223,${near?.95:.6})`;ctx.fillText(c.n.toUpperCase(),l[0],l[1]);ctx.font='300 11px Jost, "Chakra Petch", sans-serif';ctx.fillStyle=`rgba(169,166,158,${near?.9:.5})`;ctx.fillText(c.locked?'???':c.fig.toUpperCase()+' · '+lv(c)+'/10',l[0],l[1]+16);ctx.globalCompositeOperation='lighter'}}
+    if(!focused){const l=proj(c.labelD);if(l){ctx.globalCompositeOperation='source-over';ctx.textAlign='center';ctx.font='400 14px Jost, "Chakra Petch", sans-serif';ctx.fillStyle=`rgba(236,232,223,${near?.95:.6})`;ctx.fillText(c.n.toUpperCase(),l[0],l[1]);ctx.font='300 11px Jost, "Chakra Petch", sans-serif';ctx.fillStyle=`rgba(169,166,158,${near?.9:.5})`;ctx.fillText(c.soon?c.fig.toUpperCase()+' · EM BREVE':c.locked?'???':c.fig.toUpperCase()+' · '+lv(c)+'/10',l[0],l[1]+16);ctx.globalCompositeOperation='lighter'}}
   });
   parts=parts.filter(q=>(q.l-=dt)>0);for(const q of parts){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96;glow(q.x,q.y,6+q.l*10,q.c,q.l)}
   const nq=proj(nexo);ctx.globalCompositeOperation='source-over';
