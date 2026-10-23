@@ -1,3 +1,8 @@
+## v592 (23/10/2026) — Fase A, item 12 (copas escuras)
+- **Causa real:** nenhum código sobrescreve o material (`361c13` era só o `getHexString` estourando com cor 1,22/1,12/1,08). O tom marrom vinha da textura: partes da copa dos carvalhos têm texels marrons, e o tingimento de estação só pegava texels "verdes" (`leaf154`). Os carvalhos têm ~30 m, então a parte de baixo da copa enche a tela.
+- `src/core/680-bloco-journey113-cont.js`: o fragment recebe a altura relativa do modelo (`vH153`) e tinge a parte alta da copa (h > 24–30%) com a cor da estação mesmo em texel marrom; o tronco/base continua marrom. Conífera não muda.
+- Teste: jogo real, captura antes/depois (spawn e campo aberto). Não testado: outono/inverno, salgueiro/pântano.
+
 ## v591 (23/10/2026) — Fase A, fechamento (reteste dos 19 itens)
 - `tools/campaign327.js`: o herói acorda ao lado de Edran (x+4,6) em vez de na frente dele; antes o corpo do herói escondia Edran da câmera inicial (item 4 não estava resolvido). Item 15: `tools/mapa3d544.js` — nome da capital mais alto e com contorno escuro (os marcadores de portal cobriam "ASTER").
 - Reteste a pé na v590: estrada até a ponte livre, escolta, salteadores com 32 de vida, gosma→Edran, praça de Aster. **Ainda quebrado:** item 12 (copas/cascas escuras das árvores vistas de baixo), item 16/17 não reproduzidos. Doc "Fase A — fechamento" no Drive.

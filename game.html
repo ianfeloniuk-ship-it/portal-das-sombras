@@ -9426,8 +9426,8 @@ const TripoEnvironment153 = (() => {
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
           /* v243: vento nas árvores — o tronco curva com rajadas e as folhas tremem; fase por árvore */
-          if(['oak','willow','fir'].includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
-            {float H=${size.y.toFixed(3)},h=clamp(transformed.y/H,0.,1.);vec2 ph=vec2(0.);
+          if(['oak','willow','fir'].includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\nvarying float vH153;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+            {float H=${size.y.toFixed(3)},h=clamp(transformed.y/H,0.,1.);vH153=h;vec2 ph=vec2(0.);
             #ifdef USE_INSTANCING
             ph=instanceMatrix[3].xz;
             #endif
@@ -9436,8 +9436,8 @@ const TripoEnvironment153 = (() => {
             transformed.x+=sin(t*1.3+f)*b+b*.6;transformed.z+=cos(t*1.05+f*1.3)*b*.6;
             float lf=smoothstep(.35,.7,h)*H*.0025*(.6+g);vec3 q=transformed*(5./H);
             transformed+=vec3(sin(t*4.+q.y+q.z+f),sin(t*3.6+q.x)*.4,cos(t*4.4+q.z+q.x+f))*lf;}`)}
-          if(['oak','willow','fir'].includes(id))shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
-            {vec3 c0=diffuseColor.rgb;float leaf154=smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95);float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
+          if(['oak','willow','fir'].includes(id))shader.fragmentShader='varying float vH153;\n'+shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
+            {vec3 c0=diffuseColor.rgb;float leaf154=max(smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95),${id==='fir'?'0.':'smoothstep(.24,.30,vH153)'});float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
             diffuseColor.rgb=mix(c0,(dot(c0,vec3(.3,.59,.11))*2.1+.11)*vColor,leaf154*on154);}
             #endif`);
           if(!['oak','willow','fir','boulder','stones','mossrock','cacto1','cacto2'].includes(id)){
