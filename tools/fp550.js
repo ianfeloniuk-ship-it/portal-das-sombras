@@ -739,6 +739,7 @@
     FP.glow.position.set(-0.08, -0.06, -0.5);
   }
 
+  const SK0 = () => global.Skyrim588;
   FP.pose = function(){
     const P = global.player;
     if(!P || !P.m || !P.m.bones || !global.THREE || typeof camera === 'undefined' || !camera) return;
@@ -746,6 +747,13 @@
     if(!V.a){ for(const k of ['a','b','c','d','e','f','g','h','sh','el','hd','t']) V[k] = new T.Vector3(); V.q = new T.Quaternion(); V.w = new T.Quaternion(); V.p = new T.Quaternion(); }
     P.m.root.updateMatrixWorld(true); camera.updateMatrixWorld(true);
     FP.swingNow(P, GUARD[P.m.kind195] || GUARD.sword);
+    /* locomoção estilo Skyrim: respirar parado, balançar andando, abaixar a arma correndo */
+    const nowL = performance.now(), dtL = Math.min(0.06, Math.max(0, (nowL - (FP._lt || nowL)) / 1000)); FP._lt = nowL;
+    const spdRaw = (FP._px === undefined || dtL <= 0) ? 0 : Math.hypot(P.x - FP._px, P.z - FP._pz) / dtL; FP._px = P.x; FP._pz = P.z; FP._sp = (FP._sp || 0) + (Math.min(spdRaw, 12) - (FP._sp || 0)) * 0.3; const spdL = FP._sp, mvL = Math.min(1, spdL / 4), runL = spdL > 4.5 ? 1 : 0;
+    FP._run = FP._run === undefined ? 0 : FP._run; FP._run += (runL - FP._run) * Math.min(1, dtL * 8);
+    FP._ph = (FP._ph || 0) + dtL * (spdL > 4.5 ? 11 : spdL > 0.15 ? 7.5 : 1.6);
+    const bobX = Math.sin(FP._ph) * 0.014 * mvL, bobY = Math.abs(Math.cos(FP._ph)) * 0.016 * mvL, breathe = Math.sin(nowL * 0.0015) * 0.004 * (1 - mvL);
+    if(FP._run > 0.01 && FP._dir && !(SK0() && SK0().draw > 0)) FP._dir = [FP._dir[0], FP._dir[1] * (1 - 0.5 * FP._run), FP._dir[2] - 0.35 * FP._run];
     for(const s of ['r','l']){
       const ua = b['upperarm_'+s], fa = b['forearm_'+s], hd = b['hand_'+s];
       if(!ua || !fa || !hd) continue;
@@ -764,6 +772,8 @@
       if(isBow && SK.draw > 0) tt = s === 'r' ? lerp3(tt, [0.0, -0.09, -0.34], ez(SK.draw)) : lerp3(tt, [-0.09, -0.07, -0.78], ez(SK.draw));
       if(!isBow && s === 'l' && SK.cast > 0) tt = lerp3(tt, [-0.06, -0.05, -0.56], ez(Math.min(1, SK.cast * 1.8)));
       if(!isBow && s === 'r' && SK.wind > 0) tt = lerp3(tt, [0.36, -0.1, -0.36], ez(SK.wind));
+      tt[0] += (s === 'r' ? 1 : -1) * bobX * 0.7 + (s === 'r' ? 0.035 : 0) * FP._run;
+      tt[1] += -bobY * (s === 'r' ? 1 : 0.8) + breathe * (s === 'r' ? 1 : -1) - 0.05 * FP._run;
       const tgt = V.t.set(tt[0] + so3[0], tt[1] + so3[1], tt[2] + so3[2]); camera.localToWorld(tgt);
       tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
       delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);

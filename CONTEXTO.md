@@ -1,3 +1,8 @@
+## v589 (23/10/2026) — 1ª pessoa: movimento de mãos como no Skyrim
+- **Pedido de Ian**: conferir como o Skyrim deixa o personagem em 1ª pessoa e replicar.
+- `tools/fp550.js`: mãos respiram parado (oscilação lenta), balançam ao andar (passo alternado, mão da arma e livre em contrafase) e, correndo, a arma desce e inclina para a frente e a mão livre cai (como o sprint do Skyrim); velocidade medida pelo deslocamento real do jogador. Mantém: enquadramento v587 (mão livre pequena embaixo à esquerda, arma pela direita), arco/golpe forte/magia da v588.
+- Teste: jogo real parado (captura em tela larga 16:9: composição igual à referência). **Não testado em captura**: andando/correndo (o painel escondido não anda de verdade); valores conferidos só por código.
+
 ## v588 (23/10/2026) — Ataque e magia no estilo Skyrim (só a mecânica)
 - **Pedido de Ian**: arco como no Skyrim (segurar puxa, soltar atira) e copiar a mecânica de ataques e lançamento de habilidades da vista em 1ª pessoa.
 - `tools/skyrim588.js` (novo, `window.Skyrim588`): **arco** — segurar o botão puxa a corda por ~1 s (zoom de mira de até 26% no FOV, flecha encaixada na mão da corda), soltar dispara; dano ×0,4→×1,5 e velocidade ×0,65→×1 pela puxada; menos de 20% cancela; botão direito/Esc cancela; vale em 1ª e 3ª pessoa. **Espada/machado/maça/martelo (só 1ª pessoa)** — clique rápido = golpe leve; segurar >0,4 s e soltar = golpe forte (dano ×2, recarga ×1,8, tremor de tela; o braço recua enquanto segura). **Habilidades (1ª pessoa)** — ao lançar, a mão livre sobe ao centro, abre a palma e brilha na cor do elemento (~0,5 s).
