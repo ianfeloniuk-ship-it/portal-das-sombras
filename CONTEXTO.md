@@ -1,3 +1,8 @@
+## v572 (23/10/2026) — Nível máximo 777 e ponto de constelação a cada 3 níveis
+- **Pedido de Ian**: teto 777 (era infinito); 1 ponto de constelação a cada 3 níveis, de propósito, para ninguém encher as 29 constelações (290). Do nível 37 ao 777 dá **247 pontos**.
+- `370-v281.js` (`LEVEL_MAX`, `gainXp`: trava no 777, XP zera no teto, ponto só em nível ≥37 com nível%3==1), `640-telas.js` (save com nível >777 vira 777; pontos e constelações já gastos ficam), reencarnação pede `min(777, 100×(n+1))` (450, 610). Textos: `constel523.js`, `570-...constelaco.js`.
+- Teste por script (node, a função real): 1→777 = 247 pontos, nada passa do 777, save no 900 vira 777 sem perder pontos. **Não feito**: curva de XP/monstros/ranks até 777 (aguarda proposta aprovada de Ian).
+
 ## v571 (23/10/2026) — 1ª pessoa: a MÃO NORMAL do Viajante, com ossos nos dedos
 - **Pedido de Ian**: mão de 1ª pessoa igual à do Viajante, com dedos que fecham na arma ("cria ossos nos dedos e junta a malha", "refaz na mão normal").
 - `tools/fp550.js` (`rigHand`): só na 1ª pessoa, as peças da mão (`tripo_part_7` direita, `tripo_part_8` esquerda) ganham 12 ossos novos (3 por dedo: indicador, médio, anelar, mindinho), com pesos por faixa e por articulação (geometria própria; a 3ª pessoa não muda). Os ossos fecham os dedos (relaxado sem arma, firme com arma). A arma é movida para a palma (âncora) e o punho gira para a lâmina apontar à guarda; golpe em 3 tempos; arco na esquerda (menor). Sai da 1ª pessoa → tudo volta ao original. Refaz os ossos se o modelo for refeito (troca de equipamento).

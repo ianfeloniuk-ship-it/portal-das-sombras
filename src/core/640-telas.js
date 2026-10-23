@@ -38,7 +38,7 @@ function startGame(){
       .then(()=>{playerAssetsReady405=true;$('goBtn').disabled=false;startGame()});return}
   $('title').hidden=true;
   if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
-  if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
+  if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(run.level>777){run.level=777;run.xp=0}if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
   makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);

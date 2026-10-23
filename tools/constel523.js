@@ -114,7 +114,7 @@ function setup(){
     c.m=m;c.center=cb.f;c.labelD=m(0,350);build(c,i);c.dust.forEach(q=>q.d=m(q.x,q.y));c.p.forEach(p=>p.v=m(p.x,p.y))});
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
   root=document.createElement('div');root.id='cons523';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-label','Constelações');
-  root.innerHTML='<canvas tabindex="0" aria-label="Céu de constelações. Setas trocam, Enter entra, Esc volta."></canvas><div class="c5-pts"><b></b>pontos de constelação<small>Ganhe 1 por nível a partir do 35.</small></div><div class="c5-top"><h1></h1><p class="c5-sub"></p><q class="c5-q">Você chegou a Aster sem conhecer suas estrelas.</q></div><button class="c5-x" type="button">Fechar</button><button class="c5-conv" type="button" hidden></button><div class="c5-panel" aria-live="polite"></div><div class="c5-toast"></div><div class="c5-keys"></div>';
+  root.innerHTML='<canvas tabindex="0" aria-label="Céu de constelações. Setas trocam, Enter entra, Esc volta."></canvas><div class="c5-pts"><b></b>pontos de constelação<small>Ganhe 1 a cada 3 níveis, do 37 ao 777.</small></div><div class="c5-top"><h1></h1><p class="c5-sub"></p><q class="c5-q">Você chegou a Aster sem conhecer suas estrelas.</q></div><button class="c5-x" type="button">Fechar</button><button class="c5-conv" type="button" hidden></button><div class="c5-panel" aria-live="polite"></div><div class="c5-toast"></div><div class="c5-keys"></div>';
   document.body.appendChild(root);cv=root.querySelector('canvas');ctx=cv.getContext('2d');
   root.querySelector('.c5-x').onclick=close;
   root.querySelector('.c5-conv').onclick=()=>{try{extraActions('consconv',0);if(typeof saveRun==='function')saveRun()}catch(e){console.warn(e)}ui()};
@@ -152,7 +152,7 @@ function buy(p){const c=C[cur];
   if(isOn(c,p)){toast(p.apex?'Ápice aceso':'Já aceso');return}
   if(p.apex){toast('O Ápice acende sozinho com as 10 estrelas');return}
   if(!canBuy(c,p)){toast('Acenda as estrelas em ordem');return}
-  if((run.cpts||0)<1){toast('Sem pontos. Ganhe 1 por nível a partir do 35');return}
+  if((run.cpts||0)<1){toast('Sem pontos. Ganhe 1 a cada 3 níveis, do 37 ao 777');return}
   run.cons=run.cons||{};run.cons[c.k]=(run.cons[c.k]||0)+1;run.cpts--;
   if(typeof refreshStats==='function')refreshStats();if(typeof saveRun==='function')saveRun();
   try{sfx('levelup')}catch(e){}
