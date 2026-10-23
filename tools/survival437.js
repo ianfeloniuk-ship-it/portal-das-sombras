@@ -1278,7 +1278,7 @@
     } else if (['caveira', 'minion', 'warrior', 'rogue'].includes(k)) {
       corpseDrop353(e, { type: 'surv', itemKey: 'osso', name: 'Osso / Chifre', n: 1 });
     }
-    if (e.kind && /_f$|_a$/.test(e.kind) && Math.random() < 0.35) {
+    if (e.kind && /_f$|_a$/.test(e.kind) && !/^gosma/.test(e.kind) && Math.random() < 0.35) { /* v581: gosma não solta cristal glacial */
       corpseDrop353(e, { type: 'surv', itemKey: 'cristal_frio', name: 'Lasca de Cristal Frio', n: 1 });
     }
   }

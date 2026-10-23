@@ -1,3 +1,8 @@
+## v581 (23/10/2026) — Fase A, bloco 6: copas (item 12), loot da gosma, glifo do rank
+- **Item 12 (copas vermelhas/escuras):** causa real = as versões leves das árvores (`models/tripo-*153-lod.glb`) tinham só ~9% dos triângulos do modelo cheio (a nota da v418 dizia 35%): sobravam cascas gigantes cor de tronco que cobriam a tela. Os três lods (carvalho, salgueiro, conífera) foram refeitos no Blender a 30% (colapso, mesmas dimensões). Material/cor do catálogo já estavam certos (`361c13` era leitura errada de cor clampada). Teste: captura no jogo, copa verde, sem cascas.
+- **Item 6:** saque coerente — criatura Fendida/Abissal de gosma não solta mais "Lasca de Cristal Frio" (`survival437.js`). O fluxo de falas/rótulo da missão #1 foi relido no código; não reproduzido em combate real.
+- **Item 19:** nome "Gosma Verde" é o do bestiário (`ecology410`), "Fendida" vem do sufixo automático de `variants308`; mantido. Glifo ★ do rank 777: `#rk` ganhou fontes de símbolo de reserva (`game.html`); não confirmado visualmente em 777.
+
 ## v580 (23/10/2026) — Fase A, bloco 5: barcos e águas profundas ligados
 - `Surv437` agora expõe `ready()` e `world()`; `Cart437` expõe `pulling()`, `setPull()`, `loadKg()` e `menu()`. Sem isso `boats440` e `deep447` nunca ativavam, e `Boats440.board` quebrava com `Cart437.pulling is not a function`.
 - Teste no jogo local: lançar canoa em (15,450) e embarcar → `run.aboard440` ligado, sem erro de script. Não testado: navegar de verdade, entrar na água a nado/mergulho (`deep447`).
