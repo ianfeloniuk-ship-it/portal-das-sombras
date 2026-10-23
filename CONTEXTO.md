@@ -1,3 +1,9 @@
+## v562 (22/10/2026) — Chão distante não fura mais o chão real
+- **Pedido de Ian**: montanha reta, personagem enterrado em morro, relevo que não dá para atravessar.
+- Causa medida (profundidade do jogo real x `terrH`): o chão distante (`tools/capitais504.js`, malha de 30 m) subia acima do chão real em desfiladeiros e serras estreitas (374 pontos errados, até 25 m, na Estrada Sul). Agora a malha distante some a menos de 150 m do jogador e ficou mais fina (20 m). Pontos errados 374 → 40 (só na borda dos 150 m).
+- Teste: Edge headless, desfiladeiro da Estrada Sul e serra de gelo ao norte, sem buraco nem emenda visível. Não testado: desempenho em máquina fraca, celular.
+- **Não feito**: ponte da Estrada Sul sobre vala seca; cidades grandes nas capitais.
+
 ## v561 (22/10/2026) — Correção da v560: carroça de volta em y=0
 - O relevo do jogo é aplicado pelo shader (a lógica fica em y=0); a v560 pôs a carroça em `terrH` e ela subiu duas vezes (flutuava). `tools/civic343.js` volta a y=0 (inclinação na subida mantida). Visto em captura do jogo real: carroça na estrada, na encosta, assentada.
 - Lição: nunca somar `terrH` à posição y de um objeto de cena; só em lógica/câmera/mira.

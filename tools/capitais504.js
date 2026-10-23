@@ -326,11 +326,12 @@
     } catch (_) {}
   }, 400);
   /* ---------- chão distante: malha única de baixa resolução em volta do jogador ---------- */
-  const FAR = { R: 1100, N: 72, step: 150, mesh: null, cx: 1e9, cz: 1e9, on: true };
+  const FAR = { R: 1100, N: 110, step: 150, mesh: null, cx: 1e9, cz: 1e9, on: true, u: { value: new T.Vector2(1e9, 1e9) } };
   function farUpdate() {
     if (typeof L === 'undefined' || typeof player === 'undefined' || !player || typeof scene === 'undefined') return;
     const world = L.mode === 'world' && FAR.on && window.TER245 && TER245.on.value;
     if (FAR.mesh) FAR.mesh.visible = !!world;
+    FAR.u.value.set(player.x, player.z);
     if (!world) return;
     const cx = Math.round(player.x / FAR.step) * FAR.step, cz = Math.round(player.z / FAR.step) * FAR.step;
     if (cx === FAR.cx && cz === FAR.cz && FAR.mesh) return;
@@ -339,7 +340,7 @@
     envGroundColors(pg, []);
     if (!FAR.mesh) {
       const base = envGroundMat(), fm = base.clone();
-      const g = function (sh, rd) { const bf = Object.getOwnPropertyDescriptor(T.Material.prototype, 'onBeforeCompile').get.call(base); bf.call(this, sh, rd); sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>', '#ifdef USE_FOG'+String.fromCharCode(10)+'float ffg504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ffg504*.2);'+String.fromCharCode(10)+'#endif'); };
+      const g = function (sh, rd) { const bf = Object.getOwnPropertyDescriptor(T.Material.prototype, 'onBeforeCompile').get.call(base); bf.call(this, sh, rd); sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>', '#ifdef USE_FOG'+String.fromCharCode(10)+'float ffg504=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ffg504*.2);'+String.fromCharCode(10)+'#endif'); /* v562: o chão distante é grosso (20 m) e furava o chão real em desfiladeiros e serras estreitas; some perto do jogador, onde o chão real já existe */ sh.uniforms.uFarP504 = FAR.u; sh.fragmentShader = 'uniform vec2 uFarP504;' + String.fromCharCode(10) + sh.fragmentShader.replace(/void\s+main\s*\(\s*\)\s*\{/, m => m + 'if(distance(terrainWorld128.xz,uFarP504)<150.)discard;'); };
       g._w245 = true; fm.onBeforeCompile = g; fm.customProgramCacheKey = () => 'far504';
       FAR.mesh = new T.Mesh(pg, fm); FAR.mesh.frustumCulled = false; FAR.mesh.renderOrder = -2; FAR.mesh.position.y = -3.2; /* abaixo do chão carregado: sem briga de profundidade */
       FAR.mesh.userData.farGround504 = true; scene.add(FAR.mesh);
