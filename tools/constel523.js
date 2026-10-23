@@ -241,4 +241,28 @@ function close(){if(!open)return;open=false;root.hidden=true;cancelAnimationFram
 window.Cons523={open:show,close,isOpen:()=>open};
 // a janela antiga (lista com estrelas ★) vira esta tela
 consView=function(){show()};
+/* v565 (Ian): fácil de achar — tecla própria, entrada no MENU e aviso de ponto novo (sem barra nova no HUD) */
+function keyName(){try{return keyLabel(keyOf('cons'))}catch(e){return '7'}}
+function canOpen(){try{return started&&$('dead').hidden}catch(e){return false}}
+function menu(){try{toggleGameMenu95(false)}catch(e){}
+  if(open){close();return}
+  if(!canOpen())return;
+  try{if(!unl('constel')){toast('<b>[NARRADOR]</b> O céu de constelações abre no nível 35.');return}}catch(e){}
+  show()}
+window.Cons523.menu=menu;
+function labelBtn(){const b=document.getElementById('bCons523');if(b)b.innerHTML='✦ CONSTELAÇÕES <kbd style="opacity:.75">['+keyName()+']</kbd>'}
+addEventListener('keydown',e=>{if(e.repeat||e.target&&['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
+  let want='Digit7';try{want=keyOf('cons')}catch(_){}
+  if(e.code!==want)return;
+  if(open){e.preventDefault();e.stopImmediatePropagation();close();return}
+  if(!canOpen()||(typeof modalOpen!=='undefined'&&modalOpen&&0))return;
+  e.preventDefault();e.stopImmediatePropagation();menu()},true);
+let seen=-1,nt=0,nel=null;
+function note(n){if(!nel){nel=document.createElement('button');nel.type='button';nel.id='cons523note';
+  nel.style.cssText='position:fixed;top:calc(52px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:8;font:700 12px "Chakra Petch",sans-serif;letter-spacing:.06em;color:#fff3d0;background:rgba(20,16,40,.92);border:1px solid #ffd070;border-radius:6px;padding:9px 12px;cursor:pointer;box-shadow:0 0 14px #ffd07066';
+  nel.onclick=()=>{nel.hidden=true;menu()};document.body.appendChild(nel)}
+  nel.innerHTML='✦ '+(n>1?n+' novos pontos':'Novo ponto')+' — <kbd>'+keyName()+'</kbd> Constelações';nel.hidden=false;clearTimeout(nt);nt=setTimeout(()=>{nel.hidden=true},12000)}
+setInterval(()=>{try{labelBtn();if(!canOpen()){if(nel)nel.hidden=true;return}
+  const p=run.cpts||0;if(seen<0){seen=p;return}
+  if(p>seen&&!open)note(p-seen+(nel&&!nel.hidden?0:0));if(p<seen&&nel)nel.hidden=true;if(open&&nel)nel.hidden=true;seen=p}catch(e){}},1000);
 })();

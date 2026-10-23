@@ -1,3 +1,8 @@
+## v565 (22/10/2026) — Constelações fáceis de achar
+- **Pedido de Ian**: não sabia onde fica o céu de constelações.
+- Tecla **7** (`cons` em `KEYACT`, remapeável; abre/fecha), entrada **✦ CONSTELAÇÕES [7]** no MENU, aviso "Novo ponto — 7 Constelações" (clicável, 12 s) quando `run.cpts` sobe. `tools/constel523.js`, `src/core/630-controles.js`, menu em `game.html`.
+- Teste: navegador (tecla, menu, aviso, bloqueio abaixo do nível 35 com recado). Não testado: celular.
+
 ## v564 (22/10/2026) — Bússola estilo Skyrim
 - **Pedido de Ian**: a bússola do topo só mostrava N/NE/L... e nada marcado.
 - `tools/explorar539.js`: objetivo da missão ativo (◆ dourado, preso à borda se fora de vista; `Campaign327.target()` e missão rastreada de `Quests480`), cidades (⌂) e capitais (♛) descobertas, portais (◉, cor do rank), com opacidade caindo com a distância; lugares não descobertos por perto aparecem apagados em cinza e viram normais ao chegar a 130 m (`profile.cmp564`; cidade já visitada/registrada conta como descoberta, Aster desde o início); inimigos em combate a menos de 38 m viram ponto vermelho. Olhando para um marcador (±7°) aparece nome e distância sob a barra. Sem botões novos.
