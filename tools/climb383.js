@@ -71,7 +71,7 @@
     document.body.append(el);
   }
   CL.panel_toggle=panel;
-  addEventListener('keydown',e=>{if(e.code==='F9'&&!e.repeat){e.preventDefault();panel()}});
+  addEventListener('keydown',e=>{if(e.code==='F10'&&!e.repeat){e.preventDefault();panel()}});
 
   /* v385 (Ian: "ando sem tocar em nada"): no gelo, ao soltar as teclas o deslize levava ~14 s para parar.
      Agora para em ~1,5 s. E soltar uma tecla é registrado na fase de captura, antes de qualquer outro código. */

@@ -118,7 +118,7 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     h+=row('Combinação de habilidades','Monte até '+classSlotCount()+' habilidades das classes aprendidas',btn('Personalizar','loadout',0,true,'hot'));h+=row('Passivas','Veja os efeitos ativos e onde melhorar cada um',btn('Ver passivas','passives',0));h+=equipmentPanel();h+=charSheet();
     h+=row('Status e habilidades','Atributos sobem treinando',unl('status')?btn('Abrir','status',0,true):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
-    h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla J)'),btn('Abrir','bestv',0));
+    h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla L)'),btn('Abrir','bestv',0));
     h+=row('Coleção de Ecos','Todos os ecos que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
     h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>treino 10% mais rápido</b> e <b>+2% de XP</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}

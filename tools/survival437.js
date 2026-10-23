@@ -490,7 +490,7 @@
     const s = S(); if (!s) return;
     if (d.kind === 'rocha') {
       if (!count('picareta')) {
-        toast('Você precisa de uma <b>Picareta Rústica</b> para quebrar esta rocha. Fabrique uma à mão [V].');
+        toast('Você precisa de uma <b>Picareta Rústica</b> para quebrar esta rocha. Fabrique uma à mão [I].');
         return;
       }
       useTool('picareta', 1);
@@ -1441,7 +1441,7 @@
   addEventListener('keydown', e => {
     if (e.repeat || !ready()) return;
     const t = e.target; if (t && ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)) return;
-    if (e.code === 'KeyG' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
+    if (e.code === keyOf('flask') && !(typeof modalOpen !== 'undefined' && modalOpen)) {
       const flaskOrder = ['frasco_fogo', 'frasco_veneno', 'frasco_acido', 'frasco_paralisia', 'frasco_fumaca'];
       const flask = flaskOrder.find(k => count(k) > 0);
       if (flask && window.Alchemy470) {

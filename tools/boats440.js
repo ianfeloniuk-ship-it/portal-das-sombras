@@ -36,7 +36,7 @@
   function launch(site) {
     const b = { id: 'N' + Date.now().toString(36), t: site.boat || BU().B[site.t].boat, x: site.x, z: site.z, ry: site.ry, store: {} };
     boats().push(b); U().save(); spawn(b);
-    toast('<b>[ESTALEIRO]</b> ' + K[b.t].n + ' na água! Chegue perto e aperte F para embarcar.', 5000);
+    toast('<b>[ESTALEIRO]</b> ' + K[b.t].n + ' na água! Chegue perto e aperte E para embarcar.', 5000);
   }
   function spawn(b) {
     if (live.has(b.id)) return;

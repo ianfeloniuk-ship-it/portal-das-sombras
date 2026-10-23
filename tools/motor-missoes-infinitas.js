@@ -69,7 +69,7 @@
     floresta: [
       { id: 'cogufuria', name: 'Cogumelo Furioso Fendido', tactic: 'Fique fora da nuvem de esporos e nunca pise na sombra dele.' },
       { id: 'aranha', name: 'Tecelã de Vidro (Aranha Fendida)', tactic: 'Olhe para as copas antes de avançar e ataque após o gasto da teia.' },
-      { id: 'mono', name: 'Monkroose Fendido', tactic: 'Jogue uma moeda brilhante (Tecla 7) para distraí-lo antes que fuja para as ruínas altas.' },
+      { id: 'mono', name: 'Monkroose Fendido', tactic: 'Jogue uma moeda brilhante (Tecla Y) para distraí-lo antes que fuja para as ruínas altas.' },
       { id: 'fantasma', name: 'Fantasma Abissal', tactic: 'Use ataques físicos precisos; o perfil Espectral resiste à magia.' }
     ],
     neve: [
@@ -78,7 +78,7 @@
       { id: 'visitante', name: 'Visitante Abissal', tactic: 'Aproveite os 3 segundos em que ele observa antes do primeiro golpe.' }
     ],
     deserto: [
-      { id: 'escaravelho', name: 'Cavaleiro Escaravelho Fendido', tactic: 'Saia da linha reta da investida ou jogue uma moeda (Tecla 7) para travá-lo na freada.' },
+      { id: 'escaravelho', name: 'Cavaleiro Escaravelho Fendido', tactic: 'Saia da linha reta da investida ou jogue uma moeda (Tecla Y) para travá-lo na freada.' },
       { id: 'cactogig', name: 'Cactoro Gigante Fendido', tactic: 'Atraia o corpo pesado para longe da água e golpeie durante a recuperação.' }
     ],
     costa: [
@@ -799,7 +799,7 @@
     "actors": "Sultão Escaravelho (Cavaleiro Escaravelho Abissal Elite Rank SS)",
     "trigger": "Aceitar contrato de Alvo Notório Rank SS",
     "description": "Um besouro encouraçado colossal revestido de ouro antigo e vazio percorre as dunas a leste do oásis.",
-    "choicesText": "Arremessar moedas de ouro (`Tecla 7`) na beira de uma cratera de pedra para forçar sua investida e atacá-lo durante os 3 segundos de freada, ou enfrentá-lo de frente.",
+    "choicesText": "Arremessar moedas de ouro (`Tecla Y`) na beira de uma cratera de pedra para forçar sua investida e atacá-lo durante os 3 segundos de freada, ou enfrentá-lo de frente.",
     "worldConsequence": "Concede permanentemente o título 'Caçador do Sultão Escaravelho' (+6% de ouro de monstros) e +1560 de Reputação da Ordem."
   },
   {
@@ -1399,7 +1399,7 @@
     "actors": "Selene e Monkroose (#024)",
     "trigger": "Concluir #089",
     "description": "Um bando de Monkrooses (#024) roubou a chave de prata do cofre secundário de Selene e escondeu no alto de uma ruína de mármore.",
-    "choicesText": "Jogar uma moeda brilhante (`Tecla 7`) no pátio para distrair o Monkroose líder e escalar a ruína sem matar os animais, ou abater o bando.",
+    "choicesText": "Jogar uma moeda brilhante (`Tecla Y`) no pátio para distrair o Monkroose líder e escalar a ruína sem matar os animais, ou abater o bando.",
     "worldConsequence": "Recuperar a chave com a moeda sem matar o bando faz um Monkroose manso passar a trazer moedas perdidas na entrada da ruína."
   },
   {
@@ -3077,7 +3077,7 @@
     "category": "Sobrevivência & Mundo Vivo",
     "location": "Ruas de Aster de Dia (`spawnCritter`)",
     "actors": "Maela e Bichinhos da Cidade",
-    "trigger": "Fazer carinho (`Tecla F`) nos três bichinhos da cidade",
+    "trigger": "Fazer carinho (`Tecla E`) nos três bichinhos da cidade",
     "description": "Durante os cercos, os gatos, galinhas e pombos da cidade se escondem nos telhados. Um pombo-correio de Thalor pousou ferido com uma cápsula de prata na pata.",
     "choicesText": "Curar o pombo com uma gota de poção de Mira e ler a mensagem urgente vinda do mar.",
     "worldConsequence": "Revela a localização de um navio mercante naufragado cheio de lingotes de aço."
@@ -3199,7 +3199,7 @@
     "actors": "Ferreiro Viajante Ignis e Cavaleiro Escaravelho (#006)",
     "trigger": "Ouvir Ignis chamar (`F para falar`) a 12 metros",
     "description": "Três Cavaleiros Escaravelhos (#006) de carapaça de bronze foram atraídos pelo brilho das armaduras polidas na carroça de Ignis e estão prestes a esmagá-la em linha reta.",
-    "choicesText": "Jogar moedas de ouro brilhantes (`Tecla 7`) para o lado do penhasco, fazendo os três besouros investirem na moeda e travarem por 3 segundos na freada (`ecology410.js`).",
+    "choicesText": "Jogar moedas de ouro brilhantes (`Tecla Y`) para o lado do penhasco, fazendo os três besouros investirem na moeda e travarem por 3 segundos na freada (`ecology410.js`).",
     "worldConsequence": "Salva a carroça de Ignis sem um único arranhão e ele tempera gratuitamente sua arma equipada (+8% qualidade)."
   },
   {

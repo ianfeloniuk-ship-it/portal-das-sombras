@@ -1,7 +1,7 @@
 /* v480 (Ian, 20/10/2026): Sistema de Missões Secundárias e Murais de Contratos estilo Skyrim.
    Mundo aberto com total liberdade: contratos de caçada (bounties), resgates de caravanas na estrada,
    criptas/ruínas antigas com relíquias, ninhos de pragas e entregas expressas de carroça.
-   Acesse pelos Murais nas praças, Pousadas, Conselho Regional ou pelo Diário [L]. */
+   Acesse pelos Murais nas praças, Pousadas, Conselho Regional ou pelo Diário [J]. */
 (function (global) {
   'use strict';
 
@@ -282,7 +282,7 @@
     if (typeof bigText === 'function') bigText('NOVA MISSÃO: ' + qdef.title.toUpperCase(), 1800);
     if (typeof sfx === 'function') sfx('gong');
     if (typeof toast === 'function') {
-      toast(`<b>[MURAL DE CONTRATOS]</b> Missão aceita: <b>${qdef.title}</b>!<br>Abra o Diário [L] para acompanhar os detalhes no mapa.`);
+      toast(`<b>[MURAL DE CONTRATOS]</b> Missão aceita: <b>${qdef.title}</b>!<br>Abra o Diário [J] para acompanhar os detalhes no mapa.`);
     }
 
     saveState();
@@ -945,7 +945,7 @@
       name: 'ARCA DAS ROCHAS ALTAS',
       label: 'F · ABRIR ARCA DAS ROCHAS ALTAS',
       hintDefeat: 'Derrote a Monstruosidade com Chifres e as feras guardiãs para abrir a Arca!',
-      hintReady: 'As feras do covil foram derrotadas! Pressione [F] para abrir a Arca de Cristais!',
+      hintReady: 'As feras do covil foram derrotadas! Pressione [E] para abrir a Arca de Cristais!',
       winTitle: 'ARCA CONQUISTADA',
       winMsg: 'Você abriu a Arca das Rochas Altas e resgatou os cristais abissais!'
     },
@@ -954,7 +954,7 @@
       name: 'CARGA ROUBADA DE DORAN',
       label: 'F · RECUPERAR FARDOS DE MERCADORIAS',
       hintDefeat: 'Elimine os saqueadores renegados para recuperar os fardos!',
-      hintReady: 'Os saqueadores foram derrotados! Pressione [F] para resgatar a carga!',
+      hintReady: 'Os saqueadores foram derrotados! Pressione [E] para resgatar a carga!',
       winTitle: 'CARGA RECUPERADA',
       winMsg: 'Você resgatou a carga refinada do mercador Doran!'
     },
@@ -963,7 +963,7 @@
       name: 'MONÓLITO ANCESTRAL',
       label: 'F · TOCAR MONÓLITO RÚNICO',
       hintDefeat: 'Derrote a Aparição do Guardião para liberar o segredo do Monólito!',
-      hintReady: 'A Provação foi superada! Pressione [F] para tocar o Monólito!',
+      hintReady: 'A Provação foi superada! Pressione [E] para tocar o Monólito!',
       winTitle: 'PROVAÇÃO CUMPRIDA',
       winMsg: 'O Monólito ressoou e revelou seus tesouros ancestrais!'
     },
@@ -972,7 +972,7 @@
       name: 'FARDOS DO NÁUFRAGO BRAN',
       label: 'F · RESGATAR BARRIS DE PÉROLAS',
       hintDefeat: 'Destrua as criaturas das marés para recuperar os barris!',
-      hintReady: 'As marés se acalmaram! Pressione [F] para recuperar os barris de Bran!',
+      hintReady: 'As marés se acalmaram! Pressione [E] para recuperar os barris de Bran!',
       winTitle: 'BARRIS RESGATADOS',
       winMsg: 'Você recuperou os barris de pérolas do náufrago Bran!'
     },
@@ -981,7 +981,7 @@
       name: 'ESPÓLIOS DO LEVIATÃ',
       label: 'F · SAQUEAR ESPÓLIOS DO LEVIATÃ',
       hintDefeat: 'Derrote o Capitão Corsário para reivindicar os espólios!',
-      hintReady: 'Os corsários caíram! Pressione [F] para abrir o baú do Leviatã!',
+      hintReady: 'Os corsários caíram! Pressione [E] para abrir o baú do Leviatã!',
       winTitle: 'ESPÓLIOS REIVINDICADOS',
       winMsg: 'Você conquistou os espólios lendários do Leviatã!'
     },
@@ -990,7 +990,7 @@
       name: 'CHAMA ETERNA DE SKADI',
       label: 'F · ACENDER CHAMA SAGRADA',
       hintDefeat: 'Derrote o Cavaleiro Espectral do Gelo para reacender o fogo sagrado!',
-      hintReady: 'O espectro se dissipou! Pressione [F] para acender a Chama Eterna!',
+      hintReady: 'O espectro se dissipou! Pressione [E] para acender a Chama Eterna!',
       winTitle: 'CHAMA SAGRADA ACESA',
       winMsg: 'A Chama Eterna de Skadi voltou a arder contra o frio!'
     },
@@ -999,7 +999,7 @@
       name: 'SARCÓFAGO DAS DUNAS',
       label: 'F · ABRIR SARCÓFAGO ANCESTRAL',
       hintDefeat: 'Destrua o Faraó Esquelético antes de abrir o sarcófago!',
-      hintReady: 'O Faraó ruiu em pó! Pressione [F] para saquear o sarcófago!',
+      hintReady: 'O Faraó ruiu em pó! Pressione [E] para saquear o sarcófago!',
       winTitle: 'TÚMULO CONQUISTADO',
       winMsg: 'Você violou os tesouros de ouro do sarcófago das areias!'
     },
@@ -1008,7 +1008,7 @@
       name: 'RELICÁRIO DA CRIPTA SUBMERSA',
       label: 'F · PURIFICAR RELICÁRIO SUBMERSO',
       hintDefeat: 'Derrote o Cavaleiro Espectral do charco primeiro!',
-      hintReady: 'A cripta submersa silenciou! Pressione [F] para purificar o relicário!',
+      hintReady: 'A cripta submersa silenciou! Pressione [E] para purificar o relicário!',
       winTitle: 'CRIPTA PURIFICADA',
       winMsg: 'A cripta do pântano foi purificada da maldição espectral!'
     },
@@ -1017,7 +1017,7 @@
       name: 'FORJA DE OBSIDIANA',
       label: 'F · RECLAMAR FORJA VULCÂNICA',
       hintDefeat: 'Esmague os Colossos de Rocha Ardente antes de usar a forja!',
-      hintReady: 'Os colossos ardentes tombaram! Pressione [F] para ativar a forja!',
+      hintReady: 'Os colossos ardentes tombaram! Pressione [E] para ativar a forja!',
       winTitle: 'FORJA RECLAMADA',
       winMsg: 'A forja vulcânica foi reativada com poder primordial!'
     },
@@ -1026,7 +1026,7 @@
       name: 'CORAÇÃO FÚNGICO DA FLORESTA',
       label: 'F · PURIFICAR BOSQUE SAGRADO',
       hintDefeat: 'Destrua o Fungo Primordial antes de purificar as raízes!',
-      hintReady: 'O fungo corrupto foi destruído! Pressione [F] para purificar a clareira!',
+      hintReady: 'O fungo corrupto foi destruído! Pressione [E] para purificar a clareira!',
       winTitle: 'BOSQUE PURIFICADO',
       winMsg: 'O bosque de Silvanus foi purificado de toda corrupção!'
     }
@@ -1504,7 +1504,7 @@
 
         if (!remainingBoss && !remainingMinions) {
           if (objDef && sp && sp.chestIt && !sp.chestIt.opened) {
-            // Há um objeto interativo (Arca/Monólito/etc). Alerta o jogador para pressionar [F]!
+            // Há um objeto interativo (Arca/Monólito/etc). Alerta o jogador para pressionar [E]!
             if (!sp.readyNotified) {
               sp.readyNotified = true;
               if (typeof toast === 'function') toast(`<b>[GUARDIÕES DERROTADOS]</b> ${objDef.hintReady}`, 6000);
@@ -1693,7 +1693,7 @@
     } else if (totalFoes > 0) {
       detail = `⚔ Derrote os guardiões (${totalFoes} restantes)`;
     } else if (objDef) {
-      detail = `★ Interaja com: ${objDef.name} [F]!`;
+      detail = `★ Interaja com: ${objDef.name} [E]!`;
     } else {
       detail = `Objetivo concluído!`;
     }

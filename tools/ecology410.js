@@ -24,7 +24,7 @@ const P410={
  cogu:{f:['moral','emboscada'],own:'Cogu348',leader:['reicogu'],esc:{far:20,los:4},how:'Foge; encurralado, solta esporos de sono.'},
  passaro:{f:['emboscada'],own:'Bird349',esc:{far:30,los:5},how:'Mergulha pelos flancos; nunca de frente.'},
  espinhosa:{f:['vibracao'],own:'Spiky350',esc:{far:14,los:3},how:'Dispara espinhos quando sente vibração (correr ou golpear perto).'},
- escaravelho:{f:['investida','brilho'],own:'Beetle352',lure:'charge',esc:{far:26,los:4},how:'Investe em linha reta contra o que brilha e freia no fim. Jogue uma moeda (tecla 7).'},
+ escaravelho:{f:['investida','brilho'],own:'Beetle352',lure:'charge',esc:{far:26,los:4},how:'Investe em linha reta contra o que brilha e freia no fim. Jogue uma moeda (tecla Y).'},
  guardiao:{f:['perimetro'],own:'Guardian370',esc:{home:10},how:'Imóvel até alguém cruzar o espaço vigiado; volta ao posto.'},
  cactinho:{f:['habitat'],own:'Cactoro372',esc:{far:18,los:4},how:'Enraizado de dia; anda e cospe espinhos no fim da tarde.'},
  magote:{f:['carnica'],carrion:1,esc:{far:20,los:4},how:'Vai até os restos de uma luta recente ou isca de carniça e come em vez de caçar.'},
@@ -42,7 +42,7 @@ const P410={
  coelho:{f:['emboscada'],near:4,esc:{far:20,los:4},how:'Parece inofensivo até alguém chegar perto demais.'},
  caveira:{f:['luz','comando'],light:1,call:['caveira','fantasma','minion','mage','warrior','wraith','rogue'],esc:{far:24,los:4},how:'Enxerga longe à noite; o grito acorda outros mortos.'},
  redemoinho:{f:['habitat'],dawn:1,esc:{far:20,los:4},how:'Desfaz-se ao amanhecer.'},
- mono:{f:['brilho'],lure:'grab',esc:{far:26,los:5},how:'Larga tudo por uma moeda brilhante (tecla 7) e foge com ela.'},
+ mono:{f:['brilho'],lure:'grab',esc:{far:26,los:5},how:'Larga tudo por uma moeda brilhante (tecla Y) e foge com ela.'},
  ninja:{f:['emboscada'],esc:{far:30,los:6},how:'Ataca uma vez, some e espera o próximo erro.'},
  cactogig:{f:['perimetro'],near:3.5,esc:{home:12},how:'Parado e paciente; só esmaga quem chega perto da sua água.'},
  homempeixe:{f:['habitat','perimetro'],water:.7,esc:{home:16},how:'Defende a lagoa; fora da água fica lento e desiste.'},
@@ -281,9 +281,9 @@ function install(){
  if(typeof killEnemy==='function'&&!killEnemy.eco410){const k0=killEnemy;killEnemy=function(e){const was=e&&!e.dead;const r=k0.apply(this,arguments);try{if(was&&e.dead)onKill(e)}catch(err){console.warn('eco410',err)}return r};killEnemy.eco410=1}
  if(typeof attack==='function'&&!attack.sheath441){const a0=attack;attack=function(){try{if(player?.sheathed441){player.sheathed441=false;if(player.m?.wep)player.m.wep.visible=true}}catch(_){}return a0.apply(this,arguments)};attack.sheath441=1}
  if(typeof ctxTarget==='function'&&!ctxTarget.eco410){const c0=ctxTarget;ctxTarget=function(){const b=c0.apply(this,arguments);try{if(!b){const e=surrTarget();if(e)return{label:'F · ACEITAR RENDIÇÃO',use:()=>accept(e)}}}catch(_){}return b};ctxTarget.eco410=1}
- if(typeof KEYACT!=='undefined'&&!KEYACT.some(k=>k[0]==='coin410'))KEYACT.push(['coin410','Jogar moeda brilhante','Digit7']);
- if(typeof KEYACT!=='undefined'&&!KEYACT.some(k=>k[0]==='sheath441'))KEYACT.push(['sheath441','Guardar / empunhar arma','KeyX']);
- addEventListener('keydown',ev=>{try{if(ev.repeat||!started||typeof keyOf!=='function')return;const tg=ev.target;if(tg&&/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))return;if(ev.code===keyOf('coin410'))throwCoin();else if(ev.code===(keyOf('sheath441')||'KeyX')&&!(typeof modalOpen!=='undefined'&&modalOpen))toggleSheath()}catch(_){}});
+ if(typeof KEYACT!=='undefined'&&!KEYACT.some(k=>k[0]==='coin410'))KEYACT.push(['coin410','Jogar moeda brilhante','Coin592']);
+ 
+ addEventListener('keydown',ev=>{try{if(ev.repeat||!started||typeof keyOf!=='function')return;const tg=ev.target;if(tg&&/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))return;if(ev.code===keyOf('coin410'))throwCoin();else if(ev.code===keyOf('sheathe')&&!window.FP550?.active&&!(typeof modalOpen!=='undefined'&&modalOpen))toggleSheath()}catch(_){}});
  if(window.Bestiary294&&!Bestiary294.loreHtml.eco410){const l0=Bestiary294.loreHtml;Bestiary294.loreHtml=function(k,n){let h=l0.apply(this,arguments);try{const P=profileOf(k);if(P&&n>0)h+='<br><span class="eco410-lore"><b>Reação:</b> '+P.how+' <i>('+P.f.map(f=>FAM410[f]).join(' · ')+')</i><br><b>Tática de sobrevivência:</b> '+P.book[1]+used(P.base)+'</span>'}catch(_){}return h};Bestiary294.loreHtml.eco410=1}
  let last=performance.now();(function tick(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;try{coinsTick(dt)}catch(_){}setTimeout(tick,16)})();
  const css=document.createElement('style');css.textContent='#eco410tip{position:fixed;left:50%;bottom:118px;transform:translate(-50%,8px);max-width:min(560px,92vw);padding:8px 14px;border-radius:10px;background:rgba(14,26,22,.88);border:1px solid rgba(214,180,104,.55);color:#e8e2cc;font:13px/1.35 system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;z-index:40;text-align:center}#eco410tip.on{opacity:1;transform:translate(-50%,0)}#eco410tip b{color:#ffd76a}#eco410tip b.ok{color:#9fe8a8}#eco410tip small{display:block;opacity:.75;margin-top:3px}.eco410-lore{display:inline-block;margin-top:4px}';document.head.appendChild(css);

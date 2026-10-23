@@ -165,7 +165,7 @@
       pick(num - 1);
       return;
     }
-    if (e.code === 'KeyF' || e.code === 'Enter' || e.code === 'Space') {
+    if (e.code === (typeof keyOf === 'function' ? keyOf('use') : 'KeyE') || e.code === 'Enter' || e.code === 'Space') {
       e.preventDefault(); e.stopPropagation();
       if (activeOptions.length > 0) pick(0);
       return;

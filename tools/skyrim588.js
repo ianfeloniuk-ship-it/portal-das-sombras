@@ -61,10 +61,10 @@
   addEventListener('keydown', e => { if(e.key === 'Escape') cancel(); });
 
   /* sacar / guardar a arma (1ª pessoa); a tecla fica em Controles ("Sacar / guardar arma") */
-  try { if(typeof KEYACT !== 'undefined' && !KEYACT.find(k => k[0] === 'sheathe')) KEYACT.push(['sheathe', 'Sacar / guardar arma (1ª pessoa)', 'Backquote']); } catch(_) {}
+  try { if(typeof KEYACT !== 'undefined' && !KEYACT.find(k => k[0] === 'sheathe')) KEYACT.push(['sheathe', 'Sacar / guardar a arma', 'Sheathe592']); } catch(_) {}
   addEventListener('keydown', e => {
     if(e.repeat || !ready() || !fpOn() || !kind()) return;
-    let code = 'Backquote'; try { code = keyOf('sheathe'); } catch(_) {}
+    let code = 'KeyR'; try { code = keyOf('sheathe'); } catch(_) {}
     if(e.code !== code) return;
     cancel(); SK.drawn = !SK.drawn; e.preventDefault();
     try { toast(SK.drawn ? 'Arma sacada' : 'Arma guardada', 900); } catch(_) {}
@@ -72,7 +72,7 @@
   /* botão direito defende (como no Skyrim); o botão do meio continua defendendo também */
   let rmbBlock = false;
   cv.addEventListener('pointerdown', e => {
-    if(e.button !== 2 || e.pointerType === 'touch' || !ready() || !fpOn() || !kind() || SK.drawing) return;
+    if(e.button !== 2 || e.pointerType === 'touch' || !ready() || !kind() || SK.drawing) return;
     SK.drawn = true; rmbBlock = true;
     cv.dispatchEvent(new PointerEvent('pointerdown', { button: 1, buttons: 4, pointerType: 'mouse', bubbles: true, cancelable: true }));
   }, true);

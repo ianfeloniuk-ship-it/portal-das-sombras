@@ -148,8 +148,8 @@
   function objective() {
     if(!active())return null;const q=state();let text,target;
     if(q.phase==='estrada'){text='Escolte Edran e o casal até a Vila da Fronteira';target={x:cx(180),z:180};}
-    else if(q.phase==='escolha'){text='Fale com Edran antes de atravessar a ponte [F]';target={x:cx(177),z:177};}
-    else if(q.phase==='combate'&&q.choice==='paiol'&&q.water<3){text='Apague o paiol pela margem [F] · '+q.water+'/3';target={x:barn.x+6,z:barn.z+5};}
+    else if(q.phase==='escolha'){text='Fale com Edran antes de atravessar a ponte [E]';target={x:cx(177),z:177};}
+    else if(q.phase==='combate'&&q.choice==='paiol'&&q.water<3){text='Apague o paiol pela margem [E] · '+q.water+'/3';target={x:barn.x+6,z:barn.z+5};}
     else if(q.phase==='combate'){text='Derrote os salteadores na ponte · '+q.hits.length+'/3';const e=foes.find(e=>!e.dead);target=e||B;}
     else {text='Acompanhe Edran e o casal até o Portão de Aster';target={x:0,z:72};}
     if(q.waiting)text='Espere o grupo ou volte até Edran';

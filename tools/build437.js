@@ -370,7 +370,7 @@
     }
 
     h += '<div class="sec">LEVANTAR ACAMPAMENTO (DEIXAR BIOMA LIMPO)</div>';
-    h += row('Recolher ' + def.n, 'Guarda esta estrutura de volta na mochila/carrinho e devolve os materiais.', '<button class="btn hot" id="b437remove">Recolher [F]</button>');
+    h += row('Recolher ' + def.n, 'Guarda esta estrutura de volta na mochila/carrinho e devolve os materiais.', '<button class="btn hot" id="b437remove">Recolher [E]</button>');
     h += row('Recolher Acampamento Completo', 'Recolhe de uma vez a Tenda, o Varal, a Bancada e a Fogueira próximos.', '<button class="btn" id="b437packAll">Recolher Tudo</button>');
 
     openModal(def.n.toUpperCase(), h);
@@ -514,7 +514,7 @@
     const nearbyCamp = st().filter(b => !!b.inDun === inDun && Math.hypot(b.x - player.x, b.z - player.z) <= 14);
 
     let h = '<div class="sysline">⛺ <b>Acampamento Portátil de Expedição</b> (' + (inDun ? 'Dentro da Fenda · Outro Mundo' : 'Superfície de Primeva') + ').<br>' +
-      'Monte sua Fogueira, Tenda, Varal e Bancada onde precisar e <b>recolha tudo com [F]</b> ao levantar acampamento, deixando o bioma 100% limpo!</div>';
+      'Monte sua Fogueira, Tenda, Varal e Bancada onde precisar e <b>recolha tudo com [E]</b> ao levantar acampamento, deixando o bioma 100% limpo!</div>';
 
     if (nearbyCamp.length > 0) {
       h += '<div style="margin-bottom:10px"><button class="btn hot" id="b437packCampTop">🎒 Recolher Todo o Acampamento Próximo (' + nearbyCamp.length + ' estrutura' + (nearbyCamp.length > 1 ? 's' : '') + ')</button></div>';
@@ -541,10 +541,10 @@
   addEventListener('keydown', e => {
     if (e.repeat || !ready()) return;
     const t = e.target; if (t && ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)) return;
-    if (e.code === 'KeyB' && !(typeof modalOpen !== 'undefined' && modalOpen)) {
+    if (e.code === keyOf('build') && !(typeof modalOpen !== 'undefined' && modalOpen)) {
       e.preventDefault();
       open();
-    } else if (e.code === 'KeyF' && typeof modalOpen !== 'undefined' && modalOpen && activeModalStruct && STRUCTS[activeModalStruct.kind]?.packable) {
+    } else if (e.code === keyOf('use') && typeof modalOpen !== 'undefined' && modalOpen && activeModalStruct && STRUCTS[activeModalStruct.kind]?.packable) {
       // Apertar F com a janela da Tenda/Varal/Bancada aberta recolhe imediatamente a estrutura para a mochila!
       e.preventDefault();
       packStruct456(activeModalStruct);

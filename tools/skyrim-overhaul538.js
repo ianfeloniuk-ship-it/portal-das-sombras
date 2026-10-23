@@ -99,8 +99,8 @@
     });
     const fpAct = API.firstPerson ? ' active' : '';
     const orbsCount = API.deluminatorOrbs.length;
-    html += `<div class="sky538-slot${fpAct}" id="sky538-btn-pov" title="Alternar 1ª / 3ª Pessoa (Tecla V)"><kbd>V</kbd><span>🎥 ${API.firstPerson ? '1ª PESSOA' : '3ª PESSOA'}</span></div>`;
-    html += `<div class="sky538-slot${orbsCount > 0 ? ' active' : ''}" id="sky538-btn-light" title="Desiluminador de Luzes (Tecla H)"><kbd>H</kbd><span>✨ LUZ (${orbsCount})</span></div>`;
+    html += `<div class="sky538-slot${fpAct}" id="sky538-btn-pov" title="Alternar 1ª / 3ª Pessoa (Tecla F)"><kbd>F</kbd><span>🎥 ${API.firstPerson ? '1ª PESSOA' : '3ª PESSOA'}</span></div>`;
+    html += `<div class="sky538-slot${orbsCount > 0 ? ' active' : ''}" id="sky538-btn-light" title="Desiluminador de Luzes (Tecla U)"><kbd>U</kbd><span>✨ LUZ (${orbsCount})</span></div>`;
     html += `<div class="sky538-slot" id="sky538-btn-tree" title="Árvore de Habilidades Sem Classe & 300 Missões"><kbd>K</kbd><span>🌳 HABILIDADES & 300 MISSÕES</span></div>`;
     el.innerHTML = html;
 
@@ -810,8 +810,8 @@
       window._skyrim538WheelBound = true;
       window.addEventListener('keydown', e => {
         if (global.modalOpen && e.code !== 'Escape') return;
-        if (e.code === 'KeyH' && !e.ctrlKey && !e.altKey) API.useDeluminator();
-        else if (e.code === 'KeyK' && !e.ctrlKey && !e.altKey) API.openSkillTreeModal();
+        if (e.code === keyOf('deluminator') && !e.ctrlKey && !e.altKey) API.useDeluminator();
+        else if (e.code === keyOf('skilltree') && !e.ctrlKey && !e.altKey) API.openSkillTreeModal();
       });
     }
 

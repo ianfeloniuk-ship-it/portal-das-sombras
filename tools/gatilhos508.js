@@ -1,5 +1,5 @@
 /* v508 (Ian, 21/10/2026): a "teia de gatilhos" do mundo aberto, estilo Skyrim — explorar sempre esbarra numa história, e uma missão leva a outra.
-   Tudo entra no Diário [L] que já existe (aba Contratos) e em tools/quests480.js; nenhum diário novo.
+   Tudo entra no Diário [J] que já existe (aba Contratos) e em tools/quests480.js; nenhum diário novo.
    1) Documentos: 17 modelos de carta/diário achados em baús, carcaças, acampamentos, covis e ruínas (encontros502). Cada um aponta
       um lugar REAL do mapa (ruína, covil ou altar que existe por semente). Ler abre uma "Missão diversa"; chegar lá revela o item com nome.
    2) Pontos vivos: ~1 em cada 3 acampamentos/carcaças/baús/altares sorteia, a cada visita, o que acontece ali (bandidos com carta, caçador
@@ -95,7 +95,7 @@
   }
   function found(d, from) {
     if (!d) return;
-    say('<b>[' + d.kind.toUpperCase() + ']</b> ' + from + ' Você achou: <b>' + d.title + '</b>. Leia no Diário [L], aba Contratos.', 7000);
+    say('<b>[' + d.kind.toUpperCase() + ']</b> ' + from + ' Você achou: <b>' + d.title + '</b>. Leia no Diário [J], aba Contratos.', 7000);
     try { sfx('coin'); } catch (_) {}
     save();
   }
@@ -124,7 +124,7 @@
     st.active[def.id] = { id: def.id, acceptedAt: Date.now(), progress: 0, max: 1, targetPos: { x: Math.round(target.x), z: Math.round(target.z) }, spawned: false, def490: def };
     st.tracked = def.id;
     try { bigText('NOVA MISSÃO: ' + def.title.toUpperCase(), 1800); sfx('gong'); } catch (_) {}
-    say('<b>[' + (def.tag508 || 'MISSÃO').toUpperCase() + ']</b> ' + def.title + '. O marcador está no minimapa e no Diário [L].', 6000);
+    say('<b>[' + (def.tag508 || 'MISSÃO').toUpperCase() + ']</b> ' + def.title + '. O marcador está no minimapa e no Diário [J].', 6000);
     save(); return true;
   }
   /* chegada a um destino "ir até lá" */
@@ -455,7 +455,7 @@
   setInterval(() => { try { arriveTick(); } catch (e) { console.warn('gat508 a', e); } }, 700);
   setInterval(() => { try { liveTick(); witnessTick(); milestoneTick(); } catch (e) { console.warn('gat508 b', e); } }, 500);
 
-  /* ---------------- diário [L] ---------------- */
+  /* ---------------- diário [J] ---------------- */
   function diaryRows() {
     const S = G(); if (!S || !S.docs.length) return '';
     let h = '<div class="sec">CARTAS E DIÁRIOS (' + S.docs.length + ')</div>';

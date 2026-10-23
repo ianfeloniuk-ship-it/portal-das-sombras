@@ -207,10 +207,10 @@
     const bar = (lbl, v, c, tip) => '<div class="a462-meter" data-tip154="' + tip + '" style="cursor:help"><div class="a462-l"><span>' + lbl + '</span><b style="color:' + c + '">' + Math.round(v) + '%</b></div><div class="a462-b"><i style="width:' + Math.max(0, Math.min(100, v)) + '%;background:' + c + '"></i></div></div>';
     const temp = s.temp < 25 ? 'Frio' : s.temp > 75 ? 'Calor' : 'Normal';
     return '<section class="a462-surv"><div class="sec">SOBREVIVÊNCIA</div><div class="a462-grid" style="grid-template-columns:1fr">' +
-      bar('Fome', s.hunger, col(s.hunger, '#7ef5a5'), 'Cai com o tempo (mais devagar dentro da cidade). Coma pela mochila [V]. Vitalidade desacelera a queda.') +
+      bar('Fome', s.hunger, col(s.hunger, '#7ef5a5'), 'Cai com o tempo (mais devagar dentro da cidade). Coma pela mochila [I]. Vitalidade desacelera a queda.') +
       '</div><div class="a462-info"><span>Temperatura: <b>' + temp + '</b> (' + Math.round(s.temp) + '°)</span><span>Carga: <b style="color:' + (w > mw ? '#ff5d5d' : w > mw * .85 ? '#ffd54f' : 'inherit') + '">' + w.toFixed(1) + ' / ' + Math.round(mw) + ' kg</b></span>' +
       (s.intoxT > 0 ? '<span style="color:#ff8fa3">Intoxicado</span>' : '') + (s.sickT > 0 ? '<span style="color:#ff8fa3">Parasitas</span>' : '') +
-      '<button class="btn mini" data-a462-surv>Mochila e sobrevivência [V]</button></div></section>';
+      '<button class="btn mini" data-a462-surv>Mochila e sobrevivência [I]</button></div></section>';
   }
   function trainLine(k) {
     const t = T(), c = t.c[k], g = goal(t.l[k]);
@@ -251,7 +251,7 @@
     if (!box || box.nextElementSibling !== xp) {
       if (box) box.remove();
       // v463 (Ian): mesmo bloco do Status (caixinha, nome à esquerda, % colorido à direita, barra embaixo)
-      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" class="a462-grid" title="Fome · clique para abrir a mochila [V]" style="cursor:pointer;pointer-events:auto;grid-template-columns:1fr">' +
+      xp.insertAdjacentHTML('beforebegin', '<div id="a462hud" class="a462-grid" title="Fome · clique para abrir a mochila [I]" style="cursor:pointer;pointer-events:auto;grid-template-columns:1fr">' +
         '<div class="a462-meter"><div class="a462-l"><span>Fome</span><b id="a462hFv"></b></div><div class="a462-b"><i id="a462hF"></i></div></div>' +
         '</div>');
       document.getElementById('a462hud').onclick = () => { try { Surv437.open('inv'); } catch (_) {} };

@@ -459,6 +459,6 @@ function tutorialTick93(dt){if(!profile.tips93||profile.creationPending91||modal
  else if(!seen.style&&canUseMagicStyle()&&!near){id='style';title='Seu ataque básico';body=keyLabel(keyOf('style'))+' alterna entre físico e mágico. Escolha fogo, gelo e outros estilos aprendidos em Personagem → Ataque básico. As habilidades funcionam em ambos.';profile.styleTut71=true}
  else if(!seen.world&&L.mode==='world'&&!near&&nearestCity(player.x,player.z).d>40*CITYK){id='world';title='Exploração';body='O Mapa mostra os portais. Quanto mais longe das cidades, mais perigosos os monstros.'}
  else if(!seen.training&&!near){id='training';title='Evolução por uso';body='Seus atributos aumentam conforme você joga. Subir de nível concede 1 ponto de habilidade. Veja o progresso na janela de Status.'}
- else if(!seen.supplies&&!near){id='supplies';title='Preparar a expedição';body='Aperte [V] para ver comida e água tratada. Aperte [B] para montar o acampamento.'}
+ else if(!seen.supplies&&!near){id='supplies';title='Preparar a expedição';body='Aperte [I] para ver comida e água tratada. Aperte [B] para montar o acampamento.'}
  if(!id)return;seen[id]=true;tutorialDelay93=25;store.set('pds2_profile',profile);toast('<div class="guide93"><strong>[TUTORIAL] '+title+':</strong> <p>'+body+'</p></div>',6500)}
 
