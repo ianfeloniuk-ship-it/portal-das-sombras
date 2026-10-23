@@ -329,5 +329,8 @@
     try { tick(dt); hookMinimap(); } catch (_) {}
   }, 50);
 
-  window.Cart437 = { st, w, cap, put, get, togglePull, parkAtGate456, repair456, open, ensure: ensureMesh };
+  /* v580: o que boats440 chama (pulling/setPull/loadKg/menu) e nao existia */
+  const pulling = () => { const c = run && run.cart437; return !!(c && c.pulling); };
+  function setPull(v) { const c = st(); if (!c) return; c.pulling = !!v; if (!c.pulling) c.parkedAt = { x: c.x, z: c.z }; }
+  window.Cart437 = { st, w, cap, put, get, togglePull, parkAtGate456, repair456, open, ensure: ensureMesh, pulling, setPull, loadKg: w, menu: open };
 })();

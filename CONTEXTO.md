@@ -1,3 +1,9 @@
+## v580 (23/10/2026) — Fase A, bloco 5: barcos e águas profundas ligados
+- `Surv437` agora expõe `ready()` e `world()`; `Cart437` expõe `pulling()`, `setPull()`, `loadKg()` e `menu()`. Sem isso `boats440` e `deep447` nunca ativavam, e `Boats440.board` quebrava com `Cart437.pulling is not a function`.
+- Teste no jogo local: lançar canoa em (15,450) e embarcar → `run.aboard440` ligado, sem erro de script. Não testado: navegar de verdade, entrar na água a nado/mergulho (`deep447`).
+- Teste a pé da ponte (movimento real por `moveEntGround348` de z=185 a z=149): o jogador atravessa a zona de Edran/casal sem travar; salteadores ficam com 32/32 de vida sem dreno.
+- Item 12 (copas): investigado, não resolvido. Os materiais do carvalho/pinheiro/salgueiro estão com a cor certa no catálogo (`TripoEnvironment153.models`), mas os `InstancedMesh` de árvore no mundo têm cor de material `361c13` e emissivo `161614`; falta achar quem reescreve (suspeita: ajuste de noite/estação).
+
 ## v579 (23/10/2026) — Fase A, bloco 4
 - **Praça de Aster lavanda (bug 13):** (0,0) é o centro da fonte (sólido); quem aparecia ali (teleporte, queda) ficava com a câmera dentro do objeto. Novo `tools/saida579.js`: se o jogador fica 1 s dentro de um sólido, vai ao ponto livre mais próximo (raio até 24 m). Testado com captura: de (0,0) vai para (5,0) e a praça aparece.
 - `boats440`/`deep447`: o aviso `U(...).ready is not a function` sumiu (guarda `typeof`); os dois módulos continuam inativos porque `Surv437` não expõe `ready()`/`world()` — falta definir essa API.

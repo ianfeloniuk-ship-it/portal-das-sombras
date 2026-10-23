@@ -1499,7 +1499,9 @@
     craft, eat, drinkCanteen, fillCanteen, boilCanteen, distillSeaWater, useTool,
     open, nearFire, nearCamp456, glb, fit, save, nodes, give, levelTerrain,
     freshnessPct, freshStage, sealBundle, unsealBundle, throwBait,
-    canteenTier, canteenMaxSips, spoilMult, npcFellTree
+    canteenTier, canteenMaxSips, spoilMult, npcFellTree,
+    /* v580: boats440/deep447 esperam estas duas (sem elas nunca ativavam) */
+    ready, world: () => typeof L !== 'undefined' && L && L.mode === 'world'
   };
   window.Survival437 = window.Surv437;
 })();
