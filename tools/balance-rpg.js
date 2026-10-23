@@ -45,7 +45,7 @@
 
   function levelOf(value) { var n = Number(value); return Number.isFinite(n) ? Math.max(1, Math.floor(n)) : 1; }
   function threatOf(value) { var n = Number(value); return Number.isInteger(n) && THREAT_INDEX[n] != null ? n : 0; }
-  function xpNeed(level) { var l = levelOf(level); return Math.round(60 + l * 40 + 4 * Math.pow(l, 1.8)); }
+  function xpNeed(level) { var l = levelOf(level); var f = l <= 500 ? 1 : l <= 650 ? 1 - .15 * (l - 500) / 150 : .85 - .15 * (l - 650) / 127; /* v573 (Ian): acima do 500 o XP pedido desce de 100% a 85% (no 650) e a 70% (no 777) */ return Math.round((60 + l * 40 + 4 * Math.pow(l, 1.8)) * Math.max(.7, f)); }
   function growthFor(classID) {
     if(classID==='none')return Object.freeze({id:'none',hp:{base:120,perLevel:0},mp:{base:28,perLevel:0},physical:{base:12,perLevel:0},magic:{base:2.5,perLevel:0}});
     var i = Number.isInteger(classID) ? classID : GROWTH.findIndex(function (x) { return x.id === classID; });

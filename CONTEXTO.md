@@ -1,3 +1,9 @@
+## v573 (23/10/2026) — Equilíbrio até o 777 (proposta aprovada por Ian)
+- **Aprovado por Ian**: XP achatado acima do 500 e monstros podendo passar do nível do jogador. Proposta: Doc "Primeva — Proposta de equilíbrio até o nível 777" no Drive.
+- `tools/balance-rpg.js` (`xpNeed`): até o 500 igual; do 500 ao 650 desce de 100% a 85%; do 650 ao 777 a 70%. Total 1→777 ≈ 167 milhões (era 189). Sempre crescente (teste de monotonia ok).
+- `300-entidades.js` (`spawnKind`): nível dos selvagens de grau 6+ usa 25% por grau (era 15%): grau 6 ≈ 270, 7 ≈ 450, 8 ≈ 605, 9 ≈ 780. Graus 0–5 iguais.
+- **Não feito**: bônus de reencarnação (Ian não escolheu). Teste só por script (XP e nível dos monstros); não testado em combate real.
+
 ## v572 (23/10/2026) — Nível máximo 777 e ponto de constelação a cada 3 níveis
 - **Pedido de Ian**: teto 777 (era infinito); 1 ponto de constelação a cada 3 níveis, de propósito, para ninguém encher as 29 constelações (290). Do nível 37 ao 777 dá **247 pontos**.
 - `370-v281.js` (`LEVEL_MAX`, `gainXp`: trava no 777, XP zera no teto, ponto só em nível ≥37 com nível%3==1), `640-telas.js` (save com nível >777 vira 777; pontos e constelações já gastos ficam), reencarnação pede `min(777, 100×(n+1))` (450, 610). Textos: `constel523.js`, `570-...constelaco.js`.
