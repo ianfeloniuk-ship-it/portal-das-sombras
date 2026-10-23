@@ -1,3 +1,7 @@
+## v583 (23/10/2026) — Fase A, bloco 7: rótulos do céu de constelações
+- `tools/constel523.js`: os rótulos agora são coletados e desenhados depois, empilhando os que colidem em x (<150 px) e ficando acima do horizonte (antes todos grudavam em `hy-34`, sobrepostos e sob a colina). Captura do céu com as 24 constelações: sem sobreposição de texto. (Escalada ainda encosta no desenho da chave: é o desenho, não o texto.)
+- Item 11 (1ª pessoa) **não** feito: não consegui reproduzir a espada com o equipamento por código; mãos parecem grandes (alvo z=-0,62 em `fp550.js` pose).
+
 ## v581 (23/10/2026) — Fase A, bloco 6: copas (item 12), loot da gosma, glifo do rank
 - **Item 12 (copas vermelhas/escuras):** causa real = as versões leves das árvores (`models/tripo-*153-lod.glb`) tinham só ~9% dos triângulos do modelo cheio (a nota da v418 dizia 35%): sobravam cascas gigantes cor de tronco que cobriam a tela. Os três lods (carvalho, salgueiro, conífera) foram refeitos no Blender a 30% (colapso, mesmas dimensões). Material/cor do catálogo já estavam certos (`361c13` era leitura errada de cor clampada). Teste: captura no jogo, copa verde, sem cascas.
 - **Item 6:** saque coerente — criatura Fendida/Abissal de gosma não solta mais "Lasca de Cristal Frio" (`survival437.js`). O fluxo de falas/rótulo da missão #1 foi relido no código; não reproduzido em combate real.
