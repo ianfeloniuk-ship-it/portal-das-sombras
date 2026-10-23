@@ -687,7 +687,7 @@
       // Aster's south gate: the road and wall share the initial camera axis.
       P = window.Fronteira551 ? [Fronteira551.cx(334),334] : [c.x,c.z+334];
       begin(m); const s = state(m.id); s.pos = P.slice(); s.helped401 = false; s.extra = []; s.extraStep = 0; save();
-      const px = P[0] + 1.8, pz = P[1] + 3;
+      const px = P[0] + 4.6, pz = P[1] + 3; /* v588: ao lado de Edran (antes ficava na frente dele e o corpo do heroi o escondia da camera) */
       player.x = px; player.z = pz; cam.x = px; cam.z = pz; player.m.root.position.set(px, gy(px, pz), pz); try { updChunks(true); } catch (_) {}
       player.face = Math.PI; /* v576: de costas para a câmera, olhando a muralha (norte) */ pcCam.yaw = 0; pcCam.pitch = .06; run.pos = { x: px, z: pz }; s.roadSpawn401={x:px,z:pz};save();
       try { buildWorldFor(m); } catch (_) {}

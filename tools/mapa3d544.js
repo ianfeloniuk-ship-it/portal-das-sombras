@@ -113,7 +113,7 @@ function labels(){
   for(const ct of v.cities){if(far&&!ct.capital)continue;const p=put(ct.x,hAt(ct.x,ct.z)+40,ct.z);if(!p)continue;let fall=false;try{fall=cityFallen(ct)}catch(_){}
     const big=ct.capital,txt=big?ct.name.toUpperCase():ct.name;
     g.font=(big?'500 17px':'400 13px')+' "Jost","Chakra Petch",sans-serif';if('letterSpacing' in g)g.letterSpacing=big?'3px':'1px';
-    g.fillStyle=fall?'#ff8a9a':big?'#fff6df':'#f2f4f6';g.shadowColor='rgba(0,0,0,.85)';g.shadowBlur=6;g.fillText(txt,p[0],p[1]-8);g.shadowBlur=0;
+    g.fillStyle=fall?'#ff8a9a':big?'#fff6df':'#f2f4f6';g.shadowColor='rgba(0,0,0,.85)';g.shadowBlur=6;const ly=p[1]-(big?24:8);/* v588: capital mais alta e com contorno escuro (marcadores de portal cobriam o nome) */if(big){g.lineWidth=4;g.strokeStyle='rgba(20,14,6,.85)';g.lineJoin='round';g.strokeText(txt,p[0],ly)}g.fillText(txt,p[0],ly);g.shadowBlur=0;
     g.fillStyle=fall?'#ff4d6a':big?'#ffd070':'#e8e2d0';g.beginPath();if(big){g.moveTo(p[0],p[1]-6);g.lineTo(p[0]+6,p[1]);g.lineTo(p[0],p[1]+6);g.lineTo(p[0]-6,p[1])}else g.arc(p[0],p[1],3,0,7);g.fill()}
   if('letterSpacing' in g)g.letterSpacing='0px';
   const P=player,p=put(P.x,hAt(P.x,P.z)+120,P.z);if(p){g.font='500 12px "Jost","Chakra Petch",sans-serif';g.fillStyle='#ffe6a8';g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=5;g.fillText('VOCÊ',p[0],p[1]-14);g.shadowBlur=0}}

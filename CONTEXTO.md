@@ -1,3 +1,8 @@
+## v591 (23/10/2026) — Fase A, fechamento (reteste dos 19 itens)
+- `tools/campaign327.js`: o herói acorda ao lado de Edran (x+4,6) em vez de na frente dele; antes o corpo do herói escondia Edran da câmera inicial (item 4 não estava resolvido). Item 15: `tools/mapa3d544.js` — nome da capital mais alto e com contorno escuro (os marcadores de portal cobriam "ASTER").
+- Reteste a pé na v590: estrada até a ponte livre, escolta, salteadores com 32 de vida, gosma→Edran, praça de Aster. **Ainda quebrado:** item 12 (copas/cascas escuras das árvores vistas de baixo), item 16/17 não reproduzidos. Doc "Fase A — fechamento" no Drive.
+- Teste: jogo real (Edge, GPU), câmera do despertar e mapa M com captura. Não testado: Fenda, barcos/mergulho.
+
 ## v590 (23/10/2026) — 1ª pessoa: sacar/guardar arma e defesa no botão direito
 - **Pedido de Ian**: implementar os próximos passos do estilo Skyrim (sacar/guardar e bloquear).
 - `tools/skyrim588.js`: **sacar/guardar** — tecla "Sacar / guardar arma (1ª pessoa)" (padrão `` ` `` Backquote; aparece em Controles e dá para remapear). Começa guardada; atacar, puxar o arco ou defender saca sozinho. Guardada: mãos baixas nos cantos, arma/arco escondidos, dedos relaxados. **Defesa no botão direito** (só em 1ª pessoa, soma ao botão do meio que já existia; usa `Guard472`: mesmas regras de dano/aparar).
