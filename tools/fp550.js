@@ -437,6 +437,125 @@
 
   /* ---------- v563: braços e mãos do próprio Viajante (mesma malha e ossos da 3ª pessoa) ---------- */
   const ARM_RX = /^(upperarm|forearm|hand)_[lr]$/;
+  /* ---------- v570: ossos nos dedos da MÃO NORMAL do Viajante (peças 7 = direita, 8 = esquerda) ----------
+     A malha da mão é uma luva única; aqui ganha 3 ossos por dedo (indicador, médio, anelar, mindinho), com pesos por faixa
+     e por articulação, e um ponto de empunhadura na palma. Só vale na 1ª pessoa (geometria própria); a 3ª pessoa não muda. */
+  const HAND = { grip: { r: 0, l: 0 }, rig: {} };
+  const LANES = ['idx', 'mid', 'rng', 'pky'];
+  const LANE_Z = [[0.044, 9], [0.025, 0.044], [0.006, 0.025], [-9, 0.006]];   /* faixas em z (glTF) */
+  const JOINT_U = [0.052, 0.082, 0.102];                                       /* distância do punho (m do modelo) */
+  const WRIST = { r: [-0.3662, 0.7118, 0.0106], l: [0.3662, 0.7118, 0.0106] };
+  const HAND_PART = { r: 'tripo_part_7', l: 'tripo_part_8' };
+  const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+  function rigHand(side, m){
+    if(HAND.rig[side] && HAND.rig[side].m === m) return HAND.rig[side];
+    HAND.rig[side] = null; /* o modelo foi refeito (troca de equipamento): monta de novo */
+    const T = THREE, hb = m.bones['hand_' + side];
+    let part = null;
+    m.model.traverse(o => { if(!part && o.isSkinnedMesh && o.name === HAND_PART[side]) part = o; });
+    if(!hb || !part) return null;
+    const sk = part.skeleton, hi = sk.bones.indexOf(hb);
+    if(hi < 0) return null;
+    const bindH = sk.boneInverses[hi].clone().invert();            /* hand bone no espaço do modelo, na amarração */
+    const hq = new T.Quaternion(); bindH.decompose(new T.Vector3(), hq, new T.Vector3());
+    const wrist = new T.Vector3(...WRIST[side]), dirX = side === 'r' ? -1 : 1;
+    const bones = [], inverses = [], map = {};
+    const addBone = (name, parent, parentBindInv, pos) => {
+      const b = new T.Bone(); b.name = 'fp_' + side + '_' + name;
+      const bind = new T.Matrix4().makeTranslation(pos.x, pos.y, pos.z);
+      const local = parentBindInv.clone().multiply(bind);
+      local.decompose(b.position, b.quaternion, b.scale);
+      b.userData.rest = b.quaternion.clone();
+      parent.add(b);
+      const inv = bind.clone().invert();
+      bones.push(b); inverses.push(inv); map[name] = bones.length - 1;
+      return { bone: b, bindInv: inv };
+    };
+    const zc = [0.054, 0.034, 0.015, -0.003];
+    LANES.forEach((ln, li) => {
+      let parent = hb, pInv = sk.boneInverses[hi];
+      JOINT_U.forEach((u, ji) => {
+        const pos = new T.Vector3(wrist.x + dirX * u, wrist.y - 0.004, zc[li]);
+        const r = addBone(ln + (ji + 1), parent, pInv, pos);
+        parent = r.bone; pInv = r.bindInv;
+      });
+    });
+    const nb = sk.bones.length, newBones = sk.bones.concat(bones), newInv = sk.boneInverses.concat(inverses);
+    const skel = new T.Skeleton(newBones, newInv);
+    /* geometria própria da 1ª pessoa: corta nada, só troca os pesos da mão */
+    const g = part.geometry.clone(), PA = g.attributes.position, SIA = g.attributes.skinIndex, SWA = g.attributes.skinWeight;
+    const n = PA.count, si = new Uint16Array(n * 4), sw = new Float32Array(n * 4);
+    const osi = new Uint16Array(n * 4), osw = new Float32Array(n * 4);
+    for(let v = 0; v < n; v++){ osi[v*4] = SIA.getX(v); osi[v*4+1] = SIA.getY(v); osi[v*4+2] = SIA.getZ(v); osi[v*4+3] = SIA.getW(v); osw[v*4] = SWA.getX(v); osw[v*4+1] = SWA.getY(v); osw[v*4+2] = SWA.getZ(v); osw[v*4+3] = SWA.getW(v); }
+    for(let v = 0; v < n; v++){
+      const x = PA.getX(v), z = PA.getZ(v), u = (x - wrist.x) * dirX;
+      const cand = [];
+      /* pesos originais mantidos fora da mão; dentro da mão, repartidos entre o osso da mão e os dedos */
+      let handShare = 0, others = [];
+      for(let k = 0; k < 4; k++){ const bi = osi[v*4+k], w = osw[v*4+k]; if(bi === hi) handShare += w; else if(w > 0) others.push([bi, w]); }
+      if(handShare > 0.001 && u > 0.04){
+        /* faixa: pesos suaves entre faixas vizinhas */
+        const lw = LANES.map((_, li) => { const [z0, z1] = LANE_Z[li]; return smooth(z0 - 0.014, z0 + 0.014, z) * (1 - smooth(z1 - 0.014, z1 + 0.014, z)); });
+        const ls = lw.reduce((a, b) => a + b, 0) || 1;
+        const fingerW = smooth(0.038, 0.068, u);                   /* quanto da mão vira dedo */
+        const parts = [];
+        LANES.forEach((ln, li) => {
+          const wl = lw[li] / ls * fingerW * handShare; if(wl < 0.004) return;
+          const b1 = 1 - smooth(0.068, 0.094, u), b3 = smooth(0.090, 0.114, u);
+          const w1 = b1, w3 = b3, w2 = Math.max(0, 1 - w1 - w3);
+          [[1, w1], [2, w2], [3, w3]].forEach(([ji, wj]) => { if(wj > 0.01) parts.push([nb + li * 3 + (ji - 1), wl * wj]); });
+        });
+        parts.push([hi, handShare * (1 - fingerW) + handShare * fingerW * 0]);
+        for(const o of others) parts.push(o);
+        parts.sort((a, b) => b[1] - a[1]);
+        const top = parts.slice(0, 4), tot = top.reduce((a, b) => a + b[1], 0) || 1;
+        top.forEach(([bi, w], k) => { si[v*4+k] = bi; sw[v*4+k] = w / tot; });
+      } else {
+        for(let k = 0; k < 4; k++){ si[v*4+k] = osi[v*4+k]; sw[v*4+k] = osw[v*4+k]; }
+      }
+    }
+    g.setAttribute('skinIndex', new T.BufferAttribute(si, 4));
+    g.setAttribute('skinWeight', new T.BufferAttribute(sw, 4));
+    /* ponto de empunhadura: palma fechada, no eixo do modelo */
+    const anchor = new T.Object3D(); anchor.name = 'fp_grip_' + side;
+    const aPos = new T.Vector3(wrist.x + dirX * 0.05, wrist.y - 0.03, 0.034);
+    const aLocal = sk.boneInverses[hi].clone().multiply(new T.Matrix4().makeTranslation(aPos.x, aPos.y, aPos.z));
+    aLocal.decompose(anchor.position, anchor.quaternion, anchor.scale);
+    hb.add(anchor);
+    const R = { m, part, geo: g, skel, oldSkel: part.skeleton, anchor, bones, hq, side, dirX, ready: true };
+    HAND.rig[side] = R;
+    return R;
+  }
+  const CURL = [0.95, 1.15, 0.95];
+  function curlHand(R, g){
+    const q = new THREE.Quaternion(), ax = new THREE.Vector3(0, 0, 1), ang = (R.side === 'r' ? 1 : -1) * 1;
+    R.bones.forEach((b, i) => {
+      const ji = i % 3;
+      q.setFromAxisAngle(ax, ang * CURL[ji] * g * (0.9 + 0.1 * (i / 3 | 0) / 3));
+      b.quaternion.copy(b.userData.rest).multiply(q);
+    });
+  }
+  /* liga/desliga a geometria com ossos nos dedos (só na 1ª pessoa) */
+  function showHands(on, m){
+    for(const side of ['r', 'l']){
+      const R = on ? rigHand(side, m) : HAND.rig[side];
+      if(!R) continue;
+      if(on && !R.on){ R.part.userData.fpFull = R.part.userData.fpFull || R.part.geometry; R.part.geometry = R.geo; R.part.bind(R.skel, R.part.bindMatrix); R.on = true; }
+      else if(!on && R.on){ R.part.geometry = R.part.userData.fpFull; R.part.userData.fpFull = null; R.part.bind(R.oldSkel, R.part.bindMatrix); R.on = false; }
+    }
+  }
+  /* devolve a arma ao socket original ao sair da 1ª pessoa */
+  function releaseGrips(m){
+    for(const side of ['r', 'l']){
+      const R = HAND.rig[side]; if(!R) continue;
+      for(const c of R.anchor.children.slice()){
+        const u = c.userData.fpOrig;
+        if(u && u.parent){ u.parent.add(c); c.position.copy(u.pos); c.quaternion.copy(u.quat); if(u.scale) c.scale.copy(u.scale); c.userData.fpOrig = null; }
+      }
+    }
+  }
+
   /* O Viajante é feito de peças soltas (tripo_part_N) na pose em T: braço/mão = peça longe do tronco e acima da cintura */
   const ARM_PARTS = /^tripo_part_(1|2|7|8)$/;
   function isArmPiece(o){ return ARM_PARTS.test(o.name); }
@@ -451,10 +570,13 @@
     if(m.root) m.root.visible = true;
     if(!on && !m.fp563) return;
     m.fp563 = !!on;
+    showHands(!!on, m);
+    if(!on) releaseGrips(m);
     if(!on && m.bowHolder155 && m.bowHolder155.userData.fpPos0){ m.bowHolder155.position.copy(m.bowHolder155.userData.fpPos0); m.bowHolder155.quaternion.copy(m.bowHolder155.userData.fpQ0); }
     if(!on && m.socket && m.socket.userData.fpPos0) m.socket.position.copy(m.socket.userData.fpPos0);
     if(!on && m.socket && m.socket.children[0] && m.socket.children[0].userData.fpQ0) m.socket.children[0].quaternion.copy(m.socket.children[0].userData.fpQ0);
     m.model.traverse(o => {
+      if(o.userData.fpHand) return;
       if(on && o.isMesh){
         /* o jogo reabilita as peças ao trocar equipamento: reforça a cada quadro */
         if(o.isSkinnedMesh){ if(!fpKeep(o)) o.visible = false; }
@@ -464,7 +586,8 @@
       if(o.isMesh) o.userData.fpOn = !!on;
       if(o.isSkinnedMesh){
         if(on){ o.userData.fpHid = o.visible; o.visible = fpKeep(o) && o.visible; o.frustumCulled = false; }
-        else { if(o.userData.fpHid !== undefined){ o.visible = ARM_PARTS.test(o.name) || o.userData.fpHid || /^tripo_part_/.test(o.name); o.userData.fpHid = undefined; } o.frustumCulled = true; }
+        else { if(o.userData.fpFull){ o.geometry = o.userData.fpFull; o.userData.fpFull = null; }
+          if(o.userData.fpHid !== undefined){ o.visible = ARM_PARTS.test(o.name) || o.userData.fpHid || /^tripo_part_/.test(o.name); o.userData.fpHid = undefined; } o.frustumCulled = true; }
       } else if(o.isMesh){
         let keep = false, p = o.parent;
         while(p && p !== m.model){ if(p.isBone && ARM_RX.test(p.name)){ keep = true; break; } p = p.parent; }
@@ -517,58 +640,73 @@
     FP._off = off; FP._dir = dir;
   };
 
-  /* arco: segurado na mão esquerda, na vertical à frente */
-  FP.gripBow = function(m){
-    const T = THREE, H = m.bowHolder155;
-    if(!H || !H.parent) return;
-    const hd = m.bones.hand_l;
-    hd.updateWorldMatrix(true, false);
-    const palm = hd.getWorldPosition(V.a);
-    if(!H.userData.fpPos0){ H.userData.fpPos0 = H.position.clone(); H.userData.fpQ0 = H.quaternion.clone();
-      H.updateWorldMatrix(true, true);
-      const bb = new T.Box3().setFromObject(H), sz = bb.getSize(new T.Vector3());
-      const ax = sz.x >= sz.y && sz.x >= sz.z ? new T.Vector3(1,0,0) : sz.y >= sz.z ? new T.Vector3(0,1,0) : new T.Vector3(0,0,1);
-      /* eixo longo no mundo -> local do suporte */
-      H.userData.fpAx = ax.transformDirection(H.matrixWorld.clone().invert());
-    }
-    const dw = V.d.set(0.04, 1, -0.16).transformDirection(camera.matrixWorld);
-    const qw = V.q.setFromUnitVectors(H.userData.fpAx, dw);
-    const pq = H.parent.getWorldQuaternion(V.w).invert();
-    H.quaternion.copy(pq.multiply(qw));
-    H.updateWorldMatrix(true, true);
-    const C = new T.Box3().setFromObject(H).getCenter(V.c);
-    H.position.add(H.parent.worldToLocal(V.e.copy(palm)).sub(H.parent.worldToLocal(V.f.copy(C))));
-    H.updateWorldMatrix(true, true);
-  };
-
   function m_hasSock(m){ return !!(m.socket && m.socket.children[0]); }
   FP.palm = 0.1; FP.hilt = -0.12;
-  FP.grip = function(m){
-    const T = THREE, so = m.socket, W = so && so.children[0];
-    if(!W) return;
-    /* o socket do jogo fica longe do punho quando o antebraço muda de ângulo: prende o cabo no centro da mão */
-    const hd = m.bones.hand_r, fa = m.bones.forearm_r;
-    hd.updateWorldMatrix(true, false);
-    const hp = hd.getWorldPosition(V.a), fp = fa.getWorldPosition(V.b);
-    const gd = FP._dir || GUARD[m.kind195] || GUARD.sword;
-    const gw = V.e.set(gd[0], gd[1], gd[2]).transformDirection(camera.matrixWorld);
-    const gp = V.c.copy(hp).sub(fp).normalize().multiplyScalar(FP.palm).add(hp).addScaledVector(gw, -FP.hilt);
-    if(!so.userData.fpPos0) so.userData.fpPos0 = so.position.clone();
-    so.position.copy(so.parent.worldToLocal(gp));
-    so.updateWorldMatrix(true, false);
-    if(!W.userData.fpAx){
-      W.userData.fpQ0 = W.quaternion.clone();
-      W.updateWorldMatrix(true, true);
-      const box = new T.Box3().setFromObject(W), c = box.getCenter(new T.Vector3());
-      const o = new T.Vector3().setFromMatrixPosition(W.matrixWorld);
-      W.userData.fpAx = c.sub(o).normalize().transformDirection(W.matrixWorld.clone().invert());
+  /* gira o PUNHO (não a arma): o cabo continua dentro do punho fechado do jogo (socket + fist162) e a lâmina aponta para a direção de guarda */
+  function turnHand(m, hd, cur, want){
+    const q = V.q.setFromUnitVectors(cur, want);
+    const wq = hd.getWorldQuaternion(V.p).premultiply(q);
+    const pq = hd.parent.getWorldQuaternion(V.w).invert();
+    hd.quaternion.copy(pq.multiply(wq));
+    hd.updateMatrixWorld(true);
+  }
+  function axisOf(obj, key){
+    const T = THREE;
+    if(!obj.userData[key]){
+      obj.updateWorldMatrix(true, true);
+      const box = new T.Box3().setFromObject(obj), c = box.getCenter(new T.Vector3()), sz = box.getSize(new T.Vector3());
+      const o = new T.Vector3().setFromMatrixPosition(obj.matrixWorld);
+      let d = c.sub(o);
+      if(d.lengthSq() < 1e-6) d = sz.x >= sz.y && sz.x >= sz.z ? new T.Vector3(1,0,0) : sz.y >= sz.z ? new T.Vector3(0,1,0) : new T.Vector3(0,0,1);
+      obj.userData[key] = d.normalize().transformDirection(obj.matrixWorld.clone().invert());
     }
+    return obj.userData[key];
+  }
+  /* arma na mão: o cabo vai para a palma fechada (âncora da mão nova); o punho gira para a lâmina apontar à guarda */
+  function holdIn(m, side, obj, centered){
+    const R = HAND.rig[side]; if(!R || !obj) return null;
+    const anchor = R.anchor;
+    if(obj.parent !== anchor){
+      obj.userData.fpOrig = { parent: obj.parent, pos: obj.position.clone(), quat: obj.quaternion.clone(), scale: obj.scale.clone() };
+      obj.userData.fpBaseScale = obj.scale.clone();
+      obj.updateWorldMatrix(true, true);
+      obj.userData.fpWS = obj.parent.getWorldScale(new THREE.Vector3()).x;
+      const T = THREE, box = new T.Box3().setFromObject(obj), c = box.getCenter(new T.Vector3()), o = new T.Vector3().setFromMatrixPosition(obj.matrixWorld);
+      const inv = obj.matrixWorld.clone().invert();
+      obj.userData.fpAx = c.clone().sub(o).normalize().transformDirection(inv);
+      obj.userData.fpCenter = c.applyMatrix4(inv);
+      anchor.add(obj);
+    }
+    const so = obj.userData.fpOrig && obj.userData.fpOrig.parent;
+    if(!R.scaled && obj.userData.fpWS){ anchor.updateWorldMatrix(true, false); const cur = anchor.getWorldScale(V.t).x; if(cur > 1e-6) anchor.scale.multiplyScalar(obj.userData.fpWS / cur); R.scaled = true; }
+    /* eixo da arma → +z do modelo (lado do polegar), no referencial do modelo (a âncora é alinhada ao modelo pelo osso) */
+    const toModel = V.q.copy(R.hq).invert();
+    if(centered && obj.userData.fpBaseScale) obj.scale.copy(obj.userData.fpBaseScale).multiplyScalar(0.36); /* arco menor na 1ª pessoa */
+    obj.quaternion.setFromUnitVectors(obj.userData.fpAx, V.t.set(0, 0, 1)).premultiply(toModel.clone().invert());
+    if(centered) obj.position.copy(obj.userData.fpCenter).multiply(obj.scale).applyQuaternion(obj.quaternion).negate();
+    else obj.position.set(0, 0, 0.075);
+    obj.updateMatrixWorld(true);
+    return R;
+  }
+  FP.grip = function(m){
+    const W = m.socket && m.socket.children[0] || (HAND.rig.r && HAND.rig.r.anchor.children[0]);
+    const R = holdIn(m, 'r', W, false);
+    if(!R) return;
     const g = FP._dir || GUARD[m.kind195] || GUARD.sword;
-    const dw = V.d.set(g[0], g[1], g[2]).transformDirection(camera.matrixWorld);
-    const qw = V.q.setFromUnitVectors(W.userData.fpAx, dw);
-    const sq = so.getWorldQuaternion(V.w).invert();
-    W.quaternion.copy(sq.multiply(qw));
-    W.updateMatrixWorld(true);
+    /* +z do modelo (polegar/lâmina) em coordenadas do mundo */
+    R.anchor.updateWorldMatrix(true, false);
+    const mz = V.c.set(0, 0, 1).applyQuaternion(R.hq).transformDirection(R.anchor.parent.matrixWorld);
+    const want = V.d.set(g[0], g[1], g[2]).transformDirection(camera.matrixWorld);
+    turnHand(m, m.bones.hand_r, mz, want);
+  };
+  FP.gripBow = function(m){
+    const H = m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0]);
+    const R = holdIn(m, 'l', H, true);
+    if(!R) return;
+    R.anchor.updateWorldMatrix(true, false);
+    const mz = V.c.set(0, 0, 1).applyQuaternion(R.hq).transformDirection(R.anchor.parent.matrixWorld);
+    const want = V.d.set(0.05, 1, -0.2).transformDirection(camera.matrixWorld);
+    turnHand(m, m.bones.hand_l, mz, want);
   };
 
   FP.pose = function(){
@@ -588,7 +726,7 @@
       const side = s === 'r' ? 1 : -1;
       const so3 = s === 'r' ? FP._off : [0,0,0];
       const bowL = s === 'l' && P.m.bowHolder155;
-      const tgt = bowL ? V.t.set(-0.04, -0.1, -0.72) : V.t.set(side * 0.13 + so3[0], -0.14 + so3[1], -0.55 + so3[2]); camera.localToWorld(tgt);
+      const tgt = bowL ? V.t.set(-0.04, -0.1, -0.72) : (s === 'r' ? V.t.set(0.07 + so3[0], -0.06 + so3[1], -0.62 + so3[2]) : ((P.m.bowHolder155 || (HAND.rig.l && HAND.rig.l.anchor.children[0])) ? V.t.set(-0.17, -0.1, -0.85) : V.t.set(-0.15, -0.14, -0.5))); camera.localToWorld(tgt);
       tgt.y -= (typeof terrH === 'function' ? terrH(P.x, P.z) : 0); /* o relevo é aplicado pelo shader: o modelo fica em y=0 */
       delta.y *= 0.5; if(delta.length() > 0.4) delta.setLength(0.4);
       tgt.addScaledVector(delta, 0.8);
@@ -600,9 +738,13 @@
       const elbow = V.g.copy(sh).addScaledVector(dir, a).addScaledVector(pole, hh);
       aim(ua, fa, V.h.copy(elbow).sub(sh).normalize());
       aim(fa, hd, V.h.copy(sh).addScaledVector(dir, dist).sub(elbow).normalize());
-      if(s === 'r' && m_hasSock(P.m)) FP.grip(P.m);
-      if(s === 'l' && P.m.bowHolder155) FP.gripBow(P.m);
+      if(s === 'r' && HAND.rig.r && (m_hasSock(P.m) || HAND.rig.r.anchor.children[0])) FP.grip(P.m);
+      if(s === 'l' && HAND.rig.l && (P.m.bowHolder155 || HAND.rig.l.anchor.children[0])) FP.gripBow(P.m);
     }
+    const hasW = !!(P.m.socket && P.m.socket.children[0]) || !!(HAND.rig.r && HAND.rig.r.anchor.children[0]);
+    const hasB = !!P.m.bowHolder155 || !!(HAND.rig.l && HAND.rig.l.anchor.children[0]);
+    HAND.grip.r += ((hasW ? 1 : 0.25) - HAND.grip.r) * 0.25; HAND.grip.l += ((hasB ? 1 : 0.25) - HAND.grip.l) * 0.25;
+    for(const side of ['r', 'l']){ const R = HAND.rig[side]; if(R && R.on) curlHand(R, HAND.grip[side]); }
     P.m.root.updateMatrixWorld(true);
   };
 

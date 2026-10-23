@@ -1,3 +1,9 @@
+## v571 (23/10/2026) — 1ª pessoa: a MÃO NORMAL do Viajante, com ossos nos dedos
+- **Pedido de Ian**: mão de 1ª pessoa igual à do Viajante, com dedos que fecham na arma ("cria ossos nos dedos e junta a malha", "refaz na mão normal").
+- `tools/fp550.js` (`rigHand`): só na 1ª pessoa, as peças da mão (`tripo_part_7` direita, `tripo_part_8` esquerda) ganham 12 ossos novos (3 por dedo: indicador, médio, anelar, mindinho), com pesos por faixa e por articulação (geometria própria; a 3ª pessoa não muda). Os ossos fecham os dedos (relaxado sem arma, firme com arma). A arma é movida para a palma (âncora) e o punho gira para a lâmina apontar à guarda; golpe em 3 tempos; arco na esquerda (menor). Sai da 1ª pessoa → tudo volta ao original. Refaz os ossos se o modelo for refeito (troca de equipamento).
+- Lição: atributos do GLB vêm intercalados — ler com `getX/getY/...`, não `.array`.
+- Teste: jogo real (pane), espada parada e em golpe, arco, ida e volta 1ª/3ª pessoa. **Não testado**: cajado/lança/machado nessa pegada, escudo, armadura de mão equipada, polegar articulado (fica preso à mão).
+
 ## v570 (23/10/2026) — Constelações novas (estilo Skyrim)
 - **Pedido de Ian**: constelações por habilidade. 18 ativas (Uma Mão, Duas Mãos, Arquearia, Bloqueio, Armadura Pesada/Leve, Destruição, Restauração, Conjuração, Forja, Alquimia, Furtividade, Fala, Caça, Pesca, Mineração, Cozinha, Montaria) + 5 apagadas ("desperta em breve": Ilusão, Alteração, Encantamento, Gatunagem, Escalada). As 6 antigas ficam (29 no total).
 - `tools/constel569.js` (dados, efeitos por wrappers, imagens), `img/const570/*.png` (13 ilustrações geradas; `conj.png` = Conjuração, "con" é nome reservado no Windows), `constel523.js` (céu mais espaçado, nomes com contorno, suporte a imagem). 3 linhas no core (escudo, golpe furtivo, mineração).
