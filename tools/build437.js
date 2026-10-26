@@ -615,5 +615,5 @@
     try { tick(dt); } catch (_) {}
   }, 150);
 
-  window.Build437 = { STRUCTS, st, build, open, openStructModal, packStruct456, packAllCamp456, spawnMesh };
+  window.Build437 = { STRUCTS, st, build, open, openStructModal, packStruct456, packAllCamp456, spawnMesh, spawned };
 })();

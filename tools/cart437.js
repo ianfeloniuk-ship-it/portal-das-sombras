@@ -332,5 +332,6 @@
   /* v580: o que boats440 chama (pulling/setPull/loadKg/menu) e nao existia */
   const pulling = () => { const c = run && run.cart437; return !!(c && c.pulling); };
   function setPull(v) { const c = st(); if (!c) return; c.pulling = !!v; if (!c.pulling) c.parkedAt = { x: c.x, z: c.z }; }
-  window.Cart437 = { st, w, cap, put, get, togglePull, parkAtGate456, repair456, open, ensure: ensureMesh, pulling, setPull, loadKg: w, menu: open };
+  function moveTo630(x, z) { const c = st(); if (!c) return; c.x = x; c.z = z; if (meshGrp) meshGrp.position.set(x, H(x, z), z); if (interObj) { interObj.x = x; interObj.z = z; } }
+  window.Cart437 = { moveTo630, st, w, cap, put, get, togglePull, parkAtGate456, repair456, open, ensure: ensureMesh, pulling, setPull, loadKg: w, menu: open };
 })();

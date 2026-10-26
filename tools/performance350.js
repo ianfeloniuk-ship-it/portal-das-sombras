@@ -1,8 +1,8 @@
 /* Keep the GPU light layout stable when monsters, crystals and effects appear.
-   Source lights retain their positions/colors/intensity. Six nearby sources are
+   Source lights retain their positions/colors/intensity. Three nearby sources are
    represented by fixed render lights; distant decorative glow stays emissive. */
 (()=>{
- const pool=Array.from({length:6},()=>{const l=new THREE.PointLight(0xffffff,0,1,2);l.userData.pool348=true;scene.add(l);return l});
+ const pool=Array.from({length:3},()=>{const l=new THREE.PointLight(0xffffff,0,1,2);l.userData.pool348=true;scene.add(l);return l});
  const pos=new THREE.Vector3(),render=renderer.render;
  function update(){
   const candidates=[],px=player?.x||0,pz=player?.z||0;

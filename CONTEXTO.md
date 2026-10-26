@@ -1,3 +1,9 @@
+## v630 (26/10/2026) — Tela de carregamento no lugar do congelamento + enchente viva
+- **Medido (Edge headless, sem cache de shader)**: ~40 programas de ~200 ms cada (~9,5 s) compilam no 1º desenho; o custo e por programa (quantidade), nao pelo tamanho: reduzir luzes de ponto 6 -> 3 (`performance350.js`, pool fixo) so encolheu o fragment em ~2% e nao mudou o tempo.
+- `tools/carga630.js` (novo): `startGame` mostra "CARREGANDO MUNDO..." antes do trabalho pesado e so solta o jogador depois de 30 quadros seguidos < 110 ms (maximo 15 s). Resultado: o travamento de ~7,5 s + rajada de 0,3-0,8 s por ~4 s agora acontece atras da tela; depois dela nao ha quadro > 150 ms. **Nao** zerou o tempo total de compilacao (~11 s); isso exige menos programas ou three com compilacao assincrona.
+- `tools/enchente630.js` (novo): com `RAIN626.flood` alto, fogueira na agua perde o fogo (aviso), barraca (abrigo), carrinho solto e despojos de inimigos mortos sao arrastados rio abaixo (~1-3,5 m/s, malha e interacao acompanham). `Build437.spawned` e `Cart437.moveTo630` exportados.
+- Teste (Edge, agua simulada por falta de rio fundo achado): fogueira apagou, barraca/carrinho andaram ~3,5 m em 6 s, canoa embarca, anda e fica na superficie da agua nova. Despojos/lago nao testados.
+
 ## v629 (26/10/2026) — Congelamento de shader: causas medidas e 1a reducao
 - **Medido (Edge GPU, cache de shader burlado)**: o chao era ~5 s por programa (3 programas). O vertex shader do chao tinha 12 copias inlinadas de `terrH245`; o fragment (iluminacao padrao, 6 luzes de ponto) e o resto. Ruido, sombras e as camadas v626/v627 contam pouco (~1 s).
 - `tools/terrain245.js`: o chao calcula o relevo 3 vezes por vertice (`tgCompute245`: centro + 2 vizinhos) e reaproveita na elevacao, na normal e na estrada. **Programas do chao: ~4,7 s -> ~2,1 s cada.** A normal e a inclinacao viram diferenca adiante (leve mudanca, visual conferido).
