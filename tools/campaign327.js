@@ -1032,6 +1032,7 @@
       if(s.pos)return {x:s.pos[0],z:s.pos[1]};
     }
     if(m.id==='a1'&&s.s===1&&window.Fronteira551?.active())return Fronteira551.objective()?.target;
+    if(m.id==='a2'&&s.s===3&&window.Caixa606?.active())return Caixa606.objective()?.target;
     if(sp.t==='city')return GATES341.filter(g=>g.c.name===cityName(s)).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]||null;
     const shop=sp.t==='barter'?'wep':Object.keys(SHOP_NPC).find(k=>SHOP_NPC[k]===sp.npc);
     return shop?npcs.find(n=>n.shop===shop&&n.home?.name===cityName(s)):null;

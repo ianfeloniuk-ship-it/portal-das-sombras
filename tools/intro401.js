@@ -33,6 +33,7 @@ overlay.querySelector('button').onclick=next;
 addEventListener('keydown',e=>{if(!API.conversation&&!API.reclaiming())return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&[(typeof keyOf==='function'?keyOf('use'):'KeyE'),'Enter','Space'].includes(e.code))next()},true);
 addEventListener('keyup',e=>{if(API.conversation||API.reclaiming()){e.preventDefault();e.stopImmediatePropagation()}},true);
 function targetAndText(){
+ if(window.Caixa606?.active())return Caixa606.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
