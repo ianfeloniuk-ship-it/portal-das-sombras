@@ -27,6 +27,7 @@
       RS.k+=(tk-RS.k)*Math.min(1,dt*.35);
       RS.wet.value=Math.max(0,Math.min(1,RS.wet.value+(raining?dt/10:-dt/90)));
       RS.pud.value=Math.max(0,Math.min(1,RS.pud.value+(raining&&RS.k>.45?dt/35:-dt/160)));
+      RS.acc=Math.max(0,Math.min(1,RS.acc+(raining?dt*RS.k/70:-dt/300)));RS.rise.value=RS.acc*.8;RS.flood.value=Math.max(0,(RS.acc-.45)/.55);
       const on=raining;
       if(SP.parent!==scene)scene.add(SP);
       SP.visible=on&&RS.k>.05;

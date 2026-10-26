@@ -327,6 +327,15 @@ uniform vec2 uEcoOrigin;
 #endif
   }
 
+  // v628: enchente — margem alagada (umidade alta do EcoGrid) vira lama escura e brilhante
+  float flE = uFlood626 * smoothstep(0.55, 0.8, ecoHumidity);
+  if (flE > 0.001) {
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.17, 0.12, 0.075) * (0.8 + 0.4 * noise128(terrainWorld128.xz * 1.3)), flE * 0.85);
+#ifdef ECO_MUD627
+    mudK626 = max(mudK626, flE);
+#endif
+  }
+
   // Escurecimento orgânico do solo conforme fertilidade (matéria orgânica) e umidade
   float soilDarken = 1.0 - (ecoFertility * 0.16 + ecoHumidity * 0.20);
   diffuseColor.rgb *= soilDarken;
@@ -350,7 +359,7 @@ uniform vec2 uEcoOrigin;
 
       if (!shader.fragmentShader.includes('uEcoTex')) {
         const fs0 = shader.fragmentShader;
-        shader.fragmentShader = (fs0.includes('snowMask154') ? '#define ECO_RICH627\n' : '') + (fs0.includes('mudK626') ? '#define ECO_MUD627\n' : '') + (fs0.includes('uWet626') ? '' : 'float uWet626=0.;\n') + ECO_TERRAIN_FN + fs0;
+        shader.fragmentShader = (fs0.includes('snowMask154') ? '#define ECO_RICH627\n' : '') + (fs0.includes('mudK626') ? '#define ECO_MUD627\n' : '') + (fs0.includes('uWet626') ? '' : 'float uWet626=0.;float uFlood626=0.;\n') + ECO_TERRAIN_FN + fs0;
       }
       if (shader.fragmentShader.includes('#include <roughnessmap_fragment>') && !shader.fragmentShader.includes('ecoTrample')) {
         shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', ECO_TERRAIN_COLOR + '#include <roughnessmap_fragment>');
@@ -798,6 +807,8 @@ uniform vec2 uEcoOrigin;
         // v627: a chuva molha o solo (umidade sobe até 235) e, sem chuva, ele seca devagar até a umidade natural do bioma
         if (isRaining) { if (u < 235) u = Math.min(235, u + 3); }
         else if (u > cfg.rain + 20) u -= 1;
+        // v628: margem alagada fica mais fertil (aluviao)
+        if (global.RAIN626 && global.RAIN626.flood.value > 0.3 && u > 170) f = Math.min(255, f + 1);
 
         // 2. Desgaste / Recuperação do Pisoteio: sem tráfego, o solo descompacta devagar (-1 por tick)
         if (p > 0) {

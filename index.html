@@ -275,7 +275,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/boss160.js?v=454"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js?v=406"></script>
-<script src="tools/water154.js"></script>
+<script src="tools/water154.js?v=628"></script>
 <script src="tools/biome-materials132.js?v=535"></script>
 <script src="tools/citizens133.js?v=454"></script>
 <script src="tools/rift131.js?v=221"></script>
@@ -8307,9 +8307,9 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(riverWidth351(rv.b,c.z)+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
-function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight};
+function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood};
  m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
- m.fragmentShader=base.fragmentShader.replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+ m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
   float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
   float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
@@ -9660,8 +9660,9 @@ requestAnimationFrame(frame);
 <script src="tools/witcher377.js?v=476"></script>
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
-<script src="tools/rain387.js?v=627"></script>
-<script src="tools/water391.js?v=440"></script>
+<script src="tools/rain387.js?v=628"></script>
+<script src="tools/water391.js?v=628"></script>
+<script src="tools/agua628.js?v=628"></script>
 <script src="tools/map393.js?v=535"></script>
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
@@ -9684,12 +9685,12 @@ requestAnimationFrame(frame);
 <script src="tools/cart437.js?v=580"></script>
 <script src="tools/build437.js?v=485"></script>
 <script src="tools/otherworld460.js?v=469"></script>
-<script src="tools/sea439.js?v=439"></script>
+<script src="tools/sea439.js?v=628"></script>
 <script src="tools/boats440.js?v=579"></script>
 <script src="tools/terra444.js?v=458"></script>
 <script src="tools/clear445.js?v=458"></script>
 <script src="tools/ground446.js?v=447"></script>
-<script src="tools/chao626.js?v=627"></script>
+<script src="tools/chao626.js?v=628"></script>
 <script src="tools/grass446.js?v=596"></script>
 <script src="tools/deep447.js?v=579"></script>
 <script src="tools/impact459.js?v=492r1"></script>
@@ -9757,7 +9758,7 @@ requestAnimationFrame(frame);
 <script src="tools/explorar539.js?v=564"></script>
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/flora-regioes.js?v=621"></script>
-<script src="tools/ecossistema550.js?v=627"></script>
+<script src="tools/ecossistema550.js?v=628"></script>
 <script src="tools/skyrim588.js?v=600"></script>
 <script src="tools/controles593.js?v=593"></script>
 <script src="tools/mouse600.js?v=600"></script>
@@ -9766,9 +9767,9 @@ requestAnimationFrame(frame);
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v627</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v628</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=627;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=628;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

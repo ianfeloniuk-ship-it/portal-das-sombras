@@ -8,7 +8,7 @@
   if (!window.BiomeMaterials132) return;
   window.RAIN626=window.RAIN626||{wet:{value:0},pud:{value:0},k:0,wind:.25};
   const FN = `
-uniform float uWet626;uniform float uPud626;float mudK626=0.;float trail626=0.;float hb626=0.;float emb626=0.;float pud626=0.;float roughK626=0.;
+uniform float uWet626;uniform float uPud626;uniform float uFlood626;float mudK626=0.;float trail626=0.;float hb626=0.;float emb626=0.;float pud626=0.;float roughK626=0.;
 float f626(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*noise128(p);p=p*2.07+vec2(13.1,7.7);a*=.5;}return v/.875;}
 float rg626(vec2 p){return 1.-abs(noise128(p)*2.-1.);}
 vec2 pb626(vec2 p){vec2 i=floor(p),f=fract(p);float h=hash128(i);vec2 c=vec2(hash128(i+7.1),hash128(i+13.3))*.56+.22;float r=.14+.2*hash128(i+3.7);float d=length(f-c);float m=step(.5,h)*(1.-smoothstep(r*.55,r,d));return vec2(m,hash128(i+21.));}
@@ -107,7 +107,7 @@ if(hb626!=0.){vec2 dh6=vec2(dFdx(hb626),dFdy(hb626));vec3 sx6=dFdx(-vViewPositio
     const ob = r.onBeforeCompile, key = r.customProgramCacheKey();
     r.onBeforeCompile = function (s, rr) {
       ob.call(this, s, rr);
-      s.uniforms.uWet626 = RAIN626.wet; s.uniforms.uPud626 = RAIN626.pud;
+      s.uniforms.uWet626 = RAIN626.wet; s.uniforms.uPud626 = RAIN626.pud; s.uniforms.uFlood626 = RAIN626.flood || (RAIN626.flood = { value: 0 });
       let f = s.fragmentShader;
       if (!f.includes('terrainWorld128') || !f.includes('#include <roughnessmap_fragment>') || !f.includes('snowMask154') || !f.includes('vNy534') || f.includes('hb626')) return;
       const t0 = 'float trail=(1.-smoothstep(1.2,2.5,dmin+(noise128(tp*.9)-.5)*1.3));';

@@ -17,8 +17,8 @@
   const NEAR = 1200, FAR = 9000;
   const geo = new T.PlaneGeometry(NEAR, NEAR, 160, 160); geo.rotateX(-Math.PI / 2);
   const geoFar = new T.PlaneGeometry(FAR, FAR, 90, 90); geoFar.rotateX(-Math.PI / 2);
-  const U = { t: { value: 0 }, uDay: { value: 1 }, uY: { value: -.9 }, uC: { value: new T.Vector2() }, uHole: { value: 0 } };
-  const WAVE = 'float wv(vec2 p,float t){return .18*sin(p.x*.21+t*1.3)+.12*sin(p.y*.17-t*1.1)+.06*sin((p.x+p.y)*.45+t*2.);}';
+  const U = { t: { value: 0 }, uDay: { value: 1 }, uY: { value: -.9 }, uAmp: { value: 1 }, uC: { value: new T.Vector2() }, uHole: { value: 0 } };
+  const WAVE = 'uniform float uAmp;float wv(vec2 p,float t){return uAmp*(.18*sin(p.x*.21+t*1.3)+.12*sin(p.y*.17-t*1.1)+.06*sin((p.x+p.y)*.45+t*2.)+.05*sin((p.x-p.y)*.9+t*3.1));}';
   const mat = new T.ShaderMaterial({
     uniforms: U, transparent: true, depthWrite: false, side: T.DoubleSide,
     vertexShader: 'uniform float t;uniform float uY;varying float vDepth;varying float vSea;varying vec3 vW;' + WAVE +
@@ -77,7 +77,7 @@
       const near = on && s.d(player.x, player.z) > -2500;
       surf.visible = far.visible = near;
       if (near) {
-        U.t.value += dt; U.uY.value = s.Y; U.uDay.value = dayK();
+        U.t.value += dt; U.uY.value = s.Y + (window.RAIN626 ? RAIN626.rise.value * .5 : 0); U.uAmp.value = 1 + (window.RAIN626 ? RAIN626.k * 1.3 + RAIN626.flood.value * .5 : 0); U.uDay.value = dayK();
         surf.position.set(Math.round(player.x / 10) * 10, 0, Math.round(player.z / 10) * 10); surf.updateMatrixWorld();
         U.uC.value.set(surf.position.x, surf.position.z); far.position.copy(surf.position); far.updateMatrixWorld();
         if (!lastNear && !seen && s.d(player.x, player.z) > -250) { seen = true; toast('<b>[MAR DE THALOR]</b> O cheiro de sal chega com o vento. Recifes perto da praia, alto-mar e fossas mais adiante. Água do mar não mata a sede: só destilada.', 7000); }

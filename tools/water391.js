@@ -6,13 +6,15 @@
    Bioma marinho, mergulho e portais aquáticos ficam para depois (Ian, 14/10/2026). */
 (function(){
   const SWIM_DEPTH=1.3,BODY=1.25;
+  /* v628: enchente — nivel sobe com a chuva acumulada (RAIN626) e a agua avanca ate 5 m pelos baixios */
+  const RISE=()=>window.RAIN626?RAIN626.rise.value:0,FLOOD=()=>window.RAIN626?RAIN626.flood.value:0;
   function waterAt(x,z){ // {top, frozen} ou null
     if(L.mode!=='world'||L.grid)return null;
-    {const SE=window.TER245&&TER245.SEA439;if(SE&&SE.d(x,z)>-60&&terrH(x,z)<SE.Y)return {top:SE.Y,frozen:false,sea:true}} /* v439: mar a oeste de Thalor */
+    {const SE=window.TER245&&TER245.SEA439;if(SE&&SE.d(x,z)>-60&&terrH(x,z)<SE.Y+RISE()*.5)return {top:SE.Y+RISE()*.5,frozen:false,sea:true}} /* v439: mar a oeste de Thalor */
     const rv=riverNear239(x,z),w=riverWidth351(rv.b,z);
-    if(rv.d<w/2){const b=snowB(x,z);if(b>.717)return null;if(onRoad(roadSegs(x,z,1),x,z,5))return null;return {top:terrH(rv.x+w/2,z)+.06,frozen:b<.29}}
+    if(rv.d<w/2+FLOOD()*5){const b=snowB(x,z);if(b>.717)return null;if(onRoad(roadSegs(x,z,1),x,z,5))return null;return {top:terrH(rv.x+w/2,z)+.06+RISE(),frozen:b<.29}}
     const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));
-    if(lk&&Math.hypot(x-lk.x,z-lk.z)<lk.r)return {top:terrH(lk.x+lk.r,lk.z)+.06,frozen:['neve','cristal'].includes(biomeAt(lk.x,lk.z))};
+    if(lk&&Math.hypot(x-lk.x,z-lk.z)<lk.r+FLOOD()*5)return {top:terrH(lk.x+lk.r,lk.z)+.06+RISE(),frozen:['neve','cristal'].includes(biomeAt(lk.x,lk.z))};
     return null}
   function depthAt(x,z){const w=waterAt(x,z);return w&&!w.frozen?w.top-terrH(x,z):0}
   const W=window.Water391={waterAt,depthAt,swimming:false};

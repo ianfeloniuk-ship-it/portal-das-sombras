@@ -48,9 +48,9 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(riverWidth351(rv.b,c.z)+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
-function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight};
+function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood};
  m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
- m.fragmentShader=base.fragmentShader.replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+ m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
   float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
   float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
