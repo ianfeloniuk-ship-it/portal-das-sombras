@@ -6,8 +6,9 @@
 (function () {
   'use strict';
   if (!window.BiomeMaterials132) return;
+  window.RAIN626=window.RAIN626||{wet:{value:0},pud:{value:0},k:0,wind:.25};
   const FN = `
-float trail626=0.;float hb626=0.;float emb626=0.;float pud626=0.;float roughK626=0.;
+uniform float uWet626;uniform float uPud626;float mudK626=0.;float trail626=0.;float hb626=0.;float emb626=0.;float pud626=0.;float roughK626=0.;
 float f626(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*noise128(p);p=p*2.07+vec2(13.1,7.7);a*=.5;}return v/.875;}
 float rg626(vec2 p){return 1.-abs(noise128(p)*2.-1.);}
 vec2 pb626(vec2 p){vec2 i=floor(p),f=fract(p);float h=hash128(i);vec2 c=vec2(hash128(i+7.1),hash128(i+13.3))*.56+.22;float r=.14+.2*hash128(i+3.7);float d=length(f-c);float m=step(.5,h)*(1.-smoothstep(r*.55,r,d));return vec2(m,hash128(i+21.));}
@@ -81,11 +82,18 @@ vec2 pb626(vec2 p){vec2 i=floor(p),f=fract(p);float h=hash128(i);vec2 c=vec2(has
 }
 `;
   const ROUGH = `
+{/* chuva: chão molhado escurece e brilha; poça nos baixios planos e nas ruas, enche devagar e seca devagar */
+ vec2 qw=terrainWorld128.xz;float flat6=smoothstep(.955,.99,vNy534);float wetK=uWet626*(1.-.5*snowMask154);
+ float bn=f626(qw*.03+vec2(60.))*.55+f626(qw*.2+vec2(5.))*.45+(f626(qw*.7+vec2(9.))-.5)*.25+smoothstep(.2,.8,road128)*.18;float bt=.7-.16*uPud626;float basin=smoothstep(bt,bt+.05,bn);
+ float pd=basin*flat6*uPud626;pud626=max(pud626,pd);
+ diffuseColor.rgb*=1.-.5*wetK;diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.15,.2,.26),clamp(pd*1.5,0.,.9));
+ roughnessFactor=mix(roughnessFactor,.28,wetK*.75);}
+roughnessFactor=mix(roughnessFactor,.3,clamp(mudK626,0.,1.));
 roughnessFactor=mix(roughnessFactor,.97,roughK626*(1.-pud626));roughnessFactor=mix(roughnessFactor,.05,clamp(pud626*1.3,0.,1.));
 `;
   const EMIS = `
 #include <emissivemap_fragment>
-totalEmissiveRadiance+=vec3(1.,.32,.04)*emb626*1.5;
+totalEmissiveRadiance+=vec3(1.,.32,.04)*emb626*1.5+vec3(.09,.12,.17)*pud626;
 `;
   const BUMP = `
 #include <normal_fragment_maps>
@@ -99,6 +107,7 @@ if(hb626!=0.){vec2 dh6=vec2(dFdx(hb626),dFdy(hb626));vec3 sx6=dFdx(-vViewPositio
     const ob = r.onBeforeCompile, key = r.customProgramCacheKey();
     r.onBeforeCompile = function (s, rr) {
       ob.call(this, s, rr);
+      s.uniforms.uWet626 = RAIN626.wet; s.uniforms.uPud626 = RAIN626.pud;
       let f = s.fragmentShader;
       if (!f.includes('terrainWorld128') || !f.includes('#include <roughnessmap_fragment>') || !f.includes('snowMask154') || !f.includes('vNy534') || f.includes('hb626')) return;
       const t0 = 'float trail=(1.-smoothstep(1.2,2.5,dmin+(noise128(tp*.9)-.5)*1.3));';

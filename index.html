@@ -7588,7 +7588,7 @@ function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.W
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x48a8ef),sn:new THREE.Color(0x101c3d),fd:new THREE.Color(0xa5d8ed),fn:new THREE.Color(0x1d3152),hd:new THREE.Color(0xd9f1ff),hn:new THREE.Color(0x7899ce),gd:new THREE.Color(0x587a52),gn:new THREE.Color(0x2e4557),ud:new THREE.Color(0xfff5df),un:new THREE.Color(0xb6c9ff),gray:new THREE.Color(0x87909a),w:0};
-    const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
+    const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.55+.35*(window.RAIN626?RAIN626.k:.5):WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
     hemi.intensity=(.85-.35*n)*(1-D.w*.18);sun.intensity=(.90-.52*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
   else{const day=new THREE.Color(0x48a8ef),night=new THREE.Color(0x101c3d);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0xa5d8ed)).lerp(new THREE.Color(0x1d3152),n);
@@ -9660,7 +9660,7 @@ requestAnimationFrame(frame);
 <script src="tools/witcher377.js?v=476"></script>
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
-<script src="tools/rain387.js?v=387"></script>
+<script src="tools/rain387.js?v=627"></script>
 <script src="tools/water391.js?v=440"></script>
 <script src="tools/map393.js?v=535"></script>
 <script src="tools/fall393.js?v=393"></script>
@@ -9689,7 +9689,7 @@ requestAnimationFrame(frame);
 <script src="tools/terra444.js?v=458"></script>
 <script src="tools/clear445.js?v=458"></script>
 <script src="tools/ground446.js?v=447"></script>
-<script src="tools/chao626.js?v=626"></script>
+<script src="tools/chao626.js?v=627"></script>
 <script src="tools/grass446.js?v=596"></script>
 <script src="tools/deep447.js?v=579"></script>
 <script src="tools/impact459.js?v=492r1"></script>
@@ -9757,7 +9757,7 @@ requestAnimationFrame(frame);
 <script src="tools/explorar539.js?v=564"></script>
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/flora-regioes.js?v=621"></script>
-<script src="tools/ecossistema550.js?v=620"></script>
+<script src="tools/ecossistema550.js?v=627"></script>
 <script src="tools/skyrim588.js?v=600"></script>
 <script src="tools/controles593.js?v=593"></script>
 <script src="tools/mouse600.js?v=600"></script>
@@ -9766,9 +9766,9 @@ requestAnimationFrame(frame);
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v626</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v627</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=626;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=627;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

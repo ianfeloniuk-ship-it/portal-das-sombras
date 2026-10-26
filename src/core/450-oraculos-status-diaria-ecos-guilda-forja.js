@@ -222,7 +222,7 @@ function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.W
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
 function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x48a8ef),sn:new THREE.Color(0x101c3d),fd:new THREE.Color(0xa5d8ed),fn:new THREE.Color(0x1d3152),hd:new THREE.Color(0xd9f1ff),hn:new THREE.Color(0x7899ce),gd:new THREE.Color(0x587a52),gn:new THREE.Color(0x2e4557),ud:new THREE.Color(0xfff5df),un:new THREE.Color(0xb6c9ff),gray:new THREE.Color(0x87909a),w:0};
-    const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.75:WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
+    const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.55+.35*(window.RAIN626?RAIN626.k:.5):WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
     hemi.intensity=(.85-.35*n)*(1-D.w*.18);sun.intensity=(.90-.52*n)*(1-D.w*.45);scene.fog.density=.0105+D.w*.006}
   else{const day=new THREE.Color(0x48a8ef),night=new THREE.Color(0x101c3d);scene.background.copy(day).lerp(night,n);scene.fog.color.copy(new THREE.Color(0xa5d8ed)).lerp(new THREE.Color(0x1d3152),n);

@@ -304,14 +304,27 @@ uniform vec2 uEcoOrigin;
   float ecoTrample = ecoSample.b;
   float ecoBiomass = ecoSample.a;
 
-  // Trilhas por Pisoteio (Desire Paths):
-  // Mistura suavemente textura de grama com terra batida / lama
-  float pathK = smoothstep(0.45, 0.75, ecoTrample);
+  // Trilhas por Pisoteio (v627): terra batida, lama, neve suja ou areia compactada conforme o bioma, borda irregular
+  float trN = ecoTrample + (noise128(terrainWorld128.xz * 3.1) - 0.5) * 0.22;
+  float pathK = smoothstep(0.3, 0.66, trN);
   if (pathK > 0.001) {
-    vec3 dirtColor = vec3(0.42, 0.31, 0.18) * mix(0.75, 1.22, noise128(terrainWorld128.xz * 1.75));
-    // Lama úmida escurece o solo da trilha
-    dirtColor *= (1.0 - ecoHumidity * 0.28);
-    diffuseColor.rgb = mix(diffuseColor.rgb, dirtColor, pathK * 0.94);
+    float nz = noise128(terrainWorld128.xz * 1.75);
+    vec3 dirtColor = mix(vec3(0.36, 0.27, 0.17), vec3(0.5, 0.38, 0.23), nz) * (0.85 + 0.3 * noise128(terrainWorld128.xz * 9.0));
+    float deep = smoothstep(0.62, 0.95, trN);
+    float wetE = clamp(smoothstep(0.45, 0.85, ecoHumidity) + uWet626 * 0.6, 0.0, 1.0);
+    dirtColor = mix(dirtColor, vec3(0.16, 0.115, 0.075) * (0.8 + 0.4 * nz), wetE * (0.35 + 0.65 * deep));
+    float rutE = smoothstep(0.6, 0.9, noise128(vec2(terrainWorld128.x * 0.7 + terrainWorld128.z * 0.7, terrainWorld128.z * 2.2)));
+    dirtColor *= 1.0 - rutE * 0.16 * deep;
+#ifdef ECO_RICH627
+    dirtColor = mix(dirtColor, mix(vec3(0.5, 0.46, 0.42), vec3(0.34, 0.28, 0.23), deep), clamp(snowMask154, 0.0, 1.0) * 0.9);
+    dirtColor = mix(dirtColor, vec3(0.46, 0.34, 0.21) * (0.85 + 0.3 * nz), clamp(sandMask154, 0.0, 1.0) * 0.85);
+    dirtColor = mix(dirtColor, vec3(0.2, 0.19, 0.18) * (0.8 + 0.4 * nz), clamp(ashMask154, 0.0, 1.0) * 0.85);
+    dirtColor = mix(dirtColor, vec3(0.13, 0.1, 0.065), clamp(wetMask154, 0.0, 1.0) * 0.85);
+#endif
+    diffuseColor.rgb = mix(diffuseColor.rgb, dirtColor, pathK * 0.95);
+#ifdef ECO_MUD627
+    mudK626 = max(mudK626, pathK * wetE * (0.4 + 0.6 * deep));
+#endif
   }
 
   // Escurecimento orgânico do solo conforme fertilidade (matéria orgânica) e umidade
@@ -336,7 +349,8 @@ uniform vec2 uEcoOrigin;
       shader.uniforms.uEcoOrigin = m.uniforms.uEcoOrigin;
 
       if (!shader.fragmentShader.includes('uEcoTex')) {
-        shader.fragmentShader = ECO_TERRAIN_FN + shader.fragmentShader;
+        const fs0 = shader.fragmentShader;
+        shader.fragmentShader = (fs0.includes('snowMask154') ? '#define ECO_RICH627\n' : '') + (fs0.includes('mudK626') ? '#define ECO_MUD627\n' : '') + (fs0.includes('uWet626') ? '' : 'float uWet626=0.;\n') + ECO_TERRAIN_FN + fs0;
       }
       if (shader.fragmentShader.includes('#include <roughnessmap_fragment>') && !shader.fragmentShader.includes('ecoTrample')) {
         shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', ECO_TERRAIN_COLOR + '#include <roughnessmap_fragment>');
@@ -780,6 +794,10 @@ uniform vec2 uEcoOrigin;
           // Solo desmatado/exposto cai -3 por tick
           f = Math.max(0, f - 3);
         }
+
+        // v627: a chuva molha o solo (umidade sobe até 235) e, sem chuva, ele seca devagar até a umidade natural do bioma
+        if (isRaining) { if (u < 235) u = Math.min(235, u + 3); }
+        else if (u > cfg.rain + 20) u -= 1;
 
         // 2. Desgaste / Recuperação do Pisoteio: sem tráfego, o solo descompacta devagar (-1 por tick)
         if (p > 0) {
