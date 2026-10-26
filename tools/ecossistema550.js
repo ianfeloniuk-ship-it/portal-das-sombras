@@ -728,6 +728,9 @@ uniform vec2 uEcoOrigin;
       const activeRifts = (gv('gates') || []).filter(g => !g.dead && !g.cleared && !g.closed372);
 
       let gridChanged = false;
+      // v620: células com broto plantado por animal crescem mesmo em solo pobre (neve, vulcão), mais devagar
+      const seedCells = new Set();
+      for (const t of ch.ecoTrees || []) if (t.dynamic && t.currentStage < 3) { const q = EcoGrid.getCellAt(t.x, t.z); if (q) seedCells.add(q.idx / 4); }
 
       // Simulação rápida em Uint8Array (1024 iterações = ~0.04 ms em JS moderno)
       for (let i = 0; i < TOTAL_CELLS; i++) {
@@ -787,7 +790,9 @@ uniform vec2 uEcoOrigin;
         const fatorCrescimento = Math.min(u, f) * (1.0 - p / 255.0);
 
         // Trilha batida intensa (pisoteio > 180): o capim morre rapidamente abrindo a trilha de terra
-        if (p > 180) {
+        if (seedCells.has(i)) {
+          if (b < 240 && p < 80) b = Math.min(240, b + 2);
+        } else if (p > 180) {
           b = Math.max(10, b - 14);
         } else if (p < 80 && fatorCrescimento > 60) {
           // Solo fértil e pouco pisoteado: vegetação se desenvolve até o teto do bioma e da fertilidade

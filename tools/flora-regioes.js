@@ -111,8 +111,8 @@
       const bio = biomeAt(e.x, e.z);
       if (!ESPECIES[par.species].bio.includes(bio) || pick(e.x, e.z, bio, 'tree_oak') !== par.species) continue; /* mesma região e espécie */
       const c = EcoGrid.getCellAt(e.x, e.z);
-      if (!c || c.fertilidade < 150 || c.pisoteio > 40 || c.biomassa > 130) continue;
-      if (EcoGrid.nearestAny(e.x, e.z, 5)) continue;
+      if (!c || c.fertilidade < 55 || c.pisoteio > 40 || c.biomassa > 130) continue; /* neve/vulcão têm solo pobre: o limite é o de um solo vivo, não o de floresta */
+      if (EcoGrid.nearestAny(e.x, e.z, 2.6)) continue;
       if (EcoGrid.addTree(e.x, e.z, par.species, 125)) plantadas.push({ x: e.x, z: e.z, species: par.species });
     }
   }
