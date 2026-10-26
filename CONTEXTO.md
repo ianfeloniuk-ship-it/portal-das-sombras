@@ -1,3 +1,8 @@
+## v610 (26/10/2026) — missão fixa #5 «O Caderno sob o Casaco»
+- **`tools/caderno605.js` (novo) + `campaign327.js`:** o Ato II abre ao concluir o Ato I (ou no Rank E); a carroça de Dorian queimada fica na Estrada Leste (a leste de Aster), 6 inimigos (5 + 1 elite) com vida/dano calibrados pelo nível, diário sob o casaco, 2 sobreviventes. Ao entregar a Lyra, escolha: entregar direto ou copiar as páginas da inscrição antes. Copiar: página nova no Diário (Descobertas), +10 de Reputação da Ordem e a prova da Primeira Era em duas vias (`profile.fixas545.q005.copia`; agentes de Logos não apagam o rastro).
+- **Teste:** jogado no navegador (Brann → Estrada Leste → combate → diário → 2 sobreviventes → Lyra → escolha da cópia) e a #4 até a saudação por classe. Sem calibrar, a emboscada tinha 150–250 de vida e matava um nível 1.
+- **Pendente/limites:** só o ramo "copiar" foi jogado; o ramo "direto" só confere o aviso. Nenhum marcador novo: usa o do passo da missão.
+
 ## v606 (26/10/2026) — missão fixa #4 «A Bigorna de Kael e o Primeiro Aço»
 - **`tools/kael604.js` (novo) + `dialogo520.js`:** ao despertar a classe no escambo com Kael (que já entrega a arma de treino da classe de graça), Kael fala diante da bigorna aquecida pelo Nexo, confirma a arma e conta que os 9 pontos iniciais (v465) já foram para a vocação. Consequência: guardas e moradores de Aster passam a cumprimentar pela classe ("Salve, Guerreiro."; guardas: "Alto lá, ..."). Registro em `profile.fixas545.q004`.
 - **Partes ligadas:** `bondTxt` da conversa de cidade (`dialogo520.js`) recebe o prefixo; `kael604.js` carrega antes de `dialogo520.js`. Fase C: nada novo.

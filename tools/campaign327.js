@@ -20,8 +20,8 @@
       { t: 'barter', d: 'Faça o escambo com Kael, na loja de equipamentos, e equipe sua primeira arma.', done: 'Kael: — Está feito. A Fenda reconhece o seu caminho, Viajante.' }] },
     { id: 'a2', act: 2, title: 'II — O Diário de Aldric', steps: [
       { t: 'talk', npc: 'Brann', d: 'Fale com Brann, na Defesa da Vila, sobre a patrulha sumida.', say: ['Uma patrulha minha sumiu na estrada com uma carroça de mantimentos. Aldric ia junto.', 'Vá na frente. Eu seguro a muralha.'] },
-      { t: 'go', d: 'Encontre a carroça interrompida pela Fenda.', verb: 'EXAMINAR A CARROÇA', fight: { n: 5, el: 1 },
-        done: 'Entre as caixas há um caderno de capa queimada: o diário de Aldric.' },
+      { t: 'go', d: 'Encontre a carroça de Dorian queimada na Estrada Leste, cercada pela Fenda.', verb: 'EXAMINAR A CARROÇA', fight: { n: 5, el: 1 },
+        done: 'Sob um casaco, entre duas pedras, há um caderno de capa queimada: o diário de Aldric.' },
       { t: 'go', d: 'Resgate os sobreviventes escondidos perto da carroça.', verb: 'AJUDAR O SOBREVIVENTE', pts: 2, near: 1, fig: { civ: true, name: 'Sobrevivente' },
         done: 'Sobrevivente: — Aldric entrou numa passagem vermelha atrás de uma criança. Não voltou.' },
       { t: 'talk', npc: 'Lyra', d: 'Leve o diário de Aldric a Lyra.', say: ['"As marcas se repetem." Aldric viu um padrão antes de todo mundo.', 'Ele fala de uma construção mais antiga que os portais. Se quiser respostas, comece pela Torre.'] }] },
@@ -158,6 +158,7 @@
   /* Quando cada ato abre (mesmas regras que já liberam as páginas do Diário ou conclusão do ato anterior). */
   const ACT_OPEN = {
     1: () => true,
+    2: () => !!st().m.a1?.done || (profile.rank || 0) >= 2 || (profile.acts || []).includes(2), /* v607: Ato II abre ao concluir o Ato I ou ao chegar ao Rank E */
     8: () => lore().includes('act8') || !!st().m.a7?.done,
     9: () => lore().includes('act9') || !!st().m.a8?.done,
     10: () => lore().includes('act10') || !!st().m.a9?.done,
@@ -268,6 +269,9 @@
     }
     const c = nearestCity(player.x, player.z).c, wall = wallOf(c); s.city = c.name;
     if (mId === 'a1') return window.Fronteira551 ? [Fronteira551.cx(334),334] : [c.x,c.z+334];
+    if (mId === 'a2' && s.s === 1) { /* v607 (missão fixa #5): carroça de Dorian na Estrada Leste */
+      for (let k = 0; k < 40; k++) { const px = c.x + wall + rnd(40, 52), pz = c.z + rnd(-8, 8); if (freeAt(px, pz, 1.4) && freeAt(px + 2, pz, 1) && freeAt(px - 2, pz, 1)) return [px, pz]; }
+    }
     if (mId === 'a8') {
       if (s.s === 0) return [c.x - (wall + 28), c.z];
       if (s.s === 1) return [c.x - (wall + 58), c.z - 8];
@@ -822,6 +826,8 @@
         e.aggro = true;
         if (m.id === 'a1' && s.s === 0) { e.isIntroTutorial = true; e.hp = e.maxhp = 30; e.dmg = 3; }
         else if (i < elites) makeElite(e);
+        if (m.id === 'a2' && s.s === 1) { /* v607 (#5): emboscada da Estrada Leste calibrada pelo nível de quem chega (o Ato II abre ao concluir o Ato I) */
+          const cap = 50 + 14 * (run.level || 1) + (i < elites ? 40 : 0); if (e.maxhp > cap) { e.hp = e.maxhp = cap; } e.dmg = Math.min(e.dmg || 4, 4 + (run.level || 1)); }
         if (sp.fight.logos456 && i === 0) {
           e.logos456 = true; e.threat184 = 9; e.name = '[Logos] Dedo do Arquiteto'; e.short = 'Dedo do Arquiteto';
         }
