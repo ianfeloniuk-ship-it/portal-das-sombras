@@ -22,8 +22,18 @@
     pinheiro_cinza: { nome: 'Pinheiro cinza', bio: ['vulcao'], regiao: 'Urdan · vulcão e minas', falta: 'modelo (só há imagens de referência)' },
     willow:  { nome: 'Salgueiro', bio: ['pantano'], regiao: 'Thalor · docas e pântano', espalha: false },
     fir:     { nome: 'Conífera', bio: ['cristal'], regiao: 'cristal', espalha: false },
-    cacto:   { nome: 'Cacto', bio: ['deserto'], regiao: 'Zahar · deserto', espalha: false, nota: 'colocado pelo cenário (cacto1/cacto2), não por aqui' },
-    oak:     { nome: 'Carvalho', bio: ['campos', 'floresta', 'flores'], regiao: 'padrão (Verden, Aster e os outros biomas até haver espécies próprias)', espalha: false }
+    cacto:   { nome: 'Cacto', bio: ['deserto'], regiao: 'Zahar · deserto', espalha: false, cenario: true, nota: 'colocado pelo cenário (cacto1/cacto2), não por aqui' },
+    oak:     { nome: 'Carvalho', bio: ['campos', 'floresta', 'flores'], regiao: 'padrão (Verden, Aster e os outros biomas até haver espécies próprias)', espalha: false },
+    /* ---- espécies novas de Ian (26/10): só há imagens de referência e recortes (Drive: Arvores-Biomas-TRELLIS2-2026-10-23/referencias e views);
+       quando os GLB `_game` existirem, tirar `falta`, pôr `estagios` e o id nas listas TREEIDS/NAT422 — o sorteio por bioma passa a usá-las sozinho ---- */
+    carvalho_aster:  { nome: 'Carvalho de Aster', bio: ['campos', 'flores'], regiao: 'Aster e campos (a imagem mostra copa dourada)', proposta: true, falta: 'GLB (imagens: estágios + recortes broto/jovem/adulta/morta/toco)' },
+    cipreste_raizes: { nome: 'Cipreste de raízes', bio: ['pantano'], regiao: 'Thalor · brejo (raízes aéreas e musgo pendurado)', proposta: true, falta: 'GLB (imagens: estágios + recortes)' },
+    salgueiro_brejo: { nome: 'Salgueiro do brejo', bio: ['pantano'], regiao: 'Thalor · brejo', proposta: true, falta: 'GLB (imagens: estágios + recortes); substitui o salgueiro Tripo' },
+    arvore_cristal_mana: { nome: 'Árvore de cristal de mana', bio: ['cristal'], regiao: 'bioma de cristal (copa com cristais azuis)', proposta: true, falta: 'GLB (imagens: estágios + recortes); substitui a conífera' },
+    cacto_colunar:   { nome: 'Cacto colunar', bio: ['deserto'], regiao: 'Zahar · deserto', proposta: true, cenario: true, falta: 'GLB (imagens: estágios + recortes); substitui cacto1/cacto2' },
+    acacia_espinhosa: { nome: 'Acácia espinhosa', bio: ['deserto'], regiao: 'Zahar · deserto/savana (pelo nome)', proposta: true, falta: 'GLB (só a imagem de estágios)' },
+    baoba_zahar:     { nome: 'Baobá de Zahar', bio: ['deserto'], regiao: 'Zahar · deserto', proposta: true, falta: 'GLB (só a imagem de estágios)' },
+    betula_prateada: { nome: 'Bétula prateada', bio: ['floresta'], regiao: 'floresta (Verden?) — pelo nome; a região não está clara', proposta: true, falta: 'GLB (só a imagem de estágios)' }
   };
 
   /* ---------- bosques e clareiras ----------
@@ -33,13 +43,12 @@
   const noise = (x, z) => (typeof WN === 'function' ? WN(x, z) : .5);
   function grove(x, z) { return .6 * noise(x * .010 + 31, z * .010 + 17) + .4 * noise(x * .027 + 5, z * .027 + 91); }
 
+  /* espécies com modelo (sem `falta`, que não são do cenário) que nascem no bioma; mais de uma = manchas fixas por ruído */
+  function candidatos(bio) { return Object.keys(ESPECIES).filter(id => { const e = ESPECIES[id]; return !e.falta && !e.cenario && e.bio.includes(bio); }); }
   function especie(bio, x, z, key) {
-    if (bio === 'deserto') return null;
-    if (bio === 'vulcao') return 'brasa'; /* pinheiro cinza entra aqui quando houver modelo */
-    if (bio === 'neve') return noise(x * .02 + 400, z * .02 + 200) > .5 ? 'betula' : 'abeto'; /* manchas fixas de cada espécie */
-    if (bio === 'cristal') return 'fir';
-    if (bio === 'pantano') return 'willow';
-    return 'oak';
+    const c = candidatos(bio); if (!c.length) return null;
+    if (c.length === 1) return c[0];
+    return c[Math.min(c.length - 1, Math.floor(noise(x * .02 + 400, z * .02 + 200) * c.length))];
   }
 
   /* devolve o id do modelo (ou null = não nasce aqui); undefined deixa o jogo decidir */
