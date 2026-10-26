@@ -53,11 +53,12 @@ const rareStatus103=document.createElement('div');rareStatus103.id='rare-status1
 /* Textured Tripo scenery. Shared geometry/materials, instanced per streamed chunk. */
 const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
-  const files={oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
+  const files={abeto:'flora/abeto_geada_adulta.glb',betula:'flora/betula_gelida_adulta.glb',brasa:'flora/arvore_brasa_adulta.glb',oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
   const HEIGHT={guild:16,defense:16,forge:9.5,inn:13.5,church:18,potion:10.5,mill:16,well:2.8,bank:3.2,market:3.4,bankhall:14,house:9.5},KEYHEIGHT={building_tower_A_blue:16,building_tower_B_blue:16};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
   const CITY={building_barracks_blue:'guild',building_blacksmith_blue:'forge',building_home_B_red:'potion',building_tavern_blue:'inn',building_church_blue:'church',building_windmill_blue:'mill',building_well_blue:'well',building_tower_A_blue:'defense',building_tower_B_blue:'defense',building_market_blue:'defense',wall_straight:'wall','stall-red':'market','stall-green':'bank',tripo_bank_building:'bankhall',palisade154:'palisade',outerwall154:'wall'};
+  const TREEIDS=['oak','willow','fir','abeto','betula','brasa'];/* v619: espécies novas por região (tools/flora-regioes.js) */
   function prepare(gltf, id) {
     const root = gltf.scene;
     root.updateMatrixWorld(true);
@@ -85,12 +86,12 @@ const TripoEnvironment153 = (() => {
         mat.roughness=Math.max(.72,mat.roughness||0);mat.metalness=0;
         // Tripo foliage albedo is very dark under the game's lighting; lift it to read like the reference.
         // Etapa 2 (Irror, 02/10): 1.9x + strong self-glow read as neon; keep a gentle lift, slightly muted green, almost no glow.
-        if(['oak','willow','fir'].includes(id)&&mat.map){mat.color.setRGB(1.22,1.12,1.08);mat.emissiveMap=mat.map;mat.emissive.setRGB(.09,.09,.08);}else if(mat.map){mat.color.setScalar(1.3);/* painted look: never pure black at dusk */mat.emissiveMap=mat.map;mat.emissive.setRGB(.2,.19,.18);}
+        if(TREEIDS.includes(id)&&mat.map){mat.color.setRGB(1.22,1.12,1.08);mat.emissiveMap=mat.map;if(id==='brasa')mat.emissive.setRGB(.55,.42,.3);/* v619: as brasas da árvore brasa brilham */else mat.emissive.setRGB(.09,.09,.08);}else if(mat.map){mat.color.setScalar(1.3);/* painted look: never pure black at dusk */mat.emissiveMap=mat.map;mat.emissive.setRGB(.2,.19,.18);}
         // Same character visibility cutout as existing scenery. Instancing needs world positions.
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
           /* v243: vento nas árvores — o tronco curva com rajadas e as folhas tremem; fase por árvore */
-          if(['oak','willow','fir'].includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\nvarying float vH153;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+          if(TREEIDS.includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\nvarying float vH153;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
             {float H=${size.y.toFixed(3)},h=clamp(transformed.y/H,0.,1.);vH153=h;vec2 ph=vec2(0.);
             #ifdef USE_INSTANCING
             ph=instanceMatrix[3].xz;
@@ -100,11 +101,11 @@ const TripoEnvironment153 = (() => {
             transformed.x+=sin(t*1.3+f)*b+b*.6;transformed.z+=cos(t*1.05+f*1.3)*b*.6;
             float lf=smoothstep(.35,.7,h)*H*.0025*(.6+g);vec3 q=transformed*(5./H);
             transformed+=vec3(sin(t*4.+q.y+q.z+f),sin(t*3.6+q.x)*.4,cos(t*4.4+q.z+q.x+f))*lf;}`)}
-          if(['oak','willow','fir'].includes(id))shader.fragmentShader='varying float vH153;\n'+shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
+          if(TREEIDS.includes(id))shader.fragmentShader='varying float vH153;\n'+shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
             {vec3 c0=diffuseColor.rgb;float leaf154=max(smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95),${id==='fir'?'0.':'smoothstep(.24,.30,vH153)'});float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
             diffuseColor.rgb=mix(c0,(dot(c0,vec3(.3,.59,.11))*2.1+.11)*vColor,leaf154*on154);}
             #endif`);
-          if(!['oak','willow','fir','boulder','stones','mossrock','cacto1','cacto2'].includes(id)){
+          if(!['oak','willow','fir','abeto','betula','brasa','boulder','stones','mossrock','cacto1','cacto2'].includes(id)){
             // Night: amber window panes glow and the facade keeps a faint read, like the procedural houses.
             shader.uniforms.night153=window.NIGHT153U||(window.NIGHT153U={value:0});
             shader.fragmentShader='uniform float night153;\n'+shader.fragmentShader.replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
@@ -129,15 +130,17 @@ const TripoEnvironment153 = (() => {
     if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}
       /* v180: versão leve (Blender, ~3 mil triângulos) para árvores longe da câmera */
-      const lod=({oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',cacto1:'tripo-cacto446a-lod.glb',cacto2:'tripo-cacto446b-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
+      const lod=({abeto:'flora/abeto_geada_adulta-lod.glb',betula:'flora/betula_gelida_adulta-lod.glb',brasa:'flora/arvore_brasa_adulta-lod.glb',oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',cacto1:'tripo-cacto446a-lod.glb',cacto2:'tripo-cacto446b-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
       if(lod&&models[id])loader.load('models/'+lod,g2=>{const full=models[id];try{prepare(g2,id);full.liteParts=models[id].parts}catch(e){}models[id]=full;resolve()},undefined,()=>resolve());else resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
   })));
   /* v446 (Ian: refazer cacto e pedras): os cactos e pedras antigos do cenário viram modelos Tripo (cactos novos, monte de pedras e rochedo) */
   function scen446(key,x,z){if(/cactus/.test(key))return ((Math.floor(x*3.1)+Math.floor(z*1.7))&1)?'cacto1':'cacto2';
     if(/(^|:)(rock_small|rock_smallFlat|stone_small)/.test(key))return 'stones';if(/(^|:)(rock_large|rock_tall|stone_large|stone_tall)/.test(key))return 'boulder';return null}
   function tree(key,x,z){
-    if(key.includes('dead'))return null;
     const bio=L.mode==='dungeon'&&L.G?.th?.habitat124||biomeAt(x,z);
+    /* v619 (Ian): árvores por região, em bosques e clareiras fixos (tools/flora-regioes.js); no vulcão a árvore brasa aceita as chaves de árvore morta */
+    if(L.mode!=='dungeon'&&window.Flora&&Flora.pick){const f=Flora.pick(x,z,bio,key);if(f!==undefined)return f}
+    if(key.includes('dead'))return null;
     if(bio==='vulcao'||bio==='deserto')return null;
     return bio==='pantano'?'willow':bio==='neve'||bio==='cristal'?'fir':'oak';
   }
@@ -174,7 +177,7 @@ const TripoEnvironment153 = (() => {
     if(!m&&key.startsWith('tree_')&&models.oak)return 0;
     if(!m)return oldEH(batch,key,x,y,z,ry,height,tint);
     // Metre scale: real trees tower over the 1.9 m hero (oak ~10 m, willow ~9 m, fir ~12 m).
-    const scale=height*({oak:1.55,willow:1.35,fir:1.7,cacto1:1.25,cacto2:1.1,stones:1.15,boulder:1}[id]||1)/m.h;add(batch,id,x,y,z,ry,scale);return scale;
+    const scale=height*({abeto:.8,betula:.62,brasa:.55,oak:1.55,willow:1.35,fir:1.7,cacto1:1.25,cacto2:1.1,stones:1.15,boulder:1}[id]||1)/m.h;add(batch,id,x,y,z,ry,scale);return scale;
   };
   EW=function(batch,key,x,y,z,ry,width,tint){
     // v154 rocks from Tripo in the open world (dungeons keep their habitat stones). Width from the game is already in metres.
@@ -213,7 +216,7 @@ const TripoEnvironment153 = (() => {
     }
     return group;
   };
-  const NAT422=window.NAT422=new Set(['oak','willow','fir','boulder','stones','mossrock','cacto1','cacto2']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
+  const NAT422=window.NAT422=new Set(['oak','willow','fir','abeto','betula','brasa','boulder','stones','mossrock','cacto1','cacto2']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
   setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}if(!inV){m.visible=lt.visible=false;continue}const P=typeof player!=='undefined'&&player?player:camera.position,nat=NAT422.has(m.userData.tripo153);split423(m,lt,P,nat?10:40,nat?90:1e9,nat?(m.userData.thin423??1):1)}},100);
   /* v424 (Ian: jogo liso no navegador): antes o pedaço inteiro virava completo quando o jogador chegava perto do grupo
      (até 2,7 mi de triângulos só de carvalho, 12 mil cada). Agora é por árvore/construção: as mais perto ficam completas,

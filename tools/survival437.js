@@ -574,7 +574,8 @@
       new T.MeshStandardMaterial({ color: 0x5c4028, roughness: 0.92 })
     );
     cyl.position.y = 0.19;
-    g.add(cyl);
+    g.add(cyl); g.userData.cil = cyl;
+    try { if (window.Flora && Flora.toco) Flora.toco(x, z, g); } catch (_) {} /* v619: toco da espécie, quando houver modelo */
     scene.add(g);
     stumps456.set(key, g);
   }
@@ -588,7 +589,7 @@
     const s = S();
     let best = null, bd = 4.2;
     scene.traverse(o => {
-      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'].includes(o.userData?.tripo153)) return;
+      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa'].includes(o.userData?.tripo153)) return;
       for (let i = 0; i < o.count; i++) {
         o.getMatrixAt(i, _mat4);
         _pos.setFromMatrixPosition(_mat4);
@@ -685,7 +686,7 @@
     const s = S(); if (!s) return null;
     let target = null, bd = 6.0;
     scene.traverse(o => {
-      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'].includes(o.userData?.tripo153)) return;
+      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa'].includes(o.userData?.tripo153)) return;
       for (let i = 0, full = Math.max(o.count, o.userData.count415 || 0); i < full; i++) { /* v566: malha 'perto' só conta as próximas */
         o.getMatrixAt(i, _mat4);
         _pos.setFromMatrixPosition(_mat4);

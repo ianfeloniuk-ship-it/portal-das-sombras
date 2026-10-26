@@ -194,7 +194,7 @@
             if (scl.y <= 0.1) continue;
             const k = Math.round(pos.x / 1.5) + ':' + Math.round(pos.z / 1.5);
             let tp = treeIdx.get(k);
-            if (!tp) { tp = { x: pos.x, z: pos.z, refs: [] }; treeIdx.set(k, tp); treePositions.push(tp); }
+            if (!tp) { tp = { x: pos.x, z: pos.z, refs: [], species: o.userData.tripo153 }; treeIdx.set(k, tp); treePositions.push(tp); }
             tp.refs.push({ o, i, m: m4.clone() });
           }
         }
@@ -372,7 +372,7 @@ uniform vec2 uEcoOrigin;
 
   // Geometrias e materiais compartilhados dos estágios
   const ZERO_M = new T.Matrix4().makeScale(0, 0, 0);
-  const TREE_KINDS = ['oak', 'willow', 'fir', 'palm', 'dead', 'cherry'];
+  const TREE_KINDS = ['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa'];
   let GEO_STUMP = null;
   let GEO_SPROUT_STEM = null, GEO_SPROUT_LEAF = null;
   let GEO_YOUNG_TRUNK = null, GEO_YOUNG_CONE1 = null, GEO_YOUNG_CONE2 = null;
@@ -487,12 +487,81 @@ uniform vec2 uEcoOrigin;
         currentScale: 1.0,
         currentVisual: null,
         refs: tp.refs || [],
+        species: tp.species,
         hidden: false,
         felled: false
       };
       ch.ecoTrees.push(treeObj);
       EcoGrid.updateTreeVisual(treeObj, cell.biomassa, cell.fertilidade);
     }
+  };
+
+  /* escala/esconde as instâncias reais da árvore (refs); k=1 restaura */
+  function scaleRefs(treeObj, k) {
+    if (treeObj.appliedK === k) return;
+    if (!treeObj.scanned && k !== 1 && !treeObj.dynamic) {
+      const refs = [], m4 = new T.Matrix4(), p3 = new T.Vector3(), s3 = new T.Vector3();
+      const sc = gv('scene') || null;
+      if (sc) sc.traverse(o => {
+        if (!o.isInstancedMesh || !TREE_KINDS.includes(o.userData?.tripo153)) return;
+        const full = Math.max(o.count, o.userData.count415 || 0);
+        for (let n = 0; n < full; n++) {
+          o.getMatrixAt(n, m4); p3.setFromMatrixPosition(m4); s3.setFromMatrixScale(m4);
+          if (s3.y < 0.05 || Math.hypot(p3.x - treeObj.x, p3.z - treeObj.z) > 1.6) continue;
+          refs.push({ o, i: n, m: m4.clone() });
+        }
+      });
+      treeObj.refs = refs; treeObj.scanned = refs.length > 0;
+    }
+    const q4 = new T.Quaternion(), p4 = new T.Vector3(), s4 = new T.Vector3(), mk = new T.Matrix4();
+    for (const r of treeObj.refs) {
+      if (k === 1) r.o.setMatrixAt(r.i, r.m);
+      else { r.m.decompose(p4, q4, s4); mk.compose(p4, q4, s4.multiplyScalar(Math.max(k, 0.001))); r.o.setMatrixAt(r.i, mk); }
+      r.o.instanceMatrix.needsUpdate = true;
+    }
+    treeObj.appliedK = k;
+  }
+
+  /* estágio com modelo próprio: broto/jovem/morta (a árvore real some), adulta = a real (ou o modelo, se nasceu de semente), anciã = real um pouco maior */
+  function applyStaged(treeObj, stage, biomass) {
+    if (stage === 0 && treeObj.felled) return; /* o toco do lenhador é do survival437 */
+    scaleRefs(treeObj, stage <= 2 ? 0 : stage === 4 ? 1.2 : 1);
+    const H = Flora.altura(treeObj.species) * (0.85 + 0.3 * (Math.abs(Math.sin(treeObj.x * 7.31 + treeObj.z * 3.17)) % 1));
+    let want = null, metros = H;
+    if (stage === 0) { want = 'toco'; metros = (Flora.ESPECIES[treeObj.species] && Flora.ESPECIES[treeObj.species].toco) || 1.6; } /* v619: o modelo 'morta' do TRELLIS veio com placas brancas; árvore morta vira toco */
+    else if (stage === 1) { want = 'broto'; metros = H * (0.1 + 0.08 * Math.max(0, Math.min(1, (biomass - 61) / 89))); }
+    else if (stage === 2) { want = 'jovem'; metros = H * (0.38 + 0.22 * Math.max(0, Math.min(1, (biomass - 151) / 49))); }
+    else if (treeObj.dynamic) { want = 'adulta'; metros = H * (stage === 4 ? 1.15 : 1); }
+    const sig = want ? want + ':' + metros.toFixed(1) : '';
+    treeObj.currentStage = stage;
+    if (sig === treeObj.overlaySig) return;
+    treeObj.overlaySig = sig;
+    if (treeObj.overlay) { treeObj.group.remove(treeObj.overlay); treeObj.overlay = null; }
+    if (typeof global.terrH === 'function') treeObj.group.position.y = global.terrH(treeObj.x, treeObj.z);
+    if (want) Flora.overlay(treeObj.species, want, metros, m => { if (m && treeObj.overlaySig === sig) { treeObj.group.add(m); treeObj.overlay = m; } });
+  }
+
+  /* árvore nova (semente levada por animal): sem instância real, só o modelo do estágio */
+  EcoGrid.addTree = function (x, z, species, biomass) {
+    const ch = EcoGrid.getChunkAt(x, z); if (!ch || !ch.ecoGrid) return null;
+    const cell = EcoGrid.getCellAt(x, z); if (!cell) return null;
+    const sc = gv('scene'); if (!sc) return null;
+    if (!ch.ecoTreeGroup) { const tg = new T.Group(); tg.userData.terrainAbsolute245 = true; sc.add(tg); ch.ecoTreeGroup = tg; ch.ecoTrees = ch.ecoTrees || []; }
+    const g = new T.Group(); g.position.set(x, typeof global.terrH === 'function' ? global.terrH(x, z) : 0, z); ch.ecoTreeGroup.add(g);
+    const t = { x, z, key: Math.round(x) + ':' + Math.round(z), group: g, chunkKey: ch.key, currentStage: 1, currentScale: 1, currentVisual: null, refs: [], species, hidden: false, felled: false, dynamic: true };
+    cell.grid[cell.idx + 3] = biomass; ch.ecoTrees.push(t);
+    EcoGrid.updateTreeVisual(t, biomass, cell.grid[cell.idx + 1]);
+    return t;
+  };
+  EcoGrid.nearestAdult = function (x, z, r) {
+    const ch = EcoGrid.getChunkAt(x, z); if (!ch || !ch.ecoTrees) return null;
+    for (const t of ch.ecoTrees) if (t.currentStage >= 3 && !t.felled && Math.hypot(t.x - x, t.z - z) < r) return t;
+    return null;
+  };
+  EcoGrid.nearestAny = function (x, z, r) {
+    const ch = EcoGrid.getChunkAt(x, z); if (!ch || !ch.ecoTrees) return null;
+    for (const t of ch.ecoTrees) if (Math.hypot(t.x - x, t.z - z) < r) return t;
+    return null;
   };
 
   EcoGrid.updateTreeVisual = function (treeObj, biomass, fertility) {
@@ -536,6 +605,9 @@ uniform vec2 uEcoOrigin;
 
     // v566 (Ian: sem formas geométricas): todos os estágios usam o modelo REAL da árvore do jogo, só muda a escala.
     // Muda/Jovem = árvore real pequena; Adulta = tamanho normal; Anciã = um pouco maior; Toco = some (o survival437 desenha o toco do lenhador).
+    /* v619: espécies com modelo por estágio (tools/flora-regioes.js) trocam de modelo; as demais só mudam de escala */
+    const staged = !!(treeObj.species && window.Flora && Flora.staged(treeObj.species));
+    if (staged) { applyStaged(treeObj, stage, biomass); return; }
     const k = stage === 0 ? 0 : stage === 3 ? 1 : stage === 4 ? Math.min(1.2, targetScale) : targetScale;
     if (!(stage === 0 && treeObj.felled) && Math.abs(k - (treeObj.appliedK ?? 1)) > 0.02) {
       if (!treeObj.scanned && k !== 1) {
