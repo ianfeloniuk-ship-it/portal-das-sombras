@@ -225,6 +225,11 @@
     } catch (_) {}
   }
 
+  /* v629: as luzes do sonho (hemisferio e direcional) existem desde o inicio com intensidade 0. Antes eram criadas e removidas com o sonho,
+     e a mudanca no numero de luzes da cena recompilava TODOS os shaders (travadas de 4 a 10 s ao entrar e ao sair do sonho). */
+  const dreamHemiL = new THREE.HemisphereLight(0x4c1d95, 0x090212, 0);
+  const dreamRimL = new THREE.DirectionalLight(0xa855f7, 0);
+  scene.add(dreamHemiL, dreamRimL);
   // 3D Scene Components
   let dreamGroup = null;
   let handGroup = null;
@@ -250,17 +255,17 @@
     dreamGroup.add(voidSphere);
 
     // Subtle violet ambient hemi light
-    const hemi = new THREE.HemisphereLight(0x4c1d95, 0x090212, 0.7);
-    dreamGroup.add(hemi);
+    dreamHemiL.intensity = 0.7;
+    dreamGroup.add(dreamHemiL);
 
     // Pulsating purple point light + rim light for dramatic silhouette
     purpleLight = new THREE.PointLight(0xb055ff, 3.2, 14, 1.3);
     purpleLight.position.set(0, 0.35, -1.1);
     dreamGroup.add(purpleLight);
 
-    const rimLight = new THREE.DirectionalLight(0xa855f7, 1.4);
-    rimLight.position.set(0, 2.5, -3.5);
-    dreamGroup.add(rimLight);
+    dreamRimL.intensity = 1.4;
+    dreamRimL.position.set(0, 2.5, -3.5);
+    dreamGroup.add(dreamRimL);
 
     // Floating purple motes / embers
     particles = [];
@@ -312,6 +317,7 @@
 
   function cleanDreamScene() {
     if (!dreamGroup) return;
+    dreamHemiL.intensity = 0; dreamRimL.intensity = 0; scene.add(dreamHemiL, dreamRimL);
     scene.remove(dreamGroup);
     dreamGroup.traverse(o => {
       if (o.geometry) o.geometry.dispose();

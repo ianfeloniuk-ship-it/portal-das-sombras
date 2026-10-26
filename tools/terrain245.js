@@ -124,9 +124,11 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
   };
  };
  const lift=`
+/* v629: o chao calcula o relevo 3 vezes por vertice (centro + 2 vizinhos) e reaproveita em elevacao, normal e estrada; antes eram 12 copias de terrH245 e o shader levava ~5 s para compilar */
+float tgH245=0.,tgX245=0.,tgZ245=0.;void tgCompute245(vec2 p){tgH245=terrH245(p);tgX245=terrH245(p+vec2(2.,0.));tgZ245=terrH245(p+vec2(0.,2.));}
 float terrainLift245(vec3 wp){if(uTerAbsolute245>.5)return 0.;
 #ifdef TER_GROUND245
-return terrH245(wp.xz);
+return tgH245;
 #else
 #ifndef USE_INSTANCING
 if(uTerBatch245<.5)return uTerHeight245;
@@ -153,7 +155,7 @@ gl_Position=projectionMatrix*mvPosition;`;
  C.worldpos_vertex=C.worldpos_vertex.replace(/(worldPosition\s*=\s*modelMatrix\s*\*\s*worldPosition;)/,'$1\nworldPosition.y+=terrainLift245(worldPosition.xyz);');
  C.defaultnormal_vertex+=`
 #ifdef TER_NORMAL245
-{vec4 np245=modelMatrix*vec4(position,1.);if(uTerOn>.5){float e=1.5,hx=terrH245(np245.xz+vec2(e,0.))-terrH245(np245.xz-vec2(e,0.)),hz=terrH245(np245.xz+vec2(0.,e))-terrH245(np245.xz-vec2(0.,e));
+{vec4 np245=modelMatrix*vec4(position,1.);if(uTerOn>.5){float e=1.5,hx=(tgX245-tgH245)*1.5,hz=(tgZ245-tgH245)*1.5;
 vec3 wn=normalize((vec4(transformedNormal,0.)*viewMatrix).xyz);if(wn.y>.6){wn=normalize(wn+vec3(-hx,0.,-hz)/(2.*e));transformedNormal=(viewMatrix*vec4(wn,0.)).xyz;}}}
 #endif`;
  const add=function(sh){if(!sh.uniforms||sh.vertexShader.includes('terrH245(vec2'))return;
@@ -167,7 +169,8 @@ W245=instanceMatrix*W245;
 #endif
 W245=modelMatrix*W245;gl_Position+=projectionMatrix*viewMatrix*vec4(0.,terrainLift245(W245.xyz),0.,0.);}
 `+v.slice(i)}
-  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));{float e529=2.,gx529=terrH245(pw444.xz+vec2(e529,0.))-terrH245(pw444.xz-vec2(e529,0.)),gz529=terrH245(pw444.xz+vec2(0.,e529))-terrH245(pw444.xz-vec2(0.,e529));float sl534=length(vec2(gx529,gz529))/(2.*e529);road128*=1.-smoothstep(.35,.75,sl534);vNy534=inversesqrt(1.+sl534*sl534);}float th446=terrH245(pw444.xz),sm446=step(-60.,seaD439(pw444.xz));sea446=sm446*(clamp(-.9-th446,0.,1.)+clamp((-.9-th446)*.04,0.,1.));}\n'+v.slice(k);v='varying float sea446;varying float vNy534;\n'+v} /* v444: trilha e calcamento usam o visual de estrada */
+  if(ground&&/varying float road128/.test(v)){const k=v.lastIndexOf('}');v=v.slice(0,k)+'{vec4 pw444=modelMatrix*vec4(position,1.);road128=max(road128,path444(pw444.xz));{float e529=2.,gx529=(tgX245-tgH245)*2.,gz529=(tgZ245-tgH245)*2.;float sl534=length(vec2(gx529,gz529))/(2.*e529);road128*=1.-smoothstep(.35,.75,sl534);vNy534=inversesqrt(1.+sl534*sl534);}float th446=tgH245,sm446=step(-60.,seaD439(pw444.xz));sea446=sm446*(clamp(-.9-th446,0.,1.)+clamp((-.9-th446)*.04,0.,1.));}\n'+v.slice(k);v='varying float sea446;varying float vNy534;\n'+v} /* v444: trilha e calcamento usam o visual de estrada */
+  if(ground)v=v.replace(/void main\s*\(\s*\)\s*\{/,'void main(){tgCompute245((modelMatrix*vec4(position,1.)).xz);');
   sh.vertexShader=(ground?'#define TER_GROUND245\n':'')+GL+lift+v;
   /* v534: cenário instanciado (árvore, pedra) some em pontilhado a menos de 2,6 m da câmera — antes a câmera entrava no tronco e aparecia um triângulo preto */
   if(!ground&&sh.vertexShader.includes('#include <project_vertex>')&&sh.fragmentShader.includes('void main()')&&!sh.fragmentShader.includes('vCam534')){
