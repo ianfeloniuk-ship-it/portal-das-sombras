@@ -69,16 +69,10 @@
     cancel(); SK.drawn = !SK.drawn; e.preventDefault();
     try { toast(SK.drawn ? 'Arma sacada' : 'Arma guardada', 900); } catch(_) {}
   });
-  /* botão direito defende (como no Skyrim); o botão do meio continua defendendo também */
-  let rmbBlock = false;
+  /* botão direito defende (Guard472 escuta o botão direito; v600: o botão do meio não faz nada); aqui só saca a arma */
   cv.addEventListener('pointerdown', e => {
     if(e.button !== 2 || e.pointerType === 'touch' || !ready() || !kind() || SK.drawing) return;
-    SK.drawn = true; rmbBlock = true;
-    cv.dispatchEvent(new PointerEvent('pointerdown', { button: 1, buttons: 4, pointerType: 'mouse', bubbles: true, cancelable: true }));
-  }, true);
-  addEventListener('pointerup', e => {
-    if(e.button !== 2 || !rmbBlock) return;
-    rmbBlock = false; window.dispatchEvent(new PointerEvent('pointerup', { button: 1, buttons: 0, pointerType: 'mouse', bubbles: true }));
+    SK.drawn = true;
   }, true);
 
   /* flecha: dano e velocidade pela puxada */

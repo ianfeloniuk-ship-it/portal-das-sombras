@@ -23,10 +23,10 @@ G.blocking=blocking;G.hasShield=hasShield;
 function vigor(){try{return martialState260()}catch(_){return null}}
 function spend(n){const r=vigor();if(!r)return true;if(r.vigor<n){r.vigor=0;return false}r.vigor-=n;r.vigorWait=Math.max(r.vigorWait||0,1.2);return true}
 
-/* ---------- entrada: botão do meio (v476: Ian pediu defesa no meio) ---------- */
+/* ---------- entrada: botão direito segurado (v600: como no Skyrim; o botão do meio não faz nada) ---------- */
 const C=document.getElementById('c');
-function down(e){if(e.pointerType==='touch'||e.button!==1)return;if(!started||paused||modalOpen)return;held=true;t0=now();e.preventDefault()}
-function up(e){if(e.button===1)held=false}
+function down(e){if(e.pointerType==='touch'||e.button!==2)return;if(!started||paused||modalOpen)return;held=true;t0=now();e.preventDefault()}
+function up(e){if(e.button===2)held=false}
 C.addEventListener('pointerdown',down);addEventListener('pointerup',up);addEventListener('blur',()=>{held=false});
 C.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault()});
 

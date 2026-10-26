@@ -6833,7 +6833,7 @@ function update(dt){if(window.Loot353)Loot353.tick(dt);try{ter245tick();life243(
     const moved372=Math.hypot(P.x-motionX372,P.z-motionZ372);Sprint373.spend(sprintState372,martialState260(),dt,moved372>.002,resourceWait263('vigor'));
     if(P.atkT>0){P.atkT+=dt*3.6;if(P.atkT>1)P.atkT=0}
     {stepVertical357(P,dt);COLY344=0}
-    animChibi(P.m,{move:mv,sprint:sprintState372.running,walking:!!(keys.ControlLeft||keys.AltLeft||(il>0&&il<.55)),speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
+    P.deadA=0;animChibi(P.m,{move:mv,sprint:sprintState372.running,walking:!!(keys.ControlLeft||keys.AltLeft||(il>0&&il<.55)),speed:dt>0?moved372/dt:0,atk:P.atkT,dead:0,wind:0,combo:P.combo,wep:animWep173(),aimPitch253:P.aimPitch253||0,dodge:P.dodgeT>0&&!run.mounted,skill:P.skillAnim155&&P.skillAnim155.until>time?P.skillAnim155.k:null,hit:(P.hitAnimT||0)>time&&!run.mounted},time);if(window.Anim303)Anim303.post(P);if(P.air344&&window.Anim303&&Anim303.air)Anim303.air(P,P.jvy);
     if(P.mountM){if(P.mountM.fox)foxAnim(P.mountM,mv);else animChibi(P.mountM,{move:mv,atk:0,dead:0,wind:0},time);P.mountM.root.position.set(P.x,0,P.z);P.mountM.root.rotation.y=P.face;P.m.body.position.y+=.95}
   }else{P.deadA=Math.min(1,(P.deadA||0)+dt*3);animChibi(P.m,{move:0,atk:0,dead:P.deadA,wind:0},time)}
   P.m.root.position.set(P.x,0,P.z);P.m.root.rotation.y=P.face;/* v331: giro e salto das animações de habilidade (antes eram zerados aqui) */if(window.Anim303&&Anim303.root)Anim303.root(P);try{if(window.Anim547&&Anim547.postPlayer)Anim547.postPlayer(P.m,{move:mv,speed:dt>0?moved372/dt:0},dt)}catch(_){}if(P.jy!==0&&Number.isFinite(P.jy)){if(P.dead){P.jy=0;P.air344=false}else P.m.root.position.y+=P.jy}/* v339: a lança sai da mão enquanto voa */if(P.spearGone339){const h339=P.spearGone339>time&&P.m.kind195==='spear'&&P.m.socket;if(P.m.socket)P.m.socket.visible=!h339;if(!h339)P.spearGone339=0}/* v338: a lança aponta para onde o golpe vai */try{if(P.m.kind195==='spear'&&window.Warrior127&&Warrior127.spearAim){const a338=window.Anim303&&Anim303.active?Anim303.active():null,sk338=P.skillAnim155&&P.skillAnim155.until>time,at338=P.atkT>0;Warrior127.spearAim(P.m,{anim:a338||(sk338||at338?null:'rest'),throwing:at338&&!sk338&&!a338})}}catch(_){}try{alive244(P,mv,dt)}catch(_){}P.aura.rotation.z+=dt;
@@ -6900,7 +6900,7 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
-/* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. */
+/* Câmera: v600 — mouse com pointer lock (tools/mouse600.js), como no Skyrim; o botão direito só defende. O arrasto com botão direito só vale se o lock não estiver disponível. */
 const pcCam={yaw:0,pitch:.03,distance:2.25,active:false,firstPerson:false};
 window.pcCam=pcCam;
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
@@ -6908,7 +6908,7 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||window.MOUSE600||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 addEventListener('pointerup',e=>{if(e.button===2){window.camMoved472=cameraDrag375?(cameraDrag375.moved472||0):0;releaseCamera373()}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
@@ -8798,7 +8798,7 @@ function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!act
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(keyOf(act)===code)return def}for(const [act,,def] of KEYACT){if(code===def&&keyOf(act)!==def)return 'X_'+def}return code}
 function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
-function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Botão do meio (segurar): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Botão direito: segurar defende (com arma na mão, como o botão do meio); arrastar gira a câmera; clique curto trava/solta o alvo. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Botão direito (segurar): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Câmera: mexa o mouse (o cursor fica preso na tela durante o jogo; é solto ao abrir menu, mapa, inventário ou conversa e com Esc — clique na tela para prender de novo). O botão do meio não faz nada. Travar alvo: tecla CapsLock (veja a lista abaixo).','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
   h+=row('Enter também usa / fala / avança conversa','','<b>Enter</b>');h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
 function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e pressione a tecla. Esc cancela. Teclas já usadas trocam de ação. WASD, setas e Esc são reservados.</div>';
@@ -9674,7 +9674,7 @@ requestAnimationFrame(frame);
 <script src="tools/impact459.js?v=492r1"></script>
 <script src="tools/juice468.js?v=492r1"></script>
 <script src="tools/flip470.js?v=492r1"></script>
-<script src="tools/guard472.js?v=476"></script>
+<script src="tools/guard472.js?v=600"></script>
 <script src="tools/shield473.js?v=474"></script>
 <script src="tools/zone475.js?v=503r1"></script>
 <script src="tools/attrs462.js?v=505"></script>
@@ -9706,7 +9706,7 @@ requestAnimationFrame(frame);
 <script src="tools/luz-elo510.js?v=537r1"></script>
 <script src="tools/dream488.js?v=513"></script>
 <script src="tools/mapa500.js?v=535"></script>
-<script src="tools/mundo513.js?v=533"></script>
+<script src="tools/mundo513.js?v=600"></script>
 <script src="tools/mapa501.js?v=544"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
@@ -9719,7 +9719,7 @@ requestAnimationFrame(frame);
 <script src="tools/constel523.js?v=583"></script><script src="tools/saida579.js?v=579"></script>
 <script src="tools/telas535.js?v=585"></script>
 <script src="tools/motor-missoes-infinitas.js?v=546"></script>
-<script src="tools/skyrim-overhaul538.js?v=545"></script>
+<script src="tools/skyrim-overhaul538.js?v=600"></script>
 <script src="tools/lote541.js?v=541"></script>
 <script src="tools/mapa3d544.js?v=594"></script>
 <script src="tools/crime545.js?v=545"></script>
@@ -9730,8 +9730,10 @@ requestAnimationFrame(frame);
 <script src="tools/explorar539.js?v=564"></script>
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/ecossistema550.js?v=566"></script>
-<script src="tools/skyrim588.js?v=590"></script>
+<script src="tools/skyrim588.js?v=600"></script>
 <script src="tools/controles593.js?v=593"></script>
-<script src="tools/fp550.js?v=590d"></script>
+<script src="tools/mouse600.js?v=600"></script>
+<script src="tools/upright600.js?v=600"></script>
+<script src="tools/fp550.js?v=600"></script>
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>

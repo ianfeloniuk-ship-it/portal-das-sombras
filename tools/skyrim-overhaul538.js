@@ -31,7 +31,7 @@
       arcos: { level: 1, xp: 0, name: 'Arquearia & Precisão', bonus: '+5% alcance e dano à distância' },
       magia_fogo: { level: 1, xp: 0, name: 'Chamas & Destruição', bonus: '+6% dano elemental por nível' },
       luz_ilusao: { level: 1, xp: 0, name: 'Luz & Desiluminação', bonus: '+2m raio de absorção de luz' },
-      defesa: { level: 1, xp: 0, name: 'Bloqueio & Aparo', bonus: '+5% redução no botão do meio' }
+      defesa: { level: 1, xp: 0, name: 'Bloqueio & Aparo', bonus: '+5% redução no botão direito' }
     },
     bountyByCity: { Aster: 0, Ymiria: 0, Zahar: 0, Thalor: 0, Urdan: 0, Verden: 0 }
   };

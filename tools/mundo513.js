@@ -39,17 +39,32 @@
   ];
   const STEP=40;let SEGS=null;
   function pt(q){if(typeof q==='string'){const [a,b]=q.split(',').map(Number),c=regionCity(a,b);return [c.x,c.z]}return q}
+  /* v600 (Ian): estrada só passa pela muralha onde há portão. Os portões ficam nos 4 pontos cardeais (210-bloco-environment128-cont.js,
+     capitais504.js). Toda estrada que chega a uma cidade ou sai dela ganha um trecho RETO sobre o eixo cardeal mais próximo, do centro
+     até além da última muralha (135 m; 285 m nas capitais de 250 m), e só então segue a curva para o ponto seguinte. */
+  const rOut=c=>(c.capital&&c.name!=='Aster')?285:135;
+  const axisTo=(c,q)=>{const dx=q[0]-c.x,dz=q[1]-c.z;return Math.abs(dx)>=Math.abs(dz)?[Math.sign(dx)||1,0]:[0,Math.sign(dz)||1]};
+  const offAxis=(c,q,a)=>a[0]?Math.abs(q[1]-c.z):Math.abs(q[0]-c.x);
   function build(){
     const out=[];
-    for(const r of ROUTES){const P=r.map(pt);
+    for(const r of ROUTES){
+      const P=[],F=[];let force=false;const add=(p,straight)=>{P.push(p);if(P.length>1)F[P.length-2]=!!straight||force;force=false};
+      r.forEach((q,i)=>{
+        if(typeof q!=='string'){add(q,false);return}
+        const [a,b]=q.split(',').map(Number),c=regionCity(a,b),C=[c.x,c.z],R=rOut(c);
+        const prev=i>0?pt(r[i-1]):null,next=i<r.length-1?pt(r[i+1]):null;
+        if(prev){const ax=axisTo(c,prev),off=offAxis(c,prev,ax);if(off>12)add([c.x+ax[0]*R,c.z+ax[1]*R],false);add(C,off>12||Math.hypot(prev[0]-c.x,prev[1]-c.z)<=300)}
+        else add(C,false);
+        if(next){const ax=axisTo(c,next);if(offAxis(c,next,ax)>12)add([c.x+ax[0]*R,c.z+ax[1]*R],true);else if(Math.hypot(next[0]-c.x,next[1]-c.z)<=300)force=true}
+      });
       for(let i=0;i<P.length-1;i++){
         const p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(P.length-1,i+2)];
-        const straight=p1[0]===0&&p2[0]===0&&p1[1]>=0&&p2[1]<=300; /* desfiladeiro do marco zero: reto */
-        const n=Math.max(1,Math.ceil(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/STEP));let prev=p1;
+        const straight=F[i]||(p1[0]===0&&p2[0]===0&&p1[1]>=0&&p2[1]<=300); /* desfiladeiro do marco zero: reto */
+        const n=Math.max(1,Math.ceil(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/STEP));let prevP=p1;
         for(let k=1;k<=n;k++){const t=k/n;let x,z;
           if(straight){x=p1[0]+(p2[0]-p1[0])*t;z=p1[1]+(p2[1]-p1[1])*t}
           else{const t2=t*t,t3=t2*t,cr=(a,b,c,d)=>.5*(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);x=cr(p0[0],p1[0],p2[0],p3[0]);z=cr(p0[1],p1[1],p2[1],p3[1])}
-          out.push([prev[0],prev[1],x,z]);prev=[x,z]}}}
+          out.push([prevP[0],prevP[1],x,z]);prevP=[x,z]}}}
     return out}
   function segs(){if(!SEGS){try{SEGS=build()}catch(e){console.warn('mundo513',e);return []}}return SEGS}
   const wi0=worldInit;worldInit=function(){const r=wi0.apply(this,arguments);SEGS=null;return r};
