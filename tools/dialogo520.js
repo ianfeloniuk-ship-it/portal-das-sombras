@@ -445,7 +445,7 @@
     else if (isArm) defaultGreeting = 'Armadura pesada é a diferença entre voltar para casa ou virar comida de fera.';
     else if (isGuild) defaultGreeting = 'A Ordem da Fenda está sempre à procura de caçadores corajosos.';
 
-    const bondTxt = () => m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : defaultGreeting;
+    const bondTxt = () => (window.Kael604 ? Kael604.addr(n) : '') + (m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : defaultGreeting);
 
     // Ação principal de cada NPC de comércio/serviço
     let actionLabel = 'Ver as mercadorias';

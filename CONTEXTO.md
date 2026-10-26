@@ -1,3 +1,8 @@
+## v606 (26/10/2026) — missão fixa #4 «A Bigorna de Kael e o Primeiro Aço»
+- **`tools/kael604.js` (novo) + `dialogo520.js`:** ao despertar a classe no escambo com Kael (que já entrega a arma de treino da classe de graça), Kael fala diante da bigorna aquecida pelo Nexo, confirma a arma e conta que os 9 pontos iniciais (v465) já foram para a vocação. Consequência: guardas e moradores de Aster passam a cumprimentar pela classe ("Salve, Guerreiro."; guardas: "Alto lá, ..."). Registro em `profile.fixas545.q004`.
+- **Partes ligadas:** `bondTxt` da conversa de cidade (`dialogo520.js`) recebe o prefixo; `kael604.js` carrega antes de `dialogo520.js`. Fase C: nada novo.
+- **Teste:** jogado no navegador do registro com Lyra até a forja de Kael (Guerreiro) e a fala de Helena com a nova saudação; capturas de cada etapa.
+
 ## v603 (26/10/2026) — correção da missão #3 (testada jogando de verdade)
 - **Bug real:** em Aster, falar com Lyra abre a conversa de cidade (`dialogo520.js`), que chama o `openShop` guardado antes da `lyra601.js` — a escolha da #3 nunca aparecia; e ao devolver `'fim'` a conversa fechava a escolha. Agora `lyra601.js` carrega antes de `dialogo520.js` e abre a escolha 120 ms depois.
 - **Teste:** jogado no navegador (carroça → Edran → ponte com combate → portão → Mira → Lyra → escolha de guardar o sonho), com capturas de diálogo, bússola, mapa e a ponte.
