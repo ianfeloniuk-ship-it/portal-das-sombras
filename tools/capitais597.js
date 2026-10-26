@@ -193,6 +193,7 @@
       const cc = new T.Color();
       grp.traverse(o => { if (!o.isInstancedMesh || o.count !== tripoList.length) return; tripoList.forEach((t, i) => { cc.setRGB(t[0], t[1], t[2]); o.setColorAt(i, cc); }); o.instanceColor.needsUpdate = true; });
     }
+    if (grp && window.Capitais501 && Capitais501.grade) { try { Capitais501.grade(grp, c); } catch (e) { console.warn('grade625', e); } }
     envOwn(g, grp);
     c.bairros533 = stats;
     /* vendedores nas lojas dos bairros: ferreiro (equipamentos), mercado, igreja (poções) e quartel (defesa) */

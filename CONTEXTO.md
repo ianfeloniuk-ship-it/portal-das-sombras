@@ -1,3 +1,8 @@
+## v625 (26/10/2026) — Capitais: casas realistas por raça + fim do anel antigo redondo
+- `tools/capitais504.js`: `grade()` aplica nas casas e prédios das 5 capitais um acabamento realista (dessatura o cartoon, paleta por raça, grão de material, sujeira no pé, musgo em Thalor/Verden, neve nos telhados de Ymiria/Urdan); chamado também pelo `capitais597.js` nos bairros. O anel antigo (muralha de 60 m, as 8 torres/bandeiras, os anéis de 85/115 m, os portões internos e os colisores desses anéis) não é mais criado nas capitais.
+- Teste (Edge GPU): 60 fps nas 5 capitais, 37–41 NPCs, capturas de rua de Zahar, Urdan, Thalor, Verden e Ymiria sem o anel.
+- Pendente: as casas ainda são os modelos Tripo regradados (não há modelo novo de adobe/palafita/forja/catedral); palafitas de Thalor e forjas de Urdan precisam de modelos.
+
 ## v624 (26/10/2026) — Urdan, Thalor, Verden e Ymiria no kit de muralha realista
 - O kit da v623 é genérico: as 4 capitais restantes já trocaram a muralha/torres Tripo por geometria própria + material procedural, com contorno poligonal próprio (Urdan lado norte reto na serra, Thalor lado do mar reto, Verden 15 lados, Ymiria angulosa) e subúrbio nos portões. Identidade: Urdan basalto escuro (torres hexagonais de topo plano), Thalor pedra úmida com musgo + torres com telhado cônico de ardósia, Verden pé de pedra clara + paliçada de madeira velha com torres cônicas, Ymiria pedra azul-acinzentada com neve, ameias em ponta e torres em agulha. Kit sem sombra recebida (evita acne).
 - Teste (Edge GPU, painel visível): 60 fps nas 5 capitais (Zahar 59, Urdan 60, Thalor 60, Verden 60, Ymiria 60), 271–493 chamadas, 39–41 NPCs, mapa 3D abre e mostra as estradas; capturas de rua de todas.

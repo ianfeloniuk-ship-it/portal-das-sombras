@@ -154,6 +154,7 @@
   }
   const eh0 = EH, mesh0 = EnvBatch.prototype.mesh, add0 = EnvBatch.prototype.add;
   EH = function (batch, key, x, y, z, ry, height, tint) {
+    if (CTX && (key.startsWith('building_tower') || key === 'flag_blue')) return 1; /* v625: as 8 torres do anel antigo */
     if (CTX && key === 'lantern') { CTX.lamps.push({ x, z }); return eh0.call(this, batch, 'post_skull', x, y, z, ry, 3.3, tint); }
     return eh0.apply(this, arguments);
   };
@@ -164,13 +165,14 @@
     if (CTX) for (const gt of GATES341.slice(n0)) {
       const G = gt.g, ry = G.rotation.y, cs = Math.cos(ry), sn = Math.sin(ry);
       G.children.forEach(m => { if (m.isMesh) m.visible = false; });
-      for (const sd of [-1, 1]) { const lx = sd * (half + .5); CTX.pillars.push({ x: G.position.x + lx * cs, z: G.position.z - lx * sn, ry, h: h + 3.5 }); }
+      if (Math.max(...[].concat(ring)) <= 150) G.visible = false; /* portão do anel antigo: some inteiro */
+      if (Math.max(...[].concat(ring)) > 150) for (const sd of [-1, 1]) { const lx = sd * (half + .5); CTX.pillars.push({ x: G.position.x + lx * cs, z: G.position.z - lx * sn, ry, h: h + 3.5 }); }
     }
     return r;
   };
-  EnvBatch.prototype.mesh = function () { const g = mesh0.apply(this, arguments); if (CTX && g) { try { recolor(g, CTX.S); } catch (e) { console.warn('capitais504 recolor', e); } } return g; };
+  EnvBatch.prototype.mesh = function () { const g = mesh0.apply(this, arguments); if (CTX && g) { try { recolor(g, CTX.S); grade(g, CTX.c); } catch (e) { console.warn('capitais504 recolor', e); } } return g; };
   EnvBatch.prototype.add = function (k, x, y, z, ry, sx, sy, sz, tint) { /* Urdan/Verden: o muro da cidade interna também vira paliçada */
-    if (CTX && CTX.S.wall === 'palisade' && k === 'wall_straight') { const m = ENV.m[k]; return add0.call(this, 'palisade154', x, y, z, ry, (m.max[0] - m.min[0]) * (sx || 1), 1, 1, tint); }
+    if (CTX && (k === 'wall_straight' || k === 'outerwall154' || k === 'building_tower_A_blue')) return 1; /* v625: o anel antigo redondo (60/85/115 m) some nas capitais */
     return add0.apply(this, arguments);
   };
 
@@ -280,6 +282,48 @@ void main(){`;
     im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; im.castShadow = true; im.receiveShadow = false; im.userData.own = 1; return im;
   }
 
+  /* ---------- v625: casas e prédios com "grade" realista por raça (dessatura o cartoon, paleta, sujeira no pé, musgo, neve nos telhados, grão de material) ---------- */
+  const GR = {
+    Zahar: { sat: .6, tint: [1.1, .94, .72], moss: 0, snow: 0, grime: .3 },
+    Urdan: { sat: .5, tint: [.84, .78, .73], moss: 0, snow: .08, grime: .55 },
+    Thalor: { sat: .5, tint: [.8, .92, .9], moss: .9, snow: 0, grime: .5 },
+    Verden: { sat: .88, tint: [.98, 1.02, .86], moss: .45, snow: 0, grime: .3 },
+    Ymiria: { sat: .34, tint: [.76, .84, 1.06], moss: 0, snow: .75, grime: .35 }
+  };
+  const gradeCache = new Map(), NOGRADE = ['oak', 'willow', 'fir', 'abeto', 'betula', 'brasa', 'palm', 'dead', 'cherry'];
+  function gradeMat(m, name, X, Z) {
+    if (Array.isArray(m)) return m.map(x => gradeMat(x, name, X, Z));
+    if (!m || m.isShaderMaterial || m.isMeshBasicMaterial || m.isPointsMaterial || m.isSpriteMaterial) return m;
+    const key = name; let c = gradeCache.get(m); if (!c) gradeCache.set(m, c = {}); if (c[key]) return c[key];
+    const G = GR[name], r = m.clone(), prev = m.onBeforeCompile;
+    r.roughness = Math.max(.9, m.roughness || 0); r.metalness = 0;
+    r.onBeforeCompile = (sh, rd) => {
+      if (prev) prev.call(m, sh, rd);
+      sh.uniforms.gSat = { value: G.sat }; sh.uniforms.gTint = { value: new T.Vector3(...G.tint) }; sh.uniforms.gMoss = { value: G.moss }; sh.uniforms.gSnow = { value: G.snow }; sh.uniforms.gGrime = { value: G.grime }; sh.uniforms.gOrg = { value: new T.Vector2(X, Z) };
+      sh.vertexShader = sh.vertexShader.replace(/void\s+main\s*\(\s*\)\s*\{/, 'varying vec3 vGW;\nvoid main(){').replace('#include <begin_vertex>', '#include <begin_vertex>\n{vec4 gq=vec4(transformed,1.);\n#ifdef USE_INSTANCING\ngq=instanceMatrix*gq;\n#endif\nvGW=(modelMatrix*gq).xyz;}');
+      sh.fragmentShader = sh.fragmentShader.replace(/void\s+main\s*\(\s*\)\s*\{/, `uniform float gSat,gMoss,gSnow,gGrime;uniform vec3 gTint;uniform vec2 gOrg;varying vec3 vGW;
+float gh(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.23);return fract(p.x*p.y);}
+float gn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(gh(i),gh(i+vec2(1.,0.)),f.x),mix(gh(i+vec2(0.,1.)),gh(i+vec2(1.,1.)),f.x),f.y);}
+void main(){`).replace('#include <color_fragment>', `#include <color_fragment>
+{vec3 gp=vGW-vec3(gOrg.x,0.,gOrg.y);vec3 gnm=normalize(cross(dFdx(vGW),dFdy(vGW)));vec3 c=diffuseColor.rgb;float l=dot(c,vec3(.3,.59,.11));c=mix(vec3(l),c,gSat)*gTint;
+float gr=gn(vec2(gp.x+gp.z,gp.y)*1.3)*.5+gn(vec2(gp.x-gp.z,gp.y)*6.)*.5;c*=.78+.4*gr;
+float gb=1.-smoothstep(0.,2.4,gp.y);c*=1.-gGrime*gb*gn(gp.xz*2.1);
+c=mix(c,vec3(.04,.08,.02),clamp(gMoss*gb*smoothstep(.4,.7,gn(gp.xz*1.7+4.)),0.,1.));
+float up=smoothstep(.55,.85,abs(gnm.y));c=mix(c,vec3(.74,.8,.9),clamp(gSnow*up,0.,1.));
+diffuseColor.rgb=c;}`);
+    };
+    const k0 = m.customProgramCacheKey ? m.customProgramCacheKey() : ''; r.customProgramCacheKey = () => k0 + '-gr625-' + name;
+    return c[key] = r;
+  }
+  function grade(group, c) {
+    if (!c || !GR[c.name] || !group) return;
+    group.traverse(o => {
+      if (!o.isMesh || o.userData.graded625) return;
+      if (o.userData.tripo153 && NOGRADE.includes(o.userData.tripo153)) return;
+      if (o.material && o.material.isShaderMaterial) return;
+      o.material = gradeMat(o.material, c.name, c.x, c.z); o.userData.graded625 = 1;
+    });
+  }
   /* ---------- a capital ---------- */
   function capital(c, g, addCol) {
     const S = STYLE[c.name], X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.id + c.name));
@@ -454,13 +498,14 @@ void main(){`;
   const bc0 = buildCity;
   buildCity = function (c, g, addCol, R) {
     const S = c && c.capital && STYLE[c.name] && !cityFallen(c) && window.TripoEnvironment153 ? STYLE[c.name] : null;
-    if (S) CTX = { S, lamps: [], pillars: [] };
+    if (S) CTX = { S, lamps: [], pillars: [], c };
     let r;
+    if (S) { const ac0 = addCol; addCol = o => { const d = Math.hypot(o.x - c.x, o.z - c.z); if ([[60, 1.8], [60, 2.2], [85, 2.6], [115, 2.8]].some(q => Math.abs(d - q[0]) < .7 && o.r === q[1])) return; return ac0(o); }; arguments[2] = addCol; }
     try {
       r = bc0.apply(this, arguments);
       if (S) {
         if (TripoEnvironment153.models.wall) capital(c, g, addCol);
-        else TripoEnvironment153.ready.then(() => { if (g.parent) { CTX = { S, lamps: [], pillars: [] }; try { capital(c, g, addCol); } finally { CTX = null; } } });
+        else TripoEnvironment153.ready.then(() => { if (g.parent) { CTX = { S, lamps: [], pillars: [], c }; try { capital(c, g, addCol); } finally { CTX = null; } } });
         const lp = points(CTX.lamps.map(l => ({ x: l.x, y: 3.55, z: l.z, size: 3.2 })), S.flame, 1.1); if (lp) g.add(lp);
       }
     } catch (e) { console.warn('capitais504', e); } finally { CTX = null; }
@@ -503,7 +548,7 @@ void main(){`;
   setInterval(() => { try { farUpdate(); } catch (e) { console.warn('capitais504 far', e); FAR.on = false; } }, 250);
   window.Capitais501 = {
     FAR,
-    STYLE, RC, rho: rhoOf,
+    STYLE, RC, rho: rhoOf, grade,
     want(P, list) { if (L.mode !== 'world') return; for (const c of caps()) if (near(c, P, 700)) list.push([c.cx, c.cz, 99]); },
     keep(ch, P) { return L.mode === 'world' && ch.city && STYLE[ch.city.name] && near(ch.city, P, 820); }
   };
