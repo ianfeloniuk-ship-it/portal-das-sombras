@@ -178,13 +178,13 @@
   const LOOK = {
     Zahar: { k: [1, 1], cA: 0xc9a46c, cB: 0xb78f58, cM: 0x9b7545, dA: 0xe3cfa4, dB: 0xd2b98a, dM: 0xa88a5c, kp: [2.4, 1.5], kq: [2.4, 1.5], snow: 0, moss: 0,
       wt: { H: 8, th: 2.6, taper: .74, plinth: 1, merl: 'box' }, tw: { seg: 4, taper: .82, roof: 'none', r: 3.2 } },
-    Urdan: { k: [0, 0], cA: 0x544e48, cB: 0x3e3a36, cM: 0x1c1a19, dA: 0x2e2a28, dB: 0x3a3330, dM: 0x151413, kp: [1.5, .85], kq: [.6, .35], snow: .12, moss: 0,
+    Urdan: { k: [0, 0], cA: 0x7a7066, cB: 0x5e564f, cM: 0x2a2623, dA: 0x2e2a28, dB: 0x3a3330, dM: 0x151413, kp: [1.5, .85], kq: [.6, .35], snow: .12, moss: 0,
       wt: { H: 9, th: 3.2, taper: .9, plinth: 1, merl: 'box' }, tw: { seg: 6, taper: .86, roof: 'none', r: 3.4 } },
     Thalor: { k: [0, 0], cA: 0x959a90, cB: 0x7a8076, cM: 0x4d514a, dA: 0x41606a, dB: 0x34505a, dM: 0x24373e, kp: [1.1, .6], kq: [.55, .32], snow: 0, moss: 1,
       wt: { H: 9, th: 2.4, taper: .94, plinth: 1, merl: 'box' }, tw: { seg: 8, taper: .9, roof: 'cone', roofH: 1.9, r: 3.2 } },
     Verden: { k: [0, 2], cA: 0xc4bfa8, cB: 0xa9a58f, cM: 0x706d5c, dA: 0x7b5a39, dB: 0x634728, dM: 0x2f2112, kp: [1.2, .62], kq: [.42, 9], snow: 0, moss: .5,
       wt: { H: 8, th: 1.6, base: 2.8, merl: 'stake' }, tw: { seg: 8, taper: .88, roof: 'cone', roofH: 1.5, r: 3.1, base: 3.4 } },
-    Ymiria: { k: [0, 0], cA: 0x59627a, cB: 0x454c61, cM: 0x262a36, dA: 0x2a3042, dB: 0x1f2433, dM: 0x10131c, kp: [1.3, .75], kq: [.5, .3], snow: .7, moss: 0,
+    Ymiria: { k: [0, 0], cA: 0x7a86a3, cB: 0x636d89, cM: 0x262a36, dA: 0x2a3042, dB: 0x1f2433, dM: 0x10131c, kp: [1.3, .75], kq: [.5, .3], snow: .7, moss: 0,
       wt: { H: 10, th: 2.4, taper: .92, plinth: 1, merl: 'spike' }, tw: { seg: 8, taper: .8, roof: 'cone', roofH: 3.4, r: 3 } }
   };
   const mergeParts = parts => {
@@ -254,7 +254,7 @@ vec3 layer(vec2 uv,float kind,vec2 cell,vec3 cA,vec3 cB,vec3 cM,float seed){
   vec2 e=min(f,1.-f)*cell;float m=min(e.x,e.y);float mw=kind>1.5?.012:(kind>.5?.05:.032);
   float mort=1.-smoothstep(mw*.5,mw*1.7,m);
   vec3 col=mix(cA,cB,rnd);
-  float g=vn(uv*(kind>1.5?vec2(34.,2.2):vec2(13.)))*.55+vn(uv*4.7)*.45;col*=.74+.46*g;col*=.93+.14*h21(id*1.7+seed);
+  float g=vn(uv*(kind>1.5?vec2(34.,2.2):vec2(13.)))*.55+vn(uv*4.7)*.45;col*=.82+.3*g;col*=.93+.14*h21(id*1.7+seed);
   if(kind>.5&&kind<1.5){col*=.88+.24*vn(uv*1.6+seed);float cr=1.-smoothstep(.0,.02,abs(vn(uv*vec2(2.6,1.1)+seed)-.5));col=mix(col,cM,cr*.55);mort*=.3;}
   return mix(col,cM,mort*(kind>1.5?.75:.88));
 }
@@ -277,7 +277,7 @@ void main(){`;
   function kitMesh(geo, mat, list) { /* list: [{x,z,ry,sx,sy,sz}] */
     const im = new T.InstancedMesh(geo, mat, list.length), mx = new T.Matrix4(), q = new T.Quaternion(), ax = new T.Vector3(0, 1, 0);
     list.forEach((e, i) => { mx.compose(new T.Vector3(e.x, 0, e.z), q.setFromAxisAngle(ax, e.ry), new T.Vector3(e.sx, e.sy, e.sz)); im.setMatrixAt(i, mx); });
-    im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; im.castShadow = true; im.receiveShadow = true; im.userData.own = 1; return im;
+    im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; im.castShadow = true; im.receiveShadow = false; im.userData.own = 1; return im;
   }
 
   /* ---------- a capital ---------- */
