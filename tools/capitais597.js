@@ -13,13 +13,13 @@
     Urdan: { tints: [0xf2b98a, 0xc9a27e, 0xb08968, 0x9a8878, 0xd9b38c], extra: [['building_blacksmith_blue', 9], ['building_blacksmith_blue', 8.4], ['building_blacksmith_blue', 9.4]], props: [['rock_large', 26, 3, 5], ['log_stack', 22, 1.6, 1.4]] },
     Verden: { tints: [0xdcf2c8, 0xc9e6a8, 0xe8f2c8, 0xa9cf9a, 0xffe2c2], extra: [['building_lumbermill_blue', 7.5], ['building_market_blue', 9.5]], props: [['tree_oak', 46, 11, 16], ['tree_willow', 14, 10, 14]] },
     Thalor: { tints: [0xd4e6ff, 0xb9c8e0, 0xaadfd0, 0xcfeff0, 0xdcd2b8], extra: [['building_market_blue', 10], ['building_tavern_blue', 9.4]], props: [['barrel', 30, 1.3, 1.1], ['crate_A_big', 20, 1.3, 1.1], ['sack', 14, 1, .9]] },
-    Zahar: { tints: [0xf2d9a6, 0xe8c98a, 0xfff0a8, 0xf2b98a, 0xe0c090], extra: [['building_market_blue', 10], ['building_windmill_blue', 7.5]], props: [['cactus_0', 18, 4.5, 1], ['cactus_3', 14, 4, 1], ['cactus_7', 12, 5, 1], ['barrel', 14, 1.3, 1.1]] }
+    Zahar: { plaza: 24, stalls: 20, tints: [0xf2d9a6, 0xe8c98a, 0xfff0a8, 0xf2b98a, 0xe0c090], extra: [['building_market_blue', 10], ['building_windmill_blue', 7.5]], props: [['cactus_0', 18, 4.5, 1], ['cactus_3', 14, 4, 1], ['cactus_7', 12, 5, 1], ['barrel', 14, 1.3, 1.1]] }
   };
   /* árvores, pedras, barris e cactos soltos entre as casas, de acordo com o tema */
-  function themeProps(prop, R, RW, RIN, TH, X, Z, flatAt) {
+  function themeProps(prop, R, RW, RIN, TH, X, Z, flatAt, RHO) {
     for (const [key, n, h, r] of TH.props) for (let i = 0; i < n; i++) {
       for (let t = 0; t < 20; t++) {
-        const a = R() * TAU, rr = RIN + 6 + R() * (RW - RIN - 20), x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+        const a = R() * TAU, rr = RIN + 6 + R() * (RHO(a) - RIN - 20), x = Math.cos(a) * rr, z = Math.sin(a) * rr;
         if (Math.abs(x) < 12 || Math.abs(z) < 12) continue;
         prop(key, x, z, R() * TAU, h * (.8 + R() * .5), r > 3 ? 2.2 : .7); break;
       }
@@ -65,7 +65,9 @@
   const onTerrain = (geo, anc) => { geo.setAttribute('terrainAnchor245', new T.Float32BufferAttribute(anc, 2)); geo.userData.terrainBatch245 = true; return geo; };
   const reliefH = () => 0;
   function bairros(c, g, addCol, R0) {
-    const TH = THEME[c.name] || THEME.Verden, X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.name));
+    const ORGANIC = !!(window.Capitais501 && Capitais501.rho && Capitais501.rho(c, 0) !== 250);
+    let EXT = false; /* true = subúrbio fora da muralha, perto dos portões */
+    const RHO = a => (window.Capitais501 && Capitais501.rho) ? Capitais501.rho(c, a) : RW, TH = THEME[c.name] || THEME.Verden, X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.name));
     const b = new EnvBatch(), stats = { houses: 0, special: 0 }, SH = [];
     const col = (x, z, r) => addCol({ x, z, r });
 
@@ -102,7 +104,7 @@
     function place(H, x, z, ry, gapMin) {
       const dim = H.dim, f = fp(dim, x, z, ry);
       if (!H.plaza && Math.hypot(x - PL.x, z - PL.z) < PL.R + Math.max(dim.w, dim.d) / 2 + 1) return false;
-      if (f.corners.some(c => { const q = Math.hypot(c.x, c.z); return q < RIN || q > RW - 9; })) return false;
+      if (f.corners.some(k => { const q = Math.hypot(k.x, k.z), rh = RHO(Math.atan2(k.z, k.x)); return EXT ? (q < rh + 6 || q > rh + 80) : (q < RIN || q > rh - 9); })) return false;
       if (!flatAt(x, z, Math.max(dim.w, dim.d) / 2 + 6)) return false;
       if (!slopeOk(x, z, Math.max(dim.w, dim.d) / 2 + 1.5, 2.4)) return false;
       if (used.some(u => City253.clearance(f, u.footprint) < (gapMin || 2.6))) return false;
@@ -130,7 +132,7 @@
           if (!depth && nHouse >= 2 + Math.floor(R() * 3)) {
             nHouse = 0;
             const sx = px + nx * (hw + .5), sz = pz + nz * (hw + .5), lane = [[px, pz], [sx, sz]]; let h = Math.atan2(nz, nx), x = sx, z = sz, L = 0; const lim = 24 + R() * 30;
-            for (let q = 0; q < 12 && L < lim; q++) { h += (R() - .5) * .7; x += Math.cos(h) * 5; z += Math.sin(h) * 5; L += 5; const rr = Math.hypot(x, z); if (rr < RIN - 2 || rr > RW - 12 || gorgeH(X + x, Z + z) > .5 || !slopeOk(x, z, 3, 2.2) || dStreet(x, z, -1) < 4) break; lane.push([x, z]); }
+            for (let q = 0; q < 12 && L < lim; q++) { h += (R() - .5) * .7; x += Math.cos(h) * 5; z += Math.sin(h) * 5; L += 5; const rr = Math.hypot(x, z); if (rr < RIN - 2 || rr > RHO(Math.atan2(z, x)) - 12 || gorgeH(X + x, Z + z) > .5 || !slopeOk(x, z, 3, 2.2) || dStreet(x, z, -1) < 4) break; lane.push([x, z]); }
             if (lane.length >= 4) { streets.push({ pts: lane, hw: 1.6 }); frente(lane, 1.6, null, 1); }
             s += 6.5; continue;
           }
@@ -143,29 +145,33 @@
       }
     }
     const dirs = [0, PI / 2, PI, PI * 1.5];
-    dirs.forEach(q => streets.push({ pts: [[Math.cos(q) * (RIN - 6), Math.sin(q) * (RIN - 6)], [Math.cos(q) * RW, Math.sin(q) * RW]], hw: 5.5 }));
+    dirs.forEach(q => streets.push({ pts: [[Math.cos(q) * (RIN - 6), Math.sin(q) * (RIN - 6)], [Math.cos(q) * RHO(q), Math.sin(q) * RHO(q)]], hw: 5.5 }));
     /* praça do mercado (NE): poço, árvore grande, barracas em volta e as casas importantes viradas para ela */
     {
-      const pa = -PI / 4 - .1, pr = 150, px = Math.cos(pa) * pr, pz = Math.sin(pa) * pr, PR = 17;
+      const pa = -PI / 4 - .1, pr = Math.min(150, RHO(pa) - 30), px = Math.cos(pa) * pr, pz = Math.sin(pa) * pr, PR = TH.plaza || 17;
       if (flatAt(px, pz, PR)) {
         PL.x = px; PL.z = pz; PL.R = PR;
         const pg = new T.RingGeometry(.01, PR, 40, 8); pg.rotateX(-PI / 2); { const ps = pg.attributes.position, anc = []; for (let i = 0; i < ps.count; i++) { const wx = X + px + ps.getX(i), wz = Z + pz + ps.getZ(i); ps.setXYZ(i, wx, .14, wz); anc.push(wx, wz); } onTerrain(pg, anc); } const pm = new T.Mesh(pg, pavMat('brick', -5)); pm.userData.terrainBatch245 = true; pm.userData.own = 1; pm.frustumCulled = false; pavTex('brick').repeat.set(1, 1); { const uv = pg.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) - .5) * PR * 2 / 3.2, (uv.getY(i) - .5) * PR * 2 / 3.2); } pg.computeVertexNormals(); g.add(pm);
         EW(b, 'building_well_blue', X + px, 0, Z + pz, 0, 3.6); col(X + px, Z + pz, 1.8);
         EH(b, 'tree_oak', X + px + 6, 0, Z + pz - 4, 1.2, 12); col(X + px + 6, Z + pz - 4, 1.4);
-        for (let k = 0; k < 7; k++) { const aa = k / 7 * TAU + .3, sx = px + Math.cos(aa) * (PR - 3.5), sz = pz + Math.sin(aa) * (PR - 3.5); EW(b, ['stall', 'stall-red', 'stall-green', 'stall-bench'][k % 4], X + sx, 0, Z + sz, Math.atan2(-Math.cos(aa), -Math.sin(aa)), 3.4); col(X + sx, Z + sz, 1.5); }
+        for (let k = 0; k < (TH.stalls || 7); k++) { const aa = k / (TH.stalls || 7) * TAU + .3, sx = px + Math.cos(aa) * (PR - 3.5), sz = pz + Math.sin(aa) * (PR - 3.5); EW(b, ['stall', 'stall-red', 'stall-green', 'stall-bench'][k % 4], X + sx, 0, Z + sz, Math.atan2(-Math.cos(aa), -Math.sin(aa)), 3.4); col(X + sx, Z + sz, 1.5); }
         const esp = [['building_tavern_blue', 9.4], ['building_blacksmith_blue', 8.8], ['building_market_blue', 10], ['building_church_blue', 9.6], ['building_barracks_blue', 10.5]];
         esp.forEach(([key, w], k) => { const aa = pa + (k - 2) * .62, d = cityDim253(key, w), rr = PR + 2.5 + d.d / 2, cx = px + Math.cos(aa) * rr, cz = pz + Math.sin(aa) * rr; place({ ...especial(key, w), plaza: true }, cx, cz, Math.atan2(px - cx, pz - cz), .6); });
       }
     }
     dirs.forEach((q, i) => frente(streets[i].pts, 5.5, TH.extra.filter((_, k) => k % 4 === i).map(e => [...e]), 0));
+    /* subúrbio: casas fora dos muros, ao longo das estradas, perto dos portões */
+    if (ORGANIC) { EXT = true; const n0 = streets.length;
+      dirs.forEach(q => { const rh = RHO(q); streets.push({ pts: [[Math.cos(q) * (rh + 4), Math.sin(q) * (rh + 4)], [Math.cos(q) * (rh + 80), Math.sin(q) * (rh + 80)]], hw: 5.5 }); frente(streets[streets.length - 1].pts, 5.5, null, 1); });
+      EXT = false; }
     /* vielas tortas que saem das avenidas */
     for (let i = 0; i < 4; i++) {
       const q = dirs[i], ux = Math.cos(q), uz = Math.sin(q);
       let side = i % 2 ? 1 : -1;
-      for (let d = RIN + 8; d < RW - 24; d += 24 + R() * 14, side = -side) {
+      for (let d = RIN + 8; d < RHO(q) - 24; d += 24 + R() * 14, side = -side) {
         let x = ux * d - uz * side * 6, z = uz * d + ux * side * 6, h = Math.atan2(ux * side, -uz * side) + (R() - .5) * .5, L = 0;
         const pts = [[ux * d, uz * d], [x, z]], lim = 34 + R() * 34;
-        for (let k = 0; k < 14 && L < lim; k++) { h += (R() - .5) * .55; x += Math.cos(h) * 5; z += Math.sin(h) * 5; L += 5; const rr = Math.hypot(x, z); if (rr < RIN || rr > RW - 14 || gorgeH(X + x, Z + z) > .5 || (k > 2 && dStreet(x, z, -1) < 5)) break; pts.push([x, z]); }
+        for (let k = 0; k < 14 && L < lim; k++) { h += (R() - .5) * .55; x += Math.cos(h) * 5; z += Math.sin(h) * 5; L += 5; const rr = Math.hypot(x, z); if (rr < RIN || rr > RHO(Math.atan2(z, x)) - 14 || gorgeH(X + x, Z + z) > .5 || (k > 2 && dStreet(x, z, -1) < 5)) break; pts.push([x, z]); }
         if (pts.length >= 4) { streets.push({ pts, hw: 2.4 }); frente(pts, 2.4, null, 1); }
       }
     }
@@ -174,13 +180,13 @@
     streets.forEach((st, i) => { if (i < 4) { ribbon(st.pts, st.hw + .2, brk, 3.2); } else { ribbon(st.pts, st.hw + .9, edge); ribbon(st.pts, st.hw + .2, cob, 2.4); } });
     /* piso da cidade inteira: paralelepípedo mais escuro entre as casas, acompanhando as colinas (fora da garganta) */
     {
-      const R0 = RIN - 8, R1 = RW - 3, NR = Math.ceil((R1 - R0) / 4), NA = 160, P = [], UV = [], I = [], ok = [], ANC = [];
-      for (let i = 0; i <= NR; i++) for (let j = 0; j < NA; j++) { const rr = R0 + (R1 - R0) * i / NR, an = j / NA * TAU, x = Math.cos(an) * rr, z = Math.sin(an) * rr; P.push(X + x, .05, Z + z); ANC.push(X + x, Z + z); UV.push((X + x) / 2.6, (Z + z) / 2.6); ok.push(gorgeH(X + x, Z + z) < .5); }
+      const R0 = RIN - 8, R1 = 245, NR = Math.ceil((R1 - R0) / 4), NA = 160, P = [], UV = [], I = [], ok = [], ANC = [];
+      for (let i = 0; i <= NR; i++) for (let j = 0; j < NA; j++) { const an = j / NA * TAU, rr = R0 + (Math.min(R1, RHO(an) - 3) - R0) * i / NR, x = Math.cos(an) * rr, z = Math.sin(an) * rr; P.push(X + x, .05, Z + z); ANC.push(X + x, Z + z); UV.push((X + x) / 2.6, (Z + z) / 2.6); ok.push(gorgeH(X + x, Z + z) < .5); }
       for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) { const a0 = i * NA + j, a1 = i * NA + (j + 1) % NA, b0 = (i + 1) * NA + j, b1 = (i + 1) * NA + (j + 1) % NA; if (ok[a0] && ok[a1] && ok[b0] && ok[b1]) I.push(a0, b0, a1, a1, b0, b1); }
       const fg = new T.BufferGeometry(); fg.setAttribute('position', new T.Float32BufferAttribute(P, 3)); fg.setAttribute('uv', new T.Float32BufferAttribute(UV, 2)); fg.setIndex(I); fg.computeVertexNormals(); onTerrain(fg, ANC);
       const fm = new T.Mesh(fg, pavMat('cobble', -1, 0x8d8576)); fm.userData.terrainBatch245 = true; fm.userData.own = 1; fm.frustumCulled = false; g.add(fm);
     }
-    themeProps(prop, R, RW, RIN, TH, X, Z, flatAt);
+    themeProps(prop, R, RW, RIN, TH, X, Z, flatAt, RHO);
     stats.props = stats2.props; stats.trees = stats2.trees; stats.streets = streets.length;
     const grp = b.mesh(BLDMAT);
     if (grp && tripoList.length) { /* cor própria de cada casa Tripo (também no modelo leve de longe) */

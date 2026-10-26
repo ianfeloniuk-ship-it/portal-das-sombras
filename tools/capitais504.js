@@ -22,6 +22,13 @@
   const seedOf = s => { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
   const rng = n => () => { n = (Math.imul(n, 1664525) + 1013904223) >>> 0; return n / 4294967296; };
   const norm = a => { a %= TAU; return a < 0 ? a + TAU : a; };
+  /* v622 (Ian, 26/10/2026): "nenhuma cidade no mundo é redonda" — a muralha segue um contorno orgânico (raio por ângulo). Só as capitais listadas aqui;
+     as outras seguem redondas até a vez delas. Os 4 portões ficam nos eixos cardeais (as estradas da v600 saem por eles). */
+  const S_ = Math.sin;
+  const ORG = {
+    Zahar: a => 198 + 24 * S_(2 * a + 1.1) + 15 * S_(3 * a + .3) + 8 * S_(5 * a + 2)
+  };
+  const rhoOf = (c, a) => ORG[c.name] ? ORG[c.name](a) : RC;
   const gateDist = a => Math.min(...[0, PI / 2, PI, PI * 1.5, TAU].map(q => Math.abs(norm(a) - q)));
 
   const glbCache = new Map();
@@ -150,34 +157,46 @@
     };
 
     /* muralha: segmentos de ~6 m, com vãos nos 4 portões */
-    const wm = M[S.wall], seg = 6.2, n = Math.round(TAU * RC / seg), gapA = 12.5 / RC;
-    if (wm) for (let i = 0; i < n; i++) {
-      const a = (i + .5) / n * TAU; if (gateDist(a) < gapA) continue;
-      const x = X + Math.cos(a) * RC, z = Z + Math.sin(a) * RC, sea = c.name === 'Thalor' && Math.cos(a) < -.2;
-      const L = TAU * RC / n * 1.05, H = S.H + (sea ? 2 : 0), th = S.wall === 'wall' ? 2.4 : 1.4;
-      push(S.wall, x, z, -(a + PI / 2), L / wm.sx, H / wm.h, th / wm.sz, segTint(x, z));
+    const wm = M[S.wall], seg = 6.2, rho = a => rhoOf(c, a), gapA = 12.5 / RC;
+    const gateR = [0, PI / 2, PI, PI * 1.5].map(rho);
+    /* contorno em pontos igualmente espaçados ao longo do perímetro */
+    const outline = []; { const st = 720; let acc = 0, prev = null; const pts = []; for (let i = 0; i <= st; i++) { const a = i / st * TAU, r = rho(a), p = [Math.cos(a) * r, Math.sin(a) * r]; if (prev) acc += Math.hypot(p[0] - prev[0], p[1] - prev[1]); pts.push({ p, acc, a }); prev = p; }
+      const n = Math.round(acc / seg); for (let k = 0; k < n; k++) { const s = (k + .5) / n * acc; let m = 0; while (m < pts.length - 2 && pts[m + 1].acc < s) m++; const A = pts[m], B = pts[m + 1], t = (s - A.acc) / ((B.acc - A.acc) || 1), x = A.p[0] + (B.p[0] - A.p[0]) * t, z = A.p[1] + (B.p[1] - A.p[1]) * t; outline.push({ x, z, tan: Math.atan2(B.p[1] - A.p[1], B.p[0] - A.p[0]), L: acc / n * 1.05, a: Math.atan2(z, x) }); } }
+    if (wm) for (const o of outline) {
+      const gd = [[gateR[0], 0], [0, gateR[1]], [-gateR[2], 0], [0, -gateR[3]]].some(g => Math.hypot(o.x - g[0], o.z - g[1]) < 12.5); if (gd) continue;
+      const x = X + o.x, z = Z + o.z, sea = c.name === 'Thalor' && Math.cos(o.a) < -.2;
+      const H = S.H + (sea ? 2 : 0), th = S.wall === 'wall' ? 2.4 : 1.4;
+      push(S.wall, x, z, -o.tan, o.L / wm.sx, H / wm.h, th / wm.sz, segTint(x, z));
       col(x, z, 3.3);
     }
     /* torres: duas em cada portão, uma entre portões */
     const tm = M.defense, tws = [];
     if (tm) {
-      for (const q of [0, PI / 2, PI, PI * 1.5]) for (const sd of [-1, 1]) tws.push(q + sd * (gapA + 5.5 / RC));
+      [0, PI / 2, PI, PI * 1.5].forEach((q, qi) => { for (const sd of [-1, 1]) tws.push(q + sd * (18 / gateR[qi])); });
       for (const q of [PI / 4, PI * .75, PI * 1.25, PI * 1.75]) tws.push(q);
       for (const a of tws) {
-        const x = X + Math.cos(a) * RC, z = Z + Math.sin(a) * RC, hh = (gateDist(a) < .2 ? 17 : 14), sc = hh / tm.h;
+        const rA = rho(a), x = X + Math.cos(a) * rA, z = Z + Math.sin(a) * rA, hh = (gateDist(a) * rA < 30 ? 17 : 14), sc = hh / tm.h;
         push('defense', x, z, Math.atan2(X - x, Z - z), sc, sc, sc, null); col(x, z, 4.2);
         flames.push({ x: x + Math.cos(a) * -2.2, y: hh * .62, z: z + Math.sin(a) * -2.2, size: 5.5 });
       }
     }
-    cityGates341(c, g, false, RC, 9, 7);
+    cityGates341(c, g, false, gateR, 9, 7);
+    /* fortaleza: no ponto mais largo do contorno (o "alto" da cidade), um torreão grande e quatro torres de canto */
+    if (ORG[c.name] && tm) {
+      let best = 0, ba = 0; for (let i = 0; i < 360; i++) { const a = i / 360 * TAU, r = rho(a); if (r > best && gateDist(a) * r > 70) { best = r; ba = a; } }
+      const kx = X + Math.cos(ba) * (best - 42), kz = Z + Math.sin(ba) * (best - 42), face = Math.atan2(X - kx, Z - kz);
+      push('defense', kx, kz, face, 34 / tm.h, 34 / tm.h, 34 / tm.h, null); col(kx, kz, 8); flames.push({ x: kx, y: 21, z: kz, size: 8 });
+      for (const [dx, dz] of [[-17, -17], [17, -17], [-17, 17], [17, 17]]) { const tx = kx + dx, tz = kz + dz; push('defense', tx, tz, face, 22 / tm.h, 22 / tm.h, 22 / tm.h, null); col(tx, tz, 5); flames.push({ x: tx, y: 13, z: tz, size: 5 }); }
+      c.keep622 = { x: kx, z: kz };
+    }
     /* tochas ao longo da muralha, por dentro */
     for (let i = 0; i < 70; i++) {
-      const a = i / 70 * TAU + .04; if (gateDist(a) < gapA + .01) continue;
-      const r = RC - 3.5, x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
+      const a = i / 70 * TAU + .04; if (gateDist(a) * rho(a) < 13.5) continue;
+      const r = rho(a) - 3.5, x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
       EH(b, 'campfire_stones', x, 0, z, -a, 1.5); col(x, z, .8); flames.push({ x, y: 1.5, z, size: 4.2 });
     }
     /* avenidas dos portões ao centro: lanternas dos dois lados */
-    for (const q of [0, PI / 2, PI, PI * 1.5]) for (let d = 70; d < RC - 12; d += 14) for (const sd of [-1, 1]) {
+    for (const [qi, q] of [0, PI / 2, PI, PI * 1.5].entries()) for (let d = 70; d < gateR[qi] - 12; d += 14) for (const sd of [-1, 1]) {
       const px = -Math.sin(q) * sd * 7.5, pz = Math.cos(q) * sd * 7.5, x = X + Math.cos(q) * d + px, z = Z + Math.sin(q) * d + pz;
       EH(b, 'lantern', x, 0, z, 0, 3.3); col(x, z, .4);
     }
@@ -198,7 +217,7 @@
     /* adornos do bioma */
     const spot = (r0, r1, tries) => {
       for (let t = 0; t < (tries || 30); t++) {
-        const a = R() * TAU, r = r0 + R() * (r1 - r0), x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
+        const a = R() * TAU, r = r0 + R() * (Math.max(r0 + 4, Math.min(r1, rho(a) - 14)) - r0), x = X + Math.cos(a) * r, z = Z + Math.sin(a) * r;
         if (Math.abs(x - X) < 11 || Math.abs(z - Z) < 11) continue; /* avenidas livres */
         if (Math.hypot(x - (X + Math.cos(S.lmAng * PI / 180) * S.lmR), z - (Z + Math.sin(S.lmAng * PI / 180) * S.lmR)) < 14) continue;
         return { x, z, a };
@@ -349,7 +368,7 @@
   setInterval(() => { try { farUpdate(); } catch (e) { console.warn('capitais504 far', e); FAR.on = false; } }, 250);
   window.Capitais501 = {
     FAR,
-    STYLE, RC,
+    STYLE, RC, rho: rhoOf,
     want(P, list) { if (L.mode !== 'world') return; for (const c of caps()) if (near(c, P, 700)) list.push([c.cx, c.cz, 99]); },
     keep(ch, P) { return L.mode === 'world' && ch.city && STYLE[ch.city.name] && near(ch.city, P, 820); }
   };

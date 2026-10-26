@@ -4546,7 +4546,7 @@ function gateTexture341(){if(gateTex341)return gateTex341;const cv=document.crea
  for(const y of[34,128,206]){x.fillStyle='#3b352e';x.fillRect(0,y,512,22);x.fillStyle='#6a6257';x.fillRect(0,y+2,512,4);x.fillStyle='#1f1b17';x.fillRect(0,y+18,512,4);for(let i=0;i<16;i++){x.fillStyle='#a79f90';x.beginPath();x.arc(i*32+16,y+11,4,0,TAU);x.fill();x.fillStyle='#20232c';x.beginPath();x.arc(i*32+17,y+12,2,0,TAU);x.fill()}}
  gateTex341=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding&&renderer.outputEncoding===THREE.sRGBEncoding)gateTex341.encoding=THREE.sRGBEncoding;return gateTex341}
 function cityGates341(c,g,fallen,ring,half,h){const wood=new THREE.MeshToonMaterial({map:gateTexture341(),gradientMap:gmap,color:fallen?0x777777:0xffffff}),post=toonS(fallen?0x4a463f:0x9a917c),iron=toonS(0x3b352e);
- for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5]){const G=new THREE.Group();G.position.set(c.x+Math.cos(a)*ring,0,c.z+Math.sin(a)*ring);G.rotation.y=-(a+Math.PI/2);const leaves=[];
+ for(const [gi341,a] of[0,Math.PI/2,Math.PI,Math.PI*1.5].entries()){const rg341=Array.isArray(ring)?ring[gi341]:ring;const G=new THREE.Group();G.position.set(c.x+Math.cos(a)*rg341,0,c.z+Math.sin(a)*rg341);G.rotation.y=-(a+Math.PI/2);const leaves=[];
   for(const sd of[-1,1]){const pv=new THREE.Group();pv.position.set(sd*half,0,0);const w=half-.12,leaf=new THREE.Mesh(new THREE.BoxGeometry(w,h,.34),wood);leaf.position.set(-sd*w/2,h/2+.08,0);leaf.castShadow=true;pv.add(leaf);
    const cap=new THREE.Mesh(new THREE.BoxGeometry(w,.22,.46),iron);cap.position.set(-sd*w/2,h+.16,0);pv.add(cap);const edge=new THREE.Mesh(new THREE.BoxGeometry(.22,h,.46),iron);edge.position.set(-sd*(w-.11),h/2+.08,0);pv.add(edge);
    const col=new THREE.Mesh(new THREE.BoxGeometry(1.1,h+1.1,1.5),post);col.position.set(sd*(half+.5),(h+1.1)/2,0);col.castShadow=true;G.add(col);const top=new THREE.Mesh(new THREE.ConeGeometry(.95,.9,4),iron);top.position.set(sd*(half+.5),h+1.55,0);top.rotation.y=Math.PI/4;G.add(top);
@@ -9719,8 +9719,8 @@ requestAnimationFrame(frame);
 <script src="tools/mapa501.js?v=544"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
-<script src="tools/capitais504.js?v=597"></script>
-<script src="tools/capitais597.js?v=599"></script>
+<script src="tools/capitais504.js?v=622"></script>
+<script src="tools/capitais597.js?v=622"></script>
 <script src="tools/desfiladeiro510.js?v=528"></script>
 <script src="tools/marcos526.js?v=537r1"></script>
 <script src="tools/agua517.js?v=517"></script>
