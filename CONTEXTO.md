@@ -1,3 +1,10 @@
+## v626 (26/10/2026) — Chão realista medieval por bioma (camada nova)
+- **Pedido de Ian**: "o chão é meio feio; a pedra é tudo uma coisa só, o deserto também, a neve também".
+- `tools/chao626.js` (novo, carregado depois de `ground446.js`): última camada do shader do chão. Mistura por inclinação, altura, umidade, distância e ruído em várias escalas, usando as máscaras de borda irregular do `terrain153` (transição sem borda reta). Campo/floresta: manchas de terra, pedrinhas, folhas e raízes. Pântano: lama escura, poças brilhantes, alga. Deserto: duna com crista clara, ondulação, cascalho, manchas ocre. Neve: tons azulados nos baixios, ondulação de vento, terra/rocha onde o vento varre (some o desenho de "quebra-cabeça"). Vulcão: basalto, cinza e rachaduras de brasa (emissivo). Rocha em encosta/altura: estrato, fendas, cascalho no pé, musgo em faces úmidas viradas para cima; paleta por bioma. Relevo falso (bump) de pedrinha/duna por derivada de tela.
+- Não mexido: árvores, ambiente Antigravity, capitais, grama de fios, chuva. Trilhas (v512) e estradas preservadas (`trail626`).
+- Teste (Edge GPU): 60 fps antes e depois; capturas antes/depois em rocha, deserto, neve, campo, pântano, vulcão, floresta; sem erro de shader.
+- Pendente: pisoteio do EcoGrid (v550) ainda não alimenta o chão; chuva/poça molhada virá depois e deve ler `pud626`/`roughK626`; grama de fios cobre muito o chão do campo.
+
 ## v625 (26/10/2026) — Capitais: casas realistas por raça + fim do anel antigo redondo
 - `tools/capitais504.js`: `grade()` aplica nas casas e prédios das 5 capitais um acabamento realista (dessatura o cartoon, paleta por raça, grão de material, sujeira no pé, musgo em Thalor/Verden, neve nos telhados de Ymiria/Urdan); chamado também pelo `capitais597.js` nos bairros. O anel antigo (muralha de 60 m, as 8 torres/bandeiras, os anéis de 85/115 m, os portões internos e os colisores desses anéis) não é mais criado nas capitais.
 - Teste (Edge GPU): 60 fps nas 5 capitais, 37–41 NPCs, capturas de rua de Zahar, Urdan, Thalor, Verden e Ymiria sem o anel.
