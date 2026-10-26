@@ -34,6 +34,7 @@ addEventListener('keydown',e=>{if(!API.conversation&&!API.reclaiming())return;e.
 addEventListener('keyup',e=>{if(API.conversation||API.reclaiming()){e.preventDefault();e.stopImmediatePropagation()}},true);
 function targetAndText(){
  if(window.Caixa606?.active())return Caixa606.objective();
+ if(window.Torre607?.objective?.())return Torre607.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
