@@ -8,6 +8,7 @@
   function lyra() { return npcs.find(n => !n.gone && (n.short === 'Lyra' || n.name === 'Lyra' || n.shop === 'guild')); }
   if (typeof LORE !== 'undefined') LORE.q003_aldric = ['Nota de Aldric · A Mão no sonho', 'Aldric anotou à margem do Livro de Registros: quem sonha com uma mão no instante da queda foi visto antes do pouso. Lyra copiou a linha e a trancou no arquivo da Ordem.'];
   function gate() {
+    if (window.Fixas545 && !Fixas545.LIVE.primeva_q003) Fixas545.LIVE.primeva_q003 = 'v601';
     const s0 = profile?.fixas545?.q003;
     if (s0?.xpPend && !profile.classless && typeof run !== 'undefined' && run) { try { gainXp(s0.xpPend, 'quest'); } catch (_) {} s0.xpPend = 0; save(); }
     const q = profile?.fixas545?.q002, s = S(), a = a1();
@@ -35,7 +36,8 @@
     const tree = () => ({ raiz: { t: 'Abro o Livro de Registros. Linha em branco. Qual é o seu nome e de que mundo você caiu? E o sonho da queda: quer que eu registre o que viu?', o: [
       { l: 'Contar a visão da Mão do Arquiteto', fn: () => { done('mao'); then(); return 'fim'; } },
       { l: 'Registrar só a chegada e guardar o sonho', fn: () => { done('segredo'); then(); return 'fim'; } }] } });
-    if (window.Dialogo520 && npc) Dialogo520.custom({ name: 'Lyra', title: 'Chanceler da Ordem', type: 'lyra601' }, npc, tree);
+    /* a conversa da cidade fecha ao devolver 'fim': abre a nossa logo depois */
+    if (window.Dialogo520 && npc) setTimeout(() => Dialogo520.custom({ name: 'Lyra', title: 'Chanceler da Ordem', type: 'lyra601' }, npc, tree), 120);
     else { done('segredo'); then(); }
   }
   function hook() {
@@ -49,5 +51,4 @@
   }
   hook();
   window.Lyra601 = { ask, gate, state: S };
-  if (window.Fixas545) Fixas545.LIVE.primeva_q003 = 'v601';
 })();

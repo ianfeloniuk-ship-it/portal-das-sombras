@@ -1,3 +1,7 @@
+## v603 (26/10/2026) — correção da missão #3 (testada jogando de verdade)
+- **Bug real:** em Aster, falar com Lyra abre a conversa de cidade (`dialogo520.js`), que chama o `openShop` guardado antes da `lyra601.js` — a escolha da #3 nunca aparecia; e ao devolver `'fim'` a conversa fechava a escolha. Agora `lyra601.js` carrega antes de `dialogo520.js` e abre a escolha 120 ms depois.
+- **Teste:** jogado no navegador (carroça → Edran → ponte com combate → portão → Mira → Lyra → escolha de guardar o sonho), com capturas de diálogo, bússola, mapa e a ponte.
+
 ## v601 (26/10/2026) — missão fixa #3 «O Livro de Lyra e a Linha em Branco»
 - **`tools/lyra601.js` (novo):** ao chegar ao Portão Sul depois da #2, Mira recebe Edran desfalecido (diálogo). Na tenda da Ordem, Lyra abre o Livro e pergunta nome/mundo com a escolha (estilo Skyrim): contar a Mão → nota de Aldric no Diário (Descobertas) + 50 XP; guardar segredo → o Narrador elogia e entra fala rara no Histórico. Escolha em `profile.fixas545.q003`.
 - **Detalhe:** sem classe o XP é zero; os 50 XP ficam guardados (`xpPend`) e entram assim que a classe é escolhida. Marcador na bússola/mapa: o já existente do passo "falar com Lyra". Fase C: nenhum sistema novo.
