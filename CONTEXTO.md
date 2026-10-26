@@ -1,3 +1,8 @@
+## v599 (26/10/2026) — Capitais grandes (bloco 2): gente e lojas nos bairros
+- **Pedido de Ian**: NPCs nos bairros novos das 5 capitais, rotina, reação a ameaça e vendedores nas lojas.
+- `tools/vida523.js`: nas Capitais grandes (`cityBig533`) moradores moram e guardas rondam pelas avenidas dos bairros (112–237 m), com 8 guardas e 14 moradores (antes 2 e 3) e geração a até 300 m; rotina (trabalho, almoço, taverna, casa) e reação a ameaça (v554) são as de sempre. `tools/capitais597.js`: cada ferreiro, mercado, igreja e quartel dos bairros ganha vendedor (equipamentos, mercado, poções, defesa).
+- Teste: Edge headless, Zahar e Thalor: 8 guardas, 14 moradores, 8 vendedores, 5–9 ms por quadro (software), captura de rua com casas, calçada e morador; 0 erro. Não testado: reação a ameaça dentro dos bairros novos, FPS em máquina real, celular.
+
 ## v598 (23/10/2026) — Paredão da garganta não cobre mais o mapa inteiro
 - **Pedido de Ian**: "montanha reta" e relevo que não dá para atravessar.
 - Causa: o paredão do Desfiladeiro (`terrain245.js`, +17 m em z 78–560) valia para QUALQUER x: uma faixa de serra reta atravessando o mapa de ponta a ponta (ex.: Zahar tinha 23 m ao sul do centro, onde o chão devia ser plano). Agora o paredão some entre 70 e 170 m da estrada (GLSL e CPU iguais).

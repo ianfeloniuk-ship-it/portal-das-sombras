@@ -20,8 +20,11 @@
 
   function inn(c) { const i = L.inter && L.inter.find(x => x.type === 'inn' && x.city === c); return i ? { x: i.x, z: i.z + 2.2 } : { x: c.x + 8, z: c.z - 10 }; }
   function market(c) { const v = npcs.find(x => x.kind === 'vendor' && x.home === c && x.sign === 'MERCADO'); return v ? { x: v.x + 2.6, z: v.z } : { x: c.x + 7, z: c.z + 9 }; }
-  function houseSpot(c, seed) { const a = (seed % 360) * Math.PI / 180; return { x: c.x + Math.cos(a) * 24, z: c.z + Math.sin(a) * 24 }; }
-  function patrolPt(c, i) { const a = i * Math.PI / 4; return { x: c.x + Math.cos(a) * 14, z: c.z + Math.sin(a) * 14 }; }
+  /* v598 (Ian): nas Capitais grandes (muralha de 250 m) a gente mora e ronda pelas avenidas dos bairros novos */
+  const big = c => typeof cityBig533 === 'function' && cityBig533(c) > 0;
+  const avenue = (c, q, r, side) => ({ x: c.x + Math.cos(q) * r - Math.sin(q) * side, z: c.z + Math.sin(q) * r + Math.cos(q) * side });
+  function houseSpot(c, seed) { if (big(c)) return avenue(c, (seed % 4) * Math.PI / 2, 112 + (seed * 7) % 125, (seed % 2 ? 1 : -1) * (7 + seed % 3)); const a = (seed % 360) * Math.PI / 180; return { x: c.x + Math.cos(a) * 24, z: c.z + Math.sin(a) * 24 }; }
+  function patrolPt(c, i) { if (big(c)) return avenue(c, (i % 4) * Math.PI / 2, i < 4 ? 62 : 185, 7); const a = i * Math.PI / 4; return { x: c.x + Math.cos(a) * 14, z: c.z + Math.sin(a) * 14 }; }
 
   function mk(c, o) {
     const p = o.pos;
@@ -151,10 +154,10 @@
         }
       }
       for (const ch of chunks.values()) {
-        const c = ch.city; if (!c || (typeof cityFallen === 'function' && cityFallen(c)) || dist(player, c) > 120) continue;
+        const c = ch.city; if (!c || (typeof cityFallen === 'function' && cityFallen(c)) || dist(player, c) > (big(c) ? 300 : 120)) continue;
         const list = mine(c), mors = list.filter(x => x.role523 !== 'guarda' && x.role523 !== 'ladrao').length, gs = list.filter(x => x.role523 === 'guarda').length;
-        if (gs < 2) { spawnGuarda(c); break; }
-        if (mors < 3) { spawnMorador(c); break; }
+        if (gs < (big(c) ? 8 : 2)) { spawnGuarda(c); break; }
+        if (mors < (big(c) ? 14 : 3)) { spawnMorador(c); break; }
         if ((nn || p > .55) && dist(player, c) < 45 && now - lastThief > 90000 && Math.random() < .25) { lastThief = now; c.ladrao523 = 1; thief(c); }
         else if (!list.some(x => x.role523 === 'ladrao')) c.ladrao523 = 0;
       }

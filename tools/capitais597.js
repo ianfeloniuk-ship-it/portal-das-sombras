@@ -66,7 +66,7 @@
   const reliefH = () => 0;
   function bairros(c, g, addCol, R0) {
     const TH = THEME[c.name] || THEME.Verden, X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.name));
-    const b = new EnvBatch(), stats = { houses: 0, special: 0 };
+    const b = new EnvBatch(), stats = { houses: 0, special: 0 }, SH = [];
     const col = (x, z, r) => addCol({ x, z, r });
 
     /* ---- estilo Skyrim (Whiterun): avenidas retas dos portões, vielas tortas que saem delas, casas coladas de frente para a rua,
@@ -111,7 +111,7 @@
       else if (H.special) EW(b, H.key, X + x, 0, Z + z, ry, H.w, 1);
       else { const mm = ENV.m[H.key]; if (!mm) { used.pop(); return false; } const sc = H.w / mm.w, fy = .9 + R() * .4; b.add(H.key, X + x, 0, Z + z, ry + doorRot188(H.key), sc, sc * fy, sc, H.tint); }
       cityCollider253(addCol, X + x, Z + z, ry, dim); ENV.cast.push({ x: X + x + .8, z: Z + z - .6, r: Math.max(dim.w, dim.d) * .6, k: .5 });
-      if (H.special) stats.special++; else stats.houses++;
+      if (H.special) { stats.special++; SH.push({ key: H.key, x: X + x, z: Z + z, ry, dim }); } else stats.houses++;
       const fxv = Math.sin(ry), fzv = Math.cos(ry), lx = fzv, lz = -fxv;
       if (!H.special && R() < .55) { const kk = ['barrel', 'crate_A_big', 'sack', 'barrel_small', 'wheelbarrow', 'log_stack', 'crates_stacked'][Math.floor(R() * 7)], o = (R() - .5) * dim.w * .7; prop(kk, x + fxv * (dim.d / 2 + 1.7) + lx * o, z + fzv * (dim.d / 2 + 1.7) + lz * o, R() * TAU, kk === 'wheelbarrow' ? 1.1 : 1, .5); }
       if (!H.special && R() < .3) { const bx = x - fxv * (dim.d / 2 + 3.2), bz = z - fzv * (dim.d / 2 + 3.2); if (flatAt(bx, bz, 2) && dStreet(bx, bz, -1) > 2.5 && used.every(u => City253.clearance(City253.bounds({ w: 4, d: 4 }, bx, bz, 0), u.footprint) > .5)) { EH(b, R() < .5 ? 'tree_oak' : 'tree_willow', X + bx, 0, Z + bz, R() * TAU, 5.2 + R() * 2.4); col(X + bx, Z + bz, .8); stats2.trees++; } }
@@ -189,6 +189,10 @@
     }
     envOwn(g, grp);
     c.bairros533 = stats;
+    /* vendedores nas lojas dos bairros: ferreiro (equipamentos), mercado, igreja (poções) e quartel (defesa) */
+    const VS = { building_blacksmith_blue: ['wep', 'EQUIPAMENTOS', '#ffb84d', 0x7a4a2a, 'Ferreiro'], building_market_blue: ['mkt', 'MERCADO', '#b18cff', 0x5a2a6a, 'Mercador'], building_church_blue: ['pot', 'POÇÕES', '#ff8fa3', 0x8a2b4a, 'Curandeiro'], building_barracks_blue: ['arm', 'DEFESA', '#c9d3de', 0x5f6f86, 'Armeiro'] };
+    const VN = ['Torvald', 'Ysolde', 'Bertram', 'Mirabel', 'Osric', 'Edda', 'Halvar', 'Ingrid', 'Corwin', 'Selka'];
+    SH.forEach((s, i) => { const v = VS[s.key]; if (!v || typeof addVendor !== 'function') return; try { const f = cityFront253(s.x, s.z, s.ry, s.dim.d / 2 + 1.6); addVendor(c, v[0], VN[(seedOf(c.name) + i) % VN.length] + ' · ' + v[4], v[1], v[2], f.x, f.z, { body: v[3], hair: 0x3a2a1a, wep: 'none', gk: 'Rogue' }); } catch (_) {} });
   }
 
   const bc0 = buildCity;
