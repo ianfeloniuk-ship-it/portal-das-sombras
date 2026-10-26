@@ -24,10 +24,40 @@
   const norm = a => { a %= TAU; return a < 0 ? a + TAU : a; };
   /* v622 (Ian, 26/10/2026): "nenhuma cidade no mundo é redonda" — a muralha segue um contorno orgânico (raio por ângulo). Só as capitais listadas aqui;
      as outras seguem redondas até a vez delas. Os 4 portões ficam nos eixos cardeais (as estradas da v600 saem por eles). */
-  const S_ = Math.sin;
-  const ORG = {
-    Zahar: a => 198 + 24 * S_(2 * a + 1.1) + 15 * S_(3 * a + .3) + 8 * S_(5 * a + 2)
+  /* v623: o contorno é um POLÍGONO irregular (muralha reta entre torres de canto, como cidade medieval de verdade). Vértices sorteados por capital;
+     o raio por ângulo é a interseção do raio com o polígono. Zahar espalhada, Urdan colada na serra (lado norte reto), Thalor com o lado do mar reto,
+     Verden como mancha de árvores (muitos lados), Ymiria angulosa. Raio entre 172 e 240 m. */
+  const POLYCFG = {
+    Zahar: { n: 12, base: 206, amp: 34, jit: .45, seed: 5 },
+    Urdan: { n: 9, base: 200, amp: 24, jit: .3, seed: 23, flat: { a0: PI * 1.1, a1: PI * 1.9, r: 178 } },
+    Thalor: { n: 10, base: 205, amp: 26, jit: .3, seed: 37, flat: { a0: PI * .78, a1: PI * 1.22, r: 214 } },
+    Verden: { n: 15, base: 208, amp: 20, jit: .22, seed: 41 },
+    Ymiria: { n: 12, base: 208, amp: 30, jit: .28, seed: 53, alt: 1 }
   };
+  const POLY = {};
+  function polyOf(name) {
+    if (POLY[name]) return POLY[name];
+    const C = POLYCFG[name]; if (!C) return null;
+    const R = rng(C.seed * 7919 + 13), V = [];
+    for (let i = 0; i < C.n; i++) {
+      const a = (i + .5 + (R() - .5) * C.jit * 2) / C.n * TAU;
+      let r = C.base + (R() - .5) * 2 * C.amp; if (C.alt) r += (i % 2 ? -1 : 1) * 12;
+      if (C.flat && a > C.flat.a0 && a < C.flat.a1) r = C.flat.r + (R() - .5) * 4;
+      V.push({ a, r: Math.max(172, Math.min(240, r)) });
+    }
+    V.sort((p, q) => p.a - q.a);
+    return POLY[name] = V.map(v => [Math.cos(v.a) * v.r, Math.sin(v.a) * v.r]);
+  }
+  function polyRho(P, a) {
+    const dx = Math.cos(a), dz = Math.sin(a);
+    for (let i = 0; i < P.length; i++) {
+      const A = P[i], B = P[(i + 1) % P.length], ex = B[0] - A[0], ez = B[1] - A[1], den = dx * ez - dz * ex; if (Math.abs(den) < 1e-9) continue;
+      const t = (A[0] * ez - A[1] * ex) / den, u = (A[0] * dz - A[1] * dx) / den; /* ponto = t*d = A + u*e */
+      if (t > 0 && u >= -1e-6 && u <= 1 + 1e-6) return t;
+    }
+    return RC;
+  }
+  const ORG = new Proxy({}, { has: (o, k) => !!POLYCFG[k], get: (o, k) => POLYCFG[k] ? (a => polyRho(polyOf(k), a)) : undefined });
   const rhoOf = (c, a) => ORG[c.name] ? ORG[c.name](a) : RC;
   const gateDist = a => Math.min(...[0, PI / 2, PI, PI * 1.5, TAU].map(q => Math.abs(norm(a) - q)));
 
@@ -144,6 +174,112 @@
     return add0.apply(this, arguments);
   };
 
+  /* ---------- v623: muralha e torres em geometria própria, com material procedural realista (pedra com junta, adobe com reboco, madeira velha) ---------- */
+  const LOOK = {
+    Zahar: { k: [1, 1], cA: 0xc9a46c, cB: 0xb78f58, cM: 0x9b7545, dA: 0xe3cfa4, dB: 0xd2b98a, dM: 0xa88a5c, kp: [2.4, 1.5], kq: [2.4, 1.5], snow: 0, moss: 0,
+      wt: { H: 8, th: 2.6, taper: .74, plinth: 1, merl: 'box' }, tw: { seg: 4, taper: .82, roof: 'none', r: 3.2 } },
+    Urdan: { k: [0, 0], cA: 0x544e48, cB: 0x3e3a36, cM: 0x1c1a19, dA: 0x2e2a28, dB: 0x3a3330, dM: 0x151413, kp: [1.5, .85], kq: [.6, .35], snow: .12, moss: 0,
+      wt: { H: 9, th: 3.2, taper: .9, plinth: 1, merl: 'box' }, tw: { seg: 6, taper: .86, roof: 'none', r: 3.4 } },
+    Thalor: { k: [0, 0], cA: 0x959a90, cB: 0x7a8076, cM: 0x4d514a, dA: 0x41606a, dB: 0x34505a, dM: 0x24373e, kp: [1.1, .6], kq: [.55, .32], snow: 0, moss: 1,
+      wt: { H: 9, th: 2.4, taper: .94, plinth: 1, merl: 'box' }, tw: { seg: 8, taper: .9, roof: 'cone', roofH: 1.9, r: 3.2 } },
+    Verden: { k: [0, 2], cA: 0xc4bfa8, cB: 0xa9a58f, cM: 0x706d5c, dA: 0x7b5a39, dB: 0x634728, dM: 0x2f2112, kp: [1.2, .62], kq: [.42, 9], snow: 0, moss: .5,
+      wt: { H: 8, th: 1.6, base: 2.8, merl: 'stake' }, tw: { seg: 8, taper: .88, roof: 'cone', roofH: 1.5, r: 3.1, base: 3.4 } },
+    Ymiria: { k: [0, 0], cA: 0x59627a, cB: 0x454c61, cM: 0x262a36, dA: 0x2a3042, dB: 0x1f2433, dM: 0x10131c, kp: [1.3, .75], kq: [.5, .3], snow: .7, moss: 0,
+      wt: { H: 10, th: 2.4, taper: .92, plinth: 1, merl: 'spike' }, tw: { seg: 8, taper: .8, roof: 'cone', roofH: 3.4, r: 3 } }
+  };
+  const mergeParts = parts => {
+    const P = [], N = [], M = [];
+    for (const { g, mk } of parts) {
+      const q = g.index ? g.toNonIndexed() : g; q.computeVertexNormals();
+      const p = q.attributes.position.array, n = q.attributes.normal.array;
+      for (let i = 0; i < p.length; i++) { P.push(p[i]); N.push(n[i]); }
+      for (let i = 0; i < p.length / 3; i++) M.push(mk);
+      if (q !== g) q.dispose(); g.dispose();
+    }
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(P, 3)); geo.setAttribute('normal', new T.Float32BufferAttribute(N, 3)); geo.setAttribute('mk', new T.Float32BufferAttribute(M, 1));
+    geo.computeBoundingSphere(); return geo;
+  };
+  const kitGeo = {}, kitMat = {};
+  const WALL_L = 6.4, TOWER_H = 14;
+  function wallGeo(name) {
+    if (kitGeo['w' + name]) return kitGeo['w' + name];
+    const w = LOOK[name].wt, H = w.H, th = w.th, parts = [];
+    const tp = (g, mk, x, y, z) => { g.translate(x, y, z); parts.push({ g, mk }); };
+    const taper = g => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) if (p.getY(i) > 1) p.setZ(i, p.getZ(i) * w.taper); return g; };
+    if (w.base) { /* Verden: pé de pedra clara + paliçada de troncos por cima */
+      tp(new T.BoxGeometry(WALL_L, w.base, th * 1.25), 0, 0, w.base / 2, 0);
+      const up = H - w.base; tp(new T.BoxGeometry(WALL_L, up, th * .7), 1, 0, w.base + up / 2, 0);
+      for (let i = 0; i < 12; i++) { const g = new T.ConeGeometry(.3, 1.4, 4); g.rotateY(PI / 4); tp(g, 1, -WALL_L / 2 + .27 + i * (WALL_L - .54) / 11, H + .7, i % 2 ? .12 : -.12); }
+      tp(new T.BoxGeometry(WALL_L, .35, th * .9), 1, 0, w.base + 1.6, 0); tp(new T.BoxGeometry(WALL_L, .35, th * .9), 1, 0, H - 1, 0);
+    } else {
+      tp(taper(new T.BoxGeometry(WALL_L, H, th)), 0, 0, H / 2, 0);
+      if (w.plinth) tp(new T.BoxGeometry(WALL_L, 1.1, th * 1.14), 0, 0, .55, 0);
+      const tt = th * w.taper;
+      for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
+        const x = -2.1 + i * 2.1, z = side * (tt / 2 - .3);
+        if (w.merl === 'spike') { const g = new T.ConeGeometry(.75, 2.1, 4); g.rotateY(PI / 4); tp(g, 0, x, H + 1.05, z); tp(new T.BoxGeometry(1.5, .9, .6), 0, x, H + .45, z); }
+        else tp(new T.BoxGeometry(1.5, 1.4, .6), 0, x, H + .7, z);
+      }
+      tp(new T.BoxGeometry(WALL_L, .5, th * w.taper), 0, 0, H + .15, 0);
+    }
+    return kitGeo['w' + name] = mergeParts(parts);
+  }
+  function towerGeo(name) {
+    if (kitGeo['t' + name]) return kitGeo['t' + name];
+    const t = LOOK[name].tw, h = TOWER_H, r = t.r, parts = [], rot = t.seg === 4 ? PI / 4 : PI / t.seg;
+    const cyl = (rt, rb, hh, y, mk) => { const g = new T.CylinderGeometry(rt, rb, hh, t.seg, 1); g.rotateY(rot); g.translate(0, y + hh / 2, 0); parts.push({ g, mk }); };
+    const rr = t.seg === 4 ? 1.3 : 1.05; /* quadrada: o cilindro de 4 lados vai até o canto */
+    const R0 = r * rr, R1 = R0 * t.taper;
+    if (t.base) { cyl(R0 * 1.06, R0 * 1.1, t.base, 0, 0); cyl(R1, R0 * 1.03, h - t.base, t.base, 1); } else cyl(R1, R0, h, 0, 0);
+    cyl(R1 * 1.2, R1 * 1.06, 1.2, h, t.base ? 1 : 0);
+    const nm = t.seg * 2, rm = R1 * 1.12 * (t.seg === 4 ? .72 : .95);
+    for (let i = 0; i < nm; i++) { const a = i / nm * TAU + rot; const g = new T.BoxGeometry(1.05, 1.1, .55); g.rotateY(-a + PI / 2); g.translate(Math.cos(a) * rm, h + 1.75, Math.sin(a) * rm); parts.push({ g, mk: t.base ? 1 : 0 }); }
+    if (t.roof === 'cone') { const g = new T.ConeGeometry(R1 * 1.35, t.roofH * r, t.seg); g.rotateY(rot); g.translate(0, h + 1.2 + t.roofH * r / 2, 0); parts.push({ g, mk: 1 }); }
+    return kitGeo['t' + name] = mergeParts(parts);
+  }
+  const linear = hex => { const c = new T.Color(hex); c.convertSRGBToLinear(); return c; };
+  function kitMaterial(name, ox, oz) {
+    if (kitMat[name]) return kitMat[name];
+    const L = LOOK[name], m = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .96, metalness: 0 });
+    m.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, { uCA: { value: linear(L.cA) }, uCB: { value: linear(L.cB) }, uCM: { value: linear(L.cM) }, uDA: { value: linear(L.dA) }, uDB: { value: linear(L.dB) }, uDM: { value: linear(L.dM) }, uKP: { value: new T.Vector4(L.kp[0], L.kp[1], 0, 0) }, uKQ: { value: new T.Vector4(L.kq[0], L.kq[1], 0, 0) }, uKind: { value: new T.Vector3(L.k[0], L.k[1], L.snow) }, uMoss: { value: L.moss }, uOrg: { value: new T.Vector2(ox, oz) } });
+      sh.vertexShader = sh.vertexShader.replace(/void\s+main\s*\(\s*\)\s*\{/, 'attribute float mk;varying vec3 vWP;varying float vMk;\nvoid main(){').replace('#include <begin_vertex>', '#include <begin_vertex>\nvMk=mk;vec4 wq=vec4(transformed,1.);\n#ifdef USE_INSTANCING\nwq=instanceMatrix*wq;\n#endif\nvWP=(modelMatrix*wq).xyz;');
+      const fn = `uniform vec3 uCA,uCB,uCM,uDA,uDB,uDM,uKind;uniform vec4 uKP,uKQ;uniform float uMoss;uniform vec2 uOrg;varying vec3 vWP;varying float vMk;
+float h21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.23);return fract(p.x*p.y);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}
+vec3 layer(vec2 uv,float kind,vec2 cell,vec3 cA,vec3 cB,vec3 cM,float seed){
+  float row=floor(uv.y/cell.y);float ro=kind>1.5?0.:(mod(row,2.)*.5+h21(vec2(row,seed))*.35);
+  vec2 q=vec2(uv.x/cell.x+ro,uv.y/cell.y);vec2 id=floor(q),f=fract(q);float rnd=h21(id+seed);
+  vec2 e=min(f,1.-f)*cell;float m=min(e.x,e.y);float mw=kind>1.5?.012:(kind>.5?.05:.032);
+  float mort=1.-smoothstep(mw*.5,mw*1.7,m);
+  vec3 col=mix(cA,cB,rnd);
+  float g=vn(uv*(kind>1.5?vec2(34.,2.2):vec2(13.)))*.55+vn(uv*4.7)*.45;col*=.74+.46*g;col*=.93+.14*h21(id*1.7+seed);
+  if(kind>.5&&kind<1.5){col*=.88+.24*vn(uv*1.6+seed);float cr=1.-smoothstep(.0,.02,abs(vn(uv*vec2(2.6,1.1)+seed)-.5));col=mix(col,cM,cr*.55);mort*=.3;}
+  return mix(col,cM,mort*(kind>1.5?.75:.88));
+}
+vec3 proc(){
+  vec3 n=normalize(cross(dFdx(vWP),dFdy(vWP)));bool top=abs(n.y)>.7;vec3 wp=vWP-vec3(uOrg.x,0.,uOrg.y);
+  vec2 uv=top?wp.xz:vec2(dot(wp.xz,normalize(vec2(-n.z,n.x)+vec2(1e-4))),wp.y);
+  vec3 c=vMk<.5?layer(uv,uKind.x,uKP.xy,uCA,uCB,uCM,1.):layer(uv,uKind.y,uKQ.xy,uDA,uDB,uDM,7.);
+  float gr=1.-smoothstep(0.,2.6,wp.y);c*=1.-.38*gr*vn(uv*2.7);
+  c=mix(c,vec3(.035,.075,.02),clamp(uMoss*gr*smoothstep(.35,.7,vn(uv*3.3+9.)),0.,1.));
+  float sn=uKind.z*(top?1.:smoothstep(.62,.9,vn(uv*2.2+3.))*.4);c=mix(c,vec3(.72,.78,.88),clamp(sn,0.,1.));
+  return c;
+}
+void main(){`;
+      sh.fragmentShader = sh.fragmentShader.replace(/void\s+main\s*\(\s*\)\s*\{/, fn).replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb=proc();')
+        .replace('#include <fog_fragment>', '#ifdef USE_FOG\nfloat ffk=1.0-exp(-fogDensity*fogDensity*fogDepth*fogDepth);gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,ffk*.25);\n#endif');
+    };
+    m.customProgramCacheKey = () => 'kit623-' + name;
+    return kitMat[name] = m;
+  }
+  function kitMesh(geo, mat, list) { /* list: [{x,z,ry,sx,sy,sz}] */
+    const im = new T.InstancedMesh(geo, mat, list.length), mx = new T.Matrix4(), q = new T.Quaternion(), ax = new T.Vector3(0, 1, 0);
+    list.forEach((e, i) => { mx.compose(new T.Vector3(e.x, 0, e.z), q.setFromAxisAngle(ax, e.ry), new T.Vector3(e.sx, e.sy, e.sz)); im.setMatrixAt(i, mx); });
+    im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; im.castShadow = true; im.receiveShadow = true; im.userData.own = 1; return im;
+  }
+
   /* ---------- a capital ---------- */
   function capital(c, g, addCol) {
     const S = STYLE[c.name], X = c.x, Z = c.z, M = TripoEnvironment153.models, R = rng(seedOf(c.id + c.name));
@@ -156,38 +292,38 @@
       const w = Math.min(1, Math.max(0, (z - Z + 20) / 60)); return [1 - .5 * w, 1 - .58 * w, 1 - .55 * w];
     };
 
-    /* muralha: segmentos de ~6 m, com vãos nos 4 portões */
-    const wm = M[S.wall], seg = 6.2, rho = a => rhoOf(c, a), gapA = 12.5 / RC;
+    /* muralha: polígono irregular, trechos retos de ~6 m com vãos nos 4 portões, torre em cada vértice (v623) */
+    const LK = LOOK[c.name], seg = WALL_L, rho = a => rhoOf(c, a);
     const gateR = [0, PI / 2, PI, PI * 1.5].map(rho);
-    /* contorno em pontos igualmente espaçados ao longo do perímetro */
-    const outline = []; { const st = 720; let acc = 0, prev = null; const pts = []; for (let i = 0; i <= st; i++) { const a = i / st * TAU, r = rho(a), p = [Math.cos(a) * r, Math.sin(a) * r]; if (prev) acc += Math.hypot(p[0] - prev[0], p[1] - prev[1]); pts.push({ p, acc, a }); prev = p; }
-      const n = Math.round(acc / seg); for (let k = 0; k < n; k++) { const s = (k + .5) / n * acc; let m = 0; while (m < pts.length - 2 && pts[m + 1].acc < s) m++; const A = pts[m], B = pts[m + 1], t = (s - A.acc) / ((B.acc - A.acc) || 1), x = A.p[0] + (B.p[0] - A.p[0]) * t, z = A.p[1] + (B.p[1] - A.p[1]) * t; outline.push({ x, z, tan: Math.atan2(B.p[1] - A.p[1], B.p[0] - A.p[0]), L: acc / n * 1.05, a: Math.atan2(z, x) }); } }
-    if (wm) for (const o of outline) {
-      const gd = [[gateR[0], 0], [0, gateR[1]], [-gateR[2], 0], [0, -gateR[3]]].some(g => Math.hypot(o.x - g[0], o.z - g[1]) < 12.5); if (gd) continue;
-      const x = X + o.x, z = Z + o.z, sea = c.name === 'Thalor' && Math.cos(o.a) < -.2;
-      const H = S.H + (sea ? 2 : 0), th = S.wall === 'wall' ? 2.4 : 1.4;
-      push(S.wall, x, z, -o.tan, o.L / wm.sx, H / wm.h, th / wm.sz, segTint(x, z));
-      col(x, z, 3.3);
-    }
-    /* torres: duas em cada portão, uma entre portões */
-    const tm = M.defense, tws = [];
-    if (tm) {
-      [0, PI / 2, PI, PI * 1.5].forEach((q, qi) => { for (const sd of [-1, 1]) tws.push(q + sd * (18 / gateR[qi])); });
-      for (const q of [PI / 4, PI * .75, PI * 1.25, PI * 1.75]) tws.push(q);
-      for (const a of tws) {
-        const rA = rho(a), x = X + Math.cos(a) * rA, z = Z + Math.sin(a) * rA, hh = (gateDist(a) * rA < 30 ? 17 : 14), sc = hh / tm.h;
-        push('defense', x, z, Math.atan2(X - x, Z - z), sc, sc, sc, null); col(x, z, 4.2);
-        flames.push({ x: x + Math.cos(a) * -2.2, y: hh * .62, z: z + Math.sin(a) * -2.2, size: 5.5 });
+    const PLY = polyOf(c.name), wallList = [], towerList = [], flames0 = [];
+    const nearGate = (x, z) => [[gateR[0], 0], [0, gateR[1]], [-gateR[2], 0], [0, -gateR[3]]].some(g => Math.hypot(x - g[0], z - g[1]) < 12.5);
+    for (let i = 0; i < PLY.length; i++) {
+      const A = PLY[i], B = PLY[(i + 1) % PLY.length], len = Math.hypot(B[0] - A[0], B[1] - A[1]), n = Math.max(1, Math.round(len / seg)), tan = Math.atan2(B[1] - A[1], B[0] - A[0]);
+      for (let k = 0; k < n; k++) {
+        const t = (k + .5) / n, x = A[0] + (B[0] - A[0]) * t, z = A[1] + (B[1] - A[1]) * t; if (nearGate(x, z)) continue;
+        const sea = c.name === 'Thalor' && x < -60, H = LK.wt.H + (sea ? 2 : 0);
+        wallList.push({ x: X + x, z: Z + z, ry: -tan, sx: len / n / seg * 1.04, sy: H / LK.wt.H, sz: 1 }); col(X + x, Z + z, 3.3);
       }
+      const hh = i % 3 === 0 ? 17 : 14; towerList.push({ x: X + A[0], z: Z + A[1], s: hh / TOWER_H, ry: 0, hh }); col(X + A[0], Z + A[1], 4.4);
     }
     cityGates341(c, g, false, gateR, 9, 7);
+    /* torres de canto e dos portões: tochas no alto */
+    for (const e of towerList) flames.push({ x: e.x + (X - e.x) * .02, y: e.hh * .98, z: e.z, size: 5 });
     /* fortaleza: no ponto mais largo do contorno (o "alto" da cidade), um torreão grande e quatro torres de canto */
-    if (ORG[c.name] && tm) {
+    {
       let best = 0, ba = 0; for (let i = 0; i < 360; i++) { const a = i / 360 * TAU, r = rho(a); if (r > best && gateDist(a) * r > 70) { best = r; ba = a; } }
-      const kx = X + Math.cos(ba) * (best - 42), kz = Z + Math.sin(ba) * (best - 42), face = Math.atan2(X - kx, Z - kz);
-      push('defense', kx, kz, face, 34 / tm.h, 34 / tm.h, 34 / tm.h, null); col(kx, kz, 8); flames.push({ x: kx, y: 21, z: kz, size: 8 });
-      for (const [dx, dz] of [[-17, -17], [17, -17], [-17, 17], [17, 17]]) { const tx = kx + dx, tz = kz + dz; push('defense', tx, tz, face, 22 / tm.h, 22 / tm.h, 22 / tm.h, null); col(tx, tz, 5); flames.push({ x: tx, y: 13, z: tz, size: 5 }); }
+      const kx = X + Math.cos(ba) * (best - 42), kz = Z + Math.sin(ba) * (best - 42);
+      towerList.push({ x: kx, z: kz, s: 34 / TOWER_H, ry: ba, hh: 34 }); col(kx, kz, 8); flames.push({ x: kx, y: 35, z: kz, size: 8 });
+      for (const [dx, dz] of [[-17, -17], [17, -17], [-17, 17], [17, 17]]) { const tx = kx + dx, tz = kz + dz; towerList.push({ x: tx, z: tz, s: 22 / TOWER_H, ry: ba, hh: 22 }); col(tx, tz, 5); flames.push({ x: tx, y: 22.5, z: tz, size: 5 }); }
       c.keep622 = { x: kx, z: kz };
+    }
+    /* pilares dos portões viram torres de portão */
+    for (const p of CTX.pillars) { towerList.push({ x: p.x, z: p.z, s: 17 / TOWER_H, ry: 0, hh: 17 }); col(p.x, p.z, 4.4); flames.push({ x: p.x, y: 17.5, z: p.z, size: 5 }); }
+    CTX.pillars.length = 0;
+    {
+      const kmat = kitMaterial(c.name, X, Z);
+      if (wallList.length) g.add(kitMesh(wallGeo(c.name), kmat, wallList.map(e => e)));
+      if (towerList.length) g.add(kitMesh(towerGeo(c.name), kmat, towerList.map(e => ({ x: e.x, z: e.z, ry: e.ry, sx: e.s, sy: e.s, sz: e.s }))));
     }
     /* tochas ao longo da muralha, por dentro */
     for (let i = 0; i < 70; i++) {
@@ -206,7 +342,7 @@
       const a = S.lmAng * PI / 180, x = X + Math.cos(a) * S.lmR, z = Z + Math.sin(a) * S.lmR;
       const mm = M[S.lm];
       if (mm) {
-        const sc = S.lmH / mm.h; if (S.lm === 'oak') big.push({ x, z, ry: 0, sc }); else push(S.lm, x, z, Math.atan2(X - x, Z - z), sc, sc, sc, null); col(x, z, S.lm === 'oak' ? 3 : 9);
+        const sc = S.lmH / mm.h; if (S.lm === 'oak') big.push({ x, z, ry: 0, sc }); else { const ks = S.lmH / TOWER_H; g.add(kitMesh(towerGeo(c.name), kitMaterial(c.name, X, Z), [{ x, z, ry: a, sx: ks * .6, sy: ks, sz: ks * .6 }])); } col(x, z, S.lm === 'oak' ? 3 : 7);
         const halo = new T.Sprite(new T.SpriteMaterial({ map: soft(), color: S.halo, opacity: .5, transparent: true, depthWrite: false, blending: T.AdditiveBlending, fog: false }));
         halo.scale.setScalar(S.lmH * (S.lm === 'oak' ? .45 : .75)); halo.position.set(x, S.lmH * (S.lm === 'oak' ? 1.05 : .93), z); halo.renderOrder = 9; g.add(halo);
         flames.push({ x, y: S.lmH * (S.lm === 'oak' ? 1.05 : .93), z, size: S.lm === 'oak' ? 14 : 26 });
@@ -248,7 +384,6 @@
       for (let i = 0; i < 14; i++) { const p = spot(72, RC - 14); if (!p) continue; EH(b, 'tree_oak', p.x, 0, p.z, R() * TAU, 5 + R() * 2); col(p.x, p.z, 1); }
     }
 
-    if (wm) for (const p of CTX.pillars) { push(S.wall, p.x, p.z, p.ry, 2.4 / wm.sx, p.h / wm.h, 2.6 / wm.sz, null); }
     /* monta o lote instanciado e tinge por instância */
     const group = b.mesh(BLDMAT);
     if (group) {
