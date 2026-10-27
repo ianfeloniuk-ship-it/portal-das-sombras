@@ -1,3 +1,10 @@
+## v644 (27/10/2026) — defender apenas no meio (roda do mouse); mira e câmera no direito
+- Pedido de Ian: "troca pra mim, deixa o botão de defender apenas na roda do mouse clicando se segurando, e a mira pelo direito".
+- Defesa: mapeada exclusivamente para o botão do meio (`e.button === 1`), clicando e segurando a roda do mouse; `pointerdown`, `mousedown` e `auxclick` com `preventDefault` para eliminar autoscroll em qualquer navegador; soltar no meio (`pointerup`/`mouseup`/`blur`) encerra a guarda imediatamente; nenhum outro botão defende.
+- Mira e Câmera: botão direito (`e.button === 2`) arrastado gira a câmera livremente / mira (em 1ª pessoa gira o corpo/visão; em 3ª pessoa orbita a visão); clique curto (< 8 px) trava/solta a mira no alvo (`W377.toggle(true)`). O botão direito não defende em hipótese alguma.
+- Limpeza de cache / PWA: `tools/guard472.js`, `tools/skyrim588.js`, `tools/witcher377.js` e `tools/skyrim-overhaul538.js` atualizados para `?v=644` no HTML e no `sw.js` (eliminando o cache antigo que mantinha o botão direito com defesa); removidos ícones excluídos (`icon-192.png`, `icon-512.png`) do array `CORE` do `sw.js` para garantir instalação limpa do Service Worker (`pds-v644`).
+- Teste: verificação de sintaxe `node --check` em todos os módulos e scripts, `core_parts.py check` ok, compilação de `build.py` ok.
+
 ## v643 (27/10/2026) — Mana: fogueira acesa e tenda portátil, guarda do sono
 - `mana642.js`: perto de fogueira acesa (Build437, 6 m) regenera 2 por hora; a tenda portátil (`build437.js`) deixa de encher a mana e dá 24; a guarda do sono por pousada/casa usa o objeto `run.rested`. Testes: 1 hora do jogo (150 s) andando 1, parado 2, fogueira 2, Fenda 1 (relógio normal), nível 300 = 4, tenda 24, pousada +32 (limitado à barra); extração de 60 s e fadiga de 150 s simuladas quadro a quadro; save antigo (anel de mana, minérios e núcleos) carrega como Minério.
 ## v642 (27/10/2026) — Sistema de Mana (PDF v4 aprovado por Ian)

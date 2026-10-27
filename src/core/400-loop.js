@@ -176,9 +176,9 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
-addEventListener('pointerup',e=>{if(e.button===2){window.camMoved472=cameraDrag375?(cameraDrag375.moved472||0):0;releaseCamera373()}});
+addEventListener('pointerup',e=>{if(e.button===2){const moved=cameraDrag375?(cameraDrag375.moved472||0):0;window.camMoved472=moved;releaseCamera373();if(moved<8&&window.W377&&typeof W377.toggle==='function')W377.toggle(true)}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
 addEventListener('pointercancel',releaseCamera373);
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});
