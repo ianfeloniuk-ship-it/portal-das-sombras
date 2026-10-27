@@ -3,7 +3,7 @@
    Rolar e impulso passam pelo moveEnt (colisão em passos de 25 cm), então não atravessam parede nem muralha; aqui também não entram em água funda. */
 (() => {
   'use strict';
-  const COST_ROLL = 20, COST_DASH = 10, DASH_T = .2, DASH_SPD = 18, DASH_CD = .9, TAP_MS = 250;
+  const ROLL_T = .65, ROLL_IT = .45, ROLL_SPD = 4.3, ROLL_CD = .9, COST_ROLL = 20, COST_DASH = 10, DASH_T = .2, DASH_SPD = 18, DASH_CD = .9, TAP_MS = 250;
   const ok = () => typeof started !== 'undefined' && started && typeof player !== 'undefined' && player && !player.dead && !paused && !modalOpen;
   const vig = () => { try { return martialState260(); } catch (_) { return null; } };
   const spend = n => { const r = vig(); if (r) { r.vigor = Math.max(0, r.vigor - n); r.vigorWait = Math.max(r.vigorWait || 0, 1.2); } };
@@ -16,10 +16,15 @@
     const P = player;
     if (!P || P.dead || paused || P.dodgeCd > 0 || P.dodgeT > 0 || P.swim391) return;
     if (!has(COST_ROLL)) { tired(); return; }
-    P.dashNoRoll632 = false;
+    P.dashNoRoll632 = false; P.roll632 = false;
     const before = P.dodgeT || 0;
     dodge0.apply(this, arguments);
-    if ((P.dodgeT || 0) > before) spend(COST_ROLL);
+    if ((P.dodgeT || 0) > before) {
+      spend(COST_ROLL);
+      /* rolamento de verdade: 0,65 s, ~2,8 m, invulnerável por 0,45 s, animação 'rolar' (Blender) */
+      P.dodgeT = ROLL_T; P.iT = Math.max(P.iT || 0, ROLL_IT); P.roll632 = true; P.rollDur632 = ROLL_T; P.rollSpd632 = ROLL_SPD;
+      P.dodgeCd = Math.max(P.dodgeCd || 0, ROLL_CD);
+    }
   };
 
   /* impulso: toque duplo na direção */
@@ -34,7 +39,7 @@
     if (pcCam.yaw) [dx, dz] = camRot(dx, dz);
     const l = Math.hypot(dx, dz) || 1;
     P.dir = { x: dx / l, z: dz / l };
-    P.dodgeT = DASH_T; P.dashSpd = DASH_SPD; P.dashNoRoll632 = true; P.dashDmg = null;
+    P.dodgeT = DASH_T; P.dashSpd = DASH_SPD; P.dashNoRoll632 = true; P.roll632 = false; P.dashDmg = null;
     P.dashCd632 = performance.now() + DASH_CD * 1000;
     spend(COST_DASH);
     try { sfx('dodge'); } catch (_) {}

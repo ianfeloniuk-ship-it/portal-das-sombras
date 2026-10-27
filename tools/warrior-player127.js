@@ -236,7 +236,10 @@
     if(/semAnim155/.test(location.search)){API.animsSettled=true;return animPending405=Promise.resolve(false)}
     const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);
     animPending405=new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
-      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;API.anim155=Object.keys(clips);res(true)},undefined,e=>{console.warn('Animações do Viajante não carregaram; usando animação por código.',e);res(false)})).then(ok=>{API.animsSettled=true;return ok});return animPending405;
+      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;
+      /* v635: clipe de rolar (Blender) entra no mesmo banco antes de o jogador ser montado */
+      if(tripo)L.load('models/anim-rolar632.glb?v=636',g2=>{try{const c=g2.animations.find(a=>a.name==='rolar');if(c){clips.rolar=c;API.anim155=Object.keys(clips)}}catch(_){}res(true)},undefined,()=>res(true));
+      API.anim155=Object.keys(clips);if(!tripo)res(true)},undefined,e=>{console.warn('Animações do Viajante não carregaram; usando animação por código.',e);res(false)})).then(ok=>{API.animsSettled=true;return ok});return animPending405;
   };
   // v405: a prévia pode carregar o modelo antes de iniciar. Modelo pronto não significa clipes/arco prontos.
   API.prepare=function(){if(readyPending405)return readyPending405;const q=new URLSearchParams(location.search);
@@ -327,6 +330,7 @@
     if(!m.a155)setup155(m);const A=m.a155;let a;
     if(st.dead>0)play155(A,'morte',.12,true);
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
+    else if(st.dodge&&st.roll632&&A.act.rolar){a=play155(A,'rolar',.04,true,A.state!=='rolar');a.timeScale=a.getClip().duration/.65;A.state='rolar'}/* v635: rolamento de verdade (models/anim-rolar632.glb, feito no Blender) */
     else if(st.dodge){a=play155(A,'esquiva',.045,true,A.state!=='esquiva');a.timeScale=a.getClip().duration/.32;A.state='esquiva'}
     else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
     else if(st.atk>0){const seq=ATK155[m.staff174&&/^(staff|bonestaff|wand|tome|orb)$/.test(st.wep||'')?'staff':st.wep]||ATK155.fist,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
