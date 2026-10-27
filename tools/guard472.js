@@ -23,12 +23,13 @@ G.blocking=blocking;G.hasShield=hasShield;
 function vigor(){try{return martialState260()}catch(_){return null}}
 function spend(n){const r=vigor();if(!r)return true;if(r.vigor<n){r.vigor=0;return false}r.vigor-=n;r.vigorWait=Math.max(r.vigorWait||0,1.2);return true}
 
-/* ---------- entrada: botão direito segurado (v600: como no Skyrim; o botão do meio não faz nada) ---------- */
+/* ---------- entrada: botão do meio (v476: Ian pediu defesa no meio) ---------- */
 const C=document.getElementById('c');
-function down(e){if(e.pointerType==='touch'||e.button!==2)return;if(!started||paused||modalOpen)return;held=true;t0=now();e.preventDefault()}
-function up(e){if(e.button===2)held=false}
+function down(e){if(e.pointerType==='touch'||e.button!==1)return;if(!started||paused||modalOpen)return;held=true;t0=now();e.preventDefault()}
+function up(e){if(e.button===1)held=false}
 C.addEventListener('pointerdown',down);addEventListener('pointerup',up);addEventListener('blur',()=>{held=false});
 C.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault()});
+C.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault()});/* v634: sem autoscroll do navegador no botão do meio */
 
 /* ---------- dano recebido ---------- */
 function frontal(src){const P=P_();if(!src||src.x==null)return true;const a=Math.atan2(src.x-P.x,src.z-P.z);let d=a-P.face;d=Math.atan2(Math.sin(d),Math.cos(d));return Math.abs(d)<1.3}

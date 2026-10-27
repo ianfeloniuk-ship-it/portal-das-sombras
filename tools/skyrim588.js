@@ -69,9 +69,9 @@
     cancel(); SK.drawn = !SK.drawn; e.preventDefault();
     try { toast(SK.drawn ? 'Arma sacada' : 'Arma guardada', 900); } catch(_) {}
   });
-  /* botão direito defende (Guard472 escuta o botão direito; v600: o botão do meio não faz nada); aqui só saca a arma */
+  /* v634: defender = segurar o botão do MEIO (Guard472); o botão direito não defende, só gira a câmera. Defender com o meio saca a arma. */
   cv.addEventListener('pointerdown', e => {
-    if(e.button !== 2 || e.pointerType === 'touch' || !ready() || !kind() || SK.drawing) return;
+    if(e.button !== 1 || e.pointerType === 'touch' || !ready() || !kind() || SK.drawing) return;
     SK.drawn = true;
   }, true);
 

@@ -1,3 +1,8 @@
+## v634 (27/10/2026) — mouse volta ao de antes: meio defende, direito gira a câmera
+- **Decisão do diretor (Ian achou a v600 horrível):** **defender = segurar o botão do meio**; o botão direito **não defende em hipótese alguma** e **gira a câmera arrastando** (clique curto trava/solta o alvo), como antes da v593/v600. O pointer lock da v600 saiu (`tools/mouse600.js` removido; `fp550.js` voltou a ser o da v599).
+- `guard472.js` e `skyrim588.js` (ponte direito→meio removida; o meio saca a arma), `skyrim-overhaul538.js` (texto do bônus de bloqueio), `400-loop.js` (arrasto de câmera sem a trava `MOUSE600`), `630-controles.js` (texto de Controles) e o `sw.js` ajustados; `mousedown` do meio com `preventDefault` (sem autoscroll). As teclas salvas não mudam com isso (mouse não é remapeável), então não há migração.
+- Teste: jogo real — arrastar com o direito gira a câmera (−0,42 rad em 140 px) sem defender; segurar o meio defende e soltar para; o direito parado não defende.
+
 ## v633 (27/10/2026) — reverte os degraus da v632
 - Decisão do diretor: os degraus de 45 cm (`170-colisao.js`) vinham de uma leitura errada do áudio de Ian e ninguém pediu. `src/core/170-colisao.js` voltou exatamente ao que era antes da v632 (`STEP600` saiu). Rolar (Shift + direção), impulso (toque duplo) e correr no Alt continuam. Teste: rolar 2,9 m (−20 Estamina), impulso 3,7 m (−10), Alt corre (7,8 m em 1,5 s), muralha de Aster segura rolos (57,9 m).
 

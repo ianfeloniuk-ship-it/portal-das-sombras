@@ -875,7 +875,7 @@
 
     document.addEventListener('mousemove', e => {
       if(!FP.active || !FP.pointerLocked || global.paused || global.modalOpen) return;
-      if(typeof cameraLook373 === 'function' && !window.MOUSE600){ /* v600: com mouse600 o giro é feito lá, para 1ª e 3ª pessoa */
+      if(typeof cameraLook373 === 'function'){
         cameraLook373(e.movementX, e.movementY);
       }
       FP.swayX += e.movementX * 0.0004;

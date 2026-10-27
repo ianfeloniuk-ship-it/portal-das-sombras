@@ -6917,7 +6917,7 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
-/* Câmera: v600 — mouse com pointer lock (tools/mouse600.js), como no Skyrim; o botão direito só defende. O arrasto com botão direito só vale se o lock não estiver disponível. */
+/* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. v634: volta a ser assim (o pointer lock da v600 saiu). */
 const pcCam={yaw:0,pitch:.03,distance:2.25,active:false,firstPerson:false};
 window.pcCam=pcCam;
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
@@ -6925,7 +6925,7 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||window.MOUSE600||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 addEventListener('pointerup',e=>{if(e.button===2){window.camMoved472=cameraDrag375?(cameraDrag375.moved472||0):0;releaseCamera373()}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
@@ -8815,7 +8815,7 @@ function setKeyBinding(act,code){const action=KEYACT.find(k=>k[0]===act);if(!act
 {const saved=KEYMAP;KEYMAP={};if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [act] of KEYACT)if(saved[act])setKeyBinding(act,saved[act]);try{localStorage.setItem('pds_keys',JSON.stringify(KEYMAP))}catch(e){}}
 function remapCode(code){for(const [act,,def] of KEYACT){if(keyOf(act)===code)return def}for(const [act,,def] of KEYACT){if(code===def&&keyOf(act)!==def)return 'X_'+def}return code}
 function refreshKeyLabels(){if(touch){$('bZ').querySelector('.k').textContent='✦';return}for(const [id,act] of[['bQ','sk0'],['bR','sk1'],['bT','sk2'],['bG','sk3'],['bY','sk4'],['bU','sk5'],['b5','sk6'],['bZ','sovereign'],['bH','pot']])$(id).querySelector('.k').textContent=keyLabel(keyOf(act));$('bDiary').title='Diário · '+keyLabel(keyOf('journey'));$('bMap').title='Mapa · '+keyLabel(keyOf('map'));$('bBag').title='Bolsa · '+keyLabel(keyOf('bag'));if(run)buildSteal()}
-function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Rolar e impulso','Rolar: '+keyLabel(keyOf('dodge'))+' + direção (sem direção, rola para a frente); tem pouco tempo de invulnerabilidade e gasta Estamina.<br>Impulso (dash): dois toques rápidos em W, A, S ou D (até 0,25 s); é um avanço curto, sem rolar, sem invulnerabilidade, com recarga e gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Botão direito (segurar): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Câmera: mexa o mouse (o cursor fica preso na tela durante o jogo; é solto ao abrir menu, mapa, inventário ou conversa e com Esc — clique na tela para prender de novo). O botão do meio não faz nada. Travar alvo: tecla CapsLock (veja a lista abaixo).','')+'<div class="sec">SUAS TECLAS</div>';
+function controlsView(){view=controlsView;let h='<div class="sec">MOVIMENTO E CÂMERA</div>'+row('WASD / setas','Andar. Segure '+keyLabel(keyOf('sprint'))+' para correr, ou dê um toque rápido nela para deixar a corrida travada (outro toque destrava). Correr não gasta Estamina.','')+row('Rolar e impulso','Rolar: '+keyLabel(keyOf('dodge'))+' + direção (sem direção, rola para a frente); tem pouco tempo de invulnerabilidade e gasta Estamina.<br>Impulso (dash): dois toques rápidos em W, A, S ou D (até 0,25 s); é um avanço curto, sem rolar, sem invulnerabilidade, com recarga e gasta Estamina.','')+row('Mouse','Esquerdo: atacar; segure para repetir.<br>Botão do meio (segurar, clicando a bolinha de rolagem): defender — golpes de frente causam metade do dano (um quarto com escudo) e gastam Estamina. Começar a defender logo antes do golpe <b>apara</b>: nenhum dano, o inimigo fica atordoado e o próximo golpe é um contra-ataque (x1,8). Com escudo, defendendo + esquerdo dá uma escudada.<br>Botão direito (arrastar): girar a câmera; o botão direito não defende. Clique curto trava/solta o alvo. Solte para clicar nos avisos e menus.','')+'<div class="sec">SUAS TECLAS</div>';
   for(const [act,n] of KEYACT){if(act==='sovereign'&&profile.rank!==9)continue;h+=row(n,'','<b>'+keyLabel(keyOf(act))+'</b>')}
   h+=row('Enter também usa / fala / avança conversa','','<b>Enter</b>');h+=row('Fechar janela / cancelar troca de tecla','','<b>Esc</b>');h+='<div style="text-align:right">'+btn('Configurar teclas','keys',0,true)+'</div>';openModal('CONTROLES DE PC',h)}
 function keysView(){view=keysView;let h='<div class="sysline">Clique em Mudar e pressione a tecla. Esc cancela. Teclas já usadas trocam de ação. WASD, setas e Esc são reservados.</div>';
@@ -9761,7 +9761,6 @@ requestAnimationFrame(frame);
 <script src="tools/ecossistema550.js?v=628"></script>
 <script src="tools/skyrim588.js?v=600"></script>
 <script src="tools/controles593.js?v=593"></script>
-<script src="tools/mouse600.js?v=600"></script>
 <script src="tools/upright600.js?v=600"></script>
 <script src="tools/mover632.js?v=632"></script>
 <script src="tools/fp550.js?v=600"></script>
@@ -9770,9 +9769,9 @@ requestAnimationFrame(frame);
 <script src="tools/enchente630.js?v=630"></script>
 <script src="tools/carga630.js?v=631"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v633</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v634</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=633;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=634;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
