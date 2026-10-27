@@ -225,7 +225,7 @@ function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv
   for(const x of enemies)if(!x.dead&&x!==b&&!x.rival&&Math.hypot(x.x-b.x,x.z-b.z)<20)killEnemy(x);
   unlockDungeonExit();
   addChest(b.x+4,b.z+1,L.gate.rank,true);addVein(b.x-4,b.z+1,L.gate.rank,7,0xffd070);if(!b.world){run.spts=(run.spts||0)+1;floater(b.x,b.z,'+1 PONTO DE HABILIDADE','#b18cff',true,4)}beginDungeonEscape();
-  toast('<b>[NARRADOR]</b> Guardião derrotado. Transbordo em 60s. Recolha o tesouro e volte à única saída, na entrada.',5000);
+  if(!L.ow460)toast('<b>[NARRADOR]</b> Guardião derrotado. Transbordo em 60s. Recolha o tesouro e volte à única saída, na entrada.',5000);/* v654: no Outro Mundo o aviso é o de OW460.openReturn (2 minutos, duas saídas) */
   if(!L.special&&L.gate.double){const r=L.rooms[L.bossRoom],G=L.grid,dz=G.oz+(r.y+.5)*G.CS+1.2,dx=r.wx;
     const door=new THREE.Group();door.position.set(dx,0,dz);const st=mesh(geo('sdoor',()=>new THREE.BoxGeometry(3,3.4,.4)),toonS(0x3a3a46));st.position.y=1.7;door.add(st);
     const cr=new THREE.Mesh(geo('scrack',()=>new THREE.BoxGeometry(.12,2.6,.45)),glowS(0xffd070,.35));cr.position.y=1.5;door.add(cr);L.group.add(door);

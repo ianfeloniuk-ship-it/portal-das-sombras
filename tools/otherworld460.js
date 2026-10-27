@@ -11,7 +11,12 @@
    eu posso sair a qualquer momento achando a fenda de onde eu entrei; toda vez que eu entro numa fenda ela some atrás de mim
    e aparece em algum lugar; matando o chefe surge uma nova fenda." Sem Cidadela, sem sinais: o Soberano anda solto em volta
    do covil; a Fenda de entrada reaparece em algum lugar deste mundo (sem marca) e leva de volta; a morte do Soberano rasga
-   uma Fenda nova onde ele cair. Portal vermelho: a Fenda de volta fica selada até o Soberano cair (regra antiga). */
+   uma Fenda nova onde ele cair. Portal vermelho: a Fenda de volta fica selada até o Soberano cair (regra antiga).
+   v653 (Ian, 27/10/2026): "dentro da fenda não tem mais o negócio que mostra onde fica o chefe; o portal de entrada não fecha,
+   continua aberto; só vai ter o negócio para mostrar o chefe se a fenda for vermelha, e na vermelha tu não vai poder sair...
+   objetivo: ou matar cem mobs dentro da fenda ou matar o chefe... quando sair com o objetivo cumprido ela vai colapsar e vai
+   ganhar uns pontos de reputação." A Fenda de entrada fica aberta onde você chegou (não some nem reaparece longe); na vermelha
+   ela fica trancada até o objetivo. O feixe do Soberano só existe na vermelha. Objetivo: GOAL_KILLS monstros ou o Soberano. */
 (function () {
   'use strict';
   const T = THREE, TAU = Math.PI * 2;
@@ -25,7 +30,9 @@
     crio: { zen: 0x020818, hor: 0x2a5a8a, fog: 0x1d4266, fogD: .0070, gr: [0xc9dceb, 0xa2bcd0, 0xe8f3fb], rock: 0x5c6e84, peak: 0xf2f8ff, vein: 0x70f4ff, sun: 0xcdeeff, sunI: 1.15, hs: 0xc4ebff, hg: 0x2c3c50, hI: .85, pl: [0x70bcff, 0x1c3c6e, 0xd8f6ff], moon: [0xeaf6ff, 0x9cc8ee], aur: 0x60ffd8, cry: ['cristal-ancora-gelo', 'cristal-ancora-turquesa'], tint: 0xdcefff, trees: ['tree_pineRoundA', 'tree_pineTallA_detailed', 'tree_cone'], big: ['crystal', 'crystal', 'spire', 'tree', 'tree', 'ruin'], small: ['rock_smallA', 'rock_smallC', 'grass', 'plant_flatShort', 'rock_smallFlatA'], part: 'snow', pc: 0xffffff },
     ambar: { zen: 0x170c02, hor: 0x9a6422, fog: 0x74491a, fogD: .0074, gr: [0xb48444, 0xcc9a52, 0x8c6434], rock: 0x6c4c2c, peak: 0x9a7046, vein: 0xffc24a, sun: 0xffd890, sunI: 1.2, hs: 0xffdc98, hg: 0x3c2612, hI: .85, pl: [0xffbc4e, 0x7c4012, 0xfff2c4], moon: [0xfff0d0, 0xd8a060], aur: 0xffb040, cry: ['cristal-ancora-ambar'], tint: 0xe0a860, trees: ['cactus_tall', 'cactus_short', 'tree_dead_small'], big: ['mesa', 'spire', 'cactus', 'ruin', 'crystal', 'mesa'], small: ['rock_smallA', 'rock_smallC', 'rock_smallFlatA', 'plant_flatShort', 'bone_A', 'cactus_short'], part: 'sand', pc: 0xffe0a0 }
   };
-  const ZONES = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Covil do Soberano'];
+  const GOAL_KILLS = 100; /* v653: abates do objetivo de toda Fenda do Outro Mundo */
+  const ZONES = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Covil do Soberano'], ZONES_C = ['Zona 1 · Fronteira da Fenda', 'Zona 2 · Ermos do Outro Mundo', 'Zona 3 · Confins do Outro Mundo']; /* v654: na comum a Zona 3 não fala do Soberano */
+  const zoneName = z => (L.gate?.red ? ZONES : ZONES_C)[z - 1];
 
   const absolute = o => { o.userData.terrainAbsolute245 = true; return o; };
   /* pedra por altura sem passar pela troca automática da v446 (que põe o pedregulho do Tripo sem a cor do mundo): dentro da Fenda o EW mantém a pedra tingida */
@@ -331,7 +338,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     // rota escondida (curva) da chegada até a Cidadela: acampamentos e sinais ficam perto dela, não em cima
     const px = -(bz - ez) / dB, pz = (bx - ex) / dB, off = (R() - .5) * 500, kx = (ex + bx) / 2 + px * off, kz = (ez + bz) / 2 + pz * off;
     const bez = t => ({ x: (1 - t) * (1 - t) * ex + 2 * (1 - t) * t * kx + t * t * bx, z: (1 - t) * (1 - t) * ez + 2 * (1 - t) * t * kz + t * t * bz });
-    // a Fenda por onde você entrou reaparece em algum lugar deste mundo, longe da chegada e do covil (sem marca nenhuma)
+    // v653: a Fenda de entrada fica onde você chegou (arrive); este ponto só reserva espaço livre no mapa
     { let best = null; for (let k = 0; k < 40; k++) { const a = R() * TAU, d = 260 + R() * 360, x = ex + Math.cos(a) * d, z = ez + Math.sin(a) * d; if (Math.hypot(x - bx, z - bz) > 220) { best = { x, z }; break; } } st.rift = best || { x: ex - (bx - ex) * .35, z: ez - (bz - ez) * .35 }; }
     const camps = [];
     for (const t of [.1, .2, .32, .44, .56, .68, .8, .9]) { const p = bez(t), a = R() * TAU, j = 20 + R() * 60, r = room(p.x + Math.cos(a) * j, p.z + Math.sin(a) * j, 4, 'camp'); r.t = t; camps.push(r); }
@@ -495,7 +502,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     L.seen.delete(camp.room); camp.mobs = mobs;
   }
 
-  /* ---------- Fendas deste mundo: a de entrada (reaparece longe) e a que nasce quando o Soberano cai ---------- */
+  /* ---------- Fendas deste mundo: a de entrada (aberta onde você chegou, v653) e a que nasce quando o Soberano cai ---------- */
   function riftExit(x, z, locked, kind) {
     const R131 = window.RIFT131_ENABLE && window.Rift131;
     const grp = R131 ? Rift131.create({ seed: ((L.gate?.seed || 131) + (kind === 'boss' ? 7 : 0)) | 0, red: locked, exit: !locked, secret: !locked, legacyLinearOutput: true }) : new T.Group();
@@ -506,7 +513,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   function setupHunt(g, rooms, bi, mids, R) {
     const st = L.ow460;
     L.riftSignalNodes456 = []; L.riftSignalsMax456 = 0; L.riftSignals456 = 0;
-    st.exit = riftExit(st.rift.x, st.rift.z, !!g.red, 'entry');
+    /* v653: a Fenda de entrada nasce em arrive(), no lugar onde você chegou */
   }
   function onSignal() {}
   function openCitadel() {}
@@ -516,7 +523,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     let p = { x: b.x + 4, z: b.z + 3 }; for (let k = 0; k < 12 && !freeAt(p.x, p.z, 1.2); k++) { const a = k * 1.3; p = { x: b.x + Math.cos(a) * (4 + k), z: b.z + Math.sin(a) * (4 + k) }; }
     const it = riftExit(p.x, p.z, false, 'boss');
     try { if (it.grp && window.Rift131) Rift131.open(it.grp); } catch (_) {}
-    setTimeout(() => { if (L.ow460 === st) { bigText('UMA FENDA NOVA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> Vitória! Uma nova Fenda de retorno se abriu no local da conclusão.' + (L.gate?.red ? ' O retorno original também está aberto.' : '') + ' Transbordo em 2 minutos.', 7500); } }, 900);
+    setTimeout(() => { if (L.ow460 === st) { bigText('UMA FENDA NOVA SE ABRIU', 2400); toast('<b>[OUTRO MUNDO]</b> ' + (L.brk ? 'Uma nova Fenda de retorno se abriu.' : 'Objetivo cumprido! Uma nova Fenda se abriu no local da vitória; a de entrada também leva de volta. Saia para a Fenda colapsar e a Ordem pagar reputação.') + ' Transbordo em 2 minutos.', 7500); } }, 900);
   }
 
   /* o Soberano anda solto em volta do covil; quando te vê, a IA normal de chefe assume */
@@ -573,39 +580,27 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
         st.shiftFade469=0;
       }
     } else st.shiftFade469=0;
-    const target=L.bossDead ? L.exits.find(it=>it.ow460==='boss') : e || (L.defense ? L.defense.core : null);
+    /* v653 (Ian): o feixe que mostra o Soberano só existe na Fenda vermelha; na comum ele fica escondido */
+    const target=L.bossDead ? L.exits.find(it=>it.ow460==='boss') : (L.gate?.red && e) ? e : (L.defense ? L.defense.core : null);
     if(target) {
       const beam=st.beam469 ||= resonance(st.W.vein);
       beam.visible=true;beam.position.set(target.x,terrH(target.x,target.z)+50,target.z);
       beam.material.opacity=(.22+.12*Math.sin(st.t*1.7))*(1-(st.shiftFade469||0));
     } else if(st.beam469) st.beam469.visible=false;
     // A different, shorter resonance helps find the original exit in normal rifts.
-    if(st.exit && !st.exit.locked && !L.bossDead) {
+    if(st.exit && !st.exit.locked) { /* v654: continua depois do chefe — a de entrada também leva de volta */
       const exitBeam=st.exitBeam469 ||= resonance(0x70ffd6);
       exitBeam.scale.set(.7,.55,.7);exitBeam.position.set(st.exit.x,terrH(st.exit.x,st.exit.z)+27.5,st.exit.z);
       exitBeam.material.opacity=.16+.09*Math.sin(st.t*1.1);
     } else if(st.exitBeam469) st.exitBeam469.visible=false;
   }
 
-  /* saindo pela Fenda de entrada sem matar o Soberano: ela some atrás de você em Primeva e reabre em outro lugar perto */
-  function relocateGate(g) {
-    if (!g || g.dead) return false;
-    let spot = null;
-    for (let t = 0; t < 80 && !spot; t++) {
-      const a = Math.random() * TAU, d = 120 + Math.random() * 160, x = g.x + Math.cos(a) * d, z = g.z + Math.sin(a) * d;
-      try { if (nearestCity(x, z).d < 52 * (typeof CITYK !== 'undefined' ? CITYK : 1)) continue; if (gates.some(o => o !== g && !o.dead && Math.hypot(o.x - x, o.z - z) < 30)) continue; if (!worldFree(x, z, 3.5)) continue; if (typeof onRoad === 'function' && onRoad(roadSegs(x, z, 1), x, z, 10)) continue; } catch (_) { continue; }
-      spot = { x, z };
-    }
-    if (!spot) return false;
-    try { if (window.RIFT131_ENABLE && window.Rift131) { const ghost = { ...g, id: ++gateSeq, mesh: null, ring: null, sw: null, dead: false, life: 120 }; delete ghost.cleared; gateMesh(ghost); ghost.closing131 = true; gates.push(ghost); if (ghost.mesh) Rift131.close(ghost.mesh, false); } } catch (_) {}
-    try { removeGateMesh(g); } catch (_) {}
-    g.x = spot.x; g.z = spot.z;
-    setTimeout(() => toast('<b>[FENDA]</b> A Fenda se fechou atrás de você e reabriu em outro lugar por perto. A expedição ainda não foi concluída.', 6500), 1600);
-    return true;
-  }
-
+  /* v464: saindo sem concluir, a Fenda sumia e reabria longe (relocateGate). v654: removido, a entrada não fecha mais */
   function zoneAt(x, z) {
-    const st = L.ow460, de = Math.hypot(x - st.entry.x, z - st.entry.z), db = Math.hypot(x - st.boss.x, z - st.boss.z), f = de / Math.max(1, de + db);
+    const st = L.ow460, de = Math.hypot(x - st.entry.x, z - st.entry.z);
+    /* v654 (revisão): na Fenda comum a zona não pode servir de pista do Soberano — conta só a distância da entrada */
+    if (!L.gate?.red) return de < 160 ? 1 : de < 360 ? 2 : 3;
+    const db = Math.hypot(x - st.boss.x, z - st.boss.z), f = de / Math.max(1, de + db);
     return f < .38 ? 1 : f < .72 ? 2 : 3;
   }
   function objective(obj) {
@@ -613,40 +608,59 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     const day = L.riftDays456 || 1;
     let line;
     if (L.brk) line = 'O mundo está transbordando · volte por uma Fenda';
-    else if (L.bossDead) line = 'Saída aberta no local da vitória · transbordo em ' + fmtT(Math.max(0, L.closeT));
-    else if (L.defense) line = 'Siga o feixe até o Núcleo · defenda-o para concluir';
-    else if (L.combat117 && !L.combat117.spawned) line = 'Derrote os inimigos marcados como alvo para despertar o Soberano';
-    else line = L.gate?.red ? 'Siga o feixe do Soberano · derrote-o para abrir a saída' : 'Soberano: feixe pulsante · retorno: feixe verde-água';
+    else if (L.bossDead) line = 'Objetivo cumprido · saia por uma Fenda para ela colapsar · transbordo em ' + fmtT(Math.max(0, L.closeT));
+    else if (st.goalDone) line = 'Objetivo cumprido · saia pela Fenda de entrada para ela colapsar';
+    else {
+      const goal = 'Objetivo: ' + Math.min(GOAL_KILLS, kills()) + '/' + GOAL_KILLS + ' monstros ou ' + (L.defense ? 'a defesa do Núcleo' : 'o Soberano');
+      const how = L.defense ? 'siga o feixe até o Núcleo' : L.combat117 && !L.combat117.spawned ? 'derrote os alvos para despertar o Soberano' : L.gate?.red ? 'siga o feixe do Soberano' : 'a Fenda de entrada segue aberta';
+      line = goal + ' · ' + how + (L.gate?.red ? ' · a entrada destranca ao cumprir' : '');
+    }
     let rest = String(obj || '');
     if (/^(\[[^\]]*\] )?Salas /.test(rest) || /^(\[[^\]]*\] )?Transbordo em /.test(rest) || /^(\[[^\]]*\] )?TRANSBORDO/.test(rest)) rest = '';
-    return st.name + ' · Dia ' + day + ' · ' + ZONES[st.zone - 1] + '\n' + line + (rest ? '\n' + rest : '');
+    return st.name + ' · Dia ' + day + ' · ' + zoneName(st.zone) + '\n' + line + (rest ? '\n' + rest : '');
   }
   function map() { /* v461 (Ian): sem marcação de chefe, sinais ou portal no mapa — só o que você já explorou */ }
 
-  /* ---------- Chegada: o portal vermelho fecha atrás de você ---------- */
+  /* ---------- Chegada: v653 (Ian) — a Fenda de entrada fica aberta atrás de você (trancada na vermelha até o objetivo) ---------- */
   function arrive() {
     const st = L.ow460, e = st.entry, a = Math.random() * TAU, ux = Math.cos(a), uz = Math.sin(a);
     player.x = e.x + ux * 1.5; player.z = e.z + uz * 1.5; player.face = Math.atan2(ux, uz);
     pcCam.yaw = Math.atan2(-ux, -uz); pcCam.pitch = .16;
-    if (window.RIFT131_ENABLE && window.Rift131) {
-      const grp = Rift131.create({ seed: (L.gate?.seed || 131) | 0, red: true, legacyLinearOutput: true }); grp.position.set(e.x - ux * 2.4, 0, e.z - uz * 2.4); grp.rotation.y = Math.atan2(ux, uz); grp.scale.setScalar(.9);
-      L.group.add(grp); st.arrival = { t: 0, grp, closed: false };
-    } else st.arrival = { t: 0, grp: null, closed: false };
+    st.kills0 = run.kills || 0; st.goalDone = false;
+    if (!st.exit) { st.exit = riftExit(e.x - ux * 3.2, e.z - uz * 3.2, !!L.gate?.red, 'entry'); if (st.exit.grp) st.exit.grp.rotation.y = Math.atan2(ux, uz); }
+    st.arrival = { t: 0, grp: null, closed: true };
     st.cine = { t: 0, ux, uz };
+  }
+  /* v653: objetivo de toda Fenda do Outro Mundo — GOAL_KILLS monstros ou o Soberano (ou a defesa do Núcleo) */
+  function kills() { const st = L.ow460; return st ? Math.max(0, (run.kills || 0) - (st.kills0 || 0)) : 0; }
+  /* linha curta para a bússola (tools/explorar539.js) */
+  function hudLine() {
+    const st = L.ow460; if (!st || L.mode !== 'dungeon') return '';
+    if (L.defense && L.defense.failed) return 'Núcleo destruído · sem recompensa · saia pela Fenda'; /* v654 */
+    if (goalDone()) return 'Objetivo cumprido · saia pela Fenda';
+    return 'Objetivo: ' + Math.min(GOAL_KILLS, kills()) + '/' + GOAL_KILLS + ' monstros ou ' + (L.defense ? 'o Núcleo' : 'o Soberano') + (L.gate?.red ? ' · saída trancada' : '');
+  }
+  function goalDone() { const st = L.ow460; return !!(st && !(L.defense && L.defense.failed) && (st.goalDone || L.bossDead)); } /* v654: Núcleo destruído não conta */
+  function completeGoal(why) {
+    const st = L.ow460; if (!st || st.goalDone || (L.defense && L.defense.failed)) return; st.goalDone = true;
+    for (const it of L.exits) if (it.type === 'exit' && it.locked) try { unlockExitModel131(it); } catch (_) { it.locked = false; }
+    try { sfx('level'); } catch (_) {}
+    bigText('OBJETIVO CUMPRIDO', 2000);
+    toast('<b>[OUTRO MUNDO]</b> ' + (why === 'kills' ? GOAL_KILLS + ' monstros abatidos. ' : 'Objetivo cumprido. ') + (L.gate?.red ? 'A Fenda de entrada destrancou. ' : '') + 'Saia pela Fenda de entrada para ela colapsar e a Ordem pagar reputação.', 7000);
   }
 
   /* ---------- Por quadro ---------- */
   function tick(dt) {
     const st = L.ow460; if (!st || L.mode !== 'dungeon') return;
     uT.value += dt; st.t += dt; guide(dt);
+    if (!st.goalDone && !L.bossDead && !L.brk && !(L.defense && L.defense.failed) && kills() >= GOAL_KILLS) completeGoal('kills');
     const a = st.arrival;
     if (a) {
       a.t += dt; if (a.grp) try { Rift131.update(a.grp, dt); } catch (_) {}
-      if (!a.closed && a.t > 1.9) { a.closed = true; if (a.grp) try { Rift131.close(a.grp, false); } catch (_) {} try { shake(.55); sfx('portal'); } catch (_) {} bigText('O PORTAL SE FECHOU', 2000); }
       if (a.t > 4.6) {
         if (a.grp) { try { Rift131.dispose(a.grp); } catch (_) {} L.group.remove(a.grp); }
         st.arrival = null;
-        toast('<b>[' + st.name + ']</b> ' + (L.gate?.red ? 'Portal vermelho: conclua o objetivo para sair. ' : 'O feixe verde-água indica a Fenda de retorno. ') + (L.defense ? 'Siga o feixe pulsante até o Núcleo.' : L.combat117 && !L.combat117.spawned ? 'Derrote os inimigos da expedição para despertar o Soberano.' : 'Siga o feixe pulsante até o Soberano. Derrotá-lo abre uma nova saída.'), 8000);
+        toast('<b>[' + st.name + ']</b> Objetivo: abata ' + GOAL_KILLS + ' monstros ou ' + (L.defense ? 'conclua a defesa do Núcleo' : 'o Soberano') + '. ' + (L.gate?.red ? 'Portal vermelho: a Fenda de entrada fica trancada até lá, e um feixe mostra o Soberano.' : 'A Fenda de entrada fica aberta atrás de você; nada mostra o Soberano.') + ' Saia com o objetivo cumprido para a Fenda colapsar.', 8000);
       }
     }
     // chão acompanha o jogador (em passos da malha, sem tremer)
@@ -661,13 +675,13 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
     st.cullT = (st.cullT || 0) - dt;
     if (st.cullT <= 0) { st.cullT = .25; for (const e of enemies) { if (e.dead || e.gone || !e.m || !e.m.root) continue; const far = !e.isBoss && Math.hypot(e.x - player.x, e.z - player.z) > 85; e.m.root.visible = !far; } }
     const z = zoneAt(player.x, player.z);
-    if (z !== st.zone) { st.zone = z; if (!st.zoneSeen[z]) { st.zoneSeen[z] = true; bigText(ZONES[z - 1].toUpperCase(), 1800); } }
+    if (z !== st.zone) { st.zone = z; if (!st.zoneSeen[z]) { st.zoneSeen[z] = true; bigText(zoneName(z).toUpperCase(), 1800); } }
   }
   function camAfter(dt) {
     const st = L.ow460; if (!st || L.mode !== 'dungeon') return;
     if (st.sky) st.sky.position.copy(camera.position);
     const c = st.cine; if (!c) return;
-    // 1) de frente para o herói, vendo o portal vermelho atrás dele fechar; 2) gira para trás do herói e revela o planeta
+    // 1) de frente para o herói, vendo a Fenda de entrada atrás dele; 2) gira para trás do herói e revela o planeta
     c.t += Math.min(.05, Math.max(.001, dt || .016));
     const P = player, hy = terrH(P.x, P.z);
     const nPos = camera.position.clone(), dir = new T.Vector3(); camera.getWorldDirection(dir); const nLook = nPos.clone().addScaledVector(dir, 10);
@@ -691,5 +705,5 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n3(p);p*=2.03;a*=.5;
   /* cristal pequeno do Tripo para outros sistemas (ex.: marcas do cerco ao sair da Fenda) */
   function shard(parent, x, y, z, H, col) { return placeGlb(parent, crystalPath('cristal-veio'), H, x, y, z, Math.random() * TAU, m => crystalMat(m, col)); }
 
-  window.OW460 = { shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, relocateGate, objective, map, zoneAt, tick, path, roam, guide, addSolid, dropSolids, cellAt: i => cellAt(L.ow460, i) };
+  window.OW460 = { GOAL_KILLS, kills, hudLine, goalDone, completeGoal, shard, WORLDS, applies, layout, render, setupHunt, arrive, onSignal, openCitadel, openReturn, objective, map, zoneAt, tick, path, roam, guide, addSolid, dropSolids, cellAt: i => cellAt(L.ow460, i) };
 })();

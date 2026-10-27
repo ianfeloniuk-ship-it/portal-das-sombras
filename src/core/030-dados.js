@@ -179,7 +179,7 @@ const NR_LINES105={
   "Vou guardar o entusiasmo até ver como saímos."
  ],
  "red": [
-  "A passagem vermelha se fechou atrás de você.",
+  "A passagem vermelha se trancou atrás de você.",
   "Esse portal cobra atenção ao caminho de volta.",
   "Aqui, a saída tem condições. Lembre disso.",
   "Entramos em uma Fenda vermelha. Vamos observar antes de avançar.",

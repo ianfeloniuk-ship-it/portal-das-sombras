@@ -72,7 +72,9 @@ function compass(){if(typeof camera==='undefined')return;const v=new THREE.Vecto
   let best=null;for(const it of items){h+='<i class="pi'+(it.q?' q':'')+(it.en?' en':'')+'" style="left:'+(50+it.d/2.6)+'%;color:'+it.col+';opacity:'+it.op.toFixed(2)+(it.ok?'':';filter:grayscale(1)')+'">'+it.ico+'</i>';
     if(!it.en&&Math.abs(it.d)<7&&(!best||it.dist<best.dist))best=it}
   q('.cmp').innerHTML=h;
-  const n=q('.cmpn');n.textContent=best?best.name+' · '+(best.dist>=1000?(best.dist/1000).toFixed(1).replace('.',',')+' km':Math.round(best.dist)+' m'):'';n.style.opacity=best?1:0}
+  /* v653: no Outro Mundo, a linha da bússola mostra o objetivo da Fenda (100 monstros ou o Soberano) */
+  const ow653=!best&&typeof L!=='undefined'&&L.ow460&&window.OW460&&OW460.hudLine?OW460.hudLine():'';
+  const n=q('.cmpn');n.textContent=best?best.name+' · '+(best.dist>=1000?(best.dist/1000).toFixed(1).replace('.',',')+' km':Math.round(best.dist)+' m'):ow653;n.style.opacity=best||ow653?1:0}
 function found(city){profile.found539=profile.found539||{};const first=!profile.found539[city.id];profile.found539[city.id]=1;try{store.set('pds2_profile',profile)}catch(e){}
   q('.found small').textContent=first?'Local registrado na Ordem':'Entrando em';q('.found b').textContent=city.name;q('.found span').textContent=city.name==='Aster'?'Capital-nexo · as três muralhas':'Cidade de Primeva';
   const f=q('.found');f.classList.add('show');clearTimeout(foundT);foundT=setTimeout(()=>f.classList.remove('show'),4500)}
