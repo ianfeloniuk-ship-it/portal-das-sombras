@@ -25,6 +25,7 @@ const SP_TH={
   reverse:{n:'Portal Invertido',floor:0x2a0a2a,wall:0x4a1450,trim:0xff40ff,fog:0x140414,light:0xffa0ff},
   defend:{n:'Defesa do Domínio',floor:0x1e2a1e,wall:0x3a4a2a,trim:0x6fe39a,fog:0x081008,light:0xc0ffc0},
   primordial:{n:'Portal Primordial',floor:0x1a0606,wall:0x3a0a0a,trim:0xff2020,fog:0x0a0000,light:0xff8080},
+  sulco:{n:'Fenda de Fronteira',floor:0x1c1416,wall:0x3a2026,trim:0xff5a3a,fog:0x0c0406,light:0xffa090},
   temple:{n:'Santuário da Ressonância',floor:0x34343f,wall:0x55556a,trim:0xffd070,fog:0x08080e,light:0xfff0d0}};
 function buildSpecial(kind,gRef,arg){
   const ret=gRef?{x:gRef.x,z:gRef.z}:{x:player.x,z:player.z};
@@ -61,7 +62,7 @@ function buildSpecial(kind,gRef,arg){
   renderGrid(cells,Wd,Hd,CS,ox,oz,th,R,false);
   exitPortal(0,half-3,true);
   player.x=0;player.z=half-7;player.face=Math.PI;
-  if(['tower','reverse','defend','primordial'].includes(kind))specialSetup2(kind,S,arg);
+  if(['tower','reverse','defend','primordial','sulco'].includes(kind))specialSetup2(kind,S,arg);
   if(['clone','dream','past'].includes(kind))specialSetup3(kind,S,arg);
   if(kind==='weekly'){const B=weeklyBoss();const b=spawnBoss(0,-10,gr,B);b.hp*=2;b.maxhp*=2;b.xp*=2;b.gold*=3;b.name='Chefe Semanal: '+B.n;
     for(let i=0;i<4;i++){const a=i/4*TAU;const e=spawnKind(wpick(kindsFor(gr)).k,Math.cos(a)*6,-10+Math.sin(a)*6,gr,{});makeElite(e)}}
@@ -86,7 +87,7 @@ function updSpecial(dt){
     S.msg=S.stage===0?'Prepare-se':S.stage<3?'Troca de classe · onda '+S.stage+' de 3 · restam '+alive:'Derrote o Cavaleiro do Julgamento';
   }
   else if(S.kind==='penalty')penaltyUpd(S,dt);
-  else if(['tower','reverse','defend','primordial'].includes(S.kind))updSpecial2(S,dt);
+  else if(['tower','reverse','defend','primordial','sulco'].includes(S.kind))updSpecial2(S,dt);
   else if(['clone','dream','past'].includes(S.kind))updSpecial3(S,dt);
   else if(S.kind==='weekly'){S.msg=bossE&&!bossE.dead?bossE.name:'Chefe semanal'}
   else if(S.kind==='temple'){

@@ -258,9 +258,9 @@ function inConversation(){
     if(window.Dialogo520&&typeof window.Dialogo520.active==='function'&&window.Dialogo520.active())return true;
     if(document.body&&document.body.classList&&(document.body.classList.contains('story401')||document.body.classList.contains('reading406')))return true;
     const sd=document.getElementById('skyrim-dialog');
-    if(sd&&sd.style&&sd.style.display!=='none')return true;
+    if(sd&&!sd.hidden&&getComputedStyle(sd).display!=='none')return true;
     const d401=document.getElementById('dialog401');
-    if(d401&&d401.style&&d401.style.display!=='none')return true;
+    if(d401&&!d401.hidden&&getComputedStyle(d401).display!=='none')return true;
   }catch(_){}
   return false;
 }
