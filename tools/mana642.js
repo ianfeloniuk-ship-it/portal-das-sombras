@@ -75,11 +75,16 @@
     try { return Build437.st().some(b => b.kind === 'fogueira' && b.fuel > 0 && Math.hypot(b.x - player.x, b.z - player.z) < 6); } catch (_) { return false; }
   }
   function slept(n) { addMana(n); }
+  function isMage() { try { return MAGIC_CLS.includes(profile.cls); } catch (_) { return false; } }
+  const WKG = { comum: 1, elite: 1, chefe: 2, fenda: 3, dragao: 5 };
+  function weightKg() { try { return R().nuc642.reduce((a, c) => a + (WKG[c.k] || 1), 0); } catch (_) { return 0; } }
   function perHour() {
     const r = R(), P = player; if (!r) return 0;
     let h = (P.resourceRest258 || nearFire()) ? 2 : 1;
     h += Math.min(7, Math.floor((r.level || 1) / 100));
     try { h += Math.floor(cons('res') / 25); } catch (_) { }
+    if (isMage()) h += 2;
+    try { h *= 1 + pManaRegen281(); } catch (_) { }
     return h;
   }
   function accCap(k) { const a = R().acc642[k]; if (!a) return 0; const s = SLOTS.find(s => s[0] === k); return RBASE[a.rar] * FR[a.r] * (s ? s[2] : 1); }
@@ -127,9 +132,10 @@
   function errChance(c) {
     const g = grau(), d = g[1] - c.r; let e = d <= 0 ? 30 : d === 1 ? 18 : d === 2 ? 10 : 4;
     e += 10 * (c.c | 0);
+    if (isMage()) e -= 10;
         return Math.max(1, Math.min(90, e));
   }
-  function yieldPct() { let y = grau()[5]; try { y += Math.min(10, Math.floor(cons('alq') / 5)); } catch (_) { } return Math.min(100, y); }
+  function yieldPct() { let y = grau()[5] + (isMage() ? 10 : 0); try { y += Math.min(10, Math.floor(cons('alq') / 5)); } catch (_) { } return Math.min(100, y); }
   function canExtract(i) {
     const r = R(), c = r.nuc642[i], g = grau(), m = ensure(); if (!c) return 'Núcleo inexistente.';
     if (c.r > g[1]) return 'Seu grau só extrai núcleos até o rank ' + gid(g[1]) + '.';
@@ -180,6 +186,13 @@
     try { saveRun(); } catch (_) { }
     return { ok: true, take, put, err };
   }
+  function refine(r_) { // Alquimia: 3 núcleos de um rank viram 1 do rank seguinte
+    const r = R(); ensure();
+    if (!(r_ >= 0 && r_ < 9) || r.res.core[r_] < 3 || !inCityNow()) return false;
+    for (let i = 0; i < 3; i++) { let bi = -1; r.nuc642.forEach((c, j) => { if (c.r === r_ && (bi < 0 || c.m < r.nuc642[bi].m)) bi = j; }); r.nuc642.splice(bi, 1); }
+    r.res.core[r_] -= 3; r.res.core[r_ + 1]++; r.nuc642.push(mk(r_ + 1, 'comum', 0));
+    toast('<b>[ALQUIMIA]</b> 3 núcleos ' + gid(r_) + ' viraram 1 núcleo ' + gid(r_ + 1) + ' (' + coreMana('comum', r_ + 1, 0) + ' de mana).'); try { saveRun(); } catch (_) { } return true;
+  }
   function inCityNow() { try { return !!inCity(player.x, player.z) && L.mode === 'world'; } catch (_) { return false; } }
   function levelUp() {
     const r = R(), m = ensure(), g = grau(), nx = GRAU[m.g]; if (!nx) return 'Você já é Grão-Mestre.';
@@ -203,10 +216,11 @@
   function fichaHtml() {
     const r = R(), m = ensure(), g = grau(), nx = GRAU[m.g], t = accTotals(), fat = Math.max(0, Math.ceil((1 - (m.hh - m.last)) * HOUR));
     let h = '<div class="sec">MANA E EXTRAÇÃO</div>';
-    h += tipRow('Regeneração de mana', perHour() + ' por hora do jogo', 'A mana volta devagar: 1 por hora do jogo (1 hora = 2 min 30 s). Parado ou perto da fogueira: 2. Dormir na pousada: 32 por noite. Dentro das Fendas conta o relógio normal. +1 a cada 100 níveis e +1 a cada 25 pontos de Restauração.', '');
+    h += tipRow('Regeneração de mana', Math.round(perHour()) + ' por hora do jogo', 'A mana volta devagar: 1 por hora do jogo (1 hora = 2 min 30 s). Parado ou perto da fogueira: 2. Dormir na pousada: 32 por noite. Dentro das Fendas conta o relógio normal. +1 a cada 100 níveis, +1 a cada 25 pontos de Restauração, +2 para classes de mago e mais um pouco com Espírito.', '');
     h += tipRow('Extração: grau ' + m.g + ' · ' + g[0], 'Núcleos até ' + gid(g[1]) + ' · porção ' + g[4] + ' · aproveitamento ' + yieldPct() + '% · ' + g[6] + ' s' + (g[3] ? ' · Treino ' + m.t + '/' + g[3] : ''), 'Cada extração tira até ' + g[4] + ' de mana do núcleo; ' + yieldPct() + '% entram em você. Erro quebra o núcleo e cada extração do mesmo núcleo soma 10 de erro. Entre uma extração e outra passa 1 hora do jogo' + (fat ? ' (faltam ' + fat + ' s)' : '') + '. Qualquer dano cancela. O Treino sobe só com núcleos do rank do seu grau ou de 1 abaixo.', '');
     if (nx) h += row('Mestre de Extração (cidades)', 'Grau ' + nx[0] + ': Treino cheio, nível ' + nx[2] + ', ' + fmt(nx[7]) + ' de ouro.', btn('Subir de grau', 'm642up', 0, true));
     h += tipRow('Acessórios', t.s + ' de ' + t.c + ' de mana guardada', 'Anéis, brincos, braceletes, colar e coroa guardam mana. Com a barra cheia a mana nova vai para eles; com a barra vazia o jogo puxa deles ao lançar.', '');
+    for (let k = 0; k < 9; k++) if (r.res.core[k] >= 3) h += row('Refinar núcleos ' + gid(k), '3 núcleos ' + gid(k) + ' viram 1 núcleo ' + gid(k + 1) + '. Só numa cidade.', btn('Refinar', 'm642ref', k, inCityNow()));
     h += coreRows();
     return h;
   }
@@ -229,6 +243,7 @@
   function action(a, v) {
     const r = R(); if (!r) return;
     if (a === 'm642x') { if (startExtract(+v)) { try { closeModal(); } catch (_) { } return 'close'; } return 'close0'; }
+    if (a === 'm642ref') { refine(+v); try { statusView(); } catch (_) { } return 'close0'; }
     if (a === 'm642up') { const e = levelUp(); if (e) toast('<b>[EXTRAÇÃO]</b> ' + e); try { statusView(); } catch (_) { } return 'close0'; }
     if (a === 'm642buy') {
       const [k, q] = String(v).split(':'), qi = +q, s = SLOTS.find(s => s[0] === k), pr = Math.min(9, rankOf());
@@ -245,11 +260,37 @@
     const nr = naturalRegen; naturalRegen = function () { const x = nr.apply(this, arguments); x.mp = 0; return x; };
     const rt = resourceTick260; resourceTick260 = function (dt) { rt(dt); try { tick(dt); } catch (e) { console.error('Mana642', e); } };
     const re = resourceError260; resourceError260 = function (s, mp) { try { const q = resourceQuote261(s); if (q.mana > 0) topUp(q.mana); } catch (_) { } return re.call(this, s, mp === undefined ? player.mp : (mp === player.mp ? player.mp : mp)); };
+    try { const sf = statsFor; statsFor = function () { const s = sf.apply(this, arguments); if (s && s.maxmp < 60) s.maxmp = 60; return s; }; } catch (_) { }
     const oa = extraActions; extraActions = function (a, v) { if (typeof a === 'string' && a.startsWith('m642')) return action(a, v); return oa.apply(this, arguments); };
     const sv = statusView; statusView = function () { const x = sv.apply(this, arguments); try { ensure(); $('mb').insertAdjacentHTML('beforeend', fichaHtml()); } catch (e) { console.error(e); } return x; };
     const bv = bagView; bagView = function (tab) { const x = bv.apply(this, arguments); try { if ((tab || 'itens') === 'itens') { ensure(); $('mb').insertAdjacentHTML('beforeend', accHtml(false)); } } catch (e) { console.error(e); } return x; };
     const mv = mktView; mktView = function () { const x = mv.apply(this, arguments); try { ensure(); $('mb').insertAdjacentHTML('beforeend', '<div class="sec">DORIAN · ACESSÓRIOS DE MANA</div><div class="sysline" style="font-size:12px">Peças do seu rank. Cada uma guarda mana. A coroa aceita 3 gemas.</div>' + accHtml(true)); } catch (e) { console.error(e); } return x; };
   }
-  window.Mana642 = { slept, nearFire, install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
+  // segurar E sobre um núcleo caído: pega e começa a extrair (toque curto continua abrindo o saque)
+  let eHold = null;
+  function coreNear() {
+    try { return Loot353.records().find(rc => rc.entries.some(x => x.type === 'core') && Math.hypot(rc.x - player.x, rc.z - player.z) <= 3.5); } catch (_) { return null; }
+  }
+  function eStart(rc) {
+    if (hold) return;
+    const ent = rc.entries.find(x => x.type === 'core'); if (!ent) return;
+    const n0 = R().nuc642.length; Loot353.take(rc.id, ent.id);
+    const c = R().nuc642.slice(n0).pop() || R().nuc642[R().nuc642.length - 1];
+    try { closeModal(); paused = false; } catch (_) { }
+    if (c) startExtract(R().nuc642.indexOf(c));
+  }
+  window.addEventListener('keydown', ev => {
+    if (ev.code !== 'KeyE' || ev.repeat || typeof paused === 'undefined' || paused || !R() || !player || player.dead) return;
+    const rc = coreNear(); if (!rc) return;
+    ev.preventDefault(); ev.stopImmediatePropagation();
+    eHold = { rc, t0: performance.now(), done: false };
+    eHold.iv = setInterval(() => { if (eHold && !eHold.done && performance.now() - eHold.t0 >= 600) { eHold.done = true; clearInterval(eHold.iv); eStart(eHold.rc); } }, 50);
+  }, true);
+  window.addEventListener('keyup', ev => {
+    if (ev.code !== 'KeyE' || !eHold) return;
+    clearInterval(eHold.iv); const h = eHold; eHold = null;
+    if (!h.done) { try { Loot353.open(h.rc.id); } catch (_) { } }
+  }, true);
+  window.Mana642 = { weightKg, isMage, refine, slept, nearFire, install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
   install();
 })();

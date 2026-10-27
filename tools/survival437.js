@@ -192,6 +192,7 @@
     for (const [k, n] of Object.entries(s.inv)) {
       if (n > 0 && ITEMS[k]) w += ITEMS[k].w * n;
     }
+    if (window.Mana642) w += Mana642.weightKg();
     return w;
   }
   function totalW() { return equipW() + invW(); }

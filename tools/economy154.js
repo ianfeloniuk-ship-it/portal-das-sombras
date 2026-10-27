@@ -69,8 +69,8 @@ window.Econ154=(()=>{
  // ---------- dome numbers (used by Dome154) ----------
  function cityTier(){const c=cityOf();return c?Math.max(0,Math.min(5,Math.round(cityL(c)||0))):0}
  function cityResourceRank(){return Math.max(0,Math.min(9,cityTier()));}
- function domeBuild(){const r=cityResourceRank(),t=cityTier();return {gold:localPrice(Math.round(6*cityH*(.75+.1*t)/100)*100),cry:40,core:15,r}}
- function domeRepair(frac){const r=cityResourceRank(),f=Math.max(0,Math.min(1,frac)),t=cityTier();return {gold:f>0?localPrice(Math.max(1,Math.round(.4*6*cityH*(.75+.1*t)*f/100)*100)):0,cry:Math.ceil(15*f),core:Math.ceil(5*f),r}}
+ function domeBuild(){const r=cityResourceRank(),t=cityTier();return {gold:localPrice(Math.round(6*cityH*(.75+.1*t)/100)*100),cry:0,core:55,r}}
+ function domeRepair(frac){const r=cityResourceRank(),f=Math.max(0,Math.min(1,frac)),t=cityTier();return {gold:f>0?localPrice(Math.max(1,Math.round(.4*6*cityH*(.75+.1*t)*f/100)*100)):0,cry:0,core:Math.ceil(5*f),r}}
  function canPay(k){return run.gold>=k.gold&&run.res.cry[k.r]>=k.cry&&run.res.core[k.r]>=k.core}
  function pay(k){if(!canPay(k))return false;run.gold-=k.gold;run.res.cry[k.r]-=k.cry;run.res.core[k.r]-=k.core;notePurchase(k.gold);return true}
  function costText(k){return fmt(k.gold)+' ouro'+(k.cry?' + '+k.cry+' minérios '+GR[k.r].id:'')+(k.core?' + '+k.core+' núcleos '+GR[k.r].id:'')}
