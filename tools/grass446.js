@@ -111,9 +111,10 @@ vBurn446=brn;vIce446=frz;}`);
     }
     return out;
   }
+  const CF446 = new T.Vector3(), CULLCOS446 = Math.cos(100 * Math.PI / 180);
   let key = '', fill = 0;
   function rebuild() {
-    const px = player.x, pz = player.z, k = Math.round(px / 6) + ',' + Math.round(pz / 6) + ',' + ((run.terra444?.st?.length) || 0) + ',' + ((run.build437 || []).length) + ',' + ((window.EcoGrid && EcoGrid.rev) | 0); /* v566: biomassa/pisoteio do EcoGrid mudaram */
+    const px = player.x, pz = player.z, cdx = camera.getWorldDirection(CF446), yb = Math.round(Math.atan2(CF446.x, CF446.z) / .35), k = Math.round(px / 6) + ',' + Math.round(pz / 6) + ',' + yb + ',' + ((run.terra444?.st?.length) || 0) + ',' + ((run.build437 || []).length) + ',' + ((window.EcoGrid && EcoGrid.rev) | 0); /* v566: biomassa/pisoteio do EcoGrid mudaram */
     if (k === key) return; key = k;
     const ed = ((run.terra444?.st?.length) || 0) + ':' + ((run.build437 || []).length); if (ed !== rebuild.ed) { rebuild.ed = ed; tiles.clear(); } // trilha nova ou obra nova: refaz os ladrilhos
     const t0x = Math.floor((px - R) / TILE), t1x = Math.floor((px + R) / TILE), t0z = Math.floor((pz - R) / TILE), t1z = Math.floor((pz + R) / TILE);
@@ -123,6 +124,7 @@ vBurn446=brn;vIce446=frz;}`);
       if (!tiles.has(id)) { if (budget-- <= 0) { key = ''; continue; } tiles.set(id, buildTile(tx, tz)); }
       for (const g of tiles.get(id)) {
         const dx = g[0] - px, dz = g[1] - pz; if (dx * dx + dz * dz > R * R) continue;
+        if (dx * dx + dz * dz > 100) { const il = 1 / Math.hypot(CF446.x, CF446.z || 1e-6), cf = (dx * CF446.x + dz * CF446.z) * il / Math.sqrt(dx * dx + dz * dz); if (cf < CULLCOS446) continue } /* v641: só o que está na frente (±100°) */
         const eh = em ? em(g[0], g[1]) : 1; if (eh < .12) continue; /* v566: trilha batida/solo pobre não tem capim */
         const dd = dx * dx + dz * dz;
         if (dd > NR * NR) { if (g[7] || (far++ % 4) || n2 >= MAX2) continue; Q.setFromAxisAngle(up, g[2]); V.set(g[0], 0, g[1]); Sc.set(g[3] * 1.5, g[3] * 1.15 * eh, g[3] * 1.5); M.compose(V, Q, Sc); mesh2.setMatrixAt(n2, M); col.setRGB(g[4], g[5], g[6]); mesh2.setColorAt(n2, col); n2++; continue; }
@@ -207,7 +209,7 @@ vBurn446=brn;vIce446=frz;}`);
     const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
     try {
       const on = ready(); mesh.visible = mesh2.visible = fl.visible = on;
-      if (on) { U.uT.value += dt; U.uP.value.set(player.x, player.z); stepReact(dt); if (!loop.h) { loop.h = 1; hookElements(); } slow -= dt; if (slow <= 0) { slow = .25; rebuild(); } }
+      if (on) { U.uT.value += dt; U.uP.value.set(player.x, player.z); stepReact(dt); if (!loop.h) { loop.h = 1; hookElements(); } slow -= dt; if (slow <= 0) { slow = .12; rebuild(); } }
     } catch (e) { if (!loop.err) { loop.err = 1; console.warn('grass446', e); } }
     setTimeout(loop, 33);
   }

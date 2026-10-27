@@ -9,7 +9,7 @@
    então esconder o que está fora da câmera não muda a imagem. Números em `Culling637.stats()`. */
 (function () {
   const T = THREE, F = new T.Frustum(), PM = new T.Matrix4(), V = new T.Vector3(), S = new T.Sphere(), S2 = new T.Sphere();
-  const C = window.Culling637 = { dirty: true, list: [], skins: [], hid: 0, total: 0, mixSkipped: 0, mixRan: 0, on: true, last: 0 };
+  const C = window.Culling637 = { dirty: true, list: [], skins: [], hid: 0, hidLod: 0, hidOcc: 0, smalls: [], total: 0, mixSkipped: 0, mixRan: 0, on: true, last: 0 };
   const skip = m => m.userData.tripo153 || m.userData.lite180 || m.userData.golpes487 || m.userData.ctx487 || m.userData.ol210 || /^(Grass|Flowers)/.test(m.name || '');
   function instSphere(m) {
     let s = m.userData.sph637; if (s) return s;
@@ -22,13 +22,40 @@
     const sp = new T.Sphere(new T.Vector3(sx, sy + 8, sz), r + (g.boundingSphere.radius + 6) * ms + 12);
     m.userData.key637 = n; m.userData.sph637b = sp; return sp;
   }
+  const QQ = new T.Quaternion(), SC = new T.Vector3();
   function refresh() {
-    C.dirty = false; C.list.length = 0; C.skins.length = 0;
+    C.dirty = false; C.list.length = 0; C.skins.length = 0; C.smalls.length = 0;
+    if (typeof L !== 'undefined' && L.group && L.group.visible) L.group.traverse(o => {
+      if (!o.isMesh || o.isInstancedMesh || o.isSkinnedMesh || o.frustumCulled === false || o.userData.noLod637) return;
+      const g = o.geometry; if (!g) return; if (!g.boundingSphere) g.computeBoundingSphere(); if (!g.boundingSphere) return;
+      const mt = o.material; if (!mt || Array.isArray(mt) || mt.fog === false) return;
+      o.updateWorldMatrix(true, false); o.matrixWorld.decompose(V, QQ, SC);
+      const r = g.boundingSphere.radius * Math.max(SC.x, SC.y, SC.z);
+      if (r < 2.5) C.smalls.push({ o, r, x: o.matrixWorld.elements[12], z: o.matrixWorld.elements[14] });
+    });
     scene.traverse(o => {
       if (o.frustumCulled !== false) return;
       if (o.isInstancedMesh) { if (!skip(o) && !(o.userData.isLite423)) C.list.push(o) }
       else if (o.isSkinnedMesh && !o.userData.fist162 && !o.userData.golpes487) C.skins.push(o);
     });
+  }
+  /* oclusão barata por relevo: tile de árvores distantes escondido atrás de serra/morro (3 raios câmera→tile sobre terrH) */
+  function occluded(m, sp, cam, now) {
+    const u = m.userData; if (u.occT637 && now - u.occT637 < 200) return u.occ637; u.occT637 = now;
+    let res = false;
+    try {
+      const dx = sp.center.x - cam.position.x, dz = sp.center.z - cam.position.z, d = Math.hypot(dx, dz);
+      if (d > 320 && typeof terrH === 'function') {
+        const nx = -dz / d, nz = dx / d, lat = [0, sp.radius * .5, -sp.radius * .5]; let hiddenAll = true;
+        for (const L2 of lat) {
+          const tx = sp.center.x + nx * L2, tz = sp.center.z + nz * L2, ty = terrH(tx, tz) + 38; let blocked = false;
+          for (let k = 1; k <= 7 && !blocked; k++) { const t = k / 8, x = cam.position.x + (tx - cam.position.x) * t, z = cam.position.z + (tz - cam.position.z) * t, ry = cam.position.y + (ty - cam.position.y) * t; if (terrH(x, z) > ry + 3) blocked = true }
+          if (!blocked) { hiddenAll = false; break }
+        }
+        res = hiddenAll;
+      }
+    } catch (_) { }
+    u.occ637 = res; if (res) C.hidOcc++; return res;
   }
   let t0 = 0;
   const base = renderer.render;
@@ -44,7 +71,7 @@
           if (m.userData.h637 === undefined) m.userData.h637 = false;
           if (m.userData.h637 && m.visible) m.userData.h637 = false; /* alguém religou: assume o controle de volta */
           S.copy(sp).applyMatrix4(m.parent.matrixWorld);
-          const out = !F.intersectsSphere(S);
+          const out = !F.intersectsSphere(S) || (m.userData.sph637 && occluded(m, S, cam, now));
           if (out) { if (m.visible) { m.visible = false; m.userData.h637 = true } hid++ } else if (m.userData.h637) { m.visible = true; m.userData.h637 = false }
         }
         for (const m of C.skins) {
@@ -54,7 +81,14 @@
           const out = d > 30 && !F.intersectsSphere(S2);
           if (out) { if (m.visible) { m.visible = false; m.userData.h637 = true } hid++ } else if (m.userData.h637) { m.visible = true; m.userData.h637 = false }
         }
-        C.hid = hid; C.total = C.list.length + C.skins.length;
+        let lod = 0;
+        for (const q of C.smalls) {
+          const m = q.o; if (!m.parent) continue;
+          const dx = q.x - px, dz = q.z - pz, lim = 45 + 55 * q.r, far = dx * dx + dz * dz > lim * lim;
+          if (m.userData.h637 && m.visible) m.userData.h637 = false;
+          if (far) { if (m.visible) { m.visible = false; m.userData.h637 = true } lod++ } else if (m.userData.h637) { m.visible = true; m.userData.h637 = false }
+        }
+        C.hidLod = lod; C.hid = hid; C.total = C.list.length + C.skins.length + C.smalls.length;
       } catch (e) { if (!C.w) { C.w = 1; console.warn('culling637', e) } C.on = false }
     }
     return base.call(this, s, cam, ...r);
@@ -71,5 +105,5 @@
       m.sk637 = (m.sk637 || 0) + 1; if (m.sk637 >= (d > 150 ? 8 : 4)) { m.mixer.update(m.acc637); m.acc637 = 0; m.sk637 = 0; C.mixRan++ } else C.mixSkipped++;
     } catch (e) { m.mixer.update(dt) }
   };
-  C.stats = () => ({ candidatos: C.list.length, peles: C.skins.length, escondidos: C.hid, mixRan: C.mixRan, mixSkipped: C.mixSkipped });
+  C.stats = () => ({ candidatos: C.list.length, peles: C.skins.length, escondidos: C.hid, lod: C.hidLod, pequenas: C.smalls.length, ocl: C.hidOcc, mixRan: C.mixRan, mixSkipped: C.mixSkipped });
 })();
