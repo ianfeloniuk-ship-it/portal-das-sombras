@@ -419,6 +419,59 @@
     return m;
   }
 
+  /* v545 (Ian, 22/10/2026: «é sempre as mesmas perguntas, as mesmas coisas»): cada pessoa tem um jeito (pelo nome),
+     a saudação muda com a chuva, a neve, a noite e o quanto vocês se conhecem, e os assuntos mudam de pessoa para pessoa
+     e de dia para dia. Cada assunto ouvido pela primeira vez aproxima vocês (+1 de afeto). Depois de ouvido, sai da lista. */
+  function h545(s) { let h = 2166136261 >>> 0; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  const day545 = () => { try { return Math.floor(dayT / DAYLEN); } catch (_) { return 0; } };
+  const wx545 = () => { try { return (L.mode === 'world' && WX.type) || 'clear'; } catch (_) { return 'clear'; } };
+  const night545 = () => { try { return typeof isNight === 'function' && isNight(); } catch (_) { return false; } };
+  const of545 = (a, k) => a[(k >>> 0) % a.length];
+  const JEITO545 = {
+    falante: { oi: ['Ah, que bom, alguém para conversar! Faz horas que ninguém para aqui.', 'Chegue, chegue! Tenho tanta coisa para contar.', 'Você de novo? Ótimo, eu estava querendo falar com alguém.'], tique: ' Mas isso é só metade da história.', elogio: 'Obrigado, pouca gente repara! Aprendi tudo sozinho.', provoca: 'Nossa. Eu estava sendo tão simpático com você.', tchau: 'Volte logo, ainda tenho mil histórias.' },
+    rabugento: { oi: ['Hm. O que é?', 'Seja rápido, tenho mais o que fazer.', 'Se for para pedir desconto, nem comece.'], tique: ' Pronto, falei.', elogio: 'Elogio não paga as contas. Mas obrigado.', provoca: 'Repete isso se tiver coragem.', tchau: 'Finalmente.' },
+    medroso: { oi: ['Você me assustou! Achei que fosse uma fera.', 'Fale baixo, por favor. Nunca se sabe quem está ouvindo.', 'Você veio lá de fora? Viu alguma coisa estranha?'], tique: ' ...Você ouviu isso?', elogio: 'S-sério? Obrigado. Ninguém nunca me disse isso.', provoca: 'P-por que você diria uma coisa dessas?', tchau: 'Tome cuidado lá fora. De verdade.' },
+    orgulhoso: { oi: ['Sim? Fale. Não é todo dia que dou atenção a forasteiros.', 'Você com certeza já ouviu falar de mim.', 'Diga logo o que quer. Meu tempo vale ouro.'], tique: ' Nem todo mundo aguentaria.', elogio: 'Eu sei. Mas é bom ouvir de alguém que entende.', provoca: 'Você sabe com quem está falando?!', tchau: 'Pode ir. Lembre de quem te tratou bem.' },
+    sonhador: { oi: ['Já reparou como o céu mudou depois da Fenda? Desculpe, eu estava distraído.', 'Você tem cara de quem já viu muita coisa. Me conta?', 'Bom te ver. Eu estava aqui pensando na vida.'], tique: ' Às vezes eu penso nisso antes de dormir.', elogio: 'Que gentil. Vou guardar isso comigo.', provoca: 'Hm. Você não acredita nisso de verdade, acredita?', tchau: 'Que as estrelas te guiem.' },
+    devoto: { oi: ['Que a luz te proteja, viajante.', 'Paz a você. Em que posso ser útil?', 'Os deuses mandam as pessoas na hora certa. Olá.'], tique: ' Que os deuses nos guardem.', elogio: 'Agradeço. O mérito é de quem me dá forças.', provoca: 'Vou rezar por você. Está precisando.', tchau: 'Vá em paz.' }
+  };
+  const JK545 = Object.keys(JEITO545);
+  const CLIMA545 = {
+    rain: ['Que chuva, hein? Estou molhado até os ossos.', 'Com essa chuva, nem as feras saem da toca.', 'Chuva assim apaga fogueira e esconde pegada. Péssimo para caçar.'],
+    snow: ['Esse frio corta até a alma.', 'Neve de novo. Meus dedos nem mexem direito.'],
+    noite: ['A essa hora? Só gente com problema anda pela rua.', 'De noite os mortos andam. Pelo menos é o que dizem.', 'Não devia estar aqui fora tão tarde.']
+  };
+  const CACA545 = ['Acabei de voltar de uma Fenda. Ainda estou com cheiro de sangue de fera.', 'Mais um dia, mais um núcleo quebrado. E você, caçando o quê?', 'Se veio pedir ajuda, eu cobro caro. Se veio conversar, tudo bem.'];
+  /* assuntos: l = pergunta, r = respostas (cada pessoa fica sempre com a mesma), c = quando aparece */
+  const ASSUNTO545 = [
+    { id: 'origem', l: () => 'De onde você é?', r: ['Nasci aqui mesmo, nunca saí destas muralhas. Talvez um dia.', 'Vim de Ymiria, fugindo do frio. Troquei a neve pelas feras.', 'Minha família era de pescadores da costa. O mar levou meu pai, a Fenda levou o resto.', 'Não lembro. Acordei numa carroça depois da primeira Fenda e nunca mais soube quem eu era.'] },
+    { id: 'familia', l: () => 'Você tem família?', r: ['Minha filha pequena quer ser caçadora. Rezo para ela mudar de ideia.', 'Tinha um irmão. Ele entrou numa Fenda vermelha e não voltou.', 'Minha mãe ainda mora aqui perto. Faz o melhor pão da região, pode perguntar.', 'A cidade é a minha família. Os outros eu nem conheço mais.'] },
+    { id: 'medo', l: () => 'Do que você tem mais medo?', r: ['De acordar e a Fenda estar dentro das muralhas.', 'De dragões. Vi um passar uma vez e a sombra dele cobriu a praça inteira.', 'De ficar velho sem ter feito nada que valha uma história.', 'De silêncio. Quando a floresta fica quieta demais, alguma coisa grande está vindo.'] },
+    { id: 'fenda', l: () => 'O que você acha das Fendas?', r: ['Uma ferida no mundo. E feridas que não fecham apodrecem.', 'Para mim, são trabalho. Cada Fenda fechada é pão na mesa de alguém.', 'Dizem que do outro lado existe um mundo inteiro. Eu não quero saber.', 'Acho que alguém abriu de propósito. O Arquiteto, como os velhos chamam.'] },
+    { id: 'sonho', l: () => 'Se pudesse largar tudo, o que faria?', r: ['Compraria um barco e iria até onde o mapa acaba.', 'Abriria uma taverna. Com música toda noite.', 'Aprenderia a ler as estrelas, como os antigos.', 'Já larguei tudo uma vez. Não recomendo.'] },
+    { id: 'cidade', l: n => 'O que tem de bom em ' + ((n.home && n.home.name) || 'sua cidade') + '?', r: ['A taverna. E a vista da muralha quando o sol se põe.', 'As pessoas. Aqui ninguém passa fome sozinho.', 'Nada. Mas é o único lugar que eu conheço.', 'O mercado. Tudo que chega da estrada passa por ele primeiro.'] },
+    { id: 'mortos', l: () => 'Já viu os mortos andando por aí?', r: ['Vi uma luz azul com a forma de um homem perto da muralha. Ela só queria conversar.', 'Minha avó dizia que os mortos voltam quando deixam algo sem terminar. Escute se encontrar um.', 'Não, e nem quero. Mas os guardas da noite juram que veem.', 'Os fantasmas aparecem de noite, brilhando como a Fenda. Só querem conversar.'] },
+    { id: 'chuva', c: () => wx545() === 'rain', l: () => 'Essa chuva não vai parar?', r: ['Sempre para. O problema é a lama que fica.', 'Chuva boa para a plantação, ruim para os ossos.', 'Quando chove assim, raio cai nas colinas. Fique longe dos lugares altos.'] },
+    { id: 'frio', c: () => wx545() === 'snow', l: () => 'Como vocês aguentam esse frio?', r: ['Lã, fogo e muita sopa.', 'Não aguentamos. Só fingimos.', 'Em Ymiria é pior. Lá até o fogo treme.'] },
+    { id: 'noite', c: night545, l: () => 'O que você faz na rua a essa hora?', r: ['Não consigo dormir. Desde a última Fenda, nunca mais dormi direito.', 'Gosto da noite. A cidade fica quieta e dá para ouvir os próprios pensamentos.', 'Estou esperando alguém. Não pergunte quem.'] },
+    { id: 'trabalho', c: n => n.kind !== 'hunter', l: n => 'Como é o seu trabalho' + (n.job523 ? ' de ' + String(n.job523).toLowerCase() : '') + '?', r: ['É cansativo, mas honesto. Isso vale muito hoje em dia.', 'Faço a mesma coisa todo dia. Às vezes é bom, às vezes dá vontade de sumir.', 'Melhor do que caçar fera. Pelo menos eu volto inteiro para casa.'] },
+    { id: 'pior', c: n => n.kind === 'hunter', l: () => 'Qual foi a sua pior caçada?', r: ['Um ninho de aranhas numa masmorra sem luz. Ainda sinto as patas no pescoço.', 'Um chefe que voltou a levantar depois de morto. Perdi dois amigos naquele dia.', 'A primeira. Eu nem sabia segurar a arma direito.'] },
+    { id: 'rank', c: n => n.kind === 'hunter', l: n => 'Como foi chegar ao rank ' + ((typeof RANKS !== 'undefined' && RANKS[n.rank] && RANKS[n.rank].id) || 'atual') + '?', r: ['Muito sangue, pouco sono. E a Ordem não dá nada de graça.', 'Prova atrás de prova. Cada rank novo é uma Fenda mais funda.', 'Sorte, mais que tudo. Os melhores que eu conheci já morreram.'] },
+    { id: 'conselho', c: n => n.kind === 'hunter', l: () => 'Algum conselho para quem vai para a Fenda?', r: ['Nunca entre sem um jeito de sair.', 'Mate primeiro os que curam. Sempre.', 'Se o chão começar a brilhar, saia de cima.'] }
+  ];
+  /* a pessoa pergunta de volta: a resposta que combina com o jeito dela aproxima vocês */
+  const PERGUNTA545 = { l: 'E você, por que luta?', o: [['Pela Ordem e pelas pessoas', ['devoto', 'medroso']], ['Pelo ouro, claro', ['orgulhoso', 'rabugento']], ['Para descobrir o que existe do outro lado', ['sonhador', 'falante']]] };
+  function jeito545(n) { return JK545[h545('jeito|' + (n.short || n.name)) % JK545.length]; }
+  /* assuntos do dia para quem não usa buildTown (guardas): cria os nós e devolve as opções */
+  function assuntos545(n, m, N, q) {
+    const f = m.flags, nome = n.short || n.name, J = JEITO545[jeito545(n)];
+    return ASSUNTO545.filter(a => (!a.c || a.c(n)) && !f['t545_' + a.id]).sort((a, b) => h545(day545() + '|' + a.id + '|' + nome) - h545(day545() + '|' + b.id + '|' + nome)).slice(0, q).map(a => {
+      const k = h545(nome + '|' + a.id);
+      N['a545_' + a.id] = { t: of545(a.r, k), o: [{ l: of545(['Entendi', 'Interessante', 'Obrigado por contar'], k >>> 2), fn: () => { if (!f['t545_' + a.id]) { f['t545_' + a.id] = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
+      return { l: '● ' + a.l(n), go: 'a545_' + a.id };
+    });
+  }
+
   function buildTown(n, orig) {
     const m = tmem(n), f = m.flags, nome = n.short || n.name;
     const shop = n.shop || '', sign = (n.sign || '').toUpperCase();
@@ -446,7 +499,19 @@
     else if (isArm) defaultGreeting = 'Armadura pesada é a diferença entre voltar para casa ou virar comida de fera.';
     else if (isGuild) defaultGreeting = 'A Ordem da Fenda está sempre à procura de caçadores corajosos.';
 
-    const bondTxt = () => (window.Kael604 ? Kael604.addr(n) : '') + (m.bond >= 4 ? 'Ora, meu amigo! Entre, entre.' : m.bond >= 2 ? 'Bom te ver de novo.' : m.meets > 1 ? 'Ah, é você. O que precisa?' : defaultGreeting);
+    /* v545: saudação pelo jeito da pessoa, pelo clima e pela noite (a mesma durante toda a conversa) */
+    const J = JEITO545[jeito545(n)], sd = (h545(day545() + '|' + nome) + (m.meets || 0)) >>> 0, isHunter = n.kind === 'hunter';
+    const clima = wx545() === 'rain' ? CLIMA545.rain : wx545() === 'snow' ? CLIMA545.snow : night545() ? CLIMA545.noite : null;
+    const bondTxt = () => (window.Kael604 ? Kael604.addr(n) : '') + (m.bond >= 4 ? of545(['Ora, meu amigo! Entre, entre.', 'Olha quem voltou! Senti sua falta.', 'Para você eu sempre tenho tempo.'], sd)
+      : clima && sd % 2 === 0 ? of545(clima, sd >> 1)
+      : isHunter && sd % 3 === 0 ? of545(CACA545, sd)
+      : m.meets <= 1 && (isVendor || isBank) ? defaultGreeting
+      : m.bond >= 2 && sd % 3 === 1 ? 'Bom te ver de novo.' : of545(J.oi, sd));
+    const tema = id => 't545_' + id;
+    const assuntos = ASSUNTO545.filter(a => (!a.c || a.c(n)) && !f[tema(a.id)]).sort((a, b) => h545(day545() + '|' + a.id + '|' + nome) - h545(day545() + '|' + b.id + '|' + nome)).slice(0, isVendor ? 2 : 3);
+    const rk545 = (typeof RANKS !== 'undefined' && RANKS[n.rank] && RANKS[n.rank].id) || '?';
+    const elogioL = isHunter ? of545(['Elogiar a arma de ' + nome, 'Dizer que já ouviu falar das caçadas de ' + nome, 'Elogiar o trabalho de ' + nome], sd) : of545(['Elogiar o trabalho de ' + nome, 'Dizer que ' + nome + ' parece saber o que faz', 'Agradecer pelo que ' + nome + ' faz pela cidade'], sd);
+    const provocaL = isHunter ? of545(['Provocar: "Rank ' + rk545 + '? Parece rank E."', 'Provocar: "Você não vale nada"', 'Provocar: "Aposto que foge de lobo"'], sd) : of545(['Provocar: "Você não vale nada"', 'Provocar: "Já vi gente mais útil num cemitério"', 'Provocar: "Você só sabe reclamar"'], sd);
 
     // Ação principal de cada NPC de comércio/serviço
     let actionLabel = 'Ver as mercadorias';
@@ -456,7 +521,7 @@
     else if (isPot) actionLabel = 'Quero comprar poções e pergaminhos';
     else if (isArm) actionLabel = 'Quero ver armaduras e defesas da vila';
     else if (isGuild) actionLabel = 'Ver missões e serviços da Ordem';
-    else if (!isVendor) actionLabel = 'Ouvir o que ' + nome + ' tem a dizer';
+    else if (!isVendor) actionLabel = isHunter ? of545(['Ouvir o que ' + nome + ' tem a dizer', 'Perguntar de onde ' + nome + ' está vindo', 'Ouvir as histórias de ' + nome], sd) : of545(['Perguntar o que ' + nome + ' está fazendo', 'Ouvir o que ' + nome + ' tem a dizer', 'Perguntar como foi o dia de ' + nome], sd);
 
     N.raiz = {
       t: f.ofendido ? 'Depois do que você me disse, não tenho nada a tratar com você.' : bondTxt(),
@@ -478,14 +543,25 @@
           { l: (npcHas541() ? 'Sobre o que você me ensinou' : affL541() >= 3 ? '◆ Missão pessoal: ' + NPCQ[nome].d : '⌂ Missão pessoal (3 corações)'), go: 'missao541' },
           { l: '♥ Trouxe um presente (' + giftC541() + ' de ouro)', if: () => typeof AFF_PERK !== 'undefined' && AFF_PERK[nome] && affL541() < 10 && gold() >= giftC541(), fn: () => { const b = affL541(); act541('gift', nome); return affL541() > b ? 'presente541' : 'raiz'; } },
         ] : []),
-        { l: 'Perguntar como andam as coisas na cidade', go: 'noticias' },
-        { l: 'Elogiar o trabalho de ' + nome, go: 'elogio', if: () => m.bond < 5 },
-        { l: 'Pedir um agrado', go: 'agrado', if: () => n.role523 !== 'crianca' },
-        { l: 'Provocar: "Você não vale nada"', go: 'provoca', if: () => n.role523 !== 'crianca' },
+        /* v545: três assuntos desta pessoa para hoje; a pergunta dela de volta; notícias, elogio, agrado e provocação com outras palavras */
+        ...assuntos.map(a => ({ l: '● ' + a.l(n), go: 'a545_' + a.id })),
+        { l: '● Conversar sobre a vida', go: 'p545', if: () => !f.t545_pergunta && n.role523 !== 'crianca' && !aster541 },
+        { l: of545(['Perguntar como andam as coisas na cidade', 'Alguma novidade por aqui?', 'O que andam dizendo por aí?'], sd), go: 'noticias' },
+        { l: elogioL, go: 'elogio', if: () => m.bond < 5 && sd % 2 === 0 },
+        { l: of545(['Pedir um agrado', 'Perguntar se ' + nome + ' tem algo sobrando para você'], sd), go: 'agrado', if: () => n.role523 !== 'crianca' && m.bond >= 2 },
+        { l: provocaL, go: 'provoca', if: () => n.role523 !== 'crianca' && sd % 3 !== 1 },
         { l: 'Ver o crédito do modelo desta criança', if: () => n.role523 === 'crianca', fn: () => { say('<b>Crédito:</b> modelo "Low Poly Kid" de malekith97 (Nitin Chowdary), licença CC BY 4.0, do OpenGameArt.'); return 'raiz'; } },
-        { l: 'Até logo', fn: () => 'fim' }
+        { l: of545(['Até logo', 'Preciso ir', 'Até mais'], sd), fn: () => { setTimeout(() => { try { if (typeof speech153 === 'function') speech153(n, J.tchau, ''); } catch (_) {} }, 60); return 'fim'; } }
       ]
     };
+
+    for (const a of ASSUNTO545) {
+      const k = h545(nome + '|' + a.id), txt = of545(a.r, k);
+      N['a545_' + a.id] = { t: txt, o: [{ l: of545(['Entendi', 'Interessante', 'Obrigado por contar'], k >>> 2), fn: () => { if (!f[tema(a.id)]) { f[tema(a.id)] = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }] };
+    }
+    N.p545 = { t: of545(['Posso te perguntar uma coisa? ', 'Agora é a minha vez. ', 'Diga uma coisa. '], sd) + PERGUNTA545.l,
+      o: PERGUNTA545.o.map(([l, gosta]) => ({ l: l, fn: () => { f.t545_pergunta = 1; const ok = gosta.includes(jeito545(n)); if (ok) m.bond = Math.min(5, m.bond + 1); f.r545 = ok ? 1 : 0; save(); return 'p545r'; } })) };
+    N.p545r = { t: f.r545 ? of545(['É isso! Finalmente alguém que pensa como eu.', 'Gostei de ouvir isso. De verdade.'], sd) : of545(['Hm. Cada um com seus motivos.', 'Não é o que eu faria. Mas respeito.'], sd), o: [{ l: 'Voltar', go: 'raiz' }] };
 
     if (aster541) {
       const qq = NPCQ[nome], st541 = () => (profile.npcq || {})[nome] || { got: 0 };
@@ -513,7 +589,7 @@
       o: [{ l: 'Obrigado pela informação', fn: () => { if (!f.noticias) { f.noticias = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
     };
     N.elogio = {
-      t: f.elogiou ? 'Você já disse isso. Mas continuo gostando de ouvir.' : 'Fico feliz que tenha notado! Poucos reparam nisso.',
+      t: f.elogiou ? 'Você já disse isso. Mas continuo gostando de ouvir.' : J.elogio,
       o: [{ l: 'Voltar', fn: () => { if (!f.elogiou) { f.elogiou = 1; m.bond = Math.min(5, m.bond + 1); save(); } return 'raiz'; } }]
     };
     N.agrado = m.bond >= 3
@@ -522,7 +598,7 @@
       : { t: 'Um agrado? A gente mal se conhece. Volte quando eu souber mais de você (afeto 3 de 5).',
         o: [{ l: 'Entendi', go: 'raiz' }] };
     N.provoca = {
-      t: 'O que foi que você disse?!',
+      t: J.provoca,
       o: [
         { l: 'Repetir e ir embora (-10 de reputação)', fn: () => { f.ofendido = 1; fama('maldade'); m.bond = 0; subRep(10); save(); say('<b>' + nome + '</b> vira as costas. Ele não vai tratar com você tão cedo.'); return 'fim'; } },
         { l: 'Rir: "Brincadeira!"', go: 'raiz' }
@@ -599,8 +675,10 @@
       return N;
     }
     N.raiz = {
-      t: multa() ? 'Alto lá. Você me deve uma multa por desordem.' : m.bond >= 3 ? 'Cidadão de bem! Ando de olho nos ladrões, pode andar tranquilo.' : 'Mantenha a ordem e não teremos problema.',
+      t: multa() ? 'Alto lá. Você me deve uma multa por desordem.' : m.bond >= 3 ? 'Cidadão de bem! Ando de olho nos ladrões, pode andar tranquilo.'
+        : of545(['Mantenha a ordem e não teremos problema.', 'Circulando, viajante. Algum problema?', 'Mais uma ronda, mais um dia sem dormir.', night545() ? 'Noite calma. Calma demais.' : 'Dia tranquilo. Do jeito que eu gosto.'], h545(day545() + '|' + nome) + (m.meets || 0)),
       o: [
+        ...assuntos545(n, m, N, 2),
         { l: 'Pagar a multa de 50 de ouro', if: () => multa() && gold() >= 50, fn: () => { addGold(-50); profile.multa523 = 0; save(); say('<b>' + nome + ':</b> "Multa paga. Siga em frente."'); return 'raiz'; } },
         { l: 'Subornar o guarda (100 de ouro, -10 de reputação)', if: () => multa() && gold() >= 100, fn: () => { addGold(-100); profile.multa523 = 0; subRep(10); save(); say('<b>' + nome + '</b> olha para o lado e perdoa a multa.'); return 'raiz'; } },
         { l: 'Perguntar se há ladrões por perto', go: 'ladroes' },

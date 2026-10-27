@@ -23,7 +23,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 /* ---------- quem é quem ---------- */
 const isGuard=n=>n.role523==='guarda';
 const isThief=n=>n.role523==='ladrao';
-function target(n){return n&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
+function target(n){return n&&!n.alma545&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
 const essential=n=>!KILLABLE.test(n.kind||'')&&!isGuard(n);
 function cityAt(x,z){try{const q=nearestCity(x,z);return q&&q.c&&q.d<90&&q.c.name?q.c:null}catch(_){return null}}
 /* morador da cidade: moradores, guardas e vendedores daquela cidade; caçadores, viajantes e encontros são de fora */
@@ -46,7 +46,7 @@ function banner(t){if(!bannerEl){bannerEl=document.createElement('div');bannerEl
 function say(n,l){try{speech153(n,l,'')}catch(_){try{floater(n.x,n.z,l,'#ffe0c0')}catch(__){}}}
 
 function witnesses(v,x,z){let seen=false,guard=false;
-  for(const n of npcs){if(n===v||n.gone||n.dead545||n.kind==='deco'||!n.m||n.m.root.visible===false)continue;const d=Math.hypot(n.x-x,n.z-z);
+  for(const n of npcs){if(n===v||n.alma545||n.gone||n.dead545||n.kind==='deco'||!n.m||n.m.root.visible===false)continue;const d=Math.hypot(n.x-x,n.z-z);
     if(isGuard(n)&&d<35){seen=guard=true}else if(d<22){seen=true;if(!n.hostile545&&Math.random()<.5)say(n,pick(LINES.seen))}}
   return {seen,guard}}
 
