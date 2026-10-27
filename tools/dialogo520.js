@@ -215,6 +215,7 @@
     const def = ctx.def, N = ctx.tree, nd = N[ctx.node];
     if (!nd) { closeSkyrimDialog(); return; }
     startHold575();
+    try { if (typeof mouseHeld !== 'undefined') mouseHeld = false; if (document.pointerLockElement) document.exitPointerLock(); } catch (_) {}
 
     const el = ensureSkyrimUI();
     const speakerEl = document.getElementById('skyrim-speaker');

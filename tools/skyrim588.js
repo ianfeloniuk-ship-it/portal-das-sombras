@@ -15,7 +15,7 @@
   let baseFov = null, last = 0;
 
   const kind = () => { try { return weaponKind272(run.equip.w) || ''; } catch(_) { return ''; } };
-  const ready = () => { try { return !!(started && !paused && !modalOpen && player && !player.dead); } catch(_) { return false; } };
+  const ready = () => { try { return !!(started && !paused && !modalOpen && player && !player.dead && !(typeof inConversation==='function'&&inConversation())); } catch(_) { return false; } };
   const fpOn = () => { try { return !!(global.FP550 && FP550.active); } catch(_) { return false; } };
   const melee = k => /^(sword|axe|mace|hammer)$/.test(k);
 

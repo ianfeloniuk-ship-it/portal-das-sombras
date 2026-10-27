@@ -80,7 +80,7 @@ function faceTarget(max=7){
   if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);
   return e;
 }
-function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
+function attack(){if(typeof inConversation==='function'&&inConversation()){if(typeof mouseHeld!=='undefined')mouseHeld=false;return;}if(typeof isCinematic451==='function'&&isCinematic451()){if(typeof mouseHeld!=='undefined')mouseHeld=false;return;}if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;resourceCombat258();if(kitFormAttack111())return;if(window.Firearms372?.isGun(run.equip.w)){Firearms372.fire();return}
   curDType281=(()=>{const k=weaponKind272(run.equip.w)||'';if(/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k))return 'phy';if(/^(staff|bonestaff|wand|tome|orb)$/.test(k))return 'mag';return basicIsMagic()?'mag':'phy'})();
   const ci=basicAttackId(),c=CLASSES[ci],effectClass=MAGIC_CLS.includes(ci)===basicIsMagic()?ci:null;
@@ -170,7 +170,7 @@ function dodge(){if(window.Cogu348&&Cogu348.asleep(player))return;
 function potionHealFraction(){return (npcHas('Mira')?.75:.5)+(hasT('lvl50')?.15:0)}/* v485: Veterano soma 15% (antes ×1,25 = 62,5%) */
 function potionDescription(){const p=potionHealFraction();return 'Cura '+Math.round(p*100)+'% da vida máxima ('+fmt(Math.round(player.maxhp*p))+' de vida).'+(hasT('lakeg')?' Recupera também 30% do escudo máximo.':'')}
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;narratorEvent105('potion');player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
-function useSkill(sk){if(window.Cogu348&&Cogu348.asleep(player))return false;if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
+function useSkill(sk){if(typeof inConversation==='function'&&inConversation())return false;if(typeof isCinematic451==='function'&&isCinematic451())return false;if(window.Cogu348&&Cogu348.asleep(player))return false;if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
   if(sk&&!sk.empty){const canonical=kitCanonical111(sk);if(canonical){const equipped=player.skills.find(s=>!s.empty&&s.skillId===canonical.skillId);if(!equipped){toast('Equipe esta habilidade em um dos seis espaços.');return}if(!player.dead&&!paused){const c0=equipped.cdT;kitCast111(equipped);if(equipped.cdT>c0)skillAnim155(equipped)}return}}
   if(player.dead||paused||!sk||sk.empty)return;
   if(sk.n==='Sol Nascente'){sk=player.skills.find(s=>!s.empty&&s.n==='Sol Nascente');if(!sk){toast('Equipe Sol Nascente em um dos seis espaços de Personagem → Habilidades.');return}}

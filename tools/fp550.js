@@ -806,6 +806,10 @@
 
   /* ---------- Alternância 1ª / 3ª Pessoa ---------- */
   FP.set = function(enable){
+    if(typeof inConversation === 'function' && inConversation()){
+      try { if(typeof toast === 'function') toast('Saia da conversa para mudar a câmera.', 1800); } catch(_) {}
+      return FP.active;
+    }
     const was = FP.active;
     FP.active = !!enable;
 
@@ -850,6 +854,10 @@
   };
 
   FP.toggle = function(){
+    if(typeof inConversation === 'function' && inConversation()){
+      try { if(typeof toast === 'function') toast('Saia da conversa para mudar a câmera.', 1800); } catch(_) {}
+      return false;
+    }
     if(global.run?.mounted){
       try { if(typeof toast === 'function') toast('Desmonte antes de entrar em primeira pessoa.', 1800); } catch(_) {}
       return false;
@@ -863,7 +871,7 @@
     if(!c) return;
 
     c.addEventListener('click', e => {
-      if(!FP.active || !global.started || global.paused || global.modalOpen || (global.keys && global.keys.Escape)) return;
+      if(!FP.active || !global.started || global.paused || global.modalOpen || (global.keys && global.keys.Escape) || (typeof inConversation==='function'&&inConversation())) return;
       if(document.pointerLockElement !== c){
         try { c.requestPointerLock(); } catch(_) {}
       }
@@ -884,7 +892,7 @@
 
     // Zoom da rodinha do mouse: rolar para trás sai para 3ª pessoa, rolar para frente entra
     c.addEventListener('wheel', e => {
-      if(!global.started || global.paused || global.modalOpen) return;
+      if(!global.started || global.paused || global.modalOpen || (typeof inConversation==='function'&&inConversation())) return;
       if(FP.active && e.deltaY > 50){
         e.preventDefault();
         FP.set(false);

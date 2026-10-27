@@ -224,6 +224,10 @@
 
   // ===== 1ª / 3ª pessoa =====
   API.toggleFirstPerson = function () {
+    if (typeof inConversation === 'function' && inConversation()) {
+      try { if (typeof toast === 'function') toast('Saia da conversa para mudar a câmera.', 1800); } catch (_) {}
+      return API.firstPerson;
+    }
     if (global.FP550) return global.FP550.toggle();
     API.firstPerson = !API.firstPerson;
     return API.firstPerson;

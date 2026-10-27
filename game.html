@@ -6179,7 +6179,26 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
+function inConversation(){
+  try{
+    if(window.Intro401?.conversation)return true;
+    if(window.dlg520?.active)return true;
+    if(window.story401?.conversation)return true;
+    if(window.conv539?.active)return true;
+    if(window.reading406?.active)return true;
+    if(window.Dialogo520&&typeof window.Dialogo520.active==='function'&&window.Dialogo520.active())return true;
+    if(document.body&&document.body.classList&&(document.body.classList.contains('story401')||document.body.classList.contains('reading406')))return true;
+    const sd=document.getElementById('skyrim-dialog');
+    if(sd&&sd.style&&sd.style.display!=='none')return true;
+    const d401=document.getElementById('dialog401');
+    if(d401&&d401.style&&d401.style.display!=='none')return true;
+  }catch(_){}
+  return false;
+}
+if(typeof window!=='undefined'){window.inConversation=inConversation;}
+
 function isCinematic451(){
+  if(inConversation())return true;
   if(window.Dream488?.active)return true;
   if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
   if(typeof FX2!=='undefined'&&FX2.cine>0)return true;
@@ -6314,7 +6333,7 @@ function faceTarget(max=7){
   if(e)player.face=Math.atan2(e.x-player.x,e.z-player.z);
   return e;
 }
-function attack(){if(window.Cogu348&&Cogu348.asleep(player))return;
+function attack(){if(typeof inConversation==='function'&&inConversation()){if(typeof mouseHeld!=='undefined')mouseHeld=false;return;}if(typeof isCinematic451==='function'&&isCinematic451()){if(typeof mouseHeld!=='undefined')mouseHeld=false;return;}if(window.Cogu348&&Cogu348.asleep(player))return;
   if(player.dead||paused||player.atkCd>0||player.dodgeT>0)return;resourceCombat258();if(kitFormAttack111())return;if(window.Firearms372?.isGun(run.equip.w)){Firearms372.fire();return}
   curDType281=(()=>{const k=weaponKind272(run.equip.w)||'';if(/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k))return 'phy';if(/^(staff|bonestaff|wand|tome|orb)$/.test(k))return 'mag';return basicIsMagic()?'mag':'phy'})();
   const ci=basicAttackId(),c=CLASSES[ci],effectClass=MAGIC_CLS.includes(ci)===basicIsMagic()?ci:null;
@@ -6404,7 +6423,7 @@ function dodge(){if(window.Cogu348&&Cogu348.asleep(player))return;
 function potionHealFraction(){return (npcHas('Mira')?.75:.5)+(hasT('lvl50')?.15:0)}/* v485: Veterano soma 15% (antes ×1,25 = 62,5%) */
 function potionDescription(){const p=potionHealFraction();return 'Cura '+Math.round(p*100)+'% da vida máxima ('+fmt(Math.round(player.maxhp*p))+' de vida).'+(hasT('lakeg')?' Recupera também 30% do escudo máximo.':'')}
 function usePot(){if(player.dead||paused)return;if(hasAff('nocure')){toast('Afixo Sem cura: poções não funcionam aqui.');return}demandBreak('nopot');if(run.pots<=0){toast('<b>[NARRADOR]</b> Sem poções. Compre na loja de Poções.');return}if(player.hp>=player.maxhp)return;run.pots--;narratorEvent105('potion');player.hp=Math.min(player.maxhp,player.hp+player.maxhp*potionHealFraction());if(hasT('lakeg'))player.shield=Math.min(player.maxsh,player.shield+player.maxsh*.3);fxRing(player.x,player.z,0xff8fa3,2.4);floater(player.x,player.z,'+VIDA','#ff8fa3')}
-function useSkill(sk){if(window.Cogu348&&Cogu348.asleep(player))return false;if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
+function useSkill(sk){if(typeof inConversation==='function'&&inConversation())return false;if(typeof isCinematic451==='function'&&isCinematic451())return false;if(window.Cogu348&&Cogu348.asleep(player))return false;if(sk?.combo261)return useCombo261();if(!sk||sk.empty||!player||player.dead||paused)return false;
   if(sk&&!sk.empty){const canonical=kitCanonical111(sk);if(canonical){const equipped=player.skills.find(s=>!s.empty&&s.skillId===canonical.skillId);if(!equipped){toast('Equipe esta habilidade em um dos seis espaços.');return}if(!player.dead&&!paused){const c0=equipped.cdT;kitCast111(equipped);if(equipped.cdT>c0)skillAnim155(equipped)}return}}
   if(player.dead||paused||!sk||sk.empty)return;
   if(sk.n==='Sol Nascente'){sk=player.skills.find(s=>!s.empty&&s.n==='Sol Nascente');if(!sk){toast('Equipe Sol Nascente em um dos seis espaços de Personagem → Habilidades.');return}}
@@ -6742,7 +6761,7 @@ function frame(now){
   if(riftSound131&&(!started||paused||document.hidden||!AU.on||player?.dead))riftSound131.silence();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
-  if(started&&!paused&&!touch&&mouseHeld)attack();
+  if(started&&!paused&&!touch&&mouseHeld&&!(typeof inConversation==='function'&&inConversation()))attack();
   if(started&&(time|0)!==FX2.lastSec){FX2.lastSec=time|0;markVisited()}
   if(run&&run.sovSk&&run.sovSk.cdT>0)run.sovSk.cdT-=dt;
   if(L.lampT>0&&L.lampL&&player){L.lampT-=dt;L.lampL.position.set(player.x,3,player.z);if(L.lampT<=0||L.mode!=='dungeon'){scene.remove(L.lampL);L.lampL=null;L.lampT=0;if(L.mode==='dungeon'){scene.fog.density=.018;toast('<b>[NARRADOR]</b> O Lampião apagou.')}}}
@@ -6910,7 +6929,7 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 addEventListener('pointerup',e=>{if(e.button===2){const moved=cameraDrag375?(cameraDrag375.moved472||0):0;window.camMoved472=moved;releaseCamera373();if(moved<8&&window.W377&&typeof W377.toggle==='function')W377.toggle(true)}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
@@ -6923,7 +6942,7 @@ $('c').addEventListener('pointermove',e=>{const p=cameraTouch372;if(!p||p.id!==e
 for(const event of ['pointerup','pointercancel','lostpointercapture'])$('c').addEventListener(event,e=>{if(cameraTouch372?.id===e.pointerId)cameraTouch372=null});
 function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*(1-Math.exp(-14*dt));cam.z+=(P.z-cam.z)*(1-Math.exp(-14*dt));
-  if((paused||modalOpen||!$('gameMenu95').hidden)&&pcCam.active)releaseCamera373();
+  if((paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))&&pcCam.active)releaseCamera373();
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
   const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding());
   const isFP=!!(pcCam.firstPerson&&!mounted&&!P.dead);
@@ -8813,7 +8832,10 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
   if(e.code==='KeyI'){modalOpen?closeModal():bagView();return}
   if(e.code==='KeyC'||e.code==='Tab'){e.preventDefault();modalOpen?closeModal():openCharacter118();return}
-  if(paused)return;
+  if(paused||(typeof inConversation==='function'&&inConversation())){
+    if(e.code==='KeyV'){try{if(typeof toast==='function')toast('Saia da conversa para mudar a câmera.',1800);}catch(_){}}
+    return;
+  }
   if(e.code==='Space'){e.preventDefault();jump343()}
   if(e.code==='AltLeft'){e.preventDefault();dodge()}
   if(e.code==='ShiftLeft'||e.code==='ShiftRight')e.preventDefault();
@@ -8823,7 +8845,7 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
 addEventListener('keyup',e=>{keys[e.code]=false});
 /* Segurar o botão do mouse ou a tecla de ataque continua atacando (PC). */
 let mouseHeld=false;
-$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&!modalOpen){mouseHeld=true;if(started&&!paused)attack()}});
+$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&!modalOpen&&!(typeof inConversation==='function'&&inConversation())){mouseHeld=true;if(started&&!paused)attack()}});
 addEventListener('mouseup',e=>{if(e.button===0)mouseHeld=false});addEventListener('blur',()=>{mouseHeld=false});
 function bindBtn(el,fn,hold){let iv=null;
   el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();el.classList.add('on');fn();if(hold)iv=setInterval(fn,120)});
@@ -9695,7 +9717,7 @@ requestAnimationFrame(frame);
 <script src="tools/caixa606.js?v=612"></script>
 <script src="tools/torre607.js?v=614"></script>
 <script src="tools/sentinela608.js?v=618"></script>
-<script src="tools/dialogo520.js?v=605"></script>
+<script src="tools/dialogo520.js?v=645"></script>
 <script src="tools/vida522.js?v=558"></script>
 <script src="tools/vida523.js?v=599"></script>
 <script src="tools/vida527.js?v=534"></script>
@@ -9732,10 +9754,10 @@ requestAnimationFrame(frame);
 <script src="tools/constel523.js?v=583"></script><script src="tools/saida579.js?v=579"></script>
 <script src="tools/telas535.js?v=585"></script>
 <script src="tools/motor-missoes-infinitas.js?v=546"></script>
-<script src="tools/skyrim-overhaul538.js?v=644"></script>
+<script src="tools/skyrim-overhaul538.js?v=645"></script>
 <script src="tools/lote541.js?v=541"></script>
 <script src="tools/mapa3d544.js?v=594"></script>
-<script src="tools/crime545.js?v=545"></script>
+<script src="tools/crime545.js?v=645"></script>
 <script src="tools/contratos541.js?v=542"></script>
 <script src="tools/fixas545.js?v=546"></script>
 <script src="tools/fronteira551.js?v=577"></script>
@@ -9744,11 +9766,11 @@ requestAnimationFrame(frame);
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/flora-regioes.js?v=621"></script>
 <script src="tools/ecossistema550.js?v=628"></script>
-<script src="tools/skyrim588.js?v=644"></script>
+<script src="tools/skyrim588.js?v=645"></script>
 <script src="tools/controles593.js?v=593"></script>
 <script src="tools/upright600.js?v=600"></script>
 <script src="tools/mover632.js?v=632"></script>
-<script src="tools/fp550.js?v=600"></script>
+<script src="tools/fp550.js?v=645"></script>
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 <script src="tools/enchente630.js?v=634"></script>

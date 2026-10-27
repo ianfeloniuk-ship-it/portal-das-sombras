@@ -1,3 +1,10 @@
+## v645 (27/10/2026) — bloqueio total de ataques e troca de câmera durante conversas
+- Pedido de Ian: "quando to em conversa eu posso acidentealmnete dar golpes nos npc oq não deveria acontecer eu não pdoderia nem mudar de camera caso não saissse da converesa eu quero que essas mecanicas funcionem do jeiot correto".
+- Função `inConversation()` criada no núcleo (`src/core/370-v281.js` e exposta em `window.inConversation`): detecta ativamente diálogos da história (`Intro401.conversation`), diálogos do Skyrim (`#skyrim-dialog`, `.dlg520`, `.story401`, `Dialogo520.active()`, `#dialog401`). Integrada também a `isCinematic451()`.
+- Bloqueio de golpes e magias em conversa: `attack()`, `useSkill()` e `mouseHeld` bloqueados em `380-acoes.js`, `400-loop.js`, `630-controles.js` e `skyrim588.js`; `crime545.js` impede qualquer dano em NPCs com diálogo aberto (`n.talk575` e `inConversation()`).
+- Bloqueio de câmera e atalhos em conversa: alternância de 1ª/3ª pessoa (`KeyV` / `pov` / `FP550.toggle()` / `FP550.set()` / zoom de roda do mouse) bloqueada com aviso «Saia da conversa para mudar a câmera.»; atalhos de lote (`1-4`), habilidades e pulo pausados no `630-controles.js` para não conflitar com as opções [1-9] da conversa.
+- Teste: verificação de sintaxe `node --check` em todos os módulos e scripts inline, `build.py` ok, `core_parts.py check` ok.
+
 ## v644 (27/10/2026) — defender apenas no meio (roda do mouse); mira e câmera no direito
 - Pedido de Ian: "troca pra mim, deixa o botão de defender apenas na roda do mouse clicando se segurando, e a mira pelo direito".
 - Defesa: mapeada exclusivamente para o botão do meio (`e.button === 1`), clicando e segurando a roda do mouse; `pointerdown`, `mousedown` e `auxclick` com `preventDefault` para eliminar autoscroll em qualquer navegador; soltar no meio (`pointerup`/`mouseup`/`blur`) encerra a guarda imediatamente; nenhum outro botão defende.

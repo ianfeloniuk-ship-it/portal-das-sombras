@@ -30,7 +30,10 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
   if(e.code==='KeyM'){modalOpen?closeModal():mapView();return}
   if(e.code==='KeyI'){modalOpen?closeModal():bagView();return}
   if(e.code==='KeyC'||e.code==='Tab'){e.preventDefault();modalOpen?closeModal():openCharacter118();return}
-  if(paused)return;
+  if(paused||(typeof inConversation==='function'&&inConversation())){
+    if(e.code==='KeyV'){try{if(typeof toast==='function')toast('Saia da conversa para mudar a câmera.',1800);}catch(_){}}
+    return;
+  }
   if(e.code==='Space'){e.preventDefault();jump343()}
   if(e.code==='AltLeft'){e.preventDefault();dodge()}
   if(e.code==='ShiftLeft'||e.code==='ShiftRight')e.preventDefault();
@@ -40,7 +43,7 @@ addEventListener('keydown',e0=>{if(e0.target&&['INPUT','TEXTAREA','SELECT'].incl
 addEventListener('keyup',e=>{keys[e.code]=false});
 /* Segurar o botão do mouse ou a tecla de ataque continua atacando (PC). */
 let mouseHeld=false;
-$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&!modalOpen){mouseHeld=true;if(started&&!paused)attack()}});
+$('c').addEventListener('mousedown',e=>{if(!touch&&e.button===0&&!modalOpen&&!(typeof inConversation==='function'&&inConversation())){mouseHeld=true;if(started&&!paused)attack()}});
 addEventListener('mouseup',e=>{if(e.button===0)mouseHeld=false});addEventListener('blur',()=>{mouseHeld=false});
 function bindBtn(el,fn,hold){let iv=null;
   el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();el.classList.add('on');fn();if(hold)iv=setInterval(fn,120)});

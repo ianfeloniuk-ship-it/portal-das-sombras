@@ -248,7 +248,26 @@ function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.w
   b.mats.forEach(m=>{m.userData.e0=0x440000;m.emissive.setHex(0x440000)})}
 /* ESQUIVA PERFEITA: ser atingido durante a esquiva → câmera lenta + próximo golpe forte. */
 const FX2={slow:0,combo:0,comboT:0,perfCd:0,counter:false,cine:0,inv:0};
+function inConversation(){
+  try{
+    if(window.Intro401?.conversation)return true;
+    if(window.dlg520?.active)return true;
+    if(window.story401?.conversation)return true;
+    if(window.conv539?.active)return true;
+    if(window.reading406?.active)return true;
+    if(window.Dialogo520&&typeof window.Dialogo520.active==='function'&&window.Dialogo520.active())return true;
+    if(document.body&&document.body.classList&&(document.body.classList.contains('story401')||document.body.classList.contains('reading406')))return true;
+    const sd=document.getElementById('skyrim-dialog');
+    if(sd&&sd.style&&sd.style.display!=='none')return true;
+    const d401=document.getElementById('dialog401');
+    if(d401&&d401.style&&d401.style.display!=='none')return true;
+  }catch(_){}
+  return false;
+}
+if(typeof window!=='undefined'){window.inConversation=inConversation;}
+
 function isCinematic451(){
+  if(inConversation())return true;
   if(window.Dream488?.active)return true;
   if(window._cinematicGrace451&&window._cinematicGrace451>performance.now())return true;
   if(typeof FX2!=='undefined'&&FX2.cine>0)return true;

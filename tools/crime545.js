@@ -23,7 +23,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 /* ---------- quem é quem ---------- */
 const isGuard=n=>n.role523==='guarda';
 const isThief=n=>n.role523==='ladrao';
-function target(n){return n&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&n.m&&n.m.root&&n.m.root.visible!==false}
+function target(n){return n&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
 const essential=n=>!KILLABLE.test(n.kind||'')&&!isGuard(n);
 function cityAt(x,z){try{const q=nearestCity(x,z);return q&&q.c&&q.d<90&&q.c.name?q.c:null}catch(_){return null}}
 /* morador da cidade: moradores, guardas e vendedores daquela cidade; caçadores, viajantes e encontros são de fora */
@@ -63,7 +63,7 @@ function crime(v,killed){
 /* ---------- dano no NPC ---------- */
 function anger(n,quiet){n.hostile545=true;n.calm545=now()+25;n.wait=0;n.path=[];if(!quiet)say(n,pick(isGuard(n)?LINES.guard:LINES.hit))}
 function hitNpc(n,dmg){
-  if(!target(n)||!(dmg>0))return false;maxHp(n);
+  if(!target(n)||!(dmg>0)||(typeof inConversation==='function'&&inConversation())||n.talk575)return false;maxHp(n);
   dmg=Math.max(1,Math.round(dmg));n.hp545=Math.max(0,n.hp545-dmg);n.lastHit545=now();
   try{floater(n.x,n.z,'-'+dmg,'#ff6b6b')}catch(_){}
   if(n.hp545<=0){
@@ -80,9 +80,10 @@ C.hit=hitNpc;
 /* golpe corpo a corpo: mesmo alcance do básico (2,6 m; 3,1 m no terceiro golpe) */
 const A0=attack;
 attack=function(){
+  if(typeof inConversation==='function'&&inConversation())return;
   const cd=player?.atkCd||0,np=(typeof projs!=='undefined'&&projs)?projs.length:0;
   const r=A0.apply(this,arguments);
-  try{if(player&&player.atkCd>cd&&L.mode==='world'&&projs.length===np){
+  try{if(player&&player.atkCd>cd&&L.mode==='world'&&projs.length===np&&!(typeof inConversation==='function'&&inConversation())){
     const third=player.combo===3,reach=third?3.1:2.6,arc=third?1.3:1.0,dmg=player.dmg*(third?1.8:1);
     for(const n of npcs){if(!target(n))continue;const dx=n.x-player.x,dz=n.z-player.z,d=Math.hypot(dx,dz);if(d>reach+.4)continue;
       let a=Math.atan2(dx,dz)-player.face;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)<=arc||d<1)hitNpc(n,dmg)}}}catch(e){console.warn('crime545',e)}

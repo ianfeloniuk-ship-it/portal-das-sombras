@@ -8,7 +8,7 @@ function frame(now){
   if(riftSound131&&(!started||paused||document.hidden||!AU.on||player?.dead))riftSound131.silence();
   if(!started){titleCam(rdt);ENV.occ.value=0;renderer.render(scene,camera);return}
   let dt=rdt;if(freeze>0){freeze-=rdt;dt=0}if(paused)dt=0;
-  if(started&&!paused&&!touch&&mouseHeld)attack();
+  if(started&&!paused&&!touch&&mouseHeld&&!(typeof inConversation==='function'&&inConversation()))attack();
   if(started&&(time|0)!==FX2.lastSec){FX2.lastSec=time|0;markVisited()}
   if(run&&run.sovSk&&run.sovSk.cdT>0)run.sovSk.cdT-=dt;
   if(L.lampT>0&&L.lampL&&player){L.lampT-=dt;L.lampL.position.set(player.x,3,player.z);if(L.lampT<=0||L.mode!=='dungeon'){scene.remove(L.lampL);L.lampL=null;L.lampT=0;if(L.mode==='dungeon'){scene.fog.density=.018;toast('<b>[NARRADOR]</b> O Lampião apagou.')}}}
@@ -176,7 +176,7 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden)return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
 addEventListener('pointerup',e=>{if(e.button===2){const moved=cameraDrag375?(cameraDrag375.moved472||0):0;window.camMoved472=moved;releaseCamera373();if(moved<8&&window.W377&&typeof W377.toggle==='function')W377.toggle(true)}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
@@ -189,7 +189,7 @@ $('c').addEventListener('pointermove',e=>{const p=cameraTouch372;if(!p||p.id!==e
 for(const event of ['pointerup','pointercancel','lostpointercapture'])$('c').addEventListener(event,e=>{if(cameraTouch372?.id===e.pointerId)cameraTouch372=null});
 function camUpdate(dt){
   const P=player;cam.x+=(P.x-cam.x)*(1-Math.exp(-14*dt));cam.z+=(P.z-cam.z)*(1-Math.exp(-14*dt));
-  if((paused||modalOpen||!$('gameMenu95').hidden)&&pcCam.active)releaseCamera373();
+  if((paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))&&pcCam.active)releaseCamera373();
   shakeA=Math.max(0,shakeA-dt*2.2);const s=shakeA*shakeA*1.2;
   const mounted=!!run?.mounted||!!(window.Living372&&Living372.riding());
   const isFP=!!(pcCam.firstPerson&&!mounted&&!P.dead);
