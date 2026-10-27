@@ -207,7 +207,7 @@
     }
     if (s.phase === 'fenda') {
       const s0 = S(); let sp0 = spot();
-      if (!s0.lock && Math.hypot(player.x - sp0.x, player.z - sp0.z) < 230 && terrH(sp0.x, sp0.z) !== 0) sp0 = spot(true);
+      if (!s0.lock && Math.hypot(player.x - sp0.x, player.z - sp0.z) < 90 && terrH(sp0.x, sp0.z) !== 0) sp0 = spot(true);
       const near = s0.lock && Math.hypot(player.x - sp0.x, player.z - sp0.z) < 170;
       if (near && !portal) buildPortal(); else if (!near && portal) dropPortal();
       if (portal) portal.traverse(o => { if (o.userData && o.userData.pulse) o.material.opacity = .6 + Math.sin(performance.now() / 260) * .18; });
