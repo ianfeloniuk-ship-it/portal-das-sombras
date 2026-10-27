@@ -172,7 +172,7 @@ function animGlb(m,st){
   else if(m.mon&&m.mon.startsWith('magote')&&m.cur===m.atkClip){gPlay(m,'Recover',true,1);m.la=0;m.lw=0}
   else if((st.move>.1||m.hold413>0)&&(!m.locomotion||st.speed==null||st.speed>.05)){const rate=m.userRig&&m.gait413&&m.spd413!=null&&st.speed!=null?clamp(m.spd413/m.gait413,.6,2.2):m.locomotion&&st.speed!=null?clamp(st.speed/m.gaitSpeed,.25,3):.8+st.move*.4;if(m.cur!=='Running_A')gPlay(m,'Running_A',false,rate);else if(m.act.Running_A)m.act.Running_A.timeScale=rate;m.la=0;m.lw=0}
   else{const a=m.cur&&m.act[m.cur],busy=a&&a.loop===THREE.LoopOnce&&a.isRunning()&&m.cur!=='Death_A';if(m.customClips){if(!busy&&a){a.fadeOut(.25);m.cur=null}}else if(!busy&&m.cur!=='Idle')gPlay(m,'Idle',false);m.la=0;m.lw=0}
-  m.mixer.update(ADT);
+  if(window.Culling637)Culling637.mix(m,ADT);else m.mixer.update(ADT);/* v640: fora da vista ou longe anima a 1/4 do ritmo */
   try{if(window.Anim547&&Anim547.postMobGlb)Anim547.postMobGlb(m,st,ADT)}catch(_){}
 }
 

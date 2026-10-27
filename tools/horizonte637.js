@@ -77,18 +77,25 @@
     }
     if (job.i > n) finish(job);
   }
+  const TILE = 448;
   function finish(job) {
     const M = new T.Matrix4(), q = new T.Quaternion(), p = new T.Vector3(), sc = new T.Vector3(), ax = new T.Vector3(0, 1, 0), c = new T.Color();
-    let tot = 0; H.byKind = {};
+    let tot = 0; H.byKind = {}; const old = Object.values(H.meshes), nm = {}, tiles = {};
     for (const k of ids) {
       const a = job.items[k], cnt = a.length / 5; H.byKind[k] = cnt; tot += cnt;
-      let m = H.meshes[k];
-      if (m && m.instanceMatrix.count !== cnt) { group.remove(m); m.dispose(); m = null }
-      if (!cnt) { delete H.meshes[k]; continue }
-      if (!m) { m = new T.InstancedMesh(geoOf[k], mat, cnt); m.frustumCulled = false; m.castShadow = m.receiveShadow = false; m.onBeforeRender = () => u.uP637.value.set(player.x, 0, player.z); group.add(m); H.meshes[k] = m }
-      for (let i = 0; i < cnt; i++) { const o = i * 5; q.setFromAxisAngle(ax, a[o + 4]); p.set(a[o], 0, a[o + 1]); sc.set(a[o + 2], a[o + 2] * (.9 + (a[o + 3] - .82)), a[o + 2]); M.compose(p, q, sc); m.setMatrixAt(i, M); c.setRGB(a[o + 3], a[o + 3], a[o + 3]); m.setColorAt(i, c) }
-      m.instanceMatrix.needsUpdate = true; m.instanceColor.needsUpdate = true;
+      for (let i = 0; i < cnt; i++) { const o = i * 5, key = k + '|' + Math.floor(a[o] / TILE) + '|' + Math.floor(a[o + 1] / TILE); (tiles[key] = tiles[key] || []).push(o, a) }
     }
+    for (const key in tiles) {
+      const arr = tiles[key], k = key.split('|')[0], n = arr.length / 2, m = new T.InstancedMesh(geoOf[k], mat, n);
+      m.frustumCulled = false; m.castShadow = m.receiveShadow = false; m.onBeforeRender = () => u.uP637.value.set(player.x, 0, player.z);
+      let sx = 0, sz = 0; for (let i = 0; i < n; i++) { const o = arr[i * 2], a = arr[i * 2 + 1]; sx += a[o]; sz += a[o + 1] } sx /= n; sz /= n; let r = 0;
+      for (let i = 0; i < n; i++) { const o = arr[i * 2], a = arr[i * 2 + 1]; r = Math.max(r, Math.hypot(a[o] - sx, a[o + 1] - sz)); q.setFromAxisAngle(ax, a[o + 4]); p.set(a[o], 0, a[o + 1]); sc.set(a[o + 2], a[o + 2] * (.9 + (a[o + 3] - .82)), a[o + 2]); M.compose(p, q, sc); m.setMatrixAt(i, M); c.setRGB(a[o + 3], a[o + 3], a[o + 3]); m.setColorAt(i, c) }
+      m.instanceMatrix.needsUpdate = true; m.instanceColor.needsUpdate = true;
+      m.userData.sph637 = new T.Sphere(new T.Vector3(sx, 20, sz), r + 40); /* corte por quadro em culling637.js: só desenha o que está na câmera */
+      group.add(m); nm[key] = m;
+    }
+    for (const m of old) { group.remove(m); m.dispose() }
+    H.meshes = nm; if (window.Culling637) Culling637.dirty = true;
     H.n = tot; H.cx = job.cx; H.cz = job.cz; H.season = job.SE; H.builds++; H.ms = Math.round(performance.now() - job.t0); H.job = null;
   }
   let added = false;
