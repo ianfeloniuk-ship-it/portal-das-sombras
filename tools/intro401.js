@@ -39,6 +39,7 @@ function targetAndText(){
  if(window.Aldric610?.active())return Aldric610.objective();
  if(window.Corredor611?.active())return Corredor611.objective();
  if(window.Noite612?.active())return Noite612.objective();
+ if(window.Mapa613?.active())return Mapa613.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
