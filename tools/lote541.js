@@ -4,7 +4,9 @@
           girar a rodinha do mouse ou apertar 1–4 troca a arma na mão. Apertar a rodinha continua sendo defender (Guard472).
           A troca não passa pelo bloqueio de estilo: arma mágica põe o ataque básico arcano, arma física o físico.
    MANA   o ataque básico mágico gasta 1 de mana a cada segundo atacando, e a mana não regenera enquanto você ataca.
-          Sem mana, o ataque mágico não sai: troque para uma arma física. */
+          Sem mana, o ataque mágico não sai: troque para uma arma física.
+   v656   toque = 1 magia (1 de mana, sem gasto por segundo) e segurar = fluxo contínuo (1 de mana ao começar e mais 1 por segundo)
+          ficam em tools/magia653.js. O gasto por segundo daqui continua para a magia corpo a corpo (Lâmina Arcana). */
 (function(){
 'use strict';
 if(typeof attack!=='function'||typeof update!=='function')return;
@@ -52,7 +54,8 @@ attack=function(){
     if(now()-warnT>1.5){warnT=now();try{floater(player.x,player.z,'SEM MANA','#60a5fa')}catch(_){}}
     return}
   const before=player?.atkCd||0,res=A0.apply(this,arguments);
-  if(player&&player.atkCd>before&&curDType281==='mag')channelUntil=now()+player.atkCd+.25;
+  const tap653=!!(window.Magia653&&Magia653.tapJust);if(window.Magia653)Magia653.tapJust=false;/* v656: o toque do magia653 já pagou 1 de mana; não liga o gasto por segundo */
+  if(player&&player.atkCd>before&&curDType281==='mag'&&!tap653)channelUntil=now()+player.atkCd+.25;
   return res};
 const U0=update;
 update=function(dt){
