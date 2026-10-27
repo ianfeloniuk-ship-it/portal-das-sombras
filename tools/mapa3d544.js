@@ -114,7 +114,14 @@ const ICON={
   forge(g){g.moveTo(-8,-4);g.lineTo(8,-4);g.lineTo(5,0);g.lineTo(3,0);g.lineTo(3,4);g.lineTo(6,8);g.lineTo(-6,8);g.lineTo(-3,4);g.lineTo(-3,0);g.lineTo(-6,0);g.closePath()},
   inn(g){g.moveTo(-7,8);g.lineTo(-7,-1);g.lineTo(0,-7);g.lineTo(7,-1);g.lineTo(7,8);g.closePath();g.moveTo(-3,2);g.lineTo(3,2);g.lineTo(3,5);g.lineTo(-3,5);g.closePath()},
   mine(g){g.moveTo(-8,-3);g.quadraticCurveTo(0,-11,8,-3);g.moveTo(0,-7);g.lineTo(0,9)},
-  camp(g){g.moveTo(-9,8);g.lineTo(0,-8);g.lineTo(9,8);g.closePath();g.moveTo(0,-8);g.lineTo(0,8);g.moveTo(-3,8);g.lineTo(0,2);g.lineTo(3,8)}};
+  camp(g){g.moveTo(-9,8);g.lineTo(0,-8);g.lineTo(9,8);g.closePath();g.moveTo(0,-8);g.lineTo(0,8);g.moveTo(-3,8);g.lineTo(0,2);g.lineTo(3,8)},
+  /* v639: lugares no caminho */
+  ruin(g){g.moveTo(-8,8);g.lineTo(-8,-2);g.lineTo(-4,-6);g.lineTo(-4,8);g.moveTo(1,8);g.lineTo(1,-8);g.lineTo(5,-8);g.lineTo(5,8);g.moveTo(-9,8);g.lineTo(9,8)},
+  altar(g){g.moveTo(0,-9);g.lineTo(5,0);g.lineTo(0,9);g.lineTo(-5,0);g.closePath();g.moveTo(-8,8);g.lineTo(8,8)},
+  cave(g){g.moveTo(-9,8);g.quadraticCurveTo(-9,-9,0,-9);g.quadraticCurveTo(9,-9,9,8);g.moveTo(-4,8);g.quadraticCurveTo(-4,-2,0,-2);g.quadraticCurveTo(4,-2,4,8)},
+  tower(g){g.moveTo(-5,8);g.lineTo(-5,-3);g.lineTo(-7,-3);g.lineTo(-7,-8);g.lineTo(-3,-8);g.lineTo(-3,-5);g.lineTo(3,-5);g.lineTo(3,-8);g.lineTo(7,-8);g.lineTo(7,-3);g.lineTo(5,-3);g.lineTo(5,8);g.closePath()},
+  farm(g){g.moveTo(-8,8);g.lineTo(-8,-1);g.lineTo(0,-8);g.lineTo(8,-1);g.lineTo(8,8);g.closePath();g.moveTo(-8,3);g.lineTo(8,3)},
+  grave(g){g.moveTo(0,-9);g.lineTo(0,9);g.moveTo(-6,-3);g.lineTo(6,-3)}};
 function drawIcon(g,kind,x,y,hot,tint,gone){
   g.save();g.translate(x,y);g.globalAlpha=gone?.55:1;
   g.shadowColor='rgba(0,0,0,.75)';g.shadowBlur=5;
@@ -135,6 +142,7 @@ function pois(){
     out.push({kind:c.capital?'capital':'city',x:c.x,z:c.z,name:c.name,state:fall?'Caída':'Descoberto',pr:c.capital?9:7,gone:fall})}
   for(const s of v.tents){const k='t'+Math.round(s.x)+','+Math.round(s.z);if(Math.hypot(s.x-P.x,s.z-P.z)<150)learn(k);if(known(k))out.push({kind:'camp',x:s.x,z:s.z,name:'Acampamento',state:'Descoberto',pr:2})}
   for(const s of v.posts){const k='p'+Math.round(s.x)+','+Math.round(s.z);if(Math.hypot(s.x-P.x,s.z-P.z)<150)learn(k);if(known(k))out.push({kind:'inn',x:s.x,z:s.z,name:'Posto da estrada',state:'Descoberto',pr:2})}
+  if(window.Lugares637)for(const s of Lugares637.known())out.push({kind:s.map,x:s.x,z:s.z,name:s.name,state:s.cleared?'Descoberto · limpo':'Descoberto',pr:3});/* v639 */
   for(const g of gates){if(g.dead)continue;const k='g'+Math.round(g.x)+','+Math.round(g.z);if(Math.hypot(g.x-P.x,g.z-P.z)<130)learn(k);if(!known(k)&&!(profile.cmp564&&profile.cmp564[k]))continue;
     let lv=1;try{lv=gateLvl207(g)}catch(_){}const rk=(()=>{try{return gid(g.rank)}catch(_){return '?'}})(),mins=Math.max(1,Math.ceil((g.life||0)/60));
     out.push({kind:g.closing131?'rift':'portal',x:g.x,z:g.z,name:g.secret?'Portal secreto':'Portal rank '+rk,state:'Rank '+rk+' · nível '+lv+' · fecha em '+mins+' min',pr:5,tint:g.secret?'#ffd070':g.red?'#ff2030':RANKS[g.rank]?RANKS[g.rank].c:'#9b6bff'})}

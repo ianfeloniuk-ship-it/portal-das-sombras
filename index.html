@@ -4539,6 +4539,7 @@ function loadChunk(cx,cz){
   }
   const city=near.find(c=>c.cx===cx&&c.cz===cz);try{if(!city)buildWater239(ch,g,addCol)}catch(e){}if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(outpostAt217(cx,cz))buildOutpost217(ch,g,addCol);else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
   if(ch.pg){envAO(ch.pg);delete ch.pg}
+  if(window.Lugares637&&ENV.ok)Lugares637.build(ch,g,addCol,cityD);/* v639: lugares no caminho */
   L.group.add(g);chunks.set(key,ch);
 }
 function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene.remove(e.m.root);const ix=FRIENDS217.indexOf(e);if(ix>=0)FRIENDS217.splice(ix,1)}L.inter=L.inter.filter(i=>i.chunk!==ch);L.group.remove(ch.group);for(const c of ch.cols)hrem(c);ch.group.traverse(o=>{if(o.isInstancedMesh&&o.dispose)o.dispose();else if(o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material.map){o.material.map.dispose();o.material.dispose()}});ch.group.children[0].geometry.dispose();
@@ -9772,10 +9773,11 @@ requestAnimationFrame(frame);
 <script src="tools/carga630.js?v=631"></script>
 <script src="tools/enfeite637.js?v=638"></script>
 <script src="tools/horizonte637.js?v=638"></script>
+<script src="tools/lugares637.js?v=639"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v638</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v639</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=638;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=639;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

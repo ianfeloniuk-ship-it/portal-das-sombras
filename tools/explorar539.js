@@ -60,6 +60,7 @@ function compass(){if(typeof camera==='undefined')return;const v=new THREE.Vecto
       if(cityCache.seed!==WSEED){cityCache.seed=WSEED;cityCache.l=[];for(let rz=-2;rz<=2;rz++)for(let rx=-2;rx<=2;rx++){const c=regionCity(rx,rz);if(c)cityCache.l.push(c)}}
       for(const c of cityCache.l){const k='c'+(c.id||c.name),ok=disc(k,c.x,c.z,c.name==='Aster'||!!(profile.found539&&profile.found539[c.id])||!!(profile.visited217&&(profile.visited217[c.id]||profile.visited217['c_'+c.id])));
         add(c.x,c.z,c.capital?ICO.cap:ICO.city,c.capital?'#ffd070':'#e8e2d0',c.name,ok,ok?(c.capital?3200:2200):(c.capital?900:600),.35)}
+      if(window.Lugares637)for(const s of Lugares637.known())add(s.x,s.z,s.ico,s.col,s.name,true,900,.3);/* v639: lugares descobertos no caminho */
       if(typeof gates!=='undefined')for(const g of gates){if(g.dead)continue;const k='g'+Math.round(g.x)+','+Math.round(g.z),ok=disc(k,g.x,g.z,false);
         const col=g.secret?'#ffd070':g.red?'#ff2030':(typeof RANKS!=='undefined'&&RANKS[g.rank]?RANKS[g.rank].c:'#9b6bff');
         add(g.x,g.z,ICO.gate,col,ok?(g.secret?'Portal secreto':'Portal '+(typeof gid==='function'?gid(g.rank):'')):'Local desconhecido',ok,ok?1600:300,.45)}

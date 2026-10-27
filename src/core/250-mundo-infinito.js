@@ -50,6 +50,7 @@ function loadChunk(cx,cz){
   }
   const city=near.find(c=>c.cx===cx&&c.cz===cz);try{if(!city)buildWater239(ch,g,addCol)}catch(e){}if(city){ch.city=city;buildCity(city,g,addCol,R)}else if(outpostAt217(cx,cz))buildOutpost217(ch,g,addCol);else if(ruinAt(cx,cz))buildRuin(ch,g,addCol);
   if(ch.pg){envAO(ch.pg);delete ch.pg}
+  if(window.Lugares637&&ENV.ok)Lugares637.build(ch,g,addCol,cityD);/* v639: lugares no caminho */
   L.group.add(g);chunks.set(key,ch);
 }
 function unloadChunk(ch){if(ch.friend217){const e=ch.friend217;e.gone=true;scene.remove(e.m.root);const ix=FRIENDS217.indexOf(e);if(ix>=0)FRIENDS217.splice(ix,1)}L.inter=L.inter.filter(i=>i.chunk!==ch);L.group.remove(ch.group);for(const c of ch.cols)hrem(c);ch.group.traverse(o=>{if(o.isInstancedMesh&&o.dispose)o.dispose();else if(o.userData.own&&o.geometry)o.geometry.dispose();else if(o.isSprite&&o.material.map){o.material.map.dispose();o.material.dispose()}});ch.group.children[0].geometry.dispose();
