@@ -1,3 +1,6 @@
+## v633 (27/10/2026) — reverte os degraus da v632
+- Decisão do diretor: os degraus de 45 cm (`170-colisao.js`) vinham de uma leitura errada do áudio de Ian e ninguém pediu. `src/core/170-colisao.js` voltou exatamente ao que era antes da v632 (`STEP600` saiu). Rolar (Shift + direção), impulso (toque duplo) e correr no Alt continuam. Teste: rolar 2,9 m (−20 Estamina), impulso 3,7 m (−10), Alt corre (7,8 m em 1,5 s), muralha de Aster segura rolos (57,9 m).
+
 ## v632 (27/10/2026) — movimento fluido: rolar, impulso, correr no Alt, degraus
 - **Pedido de Ian:** Shift = rolar; toque duplo = impulso; correr no Alt; degraus/escadas fluidos.
 - **Teclas (`630-controles.js`):** `dodge` (Rolar) → **Shift**, `sprint` (Correr, segurar) → **Alt** (toque rápido no Alt trava a corrida). Migração única (`pds_keys_move632`): só `sprint` e `dodge` salvos voltam ao padrão novo; o resto das trocas fica. Removida a regra antiga que apagava `dodge` em Shift. O Alt já não abre o menu do navegador (`witcher377.js` faz `preventDefault`). Em `400-loop.js` saiu `keys.KeyC/AltLeft` do "andar devagar" (C agora é combinação, Alt é correr).
