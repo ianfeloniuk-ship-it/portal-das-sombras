@@ -139,7 +139,7 @@
       },
       choiceB: {
         label: 'Exigir tributo de recursos do acampamento para encerrar o caso rapidamente',
-        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.4)} de ouro e 5 Cristais, mas perde 5 de Confiança com o clã local.`,
+        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.4)} de ouro e 5 Minérios, mas perde 5 de Confiança com o clã local.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { trust: -5, gold: Math.round(ctx.gold * 1.4), crystals: 5, fameBad: 1 })
       }
     },
@@ -154,7 +154,7 @@
       },
       choiceB: {
         label: 'Guardar todo o conteúdo da arca e as relíquias para a sua forja pessoal',
-        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.5)} de ouro e 8 Cristais do ranque atual.`,
+        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.5)} de ouro e 8 Minérios do ranque atual.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { gold: Math.round(ctx.gold * 1.5), crystals: 8, rep: ctx.rep })
       }
     },
@@ -163,7 +163,7 @@
       title: (ctx) => `Selo Instável nas Terras de ${ctx.region.name}`,
       desc: (ctx) => `Uma fissura secundária está vazando miasma e atraindo ${ctx.mob.name} para perto das fazendas e minas de ${ctx.region.name}. ${ctx.region.ruler} pede intervenção imediata.`,
       choiceA: {
-        label: 'Usar 5 Cristais seus para reforçar o selo da terra após limpar os monstros',
+        label: 'Usar 5 Minérios seus para reforçar o selo da terra após limpar os monstros',
         effectText: (ctx) => `Acelera a evolução autônoma de ${ctx.region.name} em +250 pontos de construção, concede +10 de Confiança e +${ctx.gold} de ouro.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { trust: 10, buildPts: 250, gold: ctx.gold, rep: ctx.rep + 20 })
       },
@@ -215,7 +215,7 @@
       },
       choiceB: {
         label: 'Mandar o batedor escoltar os cristais já minerados até a saída enquanto você limpa a Fenda sozinho',
-        effectText: (ctx) => `Garante +6 Cristais extras, +${Math.round(ctx.gold * 1.25)} de ouro e +${ctx.rep} de Reputação.`,
+        effectText: (ctx) => `Garante +6 Minérios extras, +${Math.round(ctx.gold * 1.25)} de ouro e +${ctx.rep} de Reputação.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { trust: 6, gold: Math.round(ctx.gold * 1.25), crystals: 6, rep: ctx.rep })
       }
     },
@@ -225,7 +225,7 @@
       title: (ctx) => `[DENTRO DA FENDA] O Pilar Partido no Coração da Fenda`,
       desc: (ctx) => `No corredor central desta Fenda você encontra um Altar da Primeira Era rachado pelo miasma e cercado por ${ctx.mob.name}. O pulso do altar está fortalecendo o Chefe da masmorra.`,
       choiceA: {
-        label: 'Purificar o Altar com 3 Cristais antes de entrar na sala do Chefe da Fenda',
+        label: 'Purificar o Altar com 3 Minérios antes de entrar na sala do Chefe da Fenda',
         effectText: (ctx) => `Enfraquece o Chefe da Fenda em 20%, soma +200 pontos de construção em ${ctx.region.name} e rende ${ctx.gold} de ouro.`,
         apply: (ctx) => {
           if (global.bossE && !global.bossE.dead) {
@@ -258,7 +258,7 @@
       },
       choiceB: {
         label: 'Segurar a linha de frente no aço enquanto eles recolhem os cristais raros da câmara lateral',
-        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.35)} de ouro e +7 Cristais da Fenda.`,
+        effectText: (ctx) => `Você recebe ${Math.round(ctx.gold * 1.35)} de ouro e +7 Minérios da Fenda.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { trust: 6, gold: Math.round(ctx.gold * 1.35), crystals: 7, rep: ctx.rep })
       }
     },
@@ -274,7 +274,7 @@
       },
       choiceB: {
         label: 'Deixar a última estaca pulsar para abater a Elite invocada dentro da Fenda e tomar o espólio',
-        effectText: (ctx) => `Rende ${Math.round(ctx.gold * 1.45)} de ouro, +3 Núcleos e +5 Cristais.`,
+        effectText: (ctx) => `Rende ${Math.round(ctx.gold * 1.45)} de ouro, +3 Núcleos e +5 Minérios.`,
         apply: (ctx) => applyWorldChange(ctx.region.id, { gold: Math.round(ctx.gold * 1.45), cores: 3, crystals: 5, rep: ctx.rep })
       }
     }
@@ -428,7 +428,7 @@
     "trigger": "Vencer o Sentinela da Torre e coletar a arma marcada",
     "description": "Kael analisa uma arma torta trazida da masmorra e prova que a marca escura foi gravada depois da forja. Você entra em uma Fenda ativa para confrontar um guardião preso por correntes de contenção.",
     "choicesText": "Quebrar primeiro os 5 pilares de corrente da sala para libertar o espírito do guardião antes do golpe final, ou abater o guardião diretamente enquanto as correntes o puxam.",
-    "worldConsequence": "Quebrar as correntes purifica a arma recuperada, permitindo que Kael lhe entregue uma peça Rara limpa de maldição; matar direto fecha a Fenda mais rápido e rende +3 Cristais puros."
+    "worldConsequence": "Quebrar as correntes purifica a arma recuperada, permitindo que Kael lhe entregue uma peça Rara limpa de maldição; matar direto fecha a Fenda mais rápido e rende +3 Minérios puros."
   },
   {
     "id": "primeva_q010",
@@ -461,7 +461,7 @@
     "category": "Campanha Principal (Ato VI)",
     "location": "Três Muralhas de Aster e Bairro Externo",
     "actors": "Brann, Mira, Dorian e Selene",
-    "trigger": "Retornar da Câmara de Seleção e minerar 20 cristais dos 6 veios",
+    "trigger": "Retornar da Câmara de Seleção e minerar 20 minérios dos 6 veios",
     "description": "Um ataque massivo atinge Aster de madrugada. Enquanto Brann segura a brecha na muralha e Mira retira os feridos, uma carroça de remédios fica presa num beco em chamas do lado oposto ao depósito de armas de Kael.",
     "choicesText": "Correr para salvar a carroça de remédios de Mira ou defender o depósito de lingotes da forja de Kael.",
     "worldConsequence": "Salvar os remédios evita a morte de 4 moradores feridos e garante 2 Poções Concentradas diárias com Mira; defender o depósito preserva o estoque de aço de Kael e reduz em 15% o custo de reforço de equipamento."
@@ -511,7 +511,7 @@
     "actors": "Emir Tariq Al-Zahar e Guardião Solar (Braço Direito do Arquiteto)",
     "trigger": "Estabilizar a Pedra-Âncora de Ymiria",
     "description": "Sob o sol escaldante de Zahar, você colhe polpa de cacto e nivela a trilha de dunas para o Carrinho de Carga até as Ruínas Soterradas do Primeiro Rei, onde o Braço Direito do Arquiteto tenta romper as correntes.",
-    "choicesText": "Selar o Braço Direito imediatamente com os cristais trazidos de Aster ou ler primeiro o 2º Relato Ancestral gravado sob o trono oxidado enquanto suporta as ondas de Escaravelhos.",
+    "choicesText": "Selar o Braço Direito imediatamente com os minérios trazidos de Aster ou ler primeiro o 2º Relato Ancestral gravado sob o trono oxidado enquanto suporta as ondas de Escaravelhos.",
     "worldConsequence": "Ler o 2º Relato durante o cerco revela a origem do Narrador como antigo escriba real do primeiro ciclo e desbloqueia a relíquia regional Moeda do Primeiro Rei (+8% de ouro)."
   },
   {
@@ -715,7 +715,7 @@
     "actors": "Capitão da Milícia de Ardent",
     "trigger": "Alcançar Rank C",
     "description": "Um portal não fechado a tempo transbordou e uma tropa invasora está desgastando o Domo de proteção de Ardent.",
-    "choicesText": "Doar 15 cristais do seu próprio bolso para recarregar o Domo antes que rompa, ou deixar o Domo cair para atrair o Chefe Invasor para a praça e abatê-lo no mano a mano.",
+    "choicesText": "Doar 15 minérios do seu próprio bolso para recarregar o Domo antes que rompa, ou deixar o Domo cair para atrair o Chefe Invasor para a praça e abatê-lo no mano a mano.",
     "worldConsequence": "Impedir a queda do Domo preserva todas as lojas abertas e concede +20 de Confiança imediata em Ardent."
   },
   {

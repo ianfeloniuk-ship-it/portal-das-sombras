@@ -20,7 +20,7 @@ const TITLES=[
  {id:'brk60',n:'Inabalável',d:'sobreviver 1 min num Transbordo da Fenda',c:()=>(profile.brkBest||0)>=60,m:'Esquiva recarrega 15% mais rápido',b:{}},
  {id:'brk600',n:'Imortal',d:'sobreviver 10 min num Transbordo da Fenda',c:()=>(profile.brkBest||0)>=600,m:'Regenera 1% da vida por segundo',b:{}},
  {id:'founder',n:'Fundador',d:'levar uma cidade ao nível 10',c:()=>Object.values(profile.cityLv||{}).some(v=>v>=10),m:'Lojas 10% mais baratas em todas as cidades',b:{}},
- {id:'miner',n:'Amigo dos Mineiros',d:'história O Mineiro Desaparecido',c:()=>false,m:'Veios de mana rendem +1 cristal por golpe',b:{}},
+ {id:'miner',n:'Amigo dos Mineiros',d:'história O Mineiro Desaparecido',c:()=>false,m:'Veios de mana rendem +1 minério por golpe',b:{}},
  {id:'lakeg',n:'Guardião do Lago',d:'história A Canção do Lago',c:()=>false,m:'Poções também enchem 30% do escudo',b:{}},
  {id:'towerc',n:'Eleito da Torre',d:'história O Chamado da Torre',c:()=>false,m:'+20% de dano dentro da torre',b:{}},
  {id:'protector',n:'Protetor da Cidade',d:'história A Cidade que Cresce',c:()=>false,m:'Renda das cidades +50%',b:{}},
@@ -119,7 +119,7 @@ function cityTab(){const c=nearestCity(player.x,player.z).c,l=cityLv(),nd=cityNe
   }
   h+='<div class="sysline">Cidade de <b>'+c.name+'</b> · nível <b>'+l+'/10</b>. Cada nível muda a cidade de verdade: do 6 em diante ela cresce para fora da muralha.</div>'+CITY_U.map(([n,d])=>row('Nível '+n,d,l>=+n?'<b style="color:#6fe39a">Liberado</b>':'')).join('')
    +(l>=6?row('Renda da cidade',fmt(inc)+' ouro disponível hoje · limite total de 800 por dia',btn(got?'Coletado hoje':inc?'Coletar':'Limite diário atingido','cityinc',0,!got&&inc>0,'hot')):'')
-   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' cristais de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' cristais',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''));
+   +(l<10?row('Doar para o nível '+(l+1),nd.cry+' minérios de qualquer rank'+(nd.gold?' + '+fmt(nd.gold)+' ouro':'')+' · você tem '+tot+' minérios',btn('Doar','citydon',0,tot>=nd.cry&&run.gold>=nd.gold,'hot')):row('Capital no nível máximo','',''));
   return h;
 }
 

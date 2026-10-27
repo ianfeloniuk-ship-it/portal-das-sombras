@@ -1,5 +1,5 @@
 /* v551 (Ian, 22/10/2026): Forja da Ordem + Laboratório de Alquimia.
-   - FORJA · ORDEM DOS ARTÍFICES: reúne criar (núcleos+cristais por rank da Fenda, regra 'forge' já existente) e refinar
+   - FORJA · ORDEM DOS ARTÍFICES: reúne criar (núcleos+minérios por rank da Fenda, regra 'forge' já existente) e refinar
      (+8% por nível, regra de aprimoramento já existente) — agora também para peças que estão na bolsa.
    - ALQUIMIA · LABORATÓRIO: misture 2 a 4 ingredientes (plantas, sais minerais, essências de cristal da Fenda).
      O resultado vem das propriedades dos ingredientes; cada receita nova fica no Diário e pode ser repetida.
@@ -169,7 +169,7 @@
     const it = findRef(ref); if (!it) return false;
     const q = equipmentUpgradeCost(it);
     if (run.gold < q.gold) { toast('Ouro insuficiente.'); return false; }
-    if (cryUp(it.tier) < q.cry) { toast('Faltam cristais ' + rk(it.tier) + ' ou superiores.'); return false; }
+    if (cryUp(it.tier) < q.cry) { toast('Faltam minérios ' + rk(it.tier) + ' ou superiores.'); return false; }
     if (!spendService265(q.gold)) return false;
     spendCry(it.tier, q.cry);
     const ok = finishEquipmentUpgrade(it);
@@ -185,8 +185,8 @@
       h += '<div class="tabs">' + EQUIP_SLOTS.map(k => btn(EQUIP_LABEL[k], 'fa551slot', k, true, fz.slot === k ? 'on' : '')).join('') + '</div>';
       const maxT = (typeof secretRankKnown292 === 'function' && secretRankKnown292()) ? 9 : 8;
       for (let t = 0; t <= maxT; t++) {
-        const gc = forgePrice265(fz.slot, t), nc = run.res.core[t], cc = run.res.cry[t], ok = nc >= 5 && cc >= 5 && run.gold >= gc && run.items.length < bagCapacity353();
-        h += row('Forjar ' + EQUIP_LABEL[fz.slot].toLowerCase() + ' <span class="rl" style="color:' + RANKS[t].c + '">' + rk(t) + '</span>', '5 núcleos + 5 cristais ' + rk(t) + ' + ' + fmt(gc) + ' ouro · você tem ' + nc + '/' + cc + ' · ' + GR[t].th.n, btn('Forjar', 'forge', fz.slot + t, ok));
+        const gc = forgePrice265(fz.slot, t), cc = run.res.cry[t], ok = cc >= 10 && run.gold >= gc && run.items.length < bagCapacity353();
+        h += row('Forjar ' + EQUIP_LABEL[fz.slot].toLowerCase() + ' <span class="rl" style="color:' + RANKS[t].c + '">' + rk(t) + '</span>', '10 minérios ' + rk(t) + ' + ' + fmt(gc) + ' ouro · você tem ' + cc + ' · ' + GR[t].th.n, btn('Forjar', 'forge', fz.slot + t, ok));
       }
     } else {
       const g = gearList();
@@ -194,7 +194,7 @@
       g.sort((a, b) => (b.eq - a.eq) || (b.it.tier - a.it.tier)).slice(0, 40).forEach(({ it, ref, eq }) => {
         const up = it.up || 0, q = equipmentUpgradeCost(it), risk = up >= 10 ? ' · falha ' + Math.round(Math.min(.6, .2 + (up - 10) * .04) * 100) + '% (materiais perdidos, peça preservada)' : ' · sucesso garantido';
         const val = it.slot === 'w' ? 'ataque ' + itemAtk(it) : 'escudo ' + itemSh(it);
-        h += row('<b style="color:' + RAR[it.rar].c + '">' + esc(it.name) + '</b>' + (eq ? ' (equipada)' : ''), esc(val) + ' → +8% · ' + fmt(q.gold) + ' ouro · ' + q.cry + ' cristais ' + rk(it.tier) + '+ (você tem ' + cryUp(it.tier) + ')' + risk, btn('Refinar', 'fa551ref', ref, run.gold >= q.gold && cryUp(it.tier) >= q.cry));
+        h += row('<b style="color:' + RAR[it.rar].c + '">' + esc(it.name) + '</b>' + (eq ? ' (equipada)' : ''), esc(val) + ' → +8% · ' + fmt(q.gold) + ' ouro · ' + q.cry + ' minérios ' + rk(it.tier) + '+ (você tem ' + cryUp(it.tier) + ')' + risk, btn('Refinar', 'fa551ref', ref, run.gold >= q.gold && cryUp(it.tier) >= q.cry));
       });
     }
     h += btn('Sair', 'fa551close', 0);
@@ -267,7 +267,7 @@
   openModal = function (title, html, route) {
     try {
       const wep = SHOPS.find(s => s.id === 'wep'), arm = SHOPS.find(s => s.id === 'arm'), pot = SHOPS.find(s => s.id === 'pot');
-      if (title === wep.n || title === arm.n) html += row('Forja da Ordem', 'Criar e refinar equipamento com núcleos e cristais da Fenda.', btn('Abrir', 'fa551open', 'forja'));
+      if (title === wep.n || title === arm.n) html += row('Forja da Ordem', 'Criar e refinar equipamento com núcleos e minérios da Fenda.', btn('Abrir', 'fa551open', 'forja'));
       else if (title === pot.n) html += row('Laboratório de Alquimia', 'Misture plantas, sais e essências. Descubra receitas e elixires eternos.', btn('Abrir', 'fa551open', 'lab'));
     } catch (_) {}
     return om0.call(this, title, html, route);

@@ -73,7 +73,7 @@ window.Econ154=(()=>{
  function domeRepair(frac){const r=cityResourceRank(),f=Math.max(0,Math.min(1,frac)),t=cityTier();return {gold:f>0?localPrice(Math.max(1,Math.round(.4*6*cityH*(.75+.1*t)*f/100)*100)):0,cry:Math.ceil(15*f),core:Math.ceil(5*f),r}}
  function canPay(k){return run.gold>=k.gold&&run.res.cry[k.r]>=k.cry&&run.res.core[k.r]>=k.core}
  function pay(k){if(!canPay(k))return false;run.gold-=k.gold;run.res.cry[k.r]-=k.cry;run.res.core[k.r]-=k.core;notePurchase(k.gold);return true}
- function costText(k){return fmt(k.gold)+' ouro'+(k.cry?' + '+k.cry+' cristais '+GR[k.r].id:'')+(k.core?' + '+k.core+' núcleos '+GR[k.r].id:'')}
+ function costText(k){return fmt(k.gold)+' ouro'+(k.cry?' + '+k.cry+' minérios '+GR[k.r].id:'')+(k.core?' + '+k.core+' núcleos '+GR[k.r].id:'')}
  // ---------- panel shown at Dorian's market ----------
  function panel(){const k=cur();if(!k)return '';const s=k.s,trend=s.hist.length>1?s.ipc-s.hist[s.hist.length-2]:0;
   return '<div class="sec">ECONOMIA DE '+k.c.name.toUpperCase()+'</div>'+

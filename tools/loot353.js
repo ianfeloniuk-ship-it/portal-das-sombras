@@ -41,7 +41,7 @@ window.Loot353=(()=>{
  function take(id,entryId){const r=records().find(r=>r.id===id);if(!r||!nearby(r))return false;const i=r.entries.findIndex(x=>x.id===entryId);if(i<0)return false;const x=r.entries[i];
   if(x.type==='equipment'){if(run.items.length>=bagCapacity353())return false;run.items.push(x.item)}
   else if(x.type==='gold')run.gold+=x.n;
-  else if(x.type==='core')run.res.core[x.rank]+=x.n;
+  else if(x.type==='core'){run.res.core[x.rank]+=x.n;window.Mana642&&Mana642.got(x)}
   else if(x.type==='potion')run.pots+=x.n;
   else if(x.type==='book')run.spts=(run.spts||0)+x.n;
   else if(x.type==='material'){run.loot=run.loot||{};const old=run.loot[x.name]||(run.loot[x.name]={n:0,v:x.value,b:x.b});old.n+=x.n;old.v=Math.max(old.v,x.value);old.b=!!(old.b||x.b)}

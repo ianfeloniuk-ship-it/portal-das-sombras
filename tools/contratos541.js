@@ -117,7 +117,7 @@
     const p = [];
     if (d.gold) p.push(`<b>${d.gold} de ouro</b>`);
     if (d.rep) p.push(`<b>+${d.rep} de reputação</b> da Ordem`);
-    if (d.crystals) p.push(`<b>${d.crystals} cristais</b> do seu rank`);
+    if (d.crystals) p.push(`<b>${d.crystals} minérios</b> do seu rank`);
     if (d.cores) p.push(`<b>${d.cores} núcleos</b> do seu rank`);
     if (d.trust) p.push(`${d.trust > 0 ? '+' : ''}${d.trust} de confiança em ${city.name}`);
     if (d.scarcity < 0) p.push(`até ${-d.scarcity} pontos a menos no acréscimo de preço de ${city.name}`);
