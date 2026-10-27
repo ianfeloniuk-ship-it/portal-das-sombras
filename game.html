@@ -9559,7 +9559,7 @@ const TripoEnvironment153 = (() => {
     return group;
   };
   const NAT422=window.NAT422=new Set(['oak','willow','fir','abeto','betula','brasa','boulder','stones','mossrock','cacto1','cacto2']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
-  setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}if(!inV){m.visible=lt.visible=false;continue}const P=typeof player!=='undefined'&&player?player:camera.position,nat=NAT422.has(m.userData.tripo153);split423(m,lt,P,nat?10:40,nat?90:1e9,nat?(m.userData.thin423??1):1)}},100);
+  setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}if(!inV){m.visible=lt.visible=false;continue}const P=typeof player!=='undefined'&&player?player:camera.position,nat=NAT422.has(m.userData.tripo153);split423(m,lt,P,nat?10:40,nat?105:1e9/* v637: 90→105 m; além disso entram as árvores distantes de tools/horizonte637.js */,nat?(m.userData.thin423??1):1)}},100);
   /* v424 (Ian: jogo liso no navegador): antes o pedaço inteiro virava completo quando o jogador chegava perto do grupo
      (até 2,7 mi de triângulos só de carvalho, 12 mil cada). Agora é por árvore/construção: as mais perto ficam completas,
      o resto na versão leve (árvore completa só até 10 m), e árvore/pedra além de 90 m some. A ordem é refeita só quando o jogador anda 1,5 m. */
@@ -9721,7 +9721,7 @@ requestAnimationFrame(frame);
 <script src="tools/mapa501.js?v=544"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
-<script src="tools/capitais504.js?v=625"></script>
+<script src="tools/capitais504.js?v=637"></script>
 <script src="tools/capitais597.js?v=625"></script>
 <script src="tools/desfiladeiro510.js?v=528"></script>
 <script src="tools/marcos526.js?v=537r1"></script>
@@ -9752,3 +9752,4 @@ requestAnimationFrame(frame);
 <script src="tools/enchente630.js?v=634"></script>
 <script src="tools/teste-agua634.js?v=635"></script>
 <script src="tools/carga630.js?v=631"></script>
+<script src="tools/horizonte637.js?v=637"></script>
