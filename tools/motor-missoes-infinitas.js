@@ -32,8 +32,8 @@
   const REGIONS = [
     { id: 'aster', name: 'Aster', ruler: 'Comandante Brann & Chanceler Lyra', biome: 'campos', x: 0, z: 0 },
     { id: 'ymiria', name: 'Ymiria', ruler: 'Arquiduquesa Astrid Frostgard', biome: 'neve', x: 0, z: -3400 },
-    { id: 'zahar', name: 'Zahar', ruler: 'Emir Tariq Al-Zahar', biome: 'deserto', x: 3400, z: 0 },
-    { id: 'thalor', name: 'Thalor', ruler: 'Almirante Varis Onda-Viva', biome: 'costa', x: -3850, z: 0 },
+    { id: 'zahar', name: 'Zahar', ruler: 'Emir Tariq ibn Nadir', biome: 'deserto', x: 3400, z: 0 },
+    { id: 'thalor', name: 'Thalor', ruler: 'Almirante Varis Moura', biome: 'costa', x: -3850, z: 0 },
     { id: 'urdan', name: 'Urdan', ruler: 'Mestres da Forja Basáltica', biome: 'vulcao', x: 0, z: 3400 },
     { id: 'verden', name: 'Verden', ruler: 'Arquidruida Eldrin', biome: 'pantano', x: 2300, z: 2300 }
   ];
@@ -53,10 +53,10 @@
   ];
 
   const MARGIN_NPCS = [
-    'Nara, a Barqueira', 'Oren, o Carpinteiro Naval', 'Iria, a Cartógrafa das Marés',
-    'Bento, o Guardião do Farol', 'Sura, a Mergulhadora', 'Teren, o Cocheiro da Ordem',
-    'Maela, a Tratadora', 'Rul, o Cesteiro', 'Edda, a Salineira',
-    'Vico, o Mensageiro das Pontes', 'Ansa, a Tecelã de Velas', 'Garo, o Vigia da Enseada'
+    'A barqueira Nara', 'O carpinteiro Oren', 'A cartógrafa Iria',
+    'O faroleiro Bento', 'A mergulhadora Sura', 'O cocheiro Teren',
+    'A tratadora Maela', 'O cesteiro Rul', 'A salineira Edda',
+    'O mensageiro Vico', 'A tecelã Ansa', 'O vigia Garo'
   ];
 
   const CREATURES_BY_BIOME = {
@@ -508,7 +508,7 @@
     "title": "A Segunda Âncora: As Ruínas do Primeiro Rei em Zahar",
     "category": "Campanha Principal (Ato IX - Parte 2)",
     "location": "Garganta das Cinzas e Deserto de Zahar (+3400, 0)",
-    "actors": "Emir Tariq Al-Zahar e Guardião Solar (Braço Direito do Arquiteto)",
+    "actors": "Emir Tariq ibn Nadir e Guardião Solar (Braço Direito do Arquiteto)",
     "trigger": "Estabilizar a Pedra-Âncora de Ymiria",
     "description": "Sob o sol escaldante de Zahar, você colhe polpa de cacto e nivela a trilha de dunas para o Carrinho de Carga até as Ruínas Soterradas do Primeiro Rei, onde o Braço Direito do Arquiteto tenta romper as correntes.",
     "choicesText": "Selar o Braço Direito imediatamente com os minérios trazidos de Aster ou ler primeiro o 2º Relato Ancestral gravado sob o trono oxidado enquanto suporta as ondas de Escaravelhos.",
@@ -664,7 +664,7 @@
     "title": "Sangue na Neve do Desfiladeiro",
     "category": "Facção: Vanguarda da Muralha",
     "location": "Desfiladeiro das Lágrimas (Rota Norte)",
-    "actors": "Caçador Torben Machado-de-Gelo",
+    "actors": "Caçador Torben Halvorsen",
     "trigger": "Alcançar Rank D na Vanguarda",
     "description": "Uma patrulha de Ymiria desapareceu nas gargantas sinuosas do norte. Seguindo o rastro de sangue azul na neve, você encontra Torben cercado por Yetis Corrompidos (#119).",
     "choicesText": "Lutar ombro a ombro com Torben na garganta estreita ou subir a crista rochosa escalando para derrubar estalactites sobre as feras.",
@@ -808,7 +808,7 @@
     "title": "A Serpe das Dunas e o Dragão-Musgo",
     "category": "Facção: Vanguarda da Muralha",
     "location": "Deserto de Zahar e Floresta de Verden",
-    "actors": "Farid Falcão-das-Dunas e Kaelen Garra-Verde",
+    "actors": "Farid ibn Rashid e Cian Ardwyn",
     "trigger": "Concluir #040",
     "description": "Dois dragões regionais despertaram no mesmo ciclo semanal: a Serpe de Areia em Zahar e o Dragão-Musgo nas copas de Verden.",
     "choicesText": "Caçar primeiro a Serpe de Zahar para salvar as caravanas de especiarias ou o Dragão-Musgo de Verden para proteger os coletores de ervas.",
@@ -2044,7 +2044,7 @@
     "title": "As Águas Contadas de Zahar",
     "category": "Política & Capitais",
     "location": "Capital de Zahar (+3400, 0)",
-    "actors": "Emir Tariq Al-Zahar vs. Sacerdotes do Sol Partido",
+    "actors": "Emir Tariq ibn Nadir vs. Sacerdotes do Sol Partido",
     "trigger": "Visitar o Conselho Regional de Zahar",
     "description": "Os Sacerdotes do Sol Partido pregam que se a 2ª Pedra-Âncora for desligada, os rios antigos do deserto voltarão a correr.",
     "choicesText": "Ajudar o Emir Tariq a construir o Grande Aqueduto Subterrâneo ligando a Abóbada ao oásis de Zahar, ou apoiar o ritual dos sacerdotes.",
@@ -2056,11 +2056,11 @@
     "title": "O Julgamento das Areias Vermelhas",
     "category": "Política & Capitais",
     "location": "Arena de Arenito de Zahar",
-    "actors": "Emir Tariq e Campeão Farid Falcão-das-Dunas",
+    "actors": "Emir Tariq e Campeão Farid ibn Rashid",
     "trigger": "Concluir #144",
     "description": "Dois chefes de caravana acusam um ao outro de vender mapas das defesas de Zahar para Logos. Pela lei do deserto, a verdade é decidida na arena ou pela prova documental.",
     "choicesText": "Vasculhar as tendas dos dois mercadores durante a tempestade de areia para achar a carta selada de Logos, ou lutar como campeão na arena.",
-    "worldConsequence": "Achar a carta prova a culpa do verdadeiro traidor sem derramar sangue inocente e faz Farid Falcão-das-Dunas respeitar sua sabedoria."
+    "worldConsequence": "Achar a carta prova a culpa do verdadeiro traidor sem derramar sangue inocente e faz Farid ibn Rashid respeitar sua sabedoria."
   },
   {
     "id": "primeva_q146",
@@ -2080,7 +2080,7 @@
     "title": "O Motim das Correntes em Thalor",
     "category": "Política & Capitais",
     "location": "Cais e Farol de Thalor (-3850, 0)",
-    "actors": "Almirante Varis Onda-Viva vs. Capitães Corsários",
+    "actors": "Almirante Varis Moura vs. Capitães Corsários",
     "trigger": "Visitar o Conselho Regional de Thalor",
     "description": "Os Capitães Corsários querem cortar duas das correntes colossais que prendem a rocha de Thalor à 3ª Pedra-Âncora no fundo do mar, alegando que as correntes atraem os Senhores das Águas.",
     "choicesText": "Defender as correntes ao lado do Almirante Varis e da frota da Ordem, ou negociar uma rota segura desviando os monstros abissais.",
@@ -2152,10 +2152,10 @@
     "title": "A Sombra sob a Árvore-Mãe",
     "category": "Política & Capitais",
     "location": "Praça Central de Verden",
-    "actors": "Arquidruida Eldrin e Kaelen Garra-Verde",
+    "actors": "Arquidruida Eldrin e Cian Ardwyn",
     "trigger": "Concluir #152",
     "description": "Esporos negros plantados por agentes de Logos estão apodrecendo a raiz norte da Árvore-Mãe de Verden.",
-    "choicesText": "Descer pelo túnel das raízes com Kaelen Garra-Verde e purificar os 3 focos de corrupção usando água sagrada dos Vigias da Lagoa.",
+    "choicesText": "Descer pelo túnel das raízes com Cian Ardwyn e purificar os 3 focos de corrupção usando água sagrada dos Vigias da Lagoa.",
     "worldConsequence": "Desbloqueia o Santuário Ecológico de Verden (+10% potência em todas as ervas colhidas no sudeste)."
   },
   {
@@ -2224,7 +2224,7 @@
     "title": "O Desafio dos Cinco Campeões",
     "category": "Política & Capitais",
     "location": "Arena de Combate de Aster",
-    "actors": "Valen Radiante, Torben, Farid, Kaelen e Guarda de Thalor",
+    "actors": "Valen Corvino, Torben, Farid, Kaelen e Guarda de Thalor",
     "trigger": "Concluir #158",
     "description": "Os cinco maiores caçadores nativos do continente (`worldsim479.js`) convidam você para um torneio amistoso de cinco rodadas na praça dourada de Aster.",
     "choicesText": "Enfrentar os 5 campeões seguidos sem sair da arena.",

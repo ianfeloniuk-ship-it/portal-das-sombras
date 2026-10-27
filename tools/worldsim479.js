@@ -28,9 +28,9 @@
       ],
       goods: ['Aço da Ordem', 'Equipamentos Refinados', 'Grãos de Aster'],
       hunters: [
-        { name: 'Aldric das Brumas', rank: 'Veterano', victories: 28 },
-        { name: 'Edran Protetor da Carroça', rank: 'Guarda Veterano', victories: 19 },
-        { name: 'Kallan Lâmina-do-Aço', rank: 'Caçador Batedor', victories: 14 }
+        { name: 'Aldric Fenwick', rank: 'Veterano', victories: 28 },
+        { name: 'Edran Holt', rank: 'Guarda Veterano', victories: 19 },
+        { name: 'Kallan Brandt', rank: 'Caçador Batedor', victories: 14 }
       ]
     },
     solaria: {
@@ -51,8 +51,8 @@
       ],
       goods: ['Ouro Solar', 'Lentes de Quartzo', 'Seda Dourada'],
       hunters: [
-        { name: 'Valen Radiante', rank: 'Cavaleiro Solar', victories: 32 },
-        { name: 'Cynthia Alvorada', rank: 'Maga Rúnica', victories: 21 }
+        { name: 'Valen Corvino', rank: 'Cavaleiro Solar', victories: 32 },
+        { name: 'Cynthia Valerio', rank: 'Maga Rúnica', victories: 21 }
       ]
     },
     ymiria: {
@@ -73,8 +73,8 @@
       ],
       goods: ['Ferro Negro', 'Peles de Urso Polar', 'Carvão Mineral'],
       hunters: [
-        { name: 'Torben Machado-de-Gelo', rank: 'Patrulheiro Glacial', victories: 25 },
-        { name: 'Eira Caçadora dos Montes', rank: 'Batedora do Norte', victories: 18 }
+        { name: 'Torben Halvorsen', rank: 'Patrulheiro Glacial', victories: 25 },
+        { name: 'Eira Solberg', rank: 'Batedora do Norte', victories: 18 }
       ]
     },
     zahar: {
@@ -82,7 +82,7 @@
       name: 'Zahar',
       title: 'Pérola das Dunas Vermelhas',
       leader: {
-        name: 'Emir Tariq Al-Zahar',
+        name: 'Emir Tariq ibn Nadir',
         role: 'Governador dos Oásis',
         title: 'Guardião das Areias',
         desc: 'Foco em poços artesianos subterrâneos, colheita de incensos e rotas de camelos.',
@@ -95,8 +95,8 @@
       ],
       goods: ['Especiarias Vermelhas', 'Cristais do Sol', 'Incensos Sagrados'],
       hunters: [
-        { name: 'Farid Falcão-das-Dunas', rank: 'Atirador do Deserto', victories: 27 },
-        { name: 'Zahra Passo-Silencioso', rank: 'Espadachim Miragem', victories: 17 }
+        { name: 'Farid ibn Rashid', rank: 'Atirador do Deserto', victories: 27 },
+        { name: 'Zahra bint Karim', rank: 'Espadachim Miragem', victories: 17 }
       ]
     },
     thalor: {
@@ -104,7 +104,7 @@
       name: 'Thalor',
       title: 'Porto dos Mares Bravios',
       leader: {
-        name: 'Almirante Varis Onda-Viva',
+        name: 'Almirante Varis Moura',
         role: 'Governador dos Estreitos',
         title: 'Lorde dos Portos',
         desc: 'Foco na construção naval, pesca oceânica e defesa contra feras abissais do mar.',
@@ -117,8 +117,8 @@
       ],
       goods: ['Peixe Abissal Fresco', 'Pérolas Negras', 'Madeira de Casco'],
       hunters: [
-        { name: 'Kaelen Arpoador', rank: 'Guardião dos Mares', victories: 22 },
-        { name: 'Marina Olho-da-Tormenta', rank: 'Navegadora Arcana', victories: 16 }
+        { name: 'Martim Duarte', rank: 'Guardião dos Mares', victories: 22 },
+        { name: 'Marina Salgado', rank: 'Navegadora Arcana', victories: 16 }
       ]
     },
     urdan_verden: {
@@ -139,8 +139,8 @@
       ],
       goods: ['Seiva Curativa', 'Ervas Medicinais Raras', 'Madeira Ancestral'],
       hunters: [
-        { name: 'Kaelen Garra-Verde', rank: 'Druida Guardião', victories: 29 },
-        { name: 'Sylas Sombra-da-Copa', rank: 'Arqueiro da Floresta', victories: 20 }
+        { name: 'Cian Ardwyn', rank: 'Druida Guardião', victories: 29 },
+        { name: 'Sylas Fenwyr', rank: 'Arqueiro da Floresta', victories: 20 }
       ]
     }
   };

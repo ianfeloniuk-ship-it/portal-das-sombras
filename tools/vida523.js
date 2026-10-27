@@ -44,16 +44,24 @@
     return n;
   }
   function spawnMorador(c) {
-    const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = MN.filter(x => !used.has(x)), nm = free[Math.floor(Math.random() * free.length)] || MN[0];
-    const seed = Math.floor(Math.random() * 360), job = JOBS[seed % JOBS.length];
-    const sex = (global.Povo482 && Povo482.sexOfName && Povo482.sexOfName(nm)) || (/a$/i.test(nm) ? 'f' : 'm');
+    /* v655: moradores fixos da cidade (Povo655): sempre as mesmas pessoas; morto não volta */
+    const R655 = global.Povo655 ? Povo655.proximo(c) : null;
+    if (global.Povo655 && !R655) return false;
+    const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = MN.filter(x => !used.has(x)), nm = R655 ? R655.nome : (free[Math.floor(Math.random() * free.length)] || MN[0]);
+    const seed = R655 ? R655.seed : Math.floor(Math.random() * 360), job = R655 ? R655.job : JOBS[seed % JOBS.length];
+    const sex = (R655 && R655.sexo) || (global.Povo482 && Povo482.sexOfName && Povo482.sexOfName(nm)) || (/a$/i.test(nm) ? 'f' : 'm');
     const pick = a => a[Math.floor(Math.random() * a.length)];
-    mk(c, { pos: houseSpot(c, seed), sex, look: { body: pick([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a]), hair: pick([0x222222, 0xc85a1e, 0x6b4a2a, 0xd8b060]), wep: 'none' },
-      n: { name: nm, role523: 'morador', job523: job, seed523: seed, beber523: seed % 3 === 0 },
+    const n655 = mk(c, { pos: houseSpot(c, seed), sex, look: { body: pick([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a]), hair: pick([0x222222, 0xc85a1e, 0x6b4a2a, 0xd8b060]), wep: 'none' },
+      n: { name: nm, role523: 'morador', job523: job, seed523: seed, beber523: R655 ? R655.beber : seed % 3 === 0, res655: R655 && R655.id },
       reg482: { role: 'civil', sex, seed: seed + 101, region: global.Povo482 ? Povo482.regionOf(c) : 'aster', priority: true } });
+    /* v655: a vida continuou sem você: a pessoa aparece onde a rotina da hora manda (trabalho, almoço, taverna, casa) */
+    try { if (n655 && R655) { routine(n655, phase(), night()); if (n655.kind !== 'deco') { const j = (Math.random() - .5) * 3; n655.x = n655.tx + j; n655.z = n655.tz - j; n655.m.root.position.set(n655.x, 0, n655.z); } } } catch (_) {}
+    return true;
   }
   function spawnGuarda(c) {
-    const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = GN.filter(x => !used.has(x)), nm = free[0] || GN[0], i = Math.floor(Math.random() * 8);
+    const used = new Set(npcs.filter(x => x.vida523 && !x.gone).map(x => x.name)), free = GN.filter(x => !used.has(x)), i = Math.floor(Math.random() * 8);
+    /* v655: nome da região (o primeiro guarda de cada cidade é o capitão) */
+    const nm = global.Nomes655 ? Nomes655.nome(c, mine(c).some(x => x.role523 === 'guarda') ? 'guarda' : 'capitao', { sexo: 'm' }) : (free[0] || GN[0]);
     mk(c, { pos: patrolPt(c, i), sex: 'm', look: { body: 0x2a3f6a, hair: 0x333333, wep: 'sword', wcol: 0xcfd8e3 },
       n: { name: nm, role523: 'guarda', job523: 'Guarda da cidade', wp523: i, act523: 'patrulha' },
       reg482: { role: 'hunter', family: 'soldado', cls: 0, rank: 3, sex: 'm', weaponKind: 'sword', seed: (c.id ? (c.cx * 17 + c.cz * 31) : 1) + i * 37, region: global.Povo482 ? Povo482.regionOf(c) : 'aster', priority: true } });
@@ -148,6 +156,7 @@
       for (const n of npcs.filter(x => x.vida523 && !x.gone)) {
         if (!n.home || dist(player, n.home) > 220) { drop(n); continue; }
         if (n.role523 === 'ladrao') { thiefTick(n); continue; }
+        if (n.chat655 && n.chat655.until > now) continue; /* v655: conversando com outro morador (tools/povo655.js) */
         routine(n, p, nn);
         if (n.role523 === 'guarda' && typeof profile !== 'undefined' && profile && profile.multa523 && dist(n, player) < 6 && now - lastFine > 30000 && typeof speech153 === 'function') {
           lastFine = now; speech153(n, 'Ei, você! Pague a multa por desordem!', 'F para falar');
@@ -157,7 +166,7 @@
         const c = ch.city; if (!c || (typeof cityFallen === 'function' && cityFallen(c)) || dist(player, c) > (big(c) ? 300 : 120)) continue;
         const list = mine(c), mors = list.filter(x => x.role523 !== 'guarda' && x.role523 !== 'ladrao').length, gs = list.filter(x => x.role523 === 'guarda').length;
         if (gs < (big(c) ? 8 : 2)) { spawnGuarda(c); break; }
-        if (mors < (big(c) ? 14 : 3)) { spawnMorador(c); break; }
+        if (mors < (big(c) ? 14 : 3) && spawnMorador(c) !== false) break;
         if ((nn || p > .55) && dist(player, c) < 45 && now - lastThief > 90000 && Math.random() < .25) { lastThief = now; c.ladrao523 = 1; thief(c); }
         else if (!list.some(x => x.role523 === 'ladrao')) c.ladrao523 = 0;
       }

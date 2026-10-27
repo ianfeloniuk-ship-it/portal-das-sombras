@@ -121,7 +121,7 @@ function animate(m,st,t){const P=global.player||(typeof player!=='undefined'?pla
  if(m.last482){const v=Math.hypot(p.x-m.last482.x,p.z-m.last482.z)/Math.max(step,1e-3);m.v482+=(Math.min(v,9)-m.v482)*Math.min(1,step*6)}else{m.last482=new T.Vector3();m.v482=0}
  m.last482.copy(p);
  const s={...st};if(s.move>.08){s.speed=Math.max(.6,m.v482/(m.height482||1));s.sprint=m.v482>4.2}if(!s.wep)s.wep=m.wep482;
- if(m.civil482&&civilBank()){s.bank486='povo';const c=civilClip(m,s,step);if(c){s.clip486=c.n;s.rate486=c.r;if(c.move){s.move=1;s.speed=Math.max(s.speed||0,5)}}}
+ if(m.civil482&&!(s.dead>0)&&civilBank()){s.bank486='povo';const c=civilClip(m,s,step);if(c){s.clip486=c.n;s.rate486=c.r;if(c.move){s.move=1;s.speed=Math.max(s.speed||0,5)}}}
  if(!m.phased482&&Warrior127.anim155&&dt>0){m.phased482=true;Warrior127.animate(m,{move:0,atk:0,dead:0},t,m.phase482)}
  Warrior127.animate(m,s,t,step*m.spd482)}
 if(typeof animChibi==='function'){const base=animChibi;animChibi=function(m,st,t){if(m&&m.povo482&&global.Warrior127)return animate(m,st,t);return base.apply(this,arguments)}}
@@ -176,7 +176,7 @@ setInterval(()=>{try{tick()}catch(e){console.warn('Povo482',e)}},600);
 /* o corpo combina com o nome (CNAMES): Pietra é mulher, Otto é homem; Duda pode ser os dois */
 const SEXN={'Brígida':'f',Elsbeth:'f',Flora:'f',Helena:'f',Matilde:'f',Maud:'f',Nesta:'f',Petronela:'f',Aldo:'m',Cedric:'m',Godwin:'m',Gerold:'m',Ivo:'m',Leofric:'m',Otto:'m',Roderic:'m',Mirela:'f',Ysolde:'f',Brunhild:'f',Elowen:'f',Isolde:'f',Rowena:'f',Aldren:'m',Godric:'m',Edric:'m',Tormund:'m',Wulfric:'m',
  /* NAMES dos caçadores */Mirae:'f',Selin:'f',Yuna:'f',Hyejin:'f',Aiko:'f',Dara:'f',Nayra:'f',Talia:'f',Vega:'f',Voss:'m',Ryuga:'m',Taeho:'m',Kargan:'m',Draven:'m',Oren:'m',Bastian:'m',Ekko:'m',Kenji:'m',Lior:'m',Rurik:'m',Soren:'m'};
-function sexOfName(nm){nm=String(nm||'').split(/[ ·]/)[0];return SEXN[nm]||null}
+function sexOfName(nm){if(global.Nomes655){const s=Nomes655.sexo(nm);if(s)return s}nm=String(nm||'').split(/[ ·]/)[0];return SEXN[nm]||null}
 if(typeof spawnCitizen==='function'){const base=spawnCitizen;spawnCitizen=function(c){const n=base.apply(this,arguments);try{if(n&&!n.critter)register(n,{role:'civil',sex:sexOfName(n.name),seed:hash((c&&c.id)+'|'+n.name+'|'+Math.round(n.x)+'|'+Math.round(n.z)),region:regionOf(c)})}catch(_){}return n}}
 /* Caçadores (spawnHunter e aliados): base role=hunter da família da classe, arma do jogo pelo Rank. Sem base da família → comportamento antigo. */
 if(global.Hunters138){const base=Hunters138.attach;Hunters138.attach=function(actor,cls,rank,isCurrent){const fam=familyOf(cls);
@@ -185,12 +185,12 @@ if(global.Hunters138){const base=Hunters138.attach;Hunters138.attach=function(ac
 
 /* ---------- caçadores nomeados da v479 (tools/worldsim479.js) ---------- */
 const NAMED={
- 'Aldric das Brumas':{cls:0,sex:'m'},'Kallan Lâmina-do-Aço':{cls:1,sex:'m'},
- 'Valen Radiante':{cls:5,sex:'m'},'Cynthia Alvorada':{cls:8,sex:'f'},
- 'Torben Machado-de-Gelo':{cls:0,sex:'m'},'Eira Caçadora dos Montes':{cls:4,sex:'f'},
- 'Farid Falcão-das-Dunas':{cls:4,sex:'m'},'Zahra Passo-Silencioso':{cls:22,sex:'f'},
- 'Kaelen Arpoador':{cls:23,sex:'m'},'Marina Olho-da-Tormenta':{cls:11,sex:'f'},
- 'Kaelen Garra-Verde':{cls:10,sex:'m'},'Sylas Sombra-da-Copa':{cls:4,sex:'m',race:'elf'}
+ 'Aldric Fenwick':{cls:0,sex:'m'},'Kallan Brandt':{cls:1,sex:'m'},
+ 'Valen Corvino':{cls:5,sex:'m'},'Cynthia Valerio':{cls:8,sex:'f'},
+ 'Torben Halvorsen':{cls:0,sex:'m'},'Eira Solberg':{cls:4,sex:'f'},
+ 'Farid ibn Rashid':{cls:4,sex:'m'},'Zahra bint Karim':{cls:22,sex:'f'},
+ 'Martim Duarte':{cls:23,sex:'m'},'Marina Salgado':{cls:11,sex:'f'},
+ 'Cian Ardwyn':{cls:10,sex:'m'},'Sylas Fenwyr':{cls:4,sex:'m',race:'elf'}
 };/* Edran fica de fora: é personagem da campanha (tools/npc456.js) */
 const namedCd={};let namedT=20;
 function rankFromWins(v){return Math.max(1,Math.min(5,Math.round((v||0)/7)))}

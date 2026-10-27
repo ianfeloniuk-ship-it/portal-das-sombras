@@ -36,7 +36,7 @@
       region: 'aster',
       type: 'rescue',
       title: 'Socorro na Estrada das Brumas',
-      giver: 'Edran Protetor da Carroça',
+      giver: 'Edran Holt',
       desc: 'Uma caravana com novatos transmigradores foi encurralada por feras nas brumas da estrada. Use sua carroça rápida para chegar a tempo e espantar as feras.',
       rank: 0, // E
       biome: 'campos',
@@ -133,7 +133,7 @@
       region: 'ymiria',
       type: 'rescue',
       title: 'Batedores Soterrados na Geada',
-      giver: 'Torben Machado-de-Gelo',
+      giver: 'Torben Halvorsen',
       desc: 'Uma nevasca violenta cercou dois batedores entre as pedras de gelo. Leve provisões quentes na carroça e elimine os lobos que farejam o rastro.',
       rank: 2, // C
       biome: 'neve',
@@ -152,7 +152,7 @@
       region: 'zahar',
       type: 'bounty',
       title: 'Caçada: O Verme das Dunas Vermelhas',
-      giver: 'Emir Tariq Al-Zahar',
+      giver: 'Emir Tariq ibn Nadir',
       desc: 'Uma criatura subterrânea gigantesca tem atacado poços artesianos e engolido camelos de carga inteiros. Cace a fera no coração das dunas.',
       rank: 4, // A
       biome: 'deserto',
@@ -174,7 +174,7 @@
       region: 'thalor',
       type: 'bounty',
       title: 'Caçada: O Terror dos Arrecifes',
-      giver: 'Almirante Varis Onda-Viva',
+      giver: 'Almirante Varis Moura',
       desc: 'Uma fera abissal com carapaça de corais tem afundado barcos de pesca nos recifes externos. Limpe as águas para os pescadores de Thalor.',
       rank: 3, // B
       biome: 'pantano',
@@ -937,6 +937,11 @@
       }
     }
   ];
+  /* v655 (Ian): nome sem título («Zayd, Guardião das Areias» vira «Zayd»); a função aparece embaixo do nome na conversa */
+  for (const d of EMERGENT_DEFS) {
+    if (d.name && d.name.includes(',') && !d.role) { const p = d.name.split(','); d.name = p[0].trim(); d.role = p.slice(1).join(',').trim(); }
+    if (d.quest && d.quest.giver) d.quest.giver = String(d.quest.giver).split(' · ')[0].trim();
+  }
 
   // Objetos interativos e de tesouro gerados no local do contrato (Skyrim style)
   const QUEST_OBJECTS = {
@@ -1239,6 +1244,7 @@
           kind: 'emergent_skyrim',
           name: encDef.name,
           short: encDef.name.split(',')[0],
+          job523: encDef.role || '',
           m,
           x: nx,
           z: nz,

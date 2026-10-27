@@ -9,7 +9,7 @@ const CRIT=['gato','galinha','pombo'],CRIT_N={gato:'Miau.',galinha:'Có-có-có!
 function spawnCritter(c){const k=pick(CRIT);if(!MON.list[k])return;const m=makeChibi({mon:k,gk:'Skeleton_Minion',scale:1});const a=rnd(0,TAU),d=rnd(4,20),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);
   const n={kind:'citizen',critter:true,home:c,m,x,z,face:0,r:.3,name:'',short:'',col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],noLabel:true,label:'F · FAZER CARINHO'};n.use=()=>{floater(n.x,n.z,CRIT_N[k],'#ffd9a0');sfx('ding')};npcs.push(n);return n}
 function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4a,0x2f7a4a,0xb39a6a,0x7a5a9a]),hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0xd8b060]),wep:'none',gk:pick(['Knight','Barbarian','Mage','Rogue']),tint:pick([0xffffff,0xffe0c0,0xd0e0ff,0xe0ffd0]),scale:.88});
-  const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(CNAMES);
+  const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=window.Nomes655?Nomes655.nome(c,'morador'):pick(CNAMES);/* v655: nome da região */
   const n={kind:'citizen',home:c,m,x,z,face:0,r:.45,name:nm,short:nm,col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · CONVERSAR COM '+nm.toUpperCase()};
   n.use=()=>{const F=festival();speech153(n,F&&Math.random()<.4?F.line:(regionLine116(c)||pick(CLINES)),'Moradora(o) de '+c.name)};npcs.push(n);return n}
 

@@ -4753,7 +4753,7 @@ function spawnHunter(c,inside){
   const cl=/* v337: sem o Mago Elemental (classe extinta). v482 (Povo482): também magos de elemento, Monge, Lâmina Arcana, Lanceiro e Berserker, menos comuns */CLASSES[wpick([0,1,2,4,5,6].map(i=>({i,w:1})).concat([8,9,10,11,21,22,23,24].filter(i=>CLASSES[i]&&!CLASSES[i].legacy).map(i=>({i,w:.35})))).i],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
   const m=makeChibi({body:cl.body,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),wep:cl.wep,wcol:cl.sk[0].col,gk:CLASS_GK[CLASSES.indexOf(cl)],tint:CLASS_TINT[CLASSES.indexOf(cl)],shield:CLASSES.indexOf(cl)===0});
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
-  m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);
+  m.root.position.set(x,0,z);scene.add(m.root);const nm=window.Nomes655?Nomes655.nome(c,'cacador'):pick(NAMES);/* v655: nome da região */
   const n={kind:'hunter',home:c,m,x,z,face:0,r:.5,name:nm+' ['+RANKS[ri].id+']',short:nm,rank:ri,col:RANKS[ri].c,t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · FALAR COM '+nm.toUpperCase()};
   n.use=()=>talk(n);npcs.push(n);Hunters138.attach(n,CLASSES.indexOf(cl),ri,()=>npcs.includes(n)&&L.mode==='world');return n;
 }
@@ -8050,7 +8050,7 @@ const CRIT=['gato','galinha','pombo'],CRIT_N={gato:'Miau.',galinha:'Có-có-có!
 function spawnCritter(c){const k=pick(CRIT);if(!MON.list[k])return;const m=makeChibi({mon:k,gk:'Skeleton_Minion',scale:1});const a=rnd(0,TAU),d=rnd(4,20),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);
   const n={kind:'citizen',critter:true,home:c,m,x,z,face:0,r:.3,name:'',short:'',col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],noLabel:true,label:'F · FAZER CARINHO'};n.use=()=>{floater(n.x,n.z,CRIT_N[k],'#ffd9a0');sfx('ding')};npcs.push(n);return n}
 function spawnCitizen(c){const m=makeChibi({body:pick([0x6b4a2a,0x3a5fd0,0x8a2b4a,0x2f7a4a,0xb39a6a,0x7a5a9a]),hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0xd8b060]),wep:'none',gk:pick(['Knight','Barbarian','Mage','Rogue']),tint:pick([0xffffff,0xffe0c0,0xd0e0ff,0xe0ffd0]),scale:.88});
-  const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(CNAMES);
+  const a=rnd(0,TAU),d=rnd(4,18),x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;m.root.position.set(x,0,z);scene.add(m.root);const nm=window.Nomes655?Nomes655.nome(c,'morador'):pick(CNAMES);/* v655: nome da região */
   const n={kind:'citizen',home:c,m,x,z,face:0,r:.45,name:nm,short:nm,col:'#c9d3de',t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · CONVERSAR COM '+nm.toUpperCase()};
   n.use=()=>{const F=festival();speech153(n,F&&Math.random()<.4?F.line:(regionLine116(c)||pick(CLINES)),'Moradora(o) de '+c.name)};npcs.push(n);return n}
 
@@ -9712,8 +9712,8 @@ requestAnimationFrame(frame);
 <script src="tools/attrs462.js?v=505"></script>
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=485"></script>
-<script src="tools/worldsim479.js?v=490"></script>
-<script src="tools/quests480.js?v=542"></script>
+<script src="tools/worldsim479.js?v=655"></script>
+<script src="tools/quests480.js?v=655"></script>
 <script src="tools/lyra601.js?v=603"></script>
 <script src="tools/kael604.js?v=606"></script>
 <script src="tools/caderno605.js?v=607"></script>
@@ -9726,11 +9726,11 @@ requestAnimationFrame(frame);
 <script src="tools/noite612.js?v=650"></script>
 <script src="tools/mapa613.js?v=651"></script>
 <script src="tools/vale614.js?v=652"></script>
-<script src="tools/dialogo520.js?v=653"></script>
+<script src="tools/dialogo520.js?v=655"></script>
 <script src="tools/vida522.js?v=558"></script>
-<script src="tools/vida523.js?v=599"></script>
+<script src="tools/vida523.js?v=655"></script>
 <script src="tools/vida527.js?v=534"></script>
-<script src="tools/npc482.js?v=518"></script>
+<script src="tools/npc482.js?v=655"></script>
 <script src="tools/vida486.js?v=493"></script>
 <script src="tools/dragoes510.js?v=511"></script>
 <script src="tools/hitbox-dragao551.js?v=578"></script>
@@ -9762,16 +9762,17 @@ requestAnimationFrame(frame);
 <script src="tools/constel569.js?v=570"></script>
 <script src="tools/constel523.js?v=583"></script><script src="tools/saida579.js?v=579"></script>
 <script src="tools/telas535.js?v=585"></script>
-<script src="tools/motor-missoes-infinitas.js?v=546"></script>
+<script src="tools/motor-missoes-infinitas.js?v=655"></script>
 <script src="tools/skyrim-overhaul538.js?v=645"></script>
 <script src="tools/lote541.js?v=541"></script>
 <script src="tools/mapa3d544.js?v=594"></script>
-<script src="tools/crime545.js?v=653"></script>
+<script src="tools/crime545.js?v=655"></script>
 <script src="tools/contratos541.js?v=542"></script>
 <script src="tools/fixas545.js?v=546"></script>
 <script src="tools/fronteira551.js?v=577"></script>
 <script src="tools/conversa539.js?v=543"></script>
 <script src="tools/fantasmas545.js?v=653"></script>
+<script src="tools/povo655.js?v=655"></script>
 <script src="tools/explorar539.js?v=654"></script>
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/flora-regioes.js?v=621"></script>

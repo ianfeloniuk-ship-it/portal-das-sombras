@@ -73,7 +73,7 @@ function hitNpc(n,dmg){
   crime(n,false);return true}
 function die(n){
   crime(n,true);/* antes de mudar o tipo: o tipo diz se era da cidade */
-  n.dead545=true;n.hostile545=false;n.deadAt545=now();n.vida523=false;n.label='';n.kind='deco';n.noLabel=true;
+  n.dead545=true;n.hostile545=false;n.deadAt545=now();try{window.Povo655&&Povo655.morreu(n)}catch(_){}n.vida523=false;n.label='';n.kind='deco';n.noLabel=true;
   try{floater(n.x,n.z,(n.short||n.name||'Morador')+' morreu','#ef4444',true)}catch(_){}}
 C.hit=hitNpc;
 
@@ -93,7 +93,7 @@ attack=function(){
 const U0=updNpc;
 updNpc=function(n,dt){
   if(n.dead545){try{animChibi(n.m,{move:0,atk:0,dead:1,wind:0},(n.t=(n.t||0)+dt))}catch(_){}n.m.root.position.set(n.x,0,n.z);
-    if(now()-n.deadAt545>120){n.gone=true;try{scene.remove(n.m.root)}catch(_){}}return}
+    if(now()-n.deadAt545>900||(player&&Math.hypot(player.x-n.x,player.z-n.z)>160)){n.gone=true;try{scene.remove(n.m.root)}catch(_){}}return}/* v655: o corpo fica até você se afastar (ou 15 min) */
   if(n.knock545){if(now()<n.knock545){try{animChibi(n.m,{move:0,atk:0,dead:1,wind:0},(n.t=(n.t||0)+dt))}catch(_){}return}n.knock545=0;n.hp545=n.hpMax545}
   if(!n.hostile545)return U0.apply(this,arguments);
   const P=player,c=n.home;

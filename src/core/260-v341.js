@@ -212,7 +212,7 @@ function spawnHunter(c,inside){
   const cl=/* v337: sem o Mago Elemental (classe extinta). v482 (Povo482): também magos de elemento, Monge, Lâmina Arcana, Lanceiro e Berserker, menos comuns */CLASSES[wpick([0,1,2,4,5,6].map(i=>({i,w:1})).concat([8,9,10,11,21,22,23,24].filter(i=>CLASSES[i]&&!CLASSES[i].legacy).map(i=>({i,w:.35})))).i],ri=wpick([40,30,16,8,4,1.5,.4,.1].map((w,i)=>({i,w}))).i;
   const m=makeChibi({body:cl.body,hair:pick([0x222222,0xc85a1e,0xe8e8ff,0x6b4a2a,0x3a5fd0]),wep:cl.wep,wcol:cl.sk[0].col,gk:CLASS_GK[CLASSES.indexOf(cl)],tint:CLASS_TINT[CLASSES.indexOf(cl)],shield:CLASSES.indexOf(cl)===0});
   let x,z;if(inside){const a=rnd(0,TAU),d=rnd(4,16);x=c.x+Math.cos(a)*d;z=c.z+Math.sin(a)*d}else{const a=pick([0,Math.PI/2,Math.PI,Math.PI*1.5]);x=c.x+Math.cos(a)*40;z=c.z+Math.sin(a)*40}
-  m.root.position.set(x,0,z);scene.add(m.root);const nm=pick(NAMES);
+  m.root.position.set(x,0,z);scene.add(m.root);const nm=window.Nomes655?Nomes655.nome(c,'cacador'):pick(NAMES);/* v655: nome da região */
   const n={kind:'hunter',home:c,m,x,z,face:0,r:.5,name:nm+' ['+RANKS[ri].id+']',short:nm,rank:ri,col:RANKS[ri].c,t:Math.random()*9,tx:x,tz:z,wait:rnd(0,3),path:[],label:'F · FALAR COM '+nm.toUpperCase()};
   n.use=()=>talk(n);npcs.push(n);Hunters138.attach(n,CLASSES.indexOf(cl),ri,()=>npcs.includes(n)&&L.mode==='world');return n;
 }

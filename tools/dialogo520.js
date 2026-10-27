@@ -44,6 +44,7 @@
     if (F.bondade >= 2) L2.push('Dizem que um viajante anda dando esmola aos pobres da cidade. Gente boa.');
     if (F.maldade >= 2) L2.push('Andam falando de um viajante de mau gênio. A fama dele não é boa.');
     if (F.ladroes >= 1) L2.push('Todo mundo comenta que alguém pegou o ladrão da cidade.');
+    try { const P655 = global.Povo655 && n && Povo655.noticia(n.home); if (P655) L2.push(P655, P655); } catch (_) {} /* v655: mortes e gente nova na cidade */
     if (typeof profile !== 'undefined' && profile && profile.multa523) L2.push('Ouvi dizer que um viajante arrumou confusão com a guarda e ainda não pagou a multa.');
     try { const S = global.Quests480 && Quests480.getState(), k = S ? Object.keys(S.completed || {}).length : 0; if (k >= 1) L2.push('Contam que um viajante já cumpriu ' + k + ' contrato' + (k > 1 ? 's' : '') + ' da Ordem por aí.'); } catch (_) {}
     if (L2.length && Math.random() < .65) return L2[Math.floor(Math.random() * L2.length)];
