@@ -8,12 +8,12 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     const B=biomeAt(px,pz),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
     const n=WN(px*.035,pz*.035);at(px,pz);
     if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
-    else if(n>(B==='floresta'?.4:B==='vulcao'?.7:.56)||R()<.035){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
+    else if(n>(B==='floresta'?.34:B==='vulcao'?.66:.5)||R()<.045){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?11.5:15.5)+R()*7.5,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?3.5:5.8,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();const rk344=pk(R,ROCKS),sc344=EW(so,rk344,px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s,h:envTop344(rk344,sc344,-.08)});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
   if(B==='flores')for(let k=0,nf=lite?80:220;k<nf;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<40*CITYK||biomeAt(px,pz)!=='flores')continue;at(px,pz);EH(fl,pk(R,FLOWERS),px,0,pz,R()*TAU,.6+R()*.5)}
   if(B==='cristal'||B==='vulcao')for(let k=0;k<(lite?6:14);k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<44*CITYK)continue;at(px,pz);const s2=.7+R()*.9;const rk344=pk(R,['rock_tallA','rock_tallB','stone_tallA']),sc344=EW(so,rk344,px,-.05,pz,R()*TAU,2.2*s2,tintB(B==='cristal'?0x9fe8ff:0x6a2a1a,1));addCol({x:px,z:pz,r:.9*s2,h:envTop344(rk344,sc344,-.05)})}
-  for(let k=0,nc=lite?60:150;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<37*CITYK)continue;
+  for(let k=0,nc=lite?60:240;k<nc;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH,q=cityD(px,pz);if(q.clear||q.d<37*CITYK)continue;
     const B=biomeAt(px,pz),fo=WN(px*.035,pz*.035),fw=WN(px*.05+77,pz*.05+77),r=R(),ry=R()*TAU;at(px,pz);
     if(B==='deserto'){if(r<.5)envSolidEW357(addCol,so,pk(R,['rock_smallA','rock_smallC','rock_largeA','stone_smallA']),px,-.03,pz,ry,.6+R()*1.2,0xe8d2a0);else if(r<.62)EH(so,pk(R,['bone_A','skull','ribcage']),px,0,pz,ry,.4+R()*.3);else if(r<.8)EH(fl,'plant_bushSmall',px,0,pz,ry,.5+R()*.3,0xc9a86a);continue}
     // Etapa 2: no green plants on snow, sand or ash, decided per spot (borders are ragged now).
@@ -29,6 +29,7 @@ function envChunk(g,R,x0,z0,cityD,addCol){
     else if(r<.85)envSolidEW357(addCol,so,pk(R,['rock_smallA','rock_smallC','stone_smallA','rock_smallFlatA']),px,-.03,pz,ry,.5+R()*.7);
     else EH(fl,'blades',px,0,pz,ry,.7+R()*.5)}
   for(let k=0,nb=lite?80:220;k<nb;k++){const px=x0+(R()-.5)*CH,pz=z0+(R()-.5)*CH;if(WN(px*.09+5,pz*.09+5)<.36)continue;const q=cityD(px,pz),B=biomeAt(px,pz);if(q.clear||q.d<36*CITYK||B==='deserto'||B==='neve'||['neve','cristal'].includes(biomeAt(px,pz))||snowB(px,pz)<.33||bare154(px,pz))continue;at(px,pz);EH(fl,'blades',px,0,pz,R()*TAU,.5+R()*.6,tintB(B==='neve'?0xdfe8e0:B==='pantano'?0x8a9a70:0xffffff,.85+R()*.15))}
+  if(window.Enfeite637)Enfeite637.run({cx:Math.round(x0/CH),cz:Math.round(z0/CH),x0,z0,B,dg,SE,cityD,addCol,at:(x,z)=>{at(x,z);return{tr,fl,so}}});/* v638: enfeites por bioma */
   for(let i=0;i<4;i++){envOwn(g,TR[i].mesh(TREEMAT));envOwn(g,FL[i].mesh(FLORAMAT));envOwn(g,SO[i].mesh(ENVMAT));registerChestBatch253(SO[i],g.userData.chestObstacles253||(g.userData.chestObstacles253=[]));}
 }
 ENV.cast=[];

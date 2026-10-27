@@ -40,8 +40,8 @@
     const B = biomeAt(px, pz);
     if (B === 'deserto') return null;
     const n = WN(px * .035, pz * .035), bio = WN(px * .004 + 900, pz * .004 + 900), rnd = (rh(Math.floor(px), Math.floor(pz), 637) & 1023) / 1023;
-    const thr = B === 'floresta' ? .4 : B === 'vulcao' ? .7 : .56;
-    if (!(n > thr || rnd < .035 / 3)) return null;
+    const thr = B === 'floresta' ? .34 : B === 'vulcao' ? .66 : .5;
+    if (!(n > thr || rnd < .045 / 3)) return null;
     if (SE === 3 && B !== 'neve' && B !== 'cristal' && B !== 'vulcao') return B === 'pantano' ? 'willow' : (bio < .34 ? 'snow' : 'snowOak');
     if (B === 'neve') return 'snow'; if (B === 'cristal') return 'crystal'; if (B === 'vulcao') return 'dead';
     if (B === 'pantano') return 'willow';
