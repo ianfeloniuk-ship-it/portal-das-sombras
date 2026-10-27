@@ -409,7 +409,7 @@
     };
     const bsleep = document.getElementById('b437sleep');
     if (bsleep) bsleep.onclick = () => {
-      player.hp = player.maxhp; player.mp = player.maxmp; player.bleedT = 0;
+      player.hp = player.maxhp; if (window.Mana642) Mana642.slept(24); else player.mp = player.maxmp; player.bleedT = 0;
       const s = Surv437.S();
       s.temp = 55; s.sickT = 0; s.intoxT = 0;
       if (run) {
@@ -427,7 +427,7 @@
       closeModal();
       activeModalStruct = null;
       try { sfx('level'); bigText('DESCANSADO', 1600); } catch (_) {}
-      toast('<b>[TENDA PORTÁTIL]</b> Você dormiu aquecido: Vida/Mana em 100% e Cansaço zerado! Aperte <b>F</b> na tenda para recolher o acampamento.');
+      toast('<b>[TENDA PORTÁTIL]</b> Você dormiu aquecido: Vida em 100%, Cansaço zerado e 24 de mana! Aperte <b>F</b> na tenda para recolher o acampamento.');
       Surv437.save();
     };
     const bhm = document.getElementById('b437hangMeat');

@@ -22,7 +22,7 @@
   const GEMS = ['g0', 'g1', 'g2'];
   const gid = (n) => (typeof GR !== 'undefined' && GR[n]) ? GR[n].id : ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SS+', '★'][n];
   const R = () => (typeof run !== 'undefined') ? run : null;
-  let hold = null, bar = null, lastMp = null, lastHp = null, restOld = 0;
+  let hold = null, bar = null, lastMp = null, lastHp = null, restOld = null;
 
   function coreMana(kind, rank, threat) { return (BASE[kind] || 5) * (FR[rank] || 1) * (THR[threat] || 1); }
 
@@ -71,9 +71,13 @@
   }
 
   // ---------- regeneração ----------
+  function nearFire() { // fogueira acesa a até 6 m (Build437)
+    try { return Build437.st().some(b => b.kind === 'fogueira' && b.fuel > 0 && Math.hypot(b.x - player.x, b.z - player.z) < 6); } catch (_) { return false; }
+  }
+  function slept(n) { addMana(n); }
   function perHour() {
     const r = R(), P = player; if (!r) return 0;
-    let h = P.resourceRest258 ? 2 : 1;
+    let h = (P.resourceRest258 || nearFire()) ? 2 : 1;
     h += Math.min(7, Math.floor((r.level || 1) / 100));
     try { h += Math.floor(cons('res') / 25); } catch (_) { }
     return h;
@@ -109,8 +113,8 @@
     const m = ensure(); if (!m) return;
     m.hh += dt / HOUR;
     // sono: pousada/casa deram mana de uma vez; aqui vale 32 por noite (8 h × 4)
-    if (lastMp != null && r.rested && r.rested.t >= 595 && P.mp - lastMp > 3 && restOld !== r.rested.t) { P.mp = Math.min(P.maxmp, lastMp + 32); restOld = r.rested.t; toast('<b>[MANA]</b> Dormir devolveu 32 de mana.'); }
-    if (!r.rested || r.rested.t < 590) restOld = 0;
+    if (lastMp != null && r.rested && r.rested.t >= 595 && P.mp - lastMp > 3 && restOld !== r.rested) { P.mp = Math.min(P.maxmp, lastMp + 32); restOld = r.rested; toast('<b>[MANA]</b> Dormir devolveu 32 de mana.'); }
+    if (!r.rested) restOld = null;
     m.acc += dt / HOUR * perHour();
     if (m.acc >= 1) { const n = Math.floor(m.acc); m.acc -= n; addMana(n); }
     if (P.mp < 1) topUp(1);
@@ -246,6 +250,6 @@
     const bv = bagView; bagView = function (tab) { const x = bv.apply(this, arguments); try { if ((tab || 'itens') === 'itens') { ensure(); $('mb').insertAdjacentHTML('beforeend', accHtml(false)); } } catch (e) { console.error(e); } return x; };
     const mv = mktView; mktView = function () { const x = mv.apply(this, arguments); try { ensure(); $('mb').insertAdjacentHTML('beforeend', '<div class="sec">DORIAN · ACESSÓRIOS DE MANA</div><div class="sysline" style="font-size:12px">Peças do seu rank. Cada uma guarda mana. A coroa aceita 3 gemas.</div>' + accHtml(true)); } catch (e) { console.error(e); } return x; };
   }
-  window.Mana642 = { install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
+  window.Mana642 = { slept, nearFire, install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
   install();
 })();
