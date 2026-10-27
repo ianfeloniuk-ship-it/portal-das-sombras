@@ -36,6 +36,7 @@ function targetAndText(){
  if(window.Caixa606?.active())return Caixa606.objective();
  if(window.Torre607?.objective?.())return Torre607.objective();
  if(window.Sulco609?.active())return Sulco609.objective();
+ if(window.Aldric610?.active())return Aldric610.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
