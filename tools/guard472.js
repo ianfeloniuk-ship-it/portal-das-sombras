@@ -20,6 +20,8 @@ let held=false,t0=-9,bashCd=0,counterUntil=-9,breakUntil=-9;
 const hasShield=()=>{try{return typeof shieldActive473==='function'?shieldActive473():!!(run&&run.equip&&run.equip.sh)}catch(_){return false}};/* v473: só com arma de uma mão */
 const blocking=()=>held&&G.on&&now()>=breakUntil&&P_()&&!P_().dead&&!(P_().dodgeT>0)&&!(P_().stunT>0)&&!run?.mounted;
 G.blocking=blocking;G.hasShield=hasShield;
+/* v662: o botão direito (mão esquerda vazia ou com escudo, como no Skyrim) também defende, por tools/maos662.js */
+G.hold=function(on){if(on){if(!held){held=true;t0=now()}}else held=false};
 function vigor(){try{return martialState260()}catch(_){return null}}
 function spend(n){const r=vigor();if(!r)return true;if(r.vigor<n){r.vigor=0;return false}r.vigor-=n;r.vigorWait=Math.max(r.vigorWait||0,1.2);return true}
 

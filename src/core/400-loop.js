@@ -168,7 +168,7 @@ function updDungeon(dt){
     for(const e of enemies)if(e.room===i&&!e.dead){e.aggro=true;if(e.isBoss)bossAggro(e)}
     if(i===L.bossRoom&&(!L.combat117||L.combat117.spawned))bigText(L.defense?'NÚCLEO':'GUARDIÃO',1000);if(r.hostile)toast('<b>[NARRADOR]</b> Caçadores hostis! Eles querem seu ouro.');}});
 }
-/* Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. v634: volta a ser assim (o pointer lock da v600 saiu). */
+/* v662 (Ian: «igual ao skyrim»): com o cursor preso (tools/maos662.js) a câmera segue o mouse e o botão direito é a mão esquerda; o arrasto abaixo só vale com o cursor solto. Terceira pessoa: botão direito arrastado gira a câmera (v476: defesa no botão do meio); cursor livre para avisos e menus. v634: volta a ser assim (o pointer lock da v600 saiu). */
 const pcCam={yaw:0,pitch:.03,distance:2.25,active:false,firstPerson:false};
 window.pcCam=pcCam;
 function camRot(x,z){const c=Math.cos(pcCam.yaw),s=Math.sin(pcCam.yaw);return[x*c+z*s,-x*s+z*c]}
@@ -176,9 +176,9 @@ function cameraLook373(dx,dy){pcCam.yaw-=dx*.003;const fp=!!pcCam.firstPerson;pc
 addEventListener('contextmenu',e=>{if(!touch&&e.target===$('c'))e.preventDefault()});
 let cameraDrag375=null;
 function releaseCamera373(){const p=cameraDrag375;cameraDrag375=null;pcCam.active=false;if(p&&$('c').hasPointerCapture(p.id))$('c').releasePointerCapture(p.id)}
-$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||!started||paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+$('c').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==2||(window.MOUSE662&&document.pointerLockElement===$('c'))||!started||paused||modalOpen||!$('gameMenu95').hidden||(typeof inConversation==='function'&&inConversation()))return;cameraDrag375={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,moved472:0};pcCam.active=true;try{$('c').setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
 $('c').addEventListener('pointermove',e=>{const p=cameraDrag375;if(!p||p.id!==e.pointerId)return;if(!(e.buttons&2)||paused||modalOpen){releaseCamera373();return}p.moved472=(p.moved472||0)+Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y);cameraLook373(e.clientX-p.x,e.clientY-p.y);p.x=e.clientX;p.y=e.clientY});
-addEventListener('pointerup',e=>{if(e.button===2){const moved=cameraDrag375?(cameraDrag375.moved472||0):0;window.camMoved472=moved;releaseCamera373();if(moved<8&&window.W377&&typeof W377.toggle==='function')W377.toggle(true)}});
+addEventListener('pointerup',e=>{if(e.button===2&&!(window.MOUSE662&&document.pointerLockElement===$('c'))){const moved=cameraDrag375?(cameraDrag375.moved472||0):0;window.camMoved472=moved;releaseCamera373();if(moved<8&&window.W377&&typeof W377.toggle==='function')W377.toggle(true)}});
 $('c').addEventListener('lostpointercapture',releaseCamera373);
 addEventListener('pointercancel',releaseCamera373);
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseCamera373()});

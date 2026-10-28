@@ -188,13 +188,13 @@
     const mid = sr.add(sl).multiplyScalar(0.5); camera.worldToLocal(mid);
     holder.position.set(-mid.x, -0.3 - mid.y, 0.06 - mid.z);
     root.updateMatrixWorld(true);
-    VM.model = clone; VM.root = root; VM.bones = bones; VM.arms = arms; VM.src = m; VM.sig = gearSig(m); VM.ready = true; VM.wepKey = ''; VM.shKey = '';
+    VM.model = clone; VM.root = root; VM.bones = bones; VM.arms = arms; VM.src = m; VM.sig = gearSig(m); VM.ready = true; VM.wepKey = ''; VM.shKey = ''; VM.wlKey = '';
     root.visible = false;
     return true;
   }
   function drop(){
     if(VM.root && VM.root.parent) VM.root.parent.remove(VM.root);
-    VM.ready = false; VM.model = null; VM.root = null; VM.wep = null; VM.wepKey = ''; VM.bow = null; VM.sh = null; VM.shKey = '';
+    VM.ready = false; VM.model = null; VM.root = null; VM.wep = null; VM.wepKey = ''; VM.wl = null; VM.wlKey = ''; VM.bow = null; VM.sh = null; VM.shKey = '';
   }
 
   /* ---------------- arma, arco e escudo na mão da 1ª pessoa ---------------- */
@@ -211,7 +211,7 @@
     const ed = new T.Vector3(); ed[rest[0]] = 1;
     return { ax, ed, len: sz[k], box, c, k };
   }
-  function weaponKind(){ try { return (global.player && global.player.m && global.player.m.kind195) || weaponKind272(global.run && global.run.equip && global.run.equip.w) || null; } catch(_) { return null; } }
+  function weaponKind(){ try { return (global.player && global.player.m && global.player.m.kind195) || weaponKind272(typeof run !== 'undefined' && run.equip && run.equip.w) || null; } catch(_) { return null; } }
   function syncWeapon(){
     const m = VM.src, kind = weaponKind();
     const srcObj = kind === 'bow' ? (m.bowHolder155 && m.bowHolder155.children[0]) : (m.socket && m.socket.children[0]);
@@ -257,6 +257,31 @@
     wrap.scale.setScalar(1 / ws);
     VM.wep = wrap; VM.wepInfo = info; VM.wepKind = kind; VM.wepLen = L;
   }
+  /* v662: arma da mão esquerda (dupla empunhadura), copiada da que tools/maos662.js montou na 3ª pessoa */
+  function syncLeftWeapon(){
+    const M = global.Maos662, src = M && M.leftSrc && typeof run !== 'undefined' && run.equip && run.equip.wl ? M.leftSrc : null;
+    const key = src ? src.obj.uuid : 'none';
+    if(key === VM.wlKey) return;
+    VM.wlKey = key;
+    if(VM.wl && VM.wl.parent) VM.wl.parent.remove(VM.wl);
+    VM.wl = null; if(!src) return;
+    const copy = hasSkin(src.obj) ? T.SkeletonUtils.clone(src.obj) : src.obj.clone(true);
+    copy.traverse(o => { if(o.isMesh){ o.frustumCulled = false; o.castShadow = false; o.visible = true; o.renderOrder = 3; } });
+    copy.position.set(0, 0, 0); copy.quaternion.identity(); copy.scale.set(1, 1, 1);
+    const wrap = new T.Group(), inner = new T.Group(); inner.add(copy); wrap.add(inner);
+    const info = axisInfo(copy), kind = src.kind, maxL = LEN[kind] ? LEN[kind] * 1.15 : 1.2;
+    const sc = Math.min(src.ws || 1, maxL / Math.max(0.05, info.len));
+    inner.scale.setScalar(sc);
+    const grip = kind === 'staff' ? info.c.clone().addScaledVector(info.ax, -info.len * 0.22) : new T.Vector3();
+    inner.position.copy(grip).multiplyScalar(-sc);
+    VM.arms.l.anchor.add(wrap);
+    const Z = new T.Vector3(0, 0, 1), F = new T.Vector3(1, 0, 0);
+    const mFrom = new T.Matrix4().makeBasis(info.ax, info.ed, info.ax.clone().cross(info.ed)), mTo = new T.Matrix4().makeBasis(Z, F, Z.clone().cross(F));
+    wrap.quaternion.setFromRotationMatrix(mTo.multiply(mFrom.transpose()));
+    wrap.updateWorldMatrix(true, false);
+    wrap.scale.setScalar(1 / (wrap.parent.getWorldScale(new T.Vector3()).x || 1));
+    VM.wl = wrap; VM.wlKind = kind;
+  }
   /* pontas do arco (onde a corda prende) e cabo, medidos nos vértices: o modelo do arco não tem corda */
   function bowPoints(obj, info){
     obj.updateWorldMatrix(true, true);
@@ -279,7 +304,7 @@
   function hasSkin(o){ let s = false; o.traverse(c => { if(c.isSkinnedMesh) s = true; }); return s; }
   function syncShield(){
     const m = VM.src; let src = null;
-    try { if(global.Guard472 && Guard472.hasShield && Guard472.hasShield() && m.bones.hand_l) m.bones.hand_l.traverse(o => { if(!src && o !== m.bones.hand_l && o.parent === m.bones.hand_l && o.children.length && o !== m.bowHolder155) src = o; }); } catch(_) {}
+    try { if(global.Guard472 && Guard472.hasShield && Guard472.hasShield() && m.bones.hand_l) m.bones.hand_l.traverse(o => { if(!src && o !== m.bones.hand_l && o.parent === m.bones.hand_l && o.children.length && o !== m.bowHolder155 && o.name !== 'palm662_l') src = o; }); } catch(_) {}
     const key = src ? src.uuid : 'none';
     if(key === VM.shKey) return; VM.shKey = key;
     if(VM.sh && VM.sh.parent) VM.sh.parent.remove(VM.sh);
@@ -357,6 +382,8 @@
     pu_l: [[0, null], [0.2, P([-0.22, -0.16, -0.34], [0, 0.1, -1], [0.45, 0.9, 0], 1)], [0.5, P([-0.05, -0.09, -0.74], [0, 0, -1], [0.6, 0.8, 0], 1)], [1, null]],
     cast: [[0, null], [0.25, P([0.18, -0.15, -0.4], [-0.1, 0.6, -0.8], [-0.6, 0.5, 0.2], 0.2)], [0.55, P([0.07, -0.1, -0.66], [-0.05, 0.75, -0.65], [-0.9, 0.2, -0.1], 0.1)], [1, null]]
   };
+  /* espelha uma pose da mão direita para a esquerda */
+  function mirror(a){ return { p: [-a.p[0], a.p[1], a.p[2]], f: [-a.f[0], a.f[1], a.f[2]], t: [-a.t[0], a.t[1], a.t[2]], c: a.c, e: a.e }; }
   function blendPose(a, b, t){ const ea = a.e || EL0, eb = b.e || EL0; return { p: L3(a.p, b.p, t), f: N3(L3(a.f, b.f, t)), t: N3(L3(a.t, b.t, t)), c: lerp(a.c, b.c, t), e: (a.e || b.e) ? L3(ea, eb, t) : null }; }
   const EL0 = [0.3, -1, 0.2];
   function clip(keys, base, u){
@@ -455,8 +482,20 @@
     else if(k === 'dagger'){ r = POSE.dg_r; l = POSE.m_l; }
     else if(k === 'spear'){ r = POSE.sp_r; l = POSE.m_l; }
     else { r = POSE.m_r; l = POSE.m_l; }
-    const magicCls = (() => { try { return !k && typeof MAGIC_CLS !== 'undefined' && MAGIC_CLS.has ? MAGIC_CLS.has(profile.cls) : false; } catch(_) { return false; } })();
+    const magicCls = (() => { try { return !k && typeof MAGIC_CLS !== 'undefined' && (MAGIC_CLS.includes ? MAGIC_CLS.includes(profile.cls) : MAGIC_CLS.has(profile.cls)); } catch(_) { return false; } })();
     if(magicCls){ r = POSE.mg_r; l = POSE.mg_l; }
+    /* v662: duas mãos (tools/maos662.js) */
+    const M2 = global.Maos662;
+    if(M2){
+      if(M2.rightKind() === 'spell') r = POSE.mg_r;
+      const lk = M2.leftKind();
+      if(lk === 'spell') l = POSE.mg_l;
+      else if(lk === 'weapon'){ const wk = weaponKind272(run.equip.wl); l = mirror(wk === 'dagger' ? POSE.dg_r : (wk === 'staff' || wk === 'wand') ? POSE.st_r : POSE.m_r); }
+      const lh = M2.leftHeld ? M2.leftHeld() : 0;
+      if(lh > 0) l = blendPose(l, mirror(SW.pw[1][1]), ez(lh) * 0.6);
+      const lc = M2.lastCast, age = lc ? (performance.now() - lc.t) / 1000 : 9;
+      if(age < 0.45){ const u = age / 0.45; const pz = clip(SW.cast, lc.side === 'r' ? r : mirror(l), u); if(lc.side === 'r') r = pz; else l = mirror(pz); }
+    }
     /* preparo do golpe forte (segurando o botão) */
     if(sk.winding && sk.wind > 0 && k && k !== 'bow') r = blendPose(r, SW.pw[1][1], ez(Math.min(1, sk.wind)) * 0.85);
     /* defesa */
@@ -473,6 +512,11 @@
       else l = blendPose(l, P([-0.12, -0.11, -0.6], [0.05, 0.8, -0.6], [0.9, 0.3, -0.1], 0.1), c);
     }
     /* golpe em andamento */
+    if(S.swingL){
+      S.swingL.t += dt / S.swingL.dur;
+      l = mirror(clip(SW[S.swingL.name], mirror(l), clamp01(S.swingL.t)));
+      if(S.swingL.t >= 1) S.swingL = null;
+    }
     if(S.swing){
       S.swing.t += S.swing.hold ? 0 : dt / S.swing.dur;
       const sw = SW[S.swing.name], u = clamp01(S.swing.t);
@@ -562,7 +606,7 @@
   function apply(dt){
     const Pl = global.player;
     if(!VM.ready || VM.src !== Pl.m || VM.sig !== gearSig(Pl.m)){ if(!build()) return; }
-    syncWeapon(); syncShield();
+    syncWeapon(); syncShield(); syncLeftWeapon();
     camera.updateMatrixWorld(true); camQ.copy(camera.getWorldQuaternion(new T.Quaternion()));
     VM.root.visible = true;
     VM.model.updateMatrixWorld(true);
@@ -578,6 +622,7 @@
       if(s === 'r' && VM.wep && k !== 'bow') c = Math.max(c, 0.95);
       if(s === 'l' && VM.bow) c = 1;
       if(s === 'l' && VM.sh) c = 1;
+      if(s === 'l' && VM.wl) c = Math.max(c, 0.95);
       A.curl += (c - A.curl) * Math.min(1, dt * 18);
       curl({ side: s, fingers: A.fingers }, A.curl, s === 'r' && k === 'bow');
     }
@@ -627,13 +672,16 @@
   FP.tick = function(){
     const Pl = global.player;
     const now = performance.now(), dt = Math.min(0.05, Math.max(0.001, (now - (lastT || now)) / 1000)); lastT = now;
-    if(!Pl || Pl.dead || !FP.active || (global.run && run.mounted) || global.CINE231){
+    if(!Pl || Pl.dead || !FP.active || (typeof run !== 'undefined' && run && run.mounted) || global.CINE231){
       FP.body(false);
       return;
     }
     FP.body(true);
     try { apply(dt); } catch(e){ if(!FP._err658){ FP._err658 = 1; console.warn('fp658', e); } }
   };
+  /* v662: golpe da mão esquerda (tools/maos662.js) */
+  FP.leftSwing = function(power){ S.swingL = { name: power ? 'pw' : (S.nSwingL++ % 2 ? 'b' : 'a'), t: 0, dur: power ? 0.5 : 0.34 }; };
+  S.nSwingL = 0;
   /* boca da magia/fluxo: palma da mão que lança */
   FP.muzzle = function(){
     if(!FP.active || !VM.ready || !VM.root || !VM.root.visible) return null;
