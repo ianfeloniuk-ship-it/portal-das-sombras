@@ -236,11 +236,32 @@
     if(/semAnim155/.test(location.search)){API.animsSettled=true;return animPending405=Promise.resolve(false)}
     const L=new T.GLTFLoader();if(global.MeshoptDecoder)L.setMeshoptDecoder(global.MeshoptDecoder);
     animPending405=new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
-      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;
+      anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;try{API.esq670=mirror670(g.scene,clips,anim155.win)}catch(e){console.warn('v670 mão esquerda',e)}
       /* v635: clipe de rolar (Blender) entra no mesmo banco antes de o jogador ser montado */
       if(tripo)L.load('models/anim-rolar632.glb?v=636',g2=>{try{const c=g2.animations.find(a=>a.name==='rolar');if(c){clips.rolar=c;API.anim155=Object.keys(clips)}}catch(_){}res(true)},undefined,()=>res(true));
       API.anim155=Object.keys(clips);if(!tripo)res(true)},undefined,e=>{console.warn('Animações do Viajante não carregaram; usando animação por código.',e);res(false)})).then(ok=>{API.animsSettled=true;return ok});return animPending405;
   };
+  /* v670 (Ian: «por arma, e por ataque mágico segurando magia, igual Skyrim»): golpes e magia da MÃO ESQUERDA.
+     Cada clipe é espelhado quadro a quadro no espaço do corpo (eixo esquerda-direita) e vai para o osso do lado oposto. */
+  const ESQ670=['golpe1','golpe2','golpe3','pesado1','pesado2','adaga1','adaga2','soco','lanca1','magia_mao','guarda'];
+  function mirror670(scene,clips,win){const rig=T.SkeletonUtils.clone(scene);rig.updateMatrixWorld(true);const nodes=[];rig.traverse(o=>{if(o!==rig&&o.name)nodes.push(o)});
+    const by={};for(const o of nodes)by[o.name]=o;const flip=n=>n.includes('Left')?n.replace('Left','Right'):n.includes('Right')?n.replace('Right','Left'):n;
+    const S=new T.Matrix4().makeScale(-1,1,1),rinv=new T.Matrix4().copy(rig.matrixWorld).invert(),mixer=new T.AnimationMixer(rig),made=[];
+    const tq=new T.Matrix4(),tp=new T.Vector3(),tr=new T.Quaternion(),ts=new T.Vector3();
+    for(const name of ESQ670){const c=clips[name];if(!c||clips[name+'_esq'])continue;
+      const bound=new Set(c.tracks.map(t=>t.name.split('.')[0]));const fps=30,n=Math.max(2,Math.round(c.duration*fps)+1),times=new Float32Array(n);
+      const Q={},P={};const act=mixer.clipAction(c);act.play();
+      for(let i=0;i<n;i++){const t=Math.min(c.duration,i/fps);times[i]=t;mixer.setTime(t);rig.updateMatrixWorld(true);
+        const W={};for(const o of nodes)W[o.name]=tq.copy(rinv).multiply(o.matrixWorld).clone();
+        const M={};for(const o of nodes){const src=W[flip(o.name)]||W[o.name];M[o.name]=S.clone().multiply(src).multiply(S)}
+        for(const o of nodes){if(!bound.has(o.name)&&!bound.has(flip(o.name)))continue;const pm=o.parent&&o.parent!==rig&&M[o.parent.name]?M[o.parent.name]:null;
+          const loc=pm?new T.Matrix4().copy(pm).invert().multiply(M[o.name]):M[o.name].clone();loc.decompose(tp,tr,ts);
+          (Q[o.name]||(Q[o.name]=new Float32Array(n*4))).set([tr.x,tr.y,tr.z,tr.w],i*4);if(/Hips$/.test(o.name))(P[o.name]||(P[o.name]=new Float32Array(n*3))).set([tp.x,tp.y,tp.z],i*3)}}
+      act.stop();mixer.uncacheAction(c);
+      const tracks=[];for(const k in Q)tracks.push(new T.QuaternionKeyframeTrack(k+'.quaternion',times,Q[k]));for(const k in P)tracks.push(new T.VectorKeyframeTrack(k+'.position',times,P[k]));
+      clips[name+'_esq']=new T.AnimationClip(name+'_esq',c.duration,tracks);if(win&&win[name])win[name+'_esq']=win[name];made.push(name)}
+    return made}
+  API.mirror670=mirror670;
   // v405: a prévia pode carregar o modelo antes de iniciar. Modelo pronto não significa clipes/arco prontos.
   API.prepare=function(){if(readyPending405)return readyPending405;const q=new URLSearchParams(location.search);
     readyPending405=Promise.all([API.load(q.has('guerreiroAntigo')?'models/guerreiro-rig127.glb':'models/viajante153.glb'),
@@ -332,10 +353,11 @@
     // Habilidade com animação própria (ex.: Chuva de Flechas com/sem arco), tocada uma vez em ~0,8 s.
     else if(st.dodge&&st.roll632&&A.act.rolar){a=play155(A,'rolar',.04,true,A.state!=='rolar');a.timeScale=a.getClip().duration/.65;A.state='rolar'}/* v635: rolamento de verdade (models/anim-rolar632.glb, feito no Blender) */
     else if(st.dodge){a=play155(A,'esquiva',.045,true,A.state!=='esquiva');a.timeScale=a.getClip().duration/.32;A.state='esquiva'}
-    else if(st.skill&&A.act[st.skill]){a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
+    else if(st.skill&&A.act[st.skill]){/* v670: magia lançada pela mão esquerda */try{const H=global.Maos662;if(H&&H.castSide==='l'&&H.castUntil>performance.now()&&A.act[st.skill+'_esq']&&typeof player!=='undefined'&&player&&player.m===m)st={...st,skill:st.skill+'_esq'}}catch(_){}a=play155(A,st.skill,.06,true,A.state!==st.skill);a.timeScale=a.getClip().duration/.8;A.state=st.skill}
     else if(st.atk>0){const seq=ATK155[m.staff174&&/^(staff|bonestaff|wand|tome|orb)$/.test(st.wep||'')?'staff':st.wep]||ATK155.fist,i=((st.combo||1)-1)%3,key=[seq[i],...seq,'golpe1'].find(k=>A.act[k]);
       // Golpe novo (mesmo tipo repetido) reinicia o clipe.
-      const fresh=A.state!==key+st.combo||st.atk<A.lastAtk;A.state=key+st.combo;A.lastAtk=st.atk;a=play155(A,key,.06,true,fresh);a.paused=true;const w=anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
+      /* v670: golpe da mão esquerda = clipe espelhado (_esq) */let kk=key;try{const H=global.Maos662;if(H&&H.leftUntil>performance.now()&&typeof player!=='undefined'&&player&&player.m===m&&A.act[key+'_esq'])kk=key+'_esq'}catch(_){}
+      const fresh=A.state!==kk+st.combo||st.atk<A.lastAtk;A.state=kk+st.combo;A.lastAtk=st.atk;a=play155(A,kk,.06,true,fresh);a.paused=true;const w=anim155.win[kk]||anim155.win[key]||[0,1];a.time=a.getClip().duration*(w[0]+(w[1]-w[0])*st.atk)}
     else if(st.hit&&A.act.dano){a=play155(A,'dano',.05,true);a.timeScale=a.getClip().duration/.4;A.state='dano'}
     else{A.state=null;if((st.move||0)>.08&&(st.speed==null||st.speed>.05)){const speed=st.speed||(st.sprint?5.8:st.walking?1.85:4.2);const walking=st.walking||speed<2.5||(st.sprint===false&&speed<3.2&&A.act.caminhar);a=play155(A,walking&&A.act.caminhar?'caminhar':'correr',.16);const refSpeed=walking?1.85:(st.sprint?5.8:4.2);a.timeScale=clamp(speed/refSpeed,.4,2.0)}else{a=play155(A,'idle',.2);a.timeScale=.45}}
     apply486(m,A,st,dt);try{if(global.Anim547&&global.Anim547.postPlayer)global.Anim547.postPlayer(m,st,dt)}catch(_){}

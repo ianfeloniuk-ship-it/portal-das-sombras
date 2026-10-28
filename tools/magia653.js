@@ -179,11 +179,14 @@
         m.root.rotation.y = face; m.aimPitch253 = pitch; m.cast657 = performance.now() + 300; /* arma fica na mão enquanto o fluxo sai */
         if (staff) { m.staffCast251 = performance.now() + 450; m.root.updateMatrixWorld(true); mz = Warrior127.staffMuzzle(m); }
         else if (m.bones && m.bones.hand_r) {
+          /* v670: magia da mão esquerda aponta o braço esquerdo */
+          const LH = window.Maos662 && Maos662.castSide === 'l' && Maos662.castUntil > performance.now() && m.bones.hand_l;
+          const UA = LH ? m.bones.upperarm_l : m.bones.upperarm_r, FA = LH ? m.bones.forearm_l : m.bones.forearm_r, HD = LH ? m.bones.hand_l : m.bones.hand_r;
           const F = new T.Vector3(Math.sin(face) * Math.cos(pitch), Math.sin(pitch), Math.cos(face) * Math.cos(pitch));
           m.root.updateMatrixWorld(true);
-          aimBone(m.bones.upperarm_r, m.bones.forearm_r, F.clone().add(new T.Vector3(0, -.1, 0)));
-          aimBone(m.bones.forearm_r, m.bones.hand_r, F);
-          mz = m.bones.hand_r.getWorldPosition(new T.Vector3());
+          aimBone(UA, FA, F.clone().add(new T.Vector3(0, -.1, 0)));
+          aimBone(FA, HD, F);
+          mz = HD.getWorldPosition(new T.Vector3());
         }
         if (mz) return new T.Vector3(mz.x, mz.y + (window.TER245 ? TER245.heightFor(m.root) : terrH(player.x, player.z)), mz.z);
       }

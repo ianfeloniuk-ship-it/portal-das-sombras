@@ -125,6 +125,8 @@
   H.playing = playing;
   function cast(side){
     const sk = skillByKey(hands()[side]); if(!sk) return false;
+    /* v670: qual mão lança (animação e braço da magia do lado certo) */
+    H.castSide = side; H.castUntil = performance.now() + 900;
     let r = false;
     try { r = useSkill(sk); } catch(e){ console.warn('maos662 cast', e); }
     if(r !== false){ H.stats.casts[side]++; H.lastCast = { side, t: performance.now(), col: typeof sk.col === 'number' ? sk.col : 0x88ccff }; }
@@ -154,6 +156,7 @@
       L.ready = now + iv * 1000 * (power ? 1.8 : 1);
       H.stats.left++;
       H.lastLeft = { t: now, power: !!power };
+      H.leftUntil = now + Math.max(450, iv * 1000 * (power ? 1.8 : 1)); /* v670: golpe da mão esquerda (clipe espelhado) */
       try { if(global.FP550 && FP550.leftSwing) FP550.leftSwing(!!power); } catch(_) {}
       if(power){ try { shakeA = Math.max(shakeA || 0, 0.35); } catch(_) {} }
     }
@@ -179,6 +182,7 @@
   /* botão esquerdo com magia na mão direita: lança a magia (antes do ataque normal) */
   addEventListener('mousedown', e => {
     if(touchMode() || e.target !== C || !playing()) return;
+    if(e.button === 0){ H.leftUntil = 0; H.castSide = 'r'; } /* v670: a mão direita volta a ser a que anima */
     if(e.button === 0 && rightKind() === 'spell'){
       e.stopImmediatePropagation(); e.preventDefault();
       try { mouseHeld = false; } catch(_) {}

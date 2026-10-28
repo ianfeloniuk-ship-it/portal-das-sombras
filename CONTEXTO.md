@@ -1,3 +1,9 @@
+## v672 (28/10/2026) — Golpes e magia da mão esquerda (clipes espelhados)
+- Pedido de Ian: animação de cada mão «por arma, e por ataque mágico segurando magia, tudo igual Skyrim». Antes o golpe da mão esquerda (v662) tocava o golpe da direita: o braço direito balançava com a arma na esquerda.
+- `tools/warrior-player127.js` `mirror670`: ao carregar o banco do Viajante, 11 clipes (golpe1-3, pesado1-2, adaga1-2, soco, lança, magia_mao, guarda) são espelhados quadro a quadro no espaço do corpo (eixo esquerda-direita, Left↔Right) → `<clipe>_esq`, com a mesma janela de golpe. `frame155`: golpe da esquerda toca o `_esq` da arma (espada, adaga, machado, maça, soco…); magia lançada pela esquerda toca `magia_mao_esq`.
+- `tools/maos662.js`: `leftUntil` (golpe da esquerda), `castSide`/`castUntil` (qual mão lança); botão esquerdo devolve à direita. `tools/magia653.js`: magia segurada da mão esquerda aponta o braço esquerdo.
+- Teste (Edge, `tools/test-esq670.cjs`): 11 clipes espelhados; fotos do golpe direito × esquerdo com espada nas duas mãos (o esquerdo espelha corpo, braço e passo). Não visto em foto: magia segurada pela esquerda; 1ª pessoa já tinha o golpe esquerdo próprio (`FP550.leftSwing`).
+
 ## v671 (28/10/2026) — Correr a 7,5 m/s
 - Ian escolheu «Correr 7,5 m/s» (não conseguia fugir: corria 5,8, lobo persegue a 5,4 e raptor a 5,2). `tools/sprint373.js`: `runFactor`/`sprintFactor` = 7,5/4,2. Andar continua 4,2; correr segue sem gastar Estamina (v378). Nenhum texto do jogo citava o número.
 - Teste (Edge, `tools/test-v670.cjs`): Alt + W = 7,5 m/s, W = 4,2 m/s, 0 erros.
