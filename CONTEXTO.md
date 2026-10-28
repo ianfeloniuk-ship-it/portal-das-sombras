@@ -1,3 +1,8 @@
+## v665 (28/10/2026) — todas as janelas no padrão do Mercado
+- **Pedido de Ian:** a Bolsa (e todas as janelas) iguais ao Mercado de Recursos — estilo Skyrim com o visual Primeva; cada uma com seu conteúdo; constelações mantêm o próprio.
+- **`tools/telas535.js`:** janela sem loja/saque agora recebe `t535 t535-plain` (fundo escuro em degradê à esquerda, fonte Jost fina, títulos espaçados em maiúsculas, linhas sem caixa, abas sublinhadas em dourado, controles deslizantes dourados, sem palco 3D). Personagem (`t535-char`) perdeu as caixas verde-azuladas e a aba dourada cheia. Regras e textos não mudaram.
+- **Teste:** Edge headless 1600×900: Mercado, Bolsa, Configurações, Diário, Personagem, Bestiário, sem erro.
+
 ## v664 (28/10/2026) — essências realistas no saque, só com shader
 - **Pedido de Ian:** as essências da Prancha II do Livro (Gosma Fendida, Lodo Abissal, Gel de Fogo-Fátuo, Seiva Vital) com aparência realista, «bem parecido com a imagem mas com shader ou vfx», sem sólido 3D; «não precisa de drop, elas ficam no hud quando eu vou coletar nos bichos».
 - **`tools/essencias664.js` (novo, antes do `loot513.js`):** `ESSENCIAS.criar(tipo)` desenha cada essência por raymarching numa caixa invisível (forma, vidro, refração, absorção, brilho interno, fumaça do fogo-fátuo). `Essencia663.kind(x)` liga o material do saque `Essência de X`/`Gel de X` ao tipo: Gel ou fantasma/caveira → fogo-fátuo; gosma/slime → gosma; cogumelo/planta → seiva; resto → lodo (regra provisória, Ian pode ajustar).
