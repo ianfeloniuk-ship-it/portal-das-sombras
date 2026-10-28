@@ -63,8 +63,10 @@ function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const 
   const n={kind:'vendor',noLabel:true,home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+name.toUpperCase()+' — '+sign,use:()=>openShop(shop)};npcs.push(n);
   if(detailed&&!m.citizen133)Citizens133.load(name).then(ok=>{if(!ok||n.gone||!npcs.includes(n)||L.mode!=='world')return;const next=Citizens133.create(name);if(!next)return;next.root.position.copy(n.m.root.position);next.root.rotation.copy(n.m.root.rotation);scene.remove(n.m.root);n.m=next;scene.add(next.root)});
 }
+const WORLD_SEED668=20260927;
 function buildWorld(seed){
-  seed=seed??profile.seed;if(WSEED!==(seed|0))gates=[];
+  /* v668 (Ian): mundo fixo como no Skyrim — a mesma semente para todos (a da tela de título); o EcoGrid faz o mundo crescer por cima */
+  seed=WORLD_SEED668;if(WSEED!==(seed|0))gates=[];
   worldInit(seed);clearLevel();
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);

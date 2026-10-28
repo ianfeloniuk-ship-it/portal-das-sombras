@@ -395,7 +395,7 @@ uniform vec2 uEcoOrigin;
 
   // Geometrias e materiais compartilhados dos estágios
   const ZERO_M = new T.Matrix4().makeScale(0, 0, 0);
-  const TREE_KINDS = ['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa'];
+  const TREE_KINDS = ['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'pinheiro_cinza'];
   let GEO_STUMP = null;
   let GEO_SPROUT_STEM = null, GEO_SPROUT_LEAF = null;
   let GEO_YOUNG_TRUNK = null, GEO_YOUNG_CONE1 = null, GEO_YOUNG_CONE2 = null;

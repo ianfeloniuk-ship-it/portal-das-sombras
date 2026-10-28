@@ -7,7 +7,9 @@ function envChunk(g,R,x0,z0,cityD,addCol){
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44*CITYK||q.clear)continue;
     const B=biomeAt(px,pz),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
     const n=WN(px*.035,pz*.035);at(px,pz);
-    if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
+    if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}
+      /* v668: savana de Zahar — acácia e baobá (flora-regioes decide); hash da posição para não mudar os sorteios do resto do deserto */
+      else{const hz=((Math.sin(px*12.9898+pz*78.233)*43758.5453)%1+1)%1;if(hz<.30&&EH(tr,'tree_oak',px,0,pz,hz*62.8,15.5+hz*25)){addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:5.8,k:.42})}}}
     else if(n>(B==='floresta'?.34:B==='vulcao'?.66:.5)||R()<.045){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?11.5:15.5)+R()*7.5,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?3.5:5.8,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();const rk344=pk(R,ROCKS),sc344=EW(so,rk344,px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s,h:envTop344(rk344,sc344,-.08)});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}

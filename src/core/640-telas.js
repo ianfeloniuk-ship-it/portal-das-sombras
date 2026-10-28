@@ -39,7 +39,9 @@ function startGame(){
   $('title').hidden=true;
   if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
   if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(run.level>777){run.level=777;run.xp=0}if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
-  makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
+  /* v668: save de mundo sorteado (antes do mundo fixo) não volta para a posição antiga: o lugar pode ter virado árvore ou casa; nasce no começo */
+  const oldWorld668=(profile.seed|0)!==WORLD_SEED668;if(oldWorld668){profile.seed=WORLD_SEED668;run.pos=null}
+  makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();if(oldWorld668)toast('<b>[MUNDO]</b> O mundo de Primeva agora é o mesmo para todos. Você voltou ao ponto de partida.');
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   restoreSummons();

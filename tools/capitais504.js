@@ -290,7 +290,7 @@ void main(){`;
     Verden: { sat: .88, tint: [.98, 1.02, .86], moss: .45, snow: 0, grime: .3 },
     Ymiria: { sat: .34, tint: [.76, .84, 1.06], moss: 0, snow: .75, grime: .35 }
   };
-  const gradeCache = new Map(), NOGRADE = ['oak', 'willow', 'fir', 'abeto', 'betula', 'brasa', 'palm', 'dead', 'cherry'];
+  const gradeCache = new Map(), NOGRADE = ['oak', 'willow', 'fir', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'pinheiro_cinza', 'palm', 'dead', 'cherry'];
   function gradeMat(m, name, X, Z) {
     if (Array.isArray(m)) return m.map(x => gradeMat(x, name, X, Z));
     if (!m || m.isShaderMaterial || m.isMeshBasicMaterial || m.isPointsMaterial || m.isSpriteMaterial) return m;

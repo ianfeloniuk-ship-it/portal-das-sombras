@@ -4162,7 +4162,9 @@ function envChunk(g,R,x0,z0,cityD,addCol){
   for(let i=0;i<12;i++)for(let j=0;j<12;j++){const px=x0-CH/2+(i+.5)*st+(R()-.5)*3,pz=z0-CH/2+(j+.5)*st+(R()-.5)*3,q=cityD(px,pz);if(q.d<44*CITYK||q.clear)continue;
     const B=biomeAt(px,pz),set=B==='neve'||B==='cristal'?TREES.pine:B==='vulcao'?TREES.dead:B==='floresta'?['tree_default_dark','tree_oak_dark','tree_pineTallA_detailed','tree_tall']:bio<.34?TREES.pine:bio>.74||SE===2?TREES.fall:TREES.leaf,BT=B==='cristal'?0x9fe8ff:B==='vulcao'?0x5a3a30:B==='neve'||SE===3?0xe8f0f6:B==='pantano'?0x9aa886:null;
     const n=WN(px*.035,pz*.035);at(px,pz);
-    if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}}
+    if(B==='deserto'){if((n>.56||R()<.035)&&R()<.35){EH(tr,R()<.5?'cactus_tall':'cactus_short',px,0,pz,R()*TAU,2.2+R()*1.8);addCol({x:px,z:pz,r:.6})}
+      /* v668: savana de Zahar — acácia e baobá (flora-regioes decide); hash da posição para não mudar os sorteios do resto do deserto */
+      else{const hz=((Math.sin(px*12.9898+pz*78.233)*43758.5453)%1+1)%1;if(hz<.30&&EH(tr,'tree_oak',px,0,pz,hz*62.8,15.5+hz*25)){addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:5.8,k:.42})}}}
     else if(n>(B==='floresta'?.34:B==='vulcao'?.66:.5)||R()<.045){const dead=(dg>=5&&R()<.12+dg*.05)||(B==='pantano'&&R()<.45)||B==='vulcao';const k=dead?pk(R,TREES.dead):R()<.15?pk(R,TREES.leaf):pk(R,set);if(window.TripoEnvironment153&&!TripoEnvironment153.treeOk(k,px,pz))continue;
       EH(tr,k,px,0,pz,R()*TAU,(dead?11.5:15.5)+R()*7.5,BT&&!dead?tintB(BT,.84+R()*.16):tintB(pk(R,TINTS),.84+R()*.16));addCol({x:px,z:pz,r:.8});ENV.cast.push({x:px+.5,z:pz-.4,r:dead?3.5:5.8,k:dead?.25:.42})}
     else if(WN(px*.09+500,pz*.09+500)>.82){const s=.6+R();const rk344=pk(R,ROCKS),sc344=EW(so,rk344,px,-.08,pz,R()*TAU,2.4*s,tintB(0xffffff,.84+R()*.16));addCol({x:px,z:pz,r:1.1*s,h:envTop344(rk344,sc344,-.08)});ENV.cast.push({x:px+.3,z:pz-.25,r:1.7*s,k:.3})}}
@@ -4606,8 +4608,10 @@ function addVendor(c,shop,name,sign,col,x,z,look){if(cityFallen(c))return;const 
   const n={kind:'vendor',noLabel:true,home:c,m,x,z,face:Math.atan2(c.x-x,c.z-z),r:.5,name,short:name,shop,t:Math.random()*5,col,sign,label:'F · '+name.toUpperCase()+' — '+sign,use:()=>openShop(shop)};npcs.push(n);
   if(detailed&&!m.citizen133)Citizens133.load(name).then(ok=>{if(!ok||n.gone||!npcs.includes(n)||L.mode!=='world')return;const next=Citizens133.create(name);if(!next)return;next.root.position.copy(n.m.root.position);next.root.rotation.copy(n.m.root.rotation);scene.remove(n.m.root);n.m=next;scene.add(next.root)});
 }
+const WORLD_SEED668=20260927;
 function buildWorld(seed){
-  seed=seed??profile.seed;if(WSEED!==(seed|0))gates=[];
+  /* v668 (Ian): mundo fixo como no Skyrim — a mesma semente para todos (a da tela de título); o EcoGrid faz o mundo crescer por cima */
+  seed=WORLD_SEED668;if(WSEED!==(seed|0))gates=[];
   worldInit(seed);clearLevel();
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);
@@ -5006,7 +5010,7 @@ function pulse232(x,z){const R=400,dur=2.2,g=new THREE.Mesh(new THREE.SphereGeom
   if(player&&!player.dead&&!hit.has(player)&&Math.hypot(player.x-x,player.z-z)<=r){hit.add(player);curAtk=null;hurtPlayer(player.maxhp*.3,false);shake(.8);floater(player.x,player.z,'PULSO DA ÂNCORA','#e0b8ff',true)}
   if(!treesDone&&k>.3){treesDone=true;try{clearTrees232(x,z,R)}catch(_){}}
   if(k>=1){clearInterval(iv);L.group.remove(g,ring);g.geometry.dispose();ring.geometry.dispose()}},50)}
-function clearTrees232(x,z,R){const M=new THREE.Matrix4(),P=new THREE.Vector3(),Z=new THREE.Matrix4().makeScale(0,0,0);let n=0;scene.traverse(o=>{if(!o.isInstancedMesh||!['oak','willow','fir','abeto','betula','brasa'].includes(o.userData.tripo153))return;let ch=false;for(let i=0;i<o.count;i++){o.getMatrixAt(i,M);P.setFromMatrixPosition(M);if(Math.hypot(P.x-x,P.z-z)<=R&&!(o.userData.burnt232||(o.userData.burnt232=new Set())).has(i)){o.userData.burnt232.add(i);const cc=new THREE.Color(.11,.09,.08);if(!o.instanceColor){o.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(o.count*3).fill(1),3);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}o.setColorAt(i,cc);M.multiply(Z.makeScale(.92,.85,.92));o.setMatrixAt(i,M);ch=true;n++}}if(ch){o.instanceMatrix.needsUpdate=true;o.instanceColor.needsUpdate=true}});return n}
+function clearTrees232(x,z,R){const M=new THREE.Matrix4(),P=new THREE.Vector3(),Z=new THREE.Matrix4().makeScale(0,0,0);let n=0;scene.traverse(o=>{if(!o.isInstancedMesh||!['oak','willow','fir','abeto','betula','brasa','cipreste_raizes','salgueiro_brejo','arvore_cristal_mana','acacia_espinhosa','baoba_zahar','betula_prateada','pinheiro_cinza'].includes(o.userData.tripo153))return;let ch=false;for(let i=0;i<o.count;i++){o.getMatrixAt(i,M);P.setFromMatrixPosition(M);if(Math.hypot(P.x-x,P.z-z)<=R&&!(o.userData.burnt232||(o.userData.burnt232=new Set())).has(i)){o.userData.burnt232.add(i);const cc=new THREE.Color(.11,.09,.08);if(!o.instanceColor){o.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(o.count*3).fill(1),3);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}o.setColorAt(i,cc);M.multiply(Z.makeScale(.92,.85,.92));o.setMatrixAt(i,M);ch=true;n++}}if(ch){o.instanceMatrix.needsUpdate=true;o.instanceColor.needsUpdate=true}});return n}
 function ruptureCine231(c,gate){setTimeout(()=>{try{storyCh220('anchor237')}catch(_){}},6000);const P=player;if(!P)return;window.CINE231={x:c.x,z:c.z,t:0,dur:5};let orb=plasmaOrb231(1.4),col231=0xc070ff;orb.position.set(c.x,6,c.z);L.group.add(orb);/* v450 (Ian): no lugar da esfera genérica, a pedra-âncora da própria capital treme e explode */try{window.Anchor434&&Anchor434.crystal(c.name).then(r=>{if(!r||!orb.parent)return;L.group.remove(orb);const g=new THREE.Group();r.m.scale.setScalar(4/(r.h||1));r.m.position.y=-2;g.add(r.m);const l=new THREE.PointLight(r.col,3,30,1.6);g.add(l);g.position.set(c.x,6,c.z);L.group.add(g);orb=g;col231=r.col})}catch(_){}if(gate&&gate.mesh)gate.mesh.scale.setScalar(.01);
  bigText('A ÂNCORA SE ROMPE',2200);sfx('gong');let t=0;const iv=setInterval(()=>{t+=.05;const k=Math.min(1,t/1.6);orb.scale.setScalar(1+k*.6+Math.sin(t*40)*.08*k);
   if(t<1.6&&orb.parent){orb.position.x=c.x+Math.sin(t*55)*.15*k;orb.position.z=c.z+Math.cos(t*47)*.15*k;orb.rotation.y+=.02+k*.25}if(t>=1.6&&orb.parent){L.group.remove(orb);pulse232(c.x,c.z);shake(1.2);sfx('boom');fxRing(c.x,c.z,col231,14,.9);for(let i=0;i<4;i++)fxBurst(c.x,5,c.z,i%2?col231:0xffffff,18,9);shards250(c.x,c.z,col231)}
@@ -9016,7 +9020,9 @@ function startGame(){
   $('title').hidden=true;
   if(profile.classless&&profile.creationPending91){profile.orderPending401=true;profile.creationPending91=false;}
   if(!loadRun())newRun();if(profile.classless){run.level=0;run.xp=0;}ensureRun();if(run.level>777){run.level=777;run.xp=0}if(!run.quests)run.quests=genQuests();normalizeRewardBudgetsBalance();
-  makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();
+  /* v668: save de mundo sorteado (antes do mundo fixo) não volta para a posição antiga: o lugar pode ter virado árvore ou casa; nasce no começo */
+  const oldWorld668=(profile.seed|0)!==WORLD_SEED668;if(oldWorld668){profile.seed=WORLD_SEED668;run.pos=null}
+  makePlayer();if(run.pos){player.x=run.pos.x;player.z=run.pos.z}buildWorld();buildSteal();if(oldWorld668)toast('<b>[MUNDO]</b> O mundo de Primeva agora é o mesmo para todos. Você voltou ao ponto de partida.');
   for(const p of run.party)makeHunterAlly(p,player.x+rnd(-2,2),player.z+2,false);
   for(const r of run.shadows)if(r.on)spawnShadowRec(r,player.x+rnd(-2,2),player.z+2);
   restoreSummons();
@@ -9431,12 +9437,12 @@ const rareStatus103=document.createElement('div');rareStatus103.id='rare-status1
 /* Textured Tripo scenery. Shared geometry/materials, instanced per streamed chunk. */
 const TripoEnvironment153 = (() => {
   const models = {}, errors = [];
-  const files={abeto:'flora/abeto_geada_adulta.glb',betula:'flora/betula_gelida_adulta.glb',brasa:'flora/arvore_brasa_adulta.glb',oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'tripo-cacto446a.glb',cacto2:'tripo-cacto446b.glb',palisade:'tripo-palicada154.glb'};
+  const files={abeto:'flora/abeto_geada_adulta.glb',betula:'flora/betula_gelida_adulta.glb',brasa:'flora/arvore_brasa_adulta.glb',cipreste_raizes:'flora/cipreste_raizes_adulta.glb',salgueiro_brejo:'flora/salgueiro_brejo_adulta.glb',arvore_cristal_mana:'flora/arvore_cristal_mana_adulta.glb',acacia_espinhosa:'flora/acacia_espinhosa_adulta.glb',baoba_zahar:'flora/baoba_zahar_adulta.glb',betula_prateada:'flora/betula_prateada_adulta.glb',pinheiro_cinza:'flora/pinheiro_cinza_adulta.glb',oak:'tripo-carvalho153.glb',willow:'tripo-salgueiro153.glb',fir:'tripo-conifera153.glb',house:'tripo-casa153.glb',guild:'tripo-guilda154.glb',defense:'tripo-torre-defesa154.glb',forge:'tripo-forja154.glb',inn:'tripo-taverna154.glb',church:'tripo-capela154.glb',potion:'tripo-pocoes154.glb',mill:'tripo-moinho154.glb',wall:'tripo-muro154.glb',well:'tripo-poco154.glb',bank:'tripo-banco154.glb',market:'tripo-mercado154.glb',bankhall:'tripo-banco-predio154.glb',/* v513: elmo do Metamorfo removido do catálogo de cenário. */stones:'tripo-pedras437.glb'/* v437: o arquivo pedras154 era um braçal (Metamorfo) desde a v153 */,mossrock:'tripo-rocha-musgo154.glb',cacto1:'flora/cacto_colunar_adulta.glb',cacto2:'flora/cacto_colunar_jovem.glb'/* v668: cacto colunar */,palisade:'tripo-palicada154.glb'};
   // v154 scale rule (Ian): 1 unit = 1 m, hero ~1.9 m. Target heights in metres per building; old pieces had no common scale.
   const HEIGHT={guild:16,defense:16,forge:9.5,inn:13.5,church:18,potion:10.5,mill:16,well:2.8,bank:3.2,market:3.4,bankhall:14,house:9.5},KEYHEIGHT={building_tower_A_blue:16,building_tower_B_blue:16};
   // v154 city: original Kenney/KayKit keys -> Tripo building. Footprint follows the original piece so collisions stay valid.
   const CITY={building_barracks_blue:'guild',building_blacksmith_blue:'forge',building_home_B_red:'potion',building_tavern_blue:'inn',building_church_blue:'church',building_windmill_blue:'mill',building_well_blue:'well',building_tower_A_blue:'defense',building_tower_B_blue:'defense',building_market_blue:'defense',wall_straight:'wall','stall-red':'market','stall-green':'bank',tripo_bank_building:'bankhall',palisade154:'palisade',outerwall154:'wall'};
-  const TREEIDS=['oak','willow','fir','abeto','betula','brasa'];/* v619: espécies novas por região (tools/flora-regioes.js) */
+  const TREEIDS=['oak','willow','fir','abeto','betula','brasa','cipreste_raizes','salgueiro_brejo','arvore_cristal_mana','acacia_espinhosa','baoba_zahar','betula_prateada','pinheiro_cinza'];/* v619: espécies novas por região (tools/flora-regioes.js) */
   function prepare(gltf, id) {
     const root = gltf.scene;
     root.updateMatrixWorld(true);
@@ -9464,7 +9470,7 @@ const TripoEnvironment153 = (() => {
         mat.roughness=Math.max(.72,mat.roughness||0);mat.metalness=0;
         // Tripo foliage albedo is very dark under the game's lighting; lift it to read like the reference.
         // Etapa 2 (Irror, 02/10): 1.9x + strong self-glow read as neon; keep a gentle lift, slightly muted green, almost no glow.
-        if(TREEIDS.includes(id)&&mat.map){mat.color.setRGB(1.22,1.12,1.08);mat.emissiveMap=mat.map;if(id==='brasa')mat.emissive.setRGB(.55,.42,.3);/* v619: as brasas da árvore brasa brilham */else mat.emissive.setRGB(.09,.09,.08);}else if(mat.map){mat.color.setScalar(1.3);/* painted look: never pure black at dusk */mat.emissiveMap=mat.map;mat.emissive.setRGB(.2,.19,.18);}
+        if(TREEIDS.includes(id)&&mat.map){mat.color.setRGB(1.22,1.12,1.08);mat.emissiveMap=mat.map;if(id==='brasa')mat.emissive.setRGB(.55,.42,.3);/* v619: as brasas da árvore brasa brilham */else if(id==='arvore_cristal_mana')mat.emissive.setRGB(.35,.5,.75);/* v668: cristais da copa brilham azul */else mat.emissive.setRGB(.09,.09,.08);}else if(mat.map){mat.color.setScalar(1.3);/* painted look: never pure black at dusk */mat.emissiveMap=mat.map;mat.emissive.setRGB(.2,.19,.18);}
         // Same character visibility cutout as existing scenery. Instancing needs world positions.
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
@@ -9483,7 +9489,7 @@ const TripoEnvironment153 = (() => {
             {vec3 c0=diffuseColor.rgb;float leaf154=max(smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95),${id==='fir'?'0.':'smoothstep(.24,.30,vH153)'});float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));
             diffuseColor.rgb=mix(c0,(dot(c0,vec3(.3,.59,.11))*2.1+.11)*vColor,leaf154*on154);}
             #endif`);
-          if(!['oak','willow','fir','abeto','betula','brasa','boulder','stones','mossrock','cacto1','cacto2'].includes(id)){
+          if(!['oak','willow','fir','abeto','betula','brasa','cipreste_raizes','salgueiro_brejo','arvore_cristal_mana','acacia_espinhosa','baoba_zahar','betula_prateada','pinheiro_cinza','boulder','stones','mossrock','cacto1','cacto2'].includes(id)){
             // Night: amber window panes glow and the facade keeps a faint read, like the procedural houses.
             shader.uniforms.night153=window.NIGHT153U||(window.NIGHT153U={value:0});
             shader.fragmentShader='uniform float night153;\n'+shader.fragmentShader.replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
@@ -9508,7 +9514,7 @@ const TripoEnvironment153 = (() => {
     if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load('models/'+file,g=>{try{prepare(g,id)}catch(e){errors.push(String(e))}
       /* v180: versão leve (Blender, ~3 mil triângulos) para árvores longe da câmera */
-      const lod=({abeto:'flora/abeto_geada_adulta-lod.glb',betula:'flora/betula_gelida_adulta-lod.glb',brasa:'flora/arvore_brasa_adulta-lod.glb',oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',cacto1:'tripo-cacto446a-lod.glb',cacto2:'tripo-cacto446b-lod.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
+      const lod=({abeto:'flora/abeto_geada_adulta-lod.glb',betula:'flora/betula_gelida_adulta-lod.glb',brasa:'flora/arvore_brasa_adulta-lod.glb',cipreste_raizes:'flora/cipreste_raizes_adulta-lod.glb',salgueiro_brejo:'flora/salgueiro_brejo_adulta-lod.glb',arvore_cristal_mana:'flora/arvore_cristal_mana_adulta-lod.glb',acacia_espinhosa:'flora/acacia_espinhosa_adulta-lod.glb',baoba_zahar:'flora/baoba_zahar_adulta-lod.glb',betula_prateada:'flora/betula_prateada_adulta-lod.glb',pinheiro_cinza:'flora/pinheiro_cinza_adulta-lod.glb',oak:'tripo-carvalho153-lod.glb',willow:'tripo-salgueiro153-lod.glb',fir:'tripo-conifera153-lod.glb',wall:'tripo-muro154-lod.glb',palisade:'tripo-palicada154-lod.glb',house:'tripo-casa153-lod.glb',mossrock:'tripo-rocha-musgo154-lod.glb',stones:'tripo-pedras437-lod.glb',cacto1:'flora/cacto_colunar_adulta-lod.glb',cacto2:'flora/cacto_colunar_jovem.glb'})[id];/* v418: versões leves refeitas no Blender (~35% dos triângulos) */
       if(lod&&models[id])loader.load('models/'+lod,g2=>{const full=models[id];try{prepare(g2,id);full.liteParts=models[id].parts}catch(e){}models[id]=full;resolve()},undefined,()=>resolve());else resolve()},undefined,e=>{errors.push(file);console.warn('Tripo scenery fallback:',file);resolve()});
   })));
   /* v446 (Ian: refazer cacto e pedras): os cactos e pedras antigos do cenário viram modelos Tripo (cactos novos, monte de pedras e rochedo) */
@@ -9555,7 +9561,7 @@ const TripoEnvironment153 = (() => {
     if(!m&&key.startsWith('tree_')&&models.oak)return 0;
     if(!m)return oldEH(batch,key,x,y,z,ry,height,tint);
     // Metre scale: real trees tower over the 1.9 m hero (oak ~10 m, willow ~9 m, fir ~12 m).
-    const scale=height*({abeto:.8,betula:.62,brasa:.55,oak:1.55,willow:1.35,fir:1.7,cacto1:1.25,cacto2:1.1,stones:1.15,boulder:1}[id]||1)/m.h;add(batch,id,x,y,z,ry,scale);return scale;
+    const scale=height*({abeto:.8,betula:.62,brasa:.55,oak:1.55,willow:1.35,fir:1.7,cacto1:1.25,cacto2:1.1,stones:1.15,boulder:1}[id]||(window.Flora?.ESPECIES?.[id]?.altura?Flora.ESPECIES[id].altura*.057:1))/* v668: espécies novas pela altura do catálogo (abeto 14 m = .8) *//m.h;add(batch,id,x,y,z,ry,scale);return scale;
   };
   EW=function(batch,key,x,y,z,ry,width,tint){
     // v154 rocks from Tripo in the open world (dungeons keep their habitat stones). Width from the game is already in metres.
@@ -9594,7 +9600,7 @@ const TripoEnvironment153 = (() => {
     }
     return group;
   };
-  const NAT422=window.NAT422=new Set(['oak','willow','fir','abeto','betula','brasa','boulder','stones','mossrock','cacto1','cacto2']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
+  const NAT422=window.NAT422=new Set(['oak','willow','fir','abeto','betula','brasa','cipreste_raizes','salgueiro_brejo','arvore_cristal_mana','acacia_espinhosa','baoba_zahar','betula_prateada','pinheiro_cinza','boulder','stones','mossrock','cacto1','cacto2']);const CULL180=window.CULL180=new Set(),fr180=new THREE.Frustum(),pm180=new THREE.Matrix4();
   setInterval(()=>{if(!camera||!CULL180.size)return;camera.updateMatrixWorld();pm180.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);fr180.setFromProjectionMatrix(pm180);for(const m of CULL180){if(!m.parent){CULL180.delete(m);continue}const inV=fr180.intersectsSphere(m.userData.bs180),lt=m.userData.lite180;if(!lt){m.visible=inV;continue}if(!inV){m.visible=lt.visible=false;continue}const P=typeof player!=='undefined'&&player?player:camera.position,nat=NAT422.has(m.userData.tripo153);split423(m,lt,P,nat?10:40,nat?105:1e9/* v637: 90→105 m; além disso entram as árvores distantes de tools/horizonte637.js */,nat?(m.userData.thin423??1):1)}},100);
   /* v424 (Ian: jogo liso no navegador): antes o pedaço inteiro virava completo quando o jogador chegava perto do grupo
      (até 2,7 mi de triângulos só de carvalho, 12 mil cada). Agora é por árvore/construção: as mais perto ficam completas,
@@ -9701,7 +9707,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 <script src="tools/mechanics434.js?v=500"></script>
-<script src="tools/survival437.js?v=667"></script><script src="tools/loot663.js?v=667"></script>
+<script src="tools/survival437.js?v=668"></script><script src="tools/loot663.js?v=667"></script>
 <script src="tools/cart437.js?v=630"></script>
 <script src="tools/build437.js?v=630"></script>
 <script src="tools/otherworld460.js?v=654"></script>
@@ -9765,7 +9771,7 @@ requestAnimationFrame(frame);
 <script src="tools/mapa501.js?v=544"></script>
 <script src="tools/encontros502.js?v=512"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
-<script src="tools/capitais504.js?v=637"></script>
+<script src="tools/capitais504.js?v=668"></script>
 <script src="tools/capitais597.js?v=625"></script>
 <script src="tools/desfiladeiro510.js?v=528"></script>
 <script src="tools/marcos526.js?v=537r1"></script>
@@ -9786,8 +9792,8 @@ requestAnimationFrame(frame);
 <script src="tools/povo655.js?v=658"></script>
 <script src="tools/explorar539.js?v=654"></script>
 <script src="tools/anim547.js?v=549"></script>
-<script src="tools/flora-regioes.js?v=621"></script>
-<script src="tools/ecossistema550.js?v=628"></script>
+<script src="tools/flora-regioes.js?v=668"></script>
+<script src="tools/ecossistema550.js?v=668"></script>
 <script src="tools/skyrim588.js?v=645"></script>
 <script src="tools/controles593.js?v=593"></script>
 <script src="tools/upright600.js?v=600"></script>
