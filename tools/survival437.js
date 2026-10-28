@@ -386,7 +386,7 @@
     const p = new Promise(res => {
       if (!T.GLTFLoader) { res(null); return; }
       if (!loader) { loader = new T.GLTFLoader(); if (window.MeshoptDecoder) loader.setMeshoptDecoder(MeshoptDecoder); }
-      const path = name.includes('/') ? 'models/' + name + '.glb?v=456' : 'models/m437/' + name + '.glb?v=456';
+      const path = name.includes('/') ? 'models/' + name + '.glb?v=' + (name.startsWith('loot/') ? 667 : 456) : 'models/m437/' + name + '.glb?v=456';
       loader.load(path, g => {
         const root = g.scene;
         root.traverse(o => {
@@ -444,6 +444,8 @@
       const x = (cx + r1) * CELL, z = (cz + r2) * CELL;
       if (nearAnyCity(x, z, 14)) continue;
       try { if (typeof inWater244 === 'function' && inWater244(x, z)) continue; } catch (_) {}
+      /* v663: estrada livre — nada nasce no leito (meia-largura 4,5 m + 3 m) */
+      try { if (typeof onRoad === 'function' && onRoad(roadSegs(x, z, 1), x, z, 7.5)) continue; } catch (_) {}
       let bio = 'campos';
       try { bio = biomeAt(x, z); } catch (_) {}
       const sel = hash(cx, cz, i * 7 + 4);
@@ -455,7 +457,24 @@
       else if (sel < 0.92) kind = (bio === 'pantano' || bio === 'floresta' || bio === 'cristal') ? 'cogu' : 'arbusto';
       else kind = 'rocha';
       try { if (window.TER245 && TER245.ice500 && TER245.ice500(x, z) > 20 && (kind === 'arbusto' || kind === 'erva' || kind === 'cogu')) kind = 'pedra'; } catch (_) {} /* v502: cordilheira de gelo sem arbusto nem erva */
-      out.push({ id: cx + ',' + cz + ':' + i, kind, x, z, bio, ry: hash(cx, cz, i * 7 + 5) * TAU, s: 0.85 + hash(cx, cz, i * 7 + 6) * 0.35 });
+      /* v663: veio só em encosta/paredão (desnível ≥ 0,7 m em 4 m); em chão plano vira pedra solta */
+      let ore = null, cg = null;
+      const h7 = hash(cx, cz, i * 7 + 7);
+      let sea = false; try { sea = !!(window.TER245?.SEA439 && TER245.SEA439.d(x, z) > -60); } catch (_) {}
+      if (kind === 'rocha') {
+        let sl = 0; try { sl = Math.max(Math.abs(H(x + 2, z) - H(x - 2, z)), Math.abs(H(x, z + 2) - H(x, z - 2))); } catch (_) {}
+        const dun = typeof L !== 'undefined' && L && L.mode === 'dungeon';
+        if (dun) ore = 'geodo_cristal_mana_fenda';
+        else if (sl < 0.7) kind = 'pedra';
+        else ore = sea ? 'rocha_craca_thalor' : (bio === 'neve' || bio === 'cristal') ? 'geodo_cristal_mana_fenda'
+          : (bio === 'deserto' || bio === 'vulcao') ? (h7 < 0.12 ? 'ouro_primeiro_rei_zahar' : 'veio_cobre_zahar') : 'ferro_pantanoso_verden';
+      }
+      if (kind === 'cogu') {
+        const T6 = bio === 'pantano' ? ['cogu_amanita_venenosa', 'cogu_bolha_seiva', 'cogu_guarda_chuva_noturno']
+          : bio === 'cristal' ? ['cogu_guarda_chuva_noturno', 'cogu_bolha_seiva'] : ['cogu_orelha_de_pau', 'cogu_falso_ouro', 'cogu_amanita_venenosa'];
+        cg = T6[Math.floor(h7 * T6.length) % T6.length];
+      }
+      out.push({ id: cx + ',' + cz + ':' + i, kind, x, z, bio, ore, cg, ry: hash(cx, cz, i * 7 + 5) * TAU, s: 0.85 + hash(cx, cz, i * 7 + 6) * 0.35 });
     }
     return out;
   }
@@ -476,10 +495,10 @@
     g.rotation.y = d.ry;
     g.userData.terrainAbsolute245 = true;
     scene.add(g);
-    glb(m.glb).then(tpl => {
+    glb(d.ore ? 'loot/' + d.ore : d.cg ? 'loot/' + d.cg : m.glb).then(tpl => {
       if (!tpl || !g.parent) return;
       const mesh = fit(tpl, m.h * d.s, m.w * d.s);
-      if (d.kind === 'cogu') {
+      if (d.kind === 'cogu' && !d.cg) {
         mesh.traverse(o => { if (o.isMesh && o.material) { o.material = o.material.clone(); o.material.color.setHex(0xd8a878); } });
       }
       g.add(mesh);

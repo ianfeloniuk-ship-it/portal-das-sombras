@@ -132,6 +132,9 @@ function showFor(text,entry,color,desc){
   /* v664 (Ian): Essência/Gel do saque = núcleo fluido realista só em shader (Prancha II), não sólido */
   const flu=window.Essencia663&&(Essencia663.kind(entry)||Essencia663.kind({type:'material',name:text}));if(flu){const o=Essencia663.mesh(entry&&Essencia663.kind(entry)?entry:{type:'material',name:text});put(o,null,rim);return}
   if(entry&&entry.type==='equipment')text=(entry.item?.name||'')+' '+text;
+  /* v663: modelos do Lote 2 (models/loot) pelo espólio ou pelo nome da linha */
+  if(window.Loot663){const C=Loot663.C,lid=Loot663.idOf(entry)||Object.keys(C).sort((x,y)=>C[y].n.length-C[x].n.length).find(k=>text.includes(C[k].n));
+   if(lid){load('models/loot/'+lid+'.glb?v=667').then(g=>{if(id!==V.want)return;const{o,b}=fromGlb(g);o.userData.keep=true;put(o,b,rim)}).catch(()=>{if(id===V.want)put(part('Fragmento',0x9b6bff),null,rim)});return}}
   /* v584: Alquimia mostrava armadura e "Forjar arma" também; agora poção na alquimia e espada na forja de arma */
   const mt535=($('mt')?.textContent||'');
   if(/^ALQUIMIA/.test(mt535)&&!entry){put(part('Poção',color?new T.Color(color).getHex():0x6bd6a0),null,rim);return}
