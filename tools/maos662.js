@@ -8,10 +8,10 @@
  *     clicar na tela prende de novo.
  *   - Botão ESQUERDO = mão direita. Botão DIREITO = mão esquerda.
  *   - Mão esquerda com arma: ataca (segurar e soltar = golpe forte). Com magia: lança a magia.
- *     Com escudo, vazia com arma na direita, ou com arma de duas mãos (arco, lança): DEFENDE.
- *     As duas mãos vazias: soco da esquerda.
+ *     Vazia: soco da esquerda. Com escudo ou arma de duas mãos (arco, lança): nada.
+ *   - v670 (Ian): DEFENDER é só segurar o botão do MEIO; o direito não defende mais.
  *   - Duas armas: segurar os dois botões e soltar = golpe forte duplo (sem defesa, como no Skyrim).
- *   - Botão do meio continua defendendo; a trava de alvo continua na tecla dela.
+ *   - Botão do meio = defender (o único); a trava de alvo continua na tecla dela.
  *  MÃOS:
  *   - Mão direita: arma (slot Arma de sempre) ou uma habilidade/magia.
  *   - Mão esquerda: arma de uma mão (run.equip.wl), escudo (run.equip.sh) ou uma habilidade/magia.
@@ -192,8 +192,8 @@
     const lk = leftKind();
     if(lk === 'weapon'){ L.held = true; L.t0 = performance.now(); try { if(global.Skyrim588) Skyrim588.drawn = true; } catch(_) {} }
     else if(lk === 'spell') cast('l');
-    else if(lk === 'empty' && rightKind() === 'empty') leftAttack(false);
-    else blockOn();
+    else if(lk === 'empty') leftAttack(false);
+    /* v670 (Ian: «duas mãos, defesa no meio»): o direito nunca defende; escudo e arma de duas mãos defendem só no botão do meio */
   }
   function rightRelease(leftStill){
     if(L.held){
@@ -348,7 +348,7 @@
     return 'Vazia';
   }
   function handsHtml(){
-    let h = '<div class="sec">MÃOS</div><div class="sysline">Como no Skyrim: botão esquerdo usa a mão direita; botão direito usa a mão esquerda (com escudo, ou vazia com arma na direita, ele defende).</div>';
+    let h = '<div class="sec">MÃOS</div><div class="sysline">Como no Skyrim: botão esquerdo usa a mão direita; botão direito usa a mão esquerda (vazia, ela soca). Defender: segure o botão do meio.</div>';
     h += row('Mão direita · botão esquerdo', handLabel('r'), B('Esvaziar', 'hand662clr', 'r', !!(run.equip.w || hands().r)));
     h += row('Mão esquerda · botão direito', handLabel('l'), B('Esvaziar', 'hand662clr', 'l', !!(run.equip.wl || run.equip.sh || hands().l)));
     const sp = H.spells();

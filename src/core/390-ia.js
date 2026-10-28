@@ -179,6 +179,8 @@ function steerNpc490(n,ux,uz,dt){const base=Math.atan2(ux,uz),look=2.4;
   const pref=n.side490?Math.sign(n.side490):(Math.random()<.5?1:-1);
   for(const step of [.45,.8,1.15,1.5,1.9])for(const sg of [pref,-pref]){const a=base+sg*step;if(free(a)){n.side490=sg*step;n.side490t=1.2;return a}}
   return null}
+/* v670 (Ian: povo 'sentado em cadeira invisível'): morador anda a passo de cidade, como no Skyrim (~1,7 m/s); antes 3,2 m/s tocava a corrida */
+const NPCWALK670=1.7;
 function updNpc(n,dt){
   n.t=(n.t||0)+dt;const P=player,c=n.home;if(n.kind==='deco')return;
   if(n.kind==='vendor'){if(P&&Math.hypot(P.x-n.x,P.z-n.z)<8)turnTo(n,Math.atan2(P.x-n.x,P.z-n.z),dt,4);animChibi(n.m,{move:0,atk:0,dead:0,wind:0},n.t);n.m.root.rotation.y=n.face;return}
@@ -204,8 +206,8 @@ function updNpc(n,dt){
         if(n.kind!=='citizen'&&Math.random()<.22&&gs.length){const g=pick(gs);n.goGate=g;const ga=Math.round(Math.atan2(g.z-c.z,g.x-c.x)/(Math.PI/2))*(Math.PI/2);n.path=[{x:c.x+Math.cos(ga)*28,z:c.z+Math.sin(ga)*28},{x:c.x+Math.cos(ga)*40,z:c.z+Math.sin(ga)*40}];n.tx=g.x;n.tz=g.z+1}
         else if(Math.hypot(rx,rz)>30){const ga=Math.round(Math.atan2(rz,rx)/(Math.PI/2))*(Math.PI/2);n.path=[{x:c.x+Math.cos(ga)*40,z:c.z+Math.sin(ga)*40},{x:c.x+Math.cos(ga)*26,z:c.z+Math.sin(ga)*26}];n.tx=c.x+rnd(-10,10);n.tz=c.z+rnd(-10,10)}
         else{for(let k=0;k<10;k++){const a=rnd(0,TAU),r=rnd(3,20);n.tx=c.x+Math.cos(a)*r;n.tz=c.z+Math.sin(a)*r;if(npcClear490(n,n.tx,n.tz))break}}}}
-    else{const ang=steerNpc490(n,dx/d,dz/d,dt);if(ang==null){n.tx=n.x;n.tz=n.z;n.path=[];n.wait=rnd(1,3)}else{turnTo(n,ang,dt,6);const x0=n.x,z0=n.z;moveEnt(n,Math.sin(ang)*3.2*dt,Math.cos(ang)*3.2*dt);mv=1;
-      /* preso mesmo assim: desiste do destino e escolhe outro */const got=Math.hypot(n.x-x0,n.z-z0);n.stuck490=got<3.2*dt*.35?(n.stuck490||0)+dt:0;if(n.stuck490>1.2){n.stuck490=0;n.path=[];n.tx=n.x;n.tz=n.z}}}
+    else{const ang=steerNpc490(n,dx/d,dz/d,dt);if(ang==null){n.tx=n.x;n.tz=n.z;n.path=[];n.wait=rnd(1,3)}else{turnTo(n,ang,dt,6);const x0=n.x,z0=n.z;moveEnt(n,Math.sin(ang)*NPCWALK670*dt,Math.cos(ang)*NPCWALK670*dt);mv=1;
+      /* preso mesmo assim: desiste do destino e escolhe outro */const got=Math.hypot(n.x-x0,n.z-z0);n.stuck490=got<NPCWALK670*dt*.35?(n.stuck490||0)+dt:0;if(n.stuck490>1.2){n.stuck490=0;n.path=[];n.tx=n.x;n.tz=n.z}}}
   }
   animChibi(n.m,{move:mv,atk:0,dead:0,wind:0},n.t);n.m.root.position.set(n.x,0,n.z);n.m.root.rotation.y=n.face;
 }

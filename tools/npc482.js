@@ -120,7 +120,7 @@ function animate(m,st,t){const P=global.player||(typeof player!=='undefined'?pla
  /* velocidade real (pelo deslocamento) escolhe andar ou correr e o ritmo do clipe */
  if(m.last482){const v=Math.hypot(p.x-m.last482.x,p.z-m.last482.z)/Math.max(step,1e-3);m.v482+=(Math.min(v,9)-m.v482)*Math.min(1,step*6)}else{m.last482=new T.Vector3();m.v482=0}
  m.last482.copy(p);
- const s={...st};if(s.move>.08){s.speed=Math.max(.6,m.v482/(m.height482||1));s.sprint=m.v482>4.2}if(!s.wep)s.wep=m.wep482;
+ const s={...st};if(s.move>.08){/* v670: velocidade real (não dividida pela altura) decide andar ou correr */s.speed=Math.max(.6,m.v482);s.walking=m.v482<3;s.sprint=m.v482>4.2}if(!s.wep)s.wep=m.wep482;
  if(m.civil482&&!(s.dead>0)&&civilBank()){s.bank486='povo';const c=civilClip(m,s,step);if(c){s.clip486=c.n;s.rate486=c.r;if(c.move){s.move=1;s.speed=Math.max(s.speed||0,5)}}}
  if(!m.phased482&&Warrior127.anim155&&dt>0){m.phased482=true;Warrior127.animate(m,{move:0,atk:0,dead:0},t,m.phase482)}
  Warrior127.animate(m,s,t,step*m.spd482)}

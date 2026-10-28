@@ -1,3 +1,9 @@
+## v670 (28/10/2026) — Defender só no botão do meio; povo anda a passo de cidade
+- Pedido de Ian: «duas mãos, defesa no meio» — a v662 tinha posto defesa também no botão direito (desfazendo a v644). Agora `tools/maos662.js` `rightPress`: direito = mão esquerda (arma ataca, magia lança, vazia soca); com escudo ou arco/lança o direito não faz nada; **defender = segurar o botão do meio** (`guard472.js`), o único. Textos ligados: tela de teclas (`630-controles.js`) e painel das mãos.
+- Povo «sentado em cadeira invisível» (Ian): moradores andavam a 3,2 m/s fixos e o `npc482.js` dividia a velocidade pela altura → tocava a corrida do Viajante. Agora `NPCWALK670 = 1,7` m/s (`390-ia.js`) e andar/correr pela velocidade real (`s.walking` abaixo de 3 m/s). Fuga em pânico continua a 5,5.
+- Teste (Edge headless, `tools/test-v670.cjs`): direito com escudo não defende, meio defende; morador 1,7 m/s; jogador anda 4,2 e corre (Alt) 5,8 m/s, 0 erros. Medido também: lobo persegue a 5,4 e raptor a 5,2, quase a corrida (pendente com Ian).
+- Não feito: animações próprias de cada mão por arma (pedido de Ian).
+
 ## v669 (28/10/2026) — Nomes das árvores pela imagem
 - Ian aprovou: «Pinheiro cinza» → **Árvore de cinzas**, «Bétula gélida» → **Bétula seca**, «Cipreste de raízes» → **Mangue do brejo** (só o `nome` em `tools/flora-regioes.js`; ids e arquivos iguais). Nenhum outro texto do jogo citava esses nomes.
 
