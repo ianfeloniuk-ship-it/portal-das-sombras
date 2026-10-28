@@ -16,7 +16,7 @@ function setup(m){
   if(!list.length){m.pano672=false;return}
   const legs=[];const B=m.bones||{};for(const [a,b] of [['thigh_l','shin_l'],['shin_l','foot_l'],['thigh_r','shin_r'],['shin_r','foot_r']])if(B[a]&&B[b])legs.push([B[a],B[b]]);
   m.root.updateMatrixWorld(true);const H=new T.Box3().setFromObject(m.model).getSize(v1).y||1.8;
-  m.pano672={chains:list.map(c=>({bones:c,p:null,o:null,len:[]})),legs,r:.055*H};API.stats.models++;
+  m.pano672={chains:list.map(c=>({bones:c,p:null,o:null,len:[]})),legs,r:(list.length>9?.07:.055)*H};/* v673: vestido justo (12 correntes) afasta mais o pano das pernas */API.stats.models++;
 }
 function tipOf(b){return b.children.find(c=>c.isBone)}
 function step(m,dt){

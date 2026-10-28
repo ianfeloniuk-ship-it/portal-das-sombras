@@ -37,6 +37,7 @@ FORCE_PROXY = arg('force-proxy', flag=True)
 LEGS = arg('legs', 'auto')  # auto|pants|skirt
 HOODARG = arg('hood', 'auto')  # auto|yes: capuz no topo da cabeça (topo = roupa, cabelo só o que aparece por baixo)
 ANIM_PROOF = not arg('no-anim-proof', flag=True)
+DIGI = arg('digitigrade', flag=True)  # v673: pé de bicho (lobisomem): calcanhar alto, pé longo inteiro no osso do pé
 assert SRC and OUT and NID, 'faltou --in/--out/--id'
 assert RACE in ('human', 'dwarf', 'elf') and SEX in ('m', 'f') and ROLE in ('civil', 'hunter')
 os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
@@ -443,7 +444,9 @@ for sg, nm in ((1, 'Left'), (-1, 'Right')):
         if sel.sum() >= 3 and rng(Y[sel]) < 0.6 * flen:
             az = z0 + 0.012 * H; break
     az = clamp(az, 0.045 * H, 0.095 * H)
+    if DIGI: az = 0.15 * H
     ya = yh + 0.25 * (yt - yh)
+    if DIGI: ya = yh + 0.08 * (yt - yh)  # calcanhar alto fica atrás
     if not SKIRT:
         sl = side & (Z > sep_top - 0.06 * H) & (Z < sep_top - 0.02 * H)
         hx = mid_(X[sl] * sg) if sl.sum() > 3 else 0.055 * H
@@ -706,14 +709,52 @@ for b in NAMES:
     eb.matrix = M; eb.length = ln
 bpy.ops.object.mode_set(mode='OBJECT')
 
+# ---------------------------------------------------------------- v673: membrana entre as pernas (Trellis liga um pé ao outro)
+_kz = 0.5 * (L['LeftLeg'].z + L['RightLeg'].z)
+_dom = W.argmax(1)
+_LL = {NAMES.index(b) for b in ('LeftUpLeg', 'LeftLeg', 'LeftFoot', 'LeftToeBase')}
+_RR = {NAMES.index(b) for b in ('RightUpLeg', 'RightLeg', 'RightFoot', 'RightToeBase')}
+_bm = bmesh.new(); _bm.from_mesh(me); _bm.verts.ensure_lookup_table()
+_web = [f for f in _bm.faces if max(v.co.z for v in f.verts) < _kz and any(_dom[v.index] in _LL for v in f.verts) and any(_dom[v.index] in _RR for v in f.verts) and all(cfac[v.index] < 0.35 for v in f.verts)]
+if _web:
+    bmesh.ops.delete(_bm, geom=_web, context='FACES_ONLY'); _bm.to_mesh(me); me.update()
+    log('v673 membrana entre as pernas: %d faces apagadas' % len(_web))
+elif _web:
+    log('v673 membrana: %d faces ligam as pernas, mantidas (saia/vestido)' % len(_web))
+_bm.free()
 # ---------------------------------------------------------------- v672: correntes de pano (física no jogo: tools/pano672.js)
 # Saia/vestido/túnica abaixo do quadril: 8 correntes de 4 ossos em volta da cintura, presas no Hips. O pano (cfac) passa
 # para as correntes vizinhas (ângulo e altura), guardando parte do peso antigo (pernas) para não atravessar a coxa.
 PANO = []
 clo = cfac > 0.35
+# v673: RABO (lobisomem etc.): pedaço atrás do quadril, para fora do corpo, abaixo da cintura -> corrente própria
+back_y = L['Hips'].y + 0.09 * H
+tail = (Y > back_y) & (Z < hip_jz + 0.02 * H) & (Z > 0.02 * H) & (lg > 0.02 * H)
+TAIL = []
+if tail.sum() > 0.01 * n and float(np.ptp(Y[tail])) > 0.08 * H:
+    clo = clo & ~tail
+    tz = Z[tail]; ty = Y[tail]; tx = X[tail]
+    # linha central do rabo: da base (perto do quadril) até a ponta (mais longe do quadril)
+    dist = np.hypot(ty - L['Hips'].y, tz - hip_jz)
+    order_ = np.argsort(dist); NT = 5
+    seg = np.array_split(order_, NT)
+    pts = [Vector((L['Hips'].x, back_y - 0.03 * H, hip_jz - 0.02 * H))] + [Vector((float(tx[s_].mean()), float(ty[s_].mean()), float(tz[s_].mean()))) for s_ in seg]
+    bpy.ops.object.select_all(action='DESELECT'); bpy.context.view_layer.objects.active = arm; arm.select_set(True)
+    bpy.ops.object.mode_set(mode='EDIT'); prev = ad.edit_bones[P + 'Hips']
+    for i in range(NT):
+        nm = 'pano_9_%d' % i; eb = ad.edit_bones.new(nm); eb.head = pts[i]; eb.tail = pts[i + 1]
+        if (eb.tail - eb.head).length < 0.01 * H: eb.tail = eb.head + Vector((0, 0.02 * H, -0.01 * H))
+        eb.parent = prev; eb.use_connect = i > 0; eb.use_deform = True; eb.roll = 0; prev = eb; TAIL.append(nm)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    tw = np.zeros((n, NT)); ti = np.where(tail)[0]
+    for rank, s_ in enumerate(seg):
+        tw[ti[s_], rank] = 1.0
+    log('v673 rabo: %d verts, corrente de %d ossos' % (int(tail.sum()), NT))
 if clo.sum() > 0.02 * n:
-    K, NB = 8, 4
     cx_, cy_ = L['Hips'].x, L['Hips'].y
+    rmed = float(np.median(np.hypot(X[clo] - cx_, Y[clo] - cy_)))
+    tight = rmed <= 0.11 * H
+    K, NB = (12, 4) if tight else (8, 4)   # v673: vestido justo/longo = mais correntes (perna não passa entre elas)
     top = hip_jz - 0.01 * H
     bot = max(0.03 * H, min(float(Z[clo].min()) + 0.01 * H, hip_jz - 0.15 * H))
     ang = np.arctan2(Y - cy_, X - cx_)
@@ -744,10 +785,17 @@ if clo.sum() > 0.02 * n:
     for kc, wa in ((k0, 1 - fa), (k1, fa)):
         for ic, wb in ((i0, 1 - fb), (i1, fb)):
             np.add.at(WP, (np.arange(n), kc * NB + ic), wa * wb)
-    c = np.clip(cfac, 0, 1)[:, None] * 0.75 * clo[:, None]
+    share = 0.6 if tight else 0.75   # v673: vestido justo divide entre pernas e correntes (só correntes espalhava a barra no chão)
+    c = np.clip(cfac, 0, 1)[:, None] * share * clo[:, None]
     WA = np.concatenate([W * (1 - c), WP * c], 1)
+    log('v673 pano: raio %.3fH, %d%% nas correntes' % (rmed / H, int(share * 100)))
     idx = np.argsort(-WA, 1); keep = np.zeros_like(WA, dtype=bool); np.put_along_axis(keep, idx[:, :4], True, 1)
     WA = np.where(keep & (WA >= 0.02), WA, 0); WA = WA / WA.sum(1, keepdims=True)
+    if TAIL:
+        WT = np.zeros((n, len(TAIL))); WT[tail] = tw[tail]
+        WA = np.concatenate([np.where(tail[:, None], 0, WA), WT * 0.9], 1)
+        WA[tail, NAMES.index('Hips')] += 0.1
+        WA = WA / WA.sum(1, keepdims=True); PANO = PANO + TAIL
     for g in list(ob.vertex_groups): ob.vertex_groups.remove(g)
     allnames = [P + b for b in NAMES] + PANO
     VG = [ob.vertex_groups.new(name=nm) for nm in allnames]

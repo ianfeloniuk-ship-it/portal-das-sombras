@@ -22,8 +22,8 @@ const OUT = process.argv[2] || 'pano672';
         const g = await new Promise(r => new THREE.GLTFLoader().load('tmp672/' + id + '.glb', r, undefined, () => r(null))); if (!g) return [];
         const m = Warrior127.create({ modelScene: g.scene, legacyLinearOutput: true, equip: {} }); const y = typeof terrH === 'function' ? terrH(300, 70) : 0;
         m.root.position.set(300, y, 70); scene.add(m.root); Pano672.on = true; const out = [];
-        for (const [mv, sp] of [[1, 1.7], [2, 7]]) for (let k = 0; k < 70; k++) { Warrior127.animate(m, { move: mv, speed: sp, walking: mv === 1, sprint: mv > 1, atk: 0, dead: 0 }, k / 60, 1 / 60);
-          if (k === 45 || k === 62) { const p = m.root.position; m.root.rotation.y = 0.9;
+        for (const [mv, sp] of [[0, 0], [1, 1.7], [2, 7]]) for (let k = 0; k < 70; k++) { Warrior127.animate(m, { move: mv, speed: sp, walking: mv === 1, sprint: mv > 1, atk: 0, dead: 0 }, k / 60, 1 / 60);
+          if (k === 40 || k === 52 || k === 64) { const p = m.root.position; m.root.rotation.y = (k === 52 ? Math.PI / 2 : 0.6);
             camera.position.set(p.x + 0.3, p.y + 1.15, p.z + 3.3); camera.lookAt(p.x, p.y + 0.9, p.z); camera.updateMatrixWorld(); renderer.render(scene, camera); out.push(renderer.domElement.toDataURL('image/jpeg', .8)); } }
         scene.remove(m.root); return out;
       }, id);
