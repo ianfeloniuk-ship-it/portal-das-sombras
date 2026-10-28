@@ -4631,7 +4631,7 @@ function buildWorld(seed){
   hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
   const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));moon.position.set(-80,70,-150);L.group.add(moon);L.moon=moon;
   updChunks(true);
-  if(!gates.length)for(let i=0;i<GATE_COUNT155;i++)gates.push(newGate());
+  if(!gates.length)for(let i=0;i<((window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155);i++)gates.push(newGate());
   for(const g of gates)if(!g.dead){gateMesh(g);if(g.closing131&&g.mesh?.userData.rift131)Rift131.close(g.mesh,g.storyScar131)}
   L.cands=genCands();releaseRedPortalBreaks();
 }
@@ -4705,6 +4705,7 @@ function gateMesh(g){retireExtraction117(g);
   L.inter.push({type:'gate',g,x:g.x,z:g.z,r:3.6,label:g.secret?'F · PORTAL ???':'F · PORTAL RANK '+GR[g.rank].id,use:()=>gateModal(g)});
 }
 function removeGateMesh(g){if(g.mesh){if(g.mesh.userData.rift131){Rift131.dispose(g.mesh);envDispose(g.mesh)}L.group.remove(g.mesh);g.mesh=null}L.inter=L.inter.filter(i=>i.g!==g)}
+/* v666 (Ian): começo calmo — 4 Fendas por perto nos primeiros 30 min de jogo, 12 depois */
 const GATE_COUNT155=12,GATE_NEAR155=200,GATE_FAR155=280;
 function tickGates(dt){
   const P=player;
@@ -4712,12 +4713,13 @@ function tickGates(dt){
     // v155 (Ian): portal longe não some; só deixa de ser desenhado. Voltando antes do tempo acabar, ele continua lá.
     const far=L.mode==='world'&&P&&Math.hypot(g.x-P.x,g.z-P.z)>GATE_FAR155;
     if(L.mode==='world'&&g.life>0){if(far&&g.mesh)removeGateMesh(g);else if(!far&&!g.mesh)gateMesh(g)}
-    if(g.life<=0){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
+    if(g.life<=0){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!g.cleared&&!g.secret&&g.rank>=2&&!(window.Inicio666&&Inicio666.calmo()))dungeonBreak(g)}}}
   for(const g of closingDone){removeGateMesh(g);gates=gates.filter(x=>x!==g)}
   gates=gates.filter(g=>!g.dead||g===curGate);
   // v155 (Ian): portais espalhados pelo mundo todo. Conta só os que estão por perto; os que ficaram para trás somem e novos nascem à volta (inclusive à frente), então andar reto sempre encontra portal.
   const PP=P||{x:0,z:0};let alive=gates.filter(g=>!g.dead&&Math.hypot(g.x-PP.x,g.z-PP.z)<GATE_NEAR155).length,tries=0;
-  while(alive<GATE_COUNT155&&tries++<GATE_COUNT155){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
+  const gc666=(window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155;
+  while(alive<gc666&&tries++<gc666){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
 }
 function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   // v155 (Ian): monstros e o chefe saem do portal. Se houver vila a até 100 m, marcham para atacá-la; senão vagueiam pelo mapa.
@@ -6901,7 +6903,7 @@ function updWorld(dt){updEcon(dt);
   const P=player,nc=nearestCity(P.x,P.z),fal=cityFallen(nc.c),safe=nc.d<Math.max(36*CITYK,cityBig533(nc.c))&&!fal;
   if(fal&&nc.d<45*CITYK&&!(profile.raided155||{})[nc.c.id]){L.fallSp=L.fallSp||{};if(!L.fallSp[nc.c.id]){L.fallSp[nc.c.id]=1;const gr=clamp(rankOf()+1,0,9);for(let i=0;i<10;i++){const a=rnd(0,TAU),r=rnd(4,22);const e=spawnKind(wpick(worldKinds124(gr,nc.c.x,nc.c.z)).k,nc.c.x+Math.cos(a)*r,nc.c.z+Math.sin(a)*r,gr,{wild:true,breaker:true});e.gold*=2;if(i<3)makeElite(e)}toast('<b>[NARRADOR]</b> '+nc.c.name+' caiu. Monstros tomaram a cidade. Feche o Portal Primordial para salvá-la.',6000)}}updDayNight(dt);updEvents(dt);updWeather(dt);updInvasion(dt);updPet(dt);updGates341(dt);
   if(L.car){L.carT-=dt;if(L.carT<=0){L.carT=18;const c=L.car;for(let i=0;i<3;i++){const a=rnd(0,TAU),x=c.x+Math.cos(a)*14,z=c.z+Math.sin(a)*14;if(nearestCity(x,z).d<40*CITYK)continue;const e=spawnKind(wpick(worldKinds124(danger(x,z),x,z)).k,x,z,Math.max(danger(x,z),rankOf()-2),{wild:true});e.aggro=true}toast('<b>[CARAVANA]</b> Emboscada!',1500)}if(L.car.dead)L.car=null}
-  if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}
+  if(unl('worldboss')){L.wbT=(L.wbT??300)-dt;const wb=enemies.find(e=>e.world&&!e.dead);if(!wb&&L.wbT<=0&&!safe&&!(window.Inicio666&&Inicio666.bloqueiaChefe())){L.wbT=1200;spawnWorldBoss()}if(wb&&!wb.aggro){const dx=wb.roam.x-wb.x,dz=wb.roam.z-wb.z,d=Math.hypot(dx,dz);if(d<2)wb.roam={x:wb.x+rnd(-40,40),z:wb.z+rnd(-40,40)};else{wb.x+=dx/d*2*dt;wb.z+=dz/d*2*dt;wb.face=Math.atan2(dx,dz);wb.m.root.position.set(wb.x,0,wb.z);wb.m.root.rotation.y=wb.face}}}
   if(run.daily&&run.daily.day!==todayKey())ensureRun();
   if(run.penalty){run.penalty=false}/* v213 (Ian): diária no dia real não pune mais */
   L.loadT-=dt;if(L.loadT<=0){L.loadT=.35;updChunks(false)}
@@ -8078,7 +8080,7 @@ function startSiege(c){if(profile?.classless)return;const a=rnd(0,TAU),x=c.x+Mat
   for(const s of[-1,1]){const w=new THREE.Mesh(geo('wing',()=>new THREE.PlaneGeometry(2.2,1.2)),new THREE.MeshBasicMaterial({color:0x5a0a0a,side:THREE.DoubleSide}));w.position.set(s*1.3,1.3,-.3);w.rotation.set(0,s*.5,s*.4);b.m.body.add(w)}
   spawnCityDefenders(c,c.x+Math.cos(a)*38*CITYK,c.z+Math.sin(a)*38*CITYK);L.siege={b,c,t:300};bigText('ATAQUE À CIDADE',1600);sfx('gong');shake(.6);showSys('Um DRAGÃO SITIANTE ataca '+c.name+'! Derrote-o em 5 minutos. Recompensa: ouro, troféu e nova coleta da renda de hoje.')}
 function updSiege(dt){if(profile?.classless)return;const P=player;run.siegeT=(run.siegeT||0)+dt;
-  if(!L.siege&&run.siegeT>1500&&!bossE){const nc=nearestCity(P.x,P.z);if(nc.d<120&&cityL(nc.c)>=5&&!cityFallen(nc.c)){run.siegeT=0;startSiege(nc.c)}}
+  if(!L.siege&&run.siegeT>1500&&!bossE&&!(window.Inicio666&&Inicio666.calmo())){const nc=nearestCity(P.x,P.z);if(nc.d<120&&cityL(nc.c)>=5&&!cityFallen(nc.c)){run.siegeT=0;startSiege(nc.c)}}
   const S=L.siege;if(!S)return;S.t-=dt;if(S.b.dead){L.siege=null;return}
   if(S.t<=0){S.b.dead=true;S.b.gone=true;scene.remove(S.b.m.root);if(bossE===S.b){bossE=null;$('boss').hidden=true}L.siege=null;toast('<b>[CIDADE]</b> O dragão cansou e foi embora de '+S.c.name+'.',5000)}}
 function siegeWin(b){narratorEvent105('siege');const c=b.siege;if(!b.regional116){b.regional116=true;regionEvent116(c,15,-20,'Você venceu o cerco. Confiança +15; abastecimento recuperado.')}profile.cityDay=profile.cityDay||{};const g=Math.round(400*(1+cityL(c)));run.gold+=g;profile.trophies=profile.trophies||[];const tn='Dragão Sitiante';if(!profile.trophies.includes(tn))profile.trophies.push(tn);profile.sieges=(profile.sieges||0)+1;store.set('pds2_profile',profile);L.siege=null;
@@ -9756,9 +9758,9 @@ requestAnimationFrame(frame);
 <script src="tools/vida522.js?v=558"></script>
 <script src="tools/vida523.js?v=655"></script>
 <script src="tools/vida527.js?v=534"></script>
-<script src="tools/npc482.js?v=655"></script>
+<script src="tools/npc482.js?v=666&o=655"></script>
 <script src="tools/vida486.js?v=493"></script>
-<script src="tools/dragoes510.js?v=511"></script>
+<script src="tools/dragoes510.js?v=666"></script>
 <script src="tools/hitbox-dragao551.js?v=578"></script>
 <script src="tools/bloom487/CopyShader.js?v=487"></script>
 <script src="tools/bloom487/LuminosityHighPassShader.js?v=487"></script>
@@ -9792,7 +9794,7 @@ requestAnimationFrame(frame);
 <script src="tools/skyrim-overhaul538.js?v=645"></script>
 <script src="tools/lote541.js?v=656"></script>
 <script src="tools/mapa3d544.js?v=594"></script>
-<script src="tools/crime545.js?v=658"></script>
+<script src="tools/crime545.js?v=666"></script>
 <script src="tools/contratos541.js?v=542"></script>
 <script src="tools/fixas545.js?v=546"></script>
 <script src="tools/fronteira551.js?v=577"></script>
@@ -9822,10 +9824,12 @@ requestAnimationFrame(frame);
 <script src="tools/lugares637.js?v=639"></script>
 <script src="tools/mana642.js?v=646"></script>
 <script src="tools/corpo659.js?v=659"></script>
+<script src="tools/inicio666.js?v=666"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v665</div>
+
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v666</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=665;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=666;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

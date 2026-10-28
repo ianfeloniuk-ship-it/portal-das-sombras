@@ -1,3 +1,10 @@
+## v666 (28/10/2026) — começo calmo, cidade segura
+- **Pedido de Ian:** "3 minutos de jogo, morri 3 vezes": dragão nascendo na cidade, voando sem dar para o Guerreiro bater, habilidades acertando guardas, mapa cheio de Fendas logo no início.
+- **`tools/inicio666.js` (novo):** conta o tempo de jogo (`profile.pt666`). Primeiros 30 min (até o nível 10): 4 Fendas por perto em vez de 12 (`260-v341.js`), Fenda que vence o tempo não solta monstros, sem Chefe Errante (`400-loop.js`) e sem ataque de dragão à cidade (`510`, `dragoes510.js`). Dragão selvagem (`npc482.js`) e Chefe Errante nunca nascem a menos de 150 m de cidade.
+- **`tools/dragoes510.js`:** dragão circula 7 s no ar (antes 14) e fica 26 s no chão (18 s ferido; antes 20/12) — dá para lutar corpo a corpo.
+- **`tools/crime545.js`:** com monstro a até 14 m, golpe e tiro não acertam NPC (só quem já brigava com você) — fogo cruzado não vira crime.
+- **Teste:** jogo novo no navegador: 4 Fendas, modo calmo ativo, contador rodando, sem erro de script.
+
 ## v665 (28/10/2026) — todas as janelas no padrão do Mercado
 - **Pedido de Ian:** a Bolsa (e todas as janelas) iguais ao Mercado de Recursos — estilo Skyrim com o visual Primeva; cada uma com seu conteúdo; constelações mantêm o próprio.
 - **`tools/telas535.js`:** janela sem loja/saque agora recebe `t535 t535-plain` (fundo escuro em degradê à esquerda, fonte Jost fina, títulos espaçados em maiúsculas, linhas sem caixa, abas sublinhadas em dourado, controles deslizantes dourados, sem palco 3D). Personagem (`t535-char`) perdeu as caixas verde-azuladas e a aba dourada cheia. Regras e textos não mudaram.

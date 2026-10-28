@@ -23,7 +23,9 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 /* ---------- quem é quem ---------- */
 const isGuard=n=>n.role523==='guarda';
 const isThief=n=>n.role523==='ladrao';
-function target(n){return n&&!n.alma545&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
+/* v666 (Ian): no meio da luta com monstros, golpe e tiro não pegam NPC (só quem já está brigando com você) */
+function luta666(n){try{if(n.hostile545)return false;const P=player;return enemies.some(e=>e&&!e.dead&&e.hp>0&&Math.hypot(e.x-P.x,e.z-P.z)<14)}catch(_){return false}}
+function target(n){return n&&!luta666(n)&&!n.alma545&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
 const essential=n=>!KILLABLE.test(n.kind||'')&&!isGuard(n)&&!n.vend655;/* v657: vendedor de fora de Aster pode morrer (tools/povo655.js) */
 function cityAt(x,z){try{const q=nearestCity(x,z);return q&&q.c&&q.d<90&&q.c.name?q.c:null}catch(_){return null}}
 /* morador da cidade: moradores, guardas e vendedores daquela cidade; caçadores, viajantes e encontros são de fora */

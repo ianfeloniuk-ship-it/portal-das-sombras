@@ -34,7 +34,7 @@ startSiege=function(c){if(profile?.classless)return;const k=pickKind(c.x,c.z);if
  showSys(S.n+' ataca '+c.name+'! Derrube-o em 5 minutos. Recompensa: ouro, troféu e nova coleta da renda de hoje.')};
 /* ataque à vila também em cidades menores (antes só nível 5+) */
 const baseUpdSiege=updSiege;
-updSiege=function(dt){const r=baseUpdSiege.apply(this,arguments);try{if(!L.siege&&run.siegeT>900&&!bossE&&!profile?.classless){const nc=nearestCity(player.x,player.z);
+updSiege=function(dt){const r=baseUpdSiege.apply(this,arguments);try{if(!L.siege&&!(window.Inicio666&&Inicio666.calmo())&&run.siegeT>900&&!bossE&&!profile?.classless){const nc=nearestCity(player.x,player.z);
   if(nc.d<120&&cityL(nc.c)>=2&&cityL(nc.c)<5&&!cityFallen(nc.c)&&Math.random()<.5){run.siegeT=0;startSiege(nc.c)}}}catch(_){}return r};
 
 /* ---------- voo ---------- */
@@ -58,7 +58,7 @@ updEnemy=function(e,dt){const D=e.drake510;
   if(D.phase==='chega'){const dx=tg.x-e.x,dz=tg.z-e.z,d=Math.hypot(dx,dz);const sp=11*dt;if(d>26){e.x+=dx/d*sp;e.z+=dz/d*sp;e.face=Math.atan2(dx,dz)}else{D.phase='circula';D.t=0}}
   else if(D.phase==='circula'){D.ang+=dt*.45;const R=24,nx=tg.x+Math.cos(D.ang)*R,nz=tg.z+Math.sin(D.ang)*R;e.face=Math.atan2(nx-e.x,nz-e.z);e.x+=(nx-e.x)*Math.min(1,dt*1.6);e.z+=(nz-e.z)*Math.min(1,dt*1.6);
    D.breath-=dt;if(D.breath<=0){D.breath=3.2;breathAt(e,tg.x+(Math.random()-.5)*3,tg.z+(Math.random()-.5)*3)}
-   if(D.t>14){D.phase='pousa';D.t=0}}
+   if(D.t>7){D.phase='pousa';D.t=0}}
   else if(D.phase==='pousa'){D.alt=Math.max(0,D.alt-dt*7);if(D.alt<=0){D.phase='chao';D.t=0;setFly(e,false);e.aggro=true;try{shake(.5);sfx('boom')}catch(_){}}}
   else if(D.phase==='decola'){D.alt=Math.min(24,D.alt+dt*8);if(D.alt>=24){D.phase='circula';D.t=0}}
   if(D.phase!=='pousa'&&D.phase!=='decola')D.alt+=(24+Math.sin(D.t*1.3)*2-D.alt)*Math.min(1,dt*2);
@@ -67,7 +67,7 @@ updEnemy=function(e,dt){const D=e.drake510;
   try{if(window.Anim547&&Anim547.postDragon)Anim547.postDragon(e,dt);else{e.m.root.position.set(e.x,terrH(e.x,e.z)+D.alt,e.z);e.m.root.rotation.y=e.face;}}catch(_){e.m.root.position.set(e.x,terrH(e.x,e.z)+D.alt,e.z);e.m.root.rotation.y=e.face;}return}
  /* no chão: luta normal de chefe; depois de um tempo levanta voo de novo (mais cedo se estiver ferido) */
  const r=baseUpd.apply(this,arguments);try{if(window.Anim547&&Anim547.postDragon)Anim547.postDragon(e,dt)}catch(_){}
- if(D.t>(e.hp<e.maxhp*.5?12:20)&&!e.act){D.phase='decola';D.t=0;setFly(e,true);try{sfx('gong')}catch(_){}}
+ if(D.t>(e.hp<e.maxhp*.5?18:26)&&!e.act){D.phase='decola';D.t=0;setFly(e,true);try{sfx('gong')}catch(_){}}
  return r};
 /* mais frequente: o laço principal recarrega o Errante em 1200 s; aqui cortamos para ~600 s */
 setInterval(()=>{try{if(typeof L!=='undefined'&&L.wbT>600)L.wbT=600}catch(_){}},2000);

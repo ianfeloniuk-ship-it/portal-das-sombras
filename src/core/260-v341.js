@@ -71,7 +71,7 @@ function buildWorld(seed){
   hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
   const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));moon.position.set(-80,70,-150);L.group.add(moon);L.moon=moon;
   updChunks(true);
-  if(!gates.length)for(let i=0;i<GATE_COUNT155;i++)gates.push(newGate());
+  if(!gates.length)for(let i=0;i<((window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155);i++)gates.push(newGate());
   for(const g of gates)if(!g.dead){gateMesh(g);if(g.closing131&&g.mesh?.userData.rift131)Rift131.close(g.mesh,g.storyScar131)}
   L.cands=genCands();releaseRedPortalBreaks();
 }
@@ -145,6 +145,7 @@ function gateMesh(g){retireExtraction117(g);
   L.inter.push({type:'gate',g,x:g.x,z:g.z,r:3.6,label:g.secret?'F · PORTAL ???':'F · PORTAL RANK '+GR[g.rank].id,use:()=>gateModal(g)});
 }
 function removeGateMesh(g){if(g.mesh){if(g.mesh.userData.rift131){Rift131.dispose(g.mesh);envDispose(g.mesh)}L.group.remove(g.mesh);g.mesh=null}L.inter=L.inter.filter(i=>i.g!==g)}
+/* v666 (Ian): começo calmo — 4 Fendas por perto nos primeiros 30 min de jogo, 12 depois */
 const GATE_COUNT155=12,GATE_NEAR155=200,GATE_FAR155=280;
 function tickGates(dt){
   const P=player;
@@ -152,12 +153,13 @@ function tickGates(dt){
     // v155 (Ian): portal longe não some; só deixa de ser desenhado. Voltando antes do tempo acabar, ele continua lá.
     const far=L.mode==='world'&&P&&Math.hypot(g.x-P.x,g.z-P.z)>GATE_FAR155;
     if(L.mode==='world'&&g.life>0){if(far&&g.mesh)removeGateMesh(g);else if(!far&&!g.mesh)gateMesh(g)}
-    if(g.life<=0){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!g.cleared&&!g.secret&&g.rank>=2)dungeonBreak(g)}}}
+    if(g.life<=0){g.dead=true;if(L.mode==='world'){if(!far&&g.mesh?.userData.rift131){g.closing131=true;g.dead=false;Rift131.close(g.mesh)}else removeGateMesh(g);if(!g.cleared&&!g.secret&&g.rank>=2&&!(window.Inicio666&&Inicio666.calmo()))dungeonBreak(g)}}}
   for(const g of closingDone){removeGateMesh(g);gates=gates.filter(x=>x!==g)}
   gates=gates.filter(g=>!g.dead||g===curGate);
   // v155 (Ian): portais espalhados pelo mundo todo. Conta só os que estão por perto; os que ficaram para trás somem e novos nascem à volta (inclusive à frente), então andar reto sempre encontra portal.
   const PP=P||{x:0,z:0};let alive=gates.filter(g=>!g.dead&&Math.hypot(g.x-PP.x,g.z-PP.z)<GATE_NEAR155).length,tries=0;
-  while(alive<GATE_COUNT155&&tries++<GATE_COUNT155){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
+  const gc666=(window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155;
+  while(alive<gc666&&tries++<gc666){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
 }
 function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   // v155 (Ian): monstros e o chefe saem do portal. Se houver vila a até 100 m, marcham para atacá-la; senão vagueiam pelo mapa.
