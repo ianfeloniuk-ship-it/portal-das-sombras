@@ -1,3 +1,6 @@
+## v669 (28/10/2026) — Nomes das árvores pela imagem
+- Ian aprovou: «Pinheiro cinza» → **Árvore de cinzas**, «Bétula gélida» → **Bétula seca**, «Cipreste de raízes» → **Mangue do brejo** (só o `nome` em `tools/flora-regioes.js`; ids e arquivos iguais). Nenhum outro texto do jogo citava esses nomes.
+
 ## v668 (28/10/2026) — Mundo fixo para todos (como no Skyrim) + 7 espécies de árvore regionais (Trellis) + savana de Zahar
 - Pedido de Ian: "cenário fixo pro jogo inteiro assim como é em Skyrim, cada coisa no seu devido lugar, porém pode nascer pelo EcoGrid"; árvores do Drive `1t7i-HOkTzHSrb52Q3-9Xie52Qa1dbXeh` no jogo.
 - **Mundo fixo** (`260-v341.js`): `buildWorld` usa sempre `WORLD_SEED668 = 20260927` (a semente da tela de título) em vez da semente sorteada por perfil (`060-perfil.js`). Save antigo (`640-telas.js`): se a semente do perfil era outra, troca, zera `run.pos` (nasce no começo) e avisa «O mundo de Primeva agora é o mesmo para todos». Lugares descobertos (`profile.lug637`) do mundo antigo ficam marcados por célula (só a lista). O EcoGrid continua fazendo árvore nascer/crescer por cima.
