@@ -14,7 +14,13 @@
           O fluxo também para sozinho em cena, dormindo, conversa, janela aberta, defendendo e montado (checado a cada quadro).
           Efeitos de acerto do básico (cura do Paladino, veneno, runas, passivas) e a diária de ataques contam 1 vez por segundo.
           O dano usa resto acumulado: sempre inteiro e o mesmo dano por segundo do projétil, sem mínimo de 1 por tick.
-          Toque não liga o gasto por segundo do lote541 (paga só 1). */
+          Toque não liga o gasto por segundo do lote541 (paga só 1).
+   v657   (Ian, 27/10: cone pega todos à frente = sim; fere moradores = sim; tirar bolinhas = sim; pernas paradas = não)
+          O fluxo também fere moradores e viajantes no mundo (Crime545.hit, mesmas regras do tiro): o dano em cada um é
+          somado e aplicado 1 vez por segundo, para o aviso e a testemunha não repetirem 4 vezes por segundo.
+          Sem bolinhas: o cone vira labaredas alongadas (fogo, geada, areia) e saem a bola da mão e a da ponta do feixe.
+          Pernas andam: a pose de lançar vale só nos braços (cajado: pose de mira do Warrior127; mão: braço direito apontado);
+          pernas e corpo seguem a animação de andar/correr. */
 (function () {
   'use strict';
   if (typeof attack !== 'function' || typeof update !== 'function' || typeof THREE === 'undefined') return;
@@ -146,6 +152,17 @@
     if (e) { const b = projectileBody253(e); return new T.Vector3(b.x, b.y, b.z); }
     return null;
   }
+  /* v657: pose de lançar só nos braços. Não chama Warrior127.animate (que trocava a animação do corpo todo e travava as
+     pernas): o cajado usa a pose de mira do próprio Warrior127 (staffCast251, só braços) e a mão aponta o braço direito aqui,
+     depois da animação de andar/correr do quadro. */
+  const QA = new T.Quaternion(), QB = new T.Quaternion(), VA = new T.Vector3(), VB = new T.Vector3();
+  function aimBone(b, child, dir) {
+    if (!b || !child || !b.parent) return;
+    b.getWorldPosition(VA); child.getWorldPosition(VB); const cur = VB.sub(VA).normalize();
+    QA.setFromUnitVectors(cur, dir.clone().normalize());
+    b.getWorldQuaternion(QB); QB.premultiply(QA);
+    b.parent.getWorldQuaternion(QA); b.quaternion.copy(QA.invert().multiply(QB)); b.updateMatrixWorld(true);
+  }
   function muzzle(face, pitch) {
     if (window.FP550 && FP550.active) {
       const f = new T.Vector3(); camera.getWorldDirection(f);
@@ -157,8 +174,15 @@
       if (m && m.warrior127 && window.Warrior127) {
         let mz = null;
         const staff = weaponIsMagic173(run.equip.w) && Warrior127.staffMuzzle(m);
-        if (staff) { Warrior127.prepareStaffCast(m, { face, combo: 1, pitch253: pitch }); mz = Warrior127.staffMuzzle(m); }
-        else mz = Warrior127.handMuzzle(m, { face, combo: 1, pitch253: pitch });
+        m.root.rotation.y = face; m.aimPitch253 = pitch; m.cast657 = performance.now() + 300; /* arma fica na mão enquanto o fluxo sai */
+        if (staff) { m.staffCast251 = performance.now() + 450; m.root.updateMatrixWorld(true); mz = Warrior127.staffMuzzle(m); }
+        else if (m.bones && m.bones.hand_r) {
+          const F = new T.Vector3(Math.sin(face) * Math.cos(pitch), Math.sin(pitch), Math.cos(face) * Math.cos(pitch));
+          m.root.updateMatrixWorld(true);
+          aimBone(m.bones.upperarm_r, m.bones.forearm_r, F.clone().add(new T.Vector3(0, -.1, 0)));
+          aimBone(m.bones.forearm_r, m.bones.hand_r, F);
+          mz = m.bones.hand_r.getWorldPosition(new T.Vector3());
+        }
         if (mz) return new T.Vector3(mz.x, mz.y + (window.TER245 ? TER245.heightFor(m.root) : terrH(player.x, player.z)), mz.z);
       }
     } catch (_) { }
@@ -217,6 +241,30 @@
     }
     return best ? [best] : [];
   }
+  /* v657: moradores e viajantes no fluxo (mesmo alvo do tiro em crime545: crianças, almas e quem conversa ficam de fora) */
+  function npcList(st) {
+    const C = window.Crime545;
+    if (!C || !C.hit || !C.target || typeof npcs === 'undefined' || !npcs || (typeof L !== 'undefined' && L.mode !== 'world')) return [];
+    const o = st.o, d = st.dir, out = [], R = st.kind === 'cone' ? st.range : (st.end ? st.end.distanceTo(o) : st.range), tan = st.width / st.range;
+    for (const n of npcs) {
+      if (!C.target(n) || Math.hypot(n.x - player.x, n.z - player.z) > R + 3) continue;
+      const v = new T.Vector3(n.x - o.x, terrH(n.x, n.z) + 1 - o.y, n.z - o.z), along = v.dot(d);
+      if (along < -.5 || along > R + .5) continue;
+      const perp = Math.sqrt(Math.max(0, v.lengthSq() - along * along));
+      if (perp > (st.kind === 'cone' ? Math.max(.6, along * tan) + .9 : .9)) continue;
+      try { if (typeof los === 'function' && !los(player.x, player.z, n.x, n.z)) continue } catch (_) { }
+      out.push(n);
+    }
+    return out;
+  }
+  function npcTick(st, amt, full) {
+    const C = window.Crime545; if (!C || !C.hit) return;
+    st.npcDmg = st.npcDmg || new Map();
+    if (amt > 0) for (const n of npcList(st)) st.npcDmg.set(n, (st.npcDmg.get(n) || 0) + amt);
+    if (!full) return;
+    for (const [n, v] of st.npcDmg) { const a = Math.floor(v); if (a >= 1) { try { C.hit(n, a) } catch (err) { console.warn('magia653 npc', err) } S.stats.npcHits = (S.stats.npcHits || 0) + 1; } }
+    st.npcDmg.clear();
+  }
   function doTick(st) {
     S.stats.ticks++;
     const list = hitList(st);
@@ -227,6 +275,7 @@
     if (st.n % 4 === 1) { st.full = true; try { dprog('atk', 1) } catch (_) { } } /* 1 vez por segundo: diária de ataques e efeitos de acerto */
     let vol = 1; try { if (st.kind === 'beam') vol = 1 + rankTalent('volley') } catch (_) { } /* vários projéteis = feixe mais forte */
     st.carry += tickDamage() * vol; const amt = Math.floor(st.carry); st.dmg = amt;
+    npcTick(st, amt, st.n % 4 === 1); /* moradores: dano somado, aplicado 1 vez por segundo */
     if (amt < 1 || !list.length) { if (!list.length) st.carry = Math.min(st.carry, 1); try { curDType281 = dt0 } catch (_) { } return; }
     st.carry -= amt;
     const full = st.full; st.full = false;
@@ -297,7 +346,7 @@ void main(){float s=vUv.y,a=vUv.x;vec3 V=normalize(cameraPosition-vW);float f=ab
     }
     if (X) X.add(grp); else scene.add(grp);
     let handOrb = null, endOrb = null;
-    try { if (X) { handOrb = X.orb(new T.Vector3(), st.kind === 'cone' ? .4 : .3, col, { fire: st.look === 'fire' ? 1 : 0, noise: 1 }); if (st.kind === 'beam') endOrb = X.orb(new T.Vector3(), .7, col, { noise: 1 }); } } catch (_) { }
+    /* v657: sem bola na mão nem na ponta do feixe (Ian: tirar as bolinhas) */
     let fade = 0, dying = false, pt = 0, bt = 0, sm = 0, vis = 1;
     const pieces = [], puffs = [];
     let pf = 0;
@@ -328,8 +377,7 @@ void main(){float s=vUv.y,a=vUv.x;vec3 V=normalize(cameraPosition-vW);float f=ab
             if (s.kind === 'cone' && pt > .045 * k) {
               pt = 0; const f = .25 + Math.random() * .7, p = s.o.clone().addScaledVector(s.dir, R * f);
               p.x += (Math.random() - .5) * s.width * f; p.y += (Math.random() - .5) * s.width * f * .7; p.z += (Math.random() - .5) * s.width * f;
-              if (s.look === 'fire') X.embers(p, 1, col[1], .4, .7);
-              else shard(X, s, f);
+              if (s.look !== 'fire') shard(X, s, f); /* v657: fogo sem brasinhas redondas; geada e terra soltam lascas */
             }
             if (s.kind === 'cone' && sm > .16 * k) { sm = 0; const p = s.o.clone().addScaledVector(s.dir, R * .95); X.smoke(p, 1, s.look === 'fire' ? 0x3a2a22 : s.look === 'ice' ? 0xd8f4ff : 0x8a6a48, 1, .9, 1.2, s.look === 'ice' ? .3 : .22); }
             if (s.kind === 'beam' && s.look === 'spark' && bt > .07) { bt = 0; X.bolt(s.o, s.end || s.o.clone().addScaledVector(s.dir, R), col, { width: .09, life: .11, jit: .5, gain: .85, seg: Math.max(6, Math.min(16, Math.round(R))) }); }
@@ -345,7 +393,8 @@ void main(){float s=vUv.y,a=vUv.x;vec3 V=normalize(cameraPosition-vW);float f=ab
           q.m.position.copy(q.a).addScaledVector(q.d, q.R * ease).addScaledVector(q.side, q.R * ease * .9); q.m.position.y += q.rise * k2 * k2;
           const sz = q.s0 + (q.s1 - q.s0) * ease; q.m.scale.setScalar(sz);
           const env = Math.min(1, k2 / .1) * Math.pow(1 - k2, 1.4);
-          if (q.orb) { q.m.quaternion.copy(camera.quaternion); q.m.material.uniforms.uTime.value = t + q.seed; q.m.material.uniforms.uFade.value = env * q.op * vis * (dying ? Math.max(.2, fade) : 1); }
+          if (q.tongue) { const w = sz * .3; q.m.scale.set(w, w, sz * 1.7); q.m.lookAt(q.m.position.clone().add(q.d).addScaledVector(q.side, .8)); q.m.material.uniforms.uTime.value = t + q.seed; q.m.material.uniforms.uFade.value = env * q.op * 2 * vis * (dying ? Math.max(.2, fade) : 1); }
+          else if (q.orb) { q.m.quaternion.copy(camera.quaternion); q.m.material.uniforms.uTime.value = t + q.seed; q.m.material.uniforms.uFade.value = env * q.op * vis * (dying ? Math.max(.2, fade) : 1); }
           else q.m.material.opacity = env * q.op;
         }
         if (dying && fade <= 0 && !pieces.length && !puffs.length) { v.dispose(); return false; }
@@ -375,13 +424,12 @@ void main(){float s=vUv.y,a=vUv.x;vec3 V=normalize(cameraPosition-vW);float f=ab
       const side = new T.Vector3(Math.random() - .5, (Math.random() - .5) * .6, Math.random() - .5);
       side.addScaledVector(s.dir, -side.dot(s.dir)); side.multiplyScalar(2 * s.width / s.range * Math.random());
       const a = s.o.clone().addScaledVector(s.dir, .15), R = s.range * (.82 + Math.random() * .2);
-      let m, orb = true;
-      if (fire || ice) {
-        const c = fire ? (Math.random() < .15 ? [0xffc070, 0xff8a20, 0xb02006] : [0xff8a30, 0xff4a08, 0x6a0800]) : (Math.random() < .3 ? [0xffffff, 0xc8f0ff, 0x4a90e0] : [0xb0e8ff, 0x60b8f8, 0x1a48a0]);
-        m = X_.orb(a.clone(), .3, c, { fire: fire ? 1 : 0, noise: 1 });
-      } else { orb = false; m = X_.sprite(X_.softTex, a.clone(), .3, { color: Math.random() < .5 ? 0xb08a5a : 0xd8b888, normal: true, op: 0 }); }
+      /* v657: labareda alongada (mesmo material do jato), apontada para a frente; nada de bola */
+      const c = fire ? (Math.random() < .15 ? [0xffc070, 0xff8a20, 0xb02006] : [0xff8a30, 0xff4a08, 0x6a0800]) : ice ? (Math.random() < .3 ? [0xffffff, 0xc8f0ff, 0x4a90e0] : [0xb0e8ff, 0x60b8f8, 0x1a48a0]) : [0xf0d8a8, 0xb08a5a, 0x5a3a1c];
+      const m = new T.Mesh(CONE, jetMat(c, { spd: fire ? 9 : ice ? 5 : 6, turb: fire ? 1 : .7, gain: fire ? .3 : ice ? .26 : .22, rep: 4 })), orb = false, tongue = true;
+      m.frustumCulled = false; m.position.copy(a); X_.add(m);
       m.userData.terrainAbsolute245 = true; m.renderOrder = 6;
-      puffs.push({ m, orb, a, d: s.dir.clone(), side, R, t: 0, life: (fire ? .42 : ice ? .5 : .55) + Math.random() * .12, s0: fire ? .25 : .2, s1: (fire ? 1.6 : ice ? 1.4 : 1.8) * (.75 + Math.random() * .4), rise: fire ? .7 : ice ? -.15 : .1, seed: Math.random() * 9, op: fire ? .3 : ice ? .28 : .45 });
+      puffs.push({ m, orb, tongue, a, d: s.dir.clone(), side, R, t: 0, life: (fire ? .42 : ice ? .5 : .55) + Math.random() * .12, s0: fire ? .25 : .2, s1: (fire ? 1.6 : ice ? 1.4 : 1.8) * (.75 + Math.random() * .4), rise: fire ? .7 : ice ? -.15 : .1, seed: Math.random() * 9, op: fire ? .3 : ice ? .28 : .45 });
     }
     function killPuff(q) { if (q.m.parent) q.m.parent.remove(q.m); try { q.m.material.dispose(); if (q.orb) q.m.geometry.dispose(); } catch (_) { } q.m.userData.dead487 = true; }
     function shard(X_, s, f) {

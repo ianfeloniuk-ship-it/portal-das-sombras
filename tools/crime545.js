@@ -75,7 +75,7 @@ function die(n){
   crime(n,true);/* antes de mudar o tipo: o tipo diz se era da cidade */
   n.dead545=true;n.hostile545=false;n.deadAt545=now();try{window.Povo655&&Povo655.morreu(n)}catch(_){}n.vida523=false;n.label='';n.kind='deco';n.noLabel=true;
   try{floater(n.x,n.z,(n.short||n.name||'Morador')+' morreu','#ef4444',true)}catch(_){}}
-C.hit=hitNpc;
+C.hit=hitNpc;C.target=target;/* v657: o fluxo de magia (magia653) usa o mesmo filtro de alvo do tiro */
 
 /* golpe corpo a corpo: mesmo alcance do básico (2,6 m; 3,1 m no terceiro golpe) */
 const A0=attack;

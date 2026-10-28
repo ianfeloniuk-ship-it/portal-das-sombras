@@ -286,7 +286,7 @@
   function sheath195(m,st,dt){
     // Sem arma não há transição de guardar/sacar nem pose de ombro: idle deve permanecer neutro.
     if(!m.staff174&&!m.equipmentState?.weapon){if(m.sh195)m.sh195={s:1,idle:0,wasMove:false};return}
-    const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
+    const S=m.sh195||(m.sh195={s:1,idle:0,wasMove:false});const busy=st.atk>0||st.skill||st.dodge||performance.now()<(m.cast657||0)/* v657: fluxo de magia segurando = arma na mão */||/^(arco|chuva_com_arco|cajado)/.test(m.a155?.state||'');
     const moving=(st.move||0)>.08&&!busy;let target;
     if(busy||st.dead>0){target=0;S.idle=0}else if(moving){target=1;S.idle=0;S.wasMove=true}
     else{if(S.wasMove){S.wasMove=false;S.idle=0;S.drawn=true}S.idle+=dt||0;target=S.drawn&&S.idle<3?0:1;if(S.idle>=3)S.drawn=false}
