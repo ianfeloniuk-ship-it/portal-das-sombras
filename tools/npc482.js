@@ -12,7 +12,7 @@
 (function(global){
 'use strict';
 const T=global.THREE;if(!T||!T.GLTFLoader)return;
-const V='493',DIR='models/povo482/',CAP=48,NEAR=45,FAR=140,DROP=160;
+const V='672',DIR='models/povo482/',CAP=48,NEAR=45,FAR=140,DROP=160;
 const API={V,CAP,bases:[],byId:{},ready:false,live:new Set(),reg:new Set(),stats:{made:0,freed:0}};
 
 /* ---------- utilidades determinísticas ---------- */

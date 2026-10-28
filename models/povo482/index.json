@@ -7,10 +7,10 @@
    "sex": "f",
    "role": "civil",
    "heightScale": 0.665,
-   "family": "anao",
+   "family": "anao\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 550,
+   "kb": 560,
    "kind": "human"
   },
   {
@@ -19,10 +19,10 @@
    "sex": "m",
    "role": "civil",
    "heightScale": 0.7,
-   "family": "anao",
+   "family": "anao\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 557,
+   "kb": 567,
    "kind": "human"
   },
   {
@@ -31,10 +31,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "arqueiro",
+   "family": "arqueiro\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 586,
+   "kb": 596,
    "kind": "human"
   },
   {
@@ -43,10 +43,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "arqueiro",
+   "family": "arqueiro\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 571,
+   "kb": 581,
    "kind": "human"
   },
   {
@@ -55,10 +55,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "berserker",
+   "family": "berserker\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 596,
+   "kb": 605,
    "kind": "human"
   },
   {
@@ -67,10 +67,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "berserker",
+   "family": "berserker\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 602,
+   "kb": 611,
    "kind": "human"
   },
   {
@@ -79,10 +79,10 @@
    "sex": "m",
    "role": "civil",
    "heightScale": 1.0,
-   "family": "civil",
+   "family": "civil\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 581,
+   "kb": 591,
    "kind": "human"
   },
   {
@@ -91,10 +91,10 @@
    "sex": "f",
    "role": "civil",
    "heightScale": 0.95,
-   "family": "civil",
+   "family": "civil\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 575,
+   "kb": 585,
    "kind": "human"
   },
   {
@@ -103,10 +103,10 @@
    "sex": "m",
    "role": "civil",
    "heightScale": 1.0,
-   "family": "civil",
+   "family": "civil\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 516,
+   "kb": 525,
    "kind": "human"
   },
   {
@@ -115,10 +115,10 @@
    "sex": "f",
    "role": "civil",
    "heightScale": 0.95,
-   "family": "civil",
+   "family": "civil\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 583,
+   "kb": 593,
    "kind": "human"
   },
   {
@@ -127,10 +127,10 @@
    "sex": "f",
    "role": "civil",
    "heightScale": 0.95,
-   "family": "civil_sobrevivente",
+   "family": "civil_sobrevivente\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 577,
+   "kb": 587,
    "kind": "human"
   },
   {
@@ -139,10 +139,10 @@
    "sex": "m",
    "role": "civil",
    "heightScale": 1.0,
-   "family": "civil_sobrevivente",
+   "family": "civil_sobrevivente\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 573,
+   "kb": 583,
    "kind": "human"
   },
   {
@@ -183,10 +183,10 @@
    "sex": "f",
    "role": "civil",
    "heightScale": 0.988,
-   "family": "elfo",
+   "family": "elfo\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 638,
+   "kb": 648,
    "kind": "human"
   },
   {
@@ -195,10 +195,10 @@
    "sex": "m",
    "role": "civil",
    "heightScale": 1.04,
-   "family": "elfo",
+   "family": "elfo\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 618,
+   "kb": 628,
    "kind": "human"
   },
   {
@@ -207,10 +207,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "mago",
+   "family": "mago\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 686,
+   "kb": 696,
    "kind": "human"
   },
   {
@@ -219,10 +219,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "mago",
+   "family": "mago\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 558,
+   "kb": 568,
    "kind": "human"
   },
   {
@@ -231,10 +231,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "monge",
+   "family": "monge\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 544,
+   "kb": 554,
    "kind": "human"
   },
   {
@@ -243,10 +243,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "monge",
+   "family": "monge\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 540,
+   "kb": 549,
    "kind": "human"
   },
   {
@@ -255,10 +255,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "pesado",
+   "family": "pesado\r",
    "skirt": false,
    "tris": 8999,
-   "kb": 681,
+   "kb": 690,
    "kind": "human"
   },
   {
@@ -267,10 +267,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "pesado",
+   "family": "pesado\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 576,
+   "kb": 585,
    "kind": "human"
   },
   {
@@ -287,10 +287,10 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "soldado",
+   "family": "soldado\r",
    "skirt": true,
    "tris": 8999,
-   "kb": 579,
+   "kb": 589,
    "kind": "human"
   },
   {
@@ -299,10 +299,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "soldado",
+   "family": "soldado\r",
    "skirt": true,
    "tris": 9000,
-   "kb": 556,
+   "kb": 566,
    "kind": "human"
   },
   {
@@ -311,7 +311,7 @@
    "sex": "f",
    "role": "hunter",
    "heightScale": 0.95,
-   "family": "sombra",
+   "family": "sombra\r",
    "skirt": false,
    "tris": 8999,
    "kb": 552,
@@ -323,10 +323,10 @@
    "sex": "m",
    "role": "hunter",
    "heightScale": 1.0,
-   "family": "sombra",
+   "family": "sombra\r",
    "skirt": false,
    "tris": 9000,
-   "kb": 573,
+   "kb": 582,
    "kind": "human"
   }
  ]

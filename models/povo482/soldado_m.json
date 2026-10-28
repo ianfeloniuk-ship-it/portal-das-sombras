@@ -4,11 +4,13 @@
  "sex": "m",
  "role": "hunter",
  "heightScale": 1.0,
- "family": "soldado",
+ "family": "soldado\r",
  "rig": "mixamo23-v482",
- "weights": "heat",
+ "weights": "rigid669",
+ "pano": 32,
  "skirt": true,
  "legs": "auto",
+ "hood": false,
  "tris": 9000,
  "source": "soldado_m.glb"
 }
