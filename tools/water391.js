@@ -11,6 +11,7 @@
   function waterAt(x,z){ // {top, frozen} ou null
     if(L.mode!=='world'||L.grid)return null;
     {const SE=window.TER245&&TER245.SEA439;if(SE&&SE.d(x,z)>-60&&terrH(x,z)<SE.Y+RISE()*.5)return {top:SE.Y+RISE()*.5,frozen:false,sea:true}} /* v439: mar a oeste de Thalor */
+    {const RS=window.TER245&&TER245.RS661;if(RS)for(const r of RS)if(Math.hypot(x-r.p.x,z-r.p.z)<r.S.R+4+FLOOD()*5)return {top:-2.34+RISE(),frozen:false,pool:true}} /* v661: poço das cachoeiras (nascente do rio) */
     const rv=riverNear239(x,z),w=riverWidth351(rv.b,z);
     if(rv.d<w/2+FLOOD()*5){const b=snowB(x,z);if(b>.717)return null;if(onRoad(roadSegs(x,z,1),x,z,5))return null;return {top:terrH(rv.x+w/2,z)+.06+RISE(),frozen:b<.29}}
     const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));

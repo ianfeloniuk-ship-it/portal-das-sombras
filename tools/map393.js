@@ -10,6 +10,7 @@
   function biomeColor(x,z){let b='campos';try{b=biomeAt(x,z)}catch(_){}return BIO[b]||BIO.campos}
   function waterKind(x,z){ // 0 seco/terra, 1 água, 2 gelo
     try{if(window.TER245&&TER245.SEA439&&TER245.SEA439.d(x,z)>0)return 1}catch(_){}/* v501: mar do mapa finito */
+    try{const RS=window.TER245&&TER245.RS661;if(RS)for(const r of RS)if(Math.hypot(x-r.p.x,z-r.p.z)<r.S.R)return 1}catch(_){}/* v661: poço das cachoeiras */
     try{const rv=riverNear239(x,z),w=riverWidth351(rv.b,z);if(rv.d<w/2){const s=snowB(x,z);if(s>.717)return 0;return s<.29?2:1}
       const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));if(lk&&Math.hypot(x-lk.x,z-lk.z)<lk.r)return ['neve','cristal'].includes(biomeAt(lk.x,lk.z))?2:1}catch(_){}
     return 0}

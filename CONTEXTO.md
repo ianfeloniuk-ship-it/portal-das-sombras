@@ -1,3 +1,11 @@
+## v661 (28/10/2026) — Thalor flutua sobre o mar e todo rio nasce numa cachoeira
+- Pedido de Ian: cachoeiras vertendo das montanhas perto do reino de água (pedido antigo não feito); Thalor banhada pelo mar e flutuando por magia antiga dos zumbis (afogados); todos os rios de Primeva vêm desse mar e vertem junto das cachoeiras.
+- `tools/terrain245.js` (CPU e GLSL iguais): canal de mar em volta de Thalor (r 335–415 m, `moat661`) com 3 aterros acima do mar nas estradas; nascentes dos rios (`RIO_SRC661`): rio oeste nasce no pé da serra a leste de Thalor (curva até o pé, z0 −640), rio central nasce na serra do norte (z0 −1855); ao norte delas não há mais rio. Poço cavado + paredão irregular de ~38 m atrás de cada poço.
+- `src/core/580`: `riverCenter239` com a curva, `riverNear239` sem rio ao norte da nascente, malha do rio começa no poço.
+- `tools/cachoeiras661.js` (novo): 5 quedas (3 oeste, 2 norte) com corredeira pela encosta e queda solta do paredão, runa verde-água na nascente, névoa, poço; em Thalor runas na linha d'água, cortina de luz e 44 pedras flutuando no canal; avisos [THALOR] e [NASCENTE] uma vez. Sem árvore/pedra dentro do poço/paredão.
+- `tools/water391.js`: nadar no poço. `tools/map393.js`: poço no mapa.
+- Teste (Edge headless, porta própria): prints de Thalor ilha, quedas oeste/norte, canal de noite, nado no poço, Aster normal; sem erro novo (o erro `boats440 ... reading 'm'` já existia na v660). Não testado: PC real/desempenho, colisão das pedras (são só visuais).
+
 ## v660 (28/10/2026) — 1ª pessoa refeita como no Skyrim + campo de visão do Skyrim nas duas câmeras
 - **Pedido de Ian:** «recrie e tome conta da visão em primeira pessoa… tudo na primeira pessoa funcione igual a primeira pessoa de Skyrim. Como atacar, a mira do arco e flecha… com as mãos do meu viajante» e «calcula o fov de 3 e primeira pessoa exatamente igual a skyrim».
 - **Campo de visão (`src/core/070-three.js`):** 75° Hor+ do Skyrim Special Edition (75° na horizontal em tela 4:3, vertical fixa) = **59,8° na vertical** nas duas câmeras (antes 48°; 60° na tela em pé). Em 16:9 dá 91° na horizontal. Constante `FOV_SKYRIM658`. O zoom do arco (`skyrim588.js`) continua partindo desse valor.
