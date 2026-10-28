@@ -59,10 +59,19 @@
     tocha:          { n: 'Tocha de Resina',         w: 0.9,  cat: 'tool', tool: true, dur: 180, d: 'Ilumina a noite/masmorra, aquece contra o frio e afasta predadores fotofóbicos.' },
     vara:           { n: 'Vara de Pesca',           w: 1.2,  cat: 'tool', tool: true, dur: 22, d: 'Pesca peixes frescos em rios, lagos ou poças abissais dentro das Fendas.' },
     arco_rustico:   { n: 'Arco de Caça',            w: 1.8,  cat: 'tool', tool: true, dur: 35, d: 'Arco silencioso de madeira e corda.' },
-    flecha:         { n: 'Flecha de Lasca',         w: 0.15, cat: 'tool', d: 'Munição para o Arco de Caça.' },
+    flecha:         { n: 'Flecha de Lasca',         w: 0.15, cat: 'tool', d: 'Munição de arco: +1 de ataque somado ao do arco. Cada tiro gasta 1.' },
     atadura:        { n: 'Atadura de Ervas',        w: 0.35, cat: 'food', d: 'Estanca sangramento e restaura 35% da vida.', heal: 0.35, stopBleed: true },
     bolsa:          { n: 'Alforje de Carga (+12 kg)', w: 0,  cat: 'tool', d: 'Aumenta a capacidade máxima da mochila em +12 kg.' }
   };
+
+  /* v663 (Ian): flechas de metal, uma por rank de minério (ferro … primeva). Ataque da flecha = metade do ataque base
+     de uma arma do mesmo rank; soma ao do arco. O minério conta como ingrediente (rank igual ou maior, como na forja). */
+  const ARROW_ATK663 = t => t < 0 ? 1 : Math.round(WATK[t] * 0.5);
+  for (let t = 0; t < 10; t++) {
+    ITEMS['flecha_' + t] = { n: 'Flecha ' + TIERN[t], w: 0.1, cat: 'tool', arrow663: t, d: 'Munição de arco: +' + ARROW_ATK663(t) + ' de ataque somado ao do arco. Cada tiro gasta 1.' };
+    ITEMS['minerio_' + t] = { n: 'Minério ' + GR[t].id, w: 0, cat: 'mat', virtual663: true, d: 'Minério do rank ' + GR[t].id + ' ou maior (o da Bolsa).' };
+  }
+  ITEMS.flecha.arrow663 = -1;
 
   /* Receitas: 'mao' = à mão; 'fogueira' = Fogueira Portátil; 'bancada' = Bancada Rústica de Campo */
   const RECIPES = [
@@ -94,6 +103,7 @@
     { id: 'vara',             n: 1, cost: { galho: 2, corda: 2, osso: 1 },       st: 'bancada',  desc: 'Vara de pesca com anzol de osso.' },
     { id: 'arco_rustico',     n: 1, cost: { galho: 3, corda: 2 },                st: 'bancada',  desc: 'Arco de caça silencioso.' },
     { id: 'flecha',           n: 6, cost: { galho: 2, lasca: 2, pena: 1 },       st: 'bancada',  desc: '6 flechas com ponta de lasca.' },
+    ...Array.from({ length: 10 }, (_, t) => ({ id: 'flecha_' + t, n: 10, cost: { galho: 2, pena: 1, ['minerio_' + t]: 1 }, st: 'bancada', desc: '10 flechas com ponta ' + TIERN[t] + '.' })),
     { id: 'bolsa',            n: 1, cost: { couro: 3, corda: 2 },                st: 'bancada',  desc: 'Alforje de Carga (+12 kg na mochila).' }
   ];
 
@@ -214,6 +224,7 @@
   function count(id) {
     const s = S(); if (!s) return 0;
     if (id === 'estragada' || id === 'isca_carnica') return (s.inv.isca_carnica || 0) + (s.inv.estragada || 0);
+    if (/^minerio_\d$/.test(id)) { try { return cryUp(+id.slice(8)); } catch (_) { return 0; } } /* v663: minério da Bolsa */
     return s.inv[id] || 0;
   }
   function has(cost) {
@@ -244,6 +255,7 @@
   function take(id, n = 1) {
     const s = S(); if (!s) return false;
     if (id === 'estragada') id = 'isca_carnica';
+    if (/^minerio_\d$/.test(id)) { const t = +id.slice(8); if (count(id) < n) return false; spendCry(t, n); save(); return true; }
     if ((s.inv[id] || 0) < n) return false;
     s.inv[id] -= n;
     if (s.inv[id] <= 0) { delete s.inv[id]; delete s.spoil[id]; delete s.dur[id]; }
@@ -1498,7 +1510,7 @@
   }
 
   window.Surv437 = {
-    S, ITEMS, RECIPES, add, take, count, has, invW, maxW, totalW, overMul, canRun,
+    S, ITEMS, RECIPES, add, take, count, has, arrowAtk663: ARROW_ATK663, invW, maxW, totalW, overMul, canRun,
     craft, eat, drinkCanteen, fillCanteen, boilCanteen, distillSeaWater, useTool,
     open, nearFire, nearCamp456, glb, fit, save, nodes, give, levelTerrain,
     freshnessPct, freshStage, sealBundle, unsealBundle, throwBait,
