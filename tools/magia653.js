@@ -165,6 +165,8 @@
   }
   function muzzle(face, pitch) {
     if (window.FP550 && FP550.active) {
+      /* v660: sai da palma (ou da ponta do cajado) dos braços da 1ª pessoa */
+      try { const mz = FP550.muzzle && FP550.muzzle(); if (mz) return mz; } catch (_) { }
       const f = new T.Vector3(); camera.getWorldDirection(f);
       const r = new T.Vector3().crossVectors(f, camera.up).normalize();
       return camera.position.clone().addScaledVector(f, .6).addScaledVector(r, .2).add(new T.Vector3(0, -.24, 0));

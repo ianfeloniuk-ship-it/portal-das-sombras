@@ -20,10 +20,12 @@ if(ULTRA){GFX267.ultra=true;GFX267.apply();renderer.toneMapping=THREE.ACESFilmic
 const scene=new THREE.Scene();
 const riftLight131=window.RIFT131_ENABLE?new THREE.PointLight(0x9566ed,0,13,2):null;if(riftLight131)scene.add(riftLight131);
 let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(document.hidden&&riftSound131)riftSound131.silence()});addEventListener('pagehide',()=>{if(riftSound131)riftSound131.dispose()});
-const camera=new THREE.PerspectiveCamera(48,1,.08,260);scene.add(camera);
+/* v660 (Ian): campo de visão igual ao Skyrim nas duas câmeras — 75° Hor+ (75° na horizontal em 4:3; a vertical fica fixa e a tela larga abre dos lados) = 59,9° na vertical */
+const FOV_SKYRIM658=2*Math.atan(Math.tan(75/2*Math.PI/180)*3/4)*180/Math.PI;
+const camera=new THREE.PerspectiveCamera(FOV_SKYRIM658,1,.08,260);scene.add(camera);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
-function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?60:48;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
+function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=FOV_SKYRIM658;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
 if(!touch)document.body.classList.add('pc');
 const gmap=new THREE.DataTexture(new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]),3,1,THREE.RGBAFormat);

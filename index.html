@@ -2654,10 +2654,12 @@ if(ULTRA){GFX267.ultra=true;GFX267.apply();renderer.toneMapping=THREE.ACESFilmic
 const scene=new THREE.Scene();
 const riftLight131=window.RIFT131_ENABLE?new THREE.PointLight(0x9566ed,0,13,2):null;if(riftLight131)scene.add(riftLight131);
 let riftSound131=null;document.addEventListener('visibilitychange',()=>{if(document.hidden&&riftSound131)riftSound131.silence()});addEventListener('pagehide',()=>{if(riftSound131)riftSound131.dispose()});
-const camera=new THREE.PerspectiveCamera(48,1,.08,260);scene.add(camera);
+/* v660 (Ian): campo de visão igual ao Skyrim nas duas câmeras — 75° Hor+ (75° na horizontal em 4:3; a vertical fica fixa e a tela larga abre dos lados) = 59,9° na vertical */
+const FOV_SKYRIM658=2*Math.atan(Math.tan(75/2*Math.PI/180)*3/4)*180/Math.PI;
+const camera=new THREE.PerspectiveCamera(FOV_SKYRIM658,1,.08,260);scene.add(camera);
 const ov=$('ov'),oc=ov.getContext('2d');
 let W=1,H=1,portrait=false;
-function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=portrait?60:48;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
+function resize(){W=innerWidth;H=innerHeight;portrait=H>W;renderer.setSize(W,H,false);camera.aspect=W/H;camera.fov=FOV_SKYRIM658;camera.updateProjectionMatrix();const d=GFX267.lite?1:Math.min(devicePixelRatio,touch?1.5:2);ov.width=W*d;ov.height=H*d;oc.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',resize);resize();
 if(!touch)document.body.classList.add('pc');
 const gmap=new THREE.DataTexture(new Uint8Array([150,150,150,255,205,205,205,255,255,255,255,255]),3,1,THREE.RGBAFormat);
@@ -9667,7 +9669,7 @@ requestAnimationFrame(frame);
 <script src="tools/scenes406.js?v=458"></script>
 <script src="tools/npc456.js?v=457"></script>
 <script src="tools/campaign327.js?v=611"></script>
-<script src="tools/magia653.js?v=657"></script>
+<script src="tools/magia653.js?v=660"></script>
 <script src="tools/ecology410.js?v=493"></script>
 
 <script src="tools/classes316.js?v=352"></script>
@@ -9799,7 +9801,8 @@ requestAnimationFrame(frame);
 <script src="tools/controles593.js?v=593"></script>
 <script src="tools/upright600.js?v=600"></script>
 <script src="tools/mover632.js?v=632"></script>
-<script src="tools/fp550.js?v=645"></script>
+<script src="tools/fp550.js?v=660"></script>
+<script src="tools/fp658.js?v=660"></script>
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 <script src="tools/enchente630.js?v=634"></script>
@@ -9812,9 +9815,9 @@ requestAnimationFrame(frame);
 <script src="tools/mana642.js?v=646"></script>
 <script src="tools/corpo659.js?v=659"></script>
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v659</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v660</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=659;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=660;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
