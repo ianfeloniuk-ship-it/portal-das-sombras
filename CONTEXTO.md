@@ -1,3 +1,7 @@
+## v671 (28/10/2026) — Correr a 7,5 m/s
+- Ian escolheu «Correr 7,5 m/s» (não conseguia fugir: corria 5,8, lobo persegue a 5,4 e raptor a 5,2). `tools/sprint373.js`: `runFactor`/`sprintFactor` = 7,5/4,2. Andar continua 4,2; correr segue sem gastar Estamina (v378). Nenhum texto do jogo citava o número.
+- Teste (Edge, `tools/test-v670.cjs`): Alt + W = 7,5 m/s, W = 4,2 m/s, 0 erros.
+
 ## v670 (28/10/2026) — Defender só no botão do meio; povo anda a passo de cidade
 - Pedido de Ian: «duas mãos, defesa no meio» — a v662 tinha posto defesa também no botão direito (desfazendo a v644). Agora `tools/maos662.js` `rightPress`: direito = mão esquerda (arma ataca, magia lança, vazia soca); com escudo ou arco/lança o direito não faz nada; **defender = segurar o botão do meio** (`guard472.js`), o único. Textos ligados: tela de teclas (`630-controles.js`) e painel das mãos.
 - Povo «sentado em cadeira invisível» (Ian): moradores andavam a 3,2 m/s fixos e o `npc482.js` dividia a velocidade pela altura → tocava a corrida do Viajante. Agora `NPCWALK670 = 1,7` m/s (`390-ia.js`) e andar/correr pela velocidade real (`s.walking` abaixo de 3 m/s). Fuga em pânico continua a 5,5.
