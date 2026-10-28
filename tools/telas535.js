@@ -101,7 +101,7 @@ function stage(host){
   const tick=now=>{if(!V.cv.isConnected||$('modal').hidden){V.raf=0;return}V.raf=requestAnimationFrame(tick);const dt=Math.min(.05,(now-last)/1000);last=now;
     const w=V.cv.clientWidth,h=V.cv.clientHeight;if(!w||!h)return;if(V.cv.width!==Math.round(w*V.R.getPixelRatio())){V.R.setSize(w,h,false);V.cam.aspect=w/h;V.cam.updateProjectionMatrix()}
     if(V.auto&&!matchMedia('(prefers-reduced-motion: reduce)').matches)V.yaw+=dt*.5;const s=V.piv.scale.x;if(s<1)V.piv.scale.setScalar(Math.min(1,s+(1-s)*.14+.01));
-    V.piv.rotation.set(V.pitch,V.yaw,0);V.piv.position.y=.1+Math.sin(now/1300)*.05;V.R.render(V.sc,V.cam)};
+    window.ESSENCIAS?.update(dt);V.piv.rotation.set(V.pitch,V.yaw,0);V.piv.position.y=.1+Math.sin(now/1300)*.05;V.R.render(V.sc,V.cam)};
   V.raf=requestAnimationFrame(tick)}
 function put(o,b,rim){if(V.obj){V.piv.remove(V.obj);if(!V.obj.userData.keep)V.obj.traverse(m=>{if(m.isMesh&&!m.isSkinnedMesh&&!m.userData.shared){m.geometry.dispose()}})}
   b=b||new T.Box3().setFromObject(o);const s=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),k=1.7/Math.max(s.x,s.y,s.z,.001);
@@ -111,6 +111,8 @@ function showFor(text,entry,color,desc){
   if(!V)return;const id=++V.want,rim=color||'#9b6bff';
   if(entry&&(entry.type==='core'||entry.type==='cry')&&window.Loot513?.model){const o=Loot513.model(entry);o.userData.keep=true;put(o,null,rim);return}
   if(!entry&&/núcleo|cristal|cristais/i.test(text)&&window.Loot513?.model){let rk=0;try{const c=new T.Color(color||'#fff');rk=Math.max(0,RANKS.findIndex(r=>{const d=new T.Color(r.c);return Math.abs(d.r-c.r)+Math.abs(d.g-c.g)+Math.abs(d.b-c.b)<.06}))}catch(e){}const o=Loot513.model({type:/núcleo/i.test(text)?'core':'cry',rank:rk,n:1});o.userData.keep=true;put(o,null,rim);return}
+  /* v664 (Ian): Essência/Gel do saque = núcleo fluido realista só em shader (Prancha II), não sólido */
+  const flu=window.Essencia663&&(Essencia663.kind(entry)||Essencia663.kind({type:'material',name:text}));if(flu){const o=Essencia663.mesh(entry&&Essencia663.kind(entry)?entry:{type:'material',name:text});put(o,null,rim);return}
   if(entry&&entry.type==='equipment')text=(entry.item?.name||'')+' '+text;
   /* v584: Alquimia mostrava armadura e "Forjar arma" também; agora poção na alquimia e espada na forja de arma */
   const mt535=($('mt')?.textContent||'');
