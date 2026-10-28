@@ -858,6 +858,7 @@
   function eat(id) {
     const s = S(), it = ITEMS[id];
     if (!s || !it || !count(id)) return false;
+    if (window.Corpo659) { if (it.use658) return Corpo659.use(id); try { Corpo659.onUse(id); } catch (_) {} } /* v659: ferimentos e mutagênicos */
     if (id === 'pacote_lacrado') return unsealBundle();
     if (it.bait || id === 'isca_carnica' || id === 'estragada') {
       return throwBait();
@@ -1388,7 +1389,7 @@
           else if (it.flask) act.push('<button class="btn hot" data-throwflask="' + k + '">Arremessar [G]</button>');
           else if (it.alchemy) act.push('<button class="btn hot" data-drinkpot="' + k + '">Beber Poção</button>');
           else if (it.bait) act.push('<button class="btn hot" data-bait="' + k + '">Jogar Isca [G]</button>');
-          else if (it.eat || it.heal) act.push('<button class="btn hot" data-eat="' + k + '">' + (it.heal ? 'Usar' : 'Comer') + '</button>');
+          else if (it.eat || it.heal || it.use658) act.push('<button class="btn hot" data-eat="' + k + '">' + (it.heal || it.use658 ? 'Usar' : 'Comer') + '</button>'); /* v659: tala, unguento, álcool e mutagênicos (corpo659) */
           if (fire && k === 'carne') act.push('<button class="btn" data-cook="assada">Assar</button>');
           if (fire && k === 'peixe_cru') act.push('<button class="btn" data-cook="peixe_assado">Assar</button>');
           if (fire && k === 'cogu_bom') act.push('<button class="btn" data-cook="cogu_assado">Assar</button>');
