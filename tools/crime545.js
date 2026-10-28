@@ -24,7 +24,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const isGuard=n=>n.role523==='guarda';
 const isThief=n=>n.role523==='ladrao';
 function target(n){return n&&!n.alma545&&!n.gone&&!n.dead545&&n.kind!=='deco'&&!n.kid527&&!n.talk575&&n.m&&n.m.root&&n.m.root.visible!==false&&!(typeof inConversation==='function'&&inConversation())}
-const essential=n=>!KILLABLE.test(n.kind||'')&&!isGuard(n);
+const essential=n=>!KILLABLE.test(n.kind||'')&&!isGuard(n)&&!n.vend655;/* v657: vendedor de fora de Aster pode morrer (tools/povo655.js) */
 function cityAt(x,z){try{const q=nearestCity(x,z);return q&&q.c&&q.d<90&&q.c.name?q.c:null}catch(_){return null}}
 /* morador da cidade: moradores, guardas e vendedores daquela cidade; caçadores, viajantes e encontros são de fora */
 const fromHere=(n,c)=>!!(c&&n.home&&(n.home===c||n.home.id===c.id)&&!/^(hunter|traveler|emergent|emergent_skyrim)$/.test(n.kind||''));

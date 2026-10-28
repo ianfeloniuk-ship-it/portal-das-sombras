@@ -493,7 +493,7 @@
     const news0 = () => news(n, 'Anda tudo calmo por aqui.');
     
     let defaultGreeting = reg558(n).oi + ' Em que posso ajudar?';
-    if (isBank) defaultGreeting = 'Bem-vindo ao Banco de Aster. Seu ouro e seus bens estão sempre protegidos aqui.';
+    if (isBank) defaultGreeting = 'Bem-vindo ao Banco de ' + ((n.home && n.home.name) || 'Aster') + '. Seu ouro e seus bens estão sempre protegidos aqui.';
     else if (isWep) defaultGreeting = 'Aço bom e corte afiado mantêm um guerreiro vivo. O que procura hoje?';
     else if (isMkt) defaultGreeting = 'Minérios, peixes e provisões do dia. Tenho de tudo um pouco.';
     else if (isPot) defaultGreeting = 'Ervas raras e poções frescas. Uma boa poção na hora certa salva vidas.';

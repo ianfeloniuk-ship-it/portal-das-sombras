@@ -102,15 +102,47 @@
     return residentes(c).find(r => !vivos.has(r.id)) || null;
   }
   function morreu(n) {
-    if (!n || !n.res655 || !n.home) return; const S = estado(n.home);
-    S.mortos[n.res655] = DIA(); S.ultimo = { nome: n.short || n.name, dia: DIA() };
+    if (!n || !n.home || !(n.res655 || n.vend655)) return; const S = estado(n.home);
+    if (n.vend655) { S.lojaMorta = S.lojaMorta || {}; S.lojaMorta[n.shop] = DIA(); S.fechou = { nome: n.short || n.name, loja: n.shop, dia: DIA() }; }
+    else S.mortos[n.res655] = DIA();
+    S.ultimo = { nome: n.short || n.name, dia: DIA() };
     try { if (typeof store !== 'undefined' && store.set) store.set('pds2_profile', profile); } catch (_) {}
   }
   function noticia(c) {
     if (!c) return null; const S = estado(c), L = [];
     if (S.ultimo && DIA() - S.ultimo.dia <= 6) L.push('Ainda não acredito que ' + S.ultimo.nome + ' morreu. A casa ficou vazia.', 'Fizeram o enterro de ' + S.ultimo.nome + '. Pouca gente foi.');
     if (S.chegou && DIA() - S.chegou.dia <= 6) L.push('Tem gente nova na cidade: ' + S.chegou.nome + '. Ficou com a casa de quem morreu.');
+    if (S.fechou && S.lojaMorta && S.lojaMorta[S.fechou.loja] != null) L.push('A loja de ' + (LOJA[S.fechou.loja] || 'mercadorias') + ' está fechada desde que ' + S.fechou.nome + ' morreu.');
+    if (S.assumiu && DIA() - S.assumiu.dia <= 6) L.push(S.assumiu.nome + ' assumiu a loja de ' + (LOJA[S.assumiu.loja] || 'mercadorias') + '. Ainda está aprendendo.');
     return L.length ? L[Math.floor(Math.random() * L.length)] : null;
+  }
+
+  /* ---------- lojas fora de Aster (v657, Ian: vendedor pode morrer, como no Skyrim) ----------
+     Antes toda cidade tinha os mesmos Kael, Dorian, Selene… Fora de Aster cada loja tem dono da região (sempre o mesmo).
+     Se ele morrer, a loja fica fechada; depois de 3 dias do jogo outra pessoa assume (quando a cidade for montada de novo).
+     Os 6 de Aster continuam essenciais (missões fixas, afinidade e missão pessoal dependem deles). */
+  const LOJA = { wep: 'equipamentos', defense: 'defesa', arm: 'defesa', pot: 'poções', mkt: 'mercado', bank: 'banco', guild: 'missões da Ordem' };
+  const JOBL = { wep: ['Ferreiro', 'Ferreira'], defense: ['Armeiro', 'Armeira'], arm: ['Armeiro', 'Armeira'], pot: ['Boticário', 'Boticária'], mkt: ['Mercador', 'Mercadora'], bank: ['Banqueiro', 'Banqueira'], guild: ['Ordem da Fenda', 'Ordem da Fenda'] };
+  function vendedor(c, shop) {
+    const S = estado(c); S.loja = S.loja || {}; S.lojaMorta = S.lojaMorta || {};
+    const gera = g => { const reg = regiao(c), R = rng(hash(chave(c) + '|loja|' + shop + '|' + g)), sx = R() < .5 ? 'f' : 'm', D = REG[reg] || REG.aster, nm = pickR(R, sx === 'f' ? D.f : D.m) + ' ' + sobrenome(R, reg, sx); SEXO[nm] = sx; return { nome: nm, sexo: sx, gen: g }; };
+    const m = S.lojaMorta[shop];
+    if (m != null && DIA() - m >= 3) { S.loja[shop] = (S.loja[shop] || 0) + 1; delete S.lojaMorta[shop]; S.assumiu = { nome: gera(S.loja[shop]).nome, loja: shop, dia: DIA() }; }
+    if (S.lojaMorta[shop] != null) return null;
+    return gera(S.loja[shop] || 0);
+  }
+  if (typeof addVendor === 'function') {
+    const base = addVendor;
+    addVendor = function (c, shop, name, sign, col, x, z, look) {
+      if (!c || c.name === 'Aster' || !LOJA[shop]) return base.apply(this, arguments);
+      const V = vendedor(c, shop); if (!V) return; /* loja fechada: o dono morreu há menos de 3 dias */
+      const n0 = npcs.length; base.call(this, c, shop, V.nome, sign, col, x, z, look);
+      const n = npcs[npcs.length - 1];
+      if (n && npcs.length > n0 && n.kind === 'vendor') {
+        n.vend655 = 1; n.job523 = JOBL[shop][V.sexo === 'f' ? 1 : 0];
+        try { if (global.Povo482 && Povo482.register) Povo482.register(n, { role: 'civil', sex: V.sexo, seed: hash(V.nome), region: regiao(c), priority: true }); } catch (_) {}
+      }
+    };
   }
 
   /* ---------- conversas entre eles (vida própria) ---------- */
@@ -174,5 +206,5 @@
     } catch (e) { console.warn('Povo655', e); }
   }
   setInterval(tick, 1500);
-  global.Povo655 = { residentes, proximo, morreu, noticia, estado, conversar, cap };
+  global.Povo655 = { residentes, proximo, morreu, noticia, estado, conversar, cap, vendedor };
 })(typeof window !== 'undefined' ? window : globalThis);
