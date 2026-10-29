@@ -1,3 +1,11 @@
+## v684 (29/10/2026) — missão fixa #15 «A Primeira Âncora: O Trono de Gelo de Ymiria»
+- **Módulo:** `tools/ymiria684.js` (estado em `profile.fixas545.q015`). Começa ao fechar a #14: cruzar o Desfiladeiro até Ymiria; a menos de 90 m nasce o Golias de Geada (Yeti chefe, vida ×3) com 4 Filhotes de Yeti junto da Pedra-Âncora.
+- **Escolha pela ação:** poupar (arma guardada, só o Golias morre; os filhotes fogem pela ecologia v410) = Yeti Alfa aliado de Ymiria, `avisosNevasca`, 1º Relato intacto; se algum filhote morrer pela sua mão = sem aliança, sem avisos, Relato danificado.
+- **Ligado:** `intro401.js` e `campaign327.js` (objetivo e alvo), `game.html`, `sw.js`. O Golias tem `siege=true` (senão a regra de cidade segura de `390-ia.js` o empurra para fora das muralhas) e é preso a 45 m do trono e hostil mesmo com a arma guardada. O mundo troca ~5% das espécies ao nascer (draugr): o módulo descarta e refaz.
+- **Simplificações:** o frio usa o sistema que já existe; «avisos de nevasca» é só a marca e o texto no Diário. A #16 começa quando a #15 termina.
+- **Teste:** jogo novo no navegador, caminhada de 110 m até o trono, os dois ramos com golpe real; sem erro de script.
+
+
 ## v683 (29/10/2026) — Fim dos "Ecos": mortos do Necromante viram Servos; chefão não dá mais essência
 - Ian: «tira esse Ecos… o jogo tem a minha própria identidade… recolher a essência dos guardiões, dos chefes… não faz mais sentido». Decisões no chat: nome = **Servos**; o Necromante continua erguendo chefões, sem essência.
 - Necromante: Erguer Servo, Domínio dos Servos, Senhor dos Servos, General dos Servos, Exército/Coleção/Ordens dos servos, HUD "SERVOS n/m", textos e falas.
