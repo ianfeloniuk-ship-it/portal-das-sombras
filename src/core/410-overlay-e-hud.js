@@ -73,7 +73,7 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   return rows.join('');
 }
 let xpHudKey='';
-function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: desperte com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
+function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: arma com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
 function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=className().toUpperCase();

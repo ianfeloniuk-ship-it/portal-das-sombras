@@ -147,7 +147,7 @@ window.SOLO_RPG_STORY = {
         "Localizar os sinais de pressão em cada Âncora.",
         "Reforçar as defesas e conter ameaças onde realmente surgirem."
       ],
-      "evidence": "Depois do resgate antigo, sobreviventes e Transmigradores usaram as técnicas da Torre para separar o corpo do Arquiteto em cinco partes, cada uma presa numa capital (Ymiria, Zahar, Thalor, Urdan e Verden). Aster estabiliza a rede; não contém uma sexta parte.",
+      "evidence": "Depois do resgate antigo, sobreviventes e Rasgados usaram as técnicas da Torre para separar o corpo do Arquiteto em cinco partes, cada uma presa numa capital (Ymiria, Zahar, Thalor, Urdan e Verden). Aster estabiliza a rede; não contém uma sexta parte.",
       "consequence": "Preservar as Âncoras passa a ter um motivo claro. Nenhuma capital é destruída automaticamente pelo roteiro.",
       "diary": "Os registros das capitais explicam como a resistência formou as cinco prisões depois da primeira abertura. As Pedras-Âncora são antigas, mas seu uso para prender o corpo é posterior ao resgate. Fechar uma Fenda não recaptura uma peça fugitiva.",
       "prerequisites": [
@@ -198,9 +198,9 @@ window.SOLO_RPG_STORY = {
         "Ler a confissão no Diário e perguntar quem mais ouve a voz.",
         "Conferir as orientações da voz com os registros de Aldric, da Torre e da Ordem antes de decidir a defesa."
       ],
-      "evidence": "O Narrador matou o Primeiro Guardião para resgatar desaparecidos. A descarga destruiu seu corpo e dispersou sua alma pelas passagens. Desde então, tenta impedir o Arquiteto em inúmeras realidades e tempos, acompanhando outros Transmigradores. Se o inimigo alcançar a libertação completa em uma única realidade, poderá destruir todas. Os superiores continuam desconhecidos.",
+      "evidence": "O Narrador matou o Primeiro Guardião para resgatar desaparecidos. A descarga destruiu seu corpo e dispersou sua alma pelas passagens. Desde então, tenta impedir o Arquiteto em inúmeras realidades e tempos, acompanhando outros Rasgados. Se o inimigo alcançar a libertação completa em uma única realidade, poderá destruir todas. Os superiores continuam desconhecidos.",
       "consequence": "{nome} conhece a extensão da ameaça e participa das decisões. A confiança precisa ser reconstruída por ações; não há perdão automático nem promessa de vitória universal.",
-      "diary": "A voz que me acompanha também orienta outros Transmigradores. O Narrador carrega lembranças de tentativas em realidades e tempos diferentes. Ele abriu as passagens ao derrubar o Primeiro Guardião; agora tenta impedir a libertação completa do Arquiteto em qualquer realidade. Defender Aster importa para todas as outras. Sua experiência não é conhecimento de tudo, e ouvir sua confissão não resolve minha confiança. A partir de agora, suas lembranças precisam ser comparadas com sinais deste mundo: uma rota lembrada pode existir em outra realidade. A confiança se reconstrói por provas e ações.",
+      "diary": "A voz que me acompanha também orienta outros Rasgados. O Narrador carrega lembranças de tentativas em realidades e tempos diferentes. Ele abriu as passagens ao derrubar o Primeiro Guardião; agora tenta impedir a libertação completa do Arquiteto em qualquer realidade. Defender Aster importa para todas as outras. Sua experiência não é conhecimento de tudo, e ouvir sua confissão não resolve minha confiança. A partir de agora, suas lembranças precisam ser comparadas com sinais deste mundo: uma rota lembrada pode existir em outra realidade. A confiança se reconstrói por provas e ações.",
       "prerequisites": [
         "act_11"
       ],
@@ -310,7 +310,7 @@ window.SOLO_RPG_STORY = {
       "npc": "Lyra",
       "title": "Os nomes que chegaram",
       "objective": "Recuperar três registros legíveis de viajantes e conferir seus relatos com a Ordem.",
-      "consequence": "Pessoas resgatadas e outros Transmigradores passam a aparecer nas conversas; pistas de travessia alimentam o Diário."
+      "consequence": "Pessoas resgatadas e outros Rasgados passam a aparecer nas conversas; pistas de travessia alimentam o Diário."
     },
     {
       "id": "mira_route",
@@ -397,8 +397,8 @@ window.SOLO_RPG_STORY = {
         "“Fui atrás dos desaparecidos, {nome}. Ouvi gente viva do outro lado de uma rachadura. O Primeiro Guardião impedia a passagem. Eu o matei para tirar aquelas pessoas de lá.”",
         "“O resgate aconteceu. E o selo caiu. A descarga destruiu meu corpo e espalhou o que restava de mim pelas passagens. Quando entendi o que tinha aberto, eu já não tinha mãos para fechar.”",
         "“As Fendas deram caminho à influência do Arquiteto. Isso não era ainda a libertação de tudo que ele é. As cinco Âncoras deste mundo contêm seu corpo; a mão que você viu era uma projeção. Aster é o nexo que ele tenta alcançar.”",
-        "“Não acompanhei a formação de todas as prisões. Os registros preservados mostram que sobreviventes, Transmigradores e a primeira resistência usaram os conhecimentos da Torre para conter meu erro. Minha memória não substitui esses documentos.”",
-        "“Você perguntou quem mais me ouve. Outros Transmigradores, {nome}. Em outros mundos, em outros tempos. Tentei detê-lo em tantas realidades que não consigo ordenar todas as lembranças.”",
+        "“Não acompanhei a formação de todas as prisões. Os registros preservados mostram que sobreviventes, Rasgados e a primeira resistência usaram os conhecimentos da Torre para conter meu erro. Minha memória não substitui esses documentos.”",
+        "“Você perguntou quem mais me ouve. Outros Rasgados, {nome}. Em outros mundos, em outros tempos. Tentei detê-lo em tantas realidades que não consigo ordenar todas as lembranças.”",
         "“Se ele conseguir se libertar por inteiro em uma única realidade, poderá destruir todas. É por isso que continuo procurando quem possa fechar os caminhos que eu já não consigo tocar.”",
         "“Eu lembro tentativas. Isso não significa que saiba o que acontece em toda parte, nem quem dá ordens a ele. Também não posso dizer que seu mundo natal está salvo. Você tem direito de exigir provas de mim.”",
         "{nome} não oferece perdão automático. A resistência segue com a verdade conhecida e com as decisões compartilhadas com quem terá de viver suas consequências.",
@@ -415,7 +415,7 @@ window.SOLO_RPG_STORY = {
     }
   },
   "continuity": {
-    "authorDirection": "Ian: o Narrador acompanha Transmigradores em inúmeras realidades/tempos; libertação em uma realidade ameaça todas.",
+    "authorDirection": "Ian: o Narrador acompanha Rasgados em inúmeras realidades/tempos; libertação em uma realidade ameaça todas.",
     "integrationProposal": "IA: cronologia das prisões reconstruída pelos registros; memória testada por observação; arco de retorno e pertencimento; finais ligados a contenção, confronto e Fim do Ciclo.",
     "gameplayLimit": "Leitura e registro preventivo integrados. A leitura não concede recompensas nem altera morte, reset, classes ou missões físicas.",
     "source": "18-Historia-completa-em-prosa-v5.md; 19-Cronologia-e-regras-da-historia-v5.md"
@@ -485,7 +485,7 @@ window.SOLO_RPG_STORY = {
           "Perto de uma inscrição, a dor da queda voltou ao peito.",
           "— Isso acontece com os outros? — perguntou à voz.",
           "— Com alguns dos que atravessam.",
-          "A resposta importava. Em Aster, o nome dado a essas pessoas era Transmigradores. A Fenda havia alterado outras almas também. {nome} não era a primeira pessoa a sentir aquela ressonância, nem a única capaz de aprender a usá-la.",
+          "A resposta importava. Em Aster, o nome dado a essas pessoas era Rasgados. A Fenda havia alterado outras almas também. {nome} não era a primeira pessoa a sentir aquela ressonância, nem a única capaz de aprender a usá-la.",
           "A inscrição de Aldric estava numa sala de portas fechadas. Um arco tinha cinco pequenas marcas ao redor e um sinal central, afastado delas. Sob a pedra, outra inscrição fora parcialmente apagada. A camada inferior era muito mais antiga do que as anotações sobre a crise atual.",
           "{nome} copiou os traços. Quando tocou a borda do desenho, a voz deixou escapar:",
           "— Vocês chegaram a esta parte.",
@@ -586,10 +586,10 @@ window.SOLO_RPG_STORY = {
           "— Reconheço a rota.",
           "— Para onde?",
           "— Não consigo afirmar onde ela termina agora.",
-          "Do outro lado da sala, uma Transmigradora da expedição também tinha encontrado um sinal familiar. Ela vinha de um mundo com duas luas. Sua cópia descrevia uma ponte que nunca existira nas memórias de {nome}. As duas rotas se tocavam no mapa e seguiam para direções diferentes.",
+          "Do outro lado da sala, uma Rasgada da expedição também tinha encontrado um sinal familiar. Ela vinha de um mundo com duas luas. Sua cópia descrevia uma ponte que nunca existira nas memórias de {nome}. As duas rotas se tocavam no mapa e seguiam para direções diferentes.",
           "Não havia um caminho único de casa. Havia muitas casas, muitos desastres e uma rede capaz de misturar seus vestígios.",
           "Uma inscrição nova cobria parte do desenho antigo. Não descrevia um destino; distribuía funções. Uma linha terminava no nome do Arquiteto. Acima dela, as ordens continuavam para fora da área preservada do mapa.",
-          "— Ele responde a alguém — disse a Transmigradora.",
+          "— Ele responde a alguém — disse a Rasgada.",
           "{nome} copiou o trecho. Era possível reconhecer uma hierarquia sem saber quem ocupava o alto dela.",
           "Antes de sair, guardou também o sinal parecido com o do mundo natal. Não o chamou de esperança nem de mentira. Era uma pista que precisaria sobreviver à pressa de acreditar.",
           "Na volta, a voz indicou uma porta que não existia. Corrigiu o caminho quando a expedição lhe descreveu a parede inteira.",
@@ -627,7 +627,7 @@ window.SOLO_RPG_STORY = {
         "paragraphs": [
           "As cinco marcas vistas na Torre pertenciam às cinco capitais: Ymiria, Zahar, Thalor, Urdan e Verden. Cada uma guardava uma Pedra-Âncora. Aster ficava separada, no vínculo central da rede.",
           "Nas câmaras das capitais, os registros guardavam uma parte da história que o Narrador nunca contara.",
-          "Depois da primeira grande abertura, o Arquiteto tentara fixar seu corpo naquele mundo. Sobreviventes do resgate antigo, Transmigradores e a resistência que daria origem à Ordem trabalharam juntos para detê-lo. Conhecimentos da Torre permitiram separar sua manifestação em cinco partes. As Pedras-Âncora, antes usadas para conter passagens, tornaram-se prisões ligadas entre si.",
+          "Depois da primeira grande abertura, o Arquiteto tentara fixar seu corpo naquele mundo. Sobreviventes do resgate antigo, Rasgados e a resistência que daria origem à Ordem trabalharam juntos para detê-lo. Conhecimentos da Torre permitiram separar sua manifestação em cinco partes. As Pedras-Âncora, antes usadas para conter passagens, tornaram-se prisões ligadas entre si.",
           "Os registros posteriores à abertura preservavam nomes diferentes em suas cópias. As marcas do trabalho eram as mesmas. A Ordem atual herdara a defesa; não a inventara do nada. Aquela reconstrução não dependia de o Narrador ter testemunhado cada etapa.",
           "Aster estabilizava a rede de passagens. As cinco capitais (Ymiria nas neves, Zahar no deserto, Thalor nas águas, Urdan nas cavernas de pedra e Verden nos pântanos) mantinham suas próprias prisões físicas; o nexo central não guardava uma sexta parte. Por isso o Arquiteto atacava rotas específicas: libertar o corpo sem alcançar Aster ainda o deixaria dependente deste mundo.",
           "O primeiro aviso chegou de uma capital cuja defesa havia cedido. A Fenda da Âncora estava aberta. Sua parte prisioneira escapara.",
@@ -701,7 +701,7 @@ window.SOLO_RPG_STORY = {
           "— Eu lembro pessoas trabalhando nas Âncoras. Nem sempre sei de qual mundo vem a lembrança.",
           "{nome} pensou no erro da porta na Torre.",
           "— Quem eram os outros quando você disse “vocês”?",
-          "— Outros Transmigradores. Em outros lugares, em outros tempos. Eu tento falar com quem ainda pode alcançar os caminhos.",
+          "— Outros Rasgados. Em outros lugares, em outros tempos. Eu tento falar com quem ainda pode alcançar os caminhos.",
           "Não havia uma única tentativa, nem um único viajante. O Narrador ouvira nomes que agora confundia, acompanhara defesas que não sabia ordenar e perdera contato com pessoas cujo fim desconhecia.",
           "— As tentativas que lembro e os registros que conseguimos comparar apontam para o mesmo risco: se o Arquiteto conseguir se libertar por inteiro em uma realidade, poderá destruir todas. Um nexo rompido dá a ele o caminho para continuar. Eu não conheço todo o mecanismo, nem sei onde cada tentativa está agora. É por isso que continuo procurando.",
           "Aldric passou um dedo pela margem do documento.",

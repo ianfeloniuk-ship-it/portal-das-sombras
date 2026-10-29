@@ -1,20 +1,20 @@
 
 const BOSSES=[
- {n:'Cavaleiro Carmesim',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
- {n:'Lich Ancestral',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
- {n:'Berserker Rubro',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
- {n:'General Esqueleto',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
+ {n:'O Último Portão',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
+ {n:'O Arquivista',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
+ {n:'O Campeão das Arenas',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
+ {n:'O Marechal sem Bandeira',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
 const BOSSES_HIGH=[
  {n:'O Rei Oco',mon:'monarca',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
- {n:'Rei Demônio Vharok',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
- {n:'Dragão do Caos Kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
- {n:'Rainha Aranha Nhyssa',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
- {n:'Colosso de Gelo Ymrak',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
+ {n:'O Senhor da Fornalha',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
+ {n:'A Fera dos Quatro Céus',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
+ {n:'A Mãe do Ninho',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
+ {n:'O Inverno Que Andava',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
 const SOVEREIGNS=[
- {n:'Arconte da Destruição',mon:'user_gigante_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
- {n:'Arconte do Gelo Eterno',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
- {n:'Arconte das Pragas',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
- {n:'Arconte das Feras',mon:'user_yeti',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
+ {n:'O que Restou da Cidade',mon:'user_gigante_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
+ {n:'A Rainha do Inverno Parado',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
+ {n:'O Jardineiro da Podridão',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
+ {n:'O Caçador Primevo',mon:'user_yeti',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
 const ALLBOSS=()=>[...BOSSES,...BOSSES_HIGH,...SOVEREIGNS];
 const KINDS={
  slime:{mon:'slime',gk:'Skeleton_Minion',n:'Slime Rosa',hp:22,dmg:5,spd:3.2,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0xff8ab0,wep:'none',r:0.55,rk:0},

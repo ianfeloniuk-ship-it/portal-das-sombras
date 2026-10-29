@@ -756,7 +756,7 @@
       : [];
 
     let h = `<div class="sec">PROGRESSÃO LIVRE ESTILO SKYRIM (SEM CLASSE INICIAL FIXA — APENAS 2º DESPERTAR)</div>`;
-    h += `<div class="card" style="margin-bottom:10px;line-height:1.5">Você evolui <b>usando qualquer arma ou magia</b> (role a rodinha do mouse ou aperte <b>1, 2, 3, 4</b>). As <b>10 Classes Secretas do Segundo Despertar</b> continuam como conquistas lendárias das Fendas Vermelhas.</div>`;
+    h += `<div class="card" style="margin-bottom:10px;line-height:1.5">Você evolui <b>usando qualquer arma ou magia</b> (role a rodinha do mouse ou aperte <b>1, 2, 3, 4</b>). As <b>10 Classes Secretas do Juramento da Âncora</b> continuam como conquistas lendárias das Fendas Vermelhas.</div>`;
 
     h += `<div class="grid2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:12px">`;
     Object.keys(API.skillTree).forEach(k => {

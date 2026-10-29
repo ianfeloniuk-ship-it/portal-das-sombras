@@ -87,7 +87,7 @@ function finishCreation(){if(!profile.creationPending91)return false;const d=cre
 function transmigratorLevel253(){return Math.max(0,Math.min(10,Math.floor(Number(profile.transmigratorLv)||0)));}
 function transmigratorBonus(){return .10*transmigratorLevel253();}
 function improveTransmigrator(){const lv=transmigratorLevel253();if(lv>=10||(run.spts||0)<1)return false;run.spts--;profile.transmigratorLv=lv+1;saveRun();passivesView();return true;}
-function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Transmigrador · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
+function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Rasgado · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
 
 
 /* v406: visual oficial vibrante; uma grade compartilhada com Look154. */

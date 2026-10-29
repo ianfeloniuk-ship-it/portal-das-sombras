@@ -17,7 +17,7 @@
         name: 'Comandante Brann & Chanceler Lyra',
         role: 'Regentes da Ordem dos Caçadores',
         title: 'Governança da Ordem',
-        desc: 'Foco no acolhimento de Transmigradores, ampliação de forjas e defesa de perímetro.',
+        desc: 'Foco no acolhimento de Rasgados, ampliação de forjas e defesa de perímetro.',
         color: '#e7bd6c'
       },
       edicts: [

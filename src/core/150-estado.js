@@ -15,7 +15,7 @@ function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:
 function rememberCharacter118(){if(modalOpen&&modalRoute118)CHAR_UI118.scroll[modalRoute118]=$('mb').scrollTop}
 function openCharacter118(){const [page,slot]=CHAR_UI118.route.split(':');if(page==='loadout')return loadoutView(slot===undefined?undefined:Number(slot));if(page==='basic')return basicAttackView();if(page==='constel')return consView();return characterView(page)}
 function characterBack118(label){return '<div class="character-path118"><strong>'+label+'</strong></div>'}
-function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 por nível e por guardião de masmorra. Vale para habilidades e Transmigrador.</p></div>'}
+function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 por nível e por guardião de masmorra. Vale para habilidades e Rasgado.</p></div>'}
 
 const keys={},input={x:0,z:0},cam={x:0,z:0};
 

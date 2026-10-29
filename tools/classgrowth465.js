@@ -31,7 +31,7 @@
     for (const [k, n] of Object.entries(s)) run.stats[k] = Math.max(0, Math.floor(+run.stats[k] || 0)) + n;
     run.classPts466 = profile.cls;
     try { refreshStats(); saveRun(); } catch (_) {}
-    setTimeout(() => { try { toast('<b>[' + CLASSES[profile.cls].n.toUpperCase() + ']</b> Classe despertada! Seus atributos crescem com suas ações no mundo.', 5000); } catch (_) {} }, 1200);
+    setTimeout(() => { try { toast('<b>[' + CLASSES[profile.cls].n.toUpperCase() + ']</b> O ferro te aceitou! Seus atributos crescem com suas ações no mundo.', 5000); } catch (_) {} }, 1200);
   }
 
   function growth(ci) { try { return RpgBalance.growthFor(ci); } catch (_) { return null; } }

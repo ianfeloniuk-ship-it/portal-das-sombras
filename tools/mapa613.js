@@ -1,5 +1,5 @@
 /* Missão fixa #13 «O Mapa Astral no Centésimo Degrau» (v651). Topo da Torre da Ascensão (andar 100). Ato VII, depois da defesa de Aster (#12).
-   Limpo o andar 100, o mapa astral aparece suspenso no ar entre fragmentos de pedra, com uma Transmigradora do Mundo de Duas Luas ao lado.
+   Limpo o andar 100, o mapa astral aparece suspenso no ar entre fragmentos de pedra, com uma Rasgada do Mundo de Duas Luas ao lado.
    As rotas parecem levar aos mundos natais; acima do nome do Arquiteto há uma ordem superior. Escolha: tocar o selo luminoso que lembra a porta
    da sua casa, ou seguir o aviso do Narrador («Não toque ainda») e copiar a hierarquia.
    Copiar: os Superiores do Arquiteto entram no Diário e +5 de Vontade, com resistência a ilusões mentais (marca `resiste`). Tocar: vê a porta de casa
@@ -38,12 +38,12 @@
     glow.position.z = .08; seal.add(frame); seal.add(glow); seal.position.set(cx + 5.2, 1.4, cz + 1); seal.rotation.y = -1.1; grp.add(seal);
     L.group.add(grp);
     try {
-      const m = NPC456.create('mulher'); figure = NPC456.figure('mulher', { m, name: 'Transmigradora do Mundo de Duas Luas', down: false, x: cx - 4.2, z: cz + 2.5, t: 0 });
+      const m = NPC456.create('mulher'); figure = NPC456.figure('mulher', { m, name: 'Rasgada do Mundo de Duas Luas', down: false, x: cx - 4.2, z: cz + 2.5, t: 0 });
       m.root.userData.terrainAbsolute245 = true; m.root.position.set(cx - 4.2, 0, cz + 2.5); m.root.rotation.y = Math.PI * .8; scene.add(m.root);
     } catch (_) { figure = null; }
     inter = { x: cx, z: cz + 2.2, r: 4, label: 'E · EXAMINAR O MAPA ASTRAL', use: examine }; L.inter.push(inter);
     S().phase = 'mapa'; save();
-    try { toast('<b>[TORRE]</b> No alto da Torre o mapa não está no chão: está suspenso no ar, entre fragmentos de pedra. Há outra Transmigradora diante dele.', 8000); } catch (_) {}
+    try { toast('<b>[TORRE]</b> No alto da Torre o mapa não está no chão: está suspenso no ar, entre fragmentos de pedra. Há outra Rasgada diante dele.', 8000); } catch (_) {}
   }
   function drop() {
     if (grp) { try { L.group && L.group.remove(grp); } catch (_) {} grp.traverse(o => { o.geometry && o.geometry.dispose && o.geometry.dispose(); }); }
@@ -53,8 +53,8 @@
   }
   function examine() {
     const s = S(); if (s.done || busy) return;
-    const npc = figure || { x: -4, z: -4.5, name: 'Transmigradora' };
-    Dialogo520.custom({ name: 'Transmigradora do Mundo de Duas Luas', title: 'Topo da Torre da Ascensão', type: 'mapa613' }, npc, () => ({
+    const npc = figure || { x: -4, z: -4.5, name: 'Rasgada' };
+    Dialogo520.custom({ name: 'Rasgada do Mundo de Duas Luas', title: 'Topo da Torre da Ascensão', type: 'mapa613' }, npc, () => ({
       raiz: { t: 'Você também reconhece, não é? Rotas inteiras, e algumas parecem levar para casa. Mas olhe mais alto: há uma ordem escrita acima do nome do Arquiteto. O selo ali ao lado tem a forma da porta da minha casa... da sua também? O Narrador sussurra: «Não toque ainda.»', o: [
         { l: 'Tocar o selo luminoso que lembra a porta da sua casa', fn: () => { choose('tocar'); return 'fim'; } },
         { l: 'Seguir o aviso do Narrador e copiar a hierarquia superior', fn: () => { choose('copiar'); return 'fim'; } }] }

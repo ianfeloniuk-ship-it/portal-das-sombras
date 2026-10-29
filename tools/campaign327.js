@@ -16,7 +16,7 @@
       { t: 'go', d: 'Ajude Edran, o guarda caído ao lado da carroça tombada, na estrada perto de {cidade}.', verb: 'AJUDAR EDRAN', cart: true, fig: { look: GUARD, name: 'Edran', down: true }, fight: { n: 1, kinds: ['gosma_f'] }, /* v546: missão fixa #1 — Gosma Fendida */
         done: 'Edran: — Procure Lyra e Kael em Aster.' },
       { t: 'city', d: 'Alcance a muralha de {cidade}.', done: 'Uma voz, perto demais: — A muralha. Continue.' },
-      { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Transmigradores; em troca, você caça as Fendas.', 'Sem moedas? Ninguém que cai da Fenda tem. Fale com Kael, na loja de equipamentos: ele troca uma arma de treino por escambo.'] },
+      { t: 'talk', npc: 'Lyra', d: 'Registre seu nome com Lyra, na Ordem.', say: ['Mais alguém que caiu sob as estrelas erradas. Você não é o primeiro esta semana, {nome}.', 'Vou registrar seu nome. A Ordem dá abrigo a Rasgados; em troca, você caça as Fendas.', 'Sem moedas? Ninguém que cai da Fenda tem. Fale com Kael, na loja de equipamentos: ele troca uma arma de treino por escambo.'] },
       { t: 'barter', d: 'Faça o escambo com Kael, na loja de equipamentos, e equipe sua primeira arma.', done: 'Kael: — Está feito. A Fenda reconhece o seu caminho, Viajante.' }] },
     { id: 'a2', act: 2, title: 'II — O Diário de Aldric', steps: [
       { t: 'talk', npc: 'Brann', d: 'Fale com Brann, na Defesa da Vila, sobre a patrulha sumida.', say: ['Uma patrulha minha sumiu na estrada com uma carroça de mantimentos. Aldric ia junto.', 'Vá na frente. Eu seguro a muralha.'] },
@@ -118,7 +118,7 @@
         done: 'A lâmina tem uma marca gravada por baixo da ferrugem.' },
       { t: 'talk', npc: 'Kael', d: 'Leve a arma a Kael.', say: ['Essa marca é a mesma dos guardiões. Alguém marcou o dono antes de ele cair.'] }] },
     { id: 'selene_record', npc: 'Selene', after: 'a5', steps: [
-      { t: 'talk', npc: 'Selene', d: 'Fale com Selene, no Banco, sobre as cartas.', say: ['Tenho cartas de Transmigradores esperando resposta. Algumas notícias já foram conferidas.'] },
+      { t: 'talk', npc: 'Selene', d: 'Fale com Selene, no Banco, sobre as cartas.', say: ['Tenho cartas de Rasgados esperando resposta. Algumas notícias já foram conferidas.'] },
       { t: 'go', d: 'Entregue as notícias a quem espera.', verb: 'ENTREGAR A NOTÍCIA', pts: 2, fig: { civ: true, name: 'Morador' }, zone: 'in',
         done: 'Morador: — Então ele está vivo… Obrigado.' },
       { t: 'talk', npc: 'Selene', d: 'Volte a Selene.', say: ['Nomes guardados não se perdem. Obrigada por levar as notícias.'] }] },
@@ -923,7 +923,7 @@
       return;
     }
     if (id === 'wep' && window.Intro401 && state('a1')?.s === 3 && !state('a1').done && !state('a1').kaelIntro401 && profile.classless) {
-      Intro401.dialog('Kael', ['Lyra registrou sua chegada. Escolha sua primeira arma de treino por escambo. Ela despertará o seu caminho.', 'Depois disso, o mundo é seu: explore as regiões, masmorras e sistemas no seu ritmo. A história pode esperar.'], () => { state('a1').kaelIntro401 = true; save(); shopOrig.call(this,id); });
+      Intro401.dialog('Kael', ['Lyra registrou sua chegada. Escolha sua primeira arma de treino por escambo. A memória dela vai definir o seu caminho.', 'Depois disso, o mundo é seu: explore as regiões, masmorras e sistemas no seu ritmo. A história pode esperar.'], () => { state('a1').kaelIntro401 = true; save(); shopOrig.call(this,id); });
       return;
     }
     const r = shopOrig.apply(this, arguments);

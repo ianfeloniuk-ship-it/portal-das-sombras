@@ -233,7 +233,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <div id="title" class="scr">
   <div class="card panel">
     <h1 id="ttl">PRIMEVA</h1>
-    <div class="sysline"><b>[NARRADOR]</b> Você chegou de outro mundo. Aqui, viajantes como você são chamados de <b>Transmigradores</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. No prólogo, a morte devolve você ao último ponto seguro. Depois do despertar, perde nível, ouro e itens. Só ficam o seu rank, o despertar e o que estiver no banco ou na casa.</div>
+    <div class="sysline"><b>[NARRADOR]</b> Você atravessou a Fenda. Aqui, quem chega assim é chamado de <b>Rasgado</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. No prólogo, a morte devolve você ao último ponto seguro. Depois da primeira arma, perde nível, ouro e itens. Só ficam o seu rank, o Juramento e o que estiver no banco ou na casa.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
     <button class="go" id="goBtn">DESPERTAR</button>
@@ -322,7 +322,7 @@ const RANKS=[
  {id:'S',p:.25,mult:3.8,steal:.75,c:'#ff4df0'},{id:'SS',p:.05,mult:5,steal:.9,c:'#fff36b'},
  {id:'SS+',p:.01,mult:6,steal:.92,c:'#ffda9f'},
  {id:'★',p:0,mult:7,steal:.95,c:'#e6d6ff',secret:true}];
-const TOPR=8; // SS+ é o maior rank público; ★ (9) exige SS+, Segundo Despertar e prova própria.
+const TOPR=8; // SS+ é o maior rank público; ★ (9) exige SS+, Juramento da Âncora e prova própria.
 const RANK_STEPS=[10,20,35,55,80,120,180,220,260];
 const S=(n,t,cd,mp,pow,col)=>({n,t,cd,mp,pow,col});
 const CLASSES=[
@@ -338,7 +338,7 @@ const CLASSES=[
  {n:'Mago de Gelo',w:3.5,ranged:true,body:0x2f7fb8,hair:0xe8f8ff,wep:'staff',elem:'gelo',pt:'ice',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x70ddff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
  {n:'Mago da Terra',w:3.5,ranged:true,body:0x6a5234,hair:0x3a2a1a,wep:'staff',elem:'terra',pt:'stone',sk:[S('Estaca de Pedra','stone_lance',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
  {n:'Mago do Raio',w:3.5,ranged:true,body:0x5a4ab8,hair:0xfff8c0,wep:'staff',elem:'raio',pt:'spark',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','thunderstorm',10,28,1.9,0xfff36b)]}];
-/* Segundo Despertar — capítulo inicial e três caminhos jogáveis. */
+/* Juramento da Âncora — capítulo inicial e três caminhos jogáveis. */
 const NR_LINES105={
  "victory": [
   "A passagem fechou. Você ficou deste lado.",
@@ -693,21 +693,21 @@ const NR_LINES105={
   "Mais uma investigação em que as ameaças perderam a discussão."
  ],
  "awakening": [
-  "Você concluiu o Segundo Despertar. Seu rank continua o mesmo.",
+  "Você concluiu o Juramento da Âncora. Seu rank continua o mesmo.",
   "Há um novo despertar na sua história, além do emblema da Ordem.",
   "As três investigações abriram outra etapa do seu caminho.",
   "Você despertou outra vez. A próxima prova de rank ainda é outra conquista.",
   "Seu poder ganhou caminhos que seu rank sozinho não descreve.",
-  "O Segundo Despertar está concluído. Agora há mais formas de continuar.",
+  "O Juramento da Âncora está concluído. Agora há mais formas de continuar.",
   "Você chegou a essa mudança sustentando as manifestações.",
   "Esse despertar veio das experiências que você viveu nas fissuras.",
   "A Ordem registra seu rank. Sua jornada acaba de ganhar outra dimensão.",
-  "As investigações levaram você ao Segundo Despertar.",
+  "As investigações levaram você ao Juramento da Âncora.",
   "Você continua com seu emblema e carrega um novo despertar.",
   "O aprendizado das fissuras abriu novas possibilidades.",
   "Há mais caminhos disponíveis para o que você pode se tornar.",
   "Você concluiu uma etapa que não cabe na sequência de ranks.",
-  "Seu Segundo Despertar agora faz parte do que vivemos.",
+  "Seu Juramento da Âncora agora faz parte do que vivemos.",
   "Vou precisar de mais palavras para apresentar você.",
   "Seu emblema não ganhou outra estrela por conta própria.",
   "A Ordem cuida dos ranks. Você acaba de complicar o resto.",
@@ -1815,7 +1815,7 @@ const NR_LINES105={
   "Você converteu o contato com as manifestações em opções.",
   "O caminho investigado passou a fazer parte do que sabe.",
   "Seu repertório cresceu depois das experiências vividas.",
-  "Você deu continuidade ao aprendizado do Segundo Despertar.",
+  "Você deu continuidade ao aprendizado do Juramento da Âncora.",
   "Essa classe abre mais combinações para experimentar.",
   "O aprendizado novo acompanha o restante da jornada.",
   "Você tem outra direção rara para desenvolver.",
@@ -2499,21 +2499,21 @@ for(const [ci,skills] of Object.entries(KIT_DEFS111)){const col=CLASSES[ci].sk[0
 // END CATALOG111
 
 const BOSSES=[
- {n:'Cavaleiro Carmesim',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
- {n:'Lich Ancestral',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
- {n:'Berserker Rubro',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
- {n:'General Esqueleto',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
+ {n:'O Último Portão',mon:'user_cavaleiro_carmesim',type:'seismic',body:0xa3201f,skill:S('Golpe Sísmico','nova',8,25,3.2,0xff5533)},
+ {n:'O Arquivista',mon:'user_rei_oco',type:'soulrain',body:0x4b2a8a,skill:S('Chuva de Almas','rain',9,28,1.7,0x9c6bff)},
+ {n:'O Campeão das Arenas',mon:'user_berserker_rubro',type:'fury',body:0x7a1010,skill:S('Fúria Sangrenta','buff_dmg',14,20,1.8,0xff2244)},
+ {n:'O Marechal sem Bandeira',type:'legion',body:0x7b7b82,skill:S('Legião','summon',16,35,3,0xd0d0d0)}];
 const BOSSES_HIGH=[
  {n:'O Rei Oco',mon:'monarca',types:['seismic','soulrain'],body:0x2a2436,scale:1.5,skill:S('Colapso do Vazio','nova',8,30,2.6,0x9c6bff)},
- {n:'Rei Demônio Vharok',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
- {n:'Dragão do Caos Kaelthys',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
- {n:'Rainha Aranha Nhyssa',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
- {n:'Colosso de Gelo Ymrak',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
+ {n:'O Senhor da Fornalha',types:['fury','seismic'],body:0x6a0a0a,scale:2.8,skill:S('Chama do Rei Demônio','nova',9,30,4.5,0xff5a1e)},
+ {n:'A Fera dos Quatro Céus',types:['soulrain','seismic'],body:0x1a4a2a,scale:3,skill:S('Sopro do Caos','rain',10,34,2.6,0x6fffb0)},
+ {n:'A Mãe do Ninho',types:['legion','soulrain'],body:0x2a1a3a,scale:2.6,skill:S('Ninhada Sombria','summon',16,40,5,0xb18cff)},
+ {n:'O Inverno Que Andava',types:['seismic','legion'],body:0x6fa8c8,scale:3,skill:S('Inverno Absoluto','nova',9,32,4,0xa8f0ff)}];
 const SOVEREIGNS=[
- {n:'Arconte da Destruição',mon:'user_gigante_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
- {n:'Arconte do Gelo Eterno',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
- {n:'Arconte das Pragas',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
- {n:'Arconte das Feras',mon:'user_yeti',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
+ {n:'O que Restou da Cidade',mon:'user_gigante_pedra',types:['fury','seismic','soulrain','legion'],body:0x2a0a0a,scale:3.4,p3:true,skill:S('Autoridade da Destruição','cone',6,30,7,0xff3d1e)},
+ {n:'A Rainha do Inverno Parado',mon:'user_yeti_corrompido',types:['seismic','soulrain','legion','fury'],body:0x9fd8f0,scale:3.4,p3:true,skill:S('Era do Gelo','nova',10,40,6,0xcff4ff)},
+ {n:'O Jardineiro da Podridão',mon:'user_golem_madeira',types:['soulrain','legion','seismic','fury'],body:0x3a5a1a,scale:3.4,p3:true,skill:S('Praga Soberana','dot',8,30,5,0x9cff6b)},
+ {n:'O Caçador Primevo',mon:'user_yeti',types:['legion','fury','seismic','soulrain'],body:0x5a3a1a,scale:3.4,p3:true,skill:S('Rugido das Feras','summon',18,45,6,0xffb84d)}];
 const ALLBOSS=()=>[...BOSSES,...BOSSES_HIGH,...SOVEREIGNS];
 const KINDS={
  slime:{mon:'slime',gk:'Skeleton_Minion',n:'Slime Rosa',hp:22,dmg:5,spd:3.2,ai:'melee',range:1.3,wind:0.5,atkCd:1.4,xp:6,scale:1,body:0xff8ab0,wep:'none',r:0.55,rk:0},
@@ -3612,7 +3612,7 @@ function enterModal118(title,route){const nav=MODAL_NAV118,key=route?'character:
 function rememberCharacter118(){if(modalOpen&&modalRoute118)CHAR_UI118.scroll[modalRoute118]=$('mb').scrollTop}
 function openCharacter118(){const [page,slot]=CHAR_UI118.route.split(':');if(page==='loadout')return loadoutView(slot===undefined?undefined:Number(slot));if(page==='basic')return basicAttackView();if(page==='constel')return consView();return characterView(page)}
 function characterBack118(label){return '<div class="character-path118"><strong>'+label+'</strong></div>'}
-function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 por nível e por guardião de masmorra. Vale para habilidades e Transmigrador.</p></div>'}
+function skillPoints118(){const n=run.spts||0;return '<div class="guide93"><strong>'+n+(n===1?' ponto de habilidade disponível':' pontos de habilidade disponíveis')+'</strong><p>Ganhe 1 por nível e por guardião de masmorra. Vale para habilidades e Rasgado.</p></div>'}
 
 const keys={},input={x:0,z:0},cam={x:0,z:0};
 
@@ -6277,7 +6277,7 @@ const XP_CURVE=Object.freeze({base:60,linear:40,power:1.8,scale:4});
 function xpNeed(level=run.level){return RpgBalance.xpNeed(level)}
 function xpProgress(level=run.level,xp=run.xp){const needed=xpNeed(level),current=Math.max(0,Math.floor(xp));return {current,needed,remaining:Math.max(0,needed-current),percent:Math.min(100,current*100/needed),nextLevel:level+1}}
 function xpNumber(value){return Math.floor(value).toLocaleString('pt-BR')}
-function xpProgressText(progress){if(profile.classless)return 'Nível 0 · registre-se com Lyra e desperte sua classe no escambo com Kael.';return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
+function xpProgressText(progress){if(profile.classless)return 'Nível 0 · registre-se com Lyra e pegue sua primeira arma no escambo com Kael.';return 'XP '+xpNumber(progress.current)+' / '+xpNumber(progress.needed)+' · faltam '+xpNumber(progress.remaining)+' para NV '+progress.nextLevel} /* v169: ~2,5x mais XP por nível no 100, ~3x no 200 */
 
 /* ================= AÇÕES ================= */
 /* PC: mira pelo mouse. O golpe/habilidade vai para onde o cursor aponta no chão. */
@@ -6558,7 +6558,7 @@ function die(){
   profile.towerBest=0;if(profile.relics183){const v=profile.relics183.vault||{};profile.relics183={own:{...v},eq:[],vault:v}}
   resetPointPassives253();const keep={pos:run.invReturn372?{x:run.invReturn372.x,z:run.invReturn372.z}:run.pos,invReturn372:run.invReturn372,classLoadout:run.classLoadout,initialSkillFix259:run.initialSkillFix259};/* v341 (Ian): morrer voltava a habilidade equipada para a primeira da classe */newRun();Object.assign(run,keep);clearMissionsOnDeath332();ensureRun();if(!classLoadout().some(Boolean))run.classLoadout=[profile.cls+':0'];run.pts=(run.pts||0)+CREATION_PTS281;/* v269/v281 (Ian): os 9 pontos da criação voltam */player.skills=pSkills();refreshStats();narratorDeath105();store.set('pds2_profile',profile);player.dead=false;saveRun();player.dead=true;
   const rk=RANKS[profile.rank];
-  $('deadtxt').innerHTML='Você voltou ao nível 1.<br><b>Perdeu:</b> '+fmt(lostG)+' de ouro, '+lostI+' itens, atributos, melhorias de passivas e missões da Ordem.<br><b>Manteve:</b> rank '+rkN(profile.rank)+', despertar e bens no banco e na casa.<br>Os 9 pontos iniciais retornaram para a sua classe. Atributos sobem treinando.'+(redBroken?'<br>O portal vermelho rompeu.':'');
+  $('deadtxt').innerHTML='Você voltou ao nível 1.<br><b>Perdeu:</b> '+fmt(lostG)+' de ouro, '+lostI+' itens, atributos, melhorias de passivas e missões da Ordem.<br><b>Manteve:</b> rank '+rkN(profile.rank)+', Juramento e bens no banco e na casa.<br>Os 9 pontos iniciais retornaram para a sua classe. Atributos sobem treinando.'+(redBroken?'<br>O portal vermelho rompeu.':'');
 
   setTimeout(()=>{$('dead').hidden=false;paused=true},1300);
 }
@@ -6685,10 +6685,10 @@ function bossBars166(b){const n=b.bars||3,f=Math.max(0,b.hp)/b.maxhp*n,cur=Math.
   $('bb').style.width=(100*part)+'%';$('bb').style.background=col;$('bbar').style.background=cur>1?BOSS_COLS166[(cur-2)%BOSS_COLS166.length]+'55':'rgba(0,0,0,.45)';$('bx').textContent=n>1?'×'+cur:'';
   const pp=$('bpips');if(pp.childElementCount!==n)pp.innerHTML='<i></i>'.repeat(n);[...pp.children].forEach((d,i)=>{d.className=i<cur?'on':'';d.style.setProperty('--c',BOSS_COLS166[i%BOSS_COLS166.length])})}
 function bossBarsFor166(gr){return [1,2,3,3,4,4,5,6,7,8][Math.max(0,Math.min(9,gr|0))]}
-/* v218 (Ian): chefes falam e ligam a história (Arquiteto, Fenda, Transmigradores). Chefes do despertar e Divindades têm falas próprias. */
+/* v218 (Ian): chefes falam e ligam a história (Arquiteto, Fenda, Rasgados). Chefes do despertar e Divindades têm falas próprias. */
 const BOSSL218={
- base:{aggro:['Mais um Transmigrador... o Arquiteto disse que vocês viriam.','Esta fenda é minha. Volte para o seu mundo.','Você cheira a outro céu. Vou guardar seus ossos.'],fury:['Chega de brincar!','A Fenda me alimenta. E você só sangra.'],power:['O Arquiteto me deu isto. Veja!','Agora você conhece o meu peso.'],death:['O Arquiteto... vai lembrar... de você.','A fenda... fecha... mas outra abre.','Você só atrasou o fim.']},
- goblins:{aggro:['Ouro! Ouro de Transmigrador!','O Clã Ferrugem não teme gente de fora!'],death:['Fala... pro clã... que eu lutei bem.']},
+ base:{aggro:['Mais um Rasgado... o Arquiteto disse que vocês viriam.','Esta fenda é minha. Volte para o seu mundo.','Você cheira a outro céu. Vou guardar seus ossos.'],fury:['Chega de brincar!','A Fenda me alimenta. E você só sangra.'],power:['O Arquiteto me deu isto. Veja!','Agora você conhece o meu peso.'],death:['O Arquiteto... vai lembrar... de você.','A fenda... fecha... mas outra abre.','Você só atrasou o fim.']},
+ goblins:{aggro:['Ouro! Ouro de Rasgado!','O Clã Ferrugem não teme gente de fora!'],death:['Fala... pro clã... que eu lutei bem.']},
  wolves:{aggro:['A matilha sentiu você desde a estrada.'],death:['Os filhotes... vão uivar meu nome.']},
  demons:{aggro:['Eu já queimei três mundos antes deste.'],death:['O fogo... não morre... só espera.']},
  undead:{aggro:['Eu também atravessei a fenda um dia. Olhe no que virei.'],death:['Finalmente... silêncio.']},
@@ -7084,7 +7084,7 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   return rows.join('');
 }
 let xpHudKey='';
-function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: desperte com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
+function updateXpHud(){const key=run.level+':'+run.xp;if(key===xpHudKey)return;const xp=xpProgress(),xpText=xpProgressText(xp);$('xpb').style.width=xp.percent+'%';$('xpt').textContent=xpNumber(xp.current)+' / '+xpNumber(xp.needed);$('xpleft').textContent=profile.classless?'Nível 1: arma com Kael':'Faltam '+xpNumber(xp.remaining)+' para NV '+xp.nextLevel;$('xppercent').textContent=Math.floor(xp.percent)+'%';$('xpbar').setAttribute('aria-valuenow',String(Math.floor(xp.percent)));$('xpbar').setAttribute('aria-valuetext',xpText);$('xpbar').title=xpText;xpHudKey=key}
 function hud(){
   const P=player,rk=RANKS[rankOf()],c=CLASSES[profile.cls];
   $('rk').textContent=rk.id;$('rk').style.fontSize=rk.id.length>3?'12px':'';$('rk').style.color=rk.c;$('cls').textContent=className().toUpperCase();
@@ -7331,7 +7331,7 @@ function finishTemple(){unlockLore('temple');
   const S=L.special,P=player;S.stage=4;S.done=true;
   for(const e of S.statues){e.dead=true;e.gone=true;scene.remove(e.m.root);fxBurst(e.x,1,e.z,0xffd070,8,3)}
   S.god.eyeMat.color.setHex(0xffd070);bossLight.color.setHex(0xffd070);bossLight.intensity=2;sfx('arise');sfx('gong');
-  profile.templeCompleted103=true;store.set('pds2_profile',profile);bigText('PROTOCOLOS CONCLUÍDOS',2600);toast('<b>[NARRADOR]</b> O templo reconheceu sua vitória. A promoção a ★ exige rank SS+, Segundo Despertar e a prova da Ordem.',6000);
+  profile.templeCompleted103=true;store.set('pds2_profile',profile);bigText('PROTOCOLOS CONCLUÍDOS',2600);toast('<b>[NARRADOR]</b> O templo reconheceu sua vitória. A promoção a ★ exige rank SS+, Juramento da Âncora e a prova da Ordem.',6000);
   L.bossDead=true;L.closeT=60;
   for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
   addChest(0,S.az+4,9,true);
@@ -7346,11 +7346,11 @@ function completeTier(){narratorEvent105('tier');run.tier=tierOf()+1;run.spts=(r
 /* v155 (Ian): set completo de uma classe rara libera o teste de despertar: duelo contra o guardião do tema, mais forte. Vencer ensina a classe. */
 function awakenTestReady155(id){const S=SETS153[id];return !!S&&setCount153(id)>=5&&!awakening103().unlocked.includes(S.cls)&&profile.cls!==S.cls}
 function awakenRows155(){let h='';for(const id in SETS153){const n=setCount153(id);if(!n)continue;const S=SETS153[id],cls=CLASSES[S.cls]?.n,learned=awakening103().unlocked.includes(S.cls)||profile.cls===S.cls;
-  h+=row(S.n+' ('+n+'/5)',learned?'Você já tem a classe '+cls+'.':n<5?'Vista as 5 peças para ouvir o chamado do Despertar do '+cls+'.':(profile.awDeclined169||{})[id]===awakenKey169(id)?'Você recusou este chamado. Ele volta quando reunir um set novo.':'Set completo: o chamado do Despertar aparece no mundo.','')}return h}
-function startAwakenTest155(id){if(!awakenTestReady155(id)||L.mode!=='world'||player.dead)return false;closeModal();L.awaken155=id;buildSpecial('job');L.awaken155=id;toast('<b>[NARRADOR]</b> Teste de despertar do <b>'+CLASSES[SETS153[id].cls].n+'</b>. O dono deste set deixou um guardião para medir você.',7000);return true}
+  h+=row(S.n+' ('+n+'/5)',learned?'Você já tem a classe '+cls+'.':n<5?'Vista as 5 peças para ouvir o chamado do Juramento do '+cls+'.':(profile.awDeclined169||{})[id]===awakenKey169(id)?'Você recusou este chamado. Ele volta quando reunir um set novo.':'Set completo: o chamado do Despertar aparece no mundo.','')}return h}
+function startAwakenTest155(id){if(!awakenTestReady155(id)||L.mode!=='world'||player.dead)return false;closeModal();L.awaken155=id;buildSpecial('job');L.awaken155=id;toast('<b>[NARRADOR]</b> Teste de Juramento do <b>'+CLASSES[SETS153[id].cls].n+'</b>. O dono deste set deixou um guardião para medir você.',7000);return true}
 function updateAwakenTest155(S){const id=L.awaken155;if(!id)return false;const Set=SETS153[id];
   if(S.stage===0&&S.t>2.5){S.stage=3;const gr=clamp(rankOf()+1,0,9),B={...dungeonBoss124({family124:Set.family,biome124:'campos',rank:gr,seed:1})};B.n='Prova: '+B.n;B.scale=(B.scale||1.6)*1.3;const b=spawnBoss(0,-8,gr,B);b.hp*=5;b.maxhp*=5;b.dmg*=1.6;b.aggro=true;bossAggro(b)}
-  S.msg=S.stage===0?'Prepare-se: o guardião do '+CLASSES[Set.cls].n+' está muito mais forte':S.stage===4?'Prova de replicar · use as habilidades do '+CLASSES[Set.cls].n+': '+S.rep169.done.size+'/'+S.rep169.need+' · '+Math.max(0,Math.ceil(S.rep169.until-time))+'s':'Despertar · derrote o guardião do '+CLASSES[Set.cls].n;return true}
+  S.msg=S.stage===0?'Prepare-se: o guardião do '+CLASSES[Set.cls].n+' está muito mais forte':S.stage===4?'Prova de replicar · use as habilidades do '+CLASSES[Set.cls].n+': '+S.rep169.done.size+'/'+S.rep169.need+' · '+Math.max(0,Math.ceil(S.rep169.until-time))+'s':'Juramento · derrote o guardião do '+CLASSES[Set.cls].n;return true}
 /* v169 (Ian): despertar = popup ao vestir as 5 peças de um chefe → Aceitar leva à arena com o chefe muito mais forte
    → depois, prova de replicar: você recebe as habilidades da classe por 60s e precisa usá-las. Recusar: fica só com os itens; o popup só volta com um set novo. */
 function awakenClassSkills169(cls){const c=CLASSES[cls];if(!c)return[];const out=[];c.sk.forEach((s,i)=>{const k=classSkill(cls,i);if(k&&(k.rare103||k.kit111||cls>=12))out.push(k)});return out.slice(cls===7?-3:0).slice(0,3)}
@@ -7364,12 +7364,12 @@ function replicaTick169(){const S=L.special;if(!S||S.stage!==4||!S.rep169)return
   if(time>R.until||player.dead){S.stage=6;player.skills=S.saved169||pSkills();if(typeof showG==='function')showG();if(R.temp){const a=awakening103();a.unlocked=a.unlocked.filter(c=>c!==R.cls)}L.awaken155=null;bigText('PROVA FALHOU',1600);toast('<b>[NARRADOR]</b> Ainda não. Você manteve as peças; vista o set de novo para tentar outra vez.',7000)}}
 setInterval(()=>{try{replicaTick169()}catch(e){}},250);
 {const useSkill0=useSkill;useSkill=function(sk){const S=L&&L.special,R=S&&S.stage===4&&S.rep169;const before=R&&sk&&!sk.empty?(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk).cdT:0;const r=useSkill0.apply(this,arguments);if(R&&sk&&!sk.empty&&R.names.includes(sk.n)){const now=(player.skills.find(x=>!x.empty&&x.n===sk.n)||sk).cdT;if(now>before){R.done.add(sk.n);floater(player.x,player.z,'REPLICADA: '+sk.n,'#ffd070',true)}}return r}}
-function awakeningView103(){view=awakeningView103;L.characterTab='awakening';const a=awakening103();let h=characterTabs('awakening')+'<div class="guide93"><strong>O SEGUNDO DESPERTAR</strong><p>Derrote os chefes de classes raras em Fendas Vermelhas para conquistar suas armaduras com passivas exclusivas.</p><p>Reúna e equipe as 5 peças do conjunto completo para liberar a prova do guardião e despertar a classe correspondente.</p></div>';
-  for(const c of RARE103){const learned=a.unlocked.includes(c.id)||profile.cls===c.id;h+=row(c.n,learned?'Desperta. '+(c.exclusive||''):'Ainda não despertou.',learned?'<b>Desperta</b>':'')}openModal('PERSONAGEM',h,'awakening')}
+function awakeningView103(){view=awakeningView103;L.characterTab='awakening';const a=awakening103();let h=characterTabs('awakening')+'<div class="guide93"><strong>O JURAMENTO DA ÂNCORA</strong><p>Derrote os chefes de classes raras em Fendas Vermelhas para conquistar suas armaduras com passivas exclusivas.</p><p>Reúna e equipe as 5 peças do conjunto completo para liberar a prova do guardião e despertar a classe correspondente.</p></div>';
+  for(const c of RARE103){const learned=a.unlocked.includes(c.id)||profile.cls===c.id;h+=row(c.n,learned?'Jurado. '+(c.exclusive||''):'Ainda sem Juramento.',learned?'<b>Desperta</b>':'')}openModal('PERSONAGEM',h,'awakening')}
 function awakenKey169(id){return equippedItems().filter(it=>it.set153===id).map(it=>it.uid).sort().join('|')}
 function awakenPopup169(force){if(!started||!run||!player||player.dead||L.mode!=='world'||(!force&&(modalOpen||paused))||profile.creationPending91)return;profile.awDeclined169=profile.awDeclined169||{};
   for(const id in SETS153){if(!awakenTestReady155(id))continue;const key=awakenKey169(id);if(profile.awDeclined169[id]===key||L.awAsked169===key)continue;L.awAsked169=key;const Set=SETS153[id],cn=CLASSES[Set.cls].n;
-    openModal('DESPERTAR','<div class="guide93"><strong>'+safeText(Set.n)+' completa</strong><p>As cinco peças do '+cn+' respondem juntas. Uma passagem se abre: lá dentro o guardião do '+cn+' espera, muito mais forte. Se vencer, terá de replicar as habilidades dele para despertar a classe.</p><p>Se recusar, você fica só com os itens. O chamado só volta quando reunir um set novo.</p></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('RECUSAR','aw169no',id)+btn('ACEITAR','aw169yes',id,true,'hot')+'</div>');return}}
+    openModal('DESPERTAR','<div class="guide93"><strong>'+safeText(Set.n)+' completa</strong><p>As cinco peças do '+cn+' respondem juntas. Uma passagem se abre: lá dentro o guardião do '+cn+' espera, muito mais forte. Se vencer, terá de replicar as habilidades dele para jurar a classe.</p><p>Se recusar, você fica só com os itens. O chamado só volta quando reunir um set novo.</p></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('RECUSAR','aw169no',id)+btn('ACEITAR','aw169yes',id,true,'hot')+'</div>');return}}
 setInterval(()=>{try{awakenPopup169()}catch(e){}},1500);
 function completeAwakenTest155(){const id=L.awaken155,S=SETS153[id];L.awaken155=null;if(!S)return;const a=awakening103();a.discovered=true;if(!a.unlocked.includes(S.cls))a.unlocked.push(S.cls);a.points[S.cls]=Math.max(1,a.points[S.cls]||0);profile.jobs=[...new Set([...jobsOf(),S.cls])];store.set('pds2_profile',profile);
   bigText(CLASSES[S.cls].n.toUpperCase()+' DESPERTO',2400);sfx('arise');toast('<b>[NARRADOR]</b> Teste concluído. Você aprendeu a classe rara <b>'+CLASSES[S.cls].n+'</b>. Monte as habilidades dela em Personagem → Habilidades.',8000);saveRun()}
@@ -7412,7 +7412,7 @@ const LORE={
   act10:['Ato X · Pedaços de Deus','Aldric segura o fragmento dourado que caiu do Logos: "Isto é um dedo dele. Cada portal ★ vermelho é o Arquiteto tentando enfiar a mão neste mundo." Desde que você venceu, os portais ★ vermelhos ficaram mais raros por alguns dias. Ele sentiu.'],
   act11:['Ato XI · A Mão do Arquiteto','Ao fechar o Portal Primordial, você viu do outro lado uma mão de pedra e luz recuar. O Fim do Mundo não é um desastre: é um teste. O Arquiteto mede as muralhas, as âncoras e os caçadores. E anota.'],
   act12:['Ato XII · O Narrador','A voz que acompanha você desde o primeiro dia fala, pela primeira vez, sem tom de deboche: "Fui eu quem derrubou o primeiro guardião, há muito tempo. Achei que estava salvando este mundo. Só abri a porta para ele. Você é forte o bastante para fechá-la. Eu não fui." O próximo ciclo começa com uma pergunta: como se fecha uma porta que você mesmo abriu?'],
-  start:['O Despertar','As Fendas trouxeram ameaças e viajantes de outros mundos. Os habitantes têm dons e ranks definidos; os Transmigradores conseguem evoluir além desses limites. Uma voz acompanha sua chegada: o Narrador. Sua origem permanece desconhecida.'],
+  start:['A Travessia','As Fendas trouxeram ameaças e viajantes de outros mundos. Os habitantes têm dons e ranks definidos; os Rasgados conseguem evoluir além desses limites. Uma voz acompanha sua chegada: o Narrador. Sua origem permanece desconhecida.'],
   gate:['Fendas e Portais','Cada portal atravessa uma Fenda e leva a um fragmento de outro mundo. Se o guardião permanece vivo, a mana se acumula até transbordar: os monstros atravessam para o nosso lado.'],
   boss:['Guardiões','Todo portal tem um guardião. Quando ele cai, a masmorra perde a âncora e começa a se desfazer.'],
   city:['As Cidades','As muralhas das cidades foram erguidas com cristais de mana. Monstro nenhum atravessa. Por enquanto.'],
@@ -7421,7 +7421,7 @@ const LORE={
   penalty:['A Zona de Penalidade','O Oráculo não perdoa quem ignora o treino. Ninguém escolhe ir para lá.'],
   past:['Antes dos Portais','Havia um guardião antes de todos. Ele não deixava nada sair. Alguém o derrotou, e a porta ficou aberta.'],
   dream:['O Sonho','Os monstros que mais te mataram moram na sua cabeça. Dá para enfrentá-los dormindo.'],
-  temple:['O Santuário','Existe uma câmara oculta dentro de certas Fendas. O Vigia testa a ressonância dos despertos; quem completa os protocolos retorna ligado ao Oráculo.'],
+  temple:['O Santuário','Existe uma câmara oculta dentro de certas Fendas. O Vigia testa a ressonância dos Rasgados; quem completa os protocolos retorna ligado ao Oráculo.'],
   towerEnd:['Ato VII · A Porta do Arquiteto','No andar 100, o guardião caiu e a porta se abriu. Do outro lado não havia um trono: havia o mapa de incontáveis mundos rachados. Uma mensagem de Aldric esperava na pedra: "O Arquiteto constrói passagens, mas não decide quem atravessa. Essa escolha é nossa." Você deixou um sinal para a Ordem. O primeiro ciclo da torre está encerrado; os caminhos acima dele continuam abertos.']};
 /* v220 (Ian): segundo ciclo da história (Atos VIII–XII), cada ato ligado a um sistema novo. */
 function storyCh220(k){profile.lore=profile.lore||[];if(profile.lore.includes(k)||!LORE[k])return;unlockLore(k);setTimeout(()=>showSys('<b>'+LORE[k][0]+'</b><br>'+LORE[k][1]+'<br><small>Releia em DIÁRIO → História.</small>'),2500)}
@@ -7656,7 +7656,7 @@ function penaltyUpd(S,dt){S.sp=(S.sp||0)-dt;const left=60-S.t;S.msg='ZONA DE PEN
   if(left<=0){for(const e of enemies)if(!e.dead){e.dead=true;e.gone=true;scene.remove(e.m.root)}L.bossDead=true;L.closeT=30;for(const it of L.exits)if(it.locked){unlockExitModel131(it)}
     bigText('PENALIDADE CUMPRIDA',1600);toast('<b>[NARRADOR]</b> Penalidade cumprida. Não ignore o treino de novo.',4000)}}
 /* janelas novas */
-function characterTabs(tab){return '<div class="tabs">'+[['status','Status'],['skills','Habilidades'],['passives','Passivas'],...(profile.rank>0||profile.rankTalents?.length?[['rank','Rank']]:[]),['titles','Títulos'],['build','Build'],...(awakeningDiscovered109()?[['awakening','Despertar']]:[])].map(([k,n])=>btn(n,'character',k,true,k===tab?'on':'')).join('')+'</div>'}
+function characterTabs(tab){return '<div class="tabs">'+[['status','Status'],['skills','Habilidades'],['passives','Passivas'],...(profile.rank>0||profile.rankTalents?.length?[['rank','Rank']]:[]),['titles','Títulos'],['build','Build'],...(awakeningDiscovered109()?[['awakening','Juramento']]:[])].map(([k,n])=>btn(n,'character',k,true,k===tab?'on':'')).join('')+'</div>'}
 function characterView(tab='status'){L.characterTab=tab;if(tab==='awakening')return awakeningView103();if(tab==='rank')return rankView114();if(tab==='skills')return skillsView();if(tab==='passives')return passivesView();if(tab==='titles')return titlesView();if(tab==='build')return buildView();return statusView()}
 function rankView114(){if(!(profile.rank>0||profile.rankTalents?.length))return statusView();view=rankView114;L.characterTab='rank';openModal('PERSONAGEM',characterTabs('rank')+rankTalentRows(),'rank')}
 function masteryReady114(){const skills=learnedSkills();return skills.length>0&&skills.every(sk=>(run.skl[sk.n]||0)>=10)}
@@ -7691,12 +7691,12 @@ function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,ca
   if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SERVO (F) em guardiões e elites.':'Só o Necromante levanta servos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE SERVOS',h)}
-function startFirstEquipment(){if(profile.classless)return;if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a primeira arma desperta sua classe. Acompanhe a missão no Diário.',6500)}
+function startFirstEquipment(){if(profile.classless)return;if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a memória da primeira arma define sua classe. Acompanhe a missão no Diário.',6500)}
 function firstEquipmentObjective(){const q=profile.firstEquipment92;if(!q||q.done)return null;const found=run.items.some(it=>EQUIP_SLOTS.includes(it.slot));
- return {id:'firstEquipment',n:'Seu primeiro equipamento',d:found?'<div class="guide93"><strong>2. Equipe sua peça</strong><p>Abra a Bolsa e escolha Equipar. No PC, também pode arrastar para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Consiga um equipamento</strong><p>Monstros e baús das masmorras dão equipamentos. A forja também fabrica peças quando for liberada.</p><p>Sem ouro, Kael troca uma arma de treino por escambo (uma vez); a arma escolhida desperta sua classe. Comprar com Kael é uma alternativa cara: botas F a partir de '+equipmentShopPrice('b',0)+' ouro. Nenhuma peça exige rank para usar.</p></div>',progress:found?'Etapa 2 de 2 · equipe uma peça da bolsa':'Etapa 1 de 2 · encontre, fabrique ou compre uma peça',ready:false}}
+ return {id:'firstEquipment',n:'Seu primeiro equipamento',d:found?'<div class="guide93"><strong>2. Equipe sua peça</strong><p>Abra a Bolsa e escolha Equipar. No PC, também pode arrastar para a posição correspondente.</p></div>':'<div class="guide93"><strong>1. Consiga um equipamento</strong><p>Monstros e baús das masmorras dão equipamentos. A forja também fabrica peças quando for liberada.</p><p>Sem ouro, Kael troca uma arma de treino por escambo (uma vez); a memória da arma escolhida define sua classe. Comprar com Kael é uma alternativa cara: botas F a partir de '+equipmentShopPrice('b',0)+' ouro. Nenhuma peça exige rank para usar.</p></div>',progress:found?'Etapa 2 de 2 · equipe uma peça da bolsa':'Etapa 1 de 2 · encontre, fabrique ou compre uma peça',ready:false}}
 function finishFirstEquipment(){const q=profile.firstEquipment92;if(!q||q.done||!Object.values(run.equip).some(it=>it&&EQUIP_SLOTS.includes(it.slot)))return false;q.done=true;addOrderRep(10,'Primeiro equipamento');if(run.trackObj==='firstEquipment')run.trackObj=null;store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Seu primeiro equipamento: concluído. Você conseguiu sua primeira peça e a equipou. O próximo passo é seu.',6500);saveRun();return true}
 function journeyObjectives(){const list=[],nx=profile.rank+1;const eq=run.extractMission117;if(eq)list.push({id:'extract117',n:'Missão de extração',d:eq.completed?'Receba a recompensa com Lyra, na Ordem.':'Envie materiais pela torre verde. '+questXpText262(eq,'extract')+'. Retome com Lyra se sair.',progress:Math.min(6,eq.sent)+'/6',ready:eq.completed});const first=firstEquipmentObjective();if(first)list.push(first);
-  if(nx<=9){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos. Procure Lyra na Ordem e enfrente o Examinador. Sua reputação permanece após a prova.':'Alcance o nível '+need+' e '+fmt(orderRepNeed(nx))+' de reputação da Ordem.'+(nx===9?(isTwiceAwakened103()?' Exige também o Segundo Despertar concluído.':' Continue a história para descobrir o requisito restante.'):'')+' Ganhe reputação fechando masmorras e concluindo missões, na ordem que preferir.',progress:'Nível '+run.level+'/'+need+' · reputação '+fmt(orderRep())+'/'+fmt(orderRepNeed(nx))+(ready?' · prova disponível':''),ready})}
+  if(nx<=9){const need=GR[nx].lvl,ready=rankTrialReady(nx);list.push({id:'rank',n:'Prova de Rank '+RANKS[nx].id,d:ready?'Você cumpriu os requisitos. Procure Lyra na Ordem e enfrente o Examinador. Sua reputação permanece após a prova.':'Alcance o nível '+need+' e '+fmt(orderRepNeed(nx))+' de reputação da Ordem.'+(nx===9?(isTwiceAwakened103()?' Exige também o Juramento da Âncora concluído.':' Continue a história para descobrir o requisito restante.'):'')+' Ganhe reputação fechando masmorras e concluindo missões, na ordem que preferir.',progress:'Nível '+run.level+'/'+need+' · reputação '+fmt(orderRep())+'/'+fmt(orderRepNeed(nx))+(ready?' · prova disponível':''),ready})}
   else if(!(profile.lore||[]).includes('towerEnd'))list.push({id:'towerend',n:'A Porta do Arquiteto',d:'Complete o andar 100 da Torre da Ascensão para encerrar o primeiro ciclo da história.',progress:'andar '+Math.min(100,profile.towerBest||0)+'/100',ready:false});
   for(const S of STORIES){const st=(profile.story||{})[S.id];if(!st||st.done)continue;const sp=S.steps[st.s];if(!sp)continue;const got=STORY_ABS[sp[0]]?STORY_ABS[sp[0]]():st.got||0;list.push({id:'story:'+S.id,n:S.n,d:sp[2],progress:'capítulo '+(st.s+1)+'/'+S.steps.length+' · '+Math.min(got,sp[1])+'/'+sp[1],ready:got>=sp[1]})}
   (run.quests||[]).forEach((q,i)=>list.push({id:'quest:'+i,n:q.d+questTargetText262(q),d:q.got>=q.n?'Recompensa pronta. Volte à Ordem da Fenda para receber.':'Recompensa: '+questXpText262(q)+' · '+fmt(q.rw)+' ouro e '+questOrderRep(q)+' de reputação da Ordem. Receba com Lyra na Ordem da Fenda. '+QUEST_XP_RULE332,progress:Math.min(q.got,q.n)+'/'+q.n,ready:q.got>=q.n}));return list}
@@ -8017,7 +8017,7 @@ function finishTowerStory(announce=false){if(profile.rank<7||(profile.towerBest|
 function storyAct(r){const A=MAIN_ACTS[r];if(!A)return;profile.acts=profile.acts||[];if(!profile.acts.includes(r)){profile.acts.push(r);store.set('pds2_profile',profile)}finishTowerStory();showSys('<b>'+A[0]+'</b><br>'+A[1])}
 function rankTab(){const r=profile.rank,nx=r+1,can=nx<=9,need=can?GR[nx].lvl:0;let h='<div class="guide93"><strong>SUBIR DE RANK</strong><p>Alcance o nível e a reputação exigidos. Depois vença o Examinador.</p><p>Reputação não é gasta. Cada rank concede bônus de vida, dano e 1 escolha de combate. De E a A, libera mais 1 espaço de habilidade (máx. 6).</p></div>';
   h+=row('Seu rank','<b style="color:'+RANKS[r].c+'">'+rkN(r)+'</b>','');
-  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e masmorras.':'<br>Reputação suficiente!')+(nx===9?'<br>Segundo Despertar: <b>'+(starReady187()?'concluído':'necessário')+'</b>. Rank SS+ obrigatório.':'')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR MASMORRA</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
+  h+=row('REPUTAÇÃO DA ORDEM',fmt(orderRep())+' acumulada · permanece depois de cada prova.','');if(can)h+=row('Prova para o rank '+RANKS[nx].id,'Nível necessário: '+need+' (atual '+run.level+').<br>Reputação da Ordem: <b>'+fmt(orderRep())+' / '+fmt(orderRepNeed(nx))+'</b>.'+(orderRep()<orderRepNeed(nx)?'<br>Falta conquistar '+fmt(orderRepNeed(nx)-orderRep())+' de reputação. Escolha entre missões e masmorras.':'<br>Reputação suficiente!')+(nx===9?'<br>Juramento da Âncora: <b>'+(starReady187()?'concluído':'necessário')+'</b>. Rank SS+ obrigatório.':'')+'<br>Prova final: duelo contra o Examinador. Sem ondas e sem saída até o fim.',btn('ENFRENTAR','rktrial',nx,rankTrialReady(nx),'hot'));h+='<div class="sec">REPUTAÇÃO POR MASMORRA</div><div class="sysline">Receba ao concluir e sair pelo portal. Sair sem concluir não dá pontos. Desafios dois ou mais ranks abaixo de você rendem menos. Valores para o seu rank atual: '+RANKS.map((r,i)=>r.id+': +'+orderRepReward(i)).join(' · ')+'. Missões da Ordem mostram sua recompensa antes de receber.</div>';
 
   if(!can)h+=row('Rank ★ · Arconte','Você ultrapassou SS+.','');
   h+=row('Espaços de habilidades',classSlotCount()+' de 6 disponíveis'+(profile.legacySlots?' · espaços anteriores preservados':''),'');h+=row('Escolhas de rank',rankPoints()+' pontos disponíveis em Personagem → Passivas.',btn('Abrir Passivas','character','passives'));h+='<div class="sec">HISTÓRIA PRINCIPAL</div>';const acts=profile.acts||[];let any=false;
@@ -8149,7 +8149,7 @@ const seasonOn=()=>weekId()%3===2;
 function seasonTab(){const on=seasonOn(),done=profile.season===weekId(),fc=citiesAround(player.x,player.z,1500).filter(cityFallen).length;return '<div class="sysline">'+(on?'<b style="color:#ff4d6a">O FIM DO MUNDO COMEÇOU.</b> Um Arconte inimigo abriu o Portal Primordial. A cada dia mais cidades caem. <b>'+fc+'</b> cidade(s) perto de você já caíram. Fechar o portal salva todas.':'Tudo calmo. O próximo fim do mundo vem em '+gameLeftTxt198(((weekId()+(2-weekId()%3||3))*7)*DAYLEN-dayT)+'.')+'</div>'+
   (on?row('Portal Primordial','Arconte inimigo com vida triplicada · recompensa enorme · uma vez por evento',done?'<b>Vencido</b>':btn('ENFRENTAR','primordial',0,true,'hot')):'')}
 /* sistema com personalidade */
-const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os despertados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
+const STORY={2:'Você ouviu isso? Não. Claro que não. Continue.',5:'Interessante. Você é mais teimoso que os outros.',10:'Eu observo todos os Rasgados. Poucos chegam aqui sem chorar.',15:'Quem me criou? Pergunta errada. Pergunte por que eu escolhi você.',20:'Os portais não são acidentes, caçador. Alguém está batendo à porta.',30:'Eu já tive outros. Todos pararam em algum momento. Não pare.',40:'Os Arcontes se lembram de mim. Eu não me lembro deles. Isso me incomoda.',50:'Metade do caminho. Ou o começo. Depende de quanto você aguenta.',75:'Existe uma parede numa masmorra qualquer. Atrás dela, a verdade.',100:'Agora eu posso te dizer: eu fui o primeiro Arconte. E você é o meu herdeiro.'};
 function showSys(t){narratorSayTop(t,6000)}
 function storyLevel(l){if(l===100)STORY[100]=karma()>=3?'Você salvou quem podia. Eu fui o primeiro Arconte, e errei onde você acertou. Agora o mundo é seu.':karma()<=-3?'Você deixou cidades caírem para ficar mais forte. Igual a mim. Talvez eu devesse ter escolhido outro.':STORY[100];if(STORY[l]){normalizeStoryProgress262();if(!profile.levelStory262.includes(l)){profile.levelStory262.push(l);store.set('pds2_profile',profile);setTimeout(()=>showSys(STORY[l]),1500)}}
   if(l%10===0&&!run.demand){const T=[['nopot','Mate 40 monstros sem usar poção',40],['night','Mate 25 monstros à noite',25],['nododge','Mate 30 monstros sem esquivar',30]];const t=pick(T);run.demand={t:t[0],d:t[1],n:t[2],got:0,repRank97:Math.min(9,rankOf())};questBudget262(run.demand);const demandText=run.demand.d+questTargetText262(run.demand)+'. '+questXpText262(run.demand);setTimeout(()=>showSys('Tenho uma exigência. '+demandText+'. Não me decepcione.'),5000)}}
@@ -8387,7 +8387,7 @@ function buildOutpost217(ch,g,addCol){const point=outpostPoint361(ch.cx,ch.cz);i
   L.inter.push({type:'outpost',chunk:ch,x:x0+3.5,z:z0+2.5,r:2.6,label:'F · FALAR COM '+e.short.toUpperCase(),use:()=>{speech153(e,pick(MONSTERHUNT217));storyCh220('act8');lore206('monsterhunt','Nem todo monstro que atravessa a fenda é inimigo. Alguns aprenderam a viver aqui e caçam portais como você. O Clã Ferrugem é o maior deles.')}})}catch(_){} }
 /* v218 (Ian): monstros inteligentes que viraram caçadores. Não atacam, não podem ser atacados, conversam. */
 const FRIENDS217=[];
-const MONSTERHUNT217=['Atravessei a fenda há cem anos. Hoje caço os que vieram depois de mim.','Os humanos me olham torto. Mas o ouro da Ordem é igual para todos.','Nem todo monstro quer o fim do mundo. Eu gosto deste céu.','Se vir um chefe de aura dourada, corra. Aquilo não é bicho, é pedaço de deus.','O Clã Ferrugem tem regra: nunca deixar um portal romper perto de uma vila.','Você também veio de outro lugar, Transmigrador. Somos mais parecidos do que pensa.','Os chefes falam do Arquiteto como se fosse um pai. Eu chamo de carcereiro.']
+const MONSTERHUNT217=['Atravessei a fenda há cem anos. Hoje caço os que vieram depois de mim.','Os humanos me olham torto. Mas o ouro da Ordem é igual para todos.','Nem todo monstro quer o fim do mundo. Eu gosto deste céu.','Se vir um chefe de aura dourada, corra. Aquilo não é bicho, é pedaço de deus.','O Clã Ferrugem tem regra: nunca deixar um portal romper perto de uma vila.','Você também veio de outro lugar, Rasgado. Somos mais parecidos do que pensa.','Os chefes falam do Arquiteto como se fosse um pai. Eu chamo de carcereiro.']
 function visit217(){if(!player||L.mode!=='world')return;const n=nearestCity(player.x,player.z);if(n.d>40*CITYK)return;const V=profile.visited217=profile.visited217||{};if(!V[n.c.id]){V[n.c.id]={n:n.c.name,x:n.c.x,z:n.c.z,cap:!!n.c.capital};store.set('pds2_profile',profile);if(n.c.capital&&n.c.name!=='Aster'){storyCh220('act9');bigText(n.c.name.toUpperCase(),1800);showSys('Você chegou a <b>'+n.c.name+'</b>. As capitais guardam o comércio da região e uma Carroça da Ordem para viajar.')}}}
 /* v219 (Ian): preço só pela distância, e crescente (viagem longa pesa). */
 function travelCost219(km){return servicePrice265('travel',{km})}
@@ -8922,7 +8922,7 @@ function finishCreation(){if(!profile.creationPending91)return false;const d=cre
 function transmigratorLevel253(){return Math.max(0,Math.min(10,Math.floor(Number(profile.transmigratorLv)||0)));}
 function transmigratorBonus(){return .10*transmigratorLevel253();}
 function improveTransmigrator(){const lv=transmigratorLevel253();if(lv>=10||(run.spts||0)<1)return false;run.spts--;profile.transmigratorLv=lv+1;saveRun();passivesView();return true;}
-function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Transmigrador · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
+function transmigratorRow(){const lv=transmigratorLevel253();return '<div class="sec">ORIGEM</div>'+row('Rasgado · Passiva NV '+lv+(lv>=10?' · MÁXIMO':'/10'),'<b>XP de monstros: +'+Math.round(transmigratorBonus()*100)+'%</b><br>Inclui guardiões, mas não missões. Zera na morte sem Ressurgimento.'+(lv<10?'<br>Próximo nível: +'+(lv+1)*10+'% de XP. Custa 1 ponto de habilidade.':''),lv>=10?'':'<button class="btn" '+(!(run.spts>0)?'disabled':'')+' onclick="improveTransmigrator()">Melhorar · 1 ponto</button>');}
 
 
 /* v406: visual oficial vibrante; uma grade compartilhada com Look154. */
@@ -9004,7 +9004,7 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
 (function(){let n=0,t0=0;$('roll').addEventListener('pointerdown',()=>{const now=performance.now();if(now-t0>3000)n=0;t0=now;if(!DEV)return;if(++n>=5&&profile){n=0;profile.devGate=true;store.set('pds2_profile',profile);beep(880,.4,.06,'triangle')}})})();
 $('tbl').innerHTML='';
 function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();ensureOrderRep();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
-  $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue servos':'')+'<br>Mortes: '+(profile.deaths||0);if(profile.classless){$('rollc').textContent='VIAJANTE · SEM CLASSE';$('rolls').innerHTML='Chegou sem ouro e sem técnicas. Sua classe desperta com a primeira arma.<br>Mortes: '+(profile.deaths||0)}}
+  $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue servos':'')+'<br>Mortes: '+(profile.deaths||0);if(profile.classless){$('rollc').textContent='VIAJANTE · SEM CLASSE';$('rolls').innerHTML='Chegou sem ouro e sem técnicas. Sua classe vem da memória da primeira arma.<br>Mortes: '+(profile.deaths||0)}}
 if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
@@ -9131,7 +9131,7 @@ function narratorUpdate105(dt){if(!started||!profile||!player||paused||player.de
 function narratorSettings105(){const m=narratorMemory105(),mode=['off','quiet','normal','chatty'].includes(CFG.narrator105)?CFG.narrator105:'normal';return '<div class="sec">NARRADOR · SUA JORNADA</div><label for="narratorMode105"><span class="tipi" style="cursor:help" data-tip154="Liga ou desliga comentários no histórico. Avisos importantes continuam ativos.">Comentários do Narrador</span></label><select id="narratorMode105" onchange="setNarrator105(this.value)">'+[['off','Desligados'],['quiet','Poucos'],['normal','Equilibrados'],['chatty','Mais presentes']].map(([v,n])=>'<option value="'+v+'" '+(mode===v?'selected':'')+'>'+n+'</option>').join('')+'</select><label><input type="checkbox" '+(CFG.narratorTease105===true?'checked':'')+' onchange="CFG.narratorTease105=this.checked;applyCfg()"> Permitir provocações leves</label>'+btn('Ver lembranças','narrator105',0,!!m)}
 function narratorView105(){const m=narratorMemory105();if(!m)return;view=narratorView105;const tone={careful:'Atento aos riscos recentes',warm:'Cúmplice das suas conquistas e cuidados',playful:'À vontade para provocar',calm:'Conhecendo seu caminho'}[narratorTone105(m)];let h='<div class="guide93"><strong>'+tone+'</strong><p>A relação acompanha acontecimentos recentes e pode mudar. O Narrador lembra do que aconteceu, sem decidir o que você pensa.</p></div>';
  h+=row('Experiências compartilhadas','Fendas concluídas: '+(m.clears||0)+' · Quedas acompanhadas: '+(m.counts.death||0)+' · Falas diferentes ouvidas: '+Object.keys(m.seen).length+'.','');
- const names={victory:'Fenda concluída',hard:'Vitória acima do seu rank',narrow:'Volta com pouca vida',retreat:'Expedição interrompida',death:'Queda',returnwin:'Vitória em rank de Fenda com derrota anterior',higher:'Entrada acima do seu rank',red:'Entrada em portal vermelho',explore:'Novo trecho explorado',city:'Chegada à cidade',support:'Cura de aliado ferido',necro:'Servo especial convocado',time:'Retorno à âncora temporal',fenda:'Portal superior criado',fissure:'Fissura persistente descoberta',trial:'Investigação concluída',awakening:'Segundo Despertar concluído',rank:'Promoção pela prova',shift:'Mudança no uso de classes',veteran:'Marco de expedições concluídas'};
+ const names={victory:'Fenda concluída',hard:'Vitória acima do seu rank',narrow:'Volta com pouca vida',retreat:'Expedição interrompida',death:'Queda',returnwin:'Vitória em rank de Fenda com derrota anterior',higher:'Entrada acima do seu rank',red:'Entrada em portal vermelho',explore:'Novo trecho explorado',city:'Chegada à cidade',support:'Cura de aliado ferido',necro:'Servo especial convocado',time:'Retorno à âncora temporal',fenda:'Portal superior criado',fissure:'Fissura persistente descoberta',trial:'Investigação concluída',awakening:'Juramento da Âncora concluído',rank:'Promoção pela prova',shift:'Mudança no uso de classes',veteran:'Marco de expedições concluídas'};
  for(const f of m.facts.slice(-12).reverse())h+=row(names[f.kind]||NR_META107[f.kind]?.name||'Experiência',f.rank!==null&&RANKS[f.rank]?'Rank da experiência: '+RANKS[f.rank].id:'Registrado durante sua jornada.','');openModal('O NARRADOR E VOCÊ',h)}
 
 function setNarrator105(value){if(!["off","quiet","normal","chatty"].includes(value))return;CFG.narrator105=value;if(value==="off")NR105.queue=[];applyCfg()}
@@ -9360,7 +9360,7 @@ function affinity103(ci){return awakening103().affinity===ci&&rareActive103(ci)?
 function rareOnPortal103(g){return; /* v169 (Ian): a fissura antiga não existe mais; o despertar vem dos sets dos chefes */if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id),color:g.red?'red':'violet'};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Você sente a fissura. Uma nova aba apareceu em Personagem.',7000);store.set('pds2_profile',profile)}
 /* v292 (Ian): o rank ★ só aparece depois que o jogador ganha uma classe secreta (rara) */
 function secretRankKnown292(){try{return (profile.rank||0)>=9||awakening103().unlocked.length>0||(awakening103().total||0)>=1}catch(_){return false}}
-/* v187 (Ian): o Segundo Despertar é obtido reunindo e equipando o set de 5 peças de armadura do chefe de classe rara em Fendas Vermelhas. */
+/* v187 (Ian): o Juramento da Âncora é obtido reunindo e equipando o set de 5 peças de armadura do chefe de classe rara em Fendas Vermelhas. */
 function isTwiceAwakened103(){return (awakening103().unlocked||[]).length>0}
 function starReady187(){return isTwiceAwakened103()}
 // BEGIN JOURNEY113
@@ -9419,7 +9419,7 @@ function rareSkillRun103(sk){if(sk.sourceClass===14){guardianCast108(sk);sfx('sk
 function rareGateLevel153(sk){return run.skl[(sk||player.skills.find(s=>s.t==='rare_gate'||s.effect==='gate')||{}).n]||0}
 function rareWovenBonus153(lv){return .15+.03*lv}
 function rareAutoGate153(sk){const a=awakening103();let best=0;for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++)if(a.energy>=n*3)best=n;if(!best){toast('Você precisa de pelo menos 3 energias de Fenda.');return false}return rareOpenGate103(best)}
-function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}view=rareGateView103;let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p><p><b>Fendas tecidas: o Tecelão não rasga o mundo, ele puxa um fio do Véu e costura a passagem até um trecho que nenhum transmigrador saqueou. Lá dentro, os itens sobem um grau de raridade e guardam o calor do mundo de origem (+15% de ataque/escudo, +3% por nível da habilidade). Ao usar, a habilidade abre na hora o melhor portal que suas energias pagam, com chance de vir vermelho (12% + 3% por nível).</b></p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,BIO_N[biomeAt(player.x,player.z)]+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
+function rareGateView103(){const sk=player.skills.find(s=>s.t==='rare_gate');if(!sk)return;const err=rareCastCheck103(sk);if(err){toast(err);return}view=rareGateView103;let h='<div class="guide93"><strong>ASCENSÃO DE FENDA</strong><p>Portais temporários duram 15 minutos. Veja o rank, o ambiente e o custo antes de abrir. A promoção do personagem continua exigindo prova.</p><p><b>Fendas tecidas: o Tecelão não rasga o mundo, ele puxa um fio do Véu e costura a passagem até um trecho que nenhum rasgado saqueou. Lá dentro, os itens sobem um grau de raridade e guardam o calor do mundo de origem (+15% de ataque/escudo, +3% por nível da habilidade). Ao usar, a habilidade abre na hora o melhor portal que suas energias pagam, com chance de vir vermelho (12% + 3% por nível).</b></p></div>';for(let n=1;n<=affinity103(13)&&profile.rank+n<=8;n++){const r=profile.rank+n;h+=row('Portal rank '+GR[r].id,BIO_N[biomeAt(player.x,player.z)]+' · nível recomendado '+GR[r].lvl+' · '+(n*3)+' energias (você tem '+awakening103().energy+').',btn('Abrir este portal','awgate',n,awakening103().energy>=n*3))}openModal('ABRIR FENDA SUPERIOR',h)}
 function rareOpenGate103(n){const sk=player.skills.find(s=>s.t==='rare_gate'||s.effect==='gate');if(!sk||sk.cdT>0||rareCastCheck103(sk)||!Number.isInteger(n)||n<1||n>affinity103(13)||profile.rank+n>8||awakening103().energy<n*3)return false;let pt=null;for(let i=0;i<12;i++){const ang=i*Math.PI/6,x=player.x+Math.sin(ang)*7,z=player.z+Math.cos(ang)*7;if(worldFree(x,z,3)&&!inCity(x,z)&&gates.every(g=>g.dead||Math.hypot(g.x-x,g.z-z)>7)){pt={x,z};break}}if(!pt){toast('Não há espaço livre para o portal. Procure uma área aberta.');return false}const lv153=rareGateLevel153(sk),red153=Math.random()<Math.min(.45,.12+.03*lv153);const g=newGate();Object.assign(g,{...pt,rank:profile.rank+n,aff:[],red:red153,woven153:rareWovenBonus153(lv153),double:false,secret:false,inverse:false,time:false,life:900,custom:true,rareCreated103:true});awakening103().energy-=n*3;gates.push(g);gateMesh(g);if(g.mesh?.userData.rift131)Rift131.open(g.mesh);shake(.55);if(typeof fxBurst==='function')fxBurst(g.x,2.6,g.z,red153?0xec3552:0xb98cff,34,6);narratorEvent105('fenda',{rank:g.rank});sk.cdT=sk.cdMax=skillCooldown(sk);saveRun();closeModal();toast((red153?'Fenda VERMELHA':'Fenda')+' rank '+GR[g.rank].id+' aberta. Itens tecidos: +'+Math.round(g.woven153*100)+'%.');logNews('<b>[NARRADOR]</b> Você rasga o tecido da realidade e costura a passagem.'+(red153?' O fio veio tingido de sangue: a Fenda é vermelha.':'')+' Do outro lado há um trecho que ninguém pisou: o que se encontra lá vem intacto, com o calor do mundo de origem.');return true}
 function rareAreaTime103(x,z,boss=false){const z0=AR103.zone;return z0&&z0.until>time&&Math.hypot(x-z0.x,z-z0.z)<=z0.r?(boss?.8:.5):1}
 /* v182: efeitos de combate atrasados seguem o relógio do jogo (param na pausa e somem ao trocar de área). */
@@ -9837,9 +9837,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v687</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v688</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=687;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=688;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

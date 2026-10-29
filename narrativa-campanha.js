@@ -61,7 +61,7 @@
   NPCQ.Brann.d = 'Derrote 2 guardiões que sustentam as invasões';
   NPCQ.Dorian.d = 'Mine 30 recursos para recompor a carga perdida';
   NPCQ.Selene.d = 'Deposite 50.000 de ouro no fundo do refúgio';
-  NPCTALK.Lyra[0] = '{nome}, há outros Transmigradores nos registros. Alguns descrevem a mesma inscrição em épocas diferentes. Vamos conferir as evidências antes de tirar conclusões.';
+  NPCTALK.Lyra[0] = '{nome}, há outros Rasgados nos registros. Alguns descrevem a mesma inscrição em épocas diferentes. Vamos conferir as evidências antes de tirar conclusões.';
   NPCTALK.Mira[0] = '{nome}, os sobreviventes precisam de comida e remédios. O lago ainda abastece a cidade.';
   NPCTALK.Kael[0] = '{nome}, encontrei as mesmas marcas em armas de passagens diferentes. Precisamos de metal e evidências.';
   NPCTALK.Brann[0] = '{nome}, os guardiões atuais sustentam as invasões. Derrube-os para aliviar a pressão nas muralhas.';

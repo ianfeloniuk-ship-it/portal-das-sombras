@@ -6,7 +6,7 @@ const RANKS=[
  {id:'S',p:.25,mult:3.8,steal:.75,c:'#ff4df0'},{id:'SS',p:.05,mult:5,steal:.9,c:'#fff36b'},
  {id:'SS+',p:.01,mult:6,steal:.92,c:'#ffda9f'},
  {id:'★',p:0,mult:7,steal:.95,c:'#e6d6ff',secret:true}];
-const TOPR=8; // SS+ é o maior rank público; ★ (9) exige SS+, Segundo Despertar e prova própria.
+const TOPR=8; // SS+ é o maior rank público; ★ (9) exige SS+, Juramento da Âncora e prova própria.
 const RANK_STEPS=[10,20,35,55,80,120,180,220,260];
 const S=(n,t,cd,mp,pow,col)=>({n,t,cd,mp,pow,col});
 const CLASSES=[
@@ -22,7 +22,7 @@ const CLASSES=[
  {n:'Mago de Gelo',w:3.5,ranged:true,body:0x2f7fb8,hair:0xe8f8ff,wep:'staff',elem:'gelo',pt:'ice',sk:[S('Lança de Gelo','bolt',3,10,2.6,0x70ddff),S('Nova de Gelo','nova',8,18,1.9,0xbff4ff),S('Maremoto','cone',6,16,2.2,0x4fa8ff)]},
  {n:'Mago da Terra',w:3.5,ranged:true,body:0x6a5234,hair:0x3a2a1a,wep:'staff',elem:'terra',pt:'stone',sk:[S('Estaca de Pedra','stone_lance',4,12,2.4,0xb08a5a),S('Tremor Sísmico','nova',7,18,2.2,0xa0784a),S('Pele de Pedra','guard',14,18,.35,0xc8a070)]},
  {n:'Mago do Raio',w:3.5,ranged:true,body:0x5a4ab8,hair:0xfff8c0,wep:'staff',elem:'raio',pt:'spark',sk:[S('Corrente de Raios','chain',5,16,2,0xfff36b),S('Rajada de Vento','cone',4,10,1.7,0xc8f4ff),S('Tempestade de Raios','thunderstorm',10,28,1.9,0xfff36b)]}];
-/* Segundo Despertar — capítulo inicial e três caminhos jogáveis. */
+/* Juramento da Âncora — capítulo inicial e três caminhos jogáveis. */
 const NR_LINES105={
  "victory": [
   "A passagem fechou. Você ficou deste lado.",
@@ -377,21 +377,21 @@ const NR_LINES105={
   "Mais uma investigação em que as ameaças perderam a discussão."
  ],
  "awakening": [
-  "Você concluiu o Segundo Despertar. Seu rank continua o mesmo.",
+  "Você concluiu o Juramento da Âncora. Seu rank continua o mesmo.",
   "Há um novo despertar na sua história, além do emblema da Ordem.",
   "As três investigações abriram outra etapa do seu caminho.",
   "Você despertou outra vez. A próxima prova de rank ainda é outra conquista.",
   "Seu poder ganhou caminhos que seu rank sozinho não descreve.",
-  "O Segundo Despertar está concluído. Agora há mais formas de continuar.",
+  "O Juramento da Âncora está concluído. Agora há mais formas de continuar.",
   "Você chegou a essa mudança sustentando as manifestações.",
   "Esse despertar veio das experiências que você viveu nas fissuras.",
   "A Ordem registra seu rank. Sua jornada acaba de ganhar outra dimensão.",
-  "As investigações levaram você ao Segundo Despertar.",
+  "As investigações levaram você ao Juramento da Âncora.",
   "Você continua com seu emblema e carrega um novo despertar.",
   "O aprendizado das fissuras abriu novas possibilidades.",
   "Há mais caminhos disponíveis para o que você pode se tornar.",
   "Você concluiu uma etapa que não cabe na sequência de ranks.",
-  "Seu Segundo Despertar agora faz parte do que vivemos.",
+  "Seu Juramento da Âncora agora faz parte do que vivemos.",
   "Vou precisar de mais palavras para apresentar você.",
   "Seu emblema não ganhou outra estrela por conta própria.",
   "A Ordem cuida dos ranks. Você acaba de complicar o resto.",
@@ -1499,7 +1499,7 @@ const NR_LINES105={
   "Você converteu o contato com as manifestações em opções.",
   "O caminho investigado passou a fazer parte do que sabe.",
   "Seu repertório cresceu depois das experiências vividas.",
-  "Você deu continuidade ao aprendizado do Segundo Despertar.",
+  "Você deu continuidade ao aprendizado do Juramento da Âncora.",
   "Essa classe abre mais combinações para experimentar.",
   "O aprendizado novo acompanha o restante da jornada.",
   "Você tem outra direção rara para desenvolver.",

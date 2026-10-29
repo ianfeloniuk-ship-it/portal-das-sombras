@@ -270,7 +270,7 @@
     n => 'Não precisa sacar a arma. Só quero conversar.',
     n => 'Que sorte a minha cruzar com você neste fim de mundo.',
     n => 'Shh. Fale baixo, tem coisa rondando por aqui.',
-    n => 'Olhe só, um Transmigrador. Dizem que vocês nunca recusam um bom pedido.',
+    n => 'Olhe só, um Rasgado. Dizem que vocês nunca recusam um bom pedido.',
     n => 'Ainda bem que você veio. Eu já estava sem opção.'
   ];
   const ADEUS520 = [

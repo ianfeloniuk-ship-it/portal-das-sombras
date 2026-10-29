@@ -66,7 +66,7 @@
   function shopRows(){
     if(!canBarter())return '';
     const KC=kindClasses();
-    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael entrega sua primeira arma de treino por escambo inicial. <b>Só uma vez.</b> A arma que escolher desperta a sua classe no nível 1; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
+    let h='<div class="sec">ESCAMBO COM O KAEL</div><div class="sysline" style="font-size:12px">Sem ouro? Kael entrega sua primeira arma de treino por escambo inicial. <b>Só uma vez.</b> A memória da arma que escolher define a sua classe no nível 1; se ela serve a mais de uma, você escolhe o caminho em seguida.</div>';
     for(const k of ORDER){const l=KC[k];if(!l)continue;h+=row(k==='none'?LABEL[k]:LABEL[k]+' de treino',(l.length>1?'Caminhos: ':'Caminho: ')+'<b>'+l.map(i=>CLASSES[i].n).join(', ')+'</b>.',btn(l.length>1?'Escolher':'Trocar','barter396',k,true,'hot'))}
     return h}
   /* se a janela de vocação for fechada sem escolher, pergunta de novo */

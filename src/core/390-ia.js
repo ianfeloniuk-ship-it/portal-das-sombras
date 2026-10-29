@@ -120,10 +120,10 @@ function bossBars166(b){const n=b.bars||3,f=Math.max(0,b.hp)/b.maxhp*n,cur=Math.
   $('bb').style.width=(100*part)+'%';$('bb').style.background=col;$('bbar').style.background=cur>1?BOSS_COLS166[(cur-2)%BOSS_COLS166.length]+'55':'rgba(0,0,0,.45)';$('bx').textContent=n>1?'×'+cur:'';
   const pp=$('bpips');if(pp.childElementCount!==n)pp.innerHTML='<i></i>'.repeat(n);[...pp.children].forEach((d,i)=>{d.className=i<cur?'on':'';d.style.setProperty('--c',BOSS_COLS166[i%BOSS_COLS166.length])})}
 function bossBarsFor166(gr){return [1,2,3,3,4,4,5,6,7,8][Math.max(0,Math.min(9,gr|0))]}
-/* v218 (Ian): chefes falam e ligam a história (Arquiteto, Fenda, Transmigradores). Chefes do despertar e Divindades têm falas próprias. */
+/* v218 (Ian): chefes falam e ligam a história (Arquiteto, Fenda, Rasgados). Chefes do despertar e Divindades têm falas próprias. */
 const BOSSL218={
- base:{aggro:['Mais um Transmigrador... o Arquiteto disse que vocês viriam.','Esta fenda é minha. Volte para o seu mundo.','Você cheira a outro céu. Vou guardar seus ossos.'],fury:['Chega de brincar!','A Fenda me alimenta. E você só sangra.'],power:['O Arquiteto me deu isto. Veja!','Agora você conhece o meu peso.'],death:['O Arquiteto... vai lembrar... de você.','A fenda... fecha... mas outra abre.','Você só atrasou o fim.']},
- goblins:{aggro:['Ouro! Ouro de Transmigrador!','O Clã Ferrugem não teme gente de fora!'],death:['Fala... pro clã... que eu lutei bem.']},
+ base:{aggro:['Mais um Rasgado... o Arquiteto disse que vocês viriam.','Esta fenda é minha. Volte para o seu mundo.','Você cheira a outro céu. Vou guardar seus ossos.'],fury:['Chega de brincar!','A Fenda me alimenta. E você só sangra.'],power:['O Arquiteto me deu isto. Veja!','Agora você conhece o meu peso.'],death:['O Arquiteto... vai lembrar... de você.','A fenda... fecha... mas outra abre.','Você só atrasou o fim.']},
+ goblins:{aggro:['Ouro! Ouro de Rasgado!','O Clã Ferrugem não teme gente de fora!'],death:['Fala... pro clã... que eu lutei bem.']},
  wolves:{aggro:['A matilha sentiu você desde a estrada.'],death:['Os filhotes... vão uivar meu nome.']},
  demons:{aggro:['Eu já queimei três mundos antes deste.'],death:['O fogo... não morre... só espera.']},
  undead:{aggro:['Eu também atravessei a fenda um dia. Olhe no que virei.'],death:['Finalmente... silêncio.']},

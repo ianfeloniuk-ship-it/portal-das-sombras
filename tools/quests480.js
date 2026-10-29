@@ -37,7 +37,7 @@
       type: 'rescue',
       title: 'Socorro na Estrada das Brumas',
       giver: 'Edran Holt',
-      desc: 'Uma caravana com novatos transmigradores foi encurralada por feras nas brumas da estrada. Use sua carroça rápida para chegar a tempo e espantar as feras.',
+      desc: 'Uma caravana com novatos rasgados foi encurralada por feras nas brumas da estrada. Use sua carroça rápida para chegar a tempo e espantar as feras.',
       rank: 0, // E
       biome: 'campos',
       offset: { dx: -120, dz: 90 },
@@ -553,7 +553,7 @@
       sign: '? MONÓLITO ANCESTRAL',
       speech: 'A voz dos Primevos ainda ressoa neste monumento...',
       title: 'MISTÉRIO ANTIGO · MONÓLITO DOS PRIMEVOS',
-      desc: 'Saudações, Transmigrador. Você sente o calor desta pedra antiga? Este monumento guarda o espírito de um Guardião Ancestral que resistiu às primeiras Fendas. Se você tiver a audácia de tocar a runa e superar a Provação da Sombra, os tesouros do santuário reconhecerão seu poder!',
+      desc: 'Saudações, Rasgado. Você sente o calor desta pedra antiga? Este monumento guarda o espírito de um Guardião Ancestral que resistiu às primeiras Fendas. Se você tiver a audácia de tocar a runa e superar a Provação da Sombra, os tesouros do santuário reconhecerão seu poder!',
       chibi: { body: 0x2a3a5a, hair: 0xffffff, wep: 'staff', wcol: 0x7fd8ff, gk: 'Mage', tint: 0x7fd8ff },
       quest: {
         id: 'emergent_monolith_trial',
@@ -576,7 +576,7 @@
       biomes: ['campos', 'floresta', 'flores'],
       name: 'Vael, Batedor Renegado',
       sign: '! FUGITIVO NAS ROCHAS',
-      speech: 'Psiu! Ei, Transmigrador... aqui nas rochas!',
+      speech: 'Psiu! Ei, Rasgado... aqui nas rochas!',
       title: 'SEGREDOS NAS MONTANHAS · O BATEDOR RENEGADO',
       desc: 'A guarnição acha que fugi por covardia, mas a verdade é que descobri algo aterrador: um ninho de feras com chifres guardando uma arca reluzente de cristais abissais em um covil secreto logo acima. Eu não consigo derrotá-los sozinho, mas você sim. Fique com a localização da arca!',
       chibi: { body: 0x2d3436, hair: 0x636e72, wep: 'dagger', wcol: 0xb2bec3, gk: 'Rogue', tint: 0xdfe6e9 },

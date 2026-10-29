@@ -1,3 +1,11 @@
+## v688 (29/10/2026) — Identidade própria: Juramento da Âncora, Rasgados e Os Últimos Reis (só textos)
+- Pedido de Ian: passar para o jogo as decisões do adendo 14 (Drive, pasta Portal-das-Sombras). Só nomes e textos; nenhuma mecânica mudou.
+- "Segundo Despertar" → **Juramento da Âncora** (aba "Despertar" → "Juramento"; teste de despertar → teste de Juramento). "Transmigrador(es/a)" → **Rasgado(s/a)**. "Rank Estrela" → **Rank Aço-Estrela** nos textos.
+- Classe inicial: "a arma desperta sua classe" → "a memória da arma define sua classe"; "Classe despertada!" → "O ferro te aceitou!".
+- Chefes Colossais → **Últimos Reis**: Cavaleiro Carmesim → O Último Portão; Lich Ancestral → O Arquivista; Berserker Rubro → O Campeão das Arenas; General Esqueleto → O Marechal sem Bandeira; Rei Demônio Vharok → O Senhor da Fornalha; Dragão do Caos Kaelthys → A Fera dos Quatro Céus; Rainha Aranha Nhyssa → A Mãe do Ninho; Colosso de Gelo Ymrak → O Inverno Que Andava; Arconte da Destruição → O que Restou da Cidade; Arconte do Gelo Eterno → A Rainha do Inverno Parado; Arconte das Pragas → O Jardineiro da Podridão; Arconte das Feras → O Caçador Primevo. O Rei Oco fica. IDs internos e nomes de modelo (kaelthys, cavaleiro-carmesim.glb) não mudaram.
+- Ainda não no jogo (proposta/livro): passos do Juramento (Coroa + Pedra-Âncora), 10 reis × 3 campeões com arma única, lua com cicatriz, balística com gravidade.
+- Teste: build + core_parts ok, node --check em tudo; no navegador o texto novo aparece e nenhum nome antigo sobra. O painel do navegador não conseguiu criar o WebGL, então não deu para jogar.
+
 ## v687 (29/10/2026) — revisão dos GLBs do cenário (parte segura)
 - Pedido de Ian: «falta colocar e tirar muitos glbs, como é um cenário próprio».
 - Corrigido 404: `models/m437/pedra-lasca.glb` nunca existiu; pedras soltas usam `tripo-pedras437-lod` e rocha de picareta usa `tripo-rocha-musgo154-lod` (`tools/survival437.js`).

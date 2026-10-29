@@ -69,7 +69,7 @@ const FIG={
   pts:[[300,28],[300,200],[218,300],[192,538],[256,564],[304,580],[350,562],[404,528],[384,300],[516,330],[300,252]]}
 };
 Object.assign(FIG,(window.CONS569||{}).fig||{});
-const STAR={k:'est',n:'A Estrela',fig:'Rank secreto',hue:[255,232,180],locked:true,d:'Revela-se depois do Segundo Despertar.',
+const STAR={k:'est',n:'A Estrela',fig:'Rank secreto',hue:[255,232,180],locked:true,d:'Revela-se depois do Juramento da Âncora.',
   lore:'Há um rank acima de todos os outros. Ninguém em Aster sabe dizer que estrela é essa.',
   art:[['+',star8(240,70)],['-',star8(150,44)],['+',circ(300,300,40)]],
   pts:[[300,60],[470,130],[540,300],[470,470],[300,540],[130,470],[60,300],[130,130],[300,190],[300,410],[300,300]]};
@@ -148,7 +148,7 @@ function toScreen(p){return proj(p.v)||[-999,-999,0]}
 function pick(mx,my){if(!focused)return null;const c=C[cur];let best=null,bd=28;for(const p of c.p){const[x,y]=toScreen(p),d=Math.hypot(x-mx,y-my);if(d<bd){bd=d;best=p}}return best}
 function pickSky(mx,my){let bi=-1,bd=1e9;C.forEach((c,i)=>{const q=dot3(c.center,B.f)>.2&&proj(c.center);if(!q)return;const d=Math.hypot(q[0]-mx,q[1]-my);if(d<bd){bd=d;bi=i}});return bd<Math.max(170,F*.32)?bi:-1}
 function buy(p){const c=C[cur];
-  if(c.locked){toast(c.soon?'Desperta em breve':'Revela-se depois do Segundo Despertar');return}
+  if(c.locked){toast(c.soon?'Revela-se em breve':'Revela-se depois do Juramento da Âncora');return}
   if(isOn(c,p)){toast(p.apex?'Ápice aceso':'Já aceso');return}
   if(p.apex){toast('O Ápice acende sozinho com as 10 estrelas');return}
   if(!canBuy(c,p)){toast('Acenda as estrelas em ordem');return}

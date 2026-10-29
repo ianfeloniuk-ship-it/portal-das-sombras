@@ -49,6 +49,6 @@ function affinity103(ci){return awakening103().affinity===ci&&rareActive103(ci)?
 function rareOnPortal103(g){return; /* v169 (Ian): a fissura antiga não existe mais; o despertar vem dos sets dos chefes */if(g.rareRewarded103)return;g.rareRewarded103=true;const a=awakening103();if(a.discovered)a.energy++;if(a.pending||g.rank<Math.min(8,profile.rank)||run.level<30)return;if(!a.discovered)a.energy++;a.discovered=true;narratorEvent105('fissure',{rank:g.rank});a.pending={x:g.x,z:g.z,rank:g.rank,id:String(g.id),color:g.red?'red':'violet'};toast('<b>[NARRADOR]</b> O portal fechou. Mas alguma coisa continua sustentando uma fissura. Você sente a fissura. Uma nova aba apareceu em Personagem.',7000);store.set('pds2_profile',profile)}
 /* v292 (Ian): o rank ★ só aparece depois que o jogador ganha uma classe secreta (rara) */
 function secretRankKnown292(){try{return (profile.rank||0)>=9||awakening103().unlocked.length>0||(awakening103().total||0)>=1}catch(_){return false}}
-/* v187 (Ian): o Segundo Despertar é obtido reunindo e equipando o set de 5 peças de armadura do chefe de classe rara em Fendas Vermelhas. */
+/* v187 (Ian): o Juramento da Âncora é obtido reunindo e equipando o set de 5 peças de armadura do chefe de classe rara em Fendas Vermelhas. */
 function isTwiceAwakened103(){return (awakening103().unlocked||[]).length>0}
 function starReady187(){return isTwiceAwakened103()}
