@@ -1031,6 +1031,7 @@
     if(window.Mapa613?.active()){const t=Mapa613.objective()?.target;if(t)return t}
     if(window.Vale614?.active()){const t=Vale614.objective()?.target;if(t)return t}
     if(window.Ymiria683?.active()){const t=Ymiria683.objective()?.target;if(t)return t}
+    if(window.Zahar685?.active()){const t=Zahar685.objective()?.target;if(t)return t}
     const m=active().find(m=>'camp327:'+m.id===run.trackObj)||active().find(m=>!isSide(m));if(!m)return null;
     const s=state(m.id),sp=m.steps[s.s];
     if(sp.t==='go'){

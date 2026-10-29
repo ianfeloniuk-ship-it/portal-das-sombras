@@ -1,3 +1,10 @@
+## v685 (29/10/2026) — missão fixa #16 «A Segunda Âncora: As Ruínas do Primeiro Rei em Zahar»
+- **Módulo:** `tools/zahar685.js` (estado em `profile.fixas545.q016`). Começa ao fechar a #15; a menos de 90 m do centro de Zahar nasce o Guardião Solar (cactogigante chefe, vida ×2,5 arredondada no código) e ondas de 3 escaravelhos a cada 12 s (máx. 6 vivos).
+- **Escolha (E de verdade, `interact()`):** selar o Braço Direito na hora, ou ler o 2º Relato sob o trono parado por 4 s com as ondas atacando (afastar mais de 6 m cancela). Ler = Moeda do Primeiro Rei (+8% de ouro dos monstros, entra em `profile.lux267.relics` pela chave da cidade) e o Narrador como escriba real. Em qualquer ramo o Guardião precisa cair.
+- **Ligado:** `intro401.js` e `campaign327.js` (objetivo/alvo), `game.html`, `sw.js`. Os pontos de E ficam a 12 m do centro porque o poço de pesca (F) ocupava o lugar do trono e roubava o E. O Guardião usa `siege=true` (cidade segura) e é preso a 45 m do trono.
+- **Simplificações:** selar não gasta minério; trilha de dunas e polpa de cacto usam a sede que já existe.
+- **Teste:** jogo novo no navegador, caminhada de 110 m até o trono nos dois ramos (ler: relíquia no perfil; selar: Guardião morto por golpe real e missão encerrada), sem erro de script.
+
 ## v684 (29/10/2026) — missão fixa #15 «A Primeira Âncora: O Trono de Gelo de Ymiria»
 - **Módulo:** `tools/ymiria684.js` (estado em `profile.fixas545.q015`). Começa ao fechar a #14: cruzar o Desfiladeiro até Ymiria; a menos de 90 m nasce o Golias de Geada (Yeti chefe, vida ×3) com 4 Filhotes de Yeti junto da Pedra-Âncora.
 - **Escolha pela ação:** poupar (arma guardada, só o Golias morre; os filhotes fogem pela ecologia v410) = Yeti Alfa aliado de Ymiria, `avisosNevasca`, 1º Relato intacto; se algum filhote morrer pela sua mão = sem aliança, sem avisos, Relato danificado.
