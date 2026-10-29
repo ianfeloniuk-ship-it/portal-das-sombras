@@ -40,8 +40,9 @@ float mt383(vec2 p){if(uMt383.x<=0.)return 0.;vec2 q=p*uMt383.y;float m=smoothst
  float r1=1.-abs(sin(q.x*.012+sin(q.y*.009)*1.6)*sin(q.y*.013-q.x*.004));float r2=1.-abs(sin(q.x*.031+q.y*.008)*sin(q.y*.027-q.x*.011));float r3=1.-abs(sin(q.x*.071-q.y*.02)*sin(q.y*.063+q.x*.017));
  return uMt383.x*m*(r1*r1*.65+r2*r2*.27+r3*r3*.08);}
 /* v439 (Ian): o mar a oeste de Thalor — praia, recifes, alto-mar e fossas. Igual ao seaD439/seaBed439 do CPU. */
-/* v500 (Ian): mapa finito de 10 km — mar no oeste (Thalor), no leste (além de Zahar) e no sul (além de Urdan); cordilheira de gelo no norte. Igual ao CPU. */
-${GL661}float seaD439(vec2 p){float w=${SEAX.toFixed(1)}+150.*sin(p.y*.0009)+60.*sin(p.y*.0031+1.3)+20.*sin(p.y*.011)-p.x;float e=p.x-4250.-140.*sin(p.y*.0011+2.)-50.*sin(p.y*.0037);float s=p.y-4300.-150.*sin(p.x*.0010+.7)-55.*sin(p.x*.0029+1.9);return max(max(w,max(e,s)),moat661(p));}
+/* v689 (Ian): continente orgânico de ~100 km² com mar em volta (antes: quadrado de 10 km). Igual ao CPU. */
+${GL661}float coast684(vec2 p){vec2 d=p-vec2(600.,0.);float t=atan(d.y,d.x);float R=5630.+637.*cos(2.*t+3.0569)+367.*cos(3.*t+2.7038)+314.*cos(4.*t+3.5068)+265.*cos(5.*t+6.0495)+147.*cos(7.*t+0.7812)+70.*cos(9.*t+4.4740)+35.*sin(p.x*.011+p.y*.007)+18.*sin(p.x*.029-p.y*.023);return length(d)-R;}
+float seaD439(vec2 p){return max(coast684(p),moat661(p));}
 float ice500(vec2 p){float k=1.-smoothstep(-4550.,-3950.,p.y+90.*sin(p.x*.0013));if(k<=0.)return 0.;float r1=1.-abs(sin(p.x*.0061+sin(p.y*.004)*1.6)*sin(p.y*.0072-p.x*.002)),r2=1.-abs(sin(p.x*.019+p.y*.006)*sin(p.y*.017-p.x*.008));return k*(70.+150.*(r1*r1*.7+r2*r2*.3));}
 float seaBed439(vec2 p,float d){float b=d<60.?mix(1.2,-3.,(d+60.)/120.):d<450.?mix(-3.,-7.,(d-60.)/390.):mix(-7.,-22.,clamp((d-450.)/1200.,0.,1.));
  b+=2.6*max(0.,sin(p.x*.06+sin(p.y*.05)*2.)*sin(p.y*.055+sin(p.x*.04)*1.5)-.2)*smoothstep(40.,120.,d)*(1.-smoothstep(380.,500.,d));
@@ -75,7 +76,10 @@ ${GL513}float terrH245(vec2 p){if(uTerOn<.5)return 0.;if(uOW460.x>.5)return owH4
  TER.mt383=mt383;
  function terra444cpu(x,z,h){return h}
  TER.path444=function(){return 0};
- function seaD439(x,z){const S=Math.sin,w=SEAX+150*S(z*.0009)+60*S(z*.0031+1.3)+20*S(z*.011)-x,e=x-4250-140*S(z*.0011+2)-50*S(z*.0037),s=z-4300-150*S(x*.0010+.7)-55*S(x*.0029+1.9);return Math.max(w,e,s,moat661(x,z))}
+ /* v689 (Ian, 29/10/2026): continente de forma orgânica (~100 km²) cercado de mar — igual ao coast684 do shader. Positivo = mar. */
+ function coast684(x,z){const C=Math.cos,dx=x-600,t=Math.atan2(z,dx);return Math.hypot(dx,z)-(5630+637*C(2*t+3.0569)+367*C(3*t+2.7038)+314*C(4*t+3.5068)+265*C(5*t+6.0495)+147*C(7*t+0.7812)+70*C(9*t+4.4740)+35*Math.sin(x*.011+z*.007)+18*Math.sin(x*.029-z*.023))}
+ TER.coast684=coast684;
+ function seaD439(x,z){return Math.max(coast684(x,z),moat661(x,z))}
  function cw661(x,z){let d=1e9;for(const r of CWS661){const px=x-r[0],pz=z-r[1],dx=r[2]-r[0],dz=r[3]-r[1],h=Math.min(1,Math.max(0,(px*dx+pz*dz)/(dx*dx+dz*dz)));d=Math.min(d,Math.hypot(px-dx*h,pz-dz*h))}return d}
  function moat661(x,z){const r=Math.hypot(x-TH661.x,z-TH661.z);if(r<TH661.r0-120||r>TH661.r1+120)return -1e9;return Math.min(r-TH661.r0,TH661.r1-r,cw661(x,z)-15)*6}
  function pool661(x,z,h){const ss=(a,b,v)=>{const t=Math.min(1,Math.max(0,(v-a)/(b-a)));return t*t*(3-2*t)};for(const r of RS661){const qx=x-r.p.x,qz=z-r.p.z,d=Math.hypot(qx,qz),R=r.S.R;h=h+(-2.4-h)*(1-ss(R,R+12,d));if(d<R)h-=2.6*(1-d*d/(R*R));

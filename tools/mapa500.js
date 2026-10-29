@@ -2,10 +2,10 @@
    - Só existem as regiões -2..2 (25 regiões de ~1,9 km). Cidades comuns ficam dentro de 3,7 km do centro.
    - Aster (0,0) no centro; as 5 Capitais em volta, com bioma próprio:
      Ymiria (norte, neve) · Zahar (leste, deserto) · Thalor (oeste, costa do mar) · Urdan (sul, pântano → vulcão) · Verden (sudeste, floresta).
-   - Bordas (relevo em tools/terrain245.js): mar a oeste, leste e sul; cordilheira de gelo ao norte.
-   - Ninguém passa de 4,92 km do centro em x ou z. */
+   - v689: o quadrado virou um continente de forma orgânica (~100 km²) com mar em volta (coast684 em tools/terrain245.js);
+     a cordilheira de gelo de Ymiria agora desce até o mar do norte. */
 (function(){
-  const LIM=4920,KEEP=3700;
+  const LIM=6000,KEEP=3700;
   const CAP={
     '0,-2':{name:'Ymiria',x:0,z:-3400,b:.18,b2:.40},
     '2,0':{name:'Zahar',x:3400,z:0,b:.84,b2:.40},
@@ -45,16 +45,21 @@
     const wn=ss(-3500,-3950,z);if(wn>0){b+=(.16-b)*wn;b2+=(.4-b2)*wn}
     return {w:r.w,b,b2}};
 
-  /* borda do mundo */
+  /* borda do mundo — v689 (Ian, 29/10/2026): o continente tem forma orgânica (~100 km², costa em tools/terrain245.js, coast684).
+     Dá para nadar perto da costa; a ~900 m mar adentro o alto-mar não deixa ir mais longe. */
+  const DEEP=900,sdAt=(x,z)=>{try{return TER245.SEA439.d(x,z)}catch(_){return -1}};
   let lastMsg=0;
   const me0=moveEnt;
-  moveEnt=function(e,dx,dz){const r=me0.apply(this,arguments);
-    try{if(L.mode==='world'&&e&&!(window.TER245&&TER245.OW.value.x>.5)){let hit=null;
-      if(e.x>LIM){e.x=LIM;hit='e'}else if(e.x<-LIM){e.x=-LIM;hit='w'}
-      if(e.z>LIM){e.z=LIM;hit='s'}else if(e.z<-LIM){e.z=-LIM;hit='n'}
-      if(hit&&e===player&&performance.now()-lastMsg>12000){lastMsg=performance.now();
-        toast(hit==='n'?'<b>[CORDILHEIRA DE GELO]</b> As montanhas de Ymiria fecham o norte. Nada passa daqui.':'<b>[MAR SEM FIM]</b> O mar além daqui não tem volta. O mundo conhecido acaba nesta água.',5000)}}}catch(_){}
+  moveEnt=function(e,dx,dz){const ox=e&&e.x,oz=e&&e.z;const r=me0.apply(this,arguments);
+    try{if(L.mode==='world'&&e&&!(window.TER245&&TER245.OW.value.x>.5)){const d=sdAt(e.x,e.z);
+      if(d>DEEP&&d>sdAt(ox,oz)){e.x=ox;e.z=oz;
+        if(e===player&&performance.now()-lastMsg>12000){lastMsg=performance.now();
+          toast('<b>[MAR SEM FIM]</b> O mar além daqui não tem volta. O mundo conhecido acaba nesta água.',5000)}}}}catch(_){}
     return r};
+  /* saves antigos: quem ficou fora do continente novo volta para a terra (cidade mais perto) */
+  setInterval(()=>{try{if(typeof started==='undefined'||!started||!player||L.mode!=='world'||L.special||(window.TER245&&TER245.OW.value.x>.5))return;
+    if(sdAt(player.x,player.z)<=DEEP)return;let c=null,bd=1e18;for(let rz=-2;rz<=2;rz++)for(let rx=-2;rx<=2;rx++){const q=regionCity(rx,rz),d=Math.hypot(q.x-player.x,q.z-player.z);if(d<bd){bd=d;c=q}}player.x=c.x;player.z=c.z+8;
+    toast('<b>[MUNDO]</b> A costa mudou de lugar. A maré levou você de volta para <b>'+c.name+'</b>.',6000)}catch(_){}},1500);
 
   window.Mapa500={LIM,CAP,inMap,capital:n=>{for(const k in CAP)if(CAP[k].name===n)return regionCity(...k.split(',').map(Number));return null}};
 })();

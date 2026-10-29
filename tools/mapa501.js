@@ -1,10 +1,10 @@
-/* v501 (Ian, 21/10/2026): MAPA-MÚNDI FINITO. O mapa grande mostra o quadrado inteiro de 10 km (x e z de -5000 a +5000):
-   mar a oeste/leste/sul, cordilheira de gelo ao norte, cor do bioma (amostrada numa grade e guardada numa tela),
+/* v501 (Ian, 21/10/2026): MAPA-MÚNDI FINITO. O mapa grande mostra o continente inteiro (v689: x e z de -6800 a +6800, costa orgânica):
+   mar em volta, cor do bioma (amostrada numa grade e guardada numa tela),
    cidades, estradas, as 6 Capitais em destaque, acampamentos, postos, portais e o jogador com a direção do olhar.
    O minimapa continua local (em volta de você), mas agora pinta o mar e deixa escuro o que fica fora do mapa (tools/map393.js).
    Não há sistema de áreas exploradas no mundo aberto, então não existe neblina de guerra. */
 (function(){
-  const M=Map393,HALF=5000,N_LO=100,N_HI=400,PAD=16;
+  const M=Map393,HALF=6800,N_LO=100,N_HI=400,PAD=16;
   const SAND=[222,204,150],DEEP=[28,78,128],PARCH=[58,42,24];
   const mix=(a,b,r)=>[a[0]+(b[0]-a[0])*r,a[1]+(b[1]-a[1])*r,a[2]+(b[2]-a[2])*r];
   const C={cv:null,lo:null,job:0,vec:null,seed:-1};
@@ -39,6 +39,8 @@
     try{v.roads=roadSegs(0,0,3).filter(s=>s.every(q=>Math.abs(q)<=HALF))}catch(_){}
     try{if(window.Living372&&Living372.site)for(let i=-32;i<=32;i++)for(let j=-32;j<=32;j++){const s=Living372.site(i,j);if(s&&Math.abs(s.x)<=HALF&&Math.abs(s.z)<=HALF)v.tents.push(s)}}catch(_){}
     try{const n=Math.ceil(HALF/CH);for(let i=-n;i<=n;i++)for(let j=-n;j<=n;j++){const o=outpostPoint361(i,j);if(o&&Math.abs(o.x)<=HALF&&Math.abs(o.z)<=HALF)v.posts.push(o)}}catch(_){}
+    /* v689: nada de acampamento ou posto desenhado no mar */
+    try{const d=TER245.SEA439.d;v.tents=v.tents.filter(s=>d(s.x,s.z)<0);v.posts=v.posts.filter(o=>d(o.x,o.z)<0)}catch(_){}
     return v}
 
   function ensure(){
@@ -59,7 +61,7 @@
     ctx.textAlign='center';ctx.textBaseline='middle';
     const label=(t,x,y,font,col)=>{ctx.font=font;ctx.lineWidth=3;ctx.strokeStyle='rgba(20,12,4,.9)';ctx.strokeText(t,x,y);ctx.fillStyle=col;ctx.fillText(t,x,y)};
     const F='700 12px "Russo One",sans-serif';
-    ctx.save();ctx.globalAlpha=.8;label('CORDILHEIRA DE GELO',S/2,PAD+14,F,'#eaf6ff');
+    ctx.save();ctx.globalAlpha=.8;label('MAR',S/2,PAD+14,F,'#cfe8ff');
     label('MAR',PAD+24,S/2,F,'#cfe8ff');label('MAR',S-PAD-24,S/2,F,'#cfe8ff');label('MAR',S/2,S-PAD-12,F,'#cfe8ff');ctx.restore();
     ctx.lineCap='round';ctx.strokeStyle=M.ROAD;ctx.lineWidth=2;ctx.beginPath();for(const [x1,z1,x2,z2] of C.vec.roads){ctx.moveTo(tx(x1),tz(z1));ctx.lineTo(tx(x2),tz(z2))}ctx.stroke();
     for(const o of C.vec.posts)M.tower(ctx,tx(o.x),tz(o.z),2.5);

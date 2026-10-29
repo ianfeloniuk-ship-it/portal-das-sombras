@@ -8,7 +8,7 @@
 'use strict';
 const T=window.THREE;
 if(!T||typeof mapView!=='function'||typeof closeModal!=='function'||!window.Mapa501)return;
-const HALF=5000,N=321,TEX=1024,EX=3,SEA_Y=-.9*EX-.6;
+const HALF=6800,N=321,TEX=1024,EX=3,SEA_Y=-.9*EX-.6;
 const M=window.Mapa3D544={on:true};
 const D={seed:null,h:null,sea:null,tex:null,ready:false,job:null,texDone:0};
 const S={el:null,cv:null,lab:null,panel:null,r:null,scene:null,cam:null,terrain:null,marks:null,mkCv:null,mkTex:null,water:null,clouds:[],player:null,ring:null,

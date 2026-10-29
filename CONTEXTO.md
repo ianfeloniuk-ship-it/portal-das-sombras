@@ -1,3 +1,12 @@
+## v689 (29/10/2026) — Continente de forma orgânica (~100 km²)
+- **Pedido de Ian:** o mapa do mundo estava quadrado; quer algo sem forma geométrica, ~100 km², cada ambiente com seu reino.
+- **Costa:** `coast684` em `tools/terrain245.js` (CPU e shader iguais): raio em volta de (600, 0) somado a ondas de 2, 3, 4, 5, 7 e 9 voltas + recortes pequenos. `seaD439` = max(costa, canal de Thalor). Mar em volta inteiro (o norte também; a cordilheira de gelo de Ymiria desce até o mar). A oeste a costa continua a ~4,15 km, colada em Thalor.
+- **Área medida:** ~100 km² de terra (amostragem a cada 20 m: 99,6 km² na 1ª forma; forma final ~101 km²). Extensão aprox. x −4,3 a +6,3 km, z −6,6 a +6,3 km. Todas as 25 cidades e as 5 capitais ficam a mais de 800 m da água.
+- **Borda:** `tools/mapa500.js` — saiu o limite quadrado de 4,92 km; agora dá para nadar perto da costa e, a 900 m mar adentro, o alto-mar não deixa ir mais longe (mesmo aviso «MAR SEM FIM»). Save antigo fora do continente volta para a cidade mais perto.
+- **Mapa:** `tools/mapa501.js` e `tools/mapa3d544.js` mostram −6,8 a +6,8 km; rótulo «MAR» nos 4 lados; acampamentos/postos no mar não são desenhados.
+- **Ligado:** rios (v661) seguem como antes e desembocam na nova costa; biomas dos reinos (centro nas capitais) não mudaram.
+- **Teste:** navegador (porta 8797), mapa grande desenhado sem erro no console, bloqueio no alto-mar e volta à terra testados.
+
 ## v688 (29/10/2026) — Identidade própria: Juramento da Âncora, Rasgados e Os Últimos Reis (só textos)
 - Pedido de Ian: passar para o jogo as decisões do adendo 14 (Drive, pasta Portal-das-Sombras). Só nomes e textos; nenhuma mecânica mudou.
 - "Segundo Despertar" → **Juramento da Âncora** (aba "Despertar" → "Juramento"; teste de despertar → teste de Juramento). "Transmigrador(es/a)" → **Rasgado(s/a)**. "Rank Estrela" → **Rank Aço-Estrela** nos textos.
