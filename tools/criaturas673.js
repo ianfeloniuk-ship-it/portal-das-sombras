@@ -7,22 +7,33 @@
 (function(global){
 'use strict';
 const T=global.THREE,W=global.Warrior127;if(!T||!T.GLTFLoader||!W||typeof KINDS==='undefined'||typeof makeChibi!=='function')return;
-const V='675';
+const V='676';
 const DEF={
   lobisomem:{file:'models/lobisomem673.glb',bank:'lobo',bankFile:'models/anim-lobisomem673.glb',h:2.6,bio:['floresta','neve'],night:true,from:['lobo'],chance:.2,max:2,
     clips:{atk:['garra','soco'],dead:'morte',hit:'soco',roar:'rugido'},
-    K:{n:'Lobisomem',hp:260,dmg:24,spd:4.6,ai:'lunge',range:2.4,wind:.35,atkCd:1.3,xp:60,scale:1,body:0x4a4a52,wep:'none',r:.7,rk:4,bio:'floresta',crit673:'lobisomem'}}
+    K:{n:'Lobisomem',hp:260,dmg:24,spd:4.6,ai:'lunge',range:2.4,wind:.35,atkCd:1.3,xp:60,scale:1,body:0x4a4a52,wep:'none',r:.7,rk:4,bio:'floresta',crit673:'lobisomem'}},
+  /* v675: draugr (mortos-vivos nórdicos, 6 aparências) — neve e floresta, no lugar de esqueletos e filhotes de yeti; lentos */
+  draugr:{file:['draugr_aldea','draugr_bruxa','draugr_campones','draugr_guerreiro','draugr_jarl','draugr_shieldmaiden'].map(f=>'models/criaturas675/'+f+'.glb'),
+    bank:'draugr',bankFile:'models/anim-draugr675.glb',h:2.0,bio:['neve','floresta'],night:false,from:['minion','warrior','caveira','yetinho'],chance:.35,max:4,
+    clips:{atk:['golpe','garra'],dead:'morte',hit:'dano',roar:'grito'},
+    K:{n:'Draugr',hp:180,dmg:18,spd:3.2,ai:'melee',range:2.2,wind:.45,atkCd:1.6,xp:45,scale:1,body:0x6a6a70,wep:'none',r:.55,rk:3,bio:'neve',crit673:'draugr'}},
+  /* v675: vampiros despertados (Ymíria, reino gelado dos vampiros) — só de noite, no lugar de fantasmas e yetis */
+  vampiro:{file:['vampira_despertada_feminina','vampiro_despertado_masculino'].map(f=>'models/criaturas675/'+f+'.glb'),
+    bank:'vamp',bankFile:'models/anim-vamp675.glb',h:2.3,bio:['neve'],night:true,from:['fantasma','yeti'],chance:.25,max:2,
+    clips:{atk:['mordida','golpe'],dead:'morte',hit:'golpe',roar:'mordida'},
+    K:{n:'Vampiro Despertado',hp:220,dmg:26,spd:5.2,ai:'lunge',range:2.4,wind:.3,atkCd:1.2,xp:70,scale:1,body:0x8a1a1a,wep:'none',r:.6,rk:5,bio:'neve',crit673:'vampiro'}}
 };
 const API=global.Criaturas673={DEF,ready:{},base:{},stats:{spawned:0,made:0}};
 for(const [k,D] of Object.entries(DEF)){
   W.loadBank486(D.bank,D.bankFile+'?v='+V);
-  new T.GLTFLoader().load(D.file+'?v='+V,g=>{API.base[k]=g;if(!KINDS[k])KINDS[k]={...D.K};API.ready[k]=true},undefined,e=>console.warn('Criaturas673: '+k+' não carregou',e));
+  const files=[].concat(D.file);API.base[k]=[];
+  for(const f of files)new T.GLTFLoader().load(f+'?v='+V,g=>{API.base[k].push(g);if(!KINDS[k])KINDS[k]={...D.K};API.ready[k]=true},undefined,e=>console.warn('Criaturas673: '+f+' não carregou',e));
 }
 /* modelo: o mkEnemy do jogo monta o boneco padrão; depois troca pelo Warrior127 com o GLB da criatura, na altura dela */
-function model(k){const D=DEF[k],g=API.base[k];const m=W.create({modelScene:g.scene,legacyLinearOutput:true,equip:{}});
+function model(k){const D=DEF[k],L=API.base[k],g=L[Math.floor(Math.random()*L.length)];const m=W.create({modelScene:g.scene,legacyLinearOutput:true,equip:{}});
   m.model.scale.multiplyScalar(D.h/2.05);m.crit673=k;m.height482=D.h;API.stats.made++;return m}
 if(typeof mkEnemy==='function'){const mk0=mkEnemy;mkEnemy=function(K){const e=mk0.apply(this,arguments);
-  try{const k=K&&K.crit673;if(k&&API.base[k]&&e&&e.m&&e.m.root){const old=e.m,par=old.root.parent,m=model(k);
+  try{const k=K&&K.crit673;if(k&&API.base[k]&&API.base[k].length&&e&&e.m&&e.m.root){const old=e.m,par=old.root.parent,m=model(k);
     m.root.position.copy(old.root.position);m.root.rotation.copy(old.root.rotation);if(par){par.remove(old.root);par.add(m.root)}e.m=m;if(e.mats)e.mats=m.mats}}catch(err){console.warn('Criaturas673 modelo',err)}
   return e}}
 /* animação: banco da criatura; golpe, dano e morte pelo estado do monstro */
