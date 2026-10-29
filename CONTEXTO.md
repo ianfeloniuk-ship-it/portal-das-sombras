@@ -1,3 +1,10 @@
+## v686 (29/10/2026) — missão fixa #17 «A Terceira Âncora: A Fossa Abissal de Thalor e a Traição de Logos»
+- **Módulo:** `tools/thalor686.js` (estado em `profile.fixas545.q017`). Começa ao fechar a #16; a menos de 90 m de Thalor aparece Dorian no armazém do cais (a 20 m do centro) ao lado de um lote de 5 cristais roxos.
+- **Escolha pela ação:** ferir Dorian (revela-se Logos, foge) = Estilhaço Dourado (`s.estilhaco`) e pressão abissal de 2% da vida por segundo no mergulho; ou E no lote de cristais = pressão de 1% por segundo. Depois o Leviatã das Correntes (lula gigante chefe, vida ×3,5) junto da Pedra-Âncora; a pressão nunca mata (deixa 1 de vida). Matar o Leviatã encerra.
+- **Ligado:** `intro401.js` e `campaign327.js` (objetivo/alvo), `game.html`, `sw.js`; `siege=true` nos atores (cidade segura de `390-ia.js`).
+- **Simplificações:** o mergulho acontece no cais (sem Fossa Submersa nem bolsão de ar); o Braço Esquerdo do Arquiteto não é segundo chefe; o Estilhaço Dourado é marca no perfil e entrada no Diário, ainda sem item na forja.
+- **Teste:** jogo novo no navegador, caminhada de 110 m até Thalor, os dois ramos (E nos cristais; golpe real em Dorian) e o Leviatã morto por golpe real, sem erro de script.
+
 ## v685 (29/10/2026) — missão fixa #16 «A Segunda Âncora: As Ruínas do Primeiro Rei em Zahar»
 - **Módulo:** `tools/zahar685.js` (estado em `profile.fixas545.q016`). Começa ao fechar a #15; a menos de 90 m do centro de Zahar nasce o Guardião Solar (cactogigante chefe, vida ×2,5 arredondada no código) e ondas de 3 escaravelhos a cada 12 s (máx. 6 vivos).
 - **Escolha (E de verdade, `interact()`):** selar o Braço Direito na hora, ou ler o 2º Relato sob o trono parado por 4 s com as ondas atacando (afastar mais de 6 m cancela). Ler = Moeda do Primeiro Rei (+8% de ouro dos monstros, entra em `profile.lux267.relics` pela chave da cidade) e o Narrador como escriba real. Em qualquer ramo o Guardião precisa cair.
