@@ -56,7 +56,7 @@ const BY_KIND={goblin:'pele_goblin_curtida',orc:'couro_orc_quebrarocha',orcinho:
  lobo:'presa_lobo',raptor:'couro_raptor_sauriano',dino:'couro_raptor_sauriano',aranha:'quelicera_aranha_gigante',
  escaravelho:'quitina_escaravelho_zahar',dragao:'escama_dragao',dragaoancio:'escama_dragao',dragonete:'escama_dragao',
  chifrudo:'chifre_runico',demon:'chifre_runico',diabrete:'chifre_runico',yeti:'garra_fera',gigante:'garra_fera',
- gosma:'essencia_gosma_fendida',cogu:'cogu_esporo_vacuo',cogufuria:'cogu_esporo_vacuo',reicogu:'cogu_esporo_vacuo'};
+ lobisomem:'couro_lobisomem_zahar', gosma:'essencia_gosma_fendida',cogu:'cogu_esporo_vacuo',cogufuria:'cogu_esporo_vacuo',reicogu:'cogu_esporo_vacuo'};
 // Saíram com defeito do Trellis (cartão plano ou placa de chão): fora do jogo até refazer.
 const BAD=['quelicera_aranha_gigante','couro_raptor_sauriano','garra_fera','membrana_vampiro_ymiria','cogu_cogumelo_craca','pocao_mana'];
 // Essências fluidas = só shader (essencias664.js, v664); não usar GLB sólido.

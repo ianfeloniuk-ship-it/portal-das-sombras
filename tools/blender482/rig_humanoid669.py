@@ -37,7 +37,8 @@ FORCE_PROXY = arg('force-proxy', flag=True)
 LEGS = arg('legs', 'auto')  # auto|pants|skirt
 HOODARG = arg('hood', 'auto')  # auto|yes: capuz no topo da cabeça (topo = roupa, cabelo só o que aparece por baixo)
 ANIM_PROOF = not arg('no-anim-proof', flag=True)
-DIGI = arg('digitigrade', flag=True)  # v673: pé de bicho (lobisomem): calcanhar alto, pé longo inteiro no osso do pé
+DIGI = arg('digitigrade', flag=True)
+LEGR = float(arg('leg-r', '1.0'))  # v673: perna grossa (lobisomem) — o pelo da coxa é perna, não pano  # v673: pé de bicho (lobisomem): calcanhar alto, pé longo inteiro no osso do pé
 assert SRC and OUT and NID, 'faltou --in/--out/--id'
 assert RACE in ('human', 'dwarf', 'elf') and SEX in ('m', 'f') and ROLE in ('civil', 'hunter')
 os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
@@ -618,8 +619,8 @@ def leg_gap():
         # coxa mais grossa perto do quadril: raio 0,05H no joelho -> 0,075H na virilha (calça não vira pano)
         hh_ = np.array(L[nm + 'UpLeg'][:]); kk_ = np.array(L[nm + 'Leg'][:]); dd_ = hh_ - kk_
         u_ = np.clip(((co - kk_) @ dd_) / (dd_ @ dd_), 0, 1)
-        g = np.minimum(g, seg_dist(nm + 'UpLeg') - (0.05 + 0.025 * u_) * H)
-        g = np.minimum(g, seg_dist(nm + 'Leg') - 0.045 * H)
+        g = np.minimum(g, seg_dist(nm + 'UpLeg') - (0.05 + 0.025 * u_) * H * LEGR)
+        g = np.minimum(g, seg_dist(nm + 'Leg') - 0.045 * H * LEGR)
         g = np.minimum(g, seg_dist(nm + 'Foot') - 0.045 * H)       # pé e ponta não são pano
         g = np.minimum(g, seg_dist(nm + 'ToeBase') - 0.04 * H)
     return g
