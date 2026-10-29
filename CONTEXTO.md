@@ -1,3 +1,13 @@
+## v678 (29/10/2026) — Transformação de cinema (lobisomem, vampiro, draugr), aura de sangue e golpes das criaturas
+- Pedido de Ian: a transformação tem que ser cinema (He-Man do último filme, simbionte da Marvel), não efeito em volta do boneco. Aprovou o caminho em vídeo e mandou publicar.
+- `tools/cinema678.js` (`Cinema678.play(k)`): cena de ~12 s com 5 planos (geral baixo, close na mão, por cima do ombro, rosto no rugido, câmera abrindo), faixas pretas, cor de filme, interface escondida, o jogador parado. O modelo da criatura nasce dentro do Viajante e uma frente com borda acesa (shader por distância da mão direita) come a pele dele e revela a da fera: a mão vira garra primeiro, depois o corpo inteiro, que se contorce e cresce. Borda: fogo (lobisomem), sangue (vampiro), gelo (draugr). A câmera escolhe o lado com menos coisas na frente. Na forma grande a câmera do jogo se afasta; volta ao normal ao desfazer.
+- Forma certa: vampiro masculino para o Viajante (feminino só para personagem mulher); draugr = draugr guerreiro (antes só ficava cinza). `Criaturas673.model(k, filtro)` escolhe a aparência.
+- `tools/transforma677.js`: a volta (3 s) troca o modelo de volta nas três formas; rugido do draugr = "grito".
+- `tools/aura678.js`: aura de sangue do vampiro no próprio material (veias do peito pulsando como batida de coração + contorno vermelho), em todo vampiro (monstros e jogador transformado).
+- Correção: o golpe das criaturas reiniciava o clipe a cada quadro e o braço travava; agora o clipe novo só começa quando o tempo do ataque recomeça (`criaturas673.js`).
+- Ainda não: contágio, estágios, fome, lua cheia, cura (documento "Doença e Transformação" aprovado); asas do vampiro presas ao braço (precisam de ossos próprios); vampiros e lobisomens humanos.
+- Teste: Edge headless, `tools/video-cinema678.cjs` (3 formas jogadas e gravadas) e `tools/test-golpes678.cjs` (quadros do golpe em cena isolada); sem erros de página.
+
 ## v676 (29/10/2026) — Draugr e vampiros despertados no mundo
 - Pedido de Ian: draugr e vampiros do Drive no jogo com animações próprias (Mixamo, conta do Ian). Modelos refeitos em pose T no Colab, rigados com `rig_humanoid669.py` (capa, vestido e saiote com correntes de pano) → `models/criaturas675/` (6 draugr: aldeã, bruxa, camponês, guerreiro, jarl, shieldmaiden; 2 vampiros despertados). O Rei Vaeloth fica fora do sorteio (rei nomeado).
 - Bancos: `models/anim-draugr675.glb` (zumbi: parado, andar, correr, garra, golpe de duas mãos, grito, dano, morte) e `models/anim-vamp675.glb` (parado, andar, corrida rápida, mordida em bote, golpe horizontal, morte).

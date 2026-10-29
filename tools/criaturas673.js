@@ -27,11 +27,12 @@ const API=global.Criaturas673={DEF,ready:{},base:{},stats:{spawned:0,made:0}};
 for(const [k,D] of Object.entries(DEF)){
   W.loadBank486(D.bank,D.bankFile+'?v='+V);
   const files=[].concat(D.file);API.base[k]=[];
-  for(const f of files)new T.GLTFLoader().load(f+'?v='+V,g=>{API.base[k].push(g);if(!KINDS[k])KINDS[k]={...D.K};API.ready[k]=true},undefined,e=>console.warn('Criaturas673: '+f+' não carregou',e));
+  for(const f of files)new T.GLTFLoader().load(f+'?v='+V,g=>{g.file678=f;API.base[k].push(g);if(!KINDS[k])KINDS[k]={...D.K};API.ready[k]=true},undefined,e=>console.warn('Criaturas673: '+f+' não carregou',e));
 }
 /* modelo: o mkEnemy do jogo monta o boneco padrão; depois troca pelo Warrior127 com o GLB da criatura, na altura dela */
-function model(k){const D=DEF[k],L=API.base[k],g=L[Math.floor(Math.random()*L.length)];const m=W.create({modelScene:g.scene,legacyLinearOutput:true,equip:{}});
+function model(k,want){const D=DEF[k],L0=API.base[k],L=(want&&L0.filter(g=>want.test(g.file678||'')).length)?L0.filter(g=>want.test(g.file678||'')):L0,g=L[Math.floor(Math.random()*L.length)];/* v678: want escolhe a aparência (ex.: vampiro masculino) */const m=W.create({modelScene:g.scene,legacyLinearOutput:true,equip:{}});
   m.model.scale.multiplyScalar(D.h/2.05);m.crit673=k;m.height482=D.h;API.stats.made++;return m}
+API.model=model;
 if(typeof mkEnemy==='function'){const mk0=mkEnemy;mkEnemy=function(K){const e=mk0.apply(this,arguments);
   try{const k=K&&K.crit673;if(k&&API.base[k]&&API.base[k].length&&e&&e.m&&e.m.root){const old=e.m,par=old.root.parent,m=model(k);
     m.root.position.copy(old.root.position);m.root.rotation.copy(old.root.rotation);if(par){par.remove(old.root);par.add(m.root)}e.m=m;if(e.mats)e.mats=m.mats}}catch(err){console.warn('Criaturas673 modelo',err)}
@@ -42,8 +43,9 @@ animChibi=function(m,st,t){if(!m||!m.crit673)return an0.apply(this,arguments);
   const D=DEF[m.crit673],p=m.root.position,dt=(typeof ADT!=='undefined'?ADT:1/60)||1/60;
   if(m.last673){const v=Math.hypot(p.x-m.last673.x,p.z-m.last673.z)/Math.max(dt,1e-3);m.v673+=(Math.min(v,10)-m.v673)*Math.min(1,dt*6)}else{m.last673=new T.Vector3();m.v673=0}m.last673.copy(p);
   const s={bank486:D.bank,move:st.move,speed:m.v673,walking:m.v673<3,sprint:m.v673>4,dead:st.dead,atk:0,once486:false,clip486:null};
-  if(st.dead>0){s.clip486=D.clips.dead;s.once486=true;s.dead=0}
-  else if(st.atk>0){if(!m.atkClip673||st.atk<(m.lastAtk673||0))m.atkClip673=D.clips.atk[(m.nAtk673=(m.nAtk673||0)+1)%D.clips.atk.length];m.lastAtk673=st.atk;s.clip486=m.atkClip673;s.once486=true;s.fade486=.12}
+  if(m.forceClip677){s.clip486=m.forceClip677;s.once486=true;s.fade486=.15}/* v677: cena da transformação manda o clipe *//* v678: golpe novo só quando o tempo do ataque recomeça (antes trocava e reiniciava o clipe a cada quadro e o braço travava) */
+  else if(st.dead>0){s.clip486=D.clips.dead;s.once486=true;s.dead=0}
+  else if(st.atk>0){if(!m.atkClip673||st.atk>(m.lastAtk673||0)+.01)m.atkClip673=D.clips.atk[(m.nAtk673=(m.nAtk673||0)+1)%D.clips.atk.length];m.lastAtk673=st.atk;s.clip486=m.atkClip673;s.once486=true;s.fade486=.12}
   else m.atkClip673=null;
   return W.animate(m,s,t,dt)};
 /* geração: de noite, no bioma certo, no lugar de um lobo selvagem */
