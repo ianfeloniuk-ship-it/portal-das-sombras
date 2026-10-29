@@ -1,3 +1,6 @@
+## v684 (29/10/2026) — Controles sem "como no Skyrim"
+- Continuação da v683 (identidade própria do Primeva): a linha da tela de controles agora diz só "Mouse". Varredura: nenhum outro texto visível cita Skyrim, Solo Leveling ou Eco (os restantes são comentários de código).
+
 ## v686 (29/10/2026) — missão fixa #17 «A Terceira Âncora: A Fossa Abissal de Thalor e a Traição de Logos»
 - **Módulo:** `tools/thalor686.js` (estado em `profile.fixas545.q017`). Começa ao fechar a #16; a menos de 90 m de Thalor aparece Dorian no armazém do cais (a 20 m do centro) ao lado de um lote de 5 cristais roxos.
 - **Escolha pela ação:** ferir Dorian (revela-se Logos, foge) = Estilhaço Dourado (`s.estilhaco`) e pressão abissal de 2% da vida por segundo no mergulho; ou E no lote de cristais = pressão de 1% por segundo. Depois o Leviatã das Correntes (lula gigante chefe, vida ×3,5) junto da Pedra-Âncora; a pressão nunca mata (deixa 1 de vida). Matar o Leviatã encerra.
