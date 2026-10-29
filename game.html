@@ -5322,6 +5322,7 @@ function crystalMaterial125(rank,mineral){
 }
 const crystalReady125=new Promise(resolve=>{
  if(!THREE.GLTFLoader){resolve(false);return}
+ /* v687: cristal antigo proibido (Ian 16/10); não baixa mais o GLB, o cristal vem do crystalCluster230 do mechanics434 */resolve(false);return;
  new THREE.GLTFLoader().load('models/cristal-fenda-rank125.glb',gltf=>{
   const root=gltf.scene;root.traverse(o=>{if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.geometry.userData.shared=true;o.castShadow=false;o.receiveShadow=true;const original=o.material;o.userData.mineral125=o.name==='mineral';o.material=crystalMaterial125(0,o.userData.mineral125);if(Array.isArray(original))original.forEach(m=>m.dispose());else original.dispose()}});
   const box=new THREE.Box3().setFromObject(root),height=box.max.y-box.min.y;
@@ -9705,8 +9706,8 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
-<script src="tools/mechanics434.js?v=500"></script>
-<script src="tools/survival437.js?v=668"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=674"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
+<script src="tools/mechanics434.js?v=687"></script>
+<script src="tools/survival437.js?v=687"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=674"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
 <script src="tools/cart437.js?v=630"></script>
 <script src="tools/build437.js?v=630"></script>
 <script src="tools/otherworld460.js?v=654"></script>

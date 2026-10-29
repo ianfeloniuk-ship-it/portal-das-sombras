@@ -780,12 +780,11 @@
   }
   const veinTpl = [glb('cristal-veio'), glb('cristal-veio-2')];
   if (typeof crystalCluster230 === 'function') {
-    const old230 = crystalCluster230;
     crystalCluster230 = function (rank, size, broken) {
       const g = new T.Group(), k = (rank * 7 + Math.round(size * 10)) % 2;
       Promise.all(veinTpl).then(t => {
         const tpl = t[k] || t[1 - k];
-        if (!tpl) { g.add(old230(rank, size, broken)); return; } // sem o modelo novo (erro de rede): volta ao antigo para o veio não sumir
+        if (!tpl) return; // v687: sem o modelo novo (erro de rede) não volta ao cristal antigo proibido
         const m = fit(tpl, size * 1.05); m.rotation.y = (rank * 1.7 + size) % TAU;
         m.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(x => tintMat(x, rank, broken)) : tintMat(o.material, rank, broken); });
         g.add(m);

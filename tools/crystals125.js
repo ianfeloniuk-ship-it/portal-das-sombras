@@ -14,6 +14,7 @@ function crystalMaterial125(rank,mineral){
 }
 const crystalReady125=new Promise(resolve=>{
  if(!THREE.GLTFLoader){resolve(false);return}
+ /* v687: cristal antigo proibido (Ian 16/10); não baixa mais o GLB, o cristal vem do crystalCluster230 do mechanics434 */resolve(false);return;
  new THREE.GLTFLoader().load('models/cristal-fenda-rank125.glb',gltf=>{
   const root=gltf.scene;root.traverse(o=>{if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.geometry.userData.shared=true;o.castShadow=false;o.receiveShadow=true;const original=o.material;o.userData.mineral125=o.name==='mineral';o.material=crystalMaterial125(0,o.userData.mineral125);if(Array.isArray(original))original.forEach(m=>m.dispose());else original.dispose()}});
   const box=new THREE.Box3().setFromObject(root),height=box.max.y-box.min.y;

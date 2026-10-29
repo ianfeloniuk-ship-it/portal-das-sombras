@@ -1,3 +1,10 @@
+## v687 (29/10/2026) — revisão dos GLBs do cenário (parte segura)
+- Pedido de Ian: «falta colocar e tirar muitos glbs, como é um cenário próprio».
+- Corrigido 404: `models/m437/pedra-lasca.glb` nunca existiu; pedras soltas usam `tripo-pedras437-lod` e rocha de picareta usa `tripo-rocha-musgo154-lod` (`tools/survival437.js`).
+- Cristal proibido: `cristal-fenda-rank125.glb` não é mais baixado (`tools/crystals125.js`) e foi apagado; `mechanics434` não volta mais ao cristal desenhado antigo em erro de rede.
+- Apagados: `tripo-rochedo154(.glb/-lod)` (era o elmo do Metamorfo, sem uso desde v513) e a licença do cristal.
+- Lista completa tirar/trocar/faltar no Drive (Primeva — Revisão de GLBs 29-10). Teste: jogo novo no navegador, sem 404 novo.
+
 ## v684 (29/10/2026) — Controles sem "como no Skyrim"
 - Continuação da v683 (identidade própria do Primeva): a linha da tela de controles agora diz só "Mouse". Varredura: nenhum outro texto visível cita Skyrim, Solo Leveling ou Eco (os restantes são comentários de código).
 
