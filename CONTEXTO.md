@@ -1,3 +1,12 @@
+## v682 (29/10/2026) — Doenças: contágio e estágios
+- Pedido de Ian: «Contágio e estágios» (passo 1 do documento "Primeva — Doença e Transformação", aprovado).
+- `tools/doenca681.js` (carrega depois de `corpo659.js`), ligado em `corpo659.js` no golpe que fere, na hora do jogo e na ficha Status → Corpo. Substitui a doença simples da v659 (Vampirismo/Licantropia virando mutação); save antigo com doença incubando é convertido.
+- Pegar: só golpe que abre ferida de grau 2+. Sangue Antigo (vampiro despertado) 1 em 10; Maldição da Lua (lobisomem, só de noite) 1 em 8; Praga do Túmulo (draugr) 1 em 12.
+- Incubação: Sangue 3 dias do jogo, Túmulo 2 dias, Lua até a próxima lua cheia (a cada 8 dias do jogo). Cura barata nesse tempo: Álcool Forte ou o médico (já existiam). Primeiro sinal no aviso.
+- Estágios: vampiro 1 Saciado → 4 Sangue à tona pelo tempo sem beber (1 dia cada); sol de dia ao ar livre tira 5/10/15/15 de vida por segundo. Draugr 1 Frio → 2 Pele cinza (3 dias sem Carne Crua, −20% de velocidade) → 3 Túmulo (6 dias); comer Carne Crua volta ao 1. Lobisomem sem estágios; a ficha mostra a próxima lua cheia.
+- Ainda não: beber sangue, tecla da forma, lua cheia forçando a fera, Raiva, Grito do Túmulo, bônus de dano à noite, crime, curas pesadas.
+- Teste (`tools/test-doenca681.cjs`): 12000 golpes de draugr → 1026 contágios; grau 1 nunca passa; lobisomem de dia nunca passa; incubação, estágios, sol, velocidade, carne crua e linhas da ficha conferidos; sem erros de página.
+
 ## v681 (29/10/2026) — Gemas pelo Sistema de Mana v4 (corrige a v679)
 - Ian: «vc me deu números que não são do pdf aprovado por mim… usa o v4». Saiu tudo que a v679 inventou: 3 engastes à parte, gema enchendo ao abater, dobro para o mago, gema de mana gasta antes da barra, presente de gema.
 - `tools/mana642.js` (v4 seção 7 e 6): gema da coroa = base da raridade × fator do rank (Comum F 20, Raro F 30; antes ignorava o rank) e Dorian vende gemas do seu rank; **Carregar acessório**: ao lado de «Extrair», o núcleo enche os acessórios direto, sem passar pela barra, com o aproveitamento, a fadiga, o erro e o Treino da extração. Gema de vida não entra na conta da mana. A barra em 0 continua puxando dos acessórios ao lançar (v642).

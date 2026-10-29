@@ -128,10 +128,7 @@
     p.hp = hp;
     const g = gradeOf(c, k);
     if (t === 'mord' && g >= 2 && !p.inf && Math.random() < .2) { p.inf = true; toast('<b>' + CHUNK + '</b> A mordida no ' + P.n.toLowerCase() + ' infeccionou. Álcool Forte limpa.', 4500); }
-    if (/Vampir|Lobisomem/.test(atkName(e)) && !c.disease && Math.random() < .1) {
-      c.disease = { k: /Vampir/.test(atkName(e)) ? 'vampirismo' : 'licantropia', until: c.hh + 72 };
-      toast('<b>' + CHUNK + '</b> Você pegou ' + (c.disease.k === 'vampirismo' ? 'Vampirismo' : 'Licantropia') + '. Em 3 dias do jogo vira mutação. Álcool Forte ou o médico curam antes.', 7000);
-    }
+    try { if (window.Doenca681) Doenca681.rolar(c, e, g, atkName(e)); } catch (_) { } /* v681: contágio pelas regras do documento Doença e Transformação */
     if (k === 'cab' && g >= 2 && before < 2) blur(5);
     if (g === 3 && !p.warn && P.limb) { p.warn = true; toast('<b>' + CHUNK + '</b> ' + P.n + ' em ferida grave. Um golpe forte de elite pode arrancar a ' + P.end + '.', 4500); }
     if (g >= 2 && before < 2) hudDirty = true;
@@ -277,7 +274,7 @@
     else if (id === 'alcool_forte') {
       let inf = 0; for (const k in c.p) if (c.p[k].inf) { c.p[k].inf = false; inf++; }
       n = treat(['mord']) + inf;
-      if (c.disease) { msg = 'O álcool queimou a doença antes de virar mutação.'; c.disease = null; n++; }
+      if (c.disease) { msg = 'O álcool queimou a doença antes de ela tomar conta.'; c.disease = null; n++; }
       else msg = n ? 'Álcool na ferida: infecção limpa.' : 'Nenhuma infecção para limpar.';
     }
     if (!n) { toast('<b>' + CHUNK + '</b> ' + msg, 3000); return false; }
@@ -386,10 +383,7 @@
       if (ok) { p.hp = pmax(k); p.tr = 0; p.inf = false; p.warn = false; p.wash = true; hudDirty = true; toast('<b>' + CHUNK + '</b> ' + PARTS[k].n + ' curou' + (p.scar && g === 3 ? ', mas ficou a cicatriz.' : '.'), 3500); }
     }
     for (const f in c.genes) { const g = c.genes[f]; if (g.until && c.hh >= g.until) { delete c.genes[f]; toast('<b>' + CHUNK + '</b> O mutagênico de ' + (FAM[f] ? FAM[f].n : f) + ' passou.', 4000); hudDirty = true; } }
-    if (c.disease && c.hh >= c.disease.until) {
-      const k = c.disease.k; c.disease = null; c.genes[k] = { f: 'maior', at: c.hh, until: 0, forced: true };
-      toast('<b>' + CHUNK + '</b> A doença tomou conta: ' + (k === 'vampirismo' ? 'Vampirismo' : 'Licantropia') + ' virou mutação no seu corpo.', 7000);
-    }
+    try { if (window.Doenca681) Doenca681.hora(c); } catch (_) { } /* v681: incubação e estágios */
     startRegrow(c);
   }
   function regrown(c, k) {
@@ -476,6 +470,7 @@
     const pen = armPen(c), lp = legPen(c);
     if (pen || lp) h += R('Perdas agora', (pen ? '−' + pen + '% de dano' : '') + (pen && lp ? ' · ' : '') + (lp ? '−' + lp + '% de velocidade' : '') + (c.p.bd.g >= 4 && c.swap && c.swap <= 20 ? ' · Treino da mão esquerda ' + (c.swap - 1) + '/20' : ''), '');
     for (const f in c.genes) { const g = c.genes[f]; const name = FAM[f] ? 'Mutagênico ' + FORCE[g.f].n + ' de ' + FAM[f].n : (f === 'vampirismo' ? 'Vampirismo' : 'Licantropia'); h += R('<b>' + esc(name) + '</b>', esc((g.until ? 'passa em ' + hrs(g.until - c.hh) : 'para sempre') + (FAM[f] ? ' · ' + FAM[f].sinal : ' · efeitos ainda em definição')), ''); }
+    try { if (window.Doenca681) h += Doenca681.ficha(c, R, esc); } catch (_) { }
     h += R('Sangue', c.lowGore ? 'Menos sangue: coto enfaixado.' : 'Coto e sangue à mostra.', B(c.lowGore ? 'Mostrar sangue' : 'Menos sangue', 'corpo659gore', c.lowGore ? '0' : '1'));
     return h;
   }
