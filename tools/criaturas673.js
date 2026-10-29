@@ -7,7 +7,7 @@
 (function(global){
 'use strict';
 const T=global.THREE,W=global.Warrior127;if(!T||!T.GLTFLoader||!W||typeof KINDS==='undefined'||typeof makeChibi!=='function')return;
-const V='676';
+const V='680';
 const DEF={
   lobisomem:{file:'models/lobisomem673.glb',bank:'lobo',bankFile:'models/anim-lobisomem673.glb',h:2.6,bio:['floresta','neve'],night:true,from:['lobo'],chance:.2,max:2,
     clips:{atk:['garra','soco'],dead:'morte',hit:'soco',roar:'rugido'},

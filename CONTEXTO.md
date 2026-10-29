@@ -1,3 +1,10 @@
+## v680 (29/10/2026) — Asas do vampiro com ossos próprios
+- Pedido de Ian: as asas do vampiro seguiam o braço. Causa: o rig automático tomou a asa pelo braço (antebraço e mão dentro da asa); o braço de verdade só ia junto de longe.
+- `tools/blender482/asas678.py` (passo extra sobre um GLB já rigado): separa braço (para a frente) e asa (para trás), muda cotovelo e pulso para o braço de verdade, cria 4 ossos por asa (`asa_l_0..3`, `asa_r_0..3`, presos no Spine2) e pesa a asa neles; a ponta de baixo da asa (abaixo do quadril) também sai do antebraço. Aplicado em `models/criaturas675/vampiro_despertado_masculino.glb`.
+- `tools/asas678.js`: as asas se mexem sozinhas — paradas meio dobradas atrás das costas e respirando, fechadas na corrida, abrem e batem no golpe. Vale para qualquer modelo com esses ossos (monstro e jogador transformado).
+- A vampira desperta não mudou: nela a asa nasce do próprio braço (morcego), não há braço separado.
+- Teste: quadros do golpe em cena isolada (frente e lado), sem riscos esticados; braços golpeiam livres e a asa não segue mais o braço.
+
 ## v679 (29/10/2026) — Gemas de mana e de vida
 - Pedido de Ian: «tem que implementar as gemas de mana… senão jogar de mago é muito merda» e a gema de vida dos golpes de sangue («gasta primeiro a gema»). Base: adendo 12 do Roteiro (versão final 2) e Sistema de Mana v4.
 - `tools/gemas679.js` (`Gemas679`): 3 engastes de gema (save `run.gem679`). Todo personagem ganha 1 Gema de Mana Comum do seu rank. Capacidade = base da raridade × fator do rank × 3 (Comum F = 60). Dorian vende gemas de mana e de vida (Comum, Rara, Épica do seu rank; preço = capacidade × 4); na bolsa dá para vender por metade numa cidade.
