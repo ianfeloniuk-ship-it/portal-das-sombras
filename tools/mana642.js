@@ -88,9 +88,10 @@
     return h;
   }
   function accCap(k) { const a = R().acc642[k]; if (!a) return 0; const s = SLOTS.find(s => s[0] === k); return RBASE[a.rar] * FR[a.r] * (s ? s[2] : 1); }
-  function gemCap(k) { const a = R().acc642[k]; return a ? RBASE[a.rar] : 0; }
+  function gemCap(k) { const a = R().acc642[k]; return a ? RBASE[a.rar] * FR[a.r | 0] : 0; }
+  const isLife = (k) => { const a = R().acc642[k]; return !!(a && a.t === 'vida'); };
   function capOf(k) { return k[0] === 'g' ? gemCap(k) : accCap(k); }
-  function allKeys() { return SLOTS.map(s => s[0]).concat(R().acc642.c ? GEMS : []); }
+  function allKeys() { return SLOTS.map(s => s[0]).concat(R().acc642.c ? GEMS.filter(k => !isLife(k)) : []); }
   function accTotals() { let s = 0, c = 0; for (const k of allKeys()) { const a = R().acc642[k]; if (a) { s += a.m | 0; c += capOf(k); } } return { s, c }; }
   function accFree() { const t = accTotals(); return t.c - t.s; }
   function accPut(n) { // enche acessórios (menor capacidade primeiro); devolve o que coube
@@ -136,19 +137,19 @@
         return Math.max(1, Math.min(90, e));
   }
   function yieldPct() { let y = grau()[5] + (isMage() ? 10 : 0); try { y += Math.min(10, Math.floor(cons('alq') / 5)); } catch (_) { } return Math.min(100, y); }
-  function canExtract(i) {
+  function canExtract(i, acc) {
     const r = R(), c = r.nuc642[i], g = grau(), m = ensure(); if (!c) return 'Núcleo inexistente.';
     if (c.r > g[1]) return 'Seu grau só extrai núcleos até o rank ' + gid(g[1]) + '.';
     if (m.hh - m.last < 1) return 'Fadiga: espere ' + Math.ceil((1 - (m.hh - m.last)) * HOUR) + ' s (1 hora do jogo).';
     if (c.m <= 0) return 'Núcleo vazio.';
-    if (Math.floor(player.maxmp - player.mp) + accFree() <= 0) return 'Sem espaço: barra de mana e acessórios cheios.';
+    if (acc ? accFree() <= 0 : Math.floor(player.maxmp - player.mp) + accFree() <= 0) return acc ? 'Sem espaço: acessórios cheios.' : 'Sem espaço: barra de mana e acessórios cheios.';
     if (typeof enemies !== 'undefined' && enemies.some(e => !e.dead && !e.ally && !e.statue && e.aggro && Math.hypot(e.x - player.x, e.z - player.z) < 25)) return 'Não dá para extrair em combate.';
     if (hold) return 'Você já está extraindo.';
     return '';
   }
-  function startExtract(i) {
-    const why = canExtract(i); if (why) { toast('<b>[EXTRAÇÃO]</b> ' + why); return false; }
-    const g = grau(); hold = { i, t: 0, T: g[6], hp: player.hp, core: R().nuc642[i] };
+  function startExtract(i, acc) {
+    const why = canExtract(i, acc); if (why) { toast('<b>[EXTRAÇÃO]</b> ' + why); return false; }
+    const g = grau(); hold = { i, t: 0, T: g[6], hp: player.hp, core: R().nuc642[i], acc: !!acc };
     ensureBar(); toast('<b>[EXTRAÇÃO]</b> Extraindo por ' + g[6] + ' s. Qualquer dano cancela.'); return true;
   }
   function ensureBar() {
@@ -165,7 +166,7 @@
   }
   function cancel(msg) { hold = null; if (bar) bar.style.display = 'none'; if (msg) toast('<b>[EXTRAÇÃO]</b> ' + msg); }
   function finish(forceRoll) {
-    const r = R(), m = ensure(), c = hold ? hold.core : null; cancel();
+    const r = R(), m = ensure(), c = hold ? hold.core : null, toAcc = !!(hold && hold.acc); cancel();
     if (!c || r.nuc642.indexOf(c) < 0) return;
     m.last = m.hh;
     const err = errChance(c), roll = forceRoll != null ? forceRoll : Math.random() * 100;
@@ -176,10 +177,10 @@
     }
     const g = grau(), y = yieldPct();
     let take = Math.min(g[4], c.m), gain = Math.floor(take * y / 100);
-    const room = Math.floor(player.maxmp - player.mp) + accFree();
+    const room = toAcc ? accFree() : Math.floor(player.maxmp - player.mp) + accFree();
     if (gain > room) { gain = room; take = Math.min(take, Math.ceil(gain * 100 / y)); }
-    const put = addMana(gain); c.m -= take; c.c = (c.c | 0) + 1;
-    let msg = '<b>[EXTRAÇÃO]</b> Saíram ' + take + ' de mana do núcleo e entraram ' + put + '.';
+    const put = toAcc ? accPut(gain) : addMana(gain); c.m -= take; c.c = (c.c | 0) + 1;
+    let msg = '<b>[EXTRAÇÃO]</b> Saíram ' + take + ' de mana do núcleo e entraram ' + put + (toAcc ? ' nos acessórios.' : '.');
     if (c.m <= 0) { r.nuc642.splice(r.nuc642.indexOf(c), 1); r.res.core[c.r] = Math.max(0, r.res.core[c.r] - 1); msg += ' O núcleo esvaziou.'; }
     if (c.r >= g[1] - 1 && g[3] > 0) { m.t = Math.min(g[3], (m.t | 0) + 1); msg += ' Treino ' + m.t + '/' + g[3] + '.'; }
     toast(msg, 6000); try { sfx('coin'); } catch (_) { }
@@ -209,7 +210,7 @@
     const r = R(), m = ensure(); let h = '';
     r.nuc642.map((c, i) => [c, i]).sort((a, b) => b[0].r - a[0].r || b[0].m - a[0].m).slice(0, 14).forEach(([c, i]) => {
       const ok = !canExtract(i);
-      h += row('Núcleo ' + gid(c.r) + ' · ' + KIND_N[c.k] + (c.th ? ' (' + THREAT184[c.th].n + ')' : ''), 'Mana no núcleo: ' + c.m + (c.M !== c.m ? ' de ' + c.M : '') + ' · Erro: ' + errChance(c) + '%' + (c.r > grau()[1] ? ' · rank acima do seu grau' : ''), btn('Extrair', 'm642x', i, ok));
+      h += row('Núcleo ' + gid(c.r) + ' · ' + KIND_N[c.k] + (c.th ? ' (' + THREAT184[c.th].n + ')' : ''), 'Mana no núcleo: ' + c.m + (c.M !== c.m ? ' de ' + c.M : '') + ' · Erro: ' + errChance(c) + '%' + (c.r > grau()[1] ? ' · rank acima do seu grau' : ''), btn('Extrair', 'm642x', i, ok) + btn('Carregar acessório', 'm642c', i, !canExtract(i, true)));
     });
     return h || '<div class="sysline" style="font-size:12px">Você não tem núcleos. Criaturas deixam núcleos ao cair.</div>';
   }
@@ -219,7 +220,7 @@
     h += tipRow('Regeneração de mana', Math.round(perHour()) + ' por hora do jogo', 'A mana volta devagar: 1 por hora do jogo (1 hora = 2 min 30 s). Parado ou perto da fogueira: 2. Dormir na pousada: 32 por noite. Dentro das Fendas conta o relógio normal. +1 a cada 100 níveis, +1 a cada 25 pontos de Restauração, +2 para classes de mago e mais um pouco com Espírito.', '');
     h += tipRow('Extração: grau ' + m.g + ' · ' + g[0], 'Núcleos até ' + gid(g[1]) + ' · porção ' + g[4] + ' · aproveitamento ' + yieldPct() + '% · ' + g[6] + ' s' + (g[3] ? ' · Treino ' + m.t + '/' + g[3] : ''), 'Cada extração tira até ' + g[4] + ' de mana do núcleo; ' + yieldPct() + '% entram em você. Erro quebra o núcleo e cada extração do mesmo núcleo soma 10 de erro. Entre uma extração e outra passa 1 hora do jogo' + (fat ? ' (faltam ' + fat + ' s)' : '') + '. Qualquer dano cancela. O Treino sobe só com núcleos do rank do seu grau ou de 1 abaixo.', '');
     if (nx) h += row('Mestre de Extração (cidades)', 'Grau ' + nx[0] + ': Treino cheio, nível ' + nx[2] + ', ' + fmt(nx[7]) + ' de ouro.', btn('Subir de grau', 'm642up', 0, true));
-    h += tipRow('Acessórios', t.s + ' de ' + t.c + ' de mana guardada', 'Anéis, brincos, braceletes, colar e coroa guardam mana. Com a barra cheia a mana nova vai para eles; com a barra vazia o jogo puxa deles ao lançar.', '');
+    h += tipRow('Acessórios', t.s + ' de ' + t.c + ' de mana guardada', 'Anéis, brincos, braceletes, colar, coroa e as gemas de mana da coroa guardam mana. Com a barra cheia a mana nova vai para eles; com a barra vazia o jogo puxa deles ao lançar. Carregar acessório: o núcleo enche os acessórios direto, sem passar pela barra.', '');
     for (let k = 0; k < 9; k++) if (r.res.core[k] >= 3) h += row('Refinar núcleos ' + gid(k), '3 núcleos ' + gid(k) + ' viram 1 núcleo ' + gid(k + 1) + '. Só numa cidade.', btn('Refinar', 'm642ref', k, inCityNow()));
     h += coreRows();
     return h;
@@ -230,10 +231,10 @@
     const keys = SLOTS.map(s => s[0]).concat(r.acc642.c ? GEMS : []);
     for (const k of keys) {
       const a = r.acc642[k], s = SLOTS.find(s => s[0] === k), nm = s ? s[1] : 'Gema ' + (+k[1] + 1);
-      const desc = a ? RAR[a.rar] + ' ' + gid(a.r) + ' · ' + (a.m | 0) + '/' + capOf(k) + ' de mana' : 'Vazio';
+      const desc = a ? (a.t === 'vida' ? 'Gema de vida ' : '') + RAR[a.rar] + ' ' + gid(a.r) + ' · ' + (a.m | 0) + '/' + capOf(k) + (a.t === 'vida' ? ' de vida' : ' de mana') : 'Vazio';
       let b = '';
       if (shop) for (let q = 0; q < 3; q++) {
-        const cap = k[0] === 'g' ? RBASE[q] : RBASE[q] * FR[pr] * s[2], price = cap * 4, cur = a ? capOf(k) : 0;
+        const cap = k[0] === 'g' ? RBASE[q] * FR[pr] : RBASE[q] * FR[pr] * s[2], price = cap * 4, cur = a && a.t !== 'vida' ? capOf(k) : 0;
         b += btn(RAR[q] + ' · ' + fmt(price), 'm642buy', k + ':' + q, r.gold >= price && cap > cur);
       }
       h += row(nm, desc, b);
@@ -243,16 +244,17 @@
   function action(a, v) {
     const r = R(); if (!r) return;
     if (a === 'm642x') { if (startExtract(+v)) { try { closeModal(); } catch (_) { } return 'close'; } return 'close0'; }
+    if (a === 'm642c') { if (startExtract(+v, true)) { try { closeModal(); } catch (_) { } return 'close'; } return 'close0'; }
     if (a === 'm642ref') { refine(+v); try { statusView(); } catch (_) { } return 'close0'; }
     if (a === 'm642up') { const e = levelUp(); if (e) toast('<b>[EXTRAÇÃO]</b> ' + e); try { statusView(); } catch (_) { } return 'close0'; }
     if (a === 'm642buy') {
       const [k, q] = String(v).split(':'), qi = +q, s = SLOTS.find(s => s[0] === k), pr = Math.min(9, rankOf());
       if (!(s || GEMS.includes(k)) || !(qi >= 0 && qi < 3)) return 'close0';
       if (k[0] === 'g' && !r.acc642.c) return 'close0';
-      const cap = k[0] === 'g' ? RBASE[qi] : RBASE[qi] * FR[pr] * s[2], price = cap * 4, old = r.acc642[k];
-      if (r.gold < price || cap <= (old ? capOf(k) : 0)) return 'close0';
-      r.gold -= price; r.acc642[k] = { r: k[0] === 'g' ? 0 : pr, rar: qi, m: old ? Math.min(old.m | 0, cap) : 0 };
-      toast('<b>[MERCADO]</b> Você comprou ' + (s ? s[1] : 'uma gema') + ' ' + RAR[qi] + ' (guarda ' + cap + ' de mana).'); try { saveRun(); mktView(); } catch (_) { } return 'close0';
+      const cap = k[0] === 'g' ? RBASE[qi] * FR[pr] : RBASE[qi] * FR[pr] * s[2], price = cap * 4, old = r.acc642[k], oldMana = old && old.t !== 'vida';
+      if (r.gold < price || cap <= (oldMana ? capOf(k) : 0)) return 'close0';
+      r.gold -= price; r.acc642[k] = { r: pr, rar: qi, m: oldMana ? Math.min(old.m | 0, cap) : 0 };
+      toast('<b>[MERCADO]</b> Você comprou ' + (s ? s[1] : 'uma gema de mana') + ' ' + RAR[qi] + ' (guarda ' + cap + ' de mana).'); try { saveRun(); mktView(); } catch (_) { } return 'close0';
     }
   }
   function install() {
@@ -291,6 +293,6 @@
     clearInterval(eHold.iv); const h = eHold; eHold = null;
     if (!h.done) { try { Loot353.open(h.rc.id); } catch (_) { } }
   }, true);
-  window.Mana642 = { weightKg, isMage, refine, slept, nearFire, install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
+  window.Mana642 = { gemCap, accFree, accPut, RBASE, RAR, GEMS, weightKg, isMage, refine, slept, nearFire, install, ensure, sync, got, drop, coreMana, tick, topUp, addMana, startExtract, finish, canExtract, levelUp, errChance, perHour, accTotals, GRAU, FR, THR, BASE, HOUR, state: () => ({ hold, mana: R()?.mana642 }) , _hold: () => hold, _setHold: (h) => { hold = h; } };
   install();
 })();
