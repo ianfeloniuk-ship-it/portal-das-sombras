@@ -1,3 +1,10 @@
+## v690 (29/10/2026) — Balística real (flechas e projéteis físicos)
+- Pedido de Ian (adendo 14): projétil físico (flecha, virote, adaga, lança e pedra arremessadas) cai pela gravidade (9,8); magia voa reta; sem vento.
+- Flecha do jogador sai a 50 m/s: quase reta perto (cai 21 cm a 10 m), curva longe (5 m a 50 m); tiro para cima vai longe. Voo até 8 s. A flecha aponta para onde voa; se errar, fica cravada no chão por 20 s.
+- Monstro arqueiro compensa a queda na mira (ballisticPitch690). Tudo em src/core/380-acoes.js (BAL690).
+- Falta: força pela puxada do arco e recolher a flecha cravada.
+- Teste: build + core_parts + node ok; simulação da queda; jogo carrega sem erro novo. Não deu para atirar de fato no painel.
+
 ## v689 (29/10/2026) — Continente de forma orgânica (~100 km²)
 - **Pedido de Ian:** o mapa do mundo estava quadrado; quer algo sem forma geométrica, ~100 km², cada ambiente com seu reino.
 - **Costa:** `coast684` em `tools/terrain245.js` (CPU e shader iguais): raio em volta de (600, 0) somado a ondas de 2, 3, 4, 5, 7 e 9 voltas + recortes pequenos. `seaD439` = max(costa, canal de Thalor). Mar em volta inteiro (o norte também; a cordilheira de gelo de Ymiria desce até o mar). A oeste a costa continua a ~4,15 km, colada em Thalor.
