@@ -38,9 +38,9 @@ function demandBreak(t){const d=run.demand;if(d&&d.t===t&&d.got>0){const lost=d.
 function fusionRows(){if(!run.adv)return'';const A=ADV[profile.cls];let h='<div class="sec">FUSÃO SECRETA</div>';
   if(run.fused)return h+row('Classe híbrida: <b>'+A.n+' '+run.fused.tag+'</b>','Habilidade fundida permanente: '+run.fused.n+' (tecla − / botão ★)','');
   const t=Math.min(9,rankOf()),cost=50;
-  if(profile.cls!==7)h+=row('Fundir com as Ecos','Sua classe ganha poder de necromante: invoca 3 soldados mortos · custa 100 minérios '+GR[t].id,btn('Fundir','fuseshadow',0,run.res.cry[t]>=100));
-  else if(run.shadows.length)run.shadows.forEach((r,i)=>{h+=row('Fundir com o eco '+(r.nick||r.n),'Ela vira parte de você e pode ser chamada gigante · custa 100 minérios '+GR[t].id,btn('Fundir','fuseshadow',i,run.res.cry[t]>=100))});
-  if(!run.stolen.length)return h+'<div class="sysline" style="font-size:12px">Roube uma habilidade de guardião para poder fundi-la à sua classe.</div>';run.stolen.forEach((s,i)=>{h+=row('Fundir '+s.n,'Vira permanente e nunca sai da classe · custa '+cost+' minérios '+GR[t].id+' (você tem '+run.res.cry[t]+')',btn('Fundir','fuse',i,run.res.cry[t]>=cost))});return h}
+  if(profile.cls!==7)h+=row('Fundir com os Servos','Sua classe ganha poder de necromante: invoca 3 soldados mortos · custa 100 minérios '+GR[t].id,btn('Fundir','fuseshadow',0,run.res.cry[t]>=100));
+  else if(run.shadows.length)run.shadows.forEach((r,i)=>{h+=row('Fundir com o servo '+(r.nick||r.n),'Ela vira parte de você e pode ser chamada gigante · custa 100 minérios '+GR[t].id,btn('Fundir','fuseshadow',i,run.res.cry[t]>=100))});
+  if(!run.stolen.length)return h+'<div class="sysline" style="font-size:12px">Aprenda um poder de guardião num grimório para poder fundi-lo à sua classe.</div>';run.stolen.forEach((s,i)=>{h+=row('Fundir '+s.n,'Vira permanente e nunca sai da classe · custa '+cost+' minérios '+GR[t].id+' (você tem '+run.res.cry[t]+')',btn('Fundir','fuse',i,run.res.cry[t]>=cost))});return h}
 function fuseTag(n){return /Almas|Sombr|Praga|Ninhada/.test(n)?'Sombrio':/Gelo|Inverno/.test(n)?'Glacial':/Chama|Fúria|Destruição/.test(n)?'Carmesim':/Caos/.test(n)?'do Caos':/Legião|Feras/.test(n)?'Comandante':'Rúnico'}
 /* ações das ideias */
 function extraActions2(a,v){

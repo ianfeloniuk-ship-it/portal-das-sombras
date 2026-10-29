@@ -33,7 +33,7 @@ function pieceFlee250(c,i){const P=profile.piece250=profile.piece250||{};if(P[c.
 function pieceTick250(dt){const P=profile&&profile.piece250;if(!P||!player||L.mode!=='world')return;
  for(const id in P){const p=P[id];const e=enemies.find(x=>x.piece250===id&&!x.dead);const d=Math.hypot(p.x-player.x,p.z-player.z);
   if(e){p.x=e.x;p.z=e.z;if(!e.frag250)pieceAttach250(e,p.i);/* v449 (Ian): se o modelo do Arquiteto ainda não tinha carregado, a peça nascia com o corpo de chefe genérico; tenta de novo */if(e.frag250){e.m.root.children.forEach(c=>{if(c!==e.frag250)c.visible=false});const f=e.frag250;f.rotation.y+=dt*.4;f.position.y=(f.userData.size.y*.5+1.2)+Math.sin(time*1.3)*.4}continue}
-  if(d<170){const nb=spawnBoss(p.x,p.z,9,{n:PIECES222[p.i],types:['seismic','soulrain'],body:0x3a2a55,scale:2.6,skill:S('Eco do Arquiteto','rain',7,40,3,0xb68cff)});
+  if(d<170){const nb=spawnBoss(p.x,p.z,9,{n:PIECES222[p.i],types:['seismic','soulrain'],body:0x3a2a55,scale:2.6,skill:S('Chuva do Arquiteto','rain',7,40,3,0xb68cff)});
    nb.piece250=id;nb.wild=true;nb.world=true;nb.bars=3;nb.hp*=5;nb.maxhp*=5;nb.dmg*=1.25;threatApply184(nb,11);nb.name='[Supremo] '+PIECES222[p.i]+' do Arquiteto';nb.roam={x:p.x,z:p.z};
    pieceAttach250(nb,p.i);
    if(!p.seen){p.seen=1;toast('<b>[ORDEM]</b> Você achou o '+PIECES222[p.i]+' do Arquiteto. Derrote-o para trancá-lo de volta.',6000)}}}}
@@ -119,13 +119,13 @@ function bagView(tab){tab=tab||'itens';if(tab==='char')return openCharacter118()
     h+=row('Status e habilidades','Atributos sobem treinando',unl('status')?btn('Abrir','status',0,true):lockMsg('status'));
     h+=row('Constelações',(run.cpts||0)+' pontos',unl('constel')?btn('Abrir','consv',0):lockMsg('constel'));
     h+=row('Bestiário','Espécies estudadas dão dano extra contra elas'+(touch?'':' (tecla L)'),btn('Abrir','bestv',0));
-    h+=row('Coleção de Ecos','Todos os ecos que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
+    h+=row('Coleção de Servos','Todos os servos que você já ergueu'+(touch?'':' (tecla K)'),btn('Abrir','album',0));
     h+=row('Aparência','Cabelo e roupa',btn('Abrir','look',0));
-    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>treino 10% mais rápido</b> e <b>+2% de XP</b> por reencarnação. Mantém ouro, itens e ecos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
+    h+=row('Reencarnação','Volta ao nível 1. Ganha: +10% no bônus somado, <b>treino 10% mais rápido</b> e <b>+2% de XP</b> por reencarnação. Mantém ouro, itens e servos; zera status, habilidades, constelações e maestria. Próxima exige nível <b>'+(Math.min(777,100*((profile.rebirths||0)+1)))+'</b>.',unl('rebirth')?btn('Reencarnar','rebirth',0,run.level>=Math.min(777,100*((profile.rebirths||0)+1)),'red'):lockMsg('rebirth'))}
   else if(tab==='pow'){const w=run.equip.w;
-    h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Absorva essências de guardiões','');h+=libRows();
+    h+=row('Poderes ativos (1–3)',run.stolen.length?run.stolen.map((s,i)=>(i+1)+' '+s.n).join(' · '):'Aprenda nos grimórios','');h+=libRows();
     h+=row('Habilidade fundida',run.fused?run.fused.n+' ('+run.fused.tag+')':'Aba Classe da Ordem','');
-    h+=row('Ecos',run.shadows.length+' no exército',btn('Exército','army',0));
+    h+=row('Servos',run.shadows.length+' no exército',btn('Exército','army',0));
     h+=row('Arma viva',!unl('living')?lockMsg('living'):w?(w.soul?'<b>'+w.soul+'</b> · ':'')+'nível '+(w.wlv||0)+'/10'+((w.wlv||0)>=10?' · MÁXIMO':' · '+Math.floor(w.wxp||0)+' XP')+' · bônus da arma +'+2*(w.wlv||0)+'%'+(w.rar<2?' · só Épicas ou melhores despertam uma alma':'')+'<br><span style="color:var(--dim)">A arma que você usa ganha XP quando você mata: cada nível acrescenta +2% ao bônus de arma viva (até o 10). No nível 5, armas Épicas+ despertam uma alma que fala com você. Cada arma conserva sua própria experiência ao ser trocada.</span>':'Sem arma','');
     h+=row('Conjunto',!unl('sets')?lockMsg('sets'):(Object.keys(setB()).length?activeSets().map(s=>'<b>'+s.n+'</b>: '+s.d).join('<br>'):'Duas peças do mesmo conjunto ativam o bônus uma vez'),'');
     h+=row('Grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Contrate na Ordem','')}

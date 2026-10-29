@@ -932,7 +932,7 @@
     "trigger": "Alcançar Nível 25",
     "description": "A Lula do Vazio engole a luz e o som antes de atacar. Aldric precisa de uma glândula acústica intacta para estudar como proteger os batedores da cegueira sensorial.",
     "choicesText": "Abater a Lula do Vazio no exato instante em que ela cria a zona de silêncio, usando apenas ataques físicos sem recuar.",
-    "worldConsequence": "Rende o Sino do Eco e uma melhoria nos avisos sonoros de perigo dentro das Fendas."
+    "worldConsequence": "Rende o Sino da Fenda e uma melhoria nos avisos sonoros de perigo dentro das Fendas."
   },
   {
     "id": "primeva_q052",
@@ -1549,7 +1549,7 @@
   {
     "id": "primeva_q103",
     "num": 103,
-    "title": "O Falso Exército de Ecos",
+    "title": "O Falso Exército de Servos",
     "category": "Facção: Rede de Caravanas e Sombras",
     "location": "Fenda de Espelhos em Érebo",
     "actors": "Selene e O Rei Oco (#192)",
@@ -2341,14 +2341,14 @@
   {
     "id": "primeva_q169",
     "num": 169,
-    "title": "Coroa de Ossos: O Eco que Não Queria Partir",
+    "title": "Coroa de Ossos: O Morto que Não Queria Partir",
     "category": "Segundo Despertar & Artefatos (Necromante)",
     "location": "Fenda Vermelha da Cripta Silenciosa",
     "actors": "Guardião do Necromante e Espírito de Soldado Antigo",
     "trigger": "Reunir as 5 peças do conjunto de Necromante ou encontrar o Altar de Ossos",
     "description": "Diante do altar do Primeiro Necromante, o espírito de um guerreiro do primeiro ciclo pede que você não o obrigue a lutar como escravo, mas como companheiro de juramento.",
     "choicesText": "Jurar o Pacto dos Mortos por livre aliança (dividindo 10% da sua mana) e vencer a prova de replicar 2 habilidades da classe em 60 segundos.",
-    "worldConsequence": "Desperta a classe rara **Necromante**, concede a **Coroa de Ossos com Caveira** e dobra para 2 Ecos Especiais quando escolhida como Afinidade Principal."
+    "worldConsequence": "Desperta a classe rara **Necromante**, concede a **Coroa de Ossos com Caveira** e dobra para 2 Servos Especiais quando escolhida como Afinidade Principal."
   },
   {
     "id": "primeva_q170",
@@ -2356,7 +2356,7 @@
     "title": "Diadema do Relógio: O Segundo que Faltou",
     "category": "Segundo Despertar & Artefatos (Mago do Tempo)",
     "location": "Fenda Vermelha do Pêndulo Partido",
-    "actors": "Guardião do Tempo e Eco do Narrador",
+    "actors": "Guardião do Tempo e Voz do Narrador",
     "trigger": "Reunir as 5 peças do conjunto do Tempo ou encontrar o Altar Cronológico",
     "description": "No santuário onde o tempo corre para trás, você vê a cena congelada do momento em que o Narrador hesitou 3 segundos antes da descarga que destruiu seu corpo.",
     "choicesText": "Ativar os pulsos temporais na ordem exata, suportar o colapso do relógio e vencer o Guardião do Tempo.",
@@ -3403,7 +3403,7 @@
     "actors": "Marinheiro Misterioso 'Velho Sal'",
     "trigger": "Aceitar beber três canecas de Hidromel da Fenda na pousada de Thalor",
     "description": "Você aceita uma aposta de bebida com um velho marinheiro risonho em Thalor. A tela escurece e você acorda no dia seguinte no alto da neve de Ymiria, sem botas, com uma Alpaca Real (#028) amarrada ao poste, um recibo de casamento com uma estátua e suas botas penhoradas num ferreiro anão.",
-    "choicesText": "Rastrear passo a passo a noite perdida: devolver a Alpaca Real aos Pastores do Velo Dourado, recuperar suas botas no ferreiro e descobrir que o 'Velho Sal' era um Eco brincalhão da Primeira Era.",
+    "choicesText": "Rastrear passo a passo a noite perdida: devolver a Alpaca Real aos Pastores do Velo Dourado, recuperar suas botas no ferreiro e descobrir que o 'Velho Sal' era um espírito brincalhão da Primeira Era.",
     "worldConsequence": "Recupera suas botas aprimoradas em +2 níveis gratuitamente e ganha o Cajado da Ressaca Rúnica."
   },
   {
@@ -3798,7 +3798,7 @@
     "location": "Local de uma Queda Anterior no Mundo",
     "actors": "Voz do Narrador",
     "trigger": "Retornar ao ponto onde um Viajante caiu em combate",
-    "description": "Em Primeva, a terra guarda a marca de quem tombou lutando. Uma espada fincada na pedra guarda 20% do ouro perdido e um eco de memória.",
+    "description": "Em Primeva, a terra guarda a marca de quem tombou lutando. Uma espada fincada na pedra guarda 20% do ouro perdido e uma lembrança.",
     "choicesText": "Recuperar o espólio do túmulo e vencer o monstro elite que rondava o local da queda.",
     "worldConsequence": "Recupera o ouro acrescido de um bônus de Vontade ('Quem levanta depois da queda conhece o peso do chão')."
   },
@@ -3913,13 +3913,13 @@
   {
     "id": "primeva_q300",
     "num": 300,
-    "title": "Ecos que Nunca Terminam: O Pacto do Motor Vivo",
+    "title": "Histórias que Nunca Terminam: O Pacto do Motor Vivo",
     "category": "Ecologia & Terras Despertas (Transição para o Motor Infinito)",
     "location": "Mesa de Mapas de Lyra e Quadro das 6 Capitais",
     "actors": "Chanceler Lyra, Sábio Aldric e o Narrador",
     "trigger": "Disponível a qualquer momento (e consagrado ao concluir a 300ª missão)",
     "description": "Lyra abre um novo livro em branco sobre a mesa de carvalho: mesmo com as grandes crônicas registradas, as Terras Despertas continuam respirando. A cada dia que passa no relógio, a cada estação que vira e a cada escolha que você faz, novas histórias nascem nas estradas, nas vilas, nos clãs e nas Fendas.",
-    "choicesText": "Ativar o **Motor de Ecos e Contratos Vivos** no Livro de Lyra para receber missões procedurais infinitas moldadas pelo estado real do seu mundo.",
+    "choicesText": "Ativar o **Motor de Histórias e Contratos Vivos** no Livro de Lyra para receber missões procedurais infinitas moldadas pelo estado real do seu mundo.",
     "worldConsequence": "Conecta permanentemente as 300 missões fixas ao **Motor Procedural de Missões Infinitas (`Radiant Primeva Engine`)**, garantindo que Primeva nunca fique sem histórias inéditas para viver."
   }
 ];

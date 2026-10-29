@@ -5,7 +5,7 @@
 (function(){
 const NEW={
  lobofendido:{base:'lobo',n:'Lobo Fendido',h:1.5,a:{Idle:'Idle',Running_A:'Gallop',Death_A:'Death',ATK:'Attack',Hit:'Idle_HitReact_Left'},mul:[1.7,1.4],rk:1,
-  lore:['Lobo tocado pela Fenda: cristais roxos brotam da coluna e os olhos queimam como brasas frias.','Caça o eco de mana que fica nos viajantes depois de atravessar um portal.','Uiva antes de atacar; o uivo faz os cristais de toda a matilha pulsarem juntos.']},
+  lore:['Lobo tocado pela Fenda: cristais roxos brotam da coluna e os olhos queimam como brasas frias.','Caça o rastro de mana que fica nos viajantes depois de atravessar um portal.','Uiva antes de atacar; o uivo faz os cristais de toda a matilha pulsarem juntos.']},
  tecela:{base:'aranha',n:'Tecelã de Vidro',h:.95,a:{Idle:'Spider_Idle',Running_A:'Spider_Walk',Death_A:'Spider_Death',ATK:'Spider_Attack'},mul:[1.8,1.5],rk:2,
   lore:['Aranha cujo abdômen virou um aglomerado de cristal translúcido, com uma luz pulsando dentro.','Suga a mana das criaturas presas na teia e guarda dentro do próprio corpo.','Tece fios de luz entre os pilares de cristal; quem toca um fio é sentido por ela a quilômetros.']},
  colosso:{base:'gigante',n:'Colosso Rachado',h:4.4,a:{Idle:'Idle',Running_A:'Run',Death_A:'Death',ATK:'Attack',Hit:'HitRecieve'},mul:[2.2,1.5],rk:4,

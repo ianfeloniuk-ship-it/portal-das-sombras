@@ -23,7 +23,7 @@ window.Lux267=(()=>{
   {k:'vento',n:'Pena do Vento Norte',d:'+5% de velocidade',b:{spd:.05}},
   {k:'mare',n:'Pérola da Maré',d:'+12% de mana máxima',b:{mp:.12}},
   {k:'bastiao',n:'Pedra do Bastião',d:'+10% de escudo',b:{sh:.10}},
-  {k:'eco',n:'Sino do Eco',d:'+4% de defesa',b:{def:.04}}];
+  {k:'eco',n:'Sino da Fenda',d:'+4% de defesa',b:{def:.04}}];
  const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h};
  const relicOf=c=>RELICS[hash(c.id)%RELICS.length];
  const relicPrice=()=>price(6*H());

@@ -1,8 +1,8 @@
 /* ===== MORADORES E FESTIVAIS ===== */
-const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu um eco andando sozinha.'];
+const CLINES=['Bom dia, caçador!','Dizem que a muralha brilha à noite agora.','Meu filho quer ser caçador. Eu não deixo.','O preço do peixe subiu de novo.','Você é aquele que subiu a torre?','Cuidado com os portais vermelhos.','A pousada ficou mais confortável depois da reforma.','Ouvi dizer que um dragão foi visto perto daqui.','À noite eu fico em casa. Os monstros ficam mais fortes.','Minha avó jura que viu um morto andando sozinho.'];
 const CNAMES=['Aldo','Brígida','Cedric','Elsbeth','Godwin','Flora','Gerold','Helena','Ivo','Matilde','Leofric','Maud','Nesta','Otto','Petronela','Roderic'];/* v486: nomes medievais (antes Enzo, Duda, Pietra...) */
 function festival(){const d=new Date(),m=d.getMonth()+1,dd=d.getDate(),w=d.getDay();
-  if((m===10&&dd>=25)||(m===11&&dd<=2))return{n:'Noite dos Ecos',d:'XP +50% à noite',xp:isNight()?.5:0,shop:0,line:'Na Noite dos Ecos os portais ficam inquietos...'};
+  if((m===10&&dd>=25)||(m===11&&dd<=2))return{n:'Noite das Almas',d:'XP +50% à noite',xp:isNight()?.5:0,shop:0,line:'Na Noite das Almas os portais ficam inquietos...'};
   if((m===12&&dd>=20)||(m===1&&dd<=6))return{n:'Festival de Inverno',d:'lojas 20% mais baratas e XP +25%',xp:.25,shop:.2,line:'Feliz Festival de Inverno!'};
   if(w===0||w===6)return{n:'Feira de Fim de Semana',d:'lojas 15% mais baratas e estandartes na praça',xp:0,shop:.15,line:'Aproveita a feira! Tudo mais barato hoje.'};return null}
 const CRIT=['gato','galinha','pombo'],CRIT_N={gato:'Miau.',galinha:'Có-có-có!',pombo:'Pruu.'};

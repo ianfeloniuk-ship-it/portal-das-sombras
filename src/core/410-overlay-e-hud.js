@@ -2,7 +2,7 @@
 const v3=new THREE.Vector3();
 function proj(x,y,z){v3.set(x,y+terrH(x,z),z).project(camera);return{x:(v3.x+1)/2*W,y:(1-v3.y)/2*H,ok:v3.z<1&&v3.x>-1.2&&v3.x<1.2&&v3.y>-1.2&&v3.y<1.2}}
 function bar(x,y,w,f,col,name,ncol){oc.fillStyle='rgba(0,0,0,.65)';oc.fillRect(x-w/2-1,y-1,w+2,6);oc.fillStyle=col;oc.fillRect(x-w/2,y,w*clamp(f,0,1),4);if(name){oc.font='700 10px "Chakra Petch",sans-serif';oc.fillStyle=ncol||'#e8f6ff';oc.fillText(name,x,y-4)}}
-function combatStatusList(e){const s=[];if(e.stun>0)s.push(['ATORD.','#ffd66e']);if(e.kitRoot111>time)s.push(['PRESO','#8af0c5']);if(e.slow>0)s.push(['LENTO','#94dfff']);const d=e.basicDots||{};if(d.burn?.t>0||d.kitFire111?.t>0)s.push(['QUEIMA','#ff9b55']);if(d.bleed?.t>0)s.push(['SANGRA','#ff7085']);if(d.venom?.t>0)s.push(['VENENO','#a8e879']);if(d.reprise?.t>0||d.rune?.t>0)s.push(['ECO','#c7a1ff']);if(e.echoMarkUntil>time)s.push(['MARCADO','#bd8bff']);return s}
+function combatStatusList(e){const s=[];if(e.stun>0)s.push(['ATORD.','#ffd66e']);if(e.kitRoot111>time)s.push(['PRESO','#8af0c5']);if(e.slow>0)s.push(['LENTO','#94dfff']);const d=e.basicDots||{};if(d.burn?.t>0||d.kitFire111?.t>0)s.push(['QUEIMA','#ff9b55']);if(d.bleed?.t>0)s.push(['SANGRA','#ff7085']);if(d.venom?.t>0)s.push(['VENENO','#a8e879']);if(d.reprise?.t>0||d.rune?.t>0)s.push(['REPETE','#c7a1ff']);if(e.echoMarkUntil>time)s.push(['MARCADO','#bd8bff']);return s}
 function playerStatusList(p){const s=[];if(window.Cogu348&&Cogu348.asleep(p))s.push(['SONO','#bed3ff']);if(p.slowT>0)s.push(['LENTO','#94dfff']);if(p.bleedT>0)s.push(['SANGRA','#ff7085']);if(p.stunT>0||p.stun>0)s.push(['ATORD.','#ffd66e']);if(p.kitGuard111?.until>time||p.guard>0)s.push(['DEFESA','#8bdcff']);if(p.buff>0||p.kitBuff111?.until>time)s.push(['FORÇA','#ffd66e']);if(p.stealth>0||p.kitStealth111)s.push(['FURT.','#c7a1ff']);if(p.venomUntil>time)s.push(['VENENO','#a8e879']);return s}
 function drawCombatChips(items,x,y){if(!items.length)return;const shown=items.slice(0,4),extra=items.length-shown.length;oc.save();oc.font='700 9px "Chakra Petch",sans-serif';oc.textBaseline='middle';const widths=shown.map(([t])=>Math.ceil(oc.measureText(t).width)+8);if(extra)widths.push(18);const total=widths.reduce((a,b)=>a+b,0)+(widths.length-1)*3;let left=x-total/2;for(let i=0;i<widths.length;i++){const w=widths[i],label=i<shown.length?shown[i][0]:'+'+extra,col=i<shown.length?shown[i][1]:'#dbe8f2';oc.fillStyle='rgba(8,13,22,.88)';oc.fillRect(left,y-6,w,12);oc.strokeStyle=col;oc.lineWidth=1;oc.strokeRect(left+.5,y-5.5,w-1,11);oc.fillStyle=col;oc.textAlign='center';oc.fillText(label,left+w/2,y);left+=w+3}oc.restore()}
 function drawOverlay(){
@@ -69,7 +69,7 @@ function missionPanelText(){const rows=[],safe=t=>String(t).replace(/[&<>"']/g,c
   if(run.daily&&!run.daily.done){const n=DAILY.filter(q=>(run.daily.p[q[0]]||0)>=q[2]).length;add('Missão diária',n+' de '+DAILY.length+' objetivos concluídos. '+questXpText262(run.daily,'daily')+'. Veja os detalhes no Diário.')}
   if(done)add(done===1?'1 missão concluída':done+' missões concluídas','Fale com Lyra, na Ordem da Fenda, para receber '+(done===1?'a recompensa.':'as recompensas.'));
   else if(q&&(!track||track.n!==q.d))add(q.d,'Progresso: '+q.got+' de '+q.n+'.');
-  const count=allies.filter(a=>a.shadow&&!a.dead).length;if(count)add(count===1?'1 eco ativo':count+' ecos ativos','Ordem: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))?.[1]||'Atacar')+(touch?'.':' (tecla '+keyLabel(keyOf('orders'))+').'));
+  const count=allies.filter(a=>a.shadow&&!a.dead).length;if(count)add(count===1?'1 servo ativo':count+' servos ativos','Ordem: '+(ORDERS.find(o=>o[0]===(run.order||'atacar'))?.[1]||'Atacar')+(touch?'.':' (tecla '+keyLabel(keyOf('orders'))+').'));
   return rows.join('');
 }
 let xpHudKey='';
@@ -83,7 +83,7 @@ function hud(){
   $('sht').title=rareHud103();$('hpb').style.width=(100*Math.max(0,P.hp)/P.maxhp)+'%';$('shb').style.width=(P.maxsh?100*P.shield/P.maxsh:0)+'%';$('sht').textContent=fmt(Math.ceil(P.shield||0))+' / '+fmt(P.maxsh||0)+(healingShield(P)>0?' + '+fmt(Math.ceil(healingShield(P)))+' ÉGIDE ('+Math.ceil(P.healShieldUntil-time)+'s)':'');$('hpt').textContent=fmt(Math.max(0,Math.ceil(P.hp)))+' / '+fmt(P.maxhp)+(P.venomUntil>time&&P.venomCharges>0?' · VENENO '+P.venomCharges+' ('+Math.ceil(P.venomUntil-time)+'s)':'');
   resourceHud260();
   updateXpHud();$('gold').textContent=fmt(run.gold);
-  const mi=minionAllies().length,ec=allies.filter(a=>a.shadow&&!a.dead).length,showArmy=mi>0||ec>0||canArise()||P.skills.some(s=>s&&['summon','minionbuff'].includes(s.t));$('armyline').style.display=showArmy?'flex':'none';$('ecot').textContent='ECOS '+ec+'/'+shadowCap();$('armyt').textContent='INVOCADOS '+mi+'/'+summonCap();
+  const mi=minionAllies().length,ec=allies.filter(a=>a.shadow&&!a.dead).length,showArmy=mi>0||ec>0||canArise()||P.skills.some(s=>s&&['summon','minionbuff'].includes(s.t));$('armyline').style.display=showArmy?'flex':'none';$('ecot').textContent='SERVOS '+ec+'/'+shadowCap();$('armyt').textContent='INVOCADOS '+mi+'/'+summonCap();
   const ri=rankOf();
   $('rkp').textContent=ri<9?'Prova de Rank '+RANKS[ri+1].id+': nível '+run.level+'/'+GR[ri+1].lvl:'Rank máximo';
   $('bZ').hidden=profile.rank!==9;

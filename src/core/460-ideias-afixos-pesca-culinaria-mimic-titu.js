@@ -12,7 +12,7 @@ const TITLES=[
  {id:'rich',n:'Magnata',d:'1 milhão de ouro somando o banco',c:()=>run.gold+(profile.bank||0)>=1e6,m:'+10% de ouro dos monstros',b:{gold:.1}},
  {id:'phoenix',n:'Fênix',d:'morrer 5 vezes',c:()=>(profile.deaths||0)>=5,m:'Ao cair abaixo de 20% de vida, o escudo enche na hora (1 vez por minuto)',b:{}},
  {id:'tower',n:'Escalador',d:'andar 20 da torre',c:()=>(profile.towerBest||0)>=20,m:'Na torre, cada andar limpo cura 25% da vida',b:{}},
- {id:'army',n:'General dos Ecos',d:'10 ecos',c:()=>run.shadows.length>=10,m:'Ecos causam +20% de dano',b:{}},
+ {id:'army',n:'General dos Servos',d:'10 servos',c:()=>run.shadows.length>=10,m:'Servos causam +20% de dano',b:{}},
  {id:'fisher',n:'Pescador',d:'30 peixes',c:()=>(profile.fish||0)>=30,m:'Comida dura o dobro do tempo',b:{}},
  {id:'avenger',n:'Vingador',d:'derrotar seu nêmesis',c:()=>(profile.nemKills||0)>=1,m:'+20% de dano contra elites',b:{}},
  {id:'lord',n:'Senhor de Domínios',d:'3 masmorras dominadas',c:()=>(profile.owned||[]).length>=3,m:'Baús comuns têm +15% de chance de trazer item',b:{}},

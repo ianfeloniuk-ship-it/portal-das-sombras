@@ -195,7 +195,7 @@ function solarHeal(x,z,r,fraction){if(hasAff('nocure'))return;for(const a of [pl
 function magicEvolution(sk,dmg){const P=player,col=sk.col;
   if(['Meteoro','Sol Negro','Era do Gelo','Fúria dos Céus'].includes(sk.n)){const pt=skillGroundPoint(),meteor=sk.n==='Meteoro',fire=sk.n==='Sol Negro',ice=sk.n==='Era do Gelo',n=meteor?1:fire?5:ice?4:3,r=meteor?5:fire?4:ice?6:3;for(let i=0;i<n;i++){const delay=meteor?1:fire?.5+i:ice?.3+i:.3+i*.35,/* v485: tempos inteiros no texto (Meteoro 1s, Gelo 1 pulso/s, Fúria 3 raios em 1s) */h=hazard(pt.x,pt.z,r,delay,dmg/n,'player',col);h.kb=0;h.stun=0;h.slow=ice?2:0;if(!meteor&&!fire&&!ice)h.lightning=true;if(ice)h.icePulse=true;if(fire)h.firePulse=true;}if(meteor)fallFx(pt.x,pt.z,.9,'meteor',col);else if(fire)pillar(pt.x,pt.z,0xff3a1e,1.1,.7);else if(ice)spikes(pt.x,pt.z,12,1,6,col,1);return true}
   if(sk.n==='Sol Nascente'){solarHeal(P.x,P.z,6,sk.pow/2);for(let i=1;i<=3;i++){const h=hazard(P.x,P.z,6,i,0,'player',col);h.healFraction=sk.pow/6;}pillar(P.x,P.z,col,1.5,1);return true}
-  if(sk.n==='Domínio dos Ecos'){fxRing(P.x,P.z,col,7,1);spikes(P.x,P.z,14,1,7,col,1.5);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=7+e.r){e.echoMarkUntil=Math.max(e.echoMarkUntil||0,time+8);hurtEnemy(e,dmg,P.x,P.z,{kb:0,stun:0,fromPlayer:true,skillHit:true})}return true}
+  if(sk.n==='Domínio dos Servos'){fxRing(P.x,P.z,col,7,1);spikes(P.x,P.z,14,1,7,col,1.5);for(const e of enemies)if(!e.dead&&Math.hypot(e.x-P.x,e.z-P.z)<=7+e.r){e.echoMarkUntil=Math.max(e.echoMarkUntil||0,time+8);hurtEnemy(e,dmg,P.x,P.z,{kb:0,stun:0,fromPlayer:true,skillHit:true})}return true}
   if(sk.n==='Matilha Espiritual'||sk.n==='Colosso de Pedra'){const wolf=sk.n==='Matilha Espiritual',n=Math.min(wolf?3:1,Math.max(0,summonCap()-minionAllies().length));for(let i=0;i<n;i++){let x=P.x+Math.sin(i*2.1)*1.8,z=P.z+Math.cos(i*2.1)*1.8;if(!freeAt(x,z,.5)){x=P.x;z=P.z}spawnSummon(wolf?'wolf':'golem',x,z,1e9)}if(wolf)for(const a of allies)if(!a.dead&&a.summonKind==='wolf'){a.buffT=Math.max(a.buffT||0,8);fxRing(a.x,a.z,col,1.4,.6)}circle(P.x,P.z,col);saveRun();return true}
   return false;
 }
@@ -250,12 +250,8 @@ function runSkill(sk){skillAnim155(sk);if(sk.kit111){kitRun111(sk);castFluid139(
   sfx('skill');
 }
 function absorb(b){
-  b.absorbed=true;const rk=RANKS[rankOf()],c=CLASSES[profile.cls];
-  const has=powLib().some(s=>s.n===b.boss.skill.n);
-  if(Math.random()<rk.steal+b.gr*.03){learnPower(b.boss.skill);if(has){}else toast('<b>[NARRADOR]</b> Habilidade roubada: <b>'+b.boss.skill.n+'</b>',4000)}
-  else toast('<b>[NARRADOR]</b> A essência escapou. Chance de roubo no rank '+rk.id+': '+Math.round((rk.steal+b.gr*.03)*100)+'%',3500);
-  if(canArise()){bigText('DESPERTE',1800);shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[NARRADOR]</b> ERGUER ECO: o eco de '+b.boss.n+' agora luta com você.',4000);sfx('arise')}
-  else{fxBurst(b.x,.5,b.z,0xffd070,20,5);b.m.root.visible=false}
+  if(!canArise())return;b.absorbed=true;
+  shake(.7);fxRing(b.x,b.z,0xa26bff,6,.9);fxBurst(b.x,.3,b.z,0xa26bff,30,6);b.m.root.visible=false;addShadow({n:b.boss.n,lvl:1,xp:0,nick:null});toast('<b>[NARRADOR]</b> '+b.boss.n+' se levanta como seu servo.',4000);sfx('arise');
   saveRun();
 }
 function ctxTarget(){
@@ -263,7 +259,7 @@ function ctxTarget(){
   let best=null,bd=1e9;const P=player;
   for(const it of L.inter){if(it.hidden)continue;const d=Math.hypot(P.x-it.x,P.z-it.z);if(d<it.r&&d<bd){bd=d;best=it}}
   for(const n of npcs){if(n.gone||n.kind==='deco')continue;const d=Math.hypot(P.x-n.x,P.z-n.z);if(d<2.8&&d<bd){bd=d;best=n}}
-  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){best={label:canArise()?'F · ERGUER ECO':'F · ABSORVER ESSÊNCIA',use:()=>absorb(bossE)}}}
+  if(bossE&&bossE.dead&&!bossE.absorbed){const d=Math.hypot(P.x-bossE.x,P.z-bossE.z);if(d<4.5&&d<bd){if(canArise())best={label:'F · ERGUER SERVO',use:()=>absorb(bossE)}}}
   return best;
 }
 function interact(){if(player.dead||paused)return;const c=ctxTarget();if(!c)return;if(typeof c.use==='function')c.use();else if(c.kind==='hunter')talk(c)}

@@ -146,7 +146,7 @@ function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)r
  'Era do Gelo':()=> 'Área de gelo na mira, a até 14 m.<br><b>Área:</b> 6 m de raio · 4 pulsos, um por segundo.<br><b>Lentidão:</b> 50% por 2s a cada acerto.',
  'Fúria dos Céus':()=> '3 raios na área da mira, a até 14 m.<br><b>Área:</b> 3 m de raio · os 3 raios caem em 1s.',
  'Sol Nascente':()=> 'Área de cura com 6 m de raio.<br><b>Cura imediata:</b> '+r(sk.pow*50)+'% da vida máxima.<br><b>Cura no chão:</b> mais '+r(sk.pow*50)+'% em 3 pulsos durante 3s. Você e aliados precisam estar na área de cada pulso.',
- 'Domínio dos Ecos':()=> 'Atinge e marca inimigos em um raio de 7 m.<br><b>Marca:</b> seus ecos causam +20% de dano nesses alvos por 8s. Renova a marca do Necromante.',
+ 'Domínio dos Servos':()=> 'Atinge e marca inimigos em um raio de 7 m.<br><b>Marca:</b> seus servos causam +20% de dano nesses alvos por 8s. Renova a marca do Necromante.',
  'Matilha Espiritual':()=> 'Invoca até 3 lobos nas vagas livres; permanecem até morrer.<br><b>Matilha:</b> seus lobos recebem +60% de dano e 45% de redução de dano por 8s, mesmo com o limite cheio.<br><b>Invocações:</b> '+minionAllies().length+'/'+summonCap()+'.',
  'Colosso de Pedra':()=> 'Invoca um golem permanente até morrer, ocupando uma vaga.<br><b>Golem:</b> triplo da vida e dobro do dano de uma invocação comum; movimentação e ataques mais lentos.<br><b>Invocações:</b> '+minionAllies().length+'/'+summonCap()+'.',
  'Lâmina Rúnica':()=> '3 explosões em linha na direção da mira, até 9 m.<br><b>Área:</b> 2 m de raio por explosão.',
@@ -156,7 +156,7 @@ function skillEffect102(sk){if(sk.kit111)return kitEffect111(sk);if(sk.rare103)r
  'Lança de Gelo':()=> 'Projétil perfurante que reduz o movimento dos inimigos por 3s.',
  'Bola de Fogo':()=> 'Projétil de fogo.<br><b>Queimadura:</b> mais 25% do dano do projétil ao longo de 3s.'};
  if(named[skn])return named[skn]();
- if(sk.t==='minionbuff')return 'Cura ecos e invocações em 45% da vida máxima.<br><b>Fortalecimento:</b> +60% de dano e 45% de redução de dano por '+r(8+(sk.pow-1.5)*4)+'s.';
+ if(sk.t==='minionbuff')return 'Cura servos e invocações em 45% da vida máxima.<br><b>Fortalecimento:</b> +60% de dano e 45% de redução de dano por '+r(8+(sk.pow-1.5)*4)+'s.';
  if(sk.t==='summon')return 'Invoca até '+Math.min(Math.round(sk.pow),summonCap())+' aliados nas vagas livres. Permanecem até morrer.<br><b>Invocações:</b> '+minionAllies().length+'/'+summonCap()+' · limite aumenta com a mana máxima.';
  if(sk.t==='heal')return 'Cura você e seus aliados vivos em '+r(healingFraction(sk)*100)+'% da vida máxima ('+fmt(Math.round(player.maxhp*healingFraction(sk)))+' de vida em você).';
  if(sk.t==='guard')return 'Reduz o dano recebido em '+r((1-sk.pow)*100)+'% por 5s.';
@@ -201,7 +201,7 @@ function killEnemy(e){if(e.dead)return;if(window.Gosma347&&Gosma347.beforeKill(e
   bestKill(e.kind);
   if(e.elite&&!e.isBoss){npcEv('elite');storyEv('elite')}
   if(e.elite&&!e.isBoss&&Math.random()<.08){corpseDrop353(e,{type:'book',n:1})}
-  if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER ECO',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');bigText('DESPERTE',1000);e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
+  if(canArise()&&e.elite&&!e.isBoss&&!e.rival){const it={type:'arise',x:e.x,z:e.z,r:2.5,label:'F · ERGUER SERVO',use:()=>{it.hidden=true;fxBurst(e.x,.3,e.z,0xa26bff,16,5);sfx('arise');e.m.root.visible=false;addShadow({n:e.name.replace('Elite ',''),lvl:1,xp:0,nick:null})}};L.inter.push(it);setTimeout(()=>{it.hidden=true},8000)}
   const g=Math.round((e.gold||0)*(1+guildBonus()+(titleB().gold||0)));
   if(g>0&&run){
     run.gold=(run.gold||0)+g;
@@ -294,7 +294,7 @@ function hurtPlayer(amt,compatible111=!!curAtk&&!curAtk.isBoss){
   if(player.hp<=0)die();
 }
 function hurtAlly(a,amt){if(a.dead)return;amt=kitIncoming111(a,amt);amt*=allyProtection(a);if(a.buffT>0)amt*=.55;amt=absorbHealingShield(a,amt);amt=guardianDamage108(a,amt);if(amt<=0)return;if(window.Cogu348)Cogu348.wake(a);a.hp-=amt;a.flash=.1;if(a.hp<=0){a.dead=true;fxBurst(a.x,1,a.z,0xa26bff,10,4);scene.remove(a.m.root);
-  if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[NARRADOR]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Ecos.');saveRun()}
+  if(a.shadow&&a.rec){a.rec.lvl=0;a.rec.xp=0;a.rec.on=false;toast('<b>[NARRADOR]</b> '+(a.rec.nick||a.rec.n)+' caiu e voltou ao nível 0. Chame novamente pelo Exército de Servos.');saveRun()}
   if(a.permanentSummon)saveRun();
   if(a.caravan){L.car=null;toast('<b>[CARAVANA]</b> A caravana foi destruída. Missão falhou.',4000)}
   if(a.party){run.party=run.party.filter(p=>p!==a.data);toast('<b>[NARRADOR]</b> '+a.short+' morreu. Caçadores mortos não voltam.',3500)}}}

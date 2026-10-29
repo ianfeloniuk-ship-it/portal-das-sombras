@@ -888,7 +888,7 @@
             if (rq) {
               setTimeout(() => {
                 showSkyrimBanner(rq.title);
-                showSkyrimSubtitle('Eco da Fenda', rq.description);
+                showSkyrimSubtitle('Voz da Fenda', rq.description);
               }, 900);
             }
           }

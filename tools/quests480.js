@@ -551,7 +551,7 @@
       biomes: ['campos', 'floresta', 'flores', 'ruinas'],
       name: 'Eldrin, Sábio das Ruínas',
       sign: '? MONÓLITO ANCESTRAL',
-      speech: 'O eco dos Primevos ressoa neste monumento...',
+      speech: 'A voz dos Primevos ainda ressoa neste monumento...',
       title: 'MISTÉRIO ANTIGO · MONÓLITO DOS PRIMEVOS',
       desc: 'Saudações, Transmigrador. Você sente o calor desta pedra antiga? Este monumento guarda o espírito de um Guardião Ancestral que resistiu às primeiras Fendas. Se você tiver a audácia de tocar a runa e superar a Provação da Sombra, os tesouros do santuário reconhecerão seu poder!',
       chibi: { body: 0x2a3a5a, hair: 0xffffff, wep: 'staff', wcol: 0x7fd8ff, gk: 'Mage', tint: 0x7fd8ff },

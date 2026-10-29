@@ -1,3 +1,12 @@
+## v683 (29/10/2026) — Fim dos "Ecos": mortos do Necromante viram Servos; chefão não dá mais essência
+- Ian: «tira esse Ecos… o jogo tem a minha própria identidade… recolher a essência dos guardiões, dos chefes… não faz mais sentido». Decisões no chat: nome = **Servos**; o Necromante continua erguendo chefões, sem essência.
+- Necromante: Erguer Servo, Domínio dos Servos, Senhor dos Servos, General dos Servos, Exército/Coleção/Ordens dos servos, HUD "SERVOS n/m", textos e falas.
+- Chefão: saiu "F · ABSORVER ESSÊNCIA", o roubo de habilidade por sorte de rank e o "DESPERTE". `absorb()` só ergue o chefão como servo para quem pode erguer; para os outros não aparece nada. Botão do loot também.
+- Outros "Eco": Palma dos Ecos → Palma Ressoante (Monge); Eco gratuito → Mana devolvida; Eco do Golpe → Golpe Repetido (status REPETE); Noite dos Ecos → Noite das Almas; Eco do Arquiteto → Chuva do Arquiteto; Sino do Eco → Sino da Fenda; Eco da Fenda → Voz da Fenda; Eco da vida → Vida passada; títulos/falas de missões infinitas.
+- Poderes de guardião (teclas 8/9/0, fusão) continuam, mas só vêm de grimórios; textos "absorvido" viraram "de guardião". `RANKS.steal` ficou sem uso.
+- Saves: `tools/servos683.js` renomeia os nomes antigos de habilidade no localStorage antes do jogo carregar.
+- Teste: build + core_parts ok, node --check; navegador: habilidades do Necromante com nomes/textos novos, festival "Noite das Almas", absorb ergue servo e não dá poder, sem erro novo no console.
+
 ## v682 (29/10/2026) — Doenças: contágio e estágios
 - Pedido de Ian: «Contágio e estágios» (passo 1 do documento "Primeva — Doença e Transformação", aprovado).
 - `tools/doenca681.js` (carrega depois de `corpo659.js`), ligado em `corpo659.js` no golpe que fere, na hora do jogo e na ficha Status → Corpo. Substitui a doença simples da v659 (Vampirismo/Licantropia virando mutação); save antigo com doença incubando é convertido.

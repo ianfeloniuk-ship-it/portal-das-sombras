@@ -7,7 +7,7 @@ const ADV=[
   {n:'Atirador Celestial',sk:S('Flecha Estelar','bolt',6,25,6,0xb8a2ff)},
   {n:'Paladino Solar',sk:S('Sol Nascente','heal',14,35,.7,0xfff3a0)},
   {n:'Mestre das Bestas',sk:S('Matilha Espiritual','summon',16,40,3,0x6ff4ff)},
-  {n:'Senhor dos Ecos',sk:S('Domínio dos Ecos','nova',9,30,3.8,0xb98cff)},
+  {n:'Senhor dos Servos',sk:S('Domínio dos Servos','nova',9,30,3.8,0xb98cff)},
   {n:'Arquimago Ígneo',sk:S('Sol Negro','rain',11,35,3.4,0xff3a1e)},
   {n:'Arquimago Glacial',sk:S('Era do Gelo','nova',11,35,3,0xbff4ff)},
   {n:'Arquimago Telúrico',sk:S('Colosso de Pedra','summon',16,40,2.5,0xc8a070)},

@@ -17,7 +17,7 @@ function learnPower(sk){const lib=powLib();
   lib.push({...sk,cdT:0});
   if(run.stolen.length<3&&!run.stolen.some(x=>x.n===sk.n)){run.stolen.push({...sk,cdT:0});buildSteal()}
   else toast('<b>[NARRADOR]</b> <b>'+sk.n+'</b> foi guardado na sua Biblioteca de Poderes. Troque os ativos em Bolsa → Poderes.',6000)}
-function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder que você absorve ou aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 8, 9 e 0). Escolha qual vai em cada tecla.</div>';
+function libRows(){const lib=powLib();let h='<div class="sec">BIBLIOTECA DE PODERES ('+lib.length+')</div><div class="sysline" style="font-size:12px">Todo poder de guardião que você aprende fica guardado aqui. Só <b>3 ficam ativos</b> (teclas 8, 9 e 0). Escolha qual vai em cada tecla.</div>';
   lib.forEach((sk,i)=>{const slot=run.stolen.findIndex(x=>x.n===sk.n);h+=row('<b>'+sk.n+'</b>'+(slot>=0?' <span style="color:#6fe39a">· ativo na tecla '+(slot+1)+'</span>':''),skillDesc(sk),[0,1,2].map(k=>btn(String(k+1),'powslot',i+':'+k,true,slot===k?'on165" data-tip154="Clique de novo para tirar da tecla '+(k+1):'')).join(''))});return h}
 function sellMonsterLoot(){const gold=lootTotal();if(gold<=0)return false;run.loot={};run.gold+=gold;toast('<b>[MERCADO]</b> Espólios vendidos: +'+fmt(gold)+' ouro. Minérios e núcleos preservados.');beep(990,.15,.05);return true}
 function mktView(){
@@ -155,7 +155,7 @@ function gateModal(g){
   h+=row('Saída',isOW?'Objetivo: abata 100 monstros ou '+(et==='core'?'conclua a defesa do Núcleo':'o Soberano')+'. '+(g.red?'Portal vermelho: a Fenda de entrada fica trancada até você cumprir o objetivo.':'A Fenda de entrada fica aberta onde você chega; você pode sair antes de concluir.')+' Saindo com o objetivo cumprido, a Fenda colapsa e a Ordem paga reputação'+(g.red?' em dobro':'')+'. Ao vencer o Soberano, outra saída se abre no local e o transbordo começa em 2 minutos.':'Volte à entrada após concluir o objetivo. Transbordo em 60 segundos.','');
   if(isOW)h+=row('Orientação e tempo',(g.red?'Na Fenda vermelha, um feixe pulsante mostra o Soberano.':'Na Fenda comum, nada mostra onde está o Soberano.')+(et==='core'?' Um feixe mostra o Núcleo.':'')+' No modo Combate, elimine os alvos primeiro. Ao retornar, o calendário de Primeva avança: no mínimo 7 dias se sair cedo ou 14 ao concluir; expedições longas acrescentam mais dias.','');
   h+=row('Fecha em',fmtT(g.life)+(g.rank>=2?' · se fechar sem ser limpo, os monstros escapam':''),'');
-  h+=row('Seu grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Sozinho'+(run.shadows.length?' + '+run.shadows.length+' eco(s)':''),'');
+  h+=row('Seu grupo',run.party.length?run.party.map(p=>p.name).join(', '):'Sozinho'+(run.shadows.length?' + '+run.shadows.length+' servo(s)':''),'');
   if(g.red)h+='<div class="sysline" style="color:#ffb3c0"><b>Portal vermelho</b><br>Saída bloqueada até concluir o objetivo. Retorno não funciona.<br>Monstros com 30% mais vida; recompensas em dobro.<br>Morrer rompe o portal e libera monstros no mundo.</div>';
   h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('VOLTAR','modalback118',0)+btn('ENTRAR','enter',g.id,true,'hot')+'</div>';
   openModal('PORTAL RANK '+G.id,h);

@@ -34,7 +34,7 @@ window.Loot353=(()=>{
   if(r.entries.length)h+=btn('Pegar tudo','lootall376',id);
   for(const x of r.entries)h+=row(safeText(label(x)),detail(x),(window.Loot513?.supports(x)?btn('Examinar','lootinspect513',id+'|'+x.id):'')+btn('Pegar','loottake353',id+'|'+x.id,x.type!=='equipment'||run.items.length<bagCapacity353()));
   const boss=bossE&&bossE.dead&&!bossE.absorbed&&Math.hypot(bossE.x-r.x,bossE.z-r.z)<1;
-  if(boss)h+=btn(canArise()?'Erguer eco / essência':'Absorver essência','lootpower353',id);
+  if(boss&&canArise())h+=btn('Erguer servo','lootpower353',id);
   h+='<p>O ouro dos abates é automático. Cristais somem em 10 segundos de jogo; o tempo pausa nesta tela.'+(L.mode==='world'?'':' Saques abandonados somem ao sair da masmorra.')+'</p>';
   openModal('SAQUE · '+r.name,h);window.Loot513?.mount(r);
  }

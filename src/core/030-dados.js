@@ -267,21 +267,21 @@ const NR_LINES105={
   "Você fez alguém durar mais. Isso conta na minha memória."
  ],
  "necro": [
-  "Outro eco passou a acompanhar seus passos.",
+  "Outro servo passou a acompanhar seus passos.",
   "Você deu forma a uma presença que ficou para trás.",
   "Essa companhia veio de um vestígio.",
-  "A jornada ganhou um eco sob sua ordem.",
+  "A jornada ganhou um servo sob sua ordem.",
   "Você escolheu trazer uma essência para perto.",
   "Agora há mais uma presença no seu caminho.",
-  "Esse eco tem lugar entre os que acompanham você.",
+  "Esse servo tem lugar entre os que acompanham você.",
   "Uma vontade recebeu forma ao seu lado.",
   "O vestígio deixou de ser apenas lembrança.",
   "Você tornou aquela essência uma companhia de combate.",
-  "Há um novo eco respondendo à sua convocação.",
+  "Há um novo servo respondendo à sua convocação.",
   "Seus passos agora dividem o caminho com essa presença.",
-  "Você ergueu o eco de um inimigo derrotado.",
+  "Você ergueu o servo de um inimigo derrotado.",
   "A essência que você guardou encontrou uma forma.",
-  "Você trouxe um eco para esta parte da viagem.",
+  "Você trouxe um servo para esta parte da viagem.",
   "Sua comitiva anda aceitando membros pouco convencionais.",
   "Eu ia perguntar de onde veio. Já vi a resposta.",
   "Você tem uma maneira particular de aumentar o grupo.",
@@ -1305,43 +1305,43 @@ const NR_LINES105={
   "Você ganhou mais uma resposta para levar ao combate."
  ],
  "trial_necro": [
-  "Você sustentou a vontade do eco.",
+  "Você sustentou a vontade do servo.",
   "A investigação aproximou seu caminho da Necromancia.",
-  "A manifestação do eco encontrou sua atenção.",
+  "A manifestação do servo encontrou sua atenção.",
   "Você escolheu manter aquela presença na fissura.",
-  "Seu contato com o eco virou afinidade.",
+  "Seu contato com o servo virou afinidade.",
   "A vontade que persistia recebeu sua resposta.",
-  "Você concluiu a investigação ligada ao eco.",
+  "Você concluiu a investigação ligada ao servo.",
   "O caminho do Necromante ganhou experiência sua.",
   "Você permaneceu diante da manifestação que resistia.",
-  "O eco encontrou quem sustentasse sua presença.",
+  "O servo encontrou quem sustentasse sua presença.",
   "Essa escolha desenvolveu sua afinidade necromante.",
   "Você segurou a manifestação até o desafio terminar.",
-  "A fissura deixou uma experiência com o eco.",
+  "A fissura deixou uma experiência com os mortos.",
   "Seu caminho se aproximou das presenças que permanecem.",
   "Você respondeu à vontade que não desaparecia.",
   "A investigação reforçou essa direção do aprendizado.",
-  "O eco foi o centro da escolha que fez.",
+  "O servo foi o centro da escolha que fez.",
   "Você concluiu um contato com aquela persistência.",
   "Essa manifestação acrescentou afinidade ao seu percurso.",
   "A vontade sustentada deixou uma marca no aprendizado.",
   "Você investiu atenção no que tentava permanecer.",
-  "A escolha do eco encontrou uma conclusão.",
+  "A escolha do servo encontrou uma conclusão.",
   "Seu aprendizado necromante ganhou outra experiência.",
   "A presença persistente orientou essa investigação.",
   "Você deu continuidade ao caminho das essências.",
-  "Essa fissura foi investigada pelo lado do eco.",
+  "Essa fissura foi investigada pelo lado dos mortos.",
   "O desafio terminou com a vontade sustentada.",
   "Você enfrentou as ameaças enquanto mantinha a manifestação.",
-  "A experiência aproximou você do caminho dos ecos.",
+  "A experiência aproximou você do caminho dos mortos.",
   "Aquela presença encontrou espaço na sua jornada.",
   "Você preferiu negociar com quem não queria desaparecer.",
-  "O eco escolheu persistir. Você decidiu colaborar.",
+  "O servo escolheu persistir. Você decidiu colaborar.",
   "Seu repertório de companhias continua pouco convencional.",
   "A manifestação encontrou uma audiência bastante dedicada.",
   "Você levou a sério uma presença bastante teimosa.",
   "Essa fissura teve dificuldade para ficar vazia.",
-  "O eco insistiu e encontrou alguém à altura.",
+  "O servo insistiu e encontrou alguém à altura.",
   "Você respondeu à persistência ficando também.",
   "A vontade de permanecer acabou rendendo aprendizado.",
   "Você escolheu o lado mais acompanhado da fissura."
@@ -2145,10 +2145,10 @@ const NR_LINES105={
   "A criatura vai precisar de outro plano para aquela recuperação."
  ]
 };
-const NR_META107={"order_kill": {"name": "Missão de abates entregue", "priority": 45, "gap": 30}, "order_clear": {"name": "Missão de Fendas entregue", "priority": 45, "gap": 30}, "order_pvp": {"name": "Missão contra caçadores entregue", "priority": 45, "gap": 30}, "core_win": {"name": "Núcleo defendido", "priority": 65, "gap": 30}, "core_fail": {"name": "Núcleo perdido", "priority": 85, "gap": 30}, "stairs_up": {"name": "Descida ao próximo andar", "priority": 45, "gap": 30}, "stairs_down": {"name": "Retorno ao andar anterior", "priority": 45, "gap": 30}, "dodge": {"name": "Esquiva perfeita", "priority": 45, "gap": 30}, "healself": {"name": "Cura própria por habilidade", "priority": 20, "gap": 30}, "potion": {"name": "Poção de vida utilizada", "priority": 20, "gap": 30}, "boss": {"name": "Chefe derrotado", "priority": 65, "gap": 30}, "elite": {"name": "Elite derrotada", "priority": 20, "gap": 30}, "nemesis": {"name": "Nêmesis derrotada", "priority": 85, "gap": 30}, "buy": {"name": "Equipamento comprado", "priority": 45, "gap": 30}, "craft": {"name": "Equipamento forjado", "priority": 45, "gap": 30}, "upgrade_win": {"name": "Reforço concluído", "priority": 45, "gap": 30}, "upgrade_fail": {"name": "Reforço sem sucesso", "priority": 45, "gap": 30}, "rune": {"name": "Passiva rúnica gravada", "priority": 45, "gap": 30}, "tier": {"name": "Provação de classe concluída", "priority": 85, "gap": 30}, "job": {"name": "Evolução inicial da classe", "priority": 85, "gap": 30}, "trial_necro": {"name": "Manifestação do eco sustentada", "priority": 65, "gap": 30}, "trial_time": {"name": "Manifestação temporal sustentada", "priority": 65, "gap": 30}, "trial_fenda": {"name": "Passagem da fissura sustentada", "priority": 65, "gap": 30}, "affinity": {"name": "Afinidade principal escolhida", "priority": 85, "gap": 30}, "learnrare": {"name": "Classe rara aprendida", "priority": 85, "gap": 30}, "siege": {"name": "Cerco vencido", "priority": 85, "gap": 30}, "hire": {"name": "Companheiro contratado", "priority": 45, "gap": 30}, "travel": {"name": "Viagem entre cidades", "priority": 45, "gap": 30}, "rest": {"name": "Descanso concluído", "priority": 45, "gap": 30}, "title": {"name": "Título conquistado", "priority": 45, "gap": 30}, "night": {"name": "Chegada da noite", "priority": 20, "gap": 90}, "dawn": {"name": "Volta da luz do dia", "priority": 20, "gap": 90}, "rain": {"name": "Início de chuva", "priority": 20, "gap": 90}, "snow": {"name": "Início de neve", "priority": 20, "gap": 90}, "mimic": {"name": "Mímico revelado", "priority": 45, "gap": 30}, "treasure": {"name": "Baú de recompensa aberto", "priority": 45, "gap": 30}, "purify": {"name": "Foco purificado", "priority": 45, "gap": 30}, "destroyfocus": {"name": "Foco destruído", "priority": 45, "gap": 30}, "sendcargo": {"name": "Carga de extração enviada", "priority": 45, "gap": 30}, "nest": {"name": "Ninho destruído", "priority": 45, "gap": 30}};
+const NR_META107={"order_kill": {"name": "Missão de abates entregue", "priority": 45, "gap": 30}, "order_clear": {"name": "Missão de Fendas entregue", "priority": 45, "gap": 30}, "order_pvp": {"name": "Missão contra caçadores entregue", "priority": 45, "gap": 30}, "core_win": {"name": "Núcleo defendido", "priority": 65, "gap": 30}, "core_fail": {"name": "Núcleo perdido", "priority": 85, "gap": 30}, "stairs_up": {"name": "Descida ao próximo andar", "priority": 45, "gap": 30}, "stairs_down": {"name": "Retorno ao andar anterior", "priority": 45, "gap": 30}, "dodge": {"name": "Esquiva perfeita", "priority": 45, "gap": 30}, "healself": {"name": "Cura própria por habilidade", "priority": 20, "gap": 30}, "potion": {"name": "Poção de vida utilizada", "priority": 20, "gap": 30}, "boss": {"name": "Chefe derrotado", "priority": 65, "gap": 30}, "elite": {"name": "Elite derrotada", "priority": 20, "gap": 30}, "nemesis": {"name": "Nêmesis derrotada", "priority": 85, "gap": 30}, "buy": {"name": "Equipamento comprado", "priority": 45, "gap": 30}, "craft": {"name": "Equipamento forjado", "priority": 45, "gap": 30}, "upgrade_win": {"name": "Reforço concluído", "priority": 45, "gap": 30}, "upgrade_fail": {"name": "Reforço sem sucesso", "priority": 45, "gap": 30}, "rune": {"name": "Passiva rúnica gravada", "priority": 45, "gap": 30}, "tier": {"name": "Provação de classe concluída", "priority": 85, "gap": 30}, "job": {"name": "Evolução inicial da classe", "priority": 85, "gap": 30}, "trial_necro": {"name": "Manifestação do servo sustentada", "priority": 65, "gap": 30}, "trial_time": {"name": "Manifestação temporal sustentada", "priority": 65, "gap": 30}, "trial_fenda": {"name": "Passagem da fissura sustentada", "priority": 65, "gap": 30}, "affinity": {"name": "Afinidade principal escolhida", "priority": 85, "gap": 30}, "learnrare": {"name": "Classe rara aprendida", "priority": 85, "gap": 30}, "siege": {"name": "Cerco vencido", "priority": 85, "gap": 30}, "hire": {"name": "Companheiro contratado", "priority": 45, "gap": 30}, "travel": {"name": "Viagem entre cidades", "priority": 45, "gap": 30}, "rest": {"name": "Descanso concluído", "priority": 45, "gap": 30}, "title": {"name": "Título conquistado", "priority": 45, "gap": 30}, "night": {"name": "Chegada da noite", "priority": 20, "gap": 90}, "dawn": {"name": "Volta da luz do dia", "priority": 20, "gap": 90}, "rain": {"name": "Início de chuva", "priority": 20, "gap": 90}, "snow": {"name": "Início de neve", "priority": 20, "gap": 90}, "mimic": {"name": "Mímico revelado", "priority": 45, "gap": 30}, "treasure": {"name": "Baú de recompensa aberto", "priority": 45, "gap": 30}, "purify": {"name": "Foco purificado", "priority": 45, "gap": 30}, "destroyfocus": {"name": "Foco destruído", "priority": 45, "gap": 30}, "sendcargo": {"name": "Carga de extração enviada", "priority": 45, "gap": 30}, "nest": {"name": "Ninho destruído", "priority": 45, "gap": 30}};
 let NR105={queue:[],quietFor:0,tick:0,city:null};
 const RARE103=[
- {id:7,n:'Necromante',ready:true,choice:'Sustentar a vontade do eco',exclusive:'1 eco especial ativo; 2 com afinidade.'},
+ {id:7,n:'Necromante',ready:true,choice:'Sustentar a vontade do servo',exclusive:'1 servo especial ativo; 2 com afinidade.'},
  {id:12,n:'Mago do Tempo',ready:true,choice:'Conter o instante do colapso',exclusive:'Reserva temporal de 3s; 6s com afinidade.'},
  {id:13,n:'Tecelão de Fendas',ready:true,choice:'Costurar a passagem',exclusive:'Portais até +1 rank; até +2 com afinidade.'},
  {id:14,n:'Guardião dos Vínculos',ready:true,choice:'Proteger quem ficou na fissura',exclusive:'1 vínculo ou âncora; 2 com afinidade.'},
@@ -2158,9 +2158,9 @@ const RSK103={
  'Elo Protetor':{t:'rare_link',cd:4,mp:14,pow:0,col:0xffdb86,d:'Com um aliado na mira, a até 12 m e à vista: por 20s, você recebe 30% do dano que ele levaria, reduzido pela metade. Esse dano ignora sua esquiva e armadura e pode matar você. Sem aliado na mira: cria uma âncora a até 8 m que absorve 30% do dano que você leva a até 8 m dela, até 30% da sua vida máxima. Só 1 elo ou âncora por vez (2 com afinidade); um novo substitui o mais antigo.'},
  'Interposição':{t:'rare_interpose',cd:10,mp:20,pow:0,col:0xffdb86,d:'Precisa de um Elo ativo. Você avança até o elo ou âncora mais perto da mira, a até 12 m, sem atravessar paredes. Você e aliados a até 4 m ganham um escudo de 20% da própria vida máxima por 4s. Escudos do Guardião não somam: fica o maior.'},
  'Juramento':{t:'rare_oath',cd:18,mp:28,pow:0,col:0xffdb86,d:'Precisa de um Elo ativo. Por 6s, elos e âncoras protegem 50% em vez de 30%. No fim, uma onda a até 8 m dá a você e aos aliados um escudo de 10% da vida máxima, mais o dano que foi protegido (até 30% da sua vida máxima). O escudo dura 6s e chega no máximo a 40% da vida máxima de cada um. Não cura.'},
- 'Erguer Eco':{t:'rare_echo',cd:14,mp:24,pow:0,col:0xb98cff,d:'Recolhe o vestígio mais próximo, a até 10 m, e chama um eco especial. Sem vestígio, chama a última essência recolhida. O eco fica até morrer ou até você tirar todas as habilidades raras de Necromante. As essências ficam salvas.'},
- 'Ordem Fúnebre':{t:'rare_order',cd:8,mp:14,pow:1.5,col:0xb98cff,d:'Manda seus ecos para a mira, a até 14 m. Com inimigo, eles atacam; sem inimigo, guardam o lugar por 8s. Ecos especiais usam a técnica deles: projétil, impacto defensivo ou corte de perto.'},
- 'Pacto dos Mortos':{t:'rare_pact',cd:14,mp:0,pow:0,col:0xb98cff,d:'Custa 10% da sua vida máxima (nunca mata você). Seus ecos recuperam 35% da vida e, por 8s, causam 60% mais dano e recebem 45% menos dano. Com Sem Cura, só a recuperação é bloqueada. Precisa de ecos vivos.'},
+ 'Erguer Servo':{t:'rare_echo',cd:14,mp:24,pow:0,col:0xb98cff,d:'Ergue o corpo de elite mais próximo, a até 10 m, como servo especial. Sem corpo perto, chama de novo o último servo especial que você ergueu. O servo fica até morrer ou até você tirar todas as habilidades raras de Necromante. Os servos erguidos ficam salvos.'},
+ 'Ordem Fúnebre':{t:'rare_order',cd:8,mp:14,pow:1.5,col:0xb98cff,d:'Manda seus servos para a mira, a até 14 m. Com inimigo, eles atacam; sem inimigo, guardam o lugar por 8s. Servos especiais usam a técnica deles: projétil, impacto defensivo ou corte de perto.'},
+ 'Pacto dos Mortos':{t:'rare_pact',cd:14,mp:0,pow:0,col:0xb98cff,d:'Custa 10% da sua vida máxima (nunca mata você). Seus servos recuperam 35% da vida e, por 8s, causam 60% mais dano e recebem 45% menos dano. Com Sem Cura, só a recuperação é bloqueada. Precisa de servos vivos.'},
  'Âncora Temporal':{t:'rare_anchor',cd:16,mp:20,pow:0,col:0x8fe8ff,d:'Marca sua posição e sua vida por 3s (mais tempo com reserva temporal). Use de novo para voltar à marca e recuperar metade da vida perdida desde então. Não devolve mana nem itens, não revive e não atravessa paredes. Com Sem Cura, só a recuperação é bloqueada.'},
  'Dilatação':{t:'rare_dilate',cd:14,mp:24,pow:0,col:0x8fe8ff,d:'Cria uma área de 5 m na mira por 3s (mais tempo com reserva temporal). Inimigos e os projéteis deles ficam 50% mais lentos; chefes, 20%. Usar de novo não soma a lentidão.'},
  'Reprise':{t:'rare_reprise',cd:12,mp:25,pow:0,col:0x8fe8ff,d:'Repete a última habilidade de ataque usada nesta região, com 60% do dano. Não repete cura, invocação, veneno preparado, poderes raros nem outra Reprise. No Julgamento, repete só o dano.'},
@@ -2170,6 +2170,6 @@ const RSK103={
 };
 function rareSkill103(n){return {...S(n,RSK103[n].t,RSK103[n].cd,RSK103[n].mp,RSK103[n].pow,RSK103[n].col),rare103:true}}
 CLASSES.push({n:'Mago do Tempo',rare:true,complement103:true,w:0,ranged:true,body:0x497d98,hair:0xc6eeff,wep:'staff',sk:['Âncora Temporal','Dilatação','Reprise'].map(rareSkill103)}, {n:'Tecelão de Fendas',rare:true,complement103:true,w:0,ranged:true,body:0x685399,hair:0xc2a2ff,wep:'staff',sk:['Passagem Vinculada','Corte Espacial','Ascensão de Fenda'].map(rareSkill103)}, {n:'Guardião dos Vínculos',rare:true,complement103:true,w:0,ranged:false,body:0x9a7844,hair:0xffdb86,wep:'sword',sk:['Elo Protetor','Interposição','Juramento'].map(rareSkill103)});
-CLASSES[7].sk.push(...['Erguer Eco','Ordem Fúnebre','Pacto dos Mortos'].map(rareSkill103));
+CLASSES[7].sk.push(...['Erguer Servo','Ordem Fúnebre','Pacto dos Mortos'].map(rareSkill103));
 
 

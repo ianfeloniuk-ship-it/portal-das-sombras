@@ -879,7 +879,7 @@
       "t": "kit111"
     },
     {
-      "n": "Erguer Eco",
+      "n": "Erguer Servo",
       "effect": "echo",
       "cd": 14,
       "mp": 24,
@@ -930,7 +930,7 @@
       "t": "kit111"
     },
     {
-      "n": "Domínio dos Ecos",
+      "n": "Domínio dos Servos",
       "effect": "area",
       "cd": 8,
       "mp": 16,

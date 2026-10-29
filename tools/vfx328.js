@@ -279,8 +279,8 @@ function create405(ctx=null){
   /* Necromante */
   def('Soldado Esquelético', c => { const p = c.at(2); bones(p.x, p.z, 6, 1); wisps(p.x, p.z, C.necro, 10, 2); });
   def('Praga', c => { V.poison(c.tx, c.tz, 0x6ac04a, 3.2); wisps(c.tx, c.tz, 0x6ac04a, 12, 2.4); });
-  def('Erguer Eco', c => { const p = c.at(3); glyph(p.x, p.z, C.necro, 1.8, 'seal5', 1.6); wisps(p.x, p.z, C.necro, 16, 3); });
-  def('Domínio dos Ecos', c => { ground(c.tx, c.tz, C.necro, 4.5, 2.4); bones(c.tx, c.tz, 10, 3.4); });
+  def('Erguer Servo', c => { const p = c.at(3); glyph(p.x, p.z, C.necro, 1.8, 'seal5', 1.6); wisps(p.x, p.z, C.necro, 16, 3); });
+  def('Domínio dos Servos', c => { ground(c.tx, c.tz, C.necro, 4.5, 2.4); bones(c.tx, c.tz, 10, 3.4); });
   def('Mortalha', c => { V.dome(c.P.x, c.P.z, 0x3a1a5a, 2.3, true); wisps(c.P.x, c.P.z, C.necro, 10, 2.4); });
   def('Jaula de Ossos', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; bones(x, z, 9, 1.3); });
   def('Maldição da Fraqueza|Fome Silenciosa|Enfraquecer|Desarmar', c => { const e = c.t(); const x = e ? e.x : c.tx, z = e ? e.z : c.tz; glyph(x, z, c.col, 1.3, 'seal5', 1.6); wisps(x, z, c.col, 8, 2.2); });
@@ -404,7 +404,7 @@ function create405(ctx=null){
   def('Rajada de Punhos', c => fists(c.ang, C.monk, 9, 5));
   def('Chute Giratório', c => { V.whirl(C.monk, 2.8); V.shockwave(c.P.x, c.P.z, C.monk, 3); });
   def('Postura da Montanha', c => { V.dome(c.P.x, c.P.z, 0xc8a060, 2.2, true); V.quakeRing(c.P.x, c.P.z, 2.4, 0xc8a060); });
-  def('Palma dos Ecos', c => { const e = c.t(6); const x = e ? e.x : c.at(2).x, z = e ? e.z : c.at(2).z; fists(c.ang, C.monk, 1, 3); glyph(x, z, C.monk, 1.2, 'palm', 2.2, 1.6); });
+  def('Palma Ressoante', c => { const e = c.t(6); const x = e ? e.x : c.at(2).x, z = e ? e.z : c.at(2).z; fists(c.ang, C.monk, 1, 3); glyph(x, z, C.monk, 1.2, 'palm', 2.2, 1.6); });
   def('Passo em Oito', c => { glyph(c.P.x, c.P.z, C.monk, 2, 'eight', .9); V.dashTrail(C.monk); defer405(() => V.slash(player405().x, player405().z, c.ang, C.monk, 2.4, 1.6), 150); });
   def('Respiração Inversa', c => { wisps(c.P.x, c.P.z, 0x8affc2, 12, 2.2); defer405(() => V.aura(0xff5a2a), 300); glyph(c.P.x, c.P.z, C.monk, 1.6, 'sigil', 1.2); });
   def('Quebra de Cadência', c => { const e = c.t(6); const x = e ? e.x : c.at(2).x, z = e ? e.z : c.at(2).z; fists(c.ang, 0xffffff, 2, 3); star(x, z, C.monk, 1.8, 1.3); V.shockwave(x, z, C.monk, 1.8); });

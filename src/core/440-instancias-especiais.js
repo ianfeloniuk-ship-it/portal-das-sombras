@@ -142,7 +142,7 @@ function startReplica169(){const id=L.awaken155,SD=SETS153[id],S=L.special;if(!S
   const sk=awakenClassSkills169(SD.cls);S.saved169=player.skills;const slots=Array.from({length:7},()=>({empty:true,n:'Espaço'}));sk.forEach((k,i)=>slots[[0,1,2][i]]={...k,cdT:0});player.skills=slots;if(typeof showG==='function')showG();
   S.stage=4;S.rep169={need:Math.min(2,sk.length),done:new Set(),until:time+60,temp,cls:SD.cls,names:sk.map(k=>k.n)};player.hp=player.maxhp;player.mp=player.maxmp||player.mp;
   for(let i=0;i<4;i++){const e=spawnKind(wpick(familyPool124(SD.family,clamp(rankOf(),0,9))).k,rnd(-8,8),-6+rnd(-4,4),clamp(rankOf(),0,9),{});e.aggro=true}
-  bigText('PROVA: REPLICAR',1600);toast('<b>[NARRADOR]</b> O guardião caiu. Agora prove que entende o '+CLASSES[SD.cls].n+': use as habilidades dele ('+sk.map(k=>k.n).join(', ')+') nos ecos da arena. 60 segundos.',9000)}
+  bigText('PROVA: REPLICAR',1600);toast('<b>[NARRADOR]</b> O guardião caiu. Agora prove que entende o '+CLASSES[SD.cls].n+': use as habilidades dele ('+sk.map(k=>k.n).join(', ')+') nos servos da arena. 60 segundos.',9000)}
 function replicaTick169(){const S=L.special;if(!S||S.stage!==4||!S.rep169)return;const R=S.rep169;
   if(R.done.size>=R.need){S.stage=5;player.skills=S.saved169||pSkills();completeAwakenTest155();return}
   if(time>R.until||player.dead){S.stage=6;player.skills=S.saved169||pSkills();if(typeof showG==='function')showG();if(R.temp){const a=awakening103();a.unlocked=a.unlocked.filter(c=>c!==R.cls)}L.awaken155=null;bigText('PROVA FALHOU',1600);toast('<b>[NARRADOR]</b> Ainda não. Você manteve as peças; vista o set de novo para tentar outra vez.',7000)}}

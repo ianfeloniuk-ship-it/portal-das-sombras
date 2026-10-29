@@ -1191,7 +1191,7 @@
       "resource260": "mana"
     },
     {
-      "n": "Erguer Eco",
+      "n": "Erguer Servo",
       "effect": "echo",
       "cd": 14,
       "mp": 24,
@@ -1245,7 +1245,7 @@
       "resource260": "mana"
     },
     {
-      "n": "Domínio dos Ecos",
+      "n": "Domínio dos Servos",
       "effect": "area",
       "cd": 8,
       "mp": 16,

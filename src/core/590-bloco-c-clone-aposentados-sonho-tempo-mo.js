@@ -1,5 +1,5 @@
 /* ================= BLOCO C: CLONE, APOSENTADOS, SONHO, TEMPO, MODO DEUS, ESCOLHAS ================= */
-function retire(){profile.retired=profile.retired||[];profile.retired.push({name:'Eco da vida '+(profile.deaths||1),cls:profile.cls,lvl:run.level,rank:Math.min(9,rankOf()),gold:run.gold,sold:false});if(profile.retired.length>10)profile.retired.shift()}
+function retire(){profile.retired=profile.retired||[];profile.retired.push({name:'Vida passada '+(profile.deaths||1),cls:profile.cls,lvl:run.level,rank:Math.min(9,rankOf()),gold:run.gold,sold:false});if(profile.retired.length>10)profile.retired.shift()}
 function retiredView(i){view=()=>retiredView(i);const r=profile.retired[i];if(!r)return;const t=Math.min(9,r.rank),price=retiredPrice265(t);
   let h='<div class="sysline">"Eu era você. Morri no nível '+r.lvl+', rank '+RANKS[r.rank].id+', como '+CLASSES[r.cls].n+', carregando '+fmt(r.gold)+' de ouro. Agora vendo o que sobrou da minha vida."</div>';
   h+=r.sold?'<div class="sysline">Já te vendi tudo que eu tinha.</div>':row('Relíquia da vida passada','Equipamento épico de rank '+GR[t].id,btn(fmt(price)+' ouro','buyret',i,run.gold>=price,'hot'));openModal(r.name.toUpperCase(),h)}

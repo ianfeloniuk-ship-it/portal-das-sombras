@@ -118,7 +118,7 @@ const A={
    {t:1,b:{}}]}});
 })();
 const MAP={};
-[['socos','Rajada de Punhos'],['chute','Chute Giratório'],['palma','Palma dos Ecos|Selo dos Cinco Pontos'],['respirar','Respiração Inversa'],['direto','Quebra de Cadência'],['duplo','Balança dos Punhos'],['roda','Roda dos Meridianos'],
+[['socos','Rajada de Punhos'],['chute','Chute Giratório'],['palma','Palma Ressoante|Selo dos Cinco Pontos'],['respirar','Respiração Inversa'],['direto','Quebra de Cadência'],['duplo','Balança dos Punhos'],['roda','Roda dos Meridianos'],
  ['estocada','Estocada Longa|Ponta Absoluta|Fio da Fileira|Cravo de Muralha'],['gira_lanca','Varredura de Lança|Bússola Partida'],['cruz','Cruz de Hastes'],['recuo','Recuo de Caça'],['mirar','Medida do Caçador'],
  ['esmagar','Golpe Brutal'],['rugido','Sede de Sangue|Desafio do Maior|Juramento da Cicatriz'],['sacrificio','Dízimo de Sangue|Penhor Carmesim'],['varrer','Partilha Brutal|Corrente de Sacrifícios|Costura Astral|Díade Arcana'],['explodir','Estilhaço da Égide'],
  ['corte','Corte Arcano|Inscrição Alternada|Corte do Reservatório'],['erguer','Reserva Incandescente|Dízimo Rúnico|Lâmina Flamejante'],['salto_impacto','Salto Rúnico'],['giro','Órbita Reversa']
