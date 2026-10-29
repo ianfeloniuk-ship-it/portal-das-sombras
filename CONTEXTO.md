@@ -1,33 +1,7 @@
-## v690 (29/10/2026) — Balística real (flechas e projéteis físicos)
-- Pedido de Ian (adendo 14): projétil físico (flecha, virote, adaga, lança e pedra arremessadas) cai pela gravidade (9,8); magia voa reta; sem vento.
-- Flecha do jogador sai a 50 m/s: quase reta perto (cai 21 cm a 10 m), curva longe (5 m a 50 m); tiro para cima vai longe. Voo até 8 s. A flecha aponta para onde voa; se errar, fica cravada no chão por 20 s.
-- Monstro arqueiro compensa a queda na mira (ballisticPitch690). Tudo em src/core/380-acoes.js (BAL690).
-- Falta: força pela puxada do arco e recolher a flecha cravada.
-- Teste: build + core_parts + node ok; simulação da queda; jogo carrega sem erro novo. Não deu para atirar de fato no painel.
-
-## v689 (29/10/2026) — Continente de forma orgânica (~100 km²)
-- **Pedido de Ian:** o mapa do mundo estava quadrado; quer algo sem forma geométrica, ~100 km², cada ambiente com seu reino.
-- **Costa:** `coast684` em `tools/terrain245.js` (CPU e shader iguais): raio em volta de (600, 0) somado a ondas de 2, 3, 4, 5, 7 e 9 voltas + recortes pequenos. `seaD439` = max(costa, canal de Thalor). Mar em volta inteiro (o norte também; a cordilheira de gelo de Ymiria desce até o mar). A oeste a costa continua a ~4,15 km, colada em Thalor.
-- **Área medida:** ~100 km² de terra (amostragem a cada 20 m: 99,6 km² na 1ª forma; forma final ~101 km²). Extensão aprox. x −4,3 a +6,3 km, z −6,6 a +6,3 km. Todas as 25 cidades e as 5 capitais ficam a mais de 800 m da água.
-- **Borda:** `tools/mapa500.js` — saiu o limite quadrado de 4,92 km; agora dá para nadar perto da costa e, a 900 m mar adentro, o alto-mar não deixa ir mais longe (mesmo aviso «MAR SEM FIM»). Save antigo fora do continente volta para a cidade mais perto.
-- **Mapa:** `tools/mapa501.js` e `tools/mapa3d544.js` mostram −6,8 a +6,8 km; rótulo «MAR» nos 4 lados; acampamentos/postos no mar não são desenhados.
-- **Ligado:** rios (v661) seguem como antes e desembocam na nova costa; biomas dos reinos (centro nas capitais) não mudaram.
-- **Teste:** navegador (porta 8797), mapa grande desenhado sem erro no console, bloqueio no alto-mar e volta à terra testados.
-
-## v688 (29/10/2026) — Identidade própria: Juramento da Âncora, Rasgados e Os Últimos Reis (só textos)
-- Pedido de Ian: passar para o jogo as decisões do adendo 14 (Drive, pasta Portal-das-Sombras). Só nomes e textos; nenhuma mecânica mudou.
-- "Segundo Despertar" → **Juramento da Âncora** (aba "Despertar" → "Juramento"; teste de despertar → teste de Juramento). "Transmigrador(es/a)" → **Rasgado(s/a)**. "Rank Estrela" → **Rank Aço-Estrela** nos textos.
-- Classe inicial: "a arma desperta sua classe" → "a memória da arma define sua classe"; "Classe despertada!" → "O ferro te aceitou!".
-- Chefes Colossais → **Últimos Reis**: Cavaleiro Carmesim → O Último Portão; Lich Ancestral → O Arquivista; Berserker Rubro → O Campeão das Arenas; General Esqueleto → O Marechal sem Bandeira; Rei Demônio Vharok → O Senhor da Fornalha; Dragão do Caos Kaelthys → A Fera dos Quatro Céus; Rainha Aranha Nhyssa → A Mãe do Ninho; Colosso de Gelo Ymrak → O Inverno Que Andava; Arconte da Destruição → O que Restou da Cidade; Arconte do Gelo Eterno → A Rainha do Inverno Parado; Arconte das Pragas → O Jardineiro da Podridão; Arconte das Feras → O Caçador Primevo. O Rei Oco fica. IDs internos e nomes de modelo (kaelthys, cavaleiro-carmesim.glb) não mudaram.
-- Ainda não no jogo (proposta/livro): passos do Juramento (Coroa + Pedra-Âncora), 10 reis × 3 campeões com arma única, lua com cicatriz, balística com gravidade.
-- Teste: build + core_parts ok, node --check em tudo; no navegador o texto novo aparece e nenhum nome antigo sobra. O painel do navegador não conseguiu criar o WebGL, então não deu para jogar.
-
-## v687 (29/10/2026) — revisão dos GLBs do cenário (parte segura)
-- Pedido de Ian: «falta colocar e tirar muitos glbs, como é um cenário próprio».
-- Corrigido 404: `models/m437/pedra-lasca.glb` nunca existiu; pedras soltas usam `tripo-pedras437-lod` e rocha de picareta usa `tripo-rocha-musgo154-lod` (`tools/survival437.js`).
-- Cristal proibido: `cristal-fenda-rank125.glb` não é mais baixado (`tools/crystals125.js`) e foi apagado; `mechanics434` não volta mais ao cristal desenhado antigo em erro de rede.
-- Apagados: `tripo-rochedo154(.glb/-lod)` (era o elmo do Metamorfo, sem uso desde v513) e a licença do cristal.
-- Lista completa tirar/trocar/faltar no Drive (Primeva — Revisão de GLBs 29-10). Teste: jogo novo no navegador, sem 404 novo.
+## v691 (29/10/2026) — Vento e nuvens
+- Ian: «falta vento, nuvens». `tools/vento687.js` (novo): vento com direção que gira e rajadas (`ENV.gust`/`ENV.wd`), mais forte na chuva; céu em cúpula com 3 camadas de nuvens que andam com o vento, cobertura cinza na chuva, estrelas e lua à noite (cor de base do ciclo dia/noite); folhas (campo/floresta), poeira (deserto/estrada) e neve fina levadas pelo vento.
+- Ligado: grama (`grass446`), plantas (`190`), árvores (`680`) e pano das roupas (`pano672`) seguem a força e direção do vento. Esfera de corte (`culling637`) acompanha o jogador.
+- Teste: Edge sem tela (`tools/test-vento687.cjs`): dia, chuva, noite, deserto; sem erros. Não testado: PC real/desempenho.
 
 ## v684 (29/10/2026) — Controles sem "como no Skyrim"
 - Continuação da v683 (identidade própria do Primeva): a linha da tela de controles agora diz só "Mouse". Varredura: nenhum outro texto visível cita Skyrim, Solo Leveling ou Eco (os restantes são comentários de código).

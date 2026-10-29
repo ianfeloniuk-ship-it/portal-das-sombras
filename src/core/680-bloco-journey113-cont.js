@@ -91,15 +91,15 @@ const TripoEnvironment153 = (() => {
         mat.onBeforeCompile=shader=>{
           envShader(false,true)(shader);
           /* v243: vento nas árvores — o tronco curva com rajadas e as folhas tremem; fase por árvore */
-          if(TREEIDS.includes(id)){shader.uniforms.uWind=ENV.wind;shader.vertexShader='uniform float uWind;\nvarying float vH153;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+          if(TREEIDS.includes(id)){shader.uniforms.uWind=ENV.wind;shader.uniforms.uGu687=ENV.gust;shader.uniforms.uWd687=ENV.wd;shader.vertexShader='uniform float uWind;uniform float uGu687;uniform vec2 uWd687;\nvarying float vH153;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
             {float H=${size.y.toFixed(3)},h=clamp(transformed.y/H,0.,1.);vH153=h;vec2 ph=vec2(0.);
             #ifdef USE_INSTANCING
             ph=instanceMatrix[3].xz;
             #endif
             float t=uWind,f=dot(ph,vec2(.13,.09)),g=.55+.45*sin(t*.33+f*.7)*sin(t*.21+f*.3);
-            float b=h*h*H*(${id==='fir'?'.022':id==='willow'?'.05':'.035'})*g;
-            transformed.x+=sin(t*1.3+f)*b+b*.6;transformed.z+=cos(t*1.05+f*1.3)*b*.6;
-            float lf=smoothstep(.35,.7,h)*H*.0025*(.6+g);vec3 q=transformed*(5./H);
+            float b=h*h*H*(${id==='fir'?'.022':id==='willow'?'.05':'.035'})*g*uGu687;
+            transformed.xz+=uWd687*b*(.8+.5*sin(t*.8+f));transformed.x+=sin(t*1.3+f)*b;transformed.z+=cos(t*1.05+f*1.3)*b*.6;
+            float lf=smoothstep(.35,.7,h)*H*.0025*(.6+g)*(.5+.5*uGu687);vec3 q=transformed*(5./H);
             transformed+=vec3(sin(t*4.+q.y+q.z+f),sin(t*3.6+q.x)*.4,cos(t*4.4+q.z+q.x+f))*lf;}`)}
           if(TREEIDS.includes(id))shader.fragmentShader='varying float vH153;\n'+shader.fragmentShader.replace('#include <color_fragment>',`#if defined(USE_COLOR)
             {vec3 c0=diffuseColor.rgb;float leaf154=max(smoothstep(-.015,.035,c0.g-max(c0.r,c0.b)*.95),${id==='fir'?'0.':'smoothstep(.24,.30,vH153)'});float on154=step(.02,1.-min(vColor.r,min(vColor.g,vColor.b)));

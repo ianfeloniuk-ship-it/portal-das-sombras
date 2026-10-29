@@ -46,8 +46,8 @@
   const U = { uT: { value: 0 }, uP: { value: new T.Vector2() }, uI: { value: Array.from({ length: NI }, () => new T.Vector4()) }, uZ: { value: Array.from({ length: NZ }, () => new T.Vector4()) }, uK: { value: new Array(NZ).fill(0) } };
   const mat = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide, roughness: .85, metalness: 0 });
   mat.onBeforeCompile = sh => {
-    sh.uniforms.uT446 = U.uT; sh.uniforms.uP446 = U.uP; sh.uniforms.uI446 = U.uI; sh.uniforms.uZ446 = U.uZ; sh.uniforms.uK446 = U.uK;
-    sh.vertexShader = 'uniform float uT446;uniform vec2 uP446;uniform vec4 uI446[' + NI + '];uniform vec4 uZ446[' + NZ + '];uniform float uK446[' + NZ + '];varying float vBurn446;varying float vIce446;\n' + sh.vertexShader
+    sh.uniforms.uT446 = U.uT; sh.uniforms.uGu687 = ENV.gust; sh.uniforms.uWd687 = ENV.wd; sh.uniforms.uP446 = U.uP; sh.uniforms.uI446 = U.uI; sh.uniforms.uZ446 = U.uZ; sh.uniforms.uK446 = U.uK;
+    sh.vertexShader = 'uniform float uT446;uniform float uGu687;uniform vec2 uWd687;uniform vec2 uP446;uniform vec4 uI446[' + NI + '];uniform vec4 uZ446[' + NZ + '];uniform float uK446[' + NZ + '];varying float vBurn446;varying float vIce446;\n' + sh.vertexShader
       .replace('#include <beginnormal_vertex>', 'vec3 objectNormal=vec3(0.,1.,0.);')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
 {float h=uv.y;vec3 ip=vec3(0.);
@@ -60,7 +60,7 @@ float wave=sin(dot(ip.xz,vec2(.11,.06))-uT446*1.7)*.5+.5;sw+=wave*wave*.9;
 float brn=0.,frz=0.,fl=0.;
 for(int k=0;k<${NZ};k++){vec4 z=uZ446[k];if(z.z>0.){float w=1.-smoothstep(z.z*.55,z.z,distance(ip.xz,z.xy));float kd=uK446[k];if(kd<1.5)brn=max(brn,w*smoothstep(0.,1.5,z.w));else if(kd<2.5)frz=max(frz,w);else fl=max(fl,w);}}
 float st=1.-frz*.92;
-transformed.x+=sw*h*h*.14*st;transformed.z+=cos(uT446*1.4+ip.z*.41)*h*h*.08*st;
+sw*=.6+.4*uGu687;transformed.xz+=uWd687*(.4+wave*wave)*h*h*.09*uGu687*st;transformed.x+=sw*h*h*.14*st;transformed.z+=cos(uT446*1.4+ip.z*.41)*h*h*.08*st;
 for(int i=0;i<${NI};i++){vec4 q=uI446[i];if(q.w>.01){vec2 d=ip.xz-q.xy;float dist=length(d);if(dist<q.z&&dist>.001){float push=(1.-dist/q.z)*q.w*(1.-frz*.85);transformed.xz+=normalize(d)*push*h*.55;transformed.y-=push*h*.2;}}}
 transformed.xz+=vec2(.8,.35)*fl*h*.35;transformed.y*=(1.-brn*.97)*(1.-fl*.7);
 vBurn446=brn;vIce446=frz;}`);

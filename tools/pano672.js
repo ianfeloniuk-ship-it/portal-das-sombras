@@ -8,7 +8,7 @@
 const T=global.THREE;if(!T||!global.Warrior127)return;
 const W=global.Warrior127,base=W.animate;if(typeof base!=='function')return;
 const G=new T.Vector3(0,-9.8,0),UP=new T.Vector3(0,1,0),v1=new T.Vector3(),v2=new T.Vector3(),q1=new T.Quaternion(),q2=new T.Quaternion(),m1=new T.Matrix4();
-const API=global.Pano672={on:true,stiff:6,damp:.9,stats:{models:0,steps:0}};
+const WV=new T.Vector3();const API=global.Pano672={on:true,stiff:6,damp:.9,wind:3.2,stats:{models:0,steps:0}};
 
 function setup(m){
   const chains={};m.model.traverse(o=>{const r=/^pano_(\d+)_(\d+)$/.exec(o.name||'');if(o.isBone&&r){(chains[r[1]]||(chains[r[1]]=[]))[+r[2]]=o;o.userData.rest672=o.quaternion.clone()}});
@@ -34,7 +34,9 @@ function step(m,dt){
     if(!C.p){C.p=rest.map(v=>v.clone());C.o=rest.map(v=>v.clone());for(let i=1;i<rest.length;i++)C.len[i]=rest[i].distanceTo(rest[i-1])}
     C.p[0].copy(rest[0]);C.o[0].copy(rest[0]);
     const k=1-Math.exp(-API.stiff*dt);
-    for(let i=1;i<C.p.length;i++){const p=C.p[i],o=C.o[i];v1.copy(p).sub(o).multiplyScalar(API.damp);o.copy(p);p.add(v1).addScaledVector(G,dt*dt);p.lerp(rest[i],k)}
+    /* v687: vento (tools/vento687.js) empurra o pano na direção do vento, mais forte nas rajadas */
+    try{const E=global.ENV||(typeof ENV!=='undefined'?ENV:null);const g=E&&E.gust?E.gust.value:1,d=E&&E.wd?E.wd.value:{x:1,y:0};WV.set(d.x,0,d.y).multiplyScalar(API.wind*g)}catch(_){WV.set(0,0,0)}
+    for(let i=1;i<C.p.length;i++){const p=C.p[i],o=C.o[i];v1.copy(p).sub(o).multiplyScalar(API.damp);o.copy(p);p.add(v1).addScaledVector(G,dt*dt).addScaledVector(WV,dt*dt*(.6+.4*Math.sin(i*1.7+performance.now()*.006)));p.lerp(rest[i],k)}
     for(let it=0;it<2;it++)for(let i=1;i<C.p.length;i++){
       const a=C.p[i-1],p=C.p[i];v1.copy(p).sub(a);const d=v1.length()||1e-6;p.copy(a).addScaledVector(v1,C.len[i]/d);
       for(const [c0,c1] of caps){v2.copy(c1).sub(c0);const L2=v2.lengthSq()||1e-6;const t=Math.max(0,Math.min(1,v1.copy(p).sub(c0).dot(v2)/L2));const q=v2.multiplyScalar(t).add(c0);v1.copy(p).sub(q);const dd=v1.length();if(dd<S.r&&dd>1e-6)p.addScaledVector(v1,(S.r-dd)/dd)}}
