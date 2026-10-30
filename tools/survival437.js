@@ -621,7 +621,7 @@
     const s = S();
     let best = null, bd = 4.2;
     scene.traverse(o => {
-      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'pinheiro_cinza'].includes(o.userData?.tripo153)) return;
+      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'carvalho_aster', 'pinheiro_cinza'].includes(o.userData?.tripo153)) return;
       for (let i = 0; i < o.count; i++) {
         o.getMatrixAt(i, _mat4);
         _pos.setFromMatrixPosition(_mat4);
@@ -718,7 +718,7 @@
     const s = S(); if (!s) return null;
     let target = null, bd = 6.0;
     scene.traverse(o => {
-      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'pinheiro_cinza'].includes(o.userData?.tripo153)) return;
+      if (!o.isInstancedMesh || !['oak', 'willow', 'fir', 'palm', 'dead', 'cherry', 'abeto', 'betula', 'brasa', 'cipreste_raizes', 'salgueiro_brejo', 'arvore_cristal_mana', 'acacia_espinhosa', 'baoba_zahar', 'betula_prateada', 'carvalho_aster', 'pinheiro_cinza'].includes(o.userData?.tripo153)) return;
       for (let i = 0, full = Math.max(o.count, o.userData.count415 || 0); i < full; i++) { /* v566: malha 'perto' só conta as próximas */
         o.getMatrixAt(i, _mat4);
         _pos.setFromMatrixPosition(_mat4);

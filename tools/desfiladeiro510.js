@@ -4,7 +4,7 @@
      1. Flancos em desfiladeiro (oeste: x = -15..-25; leste: x = +15..+25, de z = 88 a 260):
         Paredões maciços de rocha lascada (tripo-rocha-musgo154 (sem o antigo elmo rotulado como rochedo)) com 14 a 24 m de altura,
         degraus geológicos e quinas angulares (anti-primitivas). Colisão sólida via addCol / HASH.
-     2. Coníferas Nórdicas Gigantes (tripo-conifera153):
+     2. Coníferas Nórdicas Gigantes (flora/abeto_geada_adulta, v689):
         Pinheiros monumentais de 18 a 24 m de altura (escala 3x) empoleirados nas cristas e saliências das rochas,
         com galhos arqueados sobre a garganta que quebram o horizonte e filtram a luz solar.
      3. Enquadramento Cênico ("Vista Shot"):
@@ -239,7 +239,7 @@
     Promise.all([
       Promise.resolve(null), // slot legado do elmo removido; usa mMoss abaixo
       glb('tripo-rocha-musgo154'),
-      glb('tripo-conifera153'),
+      glb('flora/abeto_geada_adulta'), // v689: abeto de geada do Drive no lugar da conífera antiga do Tripo
       glb('tripo-muro154'),
       glb('tripo-pedras437')
     ]).then(([mBoulder, mMoss, mFir, mWall, mStones]) => {

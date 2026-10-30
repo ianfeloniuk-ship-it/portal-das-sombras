@@ -1,3 +1,9 @@
+## v693 (29/10/2026) — Carvalho de Aster do Drive no lugar do carvalho antigo
+- Pedido de Ian: usar só os modelos do Drive no lugar dos antigos (sem gerar nada); "tem muitas árvores que a gente já criou e estão usando o modelo antigo".
+- `models/flora/`: carvalho_aster (adulta 9 mil tri + leve 3 mil, jovem, broto, morta) do Drive `Arvores-Biomas-TRELLIS2-2026-10-23` (v2), refeitos no Blender; toco do Drive saiu chapado, fica o toco genérico. Estágios que faltavam: toco do mangue e da árvore de cristal, morta do baobá, broto e morta da acácia.
+- `tools/flora-regioes.js`: carvalho de Aster em campos, flores e floresta (com a bétula); `oak` (tripo-carvalho153) marcado `fora`. Id nas listas de 680, 270, survival437, capitais504, ecossistema550.
+- `tools/desfiladeiro510.js`: conífera antiga do Tripo → abeto de geada do Drive.
+- Teste: navegador, 400 sorteios por bioma sem carvalho antigo, GLBs novos 200, nenhum 404 novo.
 ## v692 (29/10/2026) — Água que enche com física + visual mais realista
 - Ian: «a água quando enche tá bem bugada»; «água realista que nem em Skyrim; quando alagar ela tem que ir pros lugares como na vida real»; «o lago onde pesca nas capitais e cidades, sai».
 - Bug: na enchente o shader do rio (`riverMat240`, 580) alargava a água 5 m, o que deixava o rio estreito e subindo pelas paredes do leito, com 75% de marrom chapado. O alargamento saiu.
