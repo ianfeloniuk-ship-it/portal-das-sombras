@@ -1,8 +1,40 @@
-## v701 (30/10/2026) — Fases da Lua, rachadura roxa e céu fechado na chuva
-- Ian: fases da Lua «até para lobisomem»; rachadura ligada à Fenda. Escolhas dele: rachadura roxa brilhante, lua cheia a cada 28 dias (`doenca681.js`, antes 8), lua cheia força o lobisomem à noite e volta ao amanhecer, selvagens da noite +20%. Céu e toast em `vento687.js`; ligado `400-loop.js`.
+## v707 (30/10/2026) — Fases da Lua, rachadura roxa e céu fechado na chuva
+- Ian: fases da Lua «até para lobisomem»; rachadura ligada à Fenda. Escolhas dele: rachadura roxa brilhante, lua cheia a cada 28 dias (`doenca681.js`, antes 8), lua cheia força o lobisomem à noite e volta ao amanhecer, selvagens da noite +20%. Céu e aviso em `vento687.js`; ligado `400-loop.js`.
 - Chuva fecha e escurece o céu (`RAIN626.k`/`cycle`). Teste Edge: cheia, quarto, chuva, sem erros. Não testado: transformação forçada jogada de verdade.
+- Nota: o commit v701 desfez por engano v701–706; este commit restaura tudo.
 
-﻿## v700 (29/10/2026) — Flecha se pega com E; sem brilho e sem avisos; textos com a tecla certa
+## v706 (30/10/2026) — Ondas com física real e curso de rio natural
+- Ian: «faz o que faltou para ficar perfeito; quero algo bem realístico».
+- `water154`: `Ripple` simula a equação da onda em 32 m ao redor do herói (128×128). O corpo empurra a água, a braçada bate, a chuva pinga e a onda rebate onde o chão passa da água. Vale em rio, lago, mar (`sea439`) e enchente (`enchente687`). Só muda a inclinação da superfície, sem brilho.
+- Rio: curvas menores e largura variável no curso e no leito, iguais no CPU (580) e no GLSL/CPU de `terrain245`; a regra de nado acompanha.
+- Teste: Edge sem tela (software), sem erro de shader, nado e rio em print. Não testado: mar, lago, enchente em print; FPS no PC real; pontes e estradas sobre o rio novo.
+
+## v705 (30/10/2026) — Espelho da mão esquerda corrigido
+- mirror670 espelhava a orientação absoluta do osso; agora espelha o movimento desde o repouso. Alcance do punho esquerdo: espada 1 de 11 para 52 cm (direita 53), adaga igual à direita, machado e maça saíram do negativo. Ainda abaixo da direita: golpe2, golpe3, pesado1 e pesado2 (causa não achada).
+
+## v704 (30/10/2026) — Socos próprios feitos no Blender
+- Combo sem arma de quem não é Guerreiro: direto, gancho e soco para cima, com clipes separados para cada mão (tools/blender/socos702.py, models/anim-soco_*.glb). Botão esquerdo = mão direita, direito = esquerda.
+- Teste no jogo: clipes certos por mão; punho avança 61 e 62 cm no direto. Falta conferir o visual na tela. Suspeita: o espelho automático (mirror670) deu pose errada nos socos; os _esq das armas não foram medidos.
+
+## v703 (30/10/2026) — Água se mexe quando você passa; margens irregulares
+- Ian: «fez um rastro de luz; quero que a água se movimente conforme eu passo»; «as bordas não são retas na vida real».
+- `water154`: `Wake701` guarda 12 pontos de esteira; o shader abre ondas na própria superfície (só inclina o reflexo, não soma brilho). `agua628`: corpo e braçadas usam isso; anéis brancos e respingos de passo saíram; só a entrada na água solta gotas, sem brilho.
+- `580`: rio com 48 trechos por pedaço e cada margem irregular do seu jeito; lago e barranco sem forma de círculo.
+- Teste: Edge sem tela, sem erro de shader. Ondas ficaram sutis no print. Não vale no mar nem na lâmina da enchente; lago não testado com print; a regra de nado segue a largura antiga do rio.
+
+## v702 (30/10/2026) — Geografia própria: costa recortada, picos com nome e marcos
+- **Pedido de Ian:** mapa com geometria própria; montanhas e lugares que se acham, como um morro com estátua gigante.
+- **Costa:** lobos no ângulo em `coast684` (`tools/terrain245.js`): península sudoeste, enseada nordeste, fiorde a leste, cauda sudeste. ~101 km².
+- **Serras:** RIDGE513 sinuosas (passagens intactas). **Picos/morros:** `PK692`, somados no CPU, no shader e na caixa de visibilidade dos pedaços de chão.
+- **Marcos:** `tools/marcos692.js`: Observatório do Véu, Colosso do Primevo, Farol dos Afogados, Forja Partida do Arquiteto, Guardiões da Pedra-Âncora. Cópia de longe sem névoa; registro ao chegar a 70 m. Nomes e textos são proposta, a confirmar com Ian. Mapa grande mostra marcos e picos.
+- **Ligado:** `lugares637.js` não cria lugar sobre picos e morros (aplainava em círculo); `mapa500.js` resgata posição salva inválida antes de montar o mundo.
+- **Teste:** navegador antes da remontagem; o texto foi refeito idêntico sobre a v701 por perda do clone. Colosso em guardião e mapa 3D não revistos em print.
+
+﻿## v701 (30/10/2026) — Golpe sem o giro do corpo
+- Ian: «o boneco dá uma girada em torno do eixo dele e dá um ataque muito maluco». Os clipes viravam o quadril e voltavam em 0,3 s. Durante o golpe a pose inteira gira de volta e fica 1/4 da virada (GIRO701, warrior-player127.js); vale para os dois botões.
+- Teste: quadril medido no jogo, pico de 17° caiu para 2° nos quadros amostrados. A imagem do teste ficou preta (câmera de cena de abertura), então o visual não foi conferido.
+
+## v700 (29/10/2026) — Flecha se pega com E; sem brilho e sem avisos; textos com a tecla certa
 - Ian: «não passar por cima e coletar… não me dá tudo de mão beijada… não quero que avise onde estão as flechas nem mostre… intuitivo» e «tu aperta E para as coisas; o jogo fala aperta F, mas F é para mudar a visão».
 - Flechas no chão (que erraram ou caíram do corpo do monstro) só se pegam olhando para elas e apertando a tecla de usar (E no layout Skyrim): a legenda mostra «E · PEGAR 2 FLECHAS DE FERRO». Tirados: coleta automática, brilho acima das flechas, contador no canto da tela e avisos do Narrador sobre onde estão. Ficam só as duas explicações do arco (ao usar e quando estão acabando).
 - Textos com a tecla de usar escrita como F ([F], (F), <b>F</b>, «F para …») agora dizem E (32 textos); abertura: «E / Enter · avançar».

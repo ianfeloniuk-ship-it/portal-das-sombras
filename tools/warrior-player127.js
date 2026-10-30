@@ -225,7 +225,7 @@
   // Trecho útil de cada golpe (início/fim em fração do clipe), para o golpe caber nos ~0,28 s do jogo.
   const WIN155={golpe1:[.08,.75],golpe2:[.08,.75],golpe3:[.08,.75]},WINTRIPO155={golpe1:[0,.7],golpe2:[0,.7],golpe3:[.05,.6],pesado1:[0,.7],pesado2:[0,.75],lanca1:[0,.65],adaga1:[0,.8],adaga2:[0,.8],arco1:[0,.85],arco2:[0,.85],cajado1:[0,.8],cajado2:[0,.8],magia_mao:[0,.8],soco:[0,.75]};
   // Golpe básico por tipo de arma da classe (combo 1-2-3). Clipes que faltarem caem no próximo da lista.
-  const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],spear_throw:['arremesso_flecha','arremesso_flecha','arremesso_flecha'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],brawl:['soco','adaga2','pesado2'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
+  const ATK155={sword:['golpe1','golpe2','golpe3'],axe:['pesado1','pesado2','golpe3'],mace:['pesado1','pesado2','pesado1'],shield:['pesado1','pesado2','pesado1'],spear:['lanca1','lanca1','pesado2'],spear_throw:['arremesso_flecha','arremesso_flecha','arremesso_flecha'],dagger:['adaga1','adaga2','adaga1'],bow:['arco1','arco2','arco1'],bow_bare:['arremesso_flecha','adaga2','arremesso_flecha'],staff:['cajado1','cajado2','cajado1'],bonestaff:['cajado1','cajado2','cajado1'],wand:['magia_mao','cajado1','magia_mao'],tome:['magia_mao','magia_mao','cajado2'],orb:['magia_mao','magia_mao','magia_mao'],fist:['soco','soco','golpe3'],brawl:['soco_jab','soco_gancho','soco_alto'],claw:['soco','soco','golpe3'],none:['golpe1','golpe2','golpe3']};
   let anim155=null;const BOWROT155=[0,Math.PI/2,0],BOWPOS155=[0,0,0];API.BOWROT155=BOWROT155;const BOWIDLE155=[0,0,0],BOWIDLEPOS155=[.11,0,.04];let BOWPALM155=.08;API.setPalm155=v=>BOWPALM155=v;API.BOWIDLE155=BOWIDLE155;API.BOWIDLEPOS155=BOWIDLEPOS155;API.BOWPOS155=BOWPOS155;
   // v155: arco do Arqueiro (Tripo, referência aprovada) na mão esquerda.
   let bow155=null,bowPending405=null,animPending405=null,readyPending405=null;
@@ -238,7 +238,8 @@
     animPending405=new Promise(res=>L.load(url,g=>{const clips={},tripo=g.animations.some(a=>a.name==='idle');if(tripo)for(const a of g.animations)clips[a.name]=a;else for(const [k,n] of Object.entries(CLIP155)){const c=g.animations.find(a=>a.name===n);if(c)clips[k]=c}
       anim155={scene:g.scene,clips,win:tripo?WINTRIPO155:WIN155,src:tripo?'tripo':'kaykit'};API.anim155src=anim155.src;try{API.esq670=mirror670(g.scene,clips,anim155.win)}catch(e){console.warn('v670 mão esquerda',e)}
       /* v635: clipe de rolar (Blender) entra no mesmo banco antes de o jogador ser montado */
-      if(tripo)L.load('models/anim-rolar632.glb?v=636',g2=>{try{const c=g2.animations.find(a=>a.name==='rolar');if(c){clips.rolar=c;API.anim155=Object.keys(clips)}}catch(_){}res(true)},undefined,()=>res(true));
+      /* v703 (Ian): socos feitos no Blender (tools/blender/socos702.py); as duas mãos saem do Blender */const socos702=()=>Promise.all(['soco_jab','soco_gancho','soco_alto','soco_jab_esq','soco_gancho_esq','soco_alto_esq'].map(n=>new Promise(r=>L.load('models/anim-'+n+'.glb?v=703',g3=>{const c=g3.animations[0];if(c){c.name=n;clips[n]=c}r()},undefined,()=>r())))).then(()=>{try{API.esq670=mirror670(g.scene,clips,anim155.win)}catch(e){console.warn('v703 socos',e)}API.anim155=Object.keys(clips);res(true)});
+      if(tripo)L.load('models/anim-rolar632.glb?v=636',g2=>{try{const c=g2.animations.find(a=>a.name==='rolar');if(c){clips.rolar=c;API.anim155=Object.keys(clips)}}catch(_){}socos702()},undefined,()=>socos702());
       API.anim155=Object.keys(clips);if(!tripo)res(true)},undefined,e=>{console.warn('Animações do Viajante não carregaram; usando animação por código.',e);res(false)})).then(ok=>{API.animsSettled=true;return ok});return animPending405;
   };
   /* v670 (Ian: «por arma, e por ataque mágico segurando magia, igual Skyrim»): golpes e magia da MÃO ESQUERDA.
@@ -247,13 +248,13 @@
   function mirror670(scene,clips,win){const rig=T.SkeletonUtils.clone(scene);rig.updateMatrixWorld(true);const nodes=[];rig.traverse(o=>{if(o!==rig&&o.name)nodes.push(o)});
     const by={};for(const o of nodes)by[o.name]=o;const flip=n=>n.includes('Left')?n.replace('Left','Right'):n.includes('Right')?n.replace('Right','Left'):n;
     const S=new T.Matrix4().makeScale(-1,1,1),rinv=new T.Matrix4().copy(rig.matrixWorld).invert(),mixer=new T.AnimationMixer(rig),made=[];
-    const tq=new T.Matrix4(),tp=new T.Vector3(),tr=new T.Quaternion(),ts=new T.Vector3();
+    const tq=new T.Matrix4(),tp=new T.Vector3(),tr=new T.Quaternion(),ts=new T.Vector3();/* v705: osso esquerdo e direito têm eixos diferentes; espelha o MOVIMENTO desde o repouso, não a orientação absoluta */const B0={},Bi={};for(const o of nodes){B0[o.name]=tq.copy(rinv).multiply(o.matrixWorld).clone();Bi[o.name]=B0[o.name].clone().invert()}
     for(const name of ESQ670){const c=clips[name];if(!c||clips[name+'_esq'])continue;
       const bound=new Set(c.tracks.map(t=>t.name.split('.')[0]));const fps=30,n=Math.max(2,Math.round(c.duration*fps)+1),times=new Float32Array(n);
       const Q={},P={};const act=mixer.clipAction(c);act.play();
       for(let i=0;i<n;i++){const t=Math.min(c.duration,i/fps);times[i]=t;mixer.setTime(t);rig.updateMatrixWorld(true);
         const W={};for(const o of nodes)W[o.name]=tq.copy(rinv).multiply(o.matrixWorld).clone();
-        const M={};for(const o of nodes){const src=W[flip(o.name)]||W[o.name];M[o.name]=S.clone().multiply(src).multiply(S)}
+        const M={};for(const o of nodes){const sn=W[flip(o.name)]?flip(o.name):o.name;M[o.name]=S.clone().multiply(W[sn]).multiply(Bi[sn]).multiply(S).multiply(B0[o.name])}
         for(const o of nodes){if(!bound.has(o.name)&&!bound.has(flip(o.name)))continue;const pm=o.parent&&o.parent!==rig&&M[o.parent.name]?M[o.parent.name]:null;
           const loc=pm?new T.Matrix4().copy(pm).invert().multiply(M[o.name]):M[o.name].clone();loc.decompose(tp,tr,ts);
           (Q[o.name]||(Q[o.name]=new Float32Array(n*4))).set([tr.x,tr.y,tr.z,tr.w],i*4);if(/Hips$/.test(o.name))(P[o.name]||(P[o.name]=new Float32Array(n*3))).set([tp.x,tp.y,tp.z],i*3)}}
@@ -324,12 +325,13 @@
       const hp0=(B.hips||ch).getWorldPosition(new T.Vector3()),bp=dag?hp0.clone().addScaledVector(R,.2).addScaledVector(F,.02).addScaledVector(U,.05):bow?cp.clone().addScaledVector(F,-.2).addScaledVector(U,-.05):/^(staff|bonestaff|wand)$/.test(m.kind195||'')?cp.clone().addScaledVector(F,-.2).addScaledVector(R,-.1).addScaledVector(U,-.42)/* v495: pegada mais baixa para a cabeça do cajado ficar logo acima do ombro */:cp.clone().addScaledVector(F,-.2).addScaledVector(R,.16).addScaledVector(U,.22);
       const k=S.s*S.s*(3-2*S.s),wp=hp.lerp(bp,k),wq=hq.slerp(bq,k),M=new T.Matrix4().compose(wp,wq,hs);
       W.parent.updateMatrixWorld(true);M.premultiply(new T.Matrix4().copy(W.parent.matrixWorld).invert());M.decompose(W.position,W.quaternion,W.scale)}}
+  const GIRO701=.25,Y701=new T.Vector3(0,1,0),qy701=new T.Quaternion(),qh701=new T.Quaternion();function yaw701(A){const h=A.hips.k.getWorldQuaternion(qh701).multiply(q2.copy(A.hips.restK).invert());return qy701.setFromAxisAngle(Y701,-2*Math.atan2(h.y,h.w)*(1-GIRO701))}
   function apply486(m,A,st,dt){
-    A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
+    A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);/* v701 (Ian): os clipes de golpe viram o quadril até ~90° e voltam em 0,3 s; durante o golpe a pose inteira gira de volta e fica só GIRO701 da virada */const fix701=st.atk>0&&!st.dead&&A.hips?yaw701(A):null;
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
     for(const p of A.pairs){
       // delta do KayKit desde a pose T, aplicado sobre a pose T do Viajante, em espaço do modelo.
-      const d=p.k.getWorldQuaternion(q1).multiply(q2.copy(p.restK).invert()),target=d.multiply(p.restB);
+      const d=p.k.getWorldQuaternion(q1).multiply(q2.copy(p.restK).invert());if(fix701)d.premultiply(fix701);const target=d.multiply(p.restB);
       p.b.parent.updateWorldMatrix(true,false);const pq=modelQ(p.b.parent,inv,q3);p.b.quaternion.copy(pq.invert().multiply(target));
     }
     // Altura do quadril (agachar, cair ao morrer); sem andar sozinho para os lados.

@@ -17,16 +17,16 @@
   const NEAR = 1200, FAR = 9000;
   const geo = new T.PlaneGeometry(NEAR, NEAR, 160, 160); geo.rotateX(-Math.PI / 2);
   const geoFar = new T.PlaneGeometry(FAR, FAR, 90, 90); geoFar.rotateX(-Math.PI / 2);
-  const U = { t: { value: 0 }, uDay: { value: 1 }, uY: { value: -.9 }, uAmp: { value: 1 }, uC: { value: new T.Vector2() }, uHole: { value: 0 } };
+  const U = { uRip: Ripple.U.uRip, uRipC: Ripple.U.uRipC, t: { value: 0 }, uDay: { value: 1 }, uY: { value: -.9 }, uAmp: { value: 1 }, uC: { value: new T.Vector2() }, uHole: { value: 0 } };
   const WAVE = 'uniform float uAmp;float wv(vec2 p,float t){return uAmp*(.18*sin(p.x*.21+t*1.3)+.12*sin(p.y*.17-t*1.1)+.06*sin((p.x+p.y)*.45+t*2.)+.05*sin((p.x-p.y)*.9+t*3.1));}';
   const mat = new T.ShaderMaterial({
     uniforms: U, transparent: true, depthWrite: false, side: T.DoubleSide,
     vertexShader: 'uniform float t;uniform float uY;varying float vDepth;varying float vSea;varying vec3 vW;' + WAVE +
       'void main(){vec4 w=modelMatrix*vec4(position,1.);w.y=uY+wv(w.xz,t);vDepth=uY-terrH245(w.xz);vSea=seaD439(w.xz);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-    fragmentShader: 'uniform float t;uniform float uDay;uniform vec2 uC;uniform float uHole;varying float vDepth;varying float vSea;varying vec3 vW;' + WAVE +
+    fragmentShader: window.RIP_GLSL + 'uniform float t;uniform float uDay;uniform vec2 uC;uniform float uHole;varying float vDepth;varying float vSea;varying vec3 vW;' + WAVE +
       'void main(){if(vDepth<-.05||vSea<-60.)discard;if(uHole>0.&&abs(vW.x-uC.x)<uHole&&abs(vW.z-uC.y)<uHole)discard;' +
       'float e=.4,hx=wv(vW.xz+vec2(e,0.),t)-wv(vW.xz-vec2(e,0.),t),hz=wv(vW.xz+vec2(0.,e),t)-wv(vW.xz-vec2(0.,e),t);' +
-      'vec3 n=normalize(vec3(-hx/(2.*e),1.,-hz/(2.*e)));vec3 v=normalize(cameraPosition-vW);if(!gl_FrontFacing)n=-n;' +
+      'vec2 rg=ripG(vW.xz)*7.;vec3 n=normalize(vec3(-hx/(2.*e)-rg.x,1.,-hz/(2.*e)-rg.y));vec3 v=normalize(cameraPosition-vW);if(!gl_FrontFacing)n=-n;' +
       'float k=1.-exp(-max(vDepth,0.)*.16);vec3 col=mix(vec3(.24,.78,.76),vec3(.03,.17,.34),k);' +
       'vec3 sky=mix(vec3(.08,.12,.25),vec3(.58,.78,.96),uDay);float fr=pow(1.-max(dot(n,v),0.),3.);col=mix(col,sky,fr*.55);' +
       'vec3 l=normalize(vec3(.4,.8,.3));col+=vec3(1.,.95,.85)*pow(max(dot(reflect(-l,n),v),0.),70.)*.7*uDay;' +
