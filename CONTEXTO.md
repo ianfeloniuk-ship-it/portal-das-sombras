@@ -1,3 +1,6 @@
+## v734 (30/10/2026)
+- Pedido de Ian: botao da Pocao de Pressao sobrava em outras janelas. Agora fica so na loja da Mira (tools/deep447.js).
+
 ## v733 (30/10/2026) — Correções do teste de 1 hora
 - Ian (formulário): grupo de Edran alcança sozinho no passo 4/6; fome e sede zeradas matam devagar; antes da 1ª Prova, Transbordo só rank F/E e metade das vezes.
 

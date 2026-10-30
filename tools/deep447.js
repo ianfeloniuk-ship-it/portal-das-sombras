@@ -51,7 +51,7 @@
       const r = os0.apply(this, arguments);
       try {
         if (id === 'pot' && ready()) {
-          const box = document.getElementById('modal'), price = Math.round(90 * ((typeof GR !== 'undefined' && GR[Math.min(9, rankOf())]) ? GR[Math.min(9, rankOf())].gold : 1));
+          const box = document.getElementById('mb'), price = Math.round(90 * ((typeof GR !== 'undefined' && GR[Math.min(9, rankOf())]) ? GR[Math.min(9, rankOf())].gold : 1));
           if (box && !box.querySelector('#mira447')) { const d = document.createElement('div'); d.id = 'mira447'; d.style.cssText = 'margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap'; d.innerHTML = '<span><b>Poção de Pressão</b> · mergulho fundo (+15 m por 5 min)</span><button class="btn">COMPRAR · ' + (typeof fmt === 'function' ? fmt(price) : price) + '</button>'; d.querySelector('button').onclick = () => { if (run.gold < price) { toast('Ouro insuficiente.'); return; } if (!U().add('pocao_pressao', 1, true)) return; run.gold -= price; toast('<b>Mira:</b> — Beba antes de descer nas fossas.', 3500); U().save(); }; box.appendChild(d); }
         }
       } catch (_) {}
