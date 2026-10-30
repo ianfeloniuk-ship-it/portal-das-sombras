@@ -50,7 +50,7 @@ function targetAndText(){
   if(s1.s===0){if(!s1.helped401&&!s1.fightDone&&!s1.killed)return {actTitle:'ATO I · O CHAMADO',step:1,totalSteps:6,text:'Ajude o guarda Edran na carroça tombada [E]',target:edran()};
    if(API.reclaiming())return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:'Recolha o cristal deixado pela criatura [E]',target:null};
    if(!s1.fightDone)return {actTitle:'ATO I · O CHAMADO',step:2,totalSteps:6,text:s1.cartRescued401?'Derrote a criatura da Fenda com os punhos':'Empurre a carroça para salvar os dois [E] ou derrote a criatura primeiro',target:w?.foes.find(e=>!e.dead)};
-   return {actTitle:'ATO I · O CHAMADO',step:3,totalSteps:6,text:s1.edranHelp401?'Ajude Edran a empurrar a carroça [E]':'Fale com Edran [E]',target:s1.edranHelp401?Campaign327.target():edran()};}
+   return {actTitle:'ATO I · O CHAMADO',step:3,totalSteps:6,text:s1.edranHelp401?'Ajude Edran a empurrar a carroça [E]':(s1.helped401?'Fale com Edran na carroça [E]':'Fale com Edran [E]'),target:(s1.edranHelp401||s1.helped401)?Campaign327.target():edran()};}
   if(s1.s===1&&window.Fronteira551?.active())return Fronteira551.objective();
   if(s1.s===1){const c=nearestCity(player.x,player.z).c;return {actTitle:'ATO I · O CHAMADO',step:4,totalSteps:6,text:'Siga pela estrada até o Portão de Aster',target:GATES341.filter(g=>g.c.name===c.name).sort((a,b)=>Math.hypot(a.x-player.x,a.z-player.z)-Math.hypot(b.x-player.x,b.z-player.z))[0]};}
   if(s1.s===2)return {actTitle:'ATO I · O CHAMADO',step:5,totalSteps:6,text:'Registre sua chegada com Lyra na Ordem da Fenda [E]',target:vendor('Lyra')};

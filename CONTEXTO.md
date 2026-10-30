@@ -1,3 +1,6 @@
+## v720 (30/10/2026) — Missão #1: objetivo certo depois de matar a gosma primeiro
+- Replay em tempo real (Edge+GPU, teclado/mouse reais): o empurrão da carroça NÃO trava (era artefato do teste anterior). Bug real: com a gosma morta antes de empurrar, o objetivo dizia «Fale com Edran [E]» e apontava para Edran, mas a interação fica na carroça. tools/intro401.js agora aponta para a carroça ("Fale com Edran na carroça [E]").
+
 ## v719 (30/10/2026) — Botão direito + rodinha troca a mão esquerda
 - O mousedown do botão direito era engolido antes do módulo; agora lê pointer events e e.buttons.
 
