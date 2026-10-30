@@ -7,7 +7,7 @@
   const mat = new T.MeshBasicMaterial({ color: 0xe8f4ff, transparent: true, opacity: .3, depthWrite: false, fog: true });
   const rings = new T.InstancedMesh(geo, mat, N); rings.frustumCulled = false; rings.userData.noCull695 = true; rings.userData.terrainAbsolute245 = true; rings.renderOrder = 6;
   const ND = 60, dpos = new Float32Array(ND * 3).fill(0), dgeo = new T.BufferGeometry(); dgeo.setAttribute('position', new T.BufferAttribute(dpos, 3));
-  const dmat = new T.PointsMaterial({ color: 0xb8c8cc, size: .06, transparent: true, opacity: .6, depthWrite: false }); /* v703: gota sem brilho */
+  const dmat = new T.PointsMaterial({ color: 0xdff0ff, size: .09, transparent: true, opacity: .85, depthWrite: false });
   const drops = new T.Points(dgeo, dmat); drops.frustumCulled = false; drops.userData.terrainAbsolute245 = true; drops.renderOrder = 6;
   const R = [], D = [];
   for (let i = 0; i < N; i++) R.push({ t: 1, x: 0, y: 0, z: 0, s: 1, sp: 1 });
@@ -19,8 +19,7 @@
     const n = Math.round(14 * power);
     for (let i = 0; i < n; i++) { const d = D[di++ % ND], a = Math.random() * 6.283, v = (1 + Math.random() * 1.6) * power; d.t = 0; d.x = x; d.y = y; d.z = z; d.vx = Math.cos(a) * v * .8; d.vz = Math.sin(a) * v * .8; d.vy = 2.2 + Math.random() * 2.4 * power }
   }
-  function splashDrops(x, y, z, power) { const n = Math.round(10 * power); for (let i = 0; i < n; i++) { const d = D[di++ % ND], a = Math.random() * 6.283, v = (1 + Math.random() * 1.6) * power; d.t = 0; d.x = x; d.y = y; d.z = z; d.vx = Math.cos(a) * v * .8; d.vz = Math.sin(a) * v * .8; d.vy = 2.2 + Math.random() * 2.4 * power } }
-  window.Agua628 = { ripple, splash, splashDrops };
+  window.Agua628 = { ripple, splash };
   const M = new T.Matrix4(), V = new T.Vector3(), S = new T.Vector3(), Q = new T.Quaternion(), HID = new T.Matrix4().makeScale(0, 0, 0);
   /* ---- embaixo d'água ---- */
   const ov = document.createElement('div');
@@ -40,18 +39,20 @@
       if (!ok) { under = false; ov.style.opacity = 0; return }
       if (rings.parent !== scene) { scene.add(rings); scene.add(drops) }
       const ws = surfaceAt(player.x, player.z), inW = !!(ws && !ws.frozen && ws.top - terrH(player.x, player.z) > .25);
-      if (inW && !wasIn) { splashDrops(player.x, ws.top + .03, player.z, .8); window.Wake701 && Wake701.add(player.x, player.z, 1.6) }
+      if (inW && !wasIn) splash(player.x, ws.top + .03, player.z, 1);
       wasIn = inW;
-      /* v703 (Ian: «fez um rastro de luz na água; quero que a água se movimente conforme eu passo»): nada de anéis brancos.
-         O corpo, as braçadas e os passos viram ondas na própria superfície (Wake701 no shader da água); só a entrada espirra gotas. */
-      const mv = Math.hypot(player.x - ox, player.z - oz), moving = mv > .002, swim = W() && W().swimming, WK = window.Wake701;
-      if (inW && WK) {
+      /* v699 (Ian: «a água se mova com minhas batidas»): braçadas espirram, nado deixa rastro, pisada na água rasa e no chão encharcado respinga */
+      const mv = Math.hypot(player.x - ox, player.z - oz), moving = mv > .002, swim = W() && W().swimming;
+      if (inW) {
         accT += dt;
         if (swim) {
-          const ph = Math.floor(now / 1000 * 4.2 / Math.PI);
-          if (moving && ph !== strokeP) { strokeP = ph; const f = player.face || 0, side = ph % 2 ? 1 : -1; WK.add(player.x + Math.sin(f) * .7 + Math.cos(f) * .35 * side, player.z + Math.cos(f) * .7 - Math.sin(f) * .35 * side, .8) }
-          if (accT > (moving ? .22 : 1.1)) { accT = 0; WK.add(player.x, player.z, moving ? 1 : .45) }
-        } else if (accT > (moving ? .28 : 1.2)) { accT = 0; WK.add(player.x, player.z, moving ? .8 : .35) }
+          const ph = Math.floor(now / 1000 * 4.2 / Math.PI); // uma batida a cada meia volta da braçada (água391: a=t*4.2)
+          if (moving && ph !== strokeP) { strokeP = ph; const f = player.face || 0, side = ph % 2 ? 1 : -1, hx = player.x + Math.sin(f) * .7 + Math.cos(f) * .35 * side, hz = player.z + Math.cos(f) * .7 - Math.sin(f) * .35 * side; splash(hx, ws.top + .03, hz, .45) }
+          if (accT > (moving ? .16 : .8)) { accT = 0; const f = player.face || 0; ripple(player.x - Math.sin(f) * .6, ws.top + .03, player.z - Math.cos(f) * .6, moving ? 1.5 : .8, moving ? .8 : .6) }
+        } else if (accT > (moving ? .3 : .9)) { accT = 0; ripple(player.x, ws.top + .03, player.z, moving ? .9 : .6, 1); if (moving) splash(player.x, ws.top + .03, player.z, .3) }
+      } else if (moving) {
+        const RS = window.RAIN626, soak = RS ? Math.max(RS.pud.value, RS.wet.value * .6) : 0;
+        stepT += dt; if (soak > .35 && stepT > .34) { stepT = 0; const y = terrH(player.x, player.z) + .04; ripple(player.x, y, player.z, .35 * soak, 1.8); splash(player.x, y, player.z, .18 * soak) }
       }
       ox = player.x; oz = player.z;
       const cw = surfaceAt(camera.position.x, camera.position.z);

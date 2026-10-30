@@ -10,17 +10,17 @@
   const geo = new T.PlaneGeometry(SPAN, SPAN, N, N); geo.rotateX(-Math.PI / 2);
   const cnt = geo.attributes.position.count, aBase = new Float32Array(cnt).fill(-999), aTer = new Float32Array(cnt);
   geo.setAttribute('aBase', new T.BufferAttribute(aBase, 1)); geo.setAttribute('aTer', new T.BufferAttribute(aTer, 1));
-  const U = { uRip: Ripple.U.uRip, uRipC: Ripple.U.uRipC, uTime: { value: 0 }, uRise: RAIN626.rise, uFlood: RAIN626.flood, uNight: window.NIGHT153U || (window.NIGHT153U = { value: 0 }) };
+  const U = { uTime: { value: 0 }, uRise: RAIN626.rise, uFlood: RAIN626.flood, uNight: window.NIGHT153U || (window.NIGHT153U = { value: 0 }) };
   const mat = new T.ShaderMaterial({
     uniforms: U, transparent: true, depthWrite: false, fog: false,
     vertexShader: `attribute float aBase,aTer;uniform float uRise;varying float vD;varying vec3 vW;
       void main(){vec4 w=modelMatrix*vec4(position,1.);float lv=aBase+uRise;w.y=lv;vD=lv-aTer;vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
-    fragmentShader: `${window.RIP_GLSL}uniform float uTime,uFlood,uNight;varying float vD;varying vec3 vW;
+    fragmentShader: `uniform float uTime,uFlood,uNight;varying float vD;varying vec3 vW;
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
       void main(){if(vD<.02||uFlood<.01)discard;float t=uTime;vec2 p=vW.xz;
         float e=.08;float w0=n(p*.9+t*.35)+n(p*2.3-t*.5)*.5;vec2 g=vec2(n((p+vec2(e,0))*.9+t*.35)+n((p+vec2(e,0))*2.3-t*.5)*.5-w0,n((p+vec2(0,e))*.9+t*.35)+n((p+vec2(0,e))*2.3-t*.5)*.5-w0)/e;
-        g+=ripG(vW.xz)*38.;vec3 nr=normalize(vec3(-g.x*.12,1.,-g.y*.12));vec3 V=normalize(cameraPosition-vW);
+        vec3 nr=normalize(vec3(-g.x*.12,1.,-g.y*.12));vec3 V=normalize(cameraPosition-vW);
         float fres=.04+.96*pow(1.-clamp(dot(nr,V),0.,1.),5.);
         vec3 sky=mix(vec3(.55,.66,.74),vec3(.08,.11,.2),uNight),body=mix(vec3(.17,.19,.15),vec3(.04,.05,.06),uNight);
         float deep=smoothstep(.0,1.4,vD);vec3 col=mix(body*1.3,body*.7,deep);col=mix(col,sky,fres*.8);

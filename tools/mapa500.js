@@ -57,13 +57,9 @@
           toast('<b>[MAR SEM FIM]</b> O mar além daqui não tem volta. O mundo conhecido acaba nesta água.',5000)}}}}catch(_){}
     return r};
   /* saves antigos: quem ficou fora do continente novo volta para a terra (cidade mais perto) */
-  function rescue692(){if(!player||(window.TER245&&TER245.OW.value.x>.5))return false;const d=Number.isFinite(player.x)&&Number.isFinite(player.z)?sdAt(player.x,player.z):1e9;if(d<=DEEP)return false;
-    let c=null,bd=1e18;for(let rz=-2;rz<=2;rz++)for(let rx=-2;rx<=2;rx++){const q=regionCity(rx,rz),dd=Math.hypot(q.x-player.x,q.z-player.z);if(!(dd>=bd)){bd=dd;c=q}}
-    if(!c)c=regionCity(0,0);player.x=c.x;player.z=c.z+8;return c}
-  /* v702: antes de montar o mundo também (posição salva inválida travava a montagem dos pedaços) */
-  if(typeof buildWorld==='function'){const bw0=buildWorld;buildWorld=function(){try{if(typeof L==='undefined'||!L||L.mode==='world')rescue692()}catch(_){}return bw0.apply(this,arguments)}}
-  setInterval(()=>{try{if(typeof started==='undefined'||!started||!player||L.mode!=='world'||L.special)return;
-    const c=rescue692();if(c)toast('<b>[MUNDO]</b> A costa mudou de lugar. A maré levou você de volta para <b>'+c.name+'</b>.',6000)}catch(_){}},1500);
+  setInterval(()=>{try{if(typeof started==='undefined'||!started||!player||L.mode!=='world'||L.special||(window.TER245&&TER245.OW.value.x>.5))return;
+    if(sdAt(player.x,player.z)<=DEEP)return;let c=null,bd=1e18;for(let rz=-2;rz<=2;rz++)for(let rx=-2;rx<=2;rx++){const q=regionCity(rx,rz),d=Math.hypot(q.x-player.x,q.z-player.z);if(d<bd){bd=d;c=q}}player.x=c.x;player.z=c.z+8;
+    toast('<b>[MUNDO]</b> A costa mudou de lugar. A maré levou você de volta para <b>'+c.name+'</b>.',6000)}catch(_){}},1500);
 
   window.Mapa500={LIM,CAP,inMap,capital:n=>{for(const k in CAP)if(CAP[k].name===n)return regionCity(...k.split(',').map(Number));return null}};
 })();

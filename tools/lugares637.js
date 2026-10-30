@@ -37,7 +37,7 @@
     if (h % 100 < 84) {
       const x = (ci + .18 + ((h >> 8) & 255) / 255 * .64) * CELL, z = (cj + .18 + ((h >> 16) & 255) / 255 * .64) * CELL;
       const nc = nearestCity(x, z);
-      if (nc.d >= (nc.c.capital ? 330 : 170) && x > -3800 && !(window.TER245 && TER245.PK692 && TER245.PK692.some(k => Math.hypot(x - k[0], z - k[1]) < k[3] + 60)) /* nada aplaina os picos e morros dos marcos */ && !onRoad(roads(x, z), x, z, 22) && !outpostPoint361(Math.round(x / CH), Math.round(z / CH)) && !ruinAt(Math.round(x / CH), Math.round(z / CH))) {
+      if (nc.d >= (nc.c.capital ? 330 : 170) && x > -3800 && !onRoad(roads(x, z), x, z, 22) && !outpostPoint361(Math.round(x / CH), Math.round(z / CH)) && !ruinAt(Math.round(x / CH), Math.round(z / CH))) {
         let wet = false; try { wet = riverClear239(x, z) || riverClear239(x + 14, z) || riverClear239(x - 14, z) || riverClear239(x, z + 14) || riverClear239(x, z - 14) } catch (_) { }
         if (!wet && terrH(x, z) < 110) {
           const B = biomeAt(x, z), tb = BIO[B]; if (tb) { const type = tb[(h >>> 24) % tb.length]; r = { id: ci + ',' + cj, x, z, type, B, ry: ((h >> 4) & 1023) / 1023 * TAU, cx: Math.round(x / CH), cz: Math.round(z / CH), h } }

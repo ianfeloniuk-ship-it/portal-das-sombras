@@ -12,23 +12,31 @@ let t=0,gT=0,gTarget=1;
 
 /* ---------- céu ---------- */
 const U={uTop:{value:new T.Color()},uHor:{value:new T.Color()},uSun:{value:new T.Vector3(-.43,.86,.32).normalize()},uNight:{value:0},uCov:{value:.45},
-  uOff:{value:new T.Vector2()},uT:{value:0},uRain:{value:0}};
+  uOff:{value:new T.Vector2()},uT:{value:0},uRain:{value:0},uPh:{value:1}};
 const sky=new T.Mesh(new T.SphereGeometry(900,48,24),new T.ShaderMaterial({uniforms:U,side:T.BackSide,depthWrite:false,depthTest:true,fog:false,
   vertexShader:'varying vec3 vD;void main(){vD=normalize(position);vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position=p.xyww;}',
-  fragmentShader:`uniform vec3 uTop,uHor,uSun;uniform float uNight,uCov,uT,uRain;uniform vec2 uOff;varying vec3 vD;
+  fragmentShader:`uniform vec3 uTop,uHor,uSun;uniform float uNight,uCov,uT,uRain,uPh;uniform vec2 uOff;varying vec3 vD;
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
 float fbm(vec2 p){float a=.5,s=0.;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*n2(p);p=m*p;a*=.5;}return s;}
+float lum687(vec3 c){return dot(c,vec3(.3,.6,.1));}
 void main(){vec3 d=normalize(vD);float y=d.y;
  float hz=pow(1.-max(y,0.),3.);vec3 col=mix(uTop,uHor,hz);
  if(y<0.)col=uHor;
  float sd=max(dot(d,uSun),0.),day=1.-uNight;
  col+=vec3(1.,.82,.55)*(pow(sd,8.)*.25+pow(sd,600.)*3.)*day*(1.-uRain*.8);
  vec3 mo=normalize(vec3(.55,.42,-.72));float md=dot(d,mo);
- if(uNight>.01&&y>0.){vec2 sp=d.xz/(y+.08)*90.;float st=step(.9965,h21(floor(sp)))*(.6+.4*sin(uT*3.+h21(floor(sp)+3.)*40.));
+ if(uNight>.01&&y>0.){vec2 sp=d.xz/(y+.08)*90.;float st=step(.9965,h21(floor(sp)))*smoothstep(.45,.1,length(fract(sp)-.5))*(.6+.4*sin(uT*3.+h21(floor(sp)+3.)*40.));
   col+=vec3(.85,.9,1.)*st*uNight*smoothstep(.02,.25,y);
-  float disc=smoothstep(.9994,.9997,md);float crater=fbm(d.xy*260.)*.35;col=mix(col,vec3(.93,.94,.86)-crater,disc*uNight);
-  col+=vec3(.55,.62,.8)*pow(max(md,0.),90.)*.35*uNight;}
+  /* v696: fase da Lua (uPh 1 = cheia) e rachadura roxa ligada à Fenda */
+  vec3 mr=normalize(cross(mo,vec3(0.,1.,0.))),mu=cross(mr,mo);vec2 mq=vec2(dot(d-mo,mr),dot(d-mo,mu))/.0245;float mr2=dot(mq,mq);
+  float disc=smoothstep(1.,.92,mr2)*step(0.,md);float z=sqrt(max(0.,1.-mr2));
+  float litM=uPh>.985?1.:smoothstep(-.05,.05,mq.x-cos(uPh*3.14159)*sqrt(max(0.,1.-mq.y*mq.y)));float crater=fbm(mq*3.+5.)*.35;
+  vec3 mc=mix(vec3(.05,.06,.1),vec3(.93,.94,.86)-crater,max(litM,.06));
+  float crk=abs(mq.y-.35*sin(mq.x*3.1)-.12*sin(mq.x*9.+1.))/.05;float cr=smoothstep(1.,0.,crk)*step(abs(mq.x),.85);
+  float br=cr*(.5+.6*smoothstep(.7,1.,uPh))*(.8+.2*sin(uT*1.7));mc=mix(mc,vec3(.62,.25,.95),clamp(br,0.,1.))+vec3(.5,.2,.9)*cr*.6*smoothstep(.8,1.,uPh);
+  col=mix(col,mc,disc*uNight);
+  col+=vec3(.55,.62,.8)*pow(max(md,0.),90.)*.35*uNight*(.2+.8*uPh)+vec3(.45,.15,.7)*pow(max(md,0.),400.)*.25*uNight*smoothstep(.8,1.,uPh);}
  if(y>.005){vec2 P=d.xz/(y+.12);
   float acc=0.,lit=0.;
   for(int L=0;L<3;L++){float fl=float(L);vec2 q=P*(.55+fl*.42)+uOff*(1.+fl*.35)+fl*13.7;
@@ -41,6 +49,7 @@ void main(){vec3 d=normalize(vD);float y=d.y;
   vec3 cNight=mix(vec3(.05,.07,.12),vec3(.22,.26,.36),lit/max(acc,.001)*(.5+.5*pow(max(md,0.),6.)));
   vec3 cc=mix(cDay,cNight,uNight);cc+=vec3(1.,.75,.45)*pow(sd,6.)*.35*day*acc;
   col=mix(col,cc,clamp(acc,0.,1.));}
+ col=mix(col,mix(vec3(.42,.45,.5),vec3(.04,.05,.08),uNight)+lum687(col)*.12,uRain*.85);
  col=mix(col,uHor,smoothstep(.12,0.,y)*.85);
  gl_FragColor=vec4(col,1.);
  #include <colorspace_fragment>
@@ -117,8 +126,10 @@ function tick(dt){if(!W.on)return;t+=dt;
   const on=inWorld();sky.visible=on;P.visible=on;F.visible=on;if(!on)return;
   /* céu */
   try{sky.position.copy(camera.position)}catch(_){}
-  const n=window.NIGHT153U?NIGHT153U.value:0,w=(L.dn&&L.dn.w)||0;
-  U.uNight.value=n;U.uRain.value=Math.min(1,w*1.2);U.uCov.value=Math.min(1,.42+w*.75);U.uOff.value.copy(W.off);U.uT.value=t;
+  const n=window.NIGHT153U?NIGHT153U.value:0,w=Math.max((L.dn&&L.dn.w)||0,window.RAIN626?(RAIN626.k||0)*(RAIN626.cycle===undefined?1:Math.min(1,RAIN626.cycle*2+.3)):0);/* v700: na chuva o céu fecha e escurece */
+  U.uNight.value=n;U.uRain.value=Math.min(1,w*1.2);U.uCov.value=Math.min(1,.42+w*.95);U.uOff.value.copy(W.off);U.uT.value=t;
+  try{if(window.Doenca681&&Doenca681.fase)U.uPh.value=Doenca681.fase()}catch(_){}
+  try{const lc=window.Doenca681&&Doenca681.luaCheia()&&n>.9;if(lc&&!W.lc696)toast('<b>[NARRADOR]</b> Lua cheia. A rachadura da Lua brilha e as feras da noite ficam mais fortes.',6000);W.lc696=lc}catch(_){}
   if(scene.background&&scene.background.isColor)U.uTop.value.copy(scene.background).multiplyScalar(.82);
   if(scene.fog)U.uHor.value.copy(scene.fog.color);
   try{U.uSun.value.copy(sun.position).sub(sun.target.position).normalize()}catch(_){}

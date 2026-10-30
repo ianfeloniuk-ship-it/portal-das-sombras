@@ -145,7 +145,7 @@ function updWorld(dt){updEcon(dt);
     const safeBuffer=inAto1&&((nc.c&&nc.c.name==='Aster'&&nc.d<430)||!!window.Fronteira551?.active());
     if(!safeBuffer&&wild<cap455&&nc.d>30){for(let t=0;t<10;t++){const a=rnd(0,TAU),d=rnd(28,44),x=P.x+Math.cos(a)*d,z=P.z+Math.sin(a)*d;if(nearestCity(x,z).d<48*CITYK||!worldFree(x,z,1.5))continue;
       const rk455=rankOf(),dg455=danger(x,z);/* v455 (Ian: morro rápido): selvagem aleatório nasce no máximo no rank do jogador (25% de chance de rank +1); região mais perigosa segue perigosa pelos portais, elites, chefes e masmorras */const gr=clamp(Math.max(Math.min(dg455,rk455+(Math.random()<.25?1:0)),rk455-3),0,9);const resident124=worldKinds124(gr,x,z),k=wpick(resident124).k;const n=k==='minion'?3:Math.random()<.4?2:1;
-      for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){e.hp*=1.3;e.maxhp*=1.3;e.dmg*=1.25;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
+      for(let i=0;i<n;i++){const e=spawnKind(i?wpick(resident124).k:k,x+rnd(-2,2),z+rnd(-2,2),gr,{wild:true});if(isNight()){const fm696=window.Doenca681&&Doenca681.luaCheia()?1.2:1;/* v696: lua cheia, +20% */e.hp*=1.3*fm696;e.maxhp*=1.3*fm696;e.dmg*=1.25*fm696;e.nightRewardBalance=true}bioMob(e,biomeAt(x,z))}break}}}
   // v155 (Ian): monstros que escaparam de um portal ficam no mundo mesmo longe de você (só não são desenhados); no máximo 80, saem os mais distantes.
   {const br=[];for(const e of enemies)if(e.wild&&!e.dead){const d=Math.hypot(e.x-P.x,e.z-P.z);if(e.breaker){e.m.root.visible=d<=220;br.push([d,e])}else if(d>90){scene.remove(e.m.root);e.gone=true}}
    if(br.length>80)br.sort((a,b)=>b[0]-a[0]).slice(0,br.length-80).forEach(([,e])=>{scene.remove(e.m.root);e.gone=true})}

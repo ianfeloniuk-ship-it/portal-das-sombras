@@ -3,7 +3,7 @@
    estágios com bônus e preço. Liga em tools/corpo659.js (golpe que fere grau 2+, hora do jogo, ficha Status → Corpo).
    PEGAR    Sangue Antigo = vampiro despertado (1 em 10); Maldição da Lua = lobisomem, só de noite (1 em 8);
             Praga do Túmulo = draugr (1 em 12). Só golpe que abre ferida de grau 2 ou mais; golpe defendido não fere.
-   INCUBA   Sangue 3 dias do jogo; Túmulo 2 dias; Lua até a próxima lua cheia (a cada 8 dias do jogo).
+   INCUBA   Sangue 3 dias do jogo; Túmulo 2 dias; Lua até a próxima lua cheia (a cada 28 dias do jogo, v696).
             Enquanto incuba, cura barata: Álcool Forte ou o médico (já existiam).
    ESTÁGIO  Vampiro: 1 Saciado (bebeu há menos de 1 dia), 2 Sedento (1–2 dias), 3 Faminto (2–3), 4 Sangue à tona (3+).
             Sol de dia, ao ar livre: −5/−10/−15/−15 de vida por segundo. Enxerga no escuro já no 1.
@@ -13,7 +13,7 @@
    Túmulo, bônus de dano à noite, crime, curas pesadas. */
 (function(global){
 'use strict';
-const CHUNK='[DOENÇA]',FULL=8;/* lua cheia a cada 8 dias do jogo */
+const CHUNK='[DOENÇA]',FULL=28;/* v696 (Ian): lua cheia a cada 28 dias do jogo */
 const DEF={
   sangue:{n:'Sangue Antigo',forma:'Vampiro',re:/Vampir/,em:10,inc:72,sinal:'Seus olhos amanhecem vermelhos e a água não mata a sede.'},
   lua:{n:'Maldição da Lua',forma:'Lobisomem',re:/Lobisomem/,em:8,noite:true,inc:'lua',sinal:'A ferida não fecha e você sonha com caça.'},
@@ -31,7 +31,9 @@ function luaEm(){const d=day(),f=d+((FULL-1-d%FULL+FULL)%FULL||FULL);return f-d}
 function luaCheia(){return day()%FULL===FULL-1}
 function estagio(m,c){if(!m)return 0;if(m.k==='sangue'){const h=c.hh-m.fed;return h<24?1:h<48?2:h<72?3:4}
   if(m.k==='tumulo'){const h=c.hh-m.meat;return h<72?1:h<144?2:3}return 0}
-const API=global.Doenca681={DEF,estagio,luaCheia,luaEm,
+const API=global.Doenca681={DEF,estagio,luaCheia,luaEm,FULL,
+  /* v696: fase da Lua 0..1 (1 = cheia, 0 = nova) para o céu (tools/vento687.js) */
+  fase(){const d=day()%FULL,a=((d+1)%FULL)/FULL*Math.PI*2;return .5+.5*Math.cos(a)},
   /* golpe que feriu: rola a doença da criatura (chamado por corpo659 com o grau da parte) */
   rolar(c,e,g,nome){if(g<2||c.disease||c.mal681)return;for(const [k,D] of Object.entries(DEF)){if(!D.re.test(nome||''))continue;
       if(D.noite&&!night())return;if(Math.random()*D.em>=1)return;API.pegar(c,k);return}},
@@ -57,6 +59,10 @@ const API=global.Doenca681={DEF,estagio,luaCheia,luaEm,
 let acc=0,last=0;
 if(typeof update==='function'){const u0=update;update=function(dt){const r=u0.apply(this,arguments);try{tick(Math.min(.1,dt||0))}catch(e){if(!API.err)API.err=String(e)}return r}}
 function tick(dt){API.ticks=(API.ticks||0)+1;const c=corpo(),m=c&&c.mal681;if(!m||!player||player.dead)return;acc+=dt;if(acc<1)return;acc-=1;
+  /* v696 (Ian): na noite de lua cheia o lobisomem vira fera sem escolher; ao amanhecer volta */
+  if(m.k==='lua'&&global.Transforma677&&!Transforma677.scene){const T6=Transforma677,on=luaCheia()&&night()&&(typeof L==='undefined'||L.mode==='world');
+    if(on&&!T6.cur){if(T6.start('lobisomem')){m.forced696=true;try{toast('<b>'+CHUNK+'</b> A lua cheia chama a fera. Você vira Lobisomem até o amanhecer.',7000)}catch(_){}}}
+    else if(!on&&m.forced696&&T6.cur==='lobisomem'){m.forced696=false;T6.end()}}
   if(m.k==='sangue'){const s=estagio(m,c),out=typeof L==='undefined'||L.mode==='world';
     if(!night()&&out&&s>0){const n=SOL[s];player.hp-=n;try{floater(player.x,player.z,'-'+n,'#ffb040')}catch(_){}
       if(!m.solAviso){m.solAviso=1;try{toast('<b>'+CHUNK+'</b> O sol queima. Procure abrigo ou espere a noite.',5000)}catch(_){}}
