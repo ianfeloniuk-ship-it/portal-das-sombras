@@ -1,3 +1,6 @@
+## v708 (30/10/2026) — O corpo vai junto no golpe
+- Ian: «o corpo não se movimenta junto, parece taekwondo». Socos refeitos: quadril e ombros giram para dentro do golpe e o tronco inclina. Golpes de arma: GIRO701 de 1/4 para 60% da virada.
+
 ## v707 (30/10/2026) — Fases da Lua, rachadura roxa e céu fechado na chuva
 - Ian: fases da Lua «até para lobisomem»; rachadura ligada à Fenda. Escolhas dele: rachadura roxa brilhante, lua cheia a cada 28 dias (`doenca681.js`, antes 8), lua cheia força o lobisomem à noite e volta ao amanhecer, selvagens da noite +20%. Céu e aviso em `vento687.js`; ligado `400-loop.js`.
 - Chuva fecha e escurece o céu (`RAIN626.k`/`cycle`). Teste Edge: cheia, quarto, chuva, sem erros. Não testado: transformação forçada jogada de verdade.
