@@ -248,13 +248,13 @@
   function mirror670(scene,clips,win){const rig=T.SkeletonUtils.clone(scene);rig.updateMatrixWorld(true);const nodes=[];rig.traverse(o=>{if(o!==rig&&o.name)nodes.push(o)});
     const by={};for(const o of nodes)by[o.name]=o;const flip=n=>n.includes('Left')?n.replace('Left','Right'):n.includes('Right')?n.replace('Right','Left'):n;
     const S=new T.Matrix4().makeScale(-1,1,1),rinv=new T.Matrix4().copy(rig.matrixWorld).invert(),mixer=new T.AnimationMixer(rig),made=[];
-    const tq=new T.Matrix4(),tp=new T.Vector3(),tr=new T.Quaternion(),ts=new T.Vector3();
+    const tq=new T.Matrix4(),tp=new T.Vector3(),tr=new T.Quaternion(),ts=new T.Vector3();/* v705: osso esquerdo e direito têm eixos diferentes; espelha o MOVIMENTO desde o repouso, não a orientação absoluta */const B0={},Bi={};for(const o of nodes){B0[o.name]=tq.copy(rinv).multiply(o.matrixWorld).clone();Bi[o.name]=B0[o.name].clone().invert()}
     for(const name of ESQ670){const c=clips[name];if(!c||clips[name+'_esq'])continue;
       const bound=new Set(c.tracks.map(t=>t.name.split('.')[0]));const fps=30,n=Math.max(2,Math.round(c.duration*fps)+1),times=new Float32Array(n);
       const Q={},P={};const act=mixer.clipAction(c);act.play();
       for(let i=0;i<n;i++){const t=Math.min(c.duration,i/fps);times[i]=t;mixer.setTime(t);rig.updateMatrixWorld(true);
         const W={};for(const o of nodes)W[o.name]=tq.copy(rinv).multiply(o.matrixWorld).clone();
-        const M={};for(const o of nodes){const src=W[flip(o.name)]||W[o.name];M[o.name]=S.clone().multiply(src).multiply(S)}
+        const M={};for(const o of nodes){const sn=W[flip(o.name)]?flip(o.name):o.name;M[o.name]=S.clone().multiply(W[sn]).multiply(Bi[sn]).multiply(S).multiply(B0[o.name])}
         for(const o of nodes){if(!bound.has(o.name)&&!bound.has(flip(o.name)))continue;const pm=o.parent&&o.parent!==rig&&M[o.parent.name]?M[o.parent.name]:null;
           const loc=pm?new T.Matrix4().copy(pm).invert().multiply(M[o.name]):M[o.name].clone();loc.decompose(tp,tr,ts);
           (Q[o.name]||(Q[o.name]=new Float32Array(n*4))).set([tr.x,tr.y,tr.z,tr.w],i*4);if(/Hips$/.test(o.name))(P[o.name]||(P[o.name]=new Float32Array(n*3))).set([tp.x,tp.y,tp.z],i*3)}}

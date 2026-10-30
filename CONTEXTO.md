@@ -1,3 +1,6 @@
+## v705 (30/10/2026) — Espelho da mão esquerda corrigido
+- mirror670 espelhava a orientação absoluta do osso; agora espelha o movimento desde o repouso. Alcance do punho esquerdo: espada 1 de 11 para 52 cm (direita 53), adaga igual à direita, machado e maça saíram do negativo. Ainda abaixo da direita: golpe2, golpe3, pesado1 e pesado2 (causa não achada).
+
 ## v704 (30/10/2026) — Socos próprios feitos no Blender
 - Combo sem arma de quem não é Guerreiro: direto, gancho e soco para cima, com clipes separados para cada mão (tools/blender/socos702.py, models/anim-soco_*.glb). Botão esquerdo = mão direita, direito = esquerda.
 - Teste no jogo: clipes certos por mão; punho avança 61 e 62 cm no direto. Falta conferir o visual na tela. Suspeita: o espelho automático (mirror670) deu pose errada nos socos; os _esq das armas não foram medidos.
