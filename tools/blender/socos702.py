@@ -61,7 +61,7 @@ def lean(o, deg):
     bpy.context.view_layer.update()
 GUARD_R = (vec(.35, .35, -.87), vec(.75, -.2, .63))
 GUARD_L = (vec(.35, -.35, -.87), vec(.75, .2, .63))
-def solve(right, left=GUARD_L, twist=0, drop=0):
+def solve(right, left=GUARD_L, twist=0, esq=False):
     reset()
     if twist:
         # o corpo vai junto: quadril e ombros giram para dentro do golpe e o tronco inclina para a frente
@@ -69,8 +69,19 @@ def solve(right, left=GUARD_L, twist=0, drop=0):
         lean(B('Spine'), abs(twist) * .3)
     aim(B('RightArm'), B('RightForeArm'), right[0]); aim(B('RightForeArm'), B('RightHand'), right[1])
     aim(B('LeftArm'), B('LeftForeArm'), left[0]); aim(B('LeftForeArm'), B('LeftHand'), left[1])
+    # base de luta: pé oposto à mão que soca vai à frente, joelhos dobrados; quanto mais forte o golpe, mais fundo
+    k = min(1, abs(twist) / 50)
+    fr, tr = ('Right', 'Left') if esq else ('Left', 'Right')
+    s = 1 if esq else -1
+    aim(B(fr + 'UpLeg'), B(fr + 'Leg'), vec(.38 + .14 * k, s * .1, -.9))
+    aim(B(fr + 'Leg'), B(fr + 'Foot'), vec(-.08 - .1 * k, s * .03, -1))
+    aim(B(tr + 'UpLeg'), B(tr + 'Leg'), vec(-.3 - .1 * k, -s * .14, -.93))
+    aim(B(tr + 'Leg'), B(tr + 'Foot'), vec(-.55 - .15 * k, -s * .05, -.82))
+    aim(B(fr + 'Foot'), B(fr + 'ToeBase'), vec(1, s * .15, -.2))
+    aim(B(tr + 'Foot'), B(tr + 'ToeBase'), vec(.75, -s * .3, -.55))
     bpy.context.view_layer.update()
     q = {n: o.rotation_quaternion.copy() for n, o in nodes.items()}
+    q['__drop'] = .035 + .03 * k
     return q
 # sinal do giro: positivo em torno de U gira a frente para a esquerda; o soco da direita avança o ombro direito
 guard = solve(GUARD_R)
@@ -83,9 +94,9 @@ report = {}
 mir = lambda v: v - R * (2 * v.dot(R))
 for name, keys in list(CLIPS.items()) + [(k + '_esq', v) for k, v in CLIPS.items()]:
     esq = name.endswith('_esq')
-    solved = [(f, solve(GUARD_R, (mir(p[0]), mir(p[1])), -t) if esq else solve(p, twist=t)) for f, p, t in keys]
+    solved = [(f, solve(GUARD_R, (mir(p[0]), mir(p[1])), -t, True) if esq else solve(p, twist=t)) for f, p, t in keys]
     # conferência: onde fica a mão no impacto (metros, no corpo)
-    (solve(GUARD_R, (mir(keys[2][1][0]), mir(keys[2][1][1])), -keys[2][2]) if esq else solve(keys[2][1], twist=keys[2][2])); bpy.context.view_layer.update()
+    (solve(GUARD_R, (mir(keys[2][1][0]), mir(keys[2][1][1])), -keys[2][2], True) if esq else solve(keys[2][1], twist=keys[2][2])); bpy.context.view_layer.update()
     h = pos(B('RightHand')) - pos(B('Spine2'))
     report[name] = {'frente': round(h.dot(F), 2), 'direita': round(h.dot(R), 2), 'cima': round(h.dot(U), 2)}
     joints = {k: list(pos(B(k))) for k in ['Hips', 'Spine2', 'Head', 'RightArm', 'RightForeArm', 'RightHand', 'LeftArm', 'LeftForeArm', 'LeftHand']}
@@ -106,7 +117,9 @@ for name, keys in list(CLIPS.items()) + [(k + '_esq', v) for k, v in CLIPS.items
             o.rotation_quaternion = solved[i][1][n].slerp(solved[j][1][n], t)
             o.keyframe_insert('rotation_quaternion', frame=f)
             if n == 'mixamorig:Hips':
-                o.location = base_loc[n]; o.keyframe_insert('location', frame=f)
+                dr = solved[i][1]['__drop'] * (1 - t) + solved[j][1]['__drop'] * t
+                o.location = base_loc[n] + (o.parent.matrix_world.inverted().to_3x3() @ (-U)) * dr if o.parent else base_loc[n] - U * dr
+                o.keyframe_insert('location', frame=f)
     sc.frame_start = 0; sc.frame_end = last
     bpy.ops.export_scene.gltf(filepath=outdir + '/anim-' + name + '.glb', export_format='GLB', export_animations=True, export_force_sampling=True, export_frame_range=True, export_yup=True, export_apply=False)
     for o in nodes.values(): o.animation_data.action = None

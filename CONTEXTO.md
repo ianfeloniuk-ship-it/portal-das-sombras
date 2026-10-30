@@ -1,3 +1,6 @@
+## v710 (30/10/2026) — Base de luta nos socos
+- Ian: «a perna vai pra frente, dobra um pouco». Socos com pé oposto à frente, joelhos dobrados e quadril descendo no impacto (tools/blender/socos702.py).
+
 ## v709 (30/10/2026) — Lua refeita por shader
 - Ian: «essa lua tá muito feia». `vento687.js`: Lua maior, mares, crateras, escurecimento nas bordas; rachadura por shader com galhos e energia roxa correndo. Só visual.
 
