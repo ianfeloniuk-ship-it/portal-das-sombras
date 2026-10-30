@@ -462,7 +462,7 @@
       const fwd = (() => { try { return (typeof input !== 'undefined' && input.z < -0.3) || (global.keys && (keys.KeyW || keys.ArrowUp)); } catch(_) { return false; } })();
       const power = S.lastWind >= 0.99;
       let name;
-      if(!k) name = (S.nSwing % 2) ? 'pu_l' : 'pu_r';
+      if(!k) name = 'pu_r'; /* v712: botão esquerdo = sempre a mão direita */
       else if(isMagicWeapon(k)) name = 'cast';
       else if(k === 'dagger') name = power ? 'pw' : 'dga';
       else if(k === 'spear') name = 'stab';
@@ -680,7 +680,7 @@
     try { apply(dt); } catch(e){ if(!FP._err658){ FP._err658 = 1; console.warn('fp658', e); } }
   };
   /* v662: golpe da mão esquerda (tools/maos662.js) */
-  FP.leftSwing = function(power){ S.swingL = { name: power ? 'pw' : (S.nSwingL++ % 2 ? 'b' : 'a'), t: 0, dur: power ? 0.5 : 0.34 }; };
+  FP.leftSwing = function(power){ const vazia = !global.run || !run.equip.wl; S.swingL = { name: vazia ? 'pu_r' : power ? 'pw' : (S.nSwingL++ % 2 ? 'b' : 'a'), t: 0, dur: power && !vazia ? 0.5 : 0.34 }; };
   S.nSwingL = 0;
   /* boca da magia/fluxo: palma da mão que lança */
   FP.muzzle = function(){

@@ -1,3 +1,6 @@
+## v713 (30/10/2026) — 1ª pessoa: cada botão soca com a sua mão
+- Botão esquerdo alternava direita e esquerda; agora é sempre a direita. Botão direito de mão vazia usava movimento de espada; agora é soco da esquerda.
+
 ## v712 (30/10/2026) — Meses com nome e data na tela
 - Ian: primeiro mês Primevo, resto na mesma linha. `MES710`: Primevo, Ancestral, Gênese, Alvorada, Semeio, Verdor, Solar, Âmbar, Colheita, Brumal, Cinzento, Invernal, Derradeiro. Data no HUD (`data710`). Mar e cachoeiras seguem `nightK710`.
 
