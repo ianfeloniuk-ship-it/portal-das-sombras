@@ -1,3 +1,6 @@
+## v735 (30/10/2026) — Hora e data de volta à tela
+- Ian: horário e dias não apareciam. Causa: `clock384`/`data710` escrevem em `#obj`, escondido por `dialogo520.js` desde a v532; a data da v712 nunca foi vista. Novo `tools/relogio735.js`: linha própria no topo, some em conversa, pausa e cena. Socos conferidos: clipes e código batem com esquerdo = mão direita, direito = mão esquerda.
+
 ## v734 (30/10/2026)
 - Pedido de Ian: botao da Pocao de Pressao sobrava em outras janelas. Agora fica so na loja da Mira (tools/deep447.js).
 
