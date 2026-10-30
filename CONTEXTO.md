@@ -1,3 +1,8 @@
+## v738 (30/10/2026) — Missão fixa #30 «Alvo Notório: Velha Míscaro»
+- `tools/miscaro733.js` (novo; v738 porque a main já estava na v737): depois da #29 (gatilho simplificado: contrato Rank D = concluir a #29), a Velha Míscaro (Rei Cogumelo, 3× vida) na Floresta Sombria ao sul de Aster (0, 230), com 4 anéis de micélio [E]. Os 4 queimados antes do combate: sem nuvem. Com algum anel de pé, a menos de 16 m dela você adormece 1 s a cada 8 s e preserva os esporos raros (`esporosRaros730`). Nos dois: título `titulo730` «Caçador da Velha Míscaro» (marca `bonusVida730` = 3%) e +150 de Reputação da Ordem. Estado em `profile.fixas545.q030`.
+- Simplificações: queimar = só E; a nuvem é um atordoamento curto; +3% de vida é marca; sem poção de Vontade nem cocheiros.
+- Teste (navegador embutido, E real, golpes reais): os dois ramos, na base da v732; depois do rebase sobre a v737 só conferi que o módulo carrega.
+
 ## v737 (30/10/2026) — Guerreiro com os socos novos e VFX dourado
 - Ian: «quero nele também, mas com os vfx shaders de guerreiro». `animWep173` usa 'brawl' para todos; `tools/socos737.js` envolve `attack` e, no Guerreiro sem arma, solta anel, faíscas e brilho dourados; o 3º soco tem clarão e racha o chão.
 
