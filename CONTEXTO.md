@@ -1,3 +1,8 @@
+## v732 (30/10/2026) — Missão fixa #29 «Sangue na Neve do Desfiladeiro»
+- `tools/torben732.js` (novo): depois da #28 (gatilho simplificado: Rank D da Vanguarda), no Desfiladeiro da Rota Norte (60, -240) Torben Halvorsen (figurante, 100 de vida na missão) está cercado por 3 Yetis Corrompidos; cada yeti vivo o fere 1/s (0,5/s se você luta a menos de 8 m dele). Ombro a ombro: matar os 3. Crista: E para escalar (leva a 16 m) e E para derrubar estalactites (2 yetis caem, o 3º fica atordoado). Torben de pé ao fim: `aliadoTorben` (figurante volta a aparecer na rota); caído: lore triste. Estado em `profile.fixas545.q029`.
+- Simplificações: Torben não luta; a vida dele é uma conta; sem animação de escalada; «dividir fogueira» = figurante parado.
+- Teste (navegador embutido, E real, golpes reais): os dois ramos (Torben terminou de pé nos dois: 89 e 55); o caso de Torben cair não foi testado.
+
 ## v731 (30/10/2026) — Missão fixa #28 «Alvo Notório: Barrão, o Quebra-Cercas»
 - `tools/barrao731.js` (novo): depois da #27, Barrão (gigante, 2× vida) nos Campos a leste (150, 0). 3 estacas da paliçada [E] em x = 120: quando as 3 estão de pé e ele as alcança, fica preso 4 s e perde 35% da vida (uma vez). Em campo aberto, luta direta. Nos dois: título `titulo728` «Caçador do Quebra-Cercas» (marca `bonusDano728` = 2%) e +75 de Reputação da Ordem (`addOrderRep`). Estado em `profile.fixas545.q028`.
 - Simplificações: gatilho = concluir a #27 (sem tela de contrato); sem moinho nem carroças; o +2% de dano é só marca; investida = a IA do gigante não persegue de longe, então o módulo o empurra para o jogador a 1,8× da velocidade.

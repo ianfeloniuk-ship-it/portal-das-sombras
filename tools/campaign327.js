@@ -1044,6 +1044,7 @@
     if(window.Juramento726?.active()){const t=Juramento726.objective()?.target;if(t)return t}
     if(window.Ronda727?.active()){const t=Ronda727.objective()?.target;if(t)return t}
     if(window.Barrao728?.active()){const t=Barrao728.objective()?.target;if(t)return t}
+    if(window.Torben729?.active()){const t=Torben729.objective()?.target;if(t)return t}
     const m=active().find(m=>'camp327:'+m.id===run.trackObj)||active().find(m=>!isSide(m));if(!m)return null;
     const s=state(m.id),sp=m.steps[s.s];
     if(sp.t==='go'){

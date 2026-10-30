@@ -55,6 +55,7 @@ function targetAndText(){
  if(window.Juramento726?.active())return Juramento726.objective();
  if(window.Ronda727?.active())return Ronda727.objective();
  if(window.Barrao728?.active())return Barrao728.objective();
+ if(window.Torben729?.active())return Torben729.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
