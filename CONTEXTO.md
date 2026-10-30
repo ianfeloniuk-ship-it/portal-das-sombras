@@ -1,3 +1,8 @@
+## v727 (30/10/2026) — Missão fixa #24 «Caçada às Partes de Deus»
+- `tools/cacada727.js` (novo): depois da #23, uma parte do Arquiteto [Grau Supremo] (colosso, 3× vida) marcha a 2 m/s pela Estrada Sul rumo a Aster (só enquanto você está a menos de 60 m). 3 armadilhas ácidas [E] na estrada (cada uma tira 12% da vida ao ser pisada). Matar a peça na estrada aberta (z acima de 150): Desfecho de Contenção (`contencao`, bairros intactos). Matar quando ela já chegou perto da cidade (z até 150): `bairrosDestruidos`. Estado em `profile.fixas545.q024`.
+- Simplificações: guardas sem IA nova; frasco ácido = dano fixo; Torvo e Brann só no aviso; desenvolvimento municipal = marca.
+- Teste (navegador embutido, E real, golpes reais, captura): os dois ramos. No ramo «esperar», a peça foi levada à mão de z 416 para 165 (para poupar minutos) e marchou sozinha até 135.
+
 ## v726 (30/10/2026) — Missão fixa #23 «A Confissão do Narrador e a Ponte Inexistente»
 - `tools/ponte726.js` (novo): depois da #22, em Aster colocar os documentos na mesa de Lyra [E] abre a conversa: confissão do Narrador (primeiro Viajante; matou o Primeiro Guardião; perdeu o corpo; entrada no Diário) e a ponte «atalho» do Desfiladeiro do Arco. Conferir com Selene e Aldric: a ponte caiu há décadas, patrulha viva, Diário separa «memória deslocada» de «sinal verificado» (entrada). Confiar: no Arco não há ponte, patrulha cai (marca `patrulhaPerdida`). Em ambos o jogador acompanha a caravana a pé até o Arco (Fronteira, ao sul de Aster). Estado em `profile.fixas545.q023`.
 - Simplificações: Selene/Aldric só na conversa; caravana = o jogador chegando; queda da patrulha = marca e aviso; a regra do Diário é só a entrada.

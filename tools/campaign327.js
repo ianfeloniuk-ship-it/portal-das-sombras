@@ -1039,6 +1039,7 @@
     if(window.Erebo724?.active()){const t=Erebo724.objective()?.target;if(t)return t}
     if(window.Portal725?.active()){const t=Portal725.objective()?.target;if(t)return t}
     if(window.Ponte726?.active()){const t=Ponte726.objective()?.target;if(t)return t}
+    if(window.Cacada727?.active()){const t=Cacada727.objective()?.target;if(t)return t}
     const m=active().find(m=>'camp327:'+m.id===run.trackObj)||active().find(m=>!isSide(m));if(!m)return null;
     const s=state(m.id),sp=m.steps[s.s];
     if(sp.t==='go'){
