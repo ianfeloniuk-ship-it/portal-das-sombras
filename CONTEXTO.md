@@ -1,3 +1,11 @@
+## v702 (30/10/2026) — Geografia própria: costa recortada, picos com nome e marcos
+- **Pedido de Ian:** mapa com geometria própria; montanhas e lugares que se acham, como um morro com estátua gigante.
+- **Costa:** lobos no ângulo em `coast684` (`tools/terrain245.js`): península sudoeste, enseada nordeste, fiorde a leste, cauda sudeste. ~101 km².
+- **Serras:** RIDGE513 sinuosas (passagens intactas). **Picos/morros:** `PK692`, somados no CPU, no shader e na caixa de visibilidade dos pedaços de chão.
+- **Marcos:** `tools/marcos692.js`: Observatório do Véu, Colosso do Primevo, Farol dos Afogados, Forja Partida do Arquiteto, Guardiões da Pedra-Âncora. Cópia de longe sem névoa; registro ao chegar a 70 m. Nomes e textos são proposta, a confirmar com Ian. Mapa grande mostra marcos e picos.
+- **Ligado:** `lugares637.js` não cria lugar sobre picos e morros (aplainava em círculo); `mapa500.js` resgata posição salva inválida antes de montar o mundo.
+- **Teste:** navegador antes da remontagem; o texto foi refeito idêntico sobre a v701 por perda do clone. Colosso em guardião e mapa 3D não revistos em print.
+
 ﻿## v701 (30/10/2026) — Golpe sem o giro do corpo
 - Ian: «o boneco dá uma girada em torno do eixo dele e dá um ataque muito maluco». Os clipes viravam o quadril e voltavam em 0,3 s. Durante o golpe a pose inteira gira de volta e fica 1/4 da virada (GIRO701, warrior-player127.js); vale para os dois botões.
 - Teste: quadril medido no jogo, pico de 17° caiu para 2° nos quadros amostrados. A imagem do teste ficou preta (câmera de cena de abertura), então o visual não foi conferido.
