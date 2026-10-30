@@ -77,7 +77,7 @@
     if (e.code === key('qsave')) { e.preventDefault(); quickSave(); return; }
     if (e.code === key('qload')) { e.preventDefault(); quickLoad(); return; }
     if (busy() && !box) return;
-    if (e.code === key('fav')) { e.preventDefault(); box ? close() : open(); return; }
+    if (e.code === key('fav')) { e.preventDefault(); if (window.Rodinha718) Rodinha718.swap(); else box ? close() : open(); return; }
     if (box) { close(); return; }
     if (e.code === key('wait')) { e.preventDefault(); waitHour(); }
   });

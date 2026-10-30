@@ -1,3 +1,6 @@
+## v718 (30/10/2026) — Rodinha e troca de mãos sem painel
+- tools/rodinha718.js: rodinha troca a mão direita (armas, magias, mão vazia); botão direito segurado + rodinha troca a esquerda; Q inverte as mãos, sem painel. Corrige: arma escolhida não tirava a magia da mão direita.
+
 ## v717 (30/10/2026) — Base de luta nos golpes com arma
 - Espada e adaga: tronco e braços do clipe original, pernas em base e quadril mais baixo (tools/blender/armas717.py, models/anim-base_*.glb); mão esquerda sai do espelho. Pesado1/2 ficaram de fora: o clipe refeito reduzia o alcance da direita de 33 para 14 cm.
 

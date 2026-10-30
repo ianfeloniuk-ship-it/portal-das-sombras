@@ -28,7 +28,7 @@ L.list=()=>{const have=owned();return lote().map(u=>have.find(it=>it.uid===u))};
 
 function switchTo(uid){
   if(!run||!player||player.dead||!started||paused||modalOpen)return false;
-  const cur=run.equip.w;if(cur&&cur.uid===uid)return false;
+  if(run.hands662)run.hands662.r=null;/* v718: arma escolhida tira a magia da mão direita */const cur=run.equip.w;if(cur&&cur.uid===uid)return false;
   const i=run.items.findIndex(x=>x.uid===uid);if(i<0)return false;
   const it=run.items[i];run.items.splice(i,1);if(cur)run.items.push(cur);run.equip.w=it;
   const mag=magicWeapon(it);let canArc=false;try{canArc=canUseMagicStyle()}catch(_){}
