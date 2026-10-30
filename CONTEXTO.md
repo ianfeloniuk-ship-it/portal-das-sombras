@@ -1,3 +1,9 @@
+## v703 (30/10/2026) — Água se mexe quando você passa; margens irregulares
+- Ian: «fez um rastro de luz; quero que a água se movimente conforme eu passo»; «as bordas não são retas na vida real».
+- `water154`: `Wake701` guarda 12 pontos de esteira; o shader abre ondas na própria superfície (só inclina o reflexo, não soma brilho). `agua628`: corpo e braçadas usam isso; anéis brancos e respingos de passo saíram; só a entrada na água solta gotas, sem brilho.
+- `580`: rio com 48 trechos por pedaço e cada margem irregular do seu jeito; lago e barranco sem forma de círculo.
+- Teste: Edge sem tela, sem erro de shader. Ondas ficaram sutis no print. Não vale no mar nem na lâmina da enchente; lago não testado com print; a regra de nado segue a largura antiga do rio.
+
 ## v702 (30/10/2026) — Geografia própria: costa recortada, picos com nome e marcos
 - **Pedido de Ian:** mapa com geometria própria; montanhas e lugares que se acham, como um morro com estátua gigante.
 - **Costa:** lobos no ângulo em `coast684` (`tools/terrain245.js`): península sudoeste, enseada nordeste, fiorde a leste, cauda sudeste. ~101 km².

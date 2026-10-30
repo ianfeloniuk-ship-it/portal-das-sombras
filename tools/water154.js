@@ -2,21 +2,28 @@
 /* v628: estado compartilhado da água viva (chuva acumulada -> nível sobe e a água alaga os baixios). rain387.js atualiza. */
 window.RAIN626=window.RAIN626||{wet:{value:0},pud:{value:0},k:0,wind:.25};
 Object.assign(window.RAIN626,{rise:window.RAIN626.rise||{value:0},flood:window.RAIN626.flood||{value:0},acc:window.RAIN626.acc||0});
+/* v703 (Ian: «quero que a água se movimente conforme eu passo por ela», sem rastro de luz): até 12 pontos de esteira
+   (x, z, início, força) que o shader transforma em ondas que se abrem na própria superfície. Só mexem no reflexo, não somam brilho. */
+const WAKE={value:Array.from({length:12},()=>new THREE.Vector4(0,0,-99,0))};let wakeI=0;
+window.Wake701={u:WAKE,add(x,z,s){const v=WAKE.value[wakeI++%12];v.set(x,z,performance.now()/1000,s||1)}};
 window.Water154=(()=>{
  const night=()=>window.NIGHT153U||(window.NIGHT153U={value:0});
  let shared=null;
  function material(){
   if(shared)return shared;
-  const uniforms={uTime:{value:0},uNight:night(),uRise:RAIN626.rise,uFlood:RAIN626.flood};
+  const uniforms={uTime:{value:0},uNight:night(),uRise:RAIN626.rise,uFlood:RAIN626.flood,uWake:WAKE};
   shared=new THREE.ShaderMaterial({uniforms,transparent:true,depthWrite:false,
    vertexShader:`uniform float uRise,uFlood;varying vec2 vUv;varying vec3 vW;void main(){vUv=uv;vec3 pp=position;pp.xy+=(uv-.5)*2.*uFlood*5.;vec4 w=modelMatrix*vec4(pp,1.);w.y+=uRise;vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
-   fragmentShader:`uniform float uTime,uNight,uFlood;varying vec2 vUv;varying vec3 vW;
+   fragmentShader:`uniform float uTime,uNight,uFlood;uniform vec4 uWake[12];varying vec2 vUv;varying vec3 vW;
     float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
     float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
     float waves(vec2 p,float t){return sin(p.x*2.1+t*1.1)*.5+sin(p.y*2.7-t*.9)*.4+sin((p.x+p.y)*3.9+t*1.7)*.25+n(p*3.+t*.4)*.6;}
     void main(){
      vec2 c=vUv-.5;float r=length(c)*2.;float t=uTime;vec2 p=vW.xz;
      float e=.03;float w0=waves(p,t);vec2 g=vec2(waves(p+vec2(e,0),t)-w0,waves(p+vec2(0,e),t)-w0)/e;
+     /* v703: esteira do corpo — anéis de onda que se abrem e somem (só inclinam a superfície) */
+     vec2 wk=vec2(0.);for(int i=0;i<12;i++){vec4 W=uWake[i];float age=uTime-W.z;if(age<0.||age>3.2)continue;vec2 dd=vW.xz-W.xy;float d=length(dd)+1e-3;float R=age*1.7;float env=exp(-abs(d-R)*2.2)*exp(-age*1.1)*W.w*smoothstep(0.,.15,age);wk+=dd/d*cos((d-R)*9.)*env;}
+     g+=wk*5.;
      vec3 nrm=normalize(vec3(-g.x*.18,1.,-g.y*.18));
      vec3 deep=vec3(.025,.075,.09),shallow=vec3(.12,.25,.24);/* v692: tons naturais (antes ciano de desenho) */
      vec3 col=mix(shallow,deep,smoothstep(.15,.85,1.-r)*.85);

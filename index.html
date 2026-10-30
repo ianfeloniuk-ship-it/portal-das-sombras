@@ -276,7 +276,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/boss160.js?v=454"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js?v=406"></script>
-<script src="tools/water154.js?v=692"></script>
+<script src="tools/water154.js?v=703"></script>
 <script src="tools/biome-materials132.js?v=535"></script>
 <script src="tools/citizens133.js?v=454"></script>
 <script src="tools/rift131.js?v=221"></script>
@@ -8338,23 +8338,23 @@ function lakeAt239(cx,cz){if(rh(cx,cz,21)%100>=4)return null;const x=cx*CH+(rh(c
  if(nearestCity(x,z).d<260||onRoad(roadSegs(x,z,1),x,z,r+8)||riverNear239(x,z).d<r+30)return null;const bio=biomeAt(x,z);if(bio==='deserto'||bio==='vulcao')return null;return {x,z,r}}
 function waterMat239(){if(CRY230.wr)return CRY230.wr;const t=Water154.mesh(1);const m=t.material;CRY230.wr=m;return m}
 function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH,z0=ch.cz*CH;
- const lk=lakeAt239(ch.cx,ch.cz);if(lk){const fz=['neve','cristal'].includes(biomeAt(lk.x,lk.z));let w;if(fz){const cg=new THREE.CircleGeometry(lk.r,40);cg.setAttribute('aFD',new THREE.Float32BufferAttribute(new Float32Array(cg.attributes.position.count*2).map((v,i)=>i%2?0:1),2));const mt=riverMat240();w=new THREE.Mesh(cg,mt);w.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000}}else w=Water154.mesh(lk.r);w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);w.userData.terrainRoot245=true;g.add(w);
+ const lk=lakeAt239(ch.cx,ch.cz);if(lk){const fz=['neve','cristal'].includes(biomeAt(lk.x,lk.z));let w;if(fz){const cg=new THREE.CircleGeometry(lk.r,40);cg.setAttribute('aFD',new THREE.Float32BufferAttribute(new Float32Array(cg.attributes.position.count*2).map((v,i)=>i%2?0:1),2));const mt=riverMat240();w=new THREE.Mesh(cg,mt);w.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000}}else{w=Water154.mesh(lk.r);const pa=w.geometry.attributes.position,sd=lk.x*.013+lk.z*.007;for(let i=1;i<pa.count;i++){const x=pa.getX(i),y=pa.getY(i),a=Math.atan2(y,x),k=1-.16*(.5+.5*Math.sin(a*3+sd))-.07*(.5+.5*Math.sin(a*7+sd*2.3))-.03*(.5+.5*Math.sin(a*13+sd));pa.setXY(i,x*k,y*k)}pa.needsUpdate=true;/* v703: lago sem forma de círculo */}w.rotation.x=-Math.PI/2;w.position.set(lk.x,.06,lk.z);w.userData.terrainRoot245=true;g.add(w);
   /* v391: o centro do lago agora é uma bacia de 2,5 m (terrain245); a água sobe junto enquanto a bacia está ativa. v395: sobe o quanto a bacia realmente afunda (estrada perto deixa mais rasa), para bater com o nado. */{const ob=w.onBeforeRender,T=window.TER245;w.onBeforeRender=function(...a){const on=!!T&&T.D.value.some(v=>v.w<0&&Math.abs(v.x-lk.x)<.01&&Math.abs(v.y-lk.z)<.01),y=.06+(on?(lk.lift395??=Math.max(0,terrH(lk.x+lk.r,lk.z)-terrH(lk.x,lk.z))):0);if(w.position.y!==y){w.position.y=y;w.updateMatrixWorld()}if(ob)ob.apply(this,a)}}
-  const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,40),toonS(0x5b4a33));bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);bank.userData.terrainRoot245=true;g.add(bank);{const T=window.TER245;bank.onBeforeRender=function(){const on=!!T&&T.D.value.some(v=>v.w<0&&Math.abs(v.x-lk.x)<.01&&Math.abs(v.y-lk.z)<.01),y=.04+(on?(lk.lift395??=Math.max(0,terrH(lk.x+lk.r,lk.z)-terrH(lk.x,lk.z))):0);if(bank.position.y!==y){bank.position.y=y;bank.updateMatrixWorld()}}}
+  const bank=new THREE.Mesh(new THREE.RingGeometry(lk.r-.2,lk.r+1.6,48),toonS(0x5b4a33));{const pa=bank.geometry.attributes.position,sd=lk.x*.013+lk.z*.007;for(let i=0;i<pa.count;i++){const x=pa.getX(i),y=pa.getY(i),a=Math.atan2(y,x),k=1-.16*(.5+.5*Math.sin(a*3+sd))-.07*(.5+.5*Math.sin(a*7+sd*2.3))-.03*(.5+.5*Math.sin(a*13+sd));pa.setXY(i,x*k,y*k)}pa.needsUpdate=true}/* v703: margem acompanha o contorno do lago */bank.rotation.x=-Math.PI/2;bank.position.set(lk.x,.04,lk.z);bank.userData.terrainRoot245=true;g.add(bank);{const T=window.TER245;bank.onBeforeRender=function(){const on=!!T&&T.D.value.some(v=>v.w<0&&Math.abs(v.x-lk.x)<.01&&Math.abs(v.y-lk.z)<.01),y=.04+(on?(lk.lift395??=Math.max(0,terrH(lk.x+lk.r,lk.z)-terrH(lk.x,lk.z))):0);if(bank.position.y!==y){bank.position.y=y;bank.updateMatrixWorld()}}}
   /* v391 (Ian): dá para nadar no lago; monstros continuam fora (tools/water391.js) */L.inter.push({type:'fish',chunk:ch,x:lk.x+lk.r+.8,z:lk.z,r:2.6,label:'F · PESCAR',use:fishView})}
  let rv=riverNear239(x0,z0);if(rv.src)rv=riverNear239(x0,z0+CH/2-1);/* v661: pedaço do poço da nascente */if(rv.d>CH)return;if(nearestCity(x0,z0).d<220)return;
  /* v240 (Ian): neve/cristal = gelo (dá para andar); deserto/vulcão = seco; estrada passa por cima do rio (mureta de pedra), água some sob a estrada. */
  const RS=roadSegs(x0,z0,1),cross=[];for(const [x1,z1,x2,z2] of RS){/* v513: estradas curvas — cruza onde a estrada troca de lado do rio */const f1=x1-riverCenter239(rv.b,z1),f2=x2-riverCenter239(rv.b,z2);if(f1*f2>0||f1===f2)continue;const t=f1/(f1-f2),cz=z1+(z2-z1)*t;if(Math.abs(cz-z0)>CH/2+6)continue;cross.push({x:riverCenter239(rv.b,cz),z:cz})}
  const fd=(x,z)=>{const b=snowB(x,z);return [1-Math.min(1,Math.max(0,(b-.25)/.08)),Math.min(1,Math.max(0,(b-.66)/.06))]},kind=(x,z)=>{const [f,d]=fd(x,z);return d>.95?0:f>.5?2:1};
- const N=24,pts=[],SRC661=RIO_SRC661[rv.b];for(let i=0;i<=N;i++){const z=z0-CH/2+i*CH/N;if(SRC661&&z<SRC661.z0)continue;const x=riverCenter239(rv.b,z),[f,d]=fd(x,z);pts.push({x,z,f,d,road:cross.some(c=>Math.abs(c.z-z)<5),k:kind(x,z)})}
- {let seg=[];const flushS=()=>{if(seg.length<2){seg=[];return}const pos=[],uv=[],fdA=[],idx=[];seg.forEach((p,i)=>{pos.push(p.x-riverWidth351(rv.b,p.z)/2,.06,p.z,p.x+riverWidth351(rv.b,p.z)/2,.06,p.z);uv.push(0,.5,1,.5);fdA.push(p.f,p.d,p.f,p.d);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
+ const N=48,pts=[],SRC661=RIO_SRC661[rv.b];for(let i=0;i<=N;i++){const z=z0-CH/2+i*CH/N;if(SRC661&&z<SRC661.z0)continue;const x=riverCenter239(rv.b,z),[f,d]=fd(x,z);pts.push({x,z,f,d,road:cross.some(c=>Math.abs(c.z-z)<5),k:kind(x,z)})}
+ {let seg=[];const flushS=()=>{if(seg.length<2){seg=[];return}const pos=[],uv=[],fdA=[],idx=[];seg.forEach((p,i)=>{const hw=riverWidth351(rv.b,p.z)/2,bk=s=>1-.24*(.5+.5*Math.sin(p.z*.19+s*4.1+rv.b)*Math.sin(p.z*.061+s*1.7))-.05*(.5+.5*Math.sin(p.z*.83+s*2.3));/* v703: margem irregular, cada lado do seu jeito */pos.push(p.x-hw*bk(0),.06,p.z,p.x+hw*bk(1),.06,p.z);uv.push(0,.5,1,.5);fdA.push(p.f,p.d,p.f,p.d);if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
   const gm=new THREE.BufferGeometry();gm.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));gm.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));gm.setAttribute('aFD',new THREE.Float32BufferAttribute(fdA,2));gm.setAttribute('terrainAnchor245',new THREE.Float32BufferAttribute(pos.flatMap((v,i)=>i%3===1?[]:[v]),2));gm.setIndex(idx);gm.computeVertexNormals();
   const mt=riverMat240(),m=new THREE.Mesh(gm,mt);m.onBeforeRender=()=>{mt.uniforms.uTime.value=performance.now()/1000};g.add(m);seg=[]};
   for(const p of pts){if(p.road){flushS();continue}seg.push(p)}flushS()}
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(riverWidth351(rv.b,c.z)+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
-function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood};
+function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood,uWake:base.uniforms.uWake};
  m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;').replace('pp.xy+=(uv-.5)*2.*uFlood*5.;','').replace('w.y+=uRise;','w.y+=uRise*(1.-aFD.x);');/* v692: rio nao alarga no shader (o leito fundo ja enche com o nivel; alargar deixava a agua estreita e subindo pelas paredes); gelo fica parado na enchente */
  m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5)*(1.-vFD.x));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
@@ -9715,7 +9715,7 @@ requestAnimationFrame(frame);
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=697"></script>
 <script src="tools/water391.js?v=700"></script>
-<script src="tools/agua628.js?v=700"></script>
+<script src="tools/agua628.js?v=703"></script>
 <script src="tools/map393.js?v=661"></script>
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
@@ -9851,9 +9851,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v702</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v703</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=702;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=703;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
