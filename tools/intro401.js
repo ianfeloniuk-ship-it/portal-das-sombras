@@ -49,6 +49,7 @@ function targetAndText(){
  if(window.Logos723?.active())return Logos723.objective();
  if(window.Erebo724?.active())return Erebo724.objective();
  if(window.Portal725?.active())return Portal725.objective();
+ if(window.Ponte726?.active())return Ponte726.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');

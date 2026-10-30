@@ -1,3 +1,8 @@
+## v726 (30/10/2026) — Missão fixa #23 «A Confissão do Narrador e a Ponte Inexistente»
+- `tools/ponte726.js` (novo): depois da #22, em Aster colocar os documentos na mesa de Lyra [E] abre a conversa: confissão do Narrador (primeiro Viajante; matou o Primeiro Guardião; perdeu o corpo; entrada no Diário) e a ponte «atalho» do Desfiladeiro do Arco. Conferir com Selene e Aldric: a ponte caiu há décadas, patrulha viva, Diário separa «memória deslocada» de «sinal verificado» (entrada). Confiar: no Arco não há ponte, patrulha cai (marca `patrulhaPerdida`). Em ambos o jogador acompanha a caravana a pé até o Arco (Fronteira, ao sul de Aster). Estado em `profile.fixas545.q023`.
+- Simplificações: Selene/Aldric só na conversa; caravana = o jogador chegando; queda da patrulha = marca e aviso; a regra do Diário é só a entrada.
+- Teste (navegador embutido, E real, cliques nas respostas, captura da conversa com Lyra): os dois ramos; a viagem até o Arco teve um trecho teleportado para poupar tempo.
+
 ## v725 (30/10/2026) — Missão fixa #22 «A Mão no Portal Primordial»
 - `tools/portal725.js` (novo): depois da #21, o Portal Primordial (clareira com anel de pedras, 140 m ao sul de Érebo) tem Aldric (figurante), 2 documentos antigos [E] e a Projeção da Mão do Arquiteto (colosso, 2× vida). Recolher os 2 documentos libera «E · ROMPER O ELO DE MANA DA MÃO»: a projeção se desfaz, Aldric sai vivo com os documentos, entrada no Diário («autoridade superior desconhecida») e marca `narradorConfessa` (a #23 usa). Avançar e matar a projeção: Aldric foge sem os documentos, nada é revelado. Estado em `profile.fixas545.q022`.
 - Simplificações: sem Abóbada Subterrânea; sem «dedos» separados; Aldric não luta; Lyra ausente.
