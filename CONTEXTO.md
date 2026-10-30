@@ -1,4 +1,8 @@
-﻿## v700 (29/10/2026) — Flecha se pega com E; sem brilho e sem avisos; textos com a tecla certa
+﻿## v701 (30/10/2026) — Golpe sem o giro do corpo
+- Ian: «o boneco dá uma girada em torno do eixo dele e dá um ataque muito maluco». Os clipes viravam o quadril e voltavam em 0,3 s. Durante o golpe a pose inteira gira de volta e fica 1/4 da virada (GIRO701, warrior-player127.js); vale para os dois botões.
+- Teste: quadril medido no jogo, pico de 17° caiu para 2° nos quadros amostrados. A imagem do teste ficou preta (câmera de cena de abertura), então o visual não foi conferido.
+
+## v700 (29/10/2026) — Flecha se pega com E; sem brilho e sem avisos; textos com a tecla certa
 - Ian: «não passar por cima e coletar… não me dá tudo de mão beijada… não quero que avise onde estão as flechas nem mostre… intuitivo» e «tu aperta E para as coisas; o jogo fala aperta F, mas F é para mudar a visão».
 - Flechas no chão (que erraram ou caíram do corpo do monstro) só se pegam olhando para elas e apertando a tecla de usar (E no layout Skyrim): a legenda mostra «E · PEGAR 2 FLECHAS DE FERRO». Tirados: coleta automática, brilho acima das flechas, contador no canto da tela e avisos do Narrador sobre onde estão. Ficam só as duas explicações do arco (ao usar e quando estão acabando).
 - Textos com a tecla de usar escrita como F ([F], (F), <b>F</b>, «F para …») agora dizem E (32 textos); abertura: «E / Enter · avançar».

@@ -324,12 +324,13 @@
       const hp0=(B.hips||ch).getWorldPosition(new T.Vector3()),bp=dag?hp0.clone().addScaledVector(R,.2).addScaledVector(F,.02).addScaledVector(U,.05):bow?cp.clone().addScaledVector(F,-.2).addScaledVector(U,-.05):/^(staff|bonestaff|wand)$/.test(m.kind195||'')?cp.clone().addScaledVector(F,-.2).addScaledVector(R,-.1).addScaledVector(U,-.42)/* v495: pegada mais baixa para a cabeça do cajado ficar logo acima do ombro */:cp.clone().addScaledVector(F,-.2).addScaledVector(R,.16).addScaledVector(U,.22);
       const k=S.s*S.s*(3-2*S.s),wp=hp.lerp(bp,k),wq=hq.slerp(bq,k),M=new T.Matrix4().compose(wp,wq,hs);
       W.parent.updateMatrixWorld(true);M.premultiply(new T.Matrix4().copy(W.parent.matrixWorld).invert());M.decompose(W.position,W.quaternion,W.scale)}}
+  const GIRO701=.25,Y701=new T.Vector3(0,1,0),qy701=new T.Quaternion(),qh701=new T.Quaternion();function yaw701(A){const h=A.hips.k.getWorldQuaternion(qh701).multiply(q2.copy(A.hips.restK).invert());return qy701.setFromAxisAngle(Y701,-2*Math.atan2(h.y,h.w)*(1-GIRO701))}
   function apply486(m,A,st,dt){
-    A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);
+    A.mixer.update(dt||0);A.rig.updateMatrixWorld(true);/* v701 (Ian): os clipes de golpe viram o quadril até ~90° e voltam em 0,3 s; durante o golpe a pose inteira gira de volta e fica só GIRO701 da virada */const fix701=st.atk>0&&!st.dead&&A.hips?yaw701(A):null;
     m.root.updateMatrixWorld(true);const inv=m.model.getWorldQuaternion(new T.Quaternion()).invert();
     for(const p of A.pairs){
       // delta do KayKit desde a pose T, aplicado sobre a pose T do Viajante, em espaço do modelo.
-      const d=p.k.getWorldQuaternion(q1).multiply(q2.copy(p.restK).invert()),target=d.multiply(p.restB);
+      const d=p.k.getWorldQuaternion(q1).multiply(q2.copy(p.restK).invert());if(fix701)d.premultiply(fix701);const target=d.multiply(p.restB);
       p.b.parent.updateWorldMatrix(true,false);const pq=modelQ(p.b.parent,inv,q3);p.b.quaternion.copy(pq.invert().multiply(target));
     }
     // Altura do quadril (agachar, cair ao morrer); sem andar sozinho para os lados.
