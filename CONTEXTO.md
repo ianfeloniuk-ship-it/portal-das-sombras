@@ -1,3 +1,8 @@
+## v723 (30/10/2026) — Missão fixa #20 «O Duelo com Logos e a Porta de Casa»
+- `tools/logos723.js` (novo): com as Âncoras #15–#19 feitas, a Fenda da Fronteira Central (50 m a leste do ponto da carroça, ao sul de Aster) tem anel de linhas luminosas e Logos (mercenário grande, 4× vida). Ao vencê-lo, a fresta da Projeção do Arquiteto (E, conversa estilo Skyrim): recusar = +3 de Vontade e Confiança de Lyra no máximo (marca `confiancaLyra`); tocar = Cicatriz da Saudade (−5% de regeneração de mana por 3 dias do jogo, via `pManaRegen281`; +10% de dano contra projeções = só marca `danoProjecao`). Estado em `profile.fixas545.q020`.
+- Simplificações: sem golpes novos de Logos nem linhas que se movem; sem projeções para atacar ainda.
+- Teste: caminhada até a fenda, golpes reais, E real na fresta, cliques reais nas duas respostas; regeneração −5% medida e expirando.
+
 ## v722 (30/10/2026) — Missão fixa #19 «A Quinta Âncora: O Julgamento do Sapo Rei em Verden»
 - `tools/verden722.js` (novo): depois da #18, em Verden (+2300, +2300) o Sapo Rei (sapo grande, 8× vida) guarda a Pedra-Âncora. A 15% de vida ele se rende («SE RENDEU»; aceitar com a tecla de interagir, rótulo «F · ACEITAR RENDIÇÃO»): vira guardião (marca `guardiao`), sem carcaça para a Mão. Golpe mortal: reclama o núcleo (marca `nucleo`). Estado em `profile.fixas545.q019`.
 - Parte ligada: `tools/biomes295.js` `fx()` — com `guardiao` a lentidão do pântano cai de −10% para −5% (a mesma regra do respeito do clã, v372). Texto do bioma não muda (valor base).

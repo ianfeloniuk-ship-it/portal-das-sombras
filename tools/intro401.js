@@ -46,6 +46,7 @@ function targetAndText(){
  if(window.Thalor686?.active())return Thalor686.objective();
  if(window.Urdan721?.active())return Urdan721.objective();
  if(window.Verden722?.active())return Verden722.objective();
+ if(window.Logos723?.active())return Logos723.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
