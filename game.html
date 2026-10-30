@@ -247,7 +247,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script src="tools/wagon369.js?v=369"></script>
-<script src="tools/terrain245.js?v=702"></script>
+<script src="tools/terrain245.js?v=706"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
 <script src="tools/warrior-player127.js?v=705"></script>
@@ -259,7 +259,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/boss160.js?v=454"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js?v=406"></script>
-<script src="tools/water154.js?v=703"></script>
+<script src="tools/water154.js?v=706"></script>
 <script src="tools/biome-materials132.js?v=535"></script>
 <script src="tools/citizens133.js?v=454"></script>
 <script src="tools/rift131.js?v=221"></script>
@@ -8312,10 +8312,10 @@ function riverAt239(x){const P=REG*CH*2,b=Math.floor((x-REG*CH*.5)/P);return b}
 /* v661 (Ian): todo rio de Primeva nasce do Mar de Thalor — a água sobe pela magia antiga dos afogados, corre por dentro da serra
    e despenca nas cachoeiras (tools/cachoeiras661.js). Cada rio começa no poço da cachoeira (z0); ao norte dele não há rio.
    O rio oeste (b=-1) faz uma curva até o pé da serra perto de Thalor. RIO_SRC661 fica em tools/terrain245.js (carrega antes). */
-function riverBase239(b,z){const P=REG*CH*2;return (b*P)+REG*CH*.5+Math.sin(z*.0043+b*1.7)*95+Math.sin(z*.011+b)*28+Math.sin(z*.035+b*2.3)*18+Math.sin(z*.079+b*3.1)*5}
+function riverBase239(b,z){const P=REG*CH*2;return (b*P)+REG*CH*.5+Math.sin(z*.0043+b*1.7)*95+Math.sin(z*.011+b)*28+Math.sin(z*.035+b*2.3)*18+Math.sin(z*.079+b*3.1)*5+Math.sin(z*.19+b*1.1)*2.4+Math.sin(z*.43+b*2.2)*1.1}/* v706: curso natural; igual em terrain245 */
 function riverCenter239(b,z){const c=riverBase239(b,z),S=RIO_SRC661[b];if(!S||S.x0==null)return c;let t=Math.min(1,Math.max(0,(z-S.z0)/S.L));t=t*t*(3-2*t);return c+(S.x0-riverBase239(b,S.z0))*(1-t)}
 function riverSource661(b){const S=RIO_SRC661[b];return S?{x:S.x0==null?riverBase239(b,S.z0):S.x0,z:S.z0,r:S.R}:null}
-function riverWidth351(b,z){return RIVW239*(1+.22*Math.sin(z*.047+b*1.3)+.12*Math.sin(z*.113+b*2.7))}
+function riverWidth351(b,z){return RIVW239*(1+.22*Math.sin(z*.047+b*1.3)+.12*Math.sin(z*.113+b*2.7)+.13*Math.sin(z*.29+b*.7)+.07*Math.sin(z*.67+b*1.9))}
 function riverNear239(x,z){const P=REG*CH*2,b=Math.round((x-REG*CH*.5)/P);const cxr=riverCenter239(b,z),S=RIO_SRC661[b];if(S&&z<S.z0+6)return {b,x:cxr,d:1e9,src:1};return {b,x:cxr,d:Math.abs(x-cxr)}}
 function lakeAt239(cx,cz){if(rh(cx,cz,21)%100>=4)return null;const x=cx*CH+(rh(cx,cz,22)%20-10),z=cz*CH+(rh(cx,cz,23)%20-10),r=12+rh(cx,cz,24)%12;
  if(nearestCity(x,z).d<260||onRoad(roadSegs(x,z,1),x,z,r+8)||riverNear239(x,z).d<r+30)return null;const bio=biomeAt(x,z);if(bio==='deserto'||bio==='vulcao')return null;return {x,z,r}}
@@ -8337,7 +8337,7 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
  for(const c of cross){if(!kind(c.x,c.z))continue;const wall=toonS(0x7d776c);for(const sz of [-4.6,4.6]){const pr=mesh(geo('par240',()=>new THREE.BoxGeometry(riverWidth351(rv.b,c.z)+4,.9,.6)),wall);pr.position.set(c.x,.45,c.z+sz);g.add(pr)}}
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
-function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood,uWake:base.uniforms.uWake};
+function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood,uRip:base.uniforms.uRip,uRipC:base.uniforms.uRipC};
  m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;').replace('pp.xy+=(uv-.5)*2.*uFlood*5.;','').replace('w.y+=uRise;','w.y+=uRise*(1.-aFD.x);');/* v692: rio nao alarga no shader (o leito fundo ja enche com o nivel; alargar deixava a agua estreita e subindo pelas paredes); gelo fica parado na enchente */
  m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5)*(1.-vFD.x));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
@@ -9721,7 +9721,7 @@ requestAnimationFrame(frame);
 <script src="tools/cart437.js?v=700"></script>
 <script src="tools/build437.js?v=700"></script>
 <script src="tools/otherworld460.js?v=654"></script>
-<script src="tools/sea439.js?v=628"></script>
+<script src="tools/sea439.js?v=706"></script>
 <script src="tools/cachoeiras661.js?v=692"></script>
 <script src="tools/boats440.js?v=579"></script>
 <script src="tools/terra444.js?v=458"></script>
@@ -9820,7 +9820,7 @@ requestAnimationFrame(frame);
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 <script src="tools/enchente630.js?v=634"></script>
-<script src="tools/enchente687.js?v=692"></script>
+<script src="tools/enchente687.js?v=706"></script>
 <script src="tools/clima695.js?v=697"></script>
 <script src="tools/teste-agua634.js?v=635"></script>
 <script src="tools/carga630.js?v=631"></script>

@@ -1,3 +1,9 @@
+## v706 (30/10/2026) — Ondas com física real e curso de rio natural
+- Ian: «faz o que faltou para ficar perfeito; quero algo bem realístico».
+- `water154`: `Ripple` simula a equação da onda em 32 m ao redor do herói (128×128). O corpo empurra a água, a braçada bate, a chuva pinga e a onda rebate onde o chão passa da água. Vale em rio, lago, mar (`sea439`) e enchente (`enchente687`). Só muda a inclinação da superfície, sem brilho.
+- Rio: curvas menores e largura variável no curso e no leito, iguais no CPU (580) e no GLSL/CPU de `terrain245`; a regra de nado acompanha.
+- Teste: Edge sem tela (software), sem erro de shader, nado e rio em print. Não testado: mar, lago, enchente em print; FPS no PC real; pontes e estradas sobre o rio novo.
+
 ## v705 (30/10/2026) — Espelho da mão esquerda corrigido
 - mirror670 espelhava a orientação absoluta do osso; agora espelha o movimento desde o repouso. Alcance do punho esquerdo: espada 1 de 11 para 52 cm (direita 53), adaga igual à direita, machado e maça saíram do negativo. Ainda abaixo da direita: golpe2, golpe3, pesado1 e pesado2 (causa não achada).
 
