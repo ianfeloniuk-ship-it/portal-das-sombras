@@ -153,7 +153,7 @@
       m.compose(v.set(o.x, -.9 + o.y + Math.sin(t * o.sp * 2 + o.ph) * .7, o.z), q, sc.set(o.s, o.s, o.s)); inst.setMatrixAt(i, m); } inst.instanceMatrix.needsUpdate = true; };
   }
 
-  function dayK() { try { const p = ((dayT % DAYLEN) + DAYLEN) % DAYLEN / DAYLEN, a = NIGHT0_377, b = NIGHT1_377, ss = (e0, e1, x) => { const q = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
+  function dayK() { try { if (typeof nightK710 === 'function') return 1 - nightK710(); const p = ((dayT % DAYLEN) + DAYLEN) % DAYLEN / DAYLEN, a = NIGHT0_377, b = NIGHT1_377, ss = (e0, e1, x) => { const q = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
     return p < a ? 1 - ss(a - .05, a, p) : p > b ? ss(b, b + .04, p) : 0; } catch (_) { return 1; } }
 
   let built = false, last = performance.now();

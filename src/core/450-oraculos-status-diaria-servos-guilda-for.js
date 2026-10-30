@@ -210,6 +210,8 @@ let dayT=120;const DAYLEN=3600,NIGHT0_377=2400/3600,NIGHT1_377=1.0;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
 function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else h=6+12*(p/n0);h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'🌙 ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
 /* v710 (Ian): calendário de 13 meses de 28 dias (364 dias) e duração da noite pela época do ano e pela região; em Ymiria, metade do ano sem sol e metade sem noite */
+const MES710=['Primevo','Ancestral','Gênese','Alvorada','Semeio','Verdor','Solar','Âmbar','Colheita','Brumal','Cinzento','Invernal','Derradeiro'];
+function data710(){const C=cal710();return C.dia+' de '+MES710[C.mes-1]+', ano '+C.ano}
 function cal710(){const d=Math.floor(dayT/DAYLEN),y=Math.floor(d/364),dy=d-y*364;return{dia:dy%28+1,mes:Math.floor(dy/28)+1,ano:y+1,dy}}
 function night710(){const c=(NIGHT0_377+NIGHT1_377)/2,h0=(NIGHT1_377-NIGHT0_377)/2,s=Math.cos(cal710().dy/364*TAU);let z=0;try{z=player?player.z:0}catch(_){}
  const polar=clamp((-z-2400)/900,0,1),h=clamp(h0+s*(.06+polar*.4),0,.52);return{c,h}}

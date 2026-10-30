@@ -1,3 +1,6 @@
+## v712 (30/10/2026) — Meses com nome e data na tela
+- Ian: primeiro mês Primevo, resto na mesma linha. `MES710`: Primevo, Ancestral, Gênese, Alvorada, Semeio, Verdor, Solar, Âmbar, Colheita, Brumal, Cinzento, Invernal, Derradeiro. Data no HUD (`data710`). Mar e cachoeiras seguem `nightK710`.
+
 ## v710 (30/10/2026) — Base de luta nos socos
 - Ian: «a perna vai pra frente, dobra um pouco». Socos com pé oposto à frente, joelhos dobrados e quadril descendo no impacto (tools/blender/socos702.py).
 ## v710 (30/10/2026) — Calendário e noite polar

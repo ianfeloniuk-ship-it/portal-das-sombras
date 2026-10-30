@@ -40,7 +40,7 @@
   const far = new T.Mesh(geoFar, matFar); far.userData.terrainAbsolute245 = true; far.frustumCulled = false; far.renderOrder = 3; far.visible = false; far.name = 'Sea439far';
   scene.add(surf, far);
   function dayK() {
-    try { const p = ((dayT % DAYLEN) + DAYLEN) % DAYLEN / DAYLEN; // noite entre NIGHT0_377 e NIGHT1_377
+    try { if (typeof nightK710 === 'function') return 1 - nightK710(); const p = ((dayT % DAYLEN) + DAYLEN) % DAYLEN / DAYLEN; // noite entre NIGHT0_377 e NIGHT1_377
       const a = NIGHT0_377, b = NIGHT1_377, ss = (e0, e1, x) => { const q = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
       return p < a ? 1 - ss(a - .05, a, p) : p > b ? ss(b, b + .04, p) : 0; } catch (_) { return 1; }
   }
