@@ -1,3 +1,8 @@
+## v724 (30/10/2026) — Missão fixa #21 «Quatorze Dias no Outro Mundo»
+- `tools/erebo724.js` (novo): depois da #20, a boca da Garganta das Cinzas (140 m ao sul da Fenda da Fronteira Central) vira a clareira de Érebo: matilha de 3 lobos «Devoradores de Cinza» e o Soberano da Cinza (colosso, 1,5× vida). Escolha: pegar a carne podre [E] e lançar a Isca de Carniça [G] (a matilha corre para a isca por 25 s; marca do Invólucro de Resina) ou lutar à força. Com isca: +20% de Vida máxima por 10 min ao vencer. Nos dois: o relógio do jogo avança 14 dias (`dayT`). Estado em `profile.fixas545.q021`.
+- Simplificações: Outro Mundo = clareira desta região (o planeta de `otherworld460.js` não é usado); eclipse = dois discos no céu; Invólucro = marca; bônus só de Vida (sem Estamina); sem simular cercos nos 14 dias.
+- Teste (navegador embutido, E e G reais, golpes reais, captura do HUD): os dois ramos. Lição: monstro `wild` a mais de ~80 m do jogador some (`gone`); a cena só nasce com o jogador a menos de 55 m.
+
 ## v723 (30/10/2026) — Missão fixa #20 «O Duelo com Logos e a Porta de Casa»
 - `tools/logos723.js` (novo): com as Âncoras #15–#19 feitas, a Fenda da Fronteira Central (50 m a leste do ponto da carroça, ao sul de Aster) tem anel de linhas luminosas e Logos (mercenário grande, 4× vida). Ao vencê-lo, a fresta da Projeção do Arquiteto (E, conversa estilo Skyrim): recusar = +3 de Vontade e Confiança de Lyra no máximo (marca `confiancaLyra`); tocar = Cicatriz da Saudade (−5% de regeneração de mana por 3 dias do jogo, via `pManaRegen281`; +10% de dano contra projeções = só marca `danoProjecao`). Estado em `profile.fixas545.q020`.
 - Simplificações: sem golpes novos de Logos nem linhas que se movem; sem projeções para atacar ainda.
