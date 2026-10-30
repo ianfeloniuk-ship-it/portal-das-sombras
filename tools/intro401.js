@@ -58,6 +58,7 @@ function targetAndText(){
  if(window.Torben729?.active())return Torben729.objective();
  if(window.Miscaro730?.active())return Miscaro730.objective();
  if(window.Escolta731?.active())return Escolta731.objective();
+ if(window.Orelha732?.active())return Orelha732.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
