@@ -1,3 +1,9 @@
+## v694 (29/10/2026) — Puxada do arco na balística, recolher flecha cravada
+- Corrige a v690: ela forçava toda flecha a 50 m/s e anulava a puxada da v588. Agora puxada cheia = 50 m/s; puxada curta = mais lenta (mesma curva da v588) e cai mais cedo (a 30 m: 1,8 m cheia, 3,4 m na puxada mínima).
+- Flecha cravada no chão: passar a menos de 1,6 m recolhe (volta 1 flecha do mesmo tipo à bolsa). Some sozinha depois de 20 s.
+- Botão do título "DESPERTAR" → "ATRAVESSAR"; "Novo despertar (modo teste)" → "Nova travessia (modo teste)" (identidade v688).
+- Teste no navegador (partida carregada): flecha a 50 m/s sobe perdendo força e crava no relevo; magia de fogo sem queda; coleta 0 → 1 flecha; sem erro novo no console.
+
 ## v693 (29/10/2026) — Carvalho de Aster do Drive no lugar do carvalho antigo
 - Pedido de Ian: usar só os modelos do Drive no lugar dos antigos (sem gerar nada); "tem muitas árvores que a gente já criou e estão usando o modelo antigo".
 - `models/flora/`: carvalho_aster (adulta 9 mil tri + leve 3 mil, jovem, broto, morta) do Drive `Arvores-Biomas-TRELLIS2-2026-10-23` (v2), refeitos no Blender; toco do Drive saiu chapado, fica o toco genérico. Estágios que faltavam: toco do mangue e da árvore de cristal, morta do baobá, broto e morta da acácia.

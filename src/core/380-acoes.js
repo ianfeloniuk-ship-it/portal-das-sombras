@@ -105,7 +105,7 @@ function attack(){if(typeof inConversation==='function'&&inConversation()){if(ty
 }
 function autoAim357(a){let best=null,dist=16;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz),delta=Math.atan2(dx,dz)-a;if(d<dist&&Math.abs(Math.atan2(Math.sin(delta),Math.cos(delta)))<.45&&los(player.x,player.z,e.x,e.z)){dist=d;best=e}}return best?projectileBody253(best):null}
 /* v690 (Ian, 29/10): balística real. Projétil FÍSICO (flecha, virote, adaga, lança, pedra arremessada) cai pela gravidade;
-   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão. Monstro arqueiro compensa a queda na mira. */
+   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão; passar por cima recolhe (v691: a puxada do arco define a velocidade). Monstro arqueiro compensa a queda na mira. */
 const BAL690={g:9.8,arrow:50,life:8,stuck:20},stuck690=[];
 function physProj690(t){return !MAGIC_PT281.test(t||'')}
 function ballisticPitch690(v,d,dy){const g=BAL690.g,v2=v*v,disc=v2*v2-g*(g*d*d+2*dy*v2);return disc<0?Math.PI/4:Math.atan((v2-Math.sqrt(disc))/(g*d))}
@@ -130,15 +130,18 @@ function shoot(x,z,a,spd,dmg,team,col,type='orb',o={}){
   const y=o.worldOriginY253??((o.originY??(1.1+(nearCaster?(player.jy||0):0)))+(o.terrainLaunch245??terrH(x,z)));
   let dir=o.dir3D?Projectiles253.unit(o.dir3D):{x:Math.sin(a),y:0,z:Math.cos(a)};
   if(target){dir=Projectiles253.aim3D({x,y,z},target);const da=a-player.face,cs=Math.cos(da),sn=Math.sin(da),dx=dir.x;dir.x=dx*cs+dir.z*sn;dir.z=dir.z*cs-dx*sn;}
-  const phys690=physProj690(type);if(phys690&&team==='player'&&/^(arrow|sarrow)$/.test(type))spd=Math.max(spd,BAL690.arrow);
+  const phys690=physProj690(type);const draw691=window.__bowDraw588;if(phys690&&team==='player'&&/^(arrow|sarrow)$/.test(type))spd=draw691!=null?BAL690.arrow*(.65+.35*draw691):Math.max(spd,BAL690.arrow);
+  const arrowId691=phys690&&team==='player'&&type==='arrow'&&window.Flechas663?Flechas663.current():null;
   const holder=projModel(type,col,sc,o.vis156??o.basicClass);holder.userData.terrainAbsolute245=true;holder.position.set(x,y,z);holder.rotation.set(-Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),Math.atan2(dir.x,dir.z),0,'YXZ');scene.add(holder);
-  projs.push({elem300:o.elem300,dtype281:o.dtype281||(team==='player'?curDType281:null),originY:y,y,vy:dir.y*spd,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:dir.x*spd,vz:dir.z*spd,dmg,team,col,life:phys690?BAL690.life:1.4,grav690:phys690?BAL690.g:0,pierce:!!o.pierce,hit:new Set(),r:sc>4?1.3:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
+  projs.push({elem300:o.elem300,dtype281:o.dtype281||(team==='player'?curDType281:null),originY:y,y,vy:dir.y*spd,fromBoss111:!!o.fromBoss111,stun:o.stun,mesh:holder,ptype:type,tt:0,x,z,vx:dir.x*spd,vz:dir.z*spd,dmg,team,col,life:phys690?BAL690.life:1.4,grav690:phys690?BAL690.g:0,arrowId691,pierce:!!o.pierce,hit:new Set(),r:sc>4?1.3:sc>1.4?.7:.4,kb:o.kb??(team==='player'?.35:1.2),fromPlayer:o.fromPlayer??team==='player',longshot:!!o.longshot,originX:x,originZ:z,slow:o.slow||0,burn:o.burn||0,basicClass:o.basicClass,skillHit:!!o.skillHit,bounces:o.bounces||0,third:!!o.third});
 }
 function projectileImpact253(p){if(window.Golpes487&&!Golpes487.legacyDepth&&p.team==='player'&&!p.skillHit&&Golpes487.basic(p.basicClass??profile.cls)&&p.ptype==='tdagger')return Golpes487.legacy(()=>projectileImpact253(p));const start=fxs.length;fxBurst(p.x,p.y,p.z,p.col,5,3);for(let i=start;i<fxs.length;i++)fxs[i].o.userData.terrainAbsolute245=true;
   if(window.Flip470){const elem=p.elem300||(p.ptype==='fire'?'fogo':p.ptype==='spark'?'raio':p.ptype==='ice'?'gelo':p.ptype==='soul'?'trevas':p.ptype==='holy'?'luz':null);if(elem==='fogo')Flip470.spawn('explosion',p.x,p.y,p.z,2.2,{grow:.3});else if(elem==='raio')Flip470.spawn('lightning',p.x,p.y+.2,p.z,2.2,{grow:.15});else if(elem==='gelo')Flip470.spawn('water',p.x,p.y,p.z,2.0,{grow:.25});else if(elem==='trevas')Flip470.spawn('smoke',p.x,p.y,p.z,1.8,{tint:0x4c1d95,grow:.3});else if(elem==='luz')Flip470.spawn('rune',p.x,p.y,p.z,1.6,{grow:.1});else if(p.ptype==='arrow'||p.ptype==='sarrow'||p.ptype==='tspear')Flip470.spawn('dust',p.x,p.y,p.z,1.6,{grow:.3,op:.7});}
 }
 function updateProjectiles253(dt){
-  for(let i=stuck690.length-1;i>=0;i--){if((stuck690[i].t-=dt)<=0){scene.remove(stuck690[i].m);stuck690.splice(i,1)}}
+  for(let i=stuck690.length-1;i>=0;i--){const st=stuck690[i];
+    if(st.id&&player&&!player.dead&&Math.hypot(st.x-player.x,st.z-player.z)<1.6&&window.Surv437){try{Surv437.add(st.id,1,true);floater(player.x,player.z,'+1 flecha','#e8d8a8')}catch(_){}scene.remove(st.m);stuck690.splice(i,1);continue}
+    if((st.t-=dt)<=0){scene.remove(st.m);stuck690.splice(i,1)}}
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],lease487=window.Golpes487&&Golpes487.projectile(p),priorSkill487=window.Golpes487?.legacySkill;if(lease487){Golpes487.legacyDepth++;Golpes487.legacySkill=p.fx487.sk}try{const pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
     p.life-=pdt;if(p.grav690)p.vy=(p.vy||0)-p.grav690*pdt;p.x+=p.vx*pdt;p.y=before.y+(p.vy||0)*pdt;p.z+=p.vz*pdt;
     if(p.grav690)p.mesh.rotation.set(-Math.atan2(p.vy,Math.hypot(p.vx,p.vz)),Math.atan2(p.vx,p.vz),0,'YXZ');
@@ -158,7 +161,7 @@ function updateProjectiles253(dt){
     if(p.mesh.userData.spriteFx){const sf=p.mesh.userData.spriteFx;sf.t+=pdt;const k=Math.floor(sf.t*(sf.s.fps||30))%sf.s.n,cx=k%sf.s.c,cy=Math.floor(k/sf.s.c);sf.sp.material.map.offset.set(cx/sf.s.c,1-(cy+1)/sf.s.r)}
     else if(p.ptype==='stone'||p.basicClass===10)p.mesh.rotation.z+=pdt*1.6;
     if(!done){p.tt=(p.tt||0)-dt;if(p.tt<=0){p.tt=.05;if(p.ptype==='fire'||p.elem300==='fogo'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('flame',p.x,p.y,p.z,.7,{grow:.1,dur:.12,op:.85})}else if(p.ptype==='spark'||p.elem300==='raio'){if(window.Flip470&&Math.random()<.55)Flip470.spawn('lightning',p.x,p.y,p.z,.65,{grow:.1,dur:.1,op:.9})}else if(p.ptype==='ice'||p.elem300==='gelo'){if(window.Flip470&&Math.random()<.45)Flip470.spawn('water',p.x,p.y,p.z,.65,{grow:.1,dur:.12,op:.75})}else if(p.ptype==='soul'||p.elem300==='trevas'){trailFx(p);if(window.Flip470&&Math.random()<.45)Flip470.spawn('smoke',p.x,p.y,p.z,.6,{tint:0x4c1d95,grow:.15,dur:.15,op:.6})}else if(p.ptype==='sarrow'||p.ptype==='arrow'){trailFx(p)}}}
-    if(done){if(p.stuck690){p.mesh.position.set(p.x,p.y,p.z);stuck690.push({m:p.mesh,t:BAL690.stuck});}else scene.remove(p.mesh);projs.splice(i,1);}
+    if(done){if(p.stuck690){p.mesh.position.set(p.x,p.y,p.z);stuck690.push({m:p.mesh,t:BAL690.stuck,id:p.arrowId691,x:p.x,z:p.z});}else scene.remove(p.mesh);projs.splice(i,1);}
     }finally{if(lease487){Golpes487.legacyDepth--;Golpes487.legacySkill=priorSkill487}}
   }
 }
