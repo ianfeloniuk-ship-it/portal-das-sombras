@@ -1,3 +1,8 @@
+## v731 (30/10/2026) — Missão fixa #28 «Alvo Notório: Barrão, o Quebra-Cercas»
+- `tools/barrao731.js` (novo): depois da #27, Barrão (gigante, 2× vida) nos Campos a leste (150, 0). 3 estacas da paliçada [E] em x = 120: quando as 3 estão de pé e ele as alcança, fica preso 4 s e perde 35% da vida (uma vez). Em campo aberto, luta direta. Nos dois: título `titulo728` «Caçador do Quebra-Cercas» (marca `bonusDano728` = 2%) e +75 de Reputação da Ordem (`addOrderRep`). Estado em `profile.fixas545.q028`.
+- Simplificações: gatilho = concluir a #27 (sem tela de contrato); sem moinho nem carroças; o +2% de dano é só marca; investida = a IA do gigante não persegue de longe, então o módulo o empurra para o jogador a 1,8× da velocidade.
+- Teste (navegador embutido, E real, golpes reais, captura): os dois ramos.
+
 ## v730 (30/10/2026) — Missão fixa #27 «A Ronda das Três Tochas»
 - `tools/ronda730.js` (novo): depois da #26, 4 braseiros apagados no anel norte (~100 m de Aster) [E] e uma matilha de 3 lobos (líder 2× vida). Reacender os 4 antes de a matilha cair: marca `arqueirosFogo727` (apoio de flechas de fogo das sentinelas). Matar a matilha com algum braseiro apagado: sem apoio. Estado em `profile.fixas545.q027`.
 - Simplificações: sem exigir noite nem Feixe de Lenha/Resina/Lampião; o apoio é só a marca.
