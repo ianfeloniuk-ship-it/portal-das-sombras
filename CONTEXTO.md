@@ -1,3 +1,6 @@
+## v736 (30/10/2026) — Sem classe soca com cada mão
+- Ian: recomeçou sem classe, 3ª pessoa, «o golpe tu não dá por mão, é fixo». `profile.classless` contava como Guerreiro em `animWep173` e usava o combo antigo 'fist'. Agora usa 'brawl' (socos do Blender, com clipe por mão). Guerreiro de verdade mantém 'fist' (v696).
+
 ## v735 (30/10/2026) — Hora e data de volta à tela
 - Ian: horário e dias não apareciam. Causa: `clock384`/`data710` escrevem em `#obj`, escondido por `dialogo520.js` desde a v532; a data da v712 nunca foi vista. Novo `tools/relogio735.js`: linha própria no topo, some em conversa, pausa e cena. Socos conferidos: clipes e código batem com esquerdo = mão direita, direito = mão esquerda.
 

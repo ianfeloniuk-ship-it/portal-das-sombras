@@ -3709,7 +3709,7 @@ function weaponIsMagic173(it){if(!it)return false;const k=it.kind155||'';return 
 function hasBow259(){const w=run.equip.w;return !!w&&(w.kind155==='bow'||w.visual?.shape==='bow'||w.visualWeapon?.shape==='bow');}
 function weaponFitsStyle259(w,magic=basicIsMagic()){return !w||profile.classless||weaponIsMagic173(w)===magic;}
 function basicWeaponReady259(){const w=run.equip.w;if(!w||!weaponFitsStyle259(w))return false;if(!basicIsMagic()&&basicAttackClass().wep==='bow'&&!MAGIC_CLS.includes(basicAttackId()))return hasBow259()||w.kind155==='firearm';return true;}
-function animWep173(){const w=run.equip.w;{const k272=weaponKind272(w);if(k272&&/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k272))return k272==='spear'?'spear_throw':k272;if(weaponIsMagic173(w))return w.kind155||'staff'}if(basicIsMagic())return weaponIsMagic173(w)?w.kind155||'staff':'orb';if(bareArcher155()||!basicWeaponReady259())return basicAttackId()===0?'fist':'brawl';if(weaponIsMagic173(w))return 'mace';return w.kind155||basicAttackClass().wep||'fist';}
+function animWep173(){const w=run.equip.w;{const k272=weaponKind272(w);if(k272&&/^(sword|axe|mace|spear|hammer|bow|dagger|firearm)$/.test(k272))return k272==='spear'?'spear_throw':k272;if(weaponIsMagic173(w))return w.kind155||'staff'}if(basicIsMagic())return weaponIsMagic173(w)?w.kind155||'staff':'orb';if(bareArcher155()||!basicWeaponReady259())return basicAttackId()===0&&!profile.classless?'fist':'brawl';if(weaponIsMagic173(w))return 'mace';return w.kind155||basicAttackClass().wep||'fist';}
 function resetBasicPose259(){if(!player)return;player.combo=0;player.comboT=0;player.atkT=0;player.skillAnim155=null;player.aimPitch253=0;if(player.m){player.m.staffCast251=0;player.m.aimPitch253=0;}}
 function normalizeStyleWeapon259(){const w=run.equip.w;if(!w||weaponFitsStyle259(w))return;if(!run.items.some(i=>i.uid===w.uid))run.items.push(w);run.equip.w=null;store.set('pds3_run',{...run,stolen:run.stolen.map(s=>s.n),shadows:run.shadows});}
 function prepareStyleWeapon259(magic){const w=run.equip.w;if(weaponFitsStyle259(w,magic))return true;if(run.items.length>=bagCapacity353()){toast('Libere um espaço na bolsa para guardar a arma antes de trocar o estilo.');return false;}run.items.push(w);run.equip.w=null;refreshStats();toast('Arma guardada na bolsa. Equipe uma arma '+(magic?'mágica':'física')+' para este estilo.');return true;}
@@ -9873,9 +9873,9 @@ requestAnimationFrame(frame);
 <script src="tools/relogio735.js?v=735"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v735</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v736</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=735;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=736;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>
