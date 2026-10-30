@@ -9,7 +9,7 @@
            Gente de fora (viajante, caçador, encontro na estrada): sem recompensa, mas se alguém viu você fica falado
            e a confiança da cidade cai do mesmo jeito. Ninguém viu: nada acontece. Ladrão (de noite) não conta.
    GUARDA  com recompensa na cidade, os guardas de lá vêm até você e falam: pagar (some a recompensa) ou resistir
-           (todos os guardas da cidade atacam até você pagar). Não há cela. Os textos do guarda ficam em dialogo520.js. */
+           (todos os guardas da cidade atacam até você pagar) ou ir para a cela (v697). Os textos do guarda ficam em dialogo520.js. */
 (function(){
 'use strict';
 if(typeof attack!=='function'||typeof updNpc!=='function'||typeof hurtPlayer!=='function')return;
@@ -38,6 +38,15 @@ C.bounty=c=>c?(book().bounty545[c.id]||0):0;
 C.resisting=c=>!!(c&&book().resist545[c.id]);
 C.pay=c=>{const b=C.bounty(c);if(!b||run.gold<b)return false;run.gold-=b;delete book().bounty545[c.id];delete profile.resist545[c.id];calmGuards(c);store.set('pds2_profile',profile);saveRun();banner('Recompensa paga em '+c.name);return true};
 C.resist=c=>{if(!c)return;book().resist545[c.id]=true;store.set('pds2_profile',profile);for(const n of npcs)if(isGuard(n)&&fromHere(n,c)&&!n.gone)anger(n,true);banner('Você resistiu à prisão em '+c.name)};
+/* v697 (Ian: «não tenho dinheiro para pagar, e não vou para lugar nenhum»): cela como no Skyrim. 1 dia de pena a cada 100 de recompensa
+   (mínimo 1). O tempo passa, você perde metade do XP do nível atual, a recompensa some e você sai no portão da cidade. Itens ficam com você. */
+C.jailDays=c=>Math.max(1,Math.ceil(C.bounty(c)/100));
+C.jail=c=>{const b=C.bounty(c);if(!b)return false;const d=C.jailDays(c);
+  try{dayT+=d*DAYLEN}catch(_){}run.xp=Math.floor((run.xp||0)/2);
+  delete book().bounty545[c.id];delete profile.resist545[c.id];calmGuards(c);
+  try{const P=player,a=Math.atan2(P.z-c.z,P.x-c.x)||0,r=Math.max(typeof cityBig533==="function"?(cityBig533(c)||0):0,36*(typeof CITYK!=="undefined"?CITYK:1))+6;P.x=c.x+Math.cos(a)*r;P.z=c.z+Math.sin(a)*r;P.hp=P.maxHp||P.hp}catch(_){}
+  try{const f=document.createElement('div');f.style.cssText='position:fixed;inset:0;background:#000;z-index:60;opacity:1;transition:opacity 1.6s;display:flex;align-items:center;justify-content:center;color:#d8c9a8;font:600 22px Georgia,serif;text-align:center';f.innerHTML='Você cumpriu '+d+(d===1?' dia':' dias')+' na cela de '+c.name+'.<br><span style="font-size:15px;opacity:.8">Perdeu metade do XP do nível. A recompensa foi apagada.</span>';document.body.appendChild(f);setTimeout(()=>{f.style.opacity=0;setTimeout(()=>f.remove(),1700)},2600)}catch(_){}
+  store.set('pds2_profile',profile);saveRun();banner('Pena cumprida em '+c.name);return true};
 function calmGuards(c){for(const n of npcs)if(isGuard(n)&&fromHere(n,c)){n.hostile545=false;if(n.chase523===player)n.chase523=null}}
 function addBounty(c,v){book().bounty545[c.id]=(profile.bounty545[c.id]||0)+v;store.set('pds2_profile',profile);banner(v+' de recompensa em '+c.name)}
 function talk(c,trust,reason){try{regionEvent116(c,-trust,0,reason)}catch(_){}}

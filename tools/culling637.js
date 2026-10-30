@@ -10,7 +10,8 @@
 (function () {
   const T = THREE, F = new T.Frustum(), PM = new T.Matrix4(), V = new T.Vector3(), S = new T.Sphere(), S2 = new T.Sphere();
   const C = window.Culling637 = { dirty: true, list: [], skins: [], hid: 0, hidLod: 0, hidOcc: 0, smalls: [], total: 0, mixSkipped: 0, mixRan: 0, on: true, last: 0 };
-  const skip = m => m.userData.tripo153 || m.userData.lite180 || m.userData.golpes487 || m.userData.ctx487 || m.userData.ol210 || /^(Grass|Flowers)/.test(m.name || '');
+  /* v697: chuva e respingos andam com a câmera; a esfera guardada ficava velha e escondia a chuva conforme você virava */
+  const skip = m => m.userData.noCull695 || m.userData.tripo153 || m.userData.lite180 || m.userData.golpes487 || m.userData.ctx487 || m.userData.ol210 || /^(Grass|Flowers)/.test(m.name || '');
   function instSphere(m) {
     let s = m.userData.sph637; if (s) return s;
     const n = m.instanceMatrix.count, a = m.instanceMatrix.array; if (!n) return null;

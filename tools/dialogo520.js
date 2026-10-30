@@ -669,7 +669,7 @@
         t: 'Pare, criminoso! Você tem ' + cr() + ' de recompensa em ' + cn + '. Pague agora ou enfrente a guarda.',
         o: [
           { l: 'Pagar a recompensa (' + cr() + ' de ouro)', if: () => gold() >= cr(), fn: () => { Crime545.pay(n.home); say('<b>' + nome + ':</b> "Pago. Agora ande na linha."'); return 'fim'; } },
-          { l: 'Não tenho o ouro', if: () => gold() < cr(), fn: () => { say('<b>' + nome + ':</b> "Então volte com ' + cr() + ' de ouro. Até lá, estou de olho em você."'); return 'fim'; } },
+          { l: 'Ir para a cela (' + Crime545.jailDays(n.home) + (Crime545.jailDays(n.home) === 1 ? ' dia' : ' dias') + ', perde metade do XP do nível)', fn: () => { say('<b>' + nome + ':</b> "Sábia escolha. Vamos."'); Crime545.jail(n.home); return 'fim'; } }, /* v697: antes "Não tenho o ouro" não levava a lugar nenhum */
           { l: 'Resistir à prisão', fn: () => { Crime545.resist(n.home); return 'fim'; } }
         ]
       };

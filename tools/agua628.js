@@ -5,7 +5,7 @@
   const T = THREE, W = () => window.Water391;
   const N = 48, geo = new T.RingGeometry(.8, 1, 20); geo.rotateX(-Math.PI / 2);
   const mat = new T.MeshBasicMaterial({ color: 0xe8f4ff, transparent: true, opacity: .55, depthWrite: false, fog: true });
-  const rings = new T.InstancedMesh(geo, mat, N); rings.frustumCulled = false; rings.userData.terrainAbsolute245 = true; rings.renderOrder = 6;
+  const rings = new T.InstancedMesh(geo, mat, N); rings.frustumCulled = false; rings.userData.noCull695 = true; rings.userData.terrainAbsolute245 = true; rings.renderOrder = 6;
   const ND = 60, dpos = new Float32Array(ND * 3).fill(0), dgeo = new T.BufferGeometry(); dgeo.setAttribute('position', new T.BufferAttribute(dpos, 3));
   const dmat = new T.PointsMaterial({ color: 0xdff0ff, size: .09, transparent: true, opacity: .85, depthWrite: false });
   const drops = new T.Points(dgeo, dmat); drops.frustumCulled = false; drops.userData.terrainAbsolute245 = true; drops.renderOrder = 6;

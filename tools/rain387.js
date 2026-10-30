@@ -7,7 +7,7 @@
   const RS=window.RAIN626=window.RAIN626||{wet:{value:0},pud:{value:0},k:0,wind:.25};
   const SPN=170,SPR=15;const spGeo=new THREE.RingGeometry(.8,1,12);spGeo.rotateX(-Math.PI/2);
   const spMat=new THREE.MeshBasicMaterial({color:0xdfeaff,transparent:true,opacity:.4,depthWrite:false,fog:true});
-  const SP=new THREE.InstancedMesh(spGeo,spMat,SPN);SP.frustumCulled=false;SP.userData.terrainAbsolute245=true;SP.visible=false;SP.renderOrder=4;
+  const SP=new THREE.InstancedMesh(spGeo,spMat,SPN);SP.frustumCulled=false;SP.userData.noCull695=true;SP.userData.terrainAbsolute245=true;SP.visible=false;SP.renderOrder=4;
   const spT=new Float32Array(SPN),spX=new Float32Array(SPN),spZ=new Float32Array(SPN),spY=new Float32Array(SPN);for(let i=0;i<SPN;i++)spT[i]=Math.random();
   window.RAIN626.splash=SP;
   window.addEventListener('load',()=>{try{scene.add(SP)}catch(_){}});
@@ -17,13 +17,13 @@
   // gotas como peças finas (linhas não renderizam com o shader do relevo)
   const geo=new THREE.BoxGeometry(.018,LEN,.018);
   const m=new THREE.MeshBasicMaterial({color:0xcfe3ff,transparent:true,opacity:.6,depthWrite:false,fog:true});
-  const R=new THREE.InstancedMesh(geo,m,N);R.frustumCulled=false;R.userData.terrainAbsolute245=true;R.visible=false;R.renderOrder=5;
+  const R=new THREE.InstancedMesh(geo,m,N);R.frustumCulled=false;R.userData.noCull695=true;R.userData.terrainAbsolute245=true;R.visible=false;R.renderOrder=5;
   scene.add(R);window.RAIN387=R;const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(1,1,1),V=new THREE.Vector3(),E=new THREE.Euler();
   let last=performance.now(),wind=0;const MS=new THREE.Matrix4(),QS=new THREE.Quaternion(),VS=new THREE.Vector3(),SS=new THREE.Vector3();
   function tick(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;
     try{
       const world=started&&L.mode==='world'&&!(player&&player.dead);const raining=world&&WX.type==='rain';
-      const tk=raining?.4+.6*Math.max(0,Math.min(1,.5+.5*Math.sin(now*.00006)*Math.sin(now*.00023+1.3)*1.6)):0;
+      const cy=RS.cycle===undefined?1:RS.cycle,tk=raining?(.12+.88*cy)*(.75+.25*Math.max(0,Math.min(1,.5+.5*Math.sin(now*.00023+1.3)))):0;/* v697: ciclo da frente (clima695) */
       RS.k+=(tk-RS.k)*Math.min(1,dt*.35);
       RS.wet.value=Math.max(0,Math.min(1,RS.wet.value+(raining?dt/10:-dt/90)));
       RS.pud.value=Math.max(0,Math.min(1,RS.pud.value+(raining&&RS.k>.45?dt/35:-dt/160)));
@@ -33,12 +33,12 @@
       SP.visible=on&&RS.k>.05;
       if(SP.visible){const cnt=Math.max(10,Math.floor(SPN*RS.k));SP.count=cnt;const px=player.x,pz=player.z;
         for(let i=0;i<SPN;i++){spT[i]+=dt*(2.6+(i%5)*.3);if(spT[i]>=1){spT[i]-=1;const a=Math.random()*6.283,r=1+Math.sqrt(Math.random())*SPR;spX[i]=px+Math.cos(a)*r;spZ[i]=pz+Math.sin(a)*r;const h=terrH(spX[i],spZ[i]);spY[i]=Math.max(h,.06)+.05}
-          const t=spT[i],sc=t<.75?.03+.2*t:Math.max(.01,(1-t)*1.4);SS.set(sc,1,sc);VS.set(spX[i],spY[i],spZ[i]);MS.compose(VS,QS.identity(),SS);SP.setMatrixAt(i,MS)}
-        SP.instanceMatrix.needsUpdate=true;spMat.opacity=isNight()?.25:.4}
+          const t=spT[i],sc=t<.6?.02+.11*t:Math.max(.005,(1-t)*.22);/* v697: respingo pequeno */SS.set(sc,1,sc);VS.set(spX[i],spY[i],spZ[i]);MS.compose(VS,QS.identity(),SS);SP.setMatrixAt(i,MS)}
+        SP.instanceMatrix.needsUpdate=true;spMat.opacity=(isNight()?.12:.2)*(.5+.5*RS.k)}
       if(R.parent!==scene)scene.add(R);
       R.visible=on;if(WX.pts&&WX.type==='rain')WX.pts.visible=false;
       if(on){
-        const cx=camera.position.x,cz=camera.position.z,base=terrH(player.x,player.z);wind=(Math.sin(now*.00013)*.35+.3+Math.sin(now*.0011)*.08)*(.6+.6*RS.k);RS.wind=wind;R.count=Math.max(400,Math.floor(N*(.3+.7*RS.k)));
+        const cx=camera.position.x,cz=camera.position.z,base=Math.max(terrH(player.x,player.z),camera.position.y-9);/* v697: chuva envolve a câmera */wind=(Math.sin(now*.00013)*.35+.3+Math.sin(now*.0011)*.08)*(.6+.6*RS.k);RS.wind=wind;R.count=Math.max(400,Math.floor(N*(.3+.7*RS.k)));
         const sp=24;E.set(0,0,-Math.atan(wind));Q.setFromEuler(E);
         for(let i=0;i<N;i++){let y=seed[i*3+1]-sp*dt;if(y<0)y+=TOP;seed[i*3+1]=y;
           let x=seed[i*3]+wind*sp*dt;if(x>BOX)x-=BOX*2;seed[i*3]=x;
