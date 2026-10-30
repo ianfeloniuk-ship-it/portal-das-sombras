@@ -76,6 +76,36 @@ function spawn(s,i,px,pz,wx,wz){const a=Math.random()*6.28,r=4+Math.random()*30;
   s.k=kindFor(s.x,s.z);s.g=g;s.y=g+(s.k===0?.6+Math.random()*5:.1+Math.random()*2.2);s.vy=0;s.life=4+Math.random()*6;
   kindA[i]=s.k;P.geometry.attributes.kind687.needsUpdate=true;C.setHex(s.k===0?LEAF[i%LEAF.length]:s.k===1?DUST:SNOW);P.setColorAt(i,C)}
 
+
+/* ---------- neblina rasteira (Ian 29/10: «nuvens, neblina») ---------- */
+const NF=36;
+const fm=new T.MeshBasicMaterial({transparent:true,depthWrite:false,fog:false,color:0xffffff,opacity:.3});
+fm.uniforms={uCol:{value:fm.color},uA:{value:.3},uT:{value:0}};
+fm.onBeforeCompile=sh=>{sh.uniforms.uT687=fm.uniforms.uT;
+  sh.vertexShader=sh.vertexShader.replace('void main() {','attribute float seed687;varying vec2 vU687;varying float vS687;\nvoid main() {vU687=uv;vS687=seed687;');
+  sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform float uT687;varying vec2 vU687;varying float vS687;float h687(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float n687(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h687(i),h687(i+vec2(1,0)),f.x),mix(h687(i+vec2(0,1)),h687(i+vec2(1,1)),f.x),f.y);}\nvoid main() {')
+   .replace('#include <alphamap_fragment>','#include <alphamap_fragment>\n{vec2 q=vU687*2.-1.;float r=length(q*vec2(1.,1.6));float m=n687(vU687*3.+vS687*7.+uT687*.05)*.6+n687(vU687*7.-uT687*.08+vS687)*.4;diffuseColor.a*=smoothstep(1.,.2,r)*smoothstep(.15,.7,m);}')};
+fm.customProgramCacheKey=()=>'fog687';
+const F=new T.InstancedMesh(new T.PlaneGeometry(1,1),fm,NF);F.frustumCulled=false;F.userData.terrainAbsolute245=true;F.name='neblina687';F.renderOrder=5;
+const fseed=new Float32Array(NF);for(let i=0;i<NF;i++)fseed[i]=Math.random();F.geometry.setAttribute('seed687',new T.InstancedBufferAttribute(fseed,1));
+const FS=new T.Sphere(new T.Vector3(),200);F.userData.key637=NF;F.userData.sph637b=FS;scene.add(F);W.fog=F;
+const FB=[];for(let i=0;i<NF;i++)FB.push({x:0,z:0,y:-999,w:0,life:0});
+function fogTick(dt,px,pz,wx,wz,g,n,w){
+  const p=typeof dayT!=='undefined'&&typeof DAYLEN!=='undefined'?(dayT%DAYLEN)/DAYLEN:.3;
+  const dawn=Math.max(0,1-Math.abs(p-.08)/.08);/* manhã cedo */
+  let b='campos';try{b=biomeAt(px,pz)}catch(_){}
+  const bio=b==='pantano'?1:b==='floresta'?.75:b==='deserto'||b==='vulcao'?0:.55;
+  const dens=Math.min(1,bio*(.45+n*.5+dawn*.8)+w*.5);fm.uniforms.uA.value=.6*dens;fm.opacity=fm.uniforms.uA.value;fm.uniforms.uT.value=t;
+  if(scene.fog)fm.uniforms.uCol.value.copy(scene.fog.color).lerp(new T.Color(0xffffff),.25*(1-n));
+  FS.center.set(px,(player.y||0),pz);F.userData.key637=NF;F.userData.sph637b=FS;F.visible=dens>.02;
+  for(let i=0;i<NF;i++){const f=FB[i];f.life-=dt;
+    if(f.life<=0||Math.hypot(f.x-px,f.z-pz)>130){const a=Math.random()*6.28,r=12+Math.random()*90;f.x=px+Math.cos(a)*r;f.z=pz+Math.sin(a)*r;
+      let best=1e9,bx=f.x,bz=f.z;for(let k=0;k<4;k++){const x=f.x+(Math.random()-.5)*40,z=f.z+(Math.random()-.5)*40;let hh=0;try{hh=terrH(x,z)}catch(_){}if(hh<best){best=hh;bx=x;bz=z}}/* procura o baixio */
+      f.x=bx;f.z=bz;f.y=best+1.5+Math.random()*2;f.w=22+Math.random()*26;f.life=25+Math.random()*30}
+    f.x+=wx*dt*.8*g;f.z+=wz*dt*.8*g;const fade=Math.min(1,f.life/4);
+    M4.compose(V.set(f.x,f.y,f.z),camera.quaternion,SC.set(f.w*fade,f.w*.32*fade,1));F.setMatrixAt(i,M4)}
+  F.instanceMatrix.needsUpdate=true}
+
 function inWorld(){try{return L&&L.mode==='world'}catch(_){return false}}
 function tick(dt){if(!W.on)return;t+=dt;
   /* vento: direção vagueia, rajadas a cada poucos segundos, chuva fortalece */
@@ -84,7 +114,7 @@ function tick(dt){if(!W.on)return;t+=dt;
   W.gust+=(gTarget-W.gust)*Math.min(1,dt*.8);if(gT<1.2)gTarget+=(1-gTarget)*Math.min(1,dt*.9);
   const g=W.gust*W.str;ENV.gust.value=g;const wx=Math.cos(W.ang),wz=Math.sin(W.ang);ENV.wd.value.set(wx,wz);
   W.off.x+=wx*dt*.006*(.6+g*.6);W.off.y+=wz*dt*.006*(.6+g*.6);
-  const on=inWorld();sky.visible=on;P.visible=on;if(!on)return;
+  const on=inWorld();sky.visible=on;P.visible=on;F.visible=on;if(!on)return;
   /* céu */
   try{sky.position.copy(camera.position)}catch(_){}
   const n=window.NIGHT153U?NIGHT153U.value:0,w=(L.dn&&L.dn.w)||0;
@@ -107,9 +137,10 @@ function tick(dt){if(!W.on)return;t+=dt;
     const sz=s.k===0?.26:s.k===1?(1.6+fl*.3)*(.5+.5*g):.45;
     if(s.k===0){E.set(t*3+s.sp,t*2.2+s.ph,t*1.3);Q.setFromEuler(E)}else{Q.copy(camera.quaternion)}
     SC.set(sz*fade,sz*(s.k===0?.6:1)*fade,1);M4.compose(V.set(s.x,s.y,s.z),Q,SC);P.setMatrixAt(i,M4)}
+  try{fogTick(dt,px,pz,wx,wz,g,n,w)}catch(e){if(!W.ferr)W.ferr=String(e)}
   P.instanceMatrix.needsUpdate=true;if(P.instanceColor)P.instanceColor.needsUpdate=true;
   W.stats.live=live}
-W.tick=tick;W.S=S;
+W.tick=tick;W.S=S;W.FB=FB;
 let last=performance.now();
 (function loop(now){requestAnimationFrame(loop);now=now||performance.now();const dt=Math.min(.1,(now-last)/1000);last=now;try{tick(dt)}catch(e){if(!W.err){W.err=String(e);console.warn('vento687',e)}}})(last);
 })();

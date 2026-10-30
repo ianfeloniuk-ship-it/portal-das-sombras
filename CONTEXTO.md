@@ -1,3 +1,7 @@
+## v695 (29/10/2026) — Neblina rasteira
+- Ian (29/10): «um mapa mais realista, com nuvens, neblina». `tools/vento687.js`: bancos de neblina nos baixios em volta do jogador (até 130 m), andam com o vento; mais densos de manhã cedo, à noite, na chuva, no pântano e na floresta; nada no deserto/vulcão. Cor da névoa do ciclo dia/noite.
+- Teste: Edge sem tela (`tools/test-vento687.cjs`), sem erros.
+
 ## v694 (29/10/2026) — Puxada do arco na balística, recolher flecha cravada
 - Corrige a v690: ela forçava toda flecha a 50 m/s e anulava a puxada da v588. Agora puxada cheia = 50 m/s; puxada curta = mais lenta (mesma curva da v588) e cai mais cedo (a 30 m: 1,8 m cheia, 3,4 m na puxada mínima).
 - Flecha cravada no chão: passar a menos de 1,6 m recolhe (volta 1 flecha do mesmo tipo à bolsa). Some sozinha depois de 20 s.

@@ -17,7 +17,7 @@ const OUT = process.argv[2] || 'vento687', PORT = process.argv[3] || '8803';
     await page.waitForTimeout(4000);
     await page.evaluate(() => { profile.creationPending91 = false; try { closeModal(); } catch (_) {} });
     const shots = [
-      ['vermelho', { night: 0, rain: 0, x: 330, z: 110, pitch: .05, red: 1 }],
+      ['manha-neblina', { night: 0, rain: 0, x: 330, z: 110, pitch: .08, dawn: 1 }],
       ['dia-ceu', { night: 0, rain: 0, x: 330, z: 110, pitch: .35 }],
       ['dia-campo', { night: 0, rain: 0, x: 330, z: 110, pitch: .05 }],
       ['chuva', { night: 0, rain: 1, x: 330, z: 110, pitch: .25 }],
@@ -29,17 +29,18 @@ const OUT = process.argv[2] || 'vento687', PORT = process.argv[3] || '8803';
         if (o.desert) { for (let r = 200; r < 4000; r += 150) { let f = false; for (let a = 0; a < 6.28; a += .4) { const x = Math.cos(a) * r, z = Math.sin(a) * r; if (biomeAt(x, z) === 'deserto') { player.x = x; player.z = z; f = true; break } } if (f) break } }
         else { player.x = o.x; player.z = o.z }
         player.y = terrH(player.x, player.z);
-        const p = o.night ? (NIGHT0_377 + NIGHT1_377) / 2 : .3; dayT = p * DAYLEN;
+        const p = o.dawn ? .07 : o.night ? (NIGHT0_377 + NIGHT1_377) / 2 : .3; dayT = p * DAYLEN;
         if (typeof WX !== 'undefined') WX.type = o.rain ? 'rain' : 'clear'; if (window.RAIN626) RAIN626.k = o.rain ? 1 : 0;
         if (L.dn) L.dn.w = o.rain ? .9 : 0;
         window.__pitch = o.pitch; Vento687.parts.material.visible = !o.hide; if (o.red) { window.__pm = Vento687.parts.material; Vento687.parts.material = window.__pm; } else if (window.__pm) Vento687.parts.material = window.__pm;
       }, o);
       for (let i = 0; i < 50; i++) await page.evaluate(() => { try { const c = window.CAM || null; } catch (_) {} });
       await page.waitForTimeout(5000);
+      if (o.dawn) await page.evaluate(() => { const d = camera.getWorldDirection(new THREE.Vector3()); Vento687.FB.forEach((f, i) => { const r = 10 + (i % 6) * 6, s = ((i * 7) % 11 - 5) * 3; f.x = player.x + d.x * r - d.z * s; f.z = player.z + d.z * r + d.x * s; f.y = terrH(f.x, f.z) + 1.5; f.life = 60; }); }); await page.waitForTimeout(500);
       await page.evaluate(() => { try { camera.rotation.x = window.__pitch; camera.updateMatrixWorld() } catch (_) {} });
-      await page.screenshot({ path: `${OUT}/${name}.png` });
+      await page.screenshot({ path: `${OUT}/${name}.png` }); console.log(name, await page.evaluate(() => JSON.stringify({a: Vento687.fog.material.uniforms.uA.value, v: Vento687.fog.visible, b: biomeAt(player.x, player.z), f0: (()=>{const m=new THREE.Matrix4();Vento687.fog.getMatrixAt(0,m);return m.elements.slice(12,15).map(v=>v|0)})(), py: player.y|0, ferr: Vento687.ferr||''})));
     }
-    const st = await page.evaluate(() => JSON.stringify({s0: Vento687.S.slice(0,3).map(s=>[s.x|0,s.y|0,s.z|0,s.k]), pl:[player.x|0,player.y|0,player.z|0], mat: (()=>{const m=new THREE.Matrix4();Vento687.parts.getMatrixAt(0,m);return m.elements.map(v=>+v.toFixed(2))})(), vis: Vento687.parts.visible, prog: renderer.info.programs.length, v: Vento687.stats, err: Vento687.err || '', gust: ENV.gust.value, sky: Vento687.sky.visible, pano: Pano672.err || '' }));
+    const st = await page.evaluate(() => JSON.stringify({s0: Vento687.S.slice(0,3).map(s=>[s.x|0,s.y|0,s.z|0,s.k]), pl:[player.x|0,player.y|0,player.z|0], mat: (()=>{const m=new THREE.Matrix4();Vento687.parts.getMatrixAt(0,m);return m.elements.map(v=>+v.toFixed(2))})(), vis: Vento687.parts.visible, prog: renderer.info.programs.length, v: Vento687.stats, err: (Vento687.err || '') + (Vento687.ferr || ''), fogA: Vento687.fog.material.uniforms.uA.value, fogV: Vento687.fog.visible, gust: ENV.gust.value, sky: Vento687.sky.visible, pano: Pano672.err || '' }));
     console.log(st); console.log('errors', JSON.stringify(errors.slice(0, 5)));
   } finally { await browser.close(); }
 })();
