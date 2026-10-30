@@ -1,3 +1,6 @@
+## v709 (30/10/2026) — Lua refeita por shader
+- Ian: «essa lua tá muito feia». `vento687.js`: Lua maior, mares, crateras, escurecimento nas bordas; rachadura por shader com galhos e energia roxa correndo. Só visual.
+
 ## v708 (30/10/2026) — O corpo vai junto no golpe
 - Ian: «o corpo não se movimenta junto, parece taekwondo». Socos refeitos: quadril e ombros giram para dentro do golpe e o tronco inclina. Golpes de arma: GIRO701 de 1/4 para 60% da virada.
 

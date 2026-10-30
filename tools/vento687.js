@@ -29,14 +29,24 @@ void main(){vec3 d=normalize(vD);float y=d.y;
  if(uNight>.01&&y>0.){vec2 sp=d.xz/(y+.08)*90.;float st=step(.9965,h21(floor(sp)))*smoothstep(.45,.1,length(fract(sp)-.5))*(.6+.4*sin(uT*3.+h21(floor(sp)+3.)*40.));
   col+=vec3(.85,.9,1.)*st*uNight*smoothstep(.02,.25,y);
   /* v696: fase da Lua (uPh 1 = cheia) e rachadura roxa ligada à Fenda */
-  vec3 mr=normalize(cross(mo,vec3(0.,1.,0.))),mu=cross(mr,mo);vec2 mq=vec2(dot(d-mo,mr),dot(d-mo,mu))/.0245;float mr2=dot(mq,mq);
-  float disc=smoothstep(1.,.92,mr2)*step(0.,md);float z=sqrt(max(0.,1.-mr2));
-  float litM=uPh>.985?1.:smoothstep(-.05,.05,mq.x-cos(uPh*3.14159)*sqrt(max(0.,1.-mq.y*mq.y)));float crater=fbm(mq*3.+5.)*.35;
-  vec3 mc=mix(vec3(.05,.06,.1),vec3(.93,.94,.86)-crater,max(litM,.06));
-  float crk=abs(mq.y-.35*sin(mq.x*3.1)-.12*sin(mq.x*9.+1.))/.05;float cr=smoothstep(1.,0.,crk)*step(abs(mq.x),.85);
-  float br=cr*(.5+.6*smoothstep(.7,1.,uPh))*(.8+.2*sin(uT*1.7));mc=mix(mc,vec3(.62,.25,.95),clamp(br,0.,1.))+vec3(.5,.2,.9)*cr*.6*smoothstep(.8,1.,uPh);
+  vec3 mr=normalize(cross(mo,vec3(0.,1.,0.))),mu=cross(mr,mo);vec2 mq=vec2(dot(d-mo,mr),dot(d-mo,mu))/.042;float mr2=dot(mq,mq);
+  float disc=smoothstep(1.,.97,mr2)*step(0.,md);float z=sqrt(max(0.,1.-mr2));vec3 N=vec3(mq,z);
+  vec2 sq=mq/(1.+z*.55);/* curva a textura como uma esfera */
+  float maria=smoothstep(.42,.62,fbm(sq*1.7+vec2(3.1,1.7)));float fine=fbm(sq*9.+7.);float dust=fbm(sq*26.);
+  float crat=0.;for(int i=0;i<3;i++){float fi=float(i),sc=4.+fi*5.;vec2 g=sq*sc+fi*9.,id=floor(g),f=fract(g)-.5;vec2 o=(vec2(h21(id),h21(id+7.))-.5)*.5;float r=length(f-o),R=.12+.22*h21(id+3.);
+   float w=step(.82,h21(id+11.))*.6;crat+=w*(smoothstep(R,R*.75,r)*-.28+smoothstep(R*.8,R,r)*smoothstep(R*1.25,R,r)*.3);}
+  vec3 alb=mix(vec3(.82,.81,.77),vec3(.36,.38,.42),maria*.85);alb*=.78+.34*fine+.14*dust+crat*.75;
+  float limb=.45+.55*pow(z,.6);float litM=uPh>.985?1.:smoothstep(-.08,.08,mq.x-cos(uPh*3.14159)*sqrt(max(0.,1.-mq.y*mq.y)));
+  vec3 mc=alb*limb*max(litM,.035)+vec3(.012,.016,.03);
+  /* rachadura: campo de distância torcido por ruído, com galhos e energia correndo por dentro */
+  vec2 w1=mq+(vec2(fbm(mq*2.3+uT*.03),fbm(mq*2.3+5.-uT*.03))-.5)*.55;
+  float main_=abs(w1.y-.28*sin(w1.x*2.4+.6));float br1=abs(w1.y-.28*sin(w1.x*2.4+.6)-(w1.x-.15)*1.3)+smoothstep(.15,.75,-(w1.x-.15))*2.;float br2=abs(w1.y-.28*sin(w1.x*2.4+.6)+(w1.x+.3)*1.1)+smoothstep(-.3,-.8,w1.x)*0.+smoothstep(.25,.75,w1.x+.3)*2.;
+  float dc=min(main_,min(br1*1.6,br2*1.6));float flow=.65+.35*fbm(vec2(w1.x*5.-uT*.35,dc*14.));
+  float core=smoothstep(.022,.004,dc),halo=exp(-dc*dc*180.),pw=.55+.65*smoothstep(.6,1.,uPh),pulse=.88+.12*sin(uT*1.3);
+  mc*=1.-smoothstep(.05,.012,dc)*.75;/* borda funda */
+  mc+=(vec3(.42,.12,.95)*halo*.75+vec3(.95,.72,1.)*core*1.4)*flow*pw*pulse;
   col=mix(col,mc,disc*uNight);
-  col+=vec3(.55,.62,.8)*pow(max(md,0.),90.)*.35*uNight*(.2+.8*uPh)+vec3(.45,.15,.7)*pow(max(md,0.),400.)*.25*uNight*smoothstep(.8,1.,uPh);}
+  float gl=max(md,0.);col+=(vec3(.5,.56,.72)*(pow(gl,2600.)*.5+pow(gl,220.)*.16)*(.25+.75*uPh)+vec3(.4,.13,.75)*pow(gl,1400.)*.22*pw)*uNight*(1.-disc);}
  if(y>.005){vec2 P=d.xz/(y+.12);
   float acc=0.,lit=0.;
   for(int L=0;L<3;L++){float fl=float(L);vec2 q=P*(.55+fl*.42)+uOff*(1.+fl*.35)+fl*13.7;
