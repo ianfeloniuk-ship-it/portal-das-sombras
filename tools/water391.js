@@ -16,6 +16,7 @@
     if(rv.d<w/2+FLOOD()*5){const b=snowB(x,z);if(b>.717)return null;if(onRoad(roadSegs(x,z,1),x,z,5))return null;return {top:terrH(rv.x+w/2,z)+.06+RISE(),frozen:b<.29}}
     const lk=lakeAt239(Math.round(x/CH),Math.round(z/CH));
     if(lk&&Math.hypot(x-lk.x,z-lk.z)<lk.r+FLOOD()*5)return {top:terrH(lk.x+lk.r,lk.z)+.06+RISE(),frozen:['neve','cristal'].includes(biomeAt(lk.x,lk.z))};
+    {const t=window.Enchente687&&Enchente687.at(x,z);if(t!=null)return {top:t,frozen:false,flood:true}} /* v692: area alagada pela enchente (escorre para os baixios) */
     return null}
   function depthAt(x,z){const w=waterAt(x,z);return w&&!w.frozen?w.top-terrH(x,z):0}
   const W=window.Water391={waterAt,depthAt,swimming:false};

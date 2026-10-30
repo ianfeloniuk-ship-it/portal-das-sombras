@@ -96,7 +96,7 @@
   const falls = [];
   function buildAll() {
     for (const P of TER.RS661) {
-      const pool = abs(new T.Mesh(new T.PlaneGeometry(P.S.R * 2 + 8, P.S.R * 2 + 8), poolMat)); pool.rotation.x = -Math.PI / 2; pool.position.set(P.p.x, POOLY, P.p.z); pool.renderOrder = 4; root.add(pool);
+      const pool = abs(new T.Mesh(new T.PlaneGeometry(P.S.R * 2 + 8, P.S.R * 2 + 8), poolMat)); pool.rotation.x = -Math.PI / 2; pool.position.set(P.p.x, POOLY, P.p.z); pool.renderOrder = 4; root.add(pool); /* v692: o poço sobe junto com a enchente (a regra de nado em water391 já subia) */ pool.onBeforeRender = function () { const y = POOLY + (window.RAIN626 ? RAIN626.rise.value : 0); if (this.position.y !== y) { this.position.y = y; this.updateMatrixWorld(); } };
       for (const f of FALLS) if (f.b === P.b) falls.push(buildFall(f, P));
     }
   }

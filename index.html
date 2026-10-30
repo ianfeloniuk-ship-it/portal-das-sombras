@@ -276,7 +276,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/boss160.js?v=454"></script>
 <script src="tools/aster-materials130.js"></script>
 <script src="tools/terrain153.js?v=406"></script>
-<script src="tools/water154.js?v=628"></script>
+<script src="tools/water154.js?v=692"></script>
 <script src="tools/biome-materials132.js?v=535"></script>
 <script src="tools/citizens133.js?v=454"></script>
 <script src="tools/rift131.js?v=221"></script>
@@ -4605,8 +4605,8 @@ function buildCity(c,g,addCol,R){
     const sn=makeCitySign(s.sign,s.sc,.8);sn.position.set(0,s.h+.1,s.d/2+.6);sg.add(sn);g.add(sg)}const ry=Math.atan2(-s.x,-s.z),dim=E?cityDim253(...SHOPM[s.id]):{w:s.w,d:s.d};cityCollider253(addCol,sx,sz,ry,dim);
     const front=cityFront253(sx,sz,ry,dim.d/2+1.6),vx=front.x,vz=front.z;
     addVendor(c,s.id==='arm'?'defense':s.id,s.vendor,s.sign,s.sc,vx,vz,{body:s.vb,hair:s.vh,wep:s.vw,wcol:0xffd08a,gk:{guild:'Mage',pot:'Mage',wep:'Barbarian',arm:'Knight'}[s.id],tint:{pot:0xffb0c8}[s.id]})}
-  {const pond=window.Water154?Water154.mesh(2.25):new THREE.Mesh(geo('pond',()=>new THREE.CircleGeometry(2.2,24)),new THREE.MeshBasicMaterial({color:ENV.ok?0x2d7196:0x2a8ac8,transparent:true,opacity:.85}));pond.rotation.x=-Math.PI/2;pond.position.set(X-7,.05,Z-6);g.add(pond);if(!E){const rim=new THREE.Mesh(geo('prim',()=>new THREE.RingGeometry(2.2,2.6,24)),toonS(0x5a5a6a));rim.rotation.x=-Math.PI/2;rim.position.set(X-7,.06,Z-6);g.add(rim)}
-    L.inter.push({type:'fish',city:c,x:X-7,z:Z-4,r:2.8,label:'F · PESCAR',use:fishView});if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+10.15,2.4,Z+18);g.add(sg217);if(window.Wagon369){Wagon369.station(g,X+8,Z+18);for(const dz of [-1.9,-.5,1,3.1])addCol({x:X+8,z:Z+18+dz,r:dz===3.1?.7:1.18})}L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · TEREN · CARROÇA DA ORDEM',use:travelView217})}}
+  {/* v692 (Ian): sem lago de pesca dentro das capitais e cidades; pesca fica nos lagos e rios do mundo */
+    if(!fallen){const sg217=makeCitySign('CARROÇA','#ffd9a0',.45);sg217.position.set(X+10.15,2.4,Z+18);g.add(sg217);if(window.Wagon369){Wagon369.station(g,X+8,Z+18);for(const dz of [-1.9,-.5,1,3.1])addCol({x:X+8,z:Z+18+dz,r:dz===3.1?.7:1.18})}L.inter.push({type:'travel',city:c,x:X+8,z:Z+18,r:2.6,label:'F · TEREN · CARROÇA DA ORDEM',use:travelView217})}}
   buildHouse(c,g,E,addCol);
   if(!cityFallen(c)){const lx=X-16,lz=Z-9;if(E){const lb=new EnvBatch();EW(lb,'stall-green',lx,0,lz,Math.PI/2,3.6);EW(lb,'crates_stacked',lx-1.6,0,lz+2.2,0,1.2);envOwn(g,lb.mesh(BLDMAT))}addCol({x:lx,z:lz,r:1.4});const sg=makeCitySign('LIVRARIA','#b18cff',.5);sg.position.set(lx,4,lz);g.add(sg);L.inter.push({type:'lib',city:c,x:lx+2.4,z:lz,r:2.4,label:'F · LIVRARIA',use:libView})}
   {const inn=makeCitySign('POUSADA','#ffd9a0',.5),e=c.layout253?.inn;
@@ -8353,14 +8353,14 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
 function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood};
- m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
- m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+ m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;').replace('pp.xy+=(uv-.5)*2.*uFlood*5.;','').replace('w.y+=uRise;','w.y+=uRise*(1.-aFD.x);');/* v692: rio nao alarga no shader (o leito fundo ja enche com o nivel; alargar deixava a agua estreita e subindo pelas paredes); gelo fica parado na enchente */
+ m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5)*(1.-vFD.x));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
   float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
   float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
   vec3 Li=normalize(vec3(-.4,.8,.45));ice+=pow(max(0.,dot(reflect(-Li,vec3(0.,1.,0.)),normalize(vec3(.1,.85,.5)))),20.)*.25+pow(n(p*24.+floor(t*1.5)),30.)*1.6;
   col=mix(col,ice,smoothstep(.2,.8,fz));
-  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(.5,.95,smoothstep(.95,.35,r));a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y);gl_FragColor=vec4(col,a);');
+  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(.5,.95,smoothstep(.95,.35,r));a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y)*(1.-smoothstep(.9,1.,r)*(1.-fz));/* v692: margem some aos poucos */gl_FragColor=vec4(col,a);');
  return CRY230.rv=m}
 function onIce240(P){if(L.mode!=='world')return false;const rv=riverNear239(P.x,P.z);if(rv.d<riverWidth351(rv.b,P.z)/2+.5&&snowB(P.x,P.z)<.29)return true;const lk=lakeAt239(Math.round(P.x/CH),Math.round(P.z/CH));return !!(lk&&['neve','cristal'].includes(biomeAt(lk.x,lk.z))&&Math.hypot(P.x-lk.x,P.z-lk.z)<lk.r)}
 function iceMove240(P,vx,vz,dt){const on=onIce240(P);P.iv240=P.iv240||{x:0,z:0};if(!on){P.iv240.x=P.iv240.z=0;return false}
@@ -9712,7 +9712,7 @@ requestAnimationFrame(frame);
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=634"></script>
-<script src="tools/water391.js?v=661"></script>
+<script src="tools/water391.js?v=692"></script>
 <script src="tools/agua628.js?v=628"></script>
 <script src="tools/map393.js?v=661"></script>
 <script src="tools/fall393.js?v=393"></script>
@@ -9737,7 +9737,7 @@ requestAnimationFrame(frame);
 <script src="tools/build437.js?v=630"></script>
 <script src="tools/otherworld460.js?v=654"></script>
 <script src="tools/sea439.js?v=628"></script>
-<script src="tools/cachoeiras661.js?v=661"></script>
+<script src="tools/cachoeiras661.js?v=692"></script>
 <script src="tools/boats440.js?v=579"></script>
 <script src="tools/terra444.js?v=458"></script>
 <script src="tools/clear445.js?v=458"></script>
@@ -9833,6 +9833,7 @@ requestAnimationFrame(frame);
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 <script src="tools/enchente630.js?v=634"></script>
+<script src="tools/enchente687.js?v=692"></script>
 <script src="tools/teste-agua634.js?v=635"></script>
 <script src="tools/carga630.js?v=631"></script>
 <script src="tools/enfeite637.js?v=638"></script>
@@ -9845,9 +9846,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v691</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v692</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=691;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=692;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

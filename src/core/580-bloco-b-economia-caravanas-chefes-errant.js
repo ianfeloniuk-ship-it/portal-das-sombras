@@ -54,14 +54,14 @@ function buildWater239(ch,g,addCol){if(!window.Water154)return;const x0=ch.cx*CH
  /* v391 (Ian): sem parede invisível no rio — o herói atravessa nadando; monstros continuam fora (tools/water391.js) */}
 /* v241 (Ian): rio congela aos poucos ao entrar na neve e degela ao sair; seca perto do deserto/vulcão. Gelo com geada, rachaduras e brilho; no gelo o herói desliza. */
 function riverMat240(){if(CRY230.rv)return CRY230.rv;const base=Water154.mesh(1).material;const m=base.clone();m.uniforms={uTime:{value:0},uNight:base.uniforms.uNight,uRise:base.uniforms.uRise,uFlood:base.uniforms.uFlood};
- m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;');
- m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
+ m.vertexShader=base.vertexShader.replace('varying vec2 vUv;','attribute vec2 aFD;varying vec2 vFD;varying vec2 vUv;').replace('vUv=uv;','vUv=uv;vFD=aFD;').replace('pp.xy+=(uv-.5)*2.*uFlood*5.;','').replace('w.y+=uRise;','w.y+=uRise*(1.-aFD.x);');/* v692: rio nao alarga no shader (o leito fundo ja enche com o nivel; alargar deixava a agua estreita e subindo pelas paredes); gelo fica parado na enchente */
+ m.fragmentShader=base.fragmentShader.replace('vec2 p=vW.xz;','vec2 p=vW.xz-vec2(0.,t*(1.5+uFlood*1.5)*(1.-vFD.x));').replace('varying vec2 vUv;','varying vec2 vFD;varying vec2 vUv;').replace('col*=mix(1.,.38,uNight);',`
   /* v391: profundidade — meio escuro, margem rasa e transparente */col=mix(col,vec3(.02,.08,.12),smoothstep(.55,.0,r)*.55);
   float fz=vFD.x;vec3 ice=vec3(.62,.80,.93);float fr=n(p*1.2)*.55+n(p*5.)*.3;ice=mix(ice,vec3(.95,.98,1.),fr*.55+smoothstep(.75,1.,r)*.45);
   float cr=abs(n(p*.7+7.)-.5);float cr2=abs(n(p*1.9+3.)-.5);ice=mix(ice,vec3(.30,.48,.62),max(smoothstep(.025,.0,cr),smoothstep(.015,.0,cr2)*.7)*.85);
   vec3 Li=normalize(vec3(-.4,.8,.45));ice+=pow(max(0.,dot(reflect(-Li,vec3(0.,1.,0.)),normalize(vec3(.1,.85,.5)))),20.)*.25+pow(n(p*24.+floor(t*1.5)),30.)*1.6;
   col=mix(col,ice,smoothstep(.2,.8,fz));
-  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(.5,.95,smoothstep(.95,.35,r));a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y);gl_FragColor=vec4(col,a);');
+  col*=mix(1.,.38,uNight);`).replace('gl_FragColor=vec4(col,a);','a=mix(.5,.95,smoothstep(.95,.35,r));a=mix(a,.98,smoothstep(.2,.8,fz))*(1.-vFD.y)*(1.-smoothstep(.9,1.,r)*(1.-fz));/* v692: margem some aos poucos */gl_FragColor=vec4(col,a);');
  return CRY230.rv=m}
 function onIce240(P){if(L.mode!=='world')return false;const rv=riverNear239(P.x,P.z);if(rv.d<riverWidth351(rv.b,P.z)/2+.5&&snowB(P.x,P.z)<.29)return true;const lk=lakeAt239(Math.round(P.x/CH),Math.round(P.z/CH));return !!(lk&&['neve','cristal'].includes(biomeAt(lk.x,lk.z))&&Math.hypot(P.x-lk.x,P.z-lk.z)<lk.r)}
 function iceMove240(P,vx,vz,dt){const on=onIce240(P);P.iv240=P.iv240||{x:0,z:0};if(!on){P.iv240.x=P.iv240.z=0;return false}

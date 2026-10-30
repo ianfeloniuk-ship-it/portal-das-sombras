@@ -1,3 +1,11 @@
+## v692 (29/10/2026) — Água que enche com física + visual mais realista
+- Ian: «a água quando enche tá bem bugada»; «água realista que nem em Skyrim; quando alagar ela tem que ir pros lugares como na vida real»; «o lago onde pesca nas capitais e cidades, sai».
+- Bug: na enchente o shader do rio (`riverMat240`, 580) alargava a água 5 m, o que deixava o rio estreito e subindo pelas paredes do leito, com 75% de marrom chapado. O alargamento saiu.
+- `tools/enchente687.js` (novo): lâmina d'água no nível real (margem do rio/lago + `RAIN626.rise`). Só aparece onde o chão fica abaixo desse nível, então escorre para os baixios e para nos barrancos. `water391.waterAt` usa o mesmo nível: dá para nadar onde alagou.
+- `water154`: cores naturais (sem ciano), reflexo do céu por Fresnel, brilho do sol fino, turvação da enchente 42% com espuma correndo. O gelo não sobe nem corre na enchente; borda do rio some aos poucos; o poço das cachoeiras (`cachoeiras661`) sobe junto com a chuva.
+- Lago de pesca das capitais e cidades removido (`260-v341.js`); pesca fica nos lagos e rios do mundo. Ligado: a nota da v685 citava o poço de pesca de Zahar (os pontos de E continuam a 12 m).
+- Teste: navegador, `Primeva.testeEnchente('rio')`, print seco × cheio (água foi para o campo baixo, parou no barranco alto); nado em área alagada de 2 m (nadando = sim); cidade sem interação de pesca, carroça presente; sem erro de script. Não testado: lago (só rio), noite, desempenho no PC real.
+
 ## v691 (29/10/2026) — Vento e nuvens
 - Ian: «falta vento, nuvens». `tools/vento687.js` (novo): vento com direção que gira e rajadas (`ENV.gust`/`ENV.wd`), mais forte na chuva; céu em cúpula com 3 camadas de nuvens que andam com o vento, cobertura cinza na chuva, estrelas e lua à noite (cor de base do ciclo dia/noite); folhas (campo/floresta), poeira (deserto/estrada) e neve fina levadas pelo vento.
 - Ligado: grama (`grass446`), plantas (`190`), árvores (`680`) e pano das roupas (`pano672`) seguem a força e direção do vento. Esfera de corte (`culling637`) acompanha o jogador.
