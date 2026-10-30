@@ -239,7 +239,7 @@ function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv
   if(!L.special&&!L.gate.owned){const it={type:'dom',x:b.x-3,z:b.z+3,r:2.6,label:'F · DOMINAR MASMORRA (3 núcleos '+GR[L.gate.rank].id+')',use:()=>{if(dominate())it.hidden=true}};L.inter.push(it)}
   if(L.special&&L.special.kind==='weekly'){profile.weekly=weekId();store.set('pds2_profile',profile);addChest(b.x-4,b.z-3,L.gate.rank,true);toast('<b>[NARRADOR]</b> Chefe semanal derrotado. Um novo aparece na próxima semana.',5000)}
 }
-function awaken3(b){bossSay218(b,'power');b.phase=3;b.speed*=1.2;b.atkCd*=.8;b.dmg*=1.25;bigText('DESPERTAR DO ARCONTE',1600);shake(.9);toast('<b>[NARRADOR]</b> '+b.name+' liberou o poder verdadeiro.',3500);
+function awaken3(b){bossSay218(b,'power');b.phase=3;b.speed*=1.2;b.atkCd*=.8;b.dmg*=1.25;bigText('FÚRIA DO REI',1600);shake(.9);toast('<b>[NARRADOR]</b> '+b.name+' liberou o poder verdadeiro.',3500);
   for(let i=0;i<3;i++){const a=i/3*TAU;let x=b.x+Math.cos(a)*4,z=b.z+Math.sin(a)*4;if(!freeAt(x,z,.6)){x=b.x;z=b.z}const m=spawnKind(bossMinion124(b,'demon'),x,z,b.gr,{room:b.room});makeElite(m);m.aggro=true}
   hazard(b.x,b.z,14,1.4,b.dmg*1.5,'enemy',0xe0d0ff);b.mats.forEach(m=>{m.userData.e0=0x332255;m.emissive.setHex(0x332255)})}
 function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.wind*=.85;bossLight.color.setHex(0xff2020);bossLight.intensity=3;scene.fog.color.setHex(0x3a0508);

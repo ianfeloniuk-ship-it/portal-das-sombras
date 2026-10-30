@@ -152,7 +152,7 @@
         const interior = dummyB.mesh(ENVMAT);
         if (interior) { interior.name = 'InteriorEstatua537'; interior.userData.terrainAbsolute245 = true; g.add(interior); }
 
-        // Registro de interação (F para vasculhar/abrir)
+        // Registro de interação (E para vasculhar/abrir)
         const it = {
           type: 'estatua_colina',
           x: chestX, z: chestZ, r: 3.5,

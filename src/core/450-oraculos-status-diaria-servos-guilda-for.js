@@ -122,7 +122,7 @@ function travelTab(){const v=profile.visited||{};const ids=Object.keys(v);let h=
   for(const id of ids){if(id===here)continue;const c=v[id];if(!c||!Number.isFinite(c.x)||!Number.isFinite(c.z))continue;const cost=travelCost(c);h+=row('<b>'+c.n+'</b>',fmt(Math.round(Math.hypot(c.x-player.x,c.z-player.z)))+' m de distância',btn('Viajar · '+fmt(cost),'travel',id,run.gold>=cost))}
   return h}
 function albumView(){view=albumView;const a=profile.album||[];let h='<div class="sysline"><b>[NARRADOR]</b> Coleção de Servos: <b>'+a.length+'</b> espécies já erguidas. A coleção fica mesmo se você morrer.</div>';
-  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhum servo erguido ainda. Use ERGUER SERVO (F) em guardiões e elites.</small></div></div>';
+  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhum servo erguido ainda. Use ERGUER SERVO (E) em guardiões e elites.</small></div></div>';
   for(const n of a)h+='<div class="it"><div class="d"><b style="color:#b18cff">'+n+'</b><small>Servo registrado</small></div></div>';openModal('COLEÇÃO DE SERVOS',h)}
 function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Novo servo na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[NARRADOR]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
@@ -290,7 +290,7 @@ function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('
 
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Servos ativos: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Servos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
-  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SERVO (F) em guardiões e elites.':'Só o Necromante levanta servos.')+'</small></div></div>';
+  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SERVO (E) em guardiões e elites.':'Só o Necromante levanta servos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE SERVOS',h)}
 function startFirstEquipment(){if(profile.classless)return;if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a memória da primeira arma define sua classe. Acompanhe a missão no Diário.',6500)}

@@ -38,7 +38,7 @@ const P410={
  glub:{f:['habitat'],esc:{far:18,los:4},how:'Explode em respingos quando assustado e se reconstrói.'},
  golenzinho:{f:['moral'],leader:['golempedra','gigante','golem'],esc:{far:20,los:4},how:'Imita o golem maior; sem ele, foge.'},
  cogufuria:{f:['emboscada'],near:3,leader:['reicogu'],esc:{far:16,los:3},how:'Só ataca quem pisa na sua sombra (muito perto).'},
- sapo:{f:['honra','habitat'],honor:1,esc:{home:24},how:'Disputa o brejo; com pouca vida, se rende a quem o venceu. F para aceitar.'},
+ sapo:{f:['honra','habitat'],honor:1,esc:{home:24},how:'Disputa o brejo; com pouca vida, se rende a quem o venceu. E para aceitar.'},
  coelho:{f:['emboscada'],near:4,esc:{far:20,los:4},how:'Parece inofensivo até alguém chegar perto demais.'},
  caveira:{f:['luz','comando'],light:1,call:['caveira','fantasma','minion','mage','warrior','wraith','rogue'],esc:{far:24,los:4},how:'Enxerga longe à noite; o grito acorda outros mortos.'},
  redemoinho:{f:['habitat'],dawn:1,esc:{far:20,los:4},how:'Desfaz-se ao amanhecer.'},
@@ -77,7 +77,7 @@ const P410={
  lobo:{f:['bando','moral','carnica'],carrion:1,lone:['lobo'],loneHp:.5,esc:{far:40,los:7},how:'Cerca em matilha; fareja iscas de carniça; o último, ferido, foge.'},
  aranha:{f:['emboscada','carnica'],carrion:1,esc:{far:22,los:4},how:'Espera na teia e prende com fios; atraída por isca de carniça.'},
  vespa:{f:['emboscada'],esc:{far:28,los:5},how:'Mergulha e volta para o alto.'},
- orc:{f:['honra','duelo'],honor:1,esc:{far:26,los:5},how:'Luta por honra; com pouca vida, se rende a quem o venceu. F para aceitar.'},
+ orc:{f:['honra','duelo'],honor:1,esc:{far:26,los:5},how:'Luta por honra; com pouca vida, se rende a quem o venceu. E para aceitar.'},
  yeti:{f:['protecao'],esc:{home:24},how:'Fúria ao ver um filhote atacado; os filhotes fogem se ele cair.'},
  gigante:{f:['perimetro'],near:4.5,esc:{home:16},how:'Parece parte da parede até alguém chegar perto.'},
  raptor:{f:['cacador','bando','carnica'],carrion:1,esc:{far:36,los:6},how:'Zigue-zague pelos flancos; persegue longe, mas é distraído por isca de carniça.'},
@@ -256,7 +256,7 @@ function beforeAI(e,dt){
  }
  if(escape(e,P,S,pd,dt))return true;
  // honra: rendição com pouca vida
- if((P.honor||e.honor456)&&v!=='a'&&!S.surrDone&&e.hp>0&&e.hp<=e.maxhp*(e.honor456?.25:.15)&&pd<14){S.surr={t:0};e.act=null;e.aggro=false;floater(e.x,e.z,'SE RENDEU','#ffd76a',true,2.6);if(once('tip:rendicao')||e.honor456)showTip('<b>'+(P.book?.[0]||e.name)+'</b> reconheceu sua força e se rendeu. <b>F</b> para aceitar a rendição.',6000);return true}
+ if((P.honor||e.honor456)&&v!=='a'&&!S.surrDone&&e.hp>0&&e.hp<=e.maxhp*(e.honor456?.25:.15)&&pd<14){S.surr={t:0};e.act=null;e.aggro=false;floater(e.x,e.z,'SE RENDEU','#ffd76a',true,2.6);if(once('tip:rendicao')||e.honor456)showTip('<b>'+(P.book?.[0]||e.name)+'</b> reconheceu sua força e se rendeu. <b>E</b> para aceitar a rendição.',6000);return true}
  if(P.weak&&e.aggro&&player.hp<player.maxhp*P.weak){e.aggro=false;S.awake=false;return true}
  if(P.observe&&e.aggro){if(S.obs==null)S.obs=P.observe;if(S.obs>0){S.obs-=dt;e.act=null;turnTo(e,Math.atan2(player.x-e.x,player.z-e.z),dt,4);pose(e,0,dt);return true}}else if(!e.aggro)S.obs=null;
  if(e.aggro&&!S.was){S.was=1;onAggro(e,P);if(pd<16)tactic(e,P)}else if(!e.aggro)S.was=0;

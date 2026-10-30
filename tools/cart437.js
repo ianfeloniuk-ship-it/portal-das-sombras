@@ -200,7 +200,7 @@
       (c.pulling ? '<b style="color:#ffd54f">Você está puxando o carrinho.</b> Ao entrar numa Fenda, ele fica estacionado do lado de fora. Leve as provisões na mochila.' : 'Carrinho estacionado (visível no minimapa).') + '</div>';
 
     h += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">' +
-      '<button class="btn hot" id="ctPull">' + (c.pulling ? 'Soltar / Estacionar Carrinho (F)' : 'Puxar Carrinho (F)') + '</button>' +
+      '<button class="btn hot" id="ctPull">' + (c.pulling ? 'Soltar / Estacionar Carrinho (E)' : 'Puxar Carrinho (E)') + '</button>' +
       '<button class="btn" id="ctPutAll">Guardar Recursos Brutos & Lenha</button>' +
       '<button class="btn" id="ctTakeFood">Pegar Suprimentos p/ Fenda</button>' +
       (c.hp < c.maxHp || Surv437.count('caixa_salmoura') > 0 ? '<button class="btn" id="ctRepair">Consertar / Reforçar Salmoura</button>' : '') +

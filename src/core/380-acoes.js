@@ -105,7 +105,7 @@ function attack(){if(typeof inConversation==='function'&&inConversation()){if(ty
 }
 function autoAim357(a){let best=null,dist=16;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz),delta=Math.atan2(dx,dz)-a;if(d<dist&&Math.abs(Math.atan2(Math.sin(delta),Math.cos(delta)))<.45&&los(player.x,player.z,e.x,e.z)){dist=d;best=e}}return best?projectileBody253(best):null}
 /* v690 (Ian, 29/10): balística real. Projétil FÍSICO (flecha, virote, adaga, lança, pedra arremessada) cai pela gravidade;
-   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão; passar por cima recolhe (v691: a puxada do arco define a velocidade). Monstro arqueiro compensa a queda na mira. */
+   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão; pega-se com a tecla de usar (v699, tools/flechas695.js); v691: a puxada do arco define a velocidade. Monstro arqueiro compensa a queda na mira. */
 const BAL690={g:9.8,arrow:50,life:8,stuck:20},stuck690=[];
 function physProj690(t){return !MAGIC_PT281.test(t||'')}
 function ballisticPitch690(v,d,dy){const g=BAL690.g,v2=v*v,disc=v2*v2-g*(g*d*d+2*dy*v2);return disc<0?Math.PI/4:Math.atan((v2-Math.sqrt(disc))/(g*d))}
@@ -140,7 +140,6 @@ function projectileImpact253(p){if(window.Golpes487&&!Golpes487.legacyDepth&&p.t
 }
 function updateProjectiles253(dt){
   for(let i=stuck690.length-1;i>=0;i--){const st=stuck690[i];
-    if(st.id&&player&&!player.dead&&Math.hypot(st.x-player.x,st.z-player.z)<1.6&&window.Surv437){try{Surv437.add(st.id,1,true);floater(player.x,player.z,'+1 flecha','#e8d8a8');window.Flechas695&&Flechas695.picked(st.id)}catch(_){}scene.remove(st.m);stuck690.splice(i,1);continue}
     if((st.t-=dt)<=0){scene.remove(st.m);stuck690.splice(i,1)}}
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],lease487=window.Golpes487&&Golpes487.projectile(p),priorSkill487=window.Golpes487?.legacySkill;if(lease487){Golpes487.legacyDepth++;Golpes487.legacySkill=p.fx487.sk}try{const pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
     p.life-=pdt;if(p.grav690)p.vy=(p.vy||0)-p.grav690*pdt;p.x+=p.vx*pdt;p.y=before.y+(p.vy||0)*pdt;p.z+=p.vz*pdt;

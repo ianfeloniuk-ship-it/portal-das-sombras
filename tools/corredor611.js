@@ -167,9 +167,9 @@
     const ph = phase(); if (!ph) return null;
     if (L.special && L.special.kind === 'corredor') {
       const s = S(), left = Math.max(0, Math.ceil(LIMIT - (L.special.t || 0)));
-      return { actTitle: 'O CORREDOR DA ESCOLHA', step: 2, totalSteps: 3, text: s.escolha ? 'Saia da Fenda antes de desmoronar' : 'A Fenda desmorona em ' + left + ' s: persiga o Comandante ou arrombe a porta dos soldados [F]', target: null };
+      return { actTitle: 'O CORREDOR DA ESCOLHA', step: 2, totalSteps: 3, text: s.escolha ? 'Saia da Fenda antes de desmoronar' : 'A Fenda desmorona em ' + left + ' s: persiga o Comandante ou arrombe a porta dos soldados [E]', target: null };
     }
-    if (ph === 'fenda') return { actTitle: 'O CORREDOR DA ESCOLHA', step: 2, totalSteps: 3, text: 'Entre na Fenda Vermelha da Câmara de Seleção [F]', target: spot() };
+    if (ph === 'fenda') return { actTitle: 'O CORREDOR DA ESCOLHA', step: 2, totalSteps: 3, text: 'Entre na Fenda Vermelha da Câmara de Seleção [E]', target: spot() };
     return null;
   }
   function tick(dt) {

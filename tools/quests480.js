@@ -1310,7 +1310,7 @@
       if (dc < 13 && dc > 4 && nowc >= cn.nextCall) {
         cn.calls++; cn.nextCall = nowc + 14000;
         cn.face = Math.atan2(player.x - cn.x, player.z - cn.z);
-        try { speech153(cn, cn.speech, cn.calls === 1 ? 'F para falar' : ''); } catch (_) {}
+        try { speech153(cn, cn.speech, cn.calls === 1 ? 'E para falar' : ''); } catch (_) {}
         try { if (typeof beep === 'function') beep(520, .12, .05, 'triangle'); } catch (_) {}
       }
     }

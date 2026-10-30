@@ -115,7 +115,7 @@
       b.name = b.short = 'Guardião Acorrentado'; b.aggro = true; b.sulco609 = true; b.spd = (b.spd || 1) * .85; boss = b;
       for (let i = 0; i < 5; i++) pillars.push(mkPillar(i, b.x, b.z));
       try { bossAggro(b); } catch (_) {}
-      try { toast('<b>[FENDA]</b> Cinco pilares de corrente prendem o Guardião. Quebre-os (F) para libertar o espírito antes do golpe final, ou abata-o enquanto as correntes o puxam.', 9000); } catch (_) {}
+      try { toast('<b>[FENDA]</b> Cinco pilares de corrente prendem o Guardião. Quebre-os (E) para libertar o espírito antes do golpe final, ou abata-o enquanto as correntes o puxam.', 9000); } catch (_) {}
     }
     if (!boss) return;
     const n = S().broken || 0;
@@ -185,9 +185,9 @@
     const ph = phase(); if (!ph) return null;
     if (typeof L !== 'undefined' && L.special && L.special.kind === 'sulco') {
       const n = S().broken || 0, alive = boss && !boss.dead;
-      return { actTitle: 'O SULCO NO METAL', step: 2, totalSteps: 3, text: !boss ? 'Prepare-se: o Guardião Acorrentado desperta' : alive ? 'Quebre os pilares de corrente [F] ' + n + '/5 ou abata o Guardião' : 'Guardião derrotado: saia da Fenda', target: null };
+      return { actTitle: 'O SULCO NO METAL', step: 2, totalSteps: 3, text: !boss ? 'Prepare-se: o Guardião Acorrentado desperta' : alive ? 'Quebre os pilares de corrente [E] ' + n + '/5 ou abata o Guardião' : 'Guardião derrotado: saia da Fenda', target: null };
     }
-    if (ph === 'fenda') return { actTitle: 'O SULCO NO METAL', step: 2, totalSteps: 3, text: 'Entre na Fenda de Fronteira, ao sul de Aster [F]', target: spot() };
+    if (ph === 'fenda') return { actTitle: 'O SULCO NO METAL', step: 2, totalSteps: 3, text: 'Entre na Fenda de Fronteira, ao sul de Aster [E]', target: spot() };
     const k = typeof vendor === 'function' ? vendor('Kael') : null;
     return { actTitle: 'O SULCO NO METAL', step: 3, totalSteps: 3, text: 'Leve o resultado a Kael, na Forja de Aster', target: k || { x: aster().x, z: aster().z } };
   }

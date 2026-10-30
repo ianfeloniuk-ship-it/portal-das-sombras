@@ -143,7 +143,7 @@
       if (gd >= 20) {
         const amt = Math.min(150, Math.max(10, Math.round(gd * .1))); run.gold -= amt; n.loot523 = amt;
         if (typeof floater === 'function') floater(n.x, n.z, 'FUROU!', '#ff8a8a');
-        if (typeof toast === 'function') toast('<b>[LADRÃO]</b> Um vulto roubou ' + amt + ' de ouro de você! Corra atrás dele (F) ou chame um guarda.', 6000);
+        if (typeof toast === 'function') toast('<b>[LADRÃO]</b> Um vulto roubou ' + amt + ' de ouro de você! Corra atrás dele (E) ou chame um guarda.', 6000);
         n.label = 'F · PEGAR O LADRÃO';
       }
     }
@@ -159,7 +159,7 @@
         if (n.chat655 && n.chat655.until > now) continue; /* v655: conversando com outro morador (tools/povo655.js) */
         routine(n, p, nn);
         if (n.role523 === 'guarda' && typeof profile !== 'undefined' && profile && profile.multa523 && dist(n, player) < 6 && now - lastFine > 30000 && typeof speech153 === 'function') {
-          lastFine = now; speech153(n, 'Ei, você! Pague a multa por desordem!', 'F para falar');
+          lastFine = now; speech153(n, 'Ei, você! Pague a multa por desordem!', 'E para falar');
         }
       }
       for (const ch of chunks.values()) {

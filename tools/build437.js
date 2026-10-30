@@ -1,5 +1,5 @@
 /* v456: Acampamento Portátil de Expedição (Fogueira, Tenda/Abrigo, Varal de Secagem e Bancada Rústica).
-   Casas fixas e terraplenagem desativadas — o jogador monta e recolhe (F) seu acampamento na natureza
+   Casas fixas e terraplenagem desativadas — o jogador monta e recolhe (E) seu acampamento na natureza
    ou dentro das Fendas (Outros Mundos), deixando o bioma 100% limpo. */
 (function () {
   'use strict';
@@ -181,7 +181,7 @@
     spawned.delete(uid);
   }
 
-  /* ---------- Recolher Peça ou Acampamento Inteiro (F) ---------- */
+  /* ---------- Recolher Peça ou Acampamento Inteiro (E) ---------- */
   function packStruct456(b, silent = false) {
     if (!b) return false;
     const def = STRUCTS[b.kind];
@@ -268,7 +268,7 @@
         c.built = true; c.x = x; c.z = z; c.rot = player.face || 0; c.pulling = false; c.hp = 100; c.brineBox = true;
         window.Cart437.ensure();
       }
-      toast('<b>[CARRINHO DE CARGA]</b> Construído com Caixa de Salmoura! Use <b>F</b> perto dele para puxar ou guardar suprimentos.');
+      toast('<b>[CARRINHO DE CARGA]</b> Construído com Caixa de Salmoura! Use <b>E</b> perto dele para puxar ou guardar suprimentos.');
       Surv437.save();
       return true;
     }
@@ -284,7 +284,7 @@
     st().push(b);
     spawnMesh(b);
     Surv437.save();
-    toast('<b>[ACAMPAMENTO PORTÁTIL]</b> <b>' + def.n + '</b> montado(a)! Use <b>F</b> para interagir ou recolher ao partir.');
+    toast('<b>[ACAMPAMENTO PORTÁTIL]</b> <b>' + def.n + '</b> montado(a)! Use <b>E</b> para interagir ou recolher ao partir.');
     return true;
   }
 
@@ -427,7 +427,7 @@
       closeModal();
       activeModalStruct = null;
       try { sfx('level'); bigText('DESCANSADO', 1600); } catch (_) {}
-      toast('<b>[TENDA PORTÁTIL]</b> Você dormiu aquecido: Vida em 100%, Cansaço zerado e 24 de mana! Aperte <b>F</b> na tenda para recolher o acampamento.');
+      toast('<b>[TENDA PORTÁTIL]</b> Você dormiu aquecido: Vida em 100%, Cansaço zerado e 24 de mana! Aperte <b>E</b> na tenda para recolher o acampamento.');
       Surv437.save();
     };
     const bhm = document.getElementById('b437hangMeat');

@@ -3197,7 +3197,7 @@
     "category": "Ecologia & Terras Despertas (Bestiário #006)",
     "location": "Estrada das Dunas de Zahar",
     "actors": "Ferreiro Viajante Ignis e Cavaleiro Escaravelho (#006)",
-    "trigger": "Ouvir Ignis chamar (`F para falar`) a 12 metros",
+    "trigger": "Ouvir Ignis chamar (`E para falar`) a 12 metros",
     "description": "Três Cavaleiros Escaravelhos (#006) de carapaça de bronze foram atraídos pelo brilho das armaduras polidas na carroça de Ignis e estão prestes a esmagá-la em linha reta.",
     "choicesText": "Jogar moedas de ouro brilhantes (`Tecla Y`) para o lado do penhasco, fazendo os três besouros investirem na moeda e travarem por 3 segundos na freada (`ecology410.js`).",
     "worldConsequence": "Salva a carroça de Ignis sem um único arranhão e ele tempera gratuitamente sua arma equipada (+8% qualidade)."

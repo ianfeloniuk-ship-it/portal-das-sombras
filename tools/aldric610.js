@@ -117,9 +117,9 @@
   function objective() {
     const ph = phase(); if (!ph) return null; const s = S();
     let text, target = null;
-    if (ph === 'escolha') { text = 'Fale com Aldric, ferido sob a rocha [F]'; target = aldric ? { x: aldric.x, z: aldric.z } : null; }
+    if (ph === 'escolha') { text = 'Fale com Aldric, ferido sob a rocha [E]'; target = aldric ? { x: aldric.x, z: aldric.z } : null; }
     else if (ph === 'limpar') { text = 'Limpe a estrada: batedores da ruptura ' + (s.mortos || 0) + '/4'; const e = foes.find(e => !e.dead); target = e ? { x: e.x, z: e.z } : (s.spot || null); }
-    else if (ph === 'volta') { text = 'A estrada está livre: volte a Aldric [F]'; target = aldric ? { x: aldric.x, z: aldric.z } : null; }
+    else if (ph === 'volta') { text = 'A estrada está livre: volte a Aldric [E]'; target = aldric ? { x: aldric.x, z: aldric.z } : null; }
     else { text = s.modo === 'imediata' ? 'Escolte Aldric até a tenda de Mira · fique a menos de ' + NEAR + ' m' + ((s.quedas || 0) ? ' · quedas ' + s.quedas : '') : 'Leve Aldric até a tenda de Mira'; target = tent(); if (aldric && aldric.caido) text = 'Aldric caiu: volte e ajude-o a se levantar'; }
     return { actTitle: 'O RETORNO DE ALDRIC NA CHUVA', step: ph === 'escolta' ? 3 : 2, totalSteps: 3, text, target };
   }

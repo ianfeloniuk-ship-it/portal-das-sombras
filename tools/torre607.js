@@ -52,7 +52,7 @@
   function objective() {
     const a = a3(); if (!a || typeof L === 'undefined' || !L.special || L.special.kind !== 'tower') return null;
     const f = L.special.floor; if (!inRange(f)) return null;
-    return { actTitle: 'OS DEGRAUS DA TORRE ANTIGA', step: 1, totalSteps: 3, text: 'Andar ' + f + ' de ' + a.base + ' · archotes purificados ' + count() + '/5 [F]', target: null };
+    return { actTitle: 'OS DEGRAUS DA TORRE ANTIGA', step: 1, totalSteps: 3, text: 'Andar ' + f + ' de ' + a.base + ' · archotes purificados ' + count() + '/5 [E]', target: null };
   }
   const pu = update;
   update = function () { pu.apply(this, arguments); try { if (typeof L !== 'undefined' && L.special) floorTick(); else if (meshes.length) { clearMeshes(); floorKey = null; } if (window.Fixas545 && !Fixas545.LIVE.primeva_q007) Fixas545.LIVE.primeva_q007 = 'v613'; } catch (e) { console.warn('Torre607', e); } };

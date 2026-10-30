@@ -52,7 +52,7 @@
       { t: 'tower', n: 100, d: 'Chegue ao andar 100 da Torre da Ascensão.' },
       { t: 'talk', npc: 'Lyra', d: 'Conte a Lyra o que viu no mapa do topo.', say: ['Um mapa de mundos inteiros, em pedaços…', 'Um deles parece com o seu, {nome}. Talvez ainda exista alguém lá.'] }] },
     { id: 'a8', act: 8, title: 'VIII — O Clã Ferrugem', steps: [
-      { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com F para lutar livre) e desobstrua as pedras e troncos da passagem.', verb: 'DESOBSTRUIR PEDRAS E TRONCOS DO DESFILADEIRO', fight: { n: 6, el: 1, kinds: GOB },
+      { t: 'go', d: 'Na rota para o oeste de {cidade}, enfrente os falsos saqueadores no desfiladeiro obstruído (solte o Carrinho com E para lutar livre) e desobstrua as pedras e troncos da passagem.', verb: 'DESOBSTRUIR PEDRAS E TRONCOS DO DESFILADEIRO', fight: { n: 6, el: 1, kinds: GOB },
         done: 'O desfiladeiro está desobstruído e livre, mantendo o relevo natural intacto. O estandarte dos saqueadores foi pintado por cima: não é o vermelho do Clã Ferrugem.' },
       { t: 'go', d: 'Avance ao vale da fundição velha e ajude Torvo a defender os refugiados cercados.', verb: 'FALAR COM TORVO NO VALE', fight: { n: 5, el: 1 }, fig: { torvo: true },
         done: 'Torvo: — Você caçou goblins a vida inteira e ainda veio lutar ao nosso lado. Os refugiados estão exaustos de Fome e Cansaço.' },
@@ -661,7 +661,7 @@
         ring.material.uniforms.t.value = beam.material.uniforms.t.value = k * 6; ring.scale.setScalar(.4 + k * 2.2); beam.scale.set(1 - k * .6, 1, 1 - k * .6);
       }, 50);
       for (let i = 0; i < 3; i++) setTimeout(() => { try { fxRing(x, z, col, 2 + i * 1.6, .8); } catch (_) {} }, i * 450);
-      sfx('arise'); bigText('DESPERTAR', 1800);
+      sfx('arise'); bigText('O FERRO TE ACEITOU', 1800);
     } catch (_) {}
   }
   /* Transição cinematográfica de despertar: tela preta com fade-in suave */
@@ -794,7 +794,7 @@
     if(m.id==='a1'&&s.s===0&&!s.cartRescued401){
       const w=W.get(m.id);if(!w)return;
       if(!s.choice545)s.choice545='luta';
-      if(!s.edranHelp401){s.edranHelp401=true;if(typeof player!=='undefined'&&player){player.hp=player.maxhp;player.iT=Math.max(player.iT||0,3);try{floater(player.x,player.z,'VIDA RESTAURADA','#6bff8d',true);sfx('level')}catch(_){}}const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu. A criatura deixou um cristal; use F para recolher os recursos.','Ele desaparece em dez segundos. O ouro do abate já está com você.','Beba este bálsamo revigorante da minha bolsa para restaurar toda sua vida antes de seguir.','Meu escudo aguentou inteiro porque você foi direto na criatura.','Agora ajude-me a levantar a carroça. Há sobreviventes presos debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Beba o bálsamo da bolsa e ajude-me a levantar a carroça.',6000);return}
+      if(!s.edranHelp401){s.edranHelp401=true;if(typeof player!=='undefined'&&player){player.hp=player.maxhp;player.iT=Math.max(player.iT||0,3);try{floater(player.x,player.z,'VIDA RESTAURADA','#6bff8d',true);sfx('level')}catch(_){}}const it=w.inters[0];it.x=w.cart.position.x;it.z=w.cart.position.z+2.3;it.label='F · EMPURRAR A CARROÇA';save();if(window.Intro401)Intro401.dialog('Edran',['Você conseguiu. A criatura deixou um cristal; use E para recolher os recursos.','Ele desaparece em dez segundos. O ouro do abate já está com você.','Beba este bálsamo revigorante da minha bolsa para restaurar toda sua vida antes de seguir.','Meu escudo aguentou inteiro porque você foi direto na criatura.','Agora ajude-me a levantar a carroça. Há sobreviventes presos debaixo dela.'],()=>{});else toast('<b>Edran:</b> — Beba o bálsamo da bolsa e ajude-me a levantar a carroça.',6000);return}
       rescueCart(m,i);return;
     }
     s.hit.push(i);

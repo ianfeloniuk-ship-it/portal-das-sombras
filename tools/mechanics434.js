@@ -350,7 +350,7 @@
       const it = addVein(p[0], p[1], Math.min(9, typeof rankOf === 'function' ? rankOf() : 0), 4); if (!it) continue;
       it.label = 'F · MINERAR CRISTAL DA FENDA'; it.m428 = true; veins.push(it);
     }
-    if (veins.length) toast('<b>[HISTÓRIA]</b> Veios de Cristal da Fenda brotaram em volta da cidade. Use F para minerar.', 6000);
+    if (veins.length) toast('<b>[HISTÓRIA]</b> Veios de Cristal da Fenda brotaram em volta da cidade. Use E para minerar.', 6000);
   }
   function tickBreach(dt) {
     const w = C()?.W?.get('a6'); if (!w?.breach428 || !window.Rift131) return;
@@ -728,7 +728,7 @@
       bigText('CORRENTES ESTABILIZADAS', 2200);
       toast('<b>[DUNGEON ABISSAL]</b> As correntes do <b>Braço Esquerdo do Arquiteto</b> foram estabilizadas! Use o <b>Elevador Aquático</b> ao sul da câmara para subir até Thalor.', 7500);
     }
-    S.msg = L.bossDead ? 'Correntes estabilizadas · Use o Elevador Aquático (F) para subir a Thalor' : 'Dungeon Abissal · Elites Abissais restantes: ' + alive;
+    S.msg = L.bossDead ? 'Correntes estabilizadas · Use o Elevador Aquático (E) para subir a Thalor' : 'Dungeon Abissal · Elites Abissais restantes: ' + alive;
   }
   function tickCaps() { // a cada meio segundo: o F da pedra entra/sai junto com o pedaço da cidade; clima perto da capital
     const world = L.mode === 'world';

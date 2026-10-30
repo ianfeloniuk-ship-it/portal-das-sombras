@@ -1,3 +1,10 @@
+﻿## v700 (29/10/2026) — Flecha se pega com E; sem brilho e sem avisos; textos com a tecla certa
+- Ian: «não passar por cima e coletar… não me dá tudo de mão beijada… não quero que avise onde estão as flechas nem mostre… intuitivo» e «tu aperta E para as coisas; o jogo fala aperta F, mas F é para mudar a visão».
+- Flechas no chão (que erraram ou caíram do corpo do monstro) só se pegam olhando para elas e apertando a tecla de usar (E no layout Skyrim): a legenda mostra «E · PEGAR 2 FLECHAS DE FERRO». Tirados: coleta automática, brilho acima das flechas, contador no canto da tela e avisos do Narrador sobre onde estão. Ficam só as duas explicações do arco (ao usar e quando estão acabando).
+- Textos com a tecla de usar escrita como F ([F], (F), <b>F</b>, «F para …») agora dizem E (32 textos); abertura: «E / Enter · avançar».
+- Restos de «Despertar»: botão do título «DESPERTAR NA ESTRADA» → «ATRAVESSAR»; janela «DESPERTAR» → «JURAMENTO»; aviso «[DESPERTAR] Caminho de…» → «[CAMINHO]»; letreiro de classe → «O FERRO TE ACEITOU»; fase de chefe «DESPERTAR DO ARCONTE» → «FÚRIA DO REI».
+- Teste no navegador (jogo novo): flecha no chão não é pega ao passar; botão mostra «E · PEGAR 2 FLECHAS DE FERRO»; usar pega as 2; canto da tela limpo.
+
 ## v699 (29/10/2026) — Água reage ao corpo, sem sombra redonda, sem luz piscando
 - Ian: «a água se mova com minhas batidas»; «quando toco na água fico na luz, pisca»; «tira a sombra do personagem (fica em cima dos pés nadando)».
 - `agua628`: cada braçada espirra na mão da vez, o nado deixa rastro de marolas atrás, andar na água rasa respinga, e no chão encharcado (poças da chuva) cada passo respinga. Marolas mais finas e transparentes. A tela azul de "embaixo d'água" só liga com a câmera 25 cm abaixo da superfície (antes piscava raspando).

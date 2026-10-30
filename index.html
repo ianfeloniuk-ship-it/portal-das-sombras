@@ -236,7 +236,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
     <div class="sysline"><b>[NARRADOR]</b> Você atravessou a Fenda. Aqui, quem chega assim é chamado de <b>Rasgado</b>. Você começa no <b>rank F</b> e sobe fazendo as <b>Provas de Rank</b>. No prólogo, a morte devolve você ao último ponto seguro. Depois da primeira arma, perde nível, ouro e itens. Só ficam o seu rank, o Juramento e o que estiver no banco ou na casa.</div>
     <div class="tbl" id="tbl"></div>
     <div id="rollbox" hidden><div id="roll">?</div><div id="rollc"></div><div class="sk" id="rolls"></div></div>
-    <button class="go" id="goBtn">DESPERTAR</button>
+    <button class="go" id="goBtn">ATRAVESSAR</button>
     <button class="lnk" id="reroll" hidden>Nova travessia (modo teste)</button>
     <div style="display:flex;gap:14px;justify-content:center"><button class="lnk" id="expSave">Exportar save</button><button class="lnk" id="impSave">Importar save</button><button class="lnk" id="newSave">Novo jogo</button></div>
   </div>
@@ -267,7 +267,7 @@ button:not(:disabled){transition:transform .08s,filter .08s}button:not(:disabled
 <script src="tools/terrain245.js?v=689"></script>
 <script src="tools/city-layout253.js?v=253"></script>
 <script src="tools/warrior-equipment127.js"></script>
-<script src="tools/warrior-player127.js?v=699"></script>
+<script src="tools/warrior-player127.js?v=700"></script>
 <script src="tools/hunters138.js"></script>
 <script src="tools/combat139.js"></script>
 <script src="tools/proj155.js"></script>
@@ -6198,7 +6198,7 @@ function onBossDeath(b){expBossReward();unlockLore('boss');npcEv('boss');storyEv
   if(!L.special&&!L.gate.owned){const it={type:'dom',x:b.x-3,z:b.z+3,r:2.6,label:'F · DOMINAR MASMORRA (3 núcleos '+GR[L.gate.rank].id+')',use:()=>{if(dominate())it.hidden=true}};L.inter.push(it)}
   if(L.special&&L.special.kind==='weekly'){profile.weekly=weekId();store.set('pds2_profile',profile);addChest(b.x-4,b.z-3,L.gate.rank,true);toast('<b>[NARRADOR]</b> Chefe semanal derrotado. Um novo aparece na próxima semana.',5000)}
 }
-function awaken3(b){bossSay218(b,'power');b.phase=3;b.speed*=1.2;b.atkCd*=.8;b.dmg*=1.25;bigText('DESPERTAR DO ARCONTE',1600);shake(.9);toast('<b>[NARRADOR]</b> '+b.name+' liberou o poder verdadeiro.',3500);
+function awaken3(b){bossSay218(b,'power');b.phase=3;b.speed*=1.2;b.atkCd*=.8;b.dmg*=1.25;bigText('FÚRIA DO REI',1600);shake(.9);toast('<b>[NARRADOR]</b> '+b.name+' liberou o poder verdadeiro.',3500);
   for(let i=0;i<3;i++){const a=i/3*TAU;let x=b.x+Math.cos(a)*4,z=b.z+Math.sin(a)*4;if(!freeAt(x,z,.6)){x=b.x;z=b.z}const m=spawnKind(bossMinion124(b,'demon'),x,z,b.gr,{room:b.room});makeElite(m);m.aggro=true}
   hazard(b.x,b.z,14,1.4,b.dmg*1.5,'enemy',0xe0d0ff);b.mats.forEach(m=>{m.userData.e0=0x332255;m.emissive.setHex(0x332255)})}
 function enrage(b){bossSay218(b,'fury');b.phase=2;b.speed*=1.35;b.atkCd*=.75;b.wind*=.85;bossLight.color.setHex(0xff2020);bossLight.intensity=3;scene.fog.color.setHex(0x3a0508);
@@ -6386,7 +6386,7 @@ function attack(){if(typeof inConversation==='function'&&inConversation()){if(ty
 }
 function autoAim357(a){let best=null,dist=16;for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dz=e.z-player.z,d=Math.hypot(dx,dz),delta=Math.atan2(dx,dz)-a;if(d<dist&&Math.abs(Math.atan2(Math.sin(delta),Math.cos(delta)))<.45&&los(player.x,player.z,e.x,e.z)){dist=d;best=e}}return best?projectileBody253(best):null}
 /* v690 (Ian, 29/10): balística real. Projétil FÍSICO (flecha, virote, adaga, lança, pedra arremessada) cai pela gravidade;
-   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão; passar por cima recolhe (v691: a puxada do arco define a velocidade). Monstro arqueiro compensa a queda na mira. */
+   magia voa reta; sem vento. Flecha aponta para onde voa e, se errar, fica cravada no chão; pega-se com a tecla de usar (v699, tools/flechas695.js); v691: a puxada do arco define a velocidade. Monstro arqueiro compensa a queda na mira. */
 const BAL690={g:9.8,arrow:50,life:8,stuck:20},stuck690=[];
 function physProj690(t){return !MAGIC_PT281.test(t||'')}
 function ballisticPitch690(v,d,dy){const g=BAL690.g,v2=v*v,disc=v2*v2-g*(g*d*d+2*dy*v2);return disc<0?Math.PI/4:Math.atan((v2-Math.sqrt(disc))/(g*d))}
@@ -6421,7 +6421,6 @@ function projectileImpact253(p){if(window.Golpes487&&!Golpes487.legacyDepth&&p.t
 }
 function updateProjectiles253(dt){
   for(let i=stuck690.length-1;i>=0;i--){const st=stuck690[i];
-    if(st.id&&player&&!player.dead&&Math.hypot(st.x-player.x,st.z-player.z)<1.6&&window.Surv437){try{Surv437.add(st.id,1,true);floater(player.x,player.z,'+1 flecha','#e8d8a8');window.Flechas695&&Flechas695.picked(st.id)}catch(_){}scene.remove(st.m);stuck690.splice(i,1);continue}
     if((st.t-=dt)<=0){scene.remove(st.m);stuck690.splice(i,1)}}
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],lease487=window.Golpes487&&Golpes487.projectile(p),priorSkill487=window.Golpes487?.legacySkill;if(lease487){Golpes487.legacyDepth++;Golpes487.legacySkill=p.fx487.sk}try{const pdt=dt*(p.team==='player'?1:rareAreaTime103(p.x,p.z)),before={x:p.x,y:p.y??p.originY??1.1,z:p.z};
     p.life-=pdt;if(p.grav690)p.vy=(p.vy||0)-p.grav690*pdt;p.x+=p.vx*pdt;p.y=before.y+(p.vy||0)*pdt;p.z+=p.vz*pdt;
@@ -7380,7 +7379,7 @@ function awakeningView103(){view=awakeningView103;L.characterTab='awakening';con
 function awakenKey169(id){return equippedItems().filter(it=>it.set153===id).map(it=>it.uid).sort().join('|')}
 function awakenPopup169(force){if(!started||!run||!player||player.dead||L.mode!=='world'||(!force&&(modalOpen||paused))||profile.creationPending91)return;profile.awDeclined169=profile.awDeclined169||{};
   for(const id in SETS153){if(!awakenTestReady155(id))continue;const key=awakenKey169(id);if(profile.awDeclined169[id]===key||L.awAsked169===key)continue;L.awAsked169=key;const Set=SETS153[id],cn=CLASSES[Set.cls].n;
-    openModal('DESPERTAR','<div class="guide93"><strong>'+safeText(Set.n)+' completa</strong><p>As cinco peças do '+cn+' respondem juntas. Uma passagem se abre: lá dentro o guardião do '+cn+' espera, muito mais forte. Se vencer, terá de replicar as habilidades dele para jurar a classe.</p><p>Se recusar, você fica só com os itens. O chamado só volta quando reunir um set novo.</p></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('RECUSAR','aw169no',id)+btn('ACEITAR','aw169yes',id,true,'hot')+'</div>');return}}
+    openModal('JURAMENTO','<div class="guide93"><strong>'+safeText(Set.n)+' completa</strong><p>As cinco peças do '+cn+' respondem juntas. Uma passagem se abre: lá dentro o guardião do '+cn+' espera, muito mais forte. Se vencer, terá de replicar as habilidades dele para jurar a classe.</p><p>Se recusar, você fica só com os itens. O chamado só volta quando reunir um set novo.</p></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+btn('RECUSAR','aw169no',id)+btn('ACEITAR','aw169yes',id,true,'hot')+'</div>');return}}
 setInterval(()=>{try{awakenPopup169()}catch(e){}},1500);
 function completeAwakenTest155(){const id=L.awaken155,S=SETS153[id];L.awaken155=null;if(!S)return;const a=awakening103();a.discovered=true;if(!a.unlocked.includes(S.cls))a.unlocked.push(S.cls);a.points[S.cls]=Math.max(1,a.points[S.cls]||0);profile.jobs=[...new Set([...jobsOf(),S.cls])];store.set('pds2_profile',profile);
   bigText(CLASSES[S.cls].n.toUpperCase()+' DESPERTO',2400);sfx('arise');toast('<b>[NARRADOR]</b> Teste concluído. Você aprendeu a classe rara <b>'+CLASSES[S.cls].n+'</b>. Monte as habilidades dela em Personagem → Habilidades.',8000);saveRun()}
@@ -7531,7 +7530,7 @@ function travelTab(){const v=profile.visited||{};const ids=Object.keys(v);let h=
   for(const id of ids){if(id===here)continue;const c=v[id];if(!c||!Number.isFinite(c.x)||!Number.isFinite(c.z))continue;const cost=travelCost(c);h+=row('<b>'+c.n+'</b>',fmt(Math.round(Math.hypot(c.x-player.x,c.z-player.z)))+' m de distância',btn('Viajar · '+fmt(cost),'travel',id,run.gold>=cost))}
   return h}
 function albumView(){view=albumView;const a=profile.album||[];let h='<div class="sysline"><b>[NARRADOR]</b> Coleção de Servos: <b>'+a.length+'</b> espécies já erguidas. A coleção fica mesmo se você morrer.</div>';
-  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhum servo erguido ainda. Use ERGUER SERVO (F) em guardiões e elites.</small></div></div>';
+  if(!a.length)h+='<div class="it"><div class="d"><small>Nenhum servo erguido ainda. Use ERGUER SERVO (E) em guardiões e elites.</small></div></div>';
   for(const n of a)h+='<div class="it"><div class="d"><b style="color:#b18cff">'+n+'</b><small>Servo registrado</small></div></div>';openModal('COLEÇÃO DE SERVOS',h)}
 function addShadow(rec){{profile.album=profile.album||[];const nm=String(rec.n||'');if(nm&&!profile.album.includes(nm)){profile.album.push(nm);store.set('pds2_profile',profile);toast('<b>[NARRADOR]</b> Novo servo na coleção: <b>'+nm+'</b> ('+profile.album.length+')')}}if(run.shadows.length>=20){toast('<b>[NARRADOR]</b> Seu exército está cheio (20).');return}rec.on=run.shadows.filter(s=>s.on).length<shadowCap();run.shadows.push(rec);if(rec.on)spawnShadowRec(rec,player.x+1,player.z+1);unlockLore('shadow')}
 function spawnShadowRec(rec,x,z){const B=ALLBOSS().find(b=>b.n===rec.n);const a=spawnShadow(B||{n:rec.n},x,z,rec);return a}
@@ -7699,7 +7698,7 @@ function buildView(){view=buildView;L.characterTab='build';let h=characterTabs('
 
 function armyView(){view=armyView;const on=run.shadows.filter(s=>s.on).length,cap=shadowCap();
   let h='<div class="sysline">Servos ativos: <b>'+on+'/'+cap+'</b> · Exército: '+run.shadows.length+'/20. Servos ganham nível lutando. Ao morrer, ficam guardados no nível 0 e podem ser chamados novamente.</div>';
-  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SERVO (F) em guardiões e elites.':'Só o Necromante levanta servos.')+'</small></div></div>';
+  if(!run.shadows.length)h+='<div class="it"><div class="d"><small>'+(canArise()?'Use ERGUER SERVO (E) em guardiões e elites.':'Só o Necromante levanta servos.')+'</small></div></div>';
   run.shadows.forEach((r,i)=>{h+=row((r.nick?'<b>'+r.nick+'</b> · ':'')+r.n+' <b>NV '+r.lvl+'</b>',(r.on?'Invocada':'Guardada')+' · XP '+Math.floor(r.xp)+'/'+80*Math.max(1,r.lvl),btn(r.on?'Guardar':'Invocar','shtog',i,r.on||on<cap)+btn('Renomear','shname',i)+btn('Libertar','shfree',i,true,'red'))});
   openModal('EXÉRCITO DE SERVOS',h)}
 function startFirstEquipment(){if(profile.classless)return;if(!profile.journey92||profile.firstEquipment92)return;profile.firstEquipment92={done:false};run.trackObj='firstEquipment';toast('<b>[NARRADOR]</b> Seu primeiro equipamento: encontre uma peça em uma masmorra, fabrique na forja, compre com Kael ou troque com ele (escambo, sem ouro). Depois, equipe pela Bolsa; a memória da primeira arma define sua classe. Acompanhe a missão no Diário.',6500)}
@@ -9016,7 +9015,7 @@ const DEV=/^(127\.0\.0\.1|localhost)$/.test(location.hostname)&&/[?&]dev\b/.test
 $('tbl').innerHTML='';
 function showProfile(){backupRanks78();if(migrateRankProfile(profile))store.set('pds2_profile',profile);ensureRankProgress();ensureOrderRep();store.set('pds2_profile',profile);const rk=RANKS[profile.rank],c=CLASSES[profile.cls];$('rollbox').hidden=false;$('roll').textContent=rk.id;$('roll').style.color=rk.c;$('rollc').textContent=c.n.toUpperCase();
   $('rolls').innerHTML=c.sk.slice(0,3).map(s=>s.n).join(' · ')+(profile.creationPending91?'<br>Você escolhe a primeira habilidade na criação do personagem':'')+(c.arise?'<br>Único que ergue servos':'')+'<br>Mortes: '+(profile.deaths||0);if(profile.classless){$('rollc').textContent='VIAJANTE · SEM CLASSE';$('rolls').innerHTML='Chegou sem ouro e sem técnicas. Sua classe vem da memória da primeira arma.<br>Mortes: '+(profile.deaths||0)}}
-if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}
+if(profile){showProfile();$('goBtn').textContent=store.get('pds3_run')?'CONTINUAR':(profile.classless?'ATRAVESSAR':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}
 $('goBtn').addEventListener('click',()=>{
   audioInit();
   if(!profile&&!/[?&]escolherClasse/.test(location.search)){profile=pickAwaken(0);profile.classless=true;profile.name='Viajante';profile.creationPending91=false;profile.orderPending401=true;store.set('pds2_profile',profile);startGame();return}
@@ -9024,10 +9023,10 @@ $('goBtn').addEventListener('click',()=>{
     /* v301 (Ian): a lista vazava da caixa e o texto ficava minúsculo. Botões curtos em 2 colunas; ao clicar abre o detalhe com passiva e recurso e o botão Escolher. */
     const RN={fury:'Fúria',vigor:'Estamina',mana:'Mana'},info=i=>{const c=CLASSES[i],mag=MAGIC_CLS.includes(i);return {c,rs:RN[resourceType260({sourceClass:i})],at:mag?'Inteligência':c.ranged?'Destreza':'Força',st:c.ranged?'À distância':'Corpo a corpo'}};
     $('rolls').innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;max-height:46vh;overflow-y:auto">'+C.map(o=>{const I=info(o.i);return '<button class="btn" data-cls="'+o.i+'" style="text-align:left;white-space:normal;line-height:1.25;padding:7px 9px"><b style="font-size:14px">'+o.c.n+'</b><br><small style="opacity:.8;font-size:11.5px">'+I.st+' · '+I.rs+'</small></button>'}).join('')+'</div><div id="clsDetail301" style="margin-top:8px;font-size:13px;line-height:1.45;text-align:left;min-height:64px;opacity:.9">Clique numa classe para ver os detalhes.</div>';
-    $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{const ci=+b.dataset.cls,I=info(ci);document.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('clsDetail301').innerHTML='<b style="font-size:15px">'+I.c.n+'</b> · '+I.st+'<br>Recurso: <b>'+I.rs+'</b> · atributo principal: <b>'+I.at+'</b><br>Passiva <b>'+(PASSIVES[ci]?PASSIVES[ci].n:'')+'</b>: '+(PASSIVES[ci]?PASSIVES[ci].d:'')+'<br>Habilidades: '+I.c.sk.map(s=>s.n).join(' · ')+(window.Growth465?Growth465.panel(ci):'')+'<button class="btn hot" id="clsPick301" style="margin-top:6px">Escolher '+I.c.n+'</button>';$('clsPick301').addEventListener('click',()=>{profile=pickAwaken(ci);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent=(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');beep(880,.3,.06);$('reroll').hidden=!DEV})}));return}
+    $('goBtn').hidden=true;document.querySelectorAll('[data-cls]').forEach(b=>b.addEventListener('click',()=>{const ci=+b.dataset.cls,I=info(ci);document.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('clsDetail301').innerHTML='<b style="font-size:15px">'+I.c.n+'</b> · '+I.st+'<br>Recurso: <b>'+I.rs+'</b> · atributo principal: <b>'+I.at+'</b><br>Passiva <b>'+(PASSIVES[ci]?PASSIVES[ci].n:'')+'</b>: '+(PASSIVES[ci]?PASSIVES[ci].d:'')+'<br>Habilidades: '+I.c.sk.map(s=>s.n).join(' · ')+(window.Growth465?Growth465.panel(ci):'')+'<button class="btn hot" id="clsPick301" style="margin-top:6px">Escolher '+I.c.n+'</button>';$('clsPick301').addEventListener('click',()=>{profile=pickAwaken(ci);store.set('pds2_profile',profile);showProfile();$('goBtn').hidden=false;$('goBtn').textContent=(profile.classless?'ATRAVESSAR':'ENTRAR NA CIDADE');beep(880,.3,.06);$('reroll').hidden=!DEV})}));return}
   if(false){let n=0;
     const iv=setInterval(()=>{const r=RANKS[Math.floor(Math.random()*8)];$('roll').textContent=r.id;$('roll').style.color=r.c;$('rollc').textContent=CLASSES.filter((c,i)=>i<8&&!c.legacy)[Math.floor(Math.random()*7)].n.toUpperCase();beep(300+n*20,.04,.03);
-      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent=(profile.classless?'DESPERTAR NA ESTRADA':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}},80);return}
+      if(++n>26){clearInterval(iv);showProfile();beep(880,.3,.06);$('goBtn').disabled=false;$('goBtn').textContent=(profile.classless?'ATRAVESSAR':'ENTRAR NA CIDADE');$('reroll').hidden=!DEV}},80);return}
   startGame();
 });
 $('reroll').addEventListener('click',()=>{if(!DEV)return;profile=null;store.del('pds2_profile');store.del('pds3_run');$('goBtn').textContent='ATRAVESSAR';$('reroll').hidden=true;$('rollbox').hidden=true;$('goBtn').click()});
@@ -9407,7 +9406,7 @@ function trialUpdate113(t,dt){if(player.dead||L!==t.region||L.mode!=='world'||Ma
  for(const n of t.nodes){n.hidden=t.done.includes(n.index113)||(s.mode==='pulse'&&t.step>=3);n.label='F · '+s.verbs[n.index113]+(s.mode==='read'?(n.index113===t.safe?' · LUZ FIRME':' · OSCILANDO'):s.mode==='pulse'?(t.t%4<2?' · PULSO ABERTO':' · AGUARDE'):'')}
  if(t.t>=t.ringAt){t.ringAt=t.t+.7;fxRing(t.x,t.z,0xc2a2ff,8,.8);for(const n of t.nodes)if(!n.hidden){const active=s.mode==='read'?n.index113===t.safe:s.mode==='sequence'||s.mode==='adapt'?n.index113===t.step:s.mode==='pulse'?t.t%4<2:true;fxRing(n.x,n.z,active?0x8ef0bf:0x806090,1.2,.8)}}if(trialReady113(t))finishTrial103(true)}
 function trialHud113(t){const s=TRIALS113[t.ci],hostiles=t.targets.filter(e=>!e.dead).length,progress=s.mode==='protect'?'Peregrino '+Math.ceil(Math.max(0,t.helper.hp)/t.helper.maxhp*100)+'%':s.mode==='route'?t.done.length+'/3 condutores · '+Math.min(12,Math.floor(t.walk))+'/12m':s.mode==='pulse'?t.step+'/3 pulsos · '+(t.t%4<2?'ABERTO':'AGUARDE'):s.mode==='read'?['I','II','III'][t.safe]+' · luz firme':s.mode==='duel'?(hostiles?'Vença o reflexo':'Recolha a resposta'):t.step+'/3 etapas';return ' · '+s.title+' · '+progress+' · '+hostiles+' ameaças'+(t.t<12?' · '+Math.ceil(12-t.t)+'s':'')+(t.channel?' · concentração '+Math.floor(t.channel.progress/2*100)+'%':'')}
-function finishTrial103(success){const t=AR103.trial;if(!t)return false;if(success&&t.v113&&!trialReady113(t))return false;const a=awakening103();if(success&&t.v113&&(!a.pending||a.pending.id!==t.pendingId))success=false;for(const e of t.targets){e.dead=true;e.gone=true;if(e.m)scene.remove(e.m.root)}if(t.helper){t.helper.dead=true;scene.remove(t.helper.m.root)}if(t.region)t.region.inter=t.region.inter.filter(n=>n.trial113!==t);AR103.trial=null;AR103.zone=null;if(!success){toast('A tentativa foi interrompida. Seu progresso anterior permanece e esta fissura pode ser investigada novamente.');return false}if(!a.pending)return false;a.pending=null;a.total++;a.points[t.ci]=(a.points[t.ci]||0)+1;if(t.v113){a.journal113=Array.isArray(a.journal113)?a.journal113:[];a.journal113.push({ci:t.ci,variant:t.variant,number:a.total});a.journal113=a.journal113.slice(-30);const spec=TRIALS113[t.ci];logNews('<b>[NARRADOR]</b> '+spec.lines[t.variant],'dialogue');const chapter=trialChapter113(a.total);if(chapter)logNews('<b>[A FISSURA]</b> '+chapter,'story')}narratorEvent105(a.total===3?'awakening':'trial');store.set('pds2_profile',profile);saveRun();toast((a.total<3?'<b>[FISSURA]</b> Investigação concluída. Você guardou esta experiência.':'<b>[DESPERTAR]</b> Caminho de '+CLASSES[t.ci].n+' desenvolvido.')+(a.total===3?' Volte à cidade: Personagem → Despertar.':''),6000);return true}
+function finishTrial103(success){const t=AR103.trial;if(!t)return false;if(success&&t.v113&&!trialReady113(t))return false;const a=awakening103();if(success&&t.v113&&(!a.pending||a.pending.id!==t.pendingId))success=false;for(const e of t.targets){e.dead=true;e.gone=true;if(e.m)scene.remove(e.m.root)}if(t.helper){t.helper.dead=true;scene.remove(t.helper.m.root)}if(t.region)t.region.inter=t.region.inter.filter(n=>n.trial113!==t);AR103.trial=null;AR103.zone=null;if(!success){toast('A tentativa foi interrompida. Seu progresso anterior permanece e esta fissura pode ser investigada novamente.');return false}if(!a.pending)return false;a.pending=null;a.total++;a.points[t.ci]=(a.points[t.ci]||0)+1;if(t.v113){a.journal113=Array.isArray(a.journal113)?a.journal113:[];a.journal113.push({ci:t.ci,variant:t.variant,number:a.total});a.journal113=a.journal113.slice(-30);const spec=TRIALS113[t.ci];logNews('<b>[NARRADOR]</b> '+spec.lines[t.variant],'dialogue');const chapter=trialChapter113(a.total);if(chapter)logNews('<b>[A FISSURA]</b> '+chapter,'story')}narratorEvent105(a.total===3?'awakening':'trial');store.set('pds2_profile',profile);saveRun();toast((a.total<3?'<b>[FISSURA]</b> Investigação concluída. Você guardou esta experiência.':'<b>[CAMINHO]</b> Caminho de '+CLASSES[t.ci].n+' desenvolvido.')+(a.total===3?' Volte à cidade: Personagem → Despertar.':''),6000);return true}
 
 // END JOURNEY113
 
@@ -9692,9 +9691,9 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/scenes406.css?v=406">
 <script src="tools/scenes406.js?v=458"></script>
 <script src="tools/npc456.js?v=457"></script>
-<script src="tools/campaign327.js?v=611"></script>
+<script src="tools/campaign327.js?v=700"></script>
 <script src="tools/magia653.js?v=672"></script>
-<script src="tools/ecology410.js?v=493"></script>
+<script src="tools/ecology410.js?v=700"></script>
 
 <script src="tools/classes316.js?v=683"></script>
 
@@ -9715,13 +9714,13 @@ requestAnimationFrame(frame);
 <!-- pds-v383: montanhas por ruído, escalada e painel F9 -->
 <script src="tools/climb383.js?v=392"></script>
 <script src="tools/rain387.js?v=697"></script>
-<script src="tools/water391.js?v=699"></script>
-<script src="tools/agua628.js?v=699"></script>
+<script src="tools/water391.js?v=700"></script>
+<script src="tools/agua628.js?v=700"></script>
 <script src="tools/map393.js?v=661"></script>
 <script src="tools/fall393.js?v=393"></script>
 <script src="tools/awaken396.js?v=405"></script>
 
-<script src="tools/intro401.js?v=613"></script>
+<script src="tools/intro401.js?v=700"></script>
 
 <script src="tools/item-art405.js?v=555"></script>
 <script src="tools/exhibit405.js?v=405"></script>
@@ -9734,10 +9733,10 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/wardrobe405.css?v=405">
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
-<script src="tools/mechanics434.js?v=687"></script>
+<script src="tools/mechanics434.js?v=700"></script>
 <script src="tools/survival437.js?v=698"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=691"></script><script src="tools/vento687.js?v=695"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
-<script src="tools/cart437.js?v=630"></script>
-<script src="tools/build437.js?v=630"></script>
+<script src="tools/cart437.js?v=700"></script>
+<script src="tools/build437.js?v=700"></script>
 <script src="tools/otherworld460.js?v=654"></script>
 <script src="tools/sea439.js?v=628"></script>
 <script src="tools/cachoeiras661.js?v=692"></script>
@@ -9758,16 +9757,16 @@ requestAnimationFrame(frame);
 <script src="tools/classgrowth465.js?v=467"></script>
 <script src="tools/alchemy470.js?v=485"></script>
 <script src="tools/worldsim479.js?v=655"></script>
-<script src="tools/quests480.js?v=683"></script>
+<script src="tools/quests480.js?v=700"></script>
 <script src="tools/lyra601.js?v=603"></script>
 <script src="tools/kael604.js?v=606"></script>
 <script src="tools/caderno605.js?v=607"></script>
 <script src="tools/caixa606.js?v=612"></script>
-<script src="tools/torre607.js?v=614"></script>
+<script src="tools/torre607.js?v=700"></script>
 <script src="tools/sentinela608.js?v=648"></script>
-<script src="tools/sulco609.js?v=649"></script>
-<script src="tools/aldric610.js?v=648"></script>
-<script src="tools/corredor611.js?v=650"></script>
+<script src="tools/sulco609.js?v=700"></script>
+<script src="tools/aldric610.js?v=700"></script>
+<script src="tools/corredor611.js?v=700"></script>
 <script src="tools/noite612.js?v=650"></script>
 <script src="tools/mapa613.js?v=651"></script>
 <script src="tools/vale614.js?v=652"></script>
@@ -9776,7 +9775,7 @@ requestAnimationFrame(frame);
 <script src="tools/thalor686.js?v=686"></script>
 <script src="tools/dialogo520.js?v=697"></script>
 <script src="tools/vida522.js?v=558"></script>
-<script src="tools/vida523.js?v=655"></script>
+<script src="tools/vida523.js?v=700"></script>
 <script src="tools/vida527.js?v=534"></script>
 <script src="tools/npc482.js?v=673&o=655"></script>
 <script src="tools/vida486.js?v=493"></script>
@@ -9800,18 +9799,18 @@ requestAnimationFrame(frame);
 <script src="tools/mapa500.js?v=689"></script>
 <script src="tools/mundo513.js?v=600"></script>
 <script src="tools/mapa501.js?v=689"></script>
-<script src="tools/encontros502.js?v=512"></script>
+<script src="tools/encontros502.js?v=700"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
 <script src="tools/capitais504.js?v=692"></script>
 <script src="tools/capitais597.js?v=698"></script>
 <script src="tools/desfiladeiro510.js?v=698"></script>
-<script src="tools/marcos526.js?v=698r1"></script>
+<script src="tools/marcos526.js?v=700"></script>
 <script src="tools/agua517.js?v=517"></script>
 <script src="tools/constel569.js?v=570"></script>
 <script src="tools/constel523.js?v=583"></script><script src="tools/saida579.js?v=579"></script>
 <script src="tools/telas535.js?v=667"></script>
-<script src="tools/motor-missoes-infinitas.js?v=683"></script>
-<script src="tools/skyrim-overhaul538.js?v=683"></script>
+<script src="tools/motor-missoes-infinitas.js?v=700"></script>
+<script src="tools/skyrim-overhaul538.js?v=700"></script>
 <script src="tools/lote541.js?v=656"></script>
 <script src="tools/mapa3d544.js?v=689"></script>
 <script src="tools/crime545.js?v=697"></script>
@@ -9833,7 +9832,7 @@ requestAnimationFrame(frame);
 <script src="tools/fp658.js?v=662"></script>
 <script src="tools/maos662.js?v=672"></script>
 <script src="tools/flechas663.js?v=696"></script>
-<script src="tools/flechas695.js?v=696"></script>
+<script src="tools/flechas695.js?v=700"></script>
 <script src="tools/ameaca554.js?v=554"></script>
 <script src="tools/forja551.js?v=559"></script>
 <script src="tools/enchente630.js?v=634"></script>
@@ -9851,9 +9850,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v699</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v700</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=699;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=700;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

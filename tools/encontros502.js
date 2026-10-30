@@ -7,8 +7,8 @@
    - Não nasce no mar/praia, em água, perto de cidade, na estrada, em morro íngreme, nem nas ruínas/postos/acampamentos de clã
      que o jogo já tem (esses já contam como encontro).
    - O cenário comum (árvore, grama, pedra) abre uma clareira em volta de cada encontro.
-   - Baús, restos e acampamentos: F para vasculhar (ouro, um item, às vezes suprimentos); uma vez só por mundo.
-     Altar: F para rezar (vida e mana cheias, de novo a cada dia). Covil: criaturas do bioma aparecem quando você chega perto.
+   - Baús, restos e acampamentos: E para vasculhar (ouro, um item, às vezes suprimentos); uma vez só por mundo.
+     Altar: E para rezar (vida e mana cheias, de novo a cada dia). Covil: criaturas do bioma aparecem quando você chega perto.
    - Cordilheira de gelo (ice500 > 20): sem arbusto, flor, cogumelo nem grama; no lugar entram coníferas nevadas e rochedos
      (cenário, coleta de arbustos de tools/survival437.js e grama de tools/grass446.js). */
 (function () {
