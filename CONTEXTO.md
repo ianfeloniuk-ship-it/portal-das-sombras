@@ -1,3 +1,12 @@
+## v697 (29/10/2026) — Chuva que não some, clima por região, ciclo da chuva e cela
+- Ian: «chove na minha frente, olho pra trás e não chove»; «a chuva tem que ter um ciclo»; «no deserto não pode cair neve»; «não tenho dinheiro para pagar e não vou para lugar nenhum».
+- Bug da chuva: `culling637` guardava a esfera da chuva (InstancedMesh que anda com a câmera) e a escondia conforme você virava. Chuva, respingos e marolas ficam fora do corte (`userData.noCull695`).
+- `tools/clima695.js` (novo): o céu sorteia a frente (`WX.base`) e cada região mostra o que faz sentido: deserto/vulcão = seco; neve/cristal = neve; fora do inverno não neva nas terras quentes. Ciclo: a chuva começa fraca, engrossa e vai parando (`RAIN626.cycle`, lido por `rain387`). Neblina fecha com a chuva forte.
+- `rain387`: gotas envolvem a câmera; respingos no chão menores e discretos.
+- Cela (`crime545` + `dialogo520`): «Ir para a cela» (1 dia a cada 100 de recompensa, mínimo 1): o tempo passa, perde metade do XP do nível, recompensa some, sai no portão. Antes «Não tenho o ouro» não levava a nada.
+- Teste: navegador; biomas (deserto seco, neve, floresta chuva), ciclo 0→1→0, chuva visível em vários quadros, cela com 250 = 3 dias, XP 800→400, saída a 69 m do centro. Não testado: diálogo clicado na tela, noite, desempenho.
+- Pendente: céu nublado durante a chuva; fauna e oásis por região.
+
 ## v696 (29/10/2026) — Flechas que você vê e recolhe; sem arma = soco
 - Ian: «tenho que poder recolher as flechas que caíram… matei o bagulho… tem que me mostrar onde estão… não quero tutorial» e «se tu não tem arma nenhuma, tu dá soco… animação específica pra quem dá soco sem ser guerreiro». Magos não mudam (magia + X para físico).
 - Flecha que acerta um monstro fica no corpo (e.arrows695) e cai no chão quando ele morre; flecha que bate em parede/pedra também fica cravada; a recolhível não some mais (limite de 80, a mais antiga sai). Passar a menos de 1,6 m recolhe; aviso "Recolheu N Flechas de …".
