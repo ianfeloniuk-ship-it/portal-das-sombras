@@ -1,3 +1,8 @@
+## v739 (30/10/2026) — Missão fixa #31 «Escolta de Guerra para Solaria»
+- `tools/escolta739.js` (novo): depois da #30, uma carroça blindada (100% de integridade) parte da Estrada Real (x = 200, leste de Aster) por 3 Nós de Encontro (x = 270, 340, 410; 2 orcs cada) até x = 440 (Solaria, simplificado). Ela anda a 2,5 m/s com você a menos de 4 m (na traseira: anda mesmo com orcs vivos; orcs a menos de 6 m tiram 3%/s cada) ou com você à frente, só quando não há orc vivo a menos de 30 m. 100% na entrega: `escassezSolaria730 = 0` e `armadurasDouradas731` (marcas); menos: carga entregue sem esses efeitos. Estado em `profile.fixas545.q031`.
+- Simplificações: Solaria não existe no mundo; Teren/Aurelius só no aviso; loja dourada e Escassez são marcas; orcs comuns.
+- Teste (navegador embutido, golpes reais): à frente = 100% (`integra`); na traseira = 29% (`parcial`, com `montado`).
+
 ## v738 (30/10/2026) — Missão fixa #30 «Alvo Notório: Velha Míscaro»
 - `tools/miscaro733.js` (novo; v738 porque a main já estava na v737): depois da #29 (gatilho simplificado: contrato Rank D = concluir a #29), a Velha Míscaro (Rei Cogumelo, 3× vida) na Floresta Sombria ao sul de Aster (0, 230), com 4 anéis de micélio [E]. Os 4 queimados antes do combate: sem nuvem. Com algum anel de pé, a menos de 16 m dela você adormece 1 s a cada 8 s e preserva os esporos raros (`esporosRaros730`). Nos dois: título `titulo730` «Caçador da Velha Míscaro» (marca `bonusVida730` = 3%) e +150 de Reputação da Ordem. Estado em `profile.fixas545.q030`.
 - Simplificações: queimar = só E; a nuvem é um atordoamento curto; +3% de vida é marca; sem poção de Vontade nem cocheiros.
