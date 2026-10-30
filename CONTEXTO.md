@@ -1,3 +1,6 @@
+## v719 (30/10/2026) — Botão direito + rodinha troca a mão esquerda
+- O mousedown do botão direito era engolido antes do módulo; agora lê pointer events e e.buttons.
+
 ## v718 (30/10/2026) — Rodinha e troca de mãos sem painel
 - tools/rodinha718.js: rodinha troca a mão direita (armas, magias, mão vazia); botão direito segurado + rodinha troca a esquerda; Q inverte as mãos, sem painel. Corrige: arma escolhida não tirava a magia da mão direita.
 

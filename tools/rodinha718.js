@@ -11,8 +11,9 @@
   const C = document.getElementById('c');
   if(!C) return;
   let rightHeld = false, acc = 0, accT = 0;
-  addEventListener('mousedown', e => { if(e.button === 2) rightHeld = true; }, true);
-  addEventListener('mouseup', e => { if(e.button === 2) rightHeld = false; }, true);
+  addEventListener('pointerdown', e => { if(e.button === 2 || (e.buttons & 2)) rightHeld = true; }, true);
+  addEventListener('pointerup', e => { if(!(e.buttons & 2)) rightHeld = false; }, true);
+  addEventListener('pointermove', e => { rightHeld = !!(e.buttons & 2); }, true);
   addEventListener('blur', () => { rightHeld = false; });
   const show = t => { try { floater(player.x, player.z, t, '#f3e3c0'); sfx('swing'); } catch(_) {} };
   const keyS = s => s.skillId || s.n;
@@ -54,6 +55,6 @@
     if(performance.now() - accT > 400) acc = 0;
     accT = performance.now(); acc += e.deltaY;
     if(Math.abs(acc) < 60) return;
-    step(rightHeld ? 'l' : 'r', acc > 0 ? 1 : -1); acc = 0;
+    step(rightHeld || (e.buttons & 2) ? 'l' : 'r', acc > 0 ? 1 : -1); acc = 0;
   }, { passive: false, capture: true });
 })(window);
