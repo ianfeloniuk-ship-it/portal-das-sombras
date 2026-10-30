@@ -1,3 +1,8 @@
+## v725 (30/10/2026) — Missão fixa #22 «A Mão no Portal Primordial»
+- `tools/portal725.js` (novo): depois da #21, o Portal Primordial (clareira com anel de pedras, 140 m ao sul de Érebo) tem Aldric (figurante), 2 documentos antigos [E] e a Projeção da Mão do Arquiteto (colosso, 2× vida). Recolher os 2 documentos libera «E · ROMPER O ELO DE MANA DA MÃO»: a projeção se desfaz, Aldric sai vivo com os documentos, entrada no Diário («autoridade superior desconhecida») e marca `narradorConfessa` (a #23 usa). Avançar e matar a projeção: Aldric foge sem os documentos, nada é revelado. Estado em `profile.fixas545.q022`.
+- Simplificações: sem Abóbada Subterrânea; sem «dedos» separados; Aldric não luta; Lyra ausente.
+- Teste (navegador embutido, E real, golpes reais, captura da cena): os dois ramos.
+
 ## v724 (30/10/2026) — Missão fixa #21 «Quatorze Dias no Outro Mundo»
 - `tools/erebo724.js` (novo): depois da #20, a boca da Garganta das Cinzas (140 m ao sul da Fenda da Fronteira Central) vira a clareira de Érebo: matilha de 3 lobos «Devoradores de Cinza» e o Soberano da Cinza (colosso, 1,5× vida). Escolha: pegar a carne podre [E] e lançar a Isca de Carniça [G] (a matilha corre para a isca por 25 s; marca do Invólucro de Resina) ou lutar à força. Com isca: +20% de Vida máxima por 10 min ao vencer. Nos dois: o relógio do jogo avança 14 dias (`dayT`). Estado em `profile.fixas545.q021`.
 - Simplificações: Outro Mundo = clareira desta região (o planeta de `otherworld460.js` não é usado); eclipse = dois discos no céu; Invólucro = marca; bônus só de Vida (sem Estamina); sem simular cercos nos 14 dias.
