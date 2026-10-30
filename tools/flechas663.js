@@ -39,10 +39,7 @@
     try {
       const w = run.equip.w, k = w ? weaponKind272(w) : null;
       if(k === 'bow') return true;
-      if(w) return false;
-      if(typeof kitFormAttack111 === 'function' && run.kitForm111) return false;
-      const ci = basicAttackId(), c = CLASSES[ci];
-      return !!(c && c.wep === 'bow' && !basicIsMagic());
+      return false; /* v695 (Ian): sem arco na mão não há flecha; a classe dá soco */
     } catch(_) { return false; }
   }
   F.arrowShot = arrowShot;

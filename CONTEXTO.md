@@ -1,3 +1,11 @@
+## v696 (29/10/2026) — Flechas que você vê e recolhe; sem arma = soco
+- Ian: «tenho que poder recolher as flechas que caíram… matei o bagulho… tem que me mostrar onde estão… não quero tutorial» e «se tu não tem arma nenhuma, tu dá soco… animação específica pra quem dá soco sem ser guerreiro». Magos não mudam (magia + X para físico).
+- Flecha que acerta um monstro fica no corpo (e.arrows695) e cai no chão quando ele morre; flecha que bate em parede/pedra também fica cravada; a recolhível não some mais (limite de 80, a mais antiga sai). Passar a menos de 1,6 m recolhe; aviso "Recolheu N Flechas de …".
+- Brilho acima de cada flecha no chão (até 70 m). Canto da tela (#quiver695): flecha em uso × quantidade, total, e "N flechas no chão · a mais perto a X m".
+- Narrador explica uma vez, na hora (profile.dicas695): ao usar o arco (gasta flecha, segurar puxa, mirar acima de longe), flecha no chão, flechas no corpo, poucas flechas (Dorian / Bancada Rústica). Módulo tools/flechas695.js.
+- Sem arma e sem magia, toda classe dá soco (380 shootsNow; Flechas663.arrowShot só com arco na mão). Guerreiro mantém 'fist'; as outras classes usam o combo 'brawl' (soco → gancho adaga2 → empurrão pesado2), montado com clipes existentes.
+- Teste no navegador (partida carregada): monstro morto solta 2 flechas, canto mostra "2 flechas no chão · a mais perto a 6 m", passar por cima recolhe 2; arqueiro/assassino sem arma = brawl e 0 projéteis; guerreiro = fist; sem erro novo.
+
 ## v695 (29/10/2026) — Neblina rasteira
 - Ian (29/10): «um mapa mais realista, com nuvens, neblina». `tools/vento687.js`: bancos de neblina nos baixios em volta do jogador (até 130 m), andam com o vento; mais densos de manhã cedo, à noite, na chuva, no pântano e na floresta; nada no deserto/vulcão. Cor da névoa do ciclo dia/noite.
 - Teste: Edge sem tela (`tools/test-vento687.cjs`), sem erros.
