@@ -1,3 +1,6 @@
+## v715 (30/10/2026) — Narrador conta da magia em cada mão
+- Aviso único (profile.dicas695.maos) na primeira magia: escolher a mão na Bolsa e qual botão usa cada mão.
+
 ## v713 (30/10/2026) — 1ª pessoa: cada botão soca com a sua mão
 - Botão esquerdo alternava direita e esquerda; agora é sempre a direita. Botão direito de mão vazia usava movimento de espada; agora é soco da esquerda.
 

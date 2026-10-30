@@ -363,6 +363,16 @@
     return h;
   }
   H.handsHtml = handsHtml;
+  /* v714 (Ian): o jogo explica uma vez, quando acontece: primeira magia pronta para usar */
+  setInterval(() => {
+    try {
+      if(!started || !player || !H.spells().length) return;
+      const d = profile.dicas695 || (profile.dicas695 = {});
+      if(d.maos) return; d.maos = 1; store.set('pds2_profile', profile);
+      let k = 'I'; try { k = keyLabel(keyOf('bag')); } catch(_) {}
+      toast('<b>[NARRADOR]</b> Você pode segurar uma magia em cada mão. Na Bolsa (' + k + '), escolha a mão ao lado da magia. O botão esquerdo do mouse usa a mão direita; o direito usa a esquerda.', 9000);
+    } catch(_) {}
+  }, 1000);
   (function wrapBag(){
     if(typeof bagView !== 'function'){ setTimeout(wrapBag, 300); return; }
     const BV = bagView;
