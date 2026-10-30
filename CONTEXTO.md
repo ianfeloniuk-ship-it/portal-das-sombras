@@ -1,3 +1,8 @@
+## v721 (30/10/2026) — Missão fixa #18 «A Quarta Âncora: O Fogo Basáltico de Urdan»
+- `tools/urdan721.js` (novo): depois da #17, em Urdan (0, +3400) há 3 comportas antigas [E] e o Colosso Rachado na ponte. Fechar as 3 antes do duelo: galeria esfria, mineiros salvos (marca), veio permanente de Mithril [E, 3 minérios de grau 2 a cada 90 s] e 3º Relato no Diário. Ir direto ao Colosso (chegar a 9 m ou ferir): comportas travam, nada disso. Estado em `profile.fixas545.q018`.
+- Calor: o do bioma Vulcão que já existe (Unguento). Simplificações: «com a Força» = só E; mineiros sem figuras na cena.
+- Teste (navegador embutido, painel oculto, sem captura): caminhada até Urdan, E real nas 3 comportas, golpes reais até o Colosso cair; os DOIS ramos. Pré-condição: q017 marcada como feita no perfil.
+
 ## v720 (30/10/2026) — Missão #1: objetivo certo depois de matar a gosma primeiro
 - Replay em tempo real (Edge+GPU, teclado/mouse reais): o empurrão da carroça NÃO trava (era artefato do teste anterior). Bug real: com a gosma morta antes de empurrar, o objetivo dizia «Fale com Edran [E]» e apontava para Edran, mas a interação fica na carroça. tools/intro401.js agora aponta para a carroça ("Fale com Edran na carroça [E]").
 
