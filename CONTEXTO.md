@@ -1,3 +1,10 @@
+## v699 (29/10/2026) — Água reage ao corpo, sem sombra redonda, sem luz piscando
+- Ian: «a água se mova com minhas batidas»; «quando toco na água fico na luz, pisca»; «tira a sombra do personagem (fica em cima dos pés nadando)».
+- `agua628`: cada braçada espirra na mão da vez, o nado deixa rastro de marolas atrás, andar na água rasa respinga, e no chão encharcado (poças da chuva) cada passo respinga. Marolas mais finas e transparentes. A tela azul de "embaixo d'água" só liga com a câmera 25 cm abaixo da superfície (antes piscava raspando).
+- `water391`: o anel de rank some na água e só volta 1 s depois de sair (antes ligava e desligava a cada marola = luz piscando).
+- `warrior-player127`: a mancha de sombra redonda do Viajante não é mais criada.
+- Teste: navegador; nado em rio de 2 m: anel apagado, sem sombra, marolas e rastro no print. Não testado: pisada na poça com chuva, noite.
+
 ## v698 (29/10/2026) — Casas medievais e pedras com musgo do Drive
 - Pedido de Ian: trocar as casas antigas pelas casas do Drive (`Primeva/modelos/Cenarios-Realistas-Skyrim-Primeva/07`) e as rochas pela pasta 05; nada gerado.
 - `models/casa_medieval_01..04(.glb/-lod)`: 12 mil tri + leve 3 mil, giradas 90° para a porta ficar do mesmo lado da casa antiga. Ids `house` (02), `house2` (01), `house3` (03), `house4` (04) em 680 (files, lod, HEIGHT); casas de aldeia sorteiam uma das 4 pelo lugar; `tools/capitais597.js` sorteia uma por casa e usa as medidas dela.

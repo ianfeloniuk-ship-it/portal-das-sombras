@@ -66,9 +66,11 @@
   function swimFrame(P){
     const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000);lastT=now;
     const d=P&&!P.dead&&!run?.mounted&&!run?.aboard440?depthAt(P.x,P.z):0,sw=d>(P?.swim391?SWIM_DEPTH-.15:SWIM_DEPTH);W.swimming=sw;
-    if(!sw){W.body=BODY;W.off=null;if(P&&P.swim391){P.swim391=false;tilt=0;moveT=0;P.m.root.rotation.x=0;aura(P,true)}return}
+    /* v699 (Ian: «toco na água e fico na luz, pisca»): o anel de rank some na água e só volta 1 s depois de sair (antes ligava/desligava a cada marola) */
+    if(P&&P.m){const wet=P&&!P.dead&&depthAt(P.x,P.z)>.2;if(wet)P.dry698=0;else P.dry698=(P.dry698||0)+dt;const want=P.dry698>1;if(P.aura698!==want){P.aura698=want;aura(P,want)}}
+    if(!sw){W.body=BODY;W.off=null;if(P&&P.swim391){P.swim391=false;tilt=0;moveT=0;P.m.root.rotation.x=0}return}
     const step=Math.hypot(P.x-lastX,P.z-lastZ);lastX=P.x;lastZ=P.z;moveT=step>.002?.15:Math.max(0,moveT-dt);const moved=moveT>0;W.moving=moved;
-    if(!P.swim391){tilt=0;aura(P,false)}P.swim391=true;W.body=BODY;
+    if(!P.swim391){tilt=0}P.swim391=true;W.body=BODY;
     // volta à pose parada antes de aplicar o nado, para a caminhada não misturar com as braçadas
     try{animChibi(P.m,{move:0,atk:0,dead:0,wind:0,wep:animWep173()},time)}catch(_){}
     const root=P.m.root;root.rotation.x=0;root.rotation.order='YXZ';

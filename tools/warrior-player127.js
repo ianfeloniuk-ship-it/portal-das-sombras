@@ -56,7 +56,7 @@
       const minv=new T.Matrix4().copy(model.matrixWorld).invert();model.traverse(o=>{if(!o.isBone)return;o.userData.rest155M=inv.clone().multiply(o.getWorldQuaternion(new T.Quaternion()));o.userData.rest155P=o.getWorldPosition(new T.Vector3()).applyMatrix4(minv);});}
     const socket=new T.Group();socket.name='weapon_socket_r';socket.position.set(.002,0,.004);socket.rotation.set(2.05,0,0);if(mix153){/* v162 (Ian: "corrigir essa espada"): nos ossos do Tripo a mão em pose T tem os eixos do modelo (dedos em -X, polegar em +Z). A lâmina sai do punho para o lado do polegar e o cabo fica na palma. */socket.rotation.set(Math.PI/2,0,0);socket.position.set(-.045,-.015,0);socket.scale.setScalar(1/model.scale.x*1.6)}bones.hand_r.add(socket);
     const armorGroup=new T.Group();armorGroup.name='equipment_layers';model.add(armorGroup);
-    const shadow=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.23,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;root.add(shadow);
+    const shadow=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({color:0,transparent:true,opacity:.23,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;/* v699 (Ian: «tira a sombra do personagem»): a mancha redonda não entra mais (subia nos pés ao nadar) */
     const m={mix153,root,body,model,bones,uniforms,mats,wmats:[],wnodes:[],socket,armorParts:[],baseMaterials:mats.slice(),warrior127:true,glb:true,sc:1,armL:bones.upperarm_l,armR:bones.upperarm_r,legL:bones.thigh_l,legR:bones.thigh_r,eyeMat:new T.MeshBasicMaterial(),gearSignature:null,attackPhase:0};
     API.gear(m,options.equip||{},options);API.animate(m,{move:0,atk:0,dead:0},0,0);return m;
   };

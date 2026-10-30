@@ -3,8 +3,8 @@
 (function () {
   'use strict';
   const T = THREE, W = () => window.Water391;
-  const N = 48, geo = new T.RingGeometry(.8, 1, 20); geo.rotateX(-Math.PI / 2);
-  const mat = new T.MeshBasicMaterial({ color: 0xe8f4ff, transparent: true, opacity: .55, depthWrite: false, fog: true });
+  const N = 48, geo = new T.RingGeometry(.9, 1, 32); /* v699: marola fina */ geo.rotateX(-Math.PI / 2);
+  const mat = new T.MeshBasicMaterial({ color: 0xe8f4ff, transparent: true, opacity: .3, depthWrite: false, fog: true });
   const rings = new T.InstancedMesh(geo, mat, N); rings.frustumCulled = false; rings.userData.noCull695 = true; rings.userData.terrainAbsolute245 = true; rings.renderOrder = 6;
   const ND = 60, dpos = new Float32Array(ND * 3).fill(0), dgeo = new T.BufferGeometry(); dgeo.setAttribute('position', new T.BufferAttribute(dpos, 3));
   const dmat = new T.PointsMaterial({ color: 0xdff0ff, size: .09, transparent: true, opacity: .85, depthWrite: false });
@@ -26,6 +26,7 @@
   ov.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at 50% 30%,rgba(60,160,170,.18),rgba(8,60,80,.55) 75%),repeating-linear-gradient(100deg,rgba(255,255,255,0) 0 90px,rgba(190,255,245,.07) 110px 150px,rgba(255,255,255,0) 170px 260px);mix-blend-mode:normal';
   const addOv = () => document.body && document.body.appendChild(ov);
   if (document.body) addOv(); else window.addEventListener('DOMContentLoaded', addOv);
+  let strokeP = -1, stepT = 0;
   let under = false, wasIn = false, accT = 0, last = performance.now(), ox = 0, oz = 0, rayT = 0;
   const fogSave = { c: new T.Color(), d: 0 }, uwFog = new T.Color(0x0c5062);
   function surfaceAt(x, z) { try { return W() && W().waterAt(x, z) } catch (_) { return null } }
@@ -40,10 +41,22 @@
       const ws = surfaceAt(player.x, player.z), inW = !!(ws && !ws.frozen && ws.top - terrH(player.x, player.z) > .25);
       if (inW && !wasIn) splash(player.x, ws.top + .03, player.z, 1);
       wasIn = inW;
-      if (inW) { const mv = Math.hypot(player.x - ox, player.z - oz); accT += dt; if (accT > (mv > .002 ? .28 : .9)) { accT = 0; ripple(player.x, ws.top + .03, player.z, mv > .002 ? .9 : .6, 1) } }
+      /* v699 (Ian: «a água se mova com minhas batidas»): braçadas espirram, nado deixa rastro, pisada na água rasa e no chão encharcado respinga */
+      const mv = Math.hypot(player.x - ox, player.z - oz), moving = mv > .002, swim = W() && W().swimming;
+      if (inW) {
+        accT += dt;
+        if (swim) {
+          const ph = Math.floor(now / 1000 * 4.2 / Math.PI); // uma batida a cada meia volta da braçada (água391: a=t*4.2)
+          if (moving && ph !== strokeP) { strokeP = ph; const f = player.face || 0, side = ph % 2 ? 1 : -1, hx = player.x + Math.sin(f) * .7 + Math.cos(f) * .35 * side, hz = player.z + Math.cos(f) * .7 - Math.sin(f) * .35 * side; splash(hx, ws.top + .03, hz, .45) }
+          if (accT > (moving ? .16 : .8)) { accT = 0; const f = player.face || 0; ripple(player.x - Math.sin(f) * .6, ws.top + .03, player.z - Math.cos(f) * .6, moving ? 1.5 : .8, moving ? .8 : .6) }
+        } else if (accT > (moving ? .3 : .9)) { accT = 0; ripple(player.x, ws.top + .03, player.z, moving ? .9 : .6, 1); if (moving) splash(player.x, ws.top + .03, player.z, .3) }
+      } else if (moving) {
+        const RS = window.RAIN626, soak = RS ? Math.max(RS.pud.value, RS.wet.value * .6) : 0;
+        stepT += dt; if (soak > .35 && stepT > .34) { stepT = 0; const y = terrH(player.x, player.z) + .04; ripple(player.x, y, player.z, .35 * soak, 1.8); splash(player.x, y, player.z, .18 * soak) }
+      }
       ox = player.x; oz = player.z;
       const cw = surfaceAt(camera.position.x, camera.position.z);
-      under = !!window.Agua628.forceUnder || !!(cw && !cw.frozen && camera.position.y < cw.top - .05 && cw.top - terrH(camera.position.x, camera.position.z) > .2);
+      under = !!window.Agua628.forceUnder || !!(cw && !cw.frozen && camera.position.y < cw.top - .25 &&/* v699: margem para a tela não piscar azul quando a câmera raspa na água */ cw.top - terrH(camera.position.x, camera.position.z) > .2);
       ov.style.opacity = under ? 1 : 0;
       for (let i = 0; i < N; i++) { const r = R[i]; r.t += dt * r.sp; if (r.t >= 1) { rings.setMatrixAt(i, HID); continue } const sc = .1 + r.s * r.t * 1.4 * (1 - .3 * r.t); S.set(sc, 1, sc); V.set(r.x, r.y, r.z); M.compose(V, Q.identity(), S); rings.setMatrixAt(i, M) }
       rings.instanceMatrix.needsUpdate = true;
