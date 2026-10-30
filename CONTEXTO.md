@@ -1,3 +1,8 @@
+## v730 (30/10/2026) — Missão fixa #27 «A Ronda das Três Tochas»
+- `tools/ronda730.js` (novo): depois da #26, 4 braseiros apagados no anel norte (~100 m de Aster) [E] e uma matilha de 3 lobos (líder 2× vida). Reacender os 4 antes de a matilha cair: marca `arqueirosFogo727` (apoio de flechas de fogo das sentinelas). Matar a matilha com algum braseiro apagado: sem apoio. Estado em `profile.fixas545.q027`.
+- Simplificações: sem exigir noite nem Feixe de Lenha/Resina/Lampião; o apoio é só a marca.
+- Teste (navegador embutido, E real, golpes reais, captura): os dois ramos.
+
 ## v729 (30/10/2026) — Missão fixa #26 «Juramento de Ferro nas Ameias»
 - `tools/juramento729.js` (novo): com nível 5, E em Brann abre o juramento. 3 veteranos (mercenários com 15% do dano) treinam com você num campo a ~95 m ao norte de Aster; se rendem a 20% de vida. Depois, 3 goblins na Estrada Norte (z -170). Com 3 ou mais aparos perfeitos (botão do meio, contados em `Guard472.stats.parries`) e nenhuma guarda quebrada: `broche726` (+5% de escudo, marca) e respeito de Edran. Sem isso: juramento sem broche. Estado em `profile.fixas545.q026`.
 - Por que fora da muralha: as sentinelas (`civic343.js`) atiram em qualquer inimigo a até 26 m da muralha, e o pátio interno empurrava os veteranos para lá. Simplificações: sem animação de treino nem recrutas com guarda própria; broche = marca; «respeito de Edran» = marca.

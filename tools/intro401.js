@@ -53,6 +53,7 @@ function targetAndText(){
  if(window.Cacada727?.active())return Cacada727.objective();
  if(window.Porta728?.active())return Porta728.objective();
  if(window.Juramento726?.active())return Juramento726.objective();
+ if(window.Ronda727?.active())return Ronda727.objective();
  const s1=Campaign327?.state?.('a1');
  if(s1&&!s1.done){
   const w=Campaign327.W.get('a1');
