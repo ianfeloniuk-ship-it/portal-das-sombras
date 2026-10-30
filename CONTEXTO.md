@@ -1,5 +1,7 @@
 ## v710 (30/10/2026) — Base de luta nos socos
 - Ian: «a perna vai pra frente, dobra um pouco». Socos com pé oposto à frente, joelhos dobrados e quadril descendo no impacto (tools/blender/socos702.py).
+## v710 (30/10/2026) — Calendário e noite polar
+- Ian: dias, meses e anos; Ymiria com seis meses sem sol. Escolhas dele: 13 meses de 28 dias, noite e dia polares. `cal710`/`nightK710` em 450: noite varia com a época e a região; ao norte de z -2400 cresce até o polar em z -3300. Aviso ao mudar de mês. Pendente: nomes dos meses, data na tela; água/cachoeiras ainda usam a noite fixa.
 
 ## v709 (30/10/2026) — Lua refeita por shader
 - Ian: «essa lua tá muito feia». `vento687.js`: Lua maior, mares, crateras, escurecimento nas bordas; rachadura por shader com galhos e energia roxa correndo. Só visual.

@@ -7617,7 +7617,12 @@ const GUILDS=[
 let dayT=120;const DAYLEN=3600,NIGHT0_377=2400/3600,NIGHT1_377=1.0;
 /* v384: relógio do dia. Noite (18h–6h) ocupa a faixa NIGHT0–NIGHT1 do ciclo; o dia, o resto. */
 function clock384(){const p=(dayT%DAYLEN)/DAYLEN,n0=NIGHT0_377,n1=NIGHT1_377;let h;if(p>=n0&&p<n1)h=18+12*(p-n0)/(n1-n0);else h=6+12*(p/n0);h%=24;const H=Math.floor(h),M=Math.floor((h-H)*60/5)*5;return (H>=6&&H<18?'☀ ':'🌙 ')+String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')}
-function isNight(){const p=(dayT%DAYLEN)/DAYLEN;return p>NIGHT0_377&&p<NIGHT1_377}
+/* v710 (Ian): calendário de 13 meses de 28 dias (364 dias) e duração da noite pela época do ano e pela região; em Ymiria, metade do ano sem sol e metade sem noite */
+function cal710(){const d=Math.floor(dayT/DAYLEN),y=Math.floor(d/364),dy=d-y*364;return{dia:dy%28+1,mes:Math.floor(dy/28)+1,ano:y+1,dy}}
+function night710(){const c=(NIGHT0_377+NIGHT1_377)/2,h0=(NIGHT1_377-NIGHT0_377)/2,s=Math.cos(cal710().dy/364*TAU);let z=0;try{z=player?player.z:0}catch(_){}
+ const polar=clamp((-z-2400)/900,0,1),h=clamp(h0+s*(.06+polar*.4),0,.52);return{c,h}}
+function nightK710(){const N=night710(),p0=(dayT%DAYLEN)/DAYLEN;if(N.h<.01)return 0;let q=p0-N.c;if(q>.5)q-=1;if(q<-.5)q+=1;return clamp((N.h+.03-Math.abs(q))/.06,0,1)}
+function isNight(){return nightK710()>.5}
 /* v205 (Ian): no Fim do Mundo, a cada dia de jogo uma horda marcha para a cidade mais próxima de você (até 150 m). */
 function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window.HD205=d;return}if(d===HD205)return;HD205=d;
  if(!player||player.dead||L.mode!=='world'||!unl('season')||!seasonOn()||profile.season===weekId())return;
@@ -7628,7 +7633,7 @@ function hordeTick205(){const d=gameDay198();if(window.HD205===undefined){window
 function weekTick198(){try{hordeTick205()}catch(_){}const w=weekId();if(window.WK198===undefined){window.WK198=w;return}if(w===WK198)return;WK198=w;try{towerWeek202()}catch(_){}
  if(unl('season')&&seasonOn()&&profile.season!==w){toast('<b>[NARRADOR]</b> O FIM DO MUNDO COMEÇOU. Um Arconte inimigo abriu o Portal Primordial. A cada dia de jogo mais cidades caem. Veja a Ordem.',8000);bigText('FIM DO MUNDO',1800)}
  else toast('<b>[ORDEM]</b> Nova semana de jogo: o chefe semanal mudou.',5000)}
-function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=clamp(Math.min((p-(NIGHT0_377-.03))/.06,(NIGHT1_377+.03-p)/.06),0,1);(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
+function updDayNight(dt){dayT+=Math.max(dt,dt>0?(window.WDT196||dt):0);try{weekTick198()}catch(_){}if(profile)profile.dayT=dayT;if(L.mode!=='world')return;const p=(dayT%DAYLEN)/DAYLEN;const n=nightK710();(window.NIGHT153U||(window.NIGHT153U={value:0})).value=n;
   if(ENV.ok){if(!L.dn)L.dn={sd:new THREE.Color(0x48a8ef),sn:new THREE.Color(0x101c3d),fd:new THREE.Color(0xa5d8ed),fn:new THREE.Color(0x1d3152),hd:new THREE.Color(0xd9f1ff),hn:new THREE.Color(0x7899ce),gd:new THREE.Color(0x587a52),gn:new THREE.Color(0x2e4557),ud:new THREE.Color(0xfff5df),un:new THREE.Color(0xb6c9ff),gray:new THREE.Color(0x87909a),w:0};
     const D=L.dn,wt=typeof WX!=='undefined'?(WX.type==='rain'?.55+.35*(window.RAIN626?RAIN626.k:.5):WX.type==='snow'?.45:0):0;D.w+=(wt-D.w)*Math.min(1,dt*.4);
     scene.background.copy(D.sd).lerp(D.gray,D.w*.8).lerp(D.sn,n);scene.fog.color.copy(D.fd).lerp(D.gray,D.w*.8).lerp(D.fn,n);hemi.color.copy(D.hd).lerp(D.hn,n);hemi.groundColor.copy(D.gd).lerp(D.gn,n);sun.color.copy(D.ud).lerp(D.un,n);
@@ -9734,7 +9739,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 <script src="tools/mechanics434.js?v=700"></script>
-<script src="tools/survival437.js?v=698"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=691"></script><script src="tools/vento687.js?v=709"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
+<script src="tools/survival437.js?v=698"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=691"></script><script src="tools/vento687.js?v=711"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
 <script src="tools/cart437.js?v=700"></script>
 <script src="tools/build437.js?v=700"></script>
 <script src="tools/otherworld460.js?v=654"></script>
@@ -9851,9 +9856,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v710</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v711</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=710;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=711;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

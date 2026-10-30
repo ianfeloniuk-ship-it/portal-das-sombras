@@ -140,6 +140,7 @@ function tick(dt){if(!W.on)return;t+=dt;
   U.uNight.value=n;U.uRain.value=Math.min(1,w*1.2);U.uCov.value=Math.min(1,.42+w*.95);U.uOff.value.copy(W.off);U.uT.value=t;
   try{if(window.Doenca681&&Doenca681.fase)U.uPh.value=Doenca681.fase()}catch(_){}
   try{const lc=window.Doenca681&&Doenca681.luaCheia()&&n>.9;if(lc&&!W.lc696)toast('<b>[NARRADOR]</b> Lua cheia. A rachadura da Lua brilha e as feras da noite ficam mais fortes.',6000);W.lc696=lc}catch(_){}
+  try{const C=cal710();if(W.mes710&&W.mes710!==C.mes)toast('<b>[NARRADOR]</b> Começa o mês '+C.mes+' do ano '+C.ano+'.',5000);W.mes710=C.mes}catch(_){}
   if(scene.background&&scene.background.isColor)U.uTop.value.copy(scene.background).multiplyScalar(.82);
   if(scene.fog)U.uHor.value.copy(scene.fog.color);
   try{U.uSun.value.copy(sun.position).sub(sun.target.position).normalize()}catch(_){}
