@@ -71,7 +71,7 @@ function buildWorld(seed){
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);
   hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
-  const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));moon.position.set(-80,70,-150);L.group.add(moon);L.moon=moon;
+  /* v714: a esfera antiga saiu; a Lua é a do céu de tools/vento687.js */
   updChunks(true);
   if(!gates.length)for(let i=0;i<((window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155);i++)gates.push(newGate());
   for(const g of gates)if(!g.dead){gateMesh(g);if(g.closing131&&g.mesh?.userData.rift131)Rift131.close(g.mesh,g.storyScar131)}

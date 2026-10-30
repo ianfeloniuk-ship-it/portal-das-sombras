@@ -184,7 +184,7 @@
     const it = { type: 'enc502', x: cx, z: cz, r: 3.2, label, hidden: !npc && done(), use: () => use(s, it, mult, minRar, label) };
     if (s.type === 'altar') { it.r = 3.6; it.hidden = false; }
     if (!npc) inter.push(it);
-    const old = BUILT.get(s.id); BUILT.set(s.id, { s, guard, spawned: old ? old.spawned : false, npc, npcObj: old ? old.npcObj : null });
+    const old = BUILT.get(s.id); BUILT.set(s.id, { s, guard, spawned: old ? old.spawned : false, npc, npcObj: old ? old.npcObj : null, visto714: old ? old.visto714 : false });
   }
 
   /* ---------- usar ---------- */
@@ -223,19 +223,25 @@
       'A Ordem paga pouco e esquece rápido. Os monstros, não.',
       'Cuidado com os covis: o que vive neles aprendeu a esperar.'] }
   };
+  /* v714: viajante novo a cada vez (sem semente: não é sempre a mesma pessoa no mesmo lugar) */
   function spawnNpc(e) {
-    const s = e.s, w = WHO[e.npc], R = mulberry32(rh(Math.round(s.x), Math.round(s.z), 503)), [name, sex] = w.names[Math.floor(R() * w.names.length)];
-    const a = s.ry + .7, x = s.x + Math.cos(a) * 3.2, z = s.z + Math.sin(a) * 3.2, pk = arr => arr[Math.floor(R() * arr.length)];
+    const s = e.s, a = s.ry + .7, x = s.x + Math.cos(a) * 3.2, z = s.z + Math.sin(a) * 3.2;
+    const n = viajante(e.npc, x, z, Math.atan2(s.x - x, s.z - z)); e.npcObj = n;
+    if (window.Estrada714) Estrada714.levanta(n);
+  }
+  function viajante(tipo, x, z, face) {
+    const w = WHO[tipo], R = Math.random, [name, sex] = w.names[Math.floor(R() * w.names.length)], pk = arr => arr[Math.floor(R() * arr.length)];
     const m = makeChibi({ body: pk([0x6b4a2a, 0x3a5fd0, 0x8a2b4a, 0x2f7a4a, 0xb39a6a, 0x7a5a9a]), hair: pk([0x222222, 0xc85a1e, 0xe8e8ff, 0x6b4a2a, 0xd8b060]), wep: 'none', gk: pk(['Knight', 'Barbarian', 'Mage', 'Rogue']), scale: .9 });
     m.root.position.set(x, 0, z); m.root.userData.terrainRoot245 = true; scene.add(m.root);
     let k = 0;
-    const n = { kind: 'traveler', m, x, z, face: Math.atan2(s.x - x, s.z - z), r: .45, name, short: name, col: '#d9c9a8', t: R() * 9, label: 'F · FALAR COM ' + name.toUpperCase(), gone: false };
+    const n = { kind: 'traveler', m, x, z, face, r: .45, sub714: w.sub, name, short: name, col: '#d9c9a8', t: R() * 9, label: 'F · FALAR COM ' + name.toUpperCase(), gone: false };
     n.use = () => speech153(n, w.lines[(k++) % w.lines.length], w.sub);
-    npcs.push(n); e.npcObj = n;
+    npcs.push(n);
     try {
-      const P = window.Povo482, seed = rh(Math.round(s.x), Math.round(s.z), 504);
-      if (P && P.register) P.register(n, e.npc === 'cacador' ? { role: 'hunter', family: 'soldado', cls: 0, rank: 1, sex, seed, isCurrent: () => !n.gone && L.mode === 'world' } : { role: 'civil', sex, seed });
+      const P = window.Povo482, seed = Math.floor(R() * 2147483647);
+      if (P && P.register) P.register(n, tipo === 'cacador' ? { role: 'hunter', family: 'soldado', cls: 0, rank: 1, sex, seed, isCurrent: () => !n.gone && L.mode === 'world' } : { role: 'civil', sex, seed });
     } catch (_) {}
+    return n;
   }
   function dropNpc(e) { const n = e.npcObj; if (!n) return; n.gone = true; try { scene.remove(n.m.root); } catch (_) {} e.npcObj = null; }
 
@@ -246,7 +252,8 @@
       if (typeof started === 'undefined' || !started || !player || !run || L.mode !== 'world' || player.dead) return;
       for (const [id, e] of BUILT) {
         const d = Math.hypot(e.s.x - player.x, e.s.z - player.z);
-        if (e.npc) { if (!e.npcObj && d < 90) spawnNpc(e); else if (e.npcObj && d > 150) dropNpc(e); }
+        /* v714: a fogueira pode estar vazia; o sorteio refaz a cada vez que você volta */
+        if (e.npc) { if (!e.visto714 && d < 90) { e.visto714 = true; if (Math.random() < .3) spawnNpc(e); } else if (d > 150) { dropNpc(e); e.visto714 = false; } }
         if (d > 400) { dropNpc(e); BUILT.delete(id); continue; }
         if (!e.guard || e.spawned || d > 42 || (run.enc502 && run.enc502[id])) continue;
         e.spawned = true; const gr = Math.max(0, Math.min(9, danger(e.s.x, e.s.z)));
@@ -280,7 +287,7 @@
     pending = []; return r;
   };
 
-  window.Enc502 = {
+  window.Enc502 = { viajante,
     site, near, ice,
     clearAt(x, z) { for (let i = Math.floor((x - 12) / CELL); i <= Math.floor((x + 12) / CELL); i++) for (let j = Math.floor((z - 12) / CELL); j <= Math.floor((z + 12) / CELL); j++) { const s = site(i, j); if (s && Math.hypot(s.x - x, s.z - z) < s.cl) return true; } return false; },
     stats() { const c = {}; let n = 0; for (let i = -33; i <= 33; i++) for (let j = -33; j <= 33; j++) { const s = site(i, j); if (s) { n++; c[s.type] = (c[s.type] || 0) + 1; } } return { total: n, cells: 67 * 67, byType: c }; }

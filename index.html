@@ -4634,7 +4634,7 @@ function buildWorld(seed){
   L={mode:'world',group:new THREE.Group(),inter:[],spawnT:2,hunterT:6,cands:null,loadT:0};scene.add(L.group);
   scene.background=new THREE.Color(0x150a1c);scene.fog=new THREE.FogExp2(0x26122c,.014);
   hemi.color.setHex(0xbfdcff);hemi.intensity=.75;sun.color.setHex(0xc8a2ff);sun.intensity=.85;pLight.intensity=0;pLight.distance=22;
-  const moon=new THREE.Mesh(geo('moon',()=>new THREE.SphereGeometry(7,20,14)),new THREE.MeshBasicMaterial({color:0xcfe4ff,fog:false}));moon.position.set(-80,70,-150);L.group.add(moon);L.moon=moon;
+  /* v714: a esfera antiga saiu; a Lua é a do céu de tools/vento687.js */
   updChunks(true);
   if(!gates.length)for(let i=0;i<((window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155);i++)gates.push(newGate());
   for(const g of gates)if(!g.dead){gateMesh(g);if(g.closing131&&g.mesh?.userData.rift131)Rift131.close(g.mesh,g.storyScar131)}
@@ -9807,7 +9807,7 @@ requestAnimationFrame(frame);
 <script src="tools/mundo513.js?v=600"></script>
 <script src="tools/mapa501.js?v=702"></script>
 <script src="tools/marcos692.js?v=702"></script>
-<script src="tools/encontros502.js?v=700"></script>
+<script src="tools/encontros502.js?v=714"></script>
 <script src="tools/gatilhos508.js?v=512"></script>
 <script src="tools/capitais504.js?v=692"></script>
 <script src="tools/capitais597.js?v=698"></script>
@@ -9831,6 +9831,7 @@ requestAnimationFrame(frame);
 <script src="tools/explorar539.js?v=654"></script>
 <script src="tools/anim547.js?v=549"></script>
 <script src="tools/flora-regioes.js?v=692"></script>
+<script src="tools/estrada714.js?v=714"></script>
 <script src="tools/ecossistema550.js?v=692"></script>
 <script src="tools/skyrim588.js?v=645"></script>
 <script src="tools/controles593.js?v=593"></script>
@@ -9858,9 +9859,9 @@ requestAnimationFrame(frame);
 <script src="tools/inicio666.js?v=666"></script>
 
 
-<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v715</div>
+<div id="pdsver" style="position:fixed;left:6px;bottom:4px;font:10px monospace;color:rgba(159,200,255,.55);z-index:99;pointer-events:none">v716</div>
 <button id="pdsupd" hidden style="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:999;background:#ffd54f;color:#1a1200;border:0;border-radius:6px;padding:10px 16px;font-weight:700">NOVA VERSÃO DO JOGO · TOQUE PARA ATUALIZAR</button>
-<script>window.PDS_V=715;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
+<script>window.PDS_V=716;if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),120000)}).catch(()=>{});
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;const b=document.getElementById('pdsupd');b.hidden=false;b.onclick=()=>{try{saveRun()}catch(e){}location.reload()}})}</script>
 </body>
 </html>

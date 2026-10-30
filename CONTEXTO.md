@@ -1,3 +1,6 @@
+## v716 (30/10/2026) — Lua a mais retirada; gente de estrada aleatória
+- Ian: «falta que tem uma lua a mais»; «no skyrim é aleatório... se eu volto pro mesmo lugar o cara continua lá». Saiu a esfera `L.moon` (260). Novo `tools/estrada714.js`: viajantes nascem sem padrão na estrada, andam, param para comer e beber, somem longe ou na cidade. Fogueira de encontro: sorteio de 30% a cada visita, sem nome fixo, e a pessoa levanta depois. Avistamentos de quests480 somem ao se afastar.
+
 ## v715 (30/10/2026) — Narrador conta da magia em cada mão
 - Aviso único (profile.dicas695.maos) na primeira magia: escolher a mão na Bolsa e qual botão usa cada mão.
 
