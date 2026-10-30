@@ -1,3 +1,7 @@
+## v704 (30/10/2026) — Socos próprios feitos no Blender
+- Combo sem arma de quem não é Guerreiro: direto, gancho e soco para cima, com clipes separados para cada mão (tools/blender/socos702.py, models/anim-soco_*.glb). Botão esquerdo = mão direita, direito = esquerda.
+- Teste no jogo: clipes certos por mão; punho avança 61 e 62 cm no direto. Falta conferir o visual na tela. Suspeita: o espelho automático (mirror670) deu pose errada nos socos; os _esq das armas não foram medidos.
+
 ## v703 (30/10/2026) — Água se mexe quando você passa; margens irregulares
 - Ian: «fez um rastro de luz; quero que a água se movimente conforme eu passo»; «as bordas não são retas na vida real».
 - `water154`: `Wake701` guarda 12 pontos de esteira; o shader abre ondas na própria superfície (só inclina o reflexo, não soma brilho). `agua628`: corpo e braçadas usam isso; anéis brancos e respingos de passo saíram; só a entrada na água solta gotas, sem brilho.
