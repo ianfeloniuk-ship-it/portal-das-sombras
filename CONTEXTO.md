@@ -1,3 +1,6 @@
+## v717 (30/10/2026) — Base de luta nos golpes com arma
+- Espada e adaga: tronco e braços do clipe original, pernas em base e quadril mais baixo (tools/blender/armas717.py, models/anim-base_*.glb); mão esquerda sai do espelho. Pesado1/2 ficaram de fora: o clipe refeito reduzia o alcance da direita de 33 para 14 cm.
+
 ## v716 (30/10/2026) — Lua a mais retirada; gente de estrada aleatória
 - Ian: «falta que tem uma lua a mais»; «no skyrim é aleatório... se eu volto pro mesmo lugar o cara continua lá». Saiu a esfera `L.moon` (260). Novo `tools/estrada714.js`: viajantes nascem sem padrão na estrada, andam, param para comer e beber, somem longe ou na cidade. Fogueira de encontro: sorteio de 30% a cada visita, sem nome fixo, e a pessoa levanta depois. Avistamentos de quests480 somem ao se afastar.
 
