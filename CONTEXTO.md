@@ -1,3 +1,6 @@
+## v737 (30/10/2026) — Guerreiro com os socos novos e VFX dourado
+- Ian: «quero nele também, mas com os vfx shaders de guerreiro». `animWep173` usa 'brawl' para todos; `tools/socos737.js` envolve `attack` e, no Guerreiro sem arma, solta anel, faíscas e brilho dourados; o 3º soco tem clarão e racha o chão.
+
 ## v736 (30/10/2026) — Sem classe soca com cada mão
 - Ian: recomeçou sem classe, 3ª pessoa, «o golpe tu não dá por mão, é fixo». `profile.classless` contava como Guerreiro em `animWep173` e usava o combo antigo 'fist'. Agora usa 'brawl' (socos do Blender, com clipe por mão). Guerreiro de verdade mantém 'fist' (v696).
 
