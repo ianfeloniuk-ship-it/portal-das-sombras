@@ -4709,7 +4709,7 @@ function tickGates(dt){
   const gc666=(window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155;
   while(alive<gc666&&tries++<gc666){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
 }
-function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
+function dungeonBreak(g,opts={}){/* v733 (Ian): antes da 1ª Prova, só ranks baixos e menos vezes */if(!(profile?.rank>0)&&(g.rank>1||Math.random()<.5))return;ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   // v155 (Ian): monstros e o chefe saem do portal. Se houver vila a até 100 m, marcham para atacá-la; senão vagueiam pelo mapa.
   const near=nearestCity(g.x,g.z),wall=36*CITYK,city=near.c&&near.d-wall<=100&&!cityFallen(near.c)&&near.c.name!=='Aster'?near.c:null;
   const raid={city:city?city.id:null,cx:city?city.x:g.x,cz:city?city.z:g.z};const out=[];
@@ -9724,7 +9724,7 @@ requestAnimationFrame(frame);
 <link rel="stylesheet" href="tools/bestiary405.css?v=405">
 <script src="tools/bestiary405.js?v=405"></script>
 <script src="tools/mechanics434.js?v=700"></script>
-<script src="tools/survival437.js?v=698"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=691"></script><script src="tools/vento687.js?v=712"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
+<script src="tools/survival437.js?v=733"></script><script src="tools/loot663.js?v=676"></script><script src="tools/pano672.js?v=691"></script><script src="tools/vento687.js?v=712"></script><script src="tools/criaturas673.js?v=680"></script><script src="tools/transforma677.js?v=678b"></script><script src="tools/cinema678.js?v=678i"></script><script src="tools/aura678.js?v=678"></script><script src="tools/asas678.js?v=680"></script>
 <script src="tools/cart437.js?v=700"></script>
 <script src="tools/build437.js?v=700"></script>
 <script src="tools/otherworld460.js?v=654"></script>
@@ -9819,7 +9819,7 @@ requestAnimationFrame(frame);
 <script src="tools/crime545.js?v=697"></script>
 <script src="tools/contratos541.js?v=542"></script>
 <script src="tools/fixas545.js?v=546"></script>
-<script src="tools/fronteira551.js?v=577"></script>
+<script src="tools/fronteira551.js?v=733"></script>
 <script src="tools/conversa539.js?v=543"></script>
 <script src="tools/fantasmas545.js?v=653"></script>
 <script src="tools/povo655.js?v=658"></script>

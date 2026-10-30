@@ -1183,8 +1183,9 @@
       if (s.starveAcc >= 4) {
         s.starveAcc = 0;
         const dmg = Math.max(1, Math.round(player.maxhp * (s.thirst <= 0 ? 0.03 : 0.018) * (1 - A('starve')))); // Vontade
-        player.hp = Math.max(1, player.hp - dmg);
+        player.hp -= dmg; // v733 (Ian): fome e sede matam devagar
         floater(player.x, player.z, s.thirst <= 0 ? 'SEDE EXTREMA' : 'FOME EXTREMA', '#ff5d5d');
+        if (player.hp <= 0 && !player.dead) die();
       }
     }
   }

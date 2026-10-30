@@ -1,3 +1,6 @@
+## v733 (30/10/2026) — Correções do teste de 1 hora
+- Ian (formulário): grupo de Edran alcança sozinho no passo 4/6; fome e sede zeradas matam devagar; antes da 1ª Prova, Transbordo só rank F/E e metade das vezes.
+
 ## v732 (30/10/2026) — Missão fixa #29 «Sangue na Neve do Desfiladeiro»
 - `tools/torben732.js` (novo): depois da #28 (gatilho simplificado: Rank D da Vanguarda), no Desfiladeiro da Rota Norte (60, -240) Torben Halvorsen (figurante, 100 de vida na missão) está cercado por 3 Yetis Corrompidos; cada yeti vivo o fere 1/s (0,5/s se você luta a menos de 8 m dele). Ombro a ombro: matar os 3. Crista: E para escalar (leva a 16 m) e E para derrubar estalactites (2 yetis caem, o 3º fica atordoado). Torben de pé ao fim: `aliadoTorben` (figurante volta a aparecer na rota); caído: lore triste. Estado em `profile.fixas545.q029`.
 - Simplificações: Torben não luta; a vida dele é uma conta; sem animação de escalada; «dividir fogueira» = figurante parado.

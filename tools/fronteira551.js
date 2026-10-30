@@ -163,7 +163,7 @@
     const q=state();if(fireFx){fireFx.pts.visible=near&&Math.hypot(player.x-barn.x,player.z-barn.z)<180;fireFx.mat.uniforms.t.value=performance.now()/1000;fireFx.mat.uniforms.saved.value=q?.water>=3?1:0;}
     if(!active()||paused||player.dead)return;
     if(!interaction&&(q.phase==='escolha'||(q.phase==='combate'&&q.choice==='paiol'&&q.water<3)))setInter(q);
-    q.waiting=(q.phase==='estrada'||q.phase==='saida')&&Math.hypot(player.x-cx(q.z),player.z-q.z)>23;
+    q.waiting=false;/* v733 (Ian): o grupo anda sozinho e alcança o jogador */
     if(q.phase==='estrada'||q.phase==='saida'){
       if(!q.waiting)q.z-=dt*(q.choice==='paiol'?2:3.2);
       if(q.phase==='estrada'&&q.z<=177){q.z=177;q.phase='escolha';setInter(q);save();note('Vila da Fronteira. Fale com Edran na entrada da ponte.');}

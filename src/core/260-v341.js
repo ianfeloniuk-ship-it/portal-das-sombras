@@ -163,7 +163,7 @@ function tickGates(dt){
   const gc666=(window.Inicio666&&Inicio666.calmo())?4:GATE_COUNT155;
   while(alive<gc666&&tries++<gc666){const ng=newGate();gates.push(ng);if(L.mode==='world')gateMesh(ng);alive++}
 }
-function dungeonBreak(g,opts={}){ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
+function dungeonBreak(g,opts={}){/* v733 (Ian): antes da 1ª Prova, só ranks baixos e menos vezes */if(!(profile?.rank>0)&&(g.rank>1||Math.random()<.5))return;ECON[g.rank]=Math.min(1.8,ECON[g.rank]*1.25);
   // v155 (Ian): monstros e o chefe saem do portal. Se houver vila a até 100 m, marcham para atacá-la; senão vagueiam pelo mapa.
   const near=nearestCity(g.x,g.z),wall=36*CITYK,city=near.c&&near.d-wall<=100&&!cityFallen(near.c)&&near.c.name!=='Aster'?near.c:null;
   const raid={city:city?city.id:null,cx:city?city.x:g.x,cz:city?city.z:g.z};const out=[];
