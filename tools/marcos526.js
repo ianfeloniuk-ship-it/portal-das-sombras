@@ -82,7 +82,7 @@
     Promise.all([
       glb('m_colosso'),
       glb('tripo-rocha-musgo154'),
-      glb('tripo-pedras437')
+      glb('pedras_musgo_01')
     ]).then(([mColosso, mRock, mStones]) => {
       if (!g.parent) return;
 

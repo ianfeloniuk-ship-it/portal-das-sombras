@@ -481,7 +481,7 @@
 
   const NODE_META = {
     galho:   { glb: 'feixe-lenha', h: 0.42, w: 0.9,  r: 2.2, label: 'F · APANHAR GALHOS SECOS' },
-    pedra:   { glb: 'm437/../tripo-pedras437-lod', h: 0.38, w: 0.75, r: 2.2, label: 'F · APANHAR PEDRAS SOLTAS' },
+    pedra:   { glb: 'm437/../pedras_musgo_01-lod', h: 0.38, w: 0.75, r: 2.2, label: 'F · APANHAR PEDRAS SOLTAS' },
     arbusto: { glb: 'arbusto',     h: 1.05, w: 1.35, r: 2.4, label: 'F · COLHER FRUTAS E FIBRAS' },
     erva:    { glb: 'ervas',       h: 0.55, w: 0.85, r: 2.2, label: 'F · COLHER ERVAS MEDICINAIS' },
     cogu:    { glb: 'ervas',       h: 0.48, w: 0.75, r: 2.2, label: 'F · COLHER COGUMELOS SILVESTRES' },

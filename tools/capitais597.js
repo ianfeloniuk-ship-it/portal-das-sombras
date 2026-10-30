@@ -93,7 +93,7 @@
     };
     const casa = () => {
       const q = R();
-      if (q < .34 && HM) { const s0 = (5.4 + R() * 3.6) / HM.h, fx = .8 + R() * .55, fy = .8 + R() * .6, fz = .8 + R() * .55; return { id: 'house', s0, fx, fy, fz, tint: TT[Math.floor(R() * TT.length)], dim: { w: HM.sz * s0 * fz, d: HM.sx * s0 * fx, h: HM.h * s0 * fy } }; }
+      if (q < .34 && HM) { const hv = ['house', 'house2', 'house3', 'house4'][Math.floor(R() * 4)], HV = M[hv] || HM; /* v695: uma das 4 casas medievais do Drive */ const s0 = (5.4 + R() * 3.6) / HV.h, fx = .8 + R() * .55, fy = .8 + R() * .6, fz = .8 + R() * .55; return { id: M[hv] ? hv : 'house', s0, fx, fy, fz, tint: TT[Math.floor(R() * TT.length)], dim: { w: HV.sz * s0 * fz, d: HV.sx * s0 * fx, h: HV.h * s0 * fy } }; }
       if (q < .96) { const key = RAW[Math.floor(R() * RAW.length)], w = 4.4 + R() * 5.2; return { key, w, tint: TINTS[Math.floor(R() * TINTS.length)], dim: cityDim253(key, w) }; }
       return { key: 'building_scaffolding', w: 6, tint: 1, dim: cityDim253('building_scaffolding', 6) };
     };
@@ -109,7 +109,7 @@
       if (!slopeOk(x, z, Math.max(dim.w, dim.d) / 2 + 1.5, 2.4)) return false;
       if (used.some(u => City253.clearance(f, u.footprint) < (gapMin || 2.6))) return false;
       used.push({ footprint: f });
-      if (H.id) { b.tripo153.push({ id: 'house', x: X + x, y: 0, z: Z + z, ry: ry + PI / 2, scale: H.s0 * H.fx, sy: H.s0 * H.fy, sz: H.s0 * H.fz }); tripoList.push(H.tint); }
+      if (H.id) { b.tripo153.push({ id: H.id, x: X + x, y: 0, z: Z + z, ry: ry + PI / 2, scale: H.s0 * H.fx, sy: H.s0 * H.fy, sz: H.s0 * H.fz }); tripoList.push(H.tint); }
       else if (H.special) EW(b, H.key, X + x, 0, Z + z, ry, H.w, 1);
       else { const mm = ENV.m[H.key]; if (!mm) { used.pop(); return false; } const sc = H.w / mm.w, fy = .9 + R() * .4; b.add(H.key, X + x, 0, Z + z, ry + doorRot188(H.key), sc, sc * fy, sc, H.tint); }
       cityCollider253(addCol, X + x, Z + z, ry, dim); ENV.cast.push({ x: X + x + .8, z: Z + z - .6, r: Math.max(dim.w, dim.d) * .6, k: .5 });

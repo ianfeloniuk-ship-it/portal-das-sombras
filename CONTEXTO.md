@@ -1,3 +1,8 @@
+## v698 (29/10/2026) — Casas medievais e pedras com musgo do Drive
+- Pedido de Ian: trocar as casas antigas pelas casas do Drive (`Primeva/modelos/Cenarios-Realistas-Skyrim-Primeva/07`) e as rochas pela pasta 05; nada gerado.
+- `models/casa_medieval_01..04(.glb/-lod)`: 12 mil tri + leve 3 mil, giradas 90° para a porta ficar do mesmo lado da casa antiga. Ids `house` (02), `house2` (01), `house3` (03), `house4` (04) em 680 (files, lod, HEIGHT); casas de aldeia sorteiam uma das 4 pelo lugar; `tools/capitais597.js` sorteia uma por casa e usa as medidas dela.
+- Pedras soltas (`stones`, desfiladeiro, marcos, coleta de pedra do survival437): `pedras_musgo_01` (rock_moss_set_01 do Drive) no lugar de `tripo-pedras437`. A rocha grande (boulder_01) não reduziu no Blender: fica a rocha com musgo antiga.
+- Teste: navegador, as 4 casas e as pedras carregam (200), variantes na capital de Aster, nenhum 404 novo.
 ## v697 (29/10/2026) — Chuva que não some, clima por região, ciclo da chuva e cela
 - Ian: «chove na minha frente, olho pra trás e não chove»; «a chuva tem que ter um ciclo»; «no deserto não pode cair neve»; «não tenho dinheiro para pagar e não vou para lugar nenhum».
 - Bug da chuva: `culling637` guardava a esfera da chuva (InstancedMesh que anda com a câmera) e a escondia conforme você virava. Chuva, respingos e marolas ficam fora do corte (`userData.noCull695`).

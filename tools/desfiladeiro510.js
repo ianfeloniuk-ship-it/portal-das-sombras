@@ -241,7 +241,7 @@
       glb('tripo-rocha-musgo154'),
       glb('flora/abeto_geada_adulta'), // v689: abeto de geada do Drive no lugar da conífera antiga do Tripo
       glb('tripo-muro154'),
-      glb('tripo-pedras437')
+      glb('pedras_musgo_01')
     ]).then(([mBoulder, mMoss, mFir, mWall, mStones]) => {
       if (!g.parent) return;
 
