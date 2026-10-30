@@ -46,7 +46,7 @@ const ITEMS={cantil:{n:'Cantil de couro',d:'anula o calor do deserto',b:'deserto
 const DUR=300;
 function gear(){run.bioGear295=run.bioGear295||{};return run.bioGear295}
 function here(){try{return (typeof L!=='undefined'&&L.mode==='world'&&player)?biomeAt(player.x,player.z):null}catch(_){return null}}
-function fx(){if(window.Intro401?.guided())return null;const b=here();const f=b&&FX[b];if(!f)return null;if(b==='neve'){const w=warmSource441();if(w)return {n:f.n,protegido:true,warmBy:w};}if(window.Living372&&b==='pantano'&&run.clanRespect372&&!gear()[f.item])return {...f,move:-.05};if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true,warmBy:ITEMS[f.item].n};return f}
+function fx(){if(window.Intro401?.guided())return null;const b=here();const f=b&&FX[b];if(!f)return null;if(b==='neve'){const w=warmSource441();if(w)return {n:f.n,protegido:true,warmBy:w};}if(window.Living372&&b==='pantano'&&(run.clanRespect372||profile?.fixas545?.q019?.guardiao)&&!gear()[f.item])return {...f,move:-.05};if(f.item&&gear()[f.item]>0)return {n:f.n,protegido:true,warmBy:ITEMS[f.item].n};return f}
 function price(k){const g=(typeof GR!=='undefined'&&GR[Math.min(9,rankOf())])?GR[Math.min(9,rankOf())].gold:1;return Math.round(ITEMS[k].p*g)}
 // ---- efeitos ----
 const ms0=movementSpeed;movementSpeed=function(raw){const f=fx(),c=(run?.surv437?.cold441||0)>60?-.08:0;return ms0(f&&f.move?raw*(1+f.move+c):raw)};

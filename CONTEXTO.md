@@ -1,3 +1,9 @@
+## v722 (30/10/2026) — Missão fixa #19 «A Quinta Âncora: O Julgamento do Sapo Rei em Verden»
+- `tools/verden722.js` (novo): depois da #18, em Verden (+2300, +2300) o Sapo Rei (sapo grande, 8× vida) guarda a Pedra-Âncora. A 15% de vida ele se rende («SE RENDEU»; aceitar com a tecla de interagir, rótulo «F · ACEITAR RENDIÇÃO»): vira guardião (marca `guardiao`), sem carcaça para a Mão. Golpe mortal: reclama o núcleo (marca `nucleo`). Estado em `profile.fixas545.q019`.
+- Parte ligada: `tools/biomes295.js` `fx()` — com `guardiao` a lentidão do pântano cai de −10% para −5% (a mesma regra do respeito do clã, v372). Texto do bioma não muda (valor base).
+- O sistema de honra do `ecology410.js` ignora chefes e não disparou de forma confiável, então a rendição é própria (mesmo desfecho: `killEnemy` + `reclaimed372`).
+- Simplificações: sem canoa; coroa de lodo = nome, sem peça quebrável; núcleo = marca. Teste: caminhada em Verden, golpes reais, E real; os dois ramos; velocidade em pântano medida (7,125 com guardião contra 6,75 sem).
+
 ## v721 (30/10/2026) — Missão fixa #18 «A Quarta Âncora: O Fogo Basáltico de Urdan»
 - `tools/urdan721.js` (novo): depois da #17, em Urdan (0, +3400) há 3 comportas antigas [E] e o Colosso Rachado na ponte. Fechar as 3 antes do duelo: galeria esfria, mineiros salvos (marca), veio permanente de Mithril [E, 3 minérios de grau 2 a cada 90 s] e 3º Relato no Diário. Ir direto ao Colosso (chegar a 9 m ou ferir): comportas travam, nada disso. Estado em `profile.fixas545.q018`.
 - Calor: o do bioma Vulcão que já existe (Unguento). Simplificações: «com a Força» = só E; mineiros sem figuras na cena.
