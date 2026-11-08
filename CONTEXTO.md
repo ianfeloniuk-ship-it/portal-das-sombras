@@ -1,3 +1,8 @@
+## Fora do jogo (08/11/2026) — Carteira vira «Cripta» (tema de terror + recursos premium)
+- Ian: queria Graham, DY e «mais firulas», com cara de terror e linguagem própria. `carteira/index.html` refeito: névoa, sangue escorrendo, vela no título, fontes Pirata One + EB Garamond. Abas Cripta/Ritual/Oferendas/Grimório/Necrópole/Altar (termo real sempre embaixo).
+- Novo: preço de Graham, teto de Bazin (taxa ajustável), DY 12m e médio 5a, P/L, P/VP, ROE, margens, dívida/PL, EV/EBITDA, payout, nota 0–100 («veredito do Oráculo»), linhas de Graham/Bazin no gráfico, Vigília (lista de observação), evolução do patrimônio, renda prevista, pacto de aporte por classe. Detalhes guardados 12 h em `carteira.v1.d`. `sw.js` da carteira → `carteira-v2`.
+- Teste (Playwright): compras/venda/pacto, despertar (PETR4/VALE3 sem token), proventos automáticos, BBAS3 sem token mostra aviso, celular 390 px sem rolagem lateral, sem erros no console.
+
 ## Fora do jogo (08/11/2026) — Carteira de investimentos `carteira/`
 - Ian: queria uma alternativa grátis ao Investidor10. Novo app separado em `carteira/` (index.html, sw.js próprio com escopo /carteira/, manifest, ícone). **Não mexe no jogo** nem no `sw.js` da raiz; sem versão pds-vN.
 - Cotações via brapi.dev `/quote/list` (sem token); detalhes/dividendos pedem token grátis da brapi (Ajustes). Dados no localStorage (`carteira.v1`), com backup JSON/CSV.
