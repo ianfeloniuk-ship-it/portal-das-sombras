@@ -1,3 +1,8 @@
+## Fora do jogo (08/11/2026) — Carteira de investimentos `carteira/`
+- Ian: queria uma alternativa grátis ao Investidor10. Novo app separado em `carteira/` (index.html, sw.js próprio com escopo /carteira/, manifest, ícone). **Não mexe no jogo** nem no `sw.js` da raiz; sem versão pds-vN.
+- Cotações via brapi.dev `/quote/list` (sem token); detalhes/dividendos pedem token grátis da brapi (Ajustes). Dados no localStorage (`carteira.v1`), com backup JSON/CSV.
+- Teste (Playwright): compras, venda (preço médio e lucro conferidos), venda acima do saldo bloqueada, proventos automáticos (PETR4), tela de ativo, mercado, celular 390 px sem rolagem lateral.
+
 ## v740 (30/10/2026) — Missão fixa #32 «Alvo Notório: Orelha-Rubra»
 - `tools/orelha740.js` (novo): depois da #31 (gatilho simplificado: contrato Rank C = concluir a #31), o Orelha-Rubra (coelho, 8× vida, 50% de esquiva por golpe) nos Campos Floridos a sudoeste (-160, 60), parado até você chegar a 12 m. 2 laços [E] na trilha: se ele passa a 4 m de um armado, fica preso 8 s (sem esquiva). Aparo perfeito (botão do meio, `Guard472`) o atordoa 3 s e tira a esquiva por 4 s (Contra-Fluxo). Nos dois: título `titulo732` (marca `bonusOuro732` = 4%) e +270 de Reputação da Ordem. Ramo registrado: `laco`, `reflexo` (2 ou mais aparos) ou `campo`. Estado em `profile.fixas545.q032`.
 - Simplificações: sem a caveira de 60 m no minimapa; laço = só E (sem item); +4% de ouro = marca. A IA do coelho (tímido) apaga a agressão e não persegue, então o módulo o impulsiona até você.

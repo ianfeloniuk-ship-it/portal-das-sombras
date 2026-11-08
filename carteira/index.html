@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Minha Carteira</title>
+<meta name="description" content="Carteira de investimentos gratuita: ações, FIIs, ETFs e BDRs, preço médio, rentabilidade e proventos.">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--fg:#0f172a;--mut:#64748b;--line:#e2e8f0;--pri:#2563eb;--pos:#16a34a;--neg:#dc2626;--chip:#eef2ff;
+--c1:#2563eb;--c2:#16a34a;--c3:#f59e0b;--c4:#db2777;--c5:#7c3aed;--c6:#0891b2;--c7:#ea580c;--c8:#64748b}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--fg:#e5e7eb;--mut:#94a3b8;--line:#22304a;--pri:#60a5fa;--pos:#4ade80;--neg:#f87171;--chip:#1e293b;
+--c1:#60a5fa;--c2:#4ade80;--c3:#fbbf24;--c4:#f472b6;--c5:#a78bfa;--c6:#22d3ee;--c7:#fb923c;--c8:#94a3b8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:76px}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;margin:0;flex:1}
+header small{color:var(--mut)}
+main{max-width:1000px;margin:0 auto;padding:16px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;max-width:140px;background:none;border:0;color:var(--mut);padding:8px 2px 9px;font-size:12px;cursor:pointer}
+nav button b{display:block;font-size:19px;line-height:1.2}
+nav button.on{color:var(--pri);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi span{display:block;color:var(--mut);font-size:12px}
+.kpi b{font-size:19px;font-variant-numeric:tabular-nums}
+.kpi i{display:block;font-style:normal;font-size:12px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:12px;color:var(--mut);font-weight:500;cursor:pointer;user-select:none}
+th:first-child,td:first-child{text-align:left}
+tr.click{cursor:pointer}tr.click:hover{background:var(--chip)}
+.scroll{overflow-x:auto}
+.tk{display:flex;align-items:center;gap:8px}
+.tk img{width:26px;height:26px;border-radius:6px;background:var(--chip);flex:none}
+.tk small{display:block;color:var(--mut);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+input,select,button.b{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+button.b{cursor:pointer;background:var(--pri);color:#fff;border-color:var(--pri);font-weight:600}
+button.b.sec{background:var(--card);color:var(--fg);border-color:var(--line);font-weight:500}
+button.b.red{background:none;color:var(--neg);border-color:var(--neg)}
+button.x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:16px;padding:2px 6px}
+form.row,.row{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px;flex:1 1 120px}
+label input,label select{color:var(--fg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:13px}
+.chips button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.donut{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.leg{flex:1;min-width:160px;font-size:13px}
+.leg div{display:flex;gap:8px;align-items:center;padding:3px 0}
+.leg i{width:10px;height:10px;border-radius:3px;flex:none}
+.leg span{flex:1}
+.note{font-size:13px;color:var(--mut)}
+.empty{text-align:center;padding:30px 10px;color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.hdr{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hdr img{width:48px;height:48px;border-radius:10px;background:var(--chip)}
+.big{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--chip);color:var(--mut)}
+svg text{fill:var(--mut);font-size:11px}
+@media (max-width:600px){main{padding:12px}.hide-sm{display:none}th,td{padding:7px 4px}}
+</style>
+</head>
+<body>
+<header><h1>📈 Minha Carteira</h1><small id="upd"></small><button class="x" id="refresh" title="Atualizar cotações">⟳</button></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div class="toast" id="toast"></div>
+<script>
+'use strict';
+/* ====== Armazenamento (fica só neste aparelho; use Exportar para backup) ====== */
+const KEY='carteira.v1';
+const S=load();
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');return Object.assign({tx:[],token:'',manual:{},meta:{}},d)}catch(e){return{tx:[],token:'',manual:{},meta:{}}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Não consegui salvar neste navegador')}}
+let Q={};try{Q=JSON.parse(localStorage.getItem(KEY+'.q')||'{}')}catch(e){}
+let LIST=null; // lista de mercado completa
+
+/* ====== Utilidades ====== */
+const $=s=>document.querySelector(s);
+const brl=v=>(v==null||isNaN(v))?'—':v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num=(v,d=2)=>(v==null||isNaN(v))?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(v,d=2)=>(v==null||isNaN(v)||!isFinite(v))?'—':(v>0?'+':'')+num(v,d)+'%';
+const cls=v=>v>0?'pos':v<0?'neg':'';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const fdate=d=>d?new Date(d.length===10?d+'T12:00':d).toLocaleDateString('pt-BR'):'—';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const parseNum=s=>{s=String(s).trim();if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');return parseFloat(s)};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600)}
+const COLORS=[1,2,3,4,5,6,7,8].map(i=>`var(--c${i})`);
+const CLASSES={stock:'Ações',unit:'Ações',fii:'FIIs',etf:'ETFs',bdr:'BDRs','fi-infra':'FI-Infra','fi-agro':'Fiagro',fip:'FIP',fidc:'FIDC'};
+function classOf(t){const m=S.meta[t]||{};if(m.cls)return m.cls;const q=Q[t]||{};return CLASSES[q.sub]||(/\d{2}$/.test(t)&&t.endsWith('11')?'FIIs':/3[2-5]$/.test(t)?'BDRs':'Outros')}
+
+/* ====== API brapi.dev (gratuita) ====== */
+const API='https://brapi.dev/api';
+async function api(path,needToken){
+  const u=new URL(API+path);
+  if(S.token)u.searchParams.set('token',S.token);
+  const r=await fetch(u,{cache:'no-store'});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||j.error){const e=new Error(j.message||('Erro '+r.status));e.code=j.code;throw e}
+  return j;
+}
+// Cotações de TODOS os ativos (não precisa de token): 2 páginas de 2000
+async function loadList(force){
+  if(LIST&&!force)return LIST;
+  const all=[];
+  for(let p=1;p<=3;p++){
+    const j=await api(`/quote/list?limit=2000&page=${p}`);
+    all.push(...j.stocks);
+    if(!j.hasNextPage)break;
+  }
+  LIST=all;
+  const ts=Date.now();
+  for(const s of all){Q[s.stock]={close:s.close,change:s.change,name:s.name,logo:s.logo,sub:s.subType,sector:s.sector,subsector:s.subsector,vol:s.volume,mcap:s.market_cap,ts}}
+  try{localStorage.setItem(KEY+'.q',JSON.stringify(Q))}catch(e){}
+  return all;
+}
+async function refreshQuotes(force){
+  try{$('#upd').textContent='atualizando…';await loadList(force);stamp();render()}
+  catch(e){$('#upd').textContent='sem conexão';toast('Não consegui buscar cotações: '+e.message)}
+}
+function stamp(){const t=Object.values(Q)[0]?.ts;$('#upd').textContent=t?'cotações '+new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}
+
+/* ====== Cálculo da carteira (preço médio) ====== */
+function sortedTx(){return S.tx.slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.type==='C'?-1:1))}
+function positions(){
+  const P={};
+  for(const t of sortedTx()){
+    const p=P[t.ticker]||(P[t.ticker]={ticker:t.ticker,qty:0,cost:0,realized:0,divs:0,first:t.date});
+    if(t.type==='C'){p.qty+=t.qty;p.cost+=t.qty*t.price+(t.fees||0)}
+    else if(t.type==='V'){const pm=p.qty?p.cost/p.qty:0;const q=Math.min(t.qty,p.qty);p.realized+=q*t.price-(t.fees||0)-q*pm;p.cost-=q*pm;p.qty-=q;if(p.qty<1e-9){p.qty=0;p.cost=0}}
+    else if(t.type==='D'){p.divs+=t.value}
+  }
+  for(const p of Object.values(P)){
+    p.pm=p.qty?p.cost/p.qty:0;
+    const q=Q[p.ticker];const man=S.manual[p.ticker];
+    p.price=man!=null?man:q?.close??null;p.noQuote=p.price==null;if(p.noQuote)p.price=p.pm;
+    p.value=p.qty*p.price;p.gain=p.value-p.cost;p.gainPct=p.cost?p.gain/p.cost*100:0;
+    p.day=man!=null?0:(q?.change??0);
+    p.cls=classOf(p.ticker);p.name=S.meta[p.ticker]?.name||q?.name||'';p.logo=q?.logo||'';
+  }
+  return P;
+}
+function qtyAt(ticker,date){let q=0;for(const t of sortedTx()){if(t.ticker!==ticker||t.date>date)continue;if(t.type==='C')q+=t.qty;else if(t.type==='V')q=Math.max(0,q-t.qty)}return q}
+
+/* ====== Gráficos SVG simples ====== */
+function donut(items){
+  const tot=items.reduce((s,i)=>s+i.v,0);if(!tot)return'<p class="note">Sem dados.</p>';
+  let a=-Math.PI/2,paths='';const R=60,r=38,c=70;
+  items.forEach((it,i)=>{const f=it.v/tot;if(f<=0)return;const a2=a+f*Math.PI*2-(f>=1?1e-4:0);const L=f>.5?1:0;
+    const p=(ang,rad)=>[c+rad*Math.cos(ang),c+rad*Math.sin(ang)].map(n=>n.toFixed(2)).join(' ');
+    paths+=`<path d="M${p(a,R)}A${R} ${R} 0 ${L} 1 ${p(a2,R)}L${p(a2,r)}A${r} ${r} 0 ${L} 0 ${p(a,r)}Z" fill="${COLORS[i%8]}"><title>${esc(it.k)}: ${num(f*100,1)}%</title></path>`;a=a2});
+  const leg=items.map((it,i)=>`<div><i style="background:${COLORS[i%8]}"></i><span>${esc(it.k)}</span><b>${num(it.v/tot*100,1)}%</b></div>`).join('');
+  return `<div class="donut"><svg width="140" height="140" viewBox="0 0 140 140" role="img">${paths}</svg><div class="leg">${leg}</div></div>`;
+}
+function lineChart(pts,{h=180,fmt=v=>num(v)}={}){
+  if(!pts||pts.length<2)return'<p class="note">Sem histórico.</p>';
+  const W=640,H=h,pl=44,pr=8,pt=10,pb=22;const ys=pts.map(p=>p.y);let mn=Math.min(...ys),mx=Math.max(...ys);if(mn===mx){mn-=1;mx+=1}
+  const X=i=>pl+(W-pl-pr)*i/(pts.length-1),Y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));
+  const up=ys[ys.length-1]>=ys[0];const col=up?'var(--pos)':'var(--neg)';
+  const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)).join('');
+  let grid='';for(let k=0;k<=3;k++){const v=mn+(mx-mn)*k/3;grid+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${pl-4}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
+  const step=Math.max(1,Math.ceil(pts.length/6));let xl='';pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1)xl+=`<text x="${X(i)}" y="${H-5}" text-anchor="middle">${esc(p.x)}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-height:${H}px">${grid}<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>${xl}</svg>`;
+}
+function bars(items,{fmt=brl}={}){
+  const mx=Math.max(...items.map(i=>i.v),0);if(!mx)return'<p class="note">Sem proventos no período.</p>';
+  const W=640,H=170,pb=22,pt=16,bw=(W-10)/items.length;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-height:${H}px">${items.map((it,i)=>{const h=(H-pb-pt)*it.v/mx;const x=5+i*bw;
+    return `<rect x="${x+bw*.15}" y="${H-pb-h}" width="${bw*.7}" height="${h}" rx="3" fill="var(--c2)"><title>${esc(it.k)}: ${fmt(it.v)}</title></rect><text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${esc(it.k)}</text>`}).join('')}</svg>`;
+}
+const tkCell=(t,name,logo)=>`<div class="tk">${logo?`<img src="${esc(logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`:'<img alt="">'}<div><b>${esc(t)}</b><small>${esc(name)}</small></div></div>`;
+
+/* ====== Telas ====== */
+const TABS=[['carteira','💼','Carteira'],['lanc','➕','Lançar'],['prov','💰','Proventos'],['ativo','🔎','Ativos'],['mercado','📊','Mercado'],['ajustes','⚙️','Ajustes']];
+let tab=(location.hash.slice(1).split('/')[0])||'carteira';
+let sortKey='value',sortDir=-1,clsFilter='Todos',mktFilter={type:'stock',sort:'change',dir:'desc',q:''};
+function go(t,arg){location.hash=t+(arg?'/'+arg:'')}
+window.addEventListener('hashchange',()=>{tab=location.hash.slice(1).split('/')[0]||'carteira';render()});
+function renderNav(){$('#nav').innerHTML=TABS.map(([k,i,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><b>${i}</b>${l}</button>`).join('')}
+function render(){renderNav();const f={carteira:vCarteira,lanc:vLanc,prov:vProv,ativo:vAtivo,mercado:vMercado,ajustes:vAjustes}[tab]||vCarteira;f();window.scrollTo&&tab!==render._last&&window.scrollTo(0,0);render._last=tab}
+
+function vCarteira(){
+  const P=Object.values(positions());const open=P.filter(p=>p.qty>0);
+  if(!S.tx.length){$('#app').innerHTML=`<div class="card empty"><h2>Sua carteira está vazia</h2><p>Lance suas compras de ações, FIIs, ETFs e BDRs para ver patrimônio, rentabilidade, preço médio e proventos.</p><p class="row" style="justify-content:center"><button class="b" onclick="go('lanc')">Lançar primeira compra</button><button class="b sec" onclick="go('ajustes')">Importar backup</button></p></div>`;return}
+  const tot=open.reduce((s,p)=>s+p.value,0),cost=open.reduce((s,p)=>s+p.cost,0);
+  const real=P.reduce((s,p)=>s+p.realized,0),divs=P.reduce((s,p)=>s+p.divs,0);
+  const dayV=open.reduce((s,p)=>s+p.value-p.value/(1+p.day/100),0);
+  const gain=tot-cost,totRet=gain+real+divs;
+  const byCls={};open.forEach(p=>byCls[p.cls]=(byCls[p.cls]||0)+p.value);
+  const clsList=Object.entries(byCls).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v}));
+  const rows=open.filter(p=>clsFilter==='Todos'||p.cls===clsFilter).sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return(typeof x==='string'?x.localeCompare(y):x-y)*sortDir});
+  const topAt=open.slice().sort((a,b)=>b.value-a.value);const top=topAt.slice(0,7).map(p=>({k:p.ticker,v:p.value}));if(topAt.length>7)top.push({k:'Outros',v:topAt.slice(7).reduce((s,p)=>s+p.value,0)});
+  const th=(k,l,c='')=>`<th class="${c}" onclick="setSort('${k}')">${l}${sortKey===k?(sortDir>0?' ▲':' ▼'):''}</th>`;
+  $('#app').innerHTML=`
+  <div class="grid" style="margin-bottom:14px">
+    <div class="kpi"><span>Patrimônio</span><b>${brl(tot)}</b><i class="${cls(dayV)}">${pct(tot?dayV/(tot-dayV)*100:0)} hoje (${brl(dayV)})</i></div>
+    <div class="kpi"><span>Valor investido</span><b>${brl(cost)}</b></div>
+    <div class="kpi"><span>Lucro/prejuízo (posições)</span><b class="${cls(gain)}">${brl(gain)}</b><i class="${cls(gain)}">${pct(cost?gain/cost*100:0)}</i></div>
+    <div class="kpi"><span>Proventos recebidos</span><b class="pos">${brl(divs)}</b><i class="mut">yield on cost ${pct(cost?divs/cost*100:0)}</i></div>
+    <div class="kpi"><span>Lucro com vendas</span><b class="${cls(real)}">${brl(real)}</b></div>
+    <div class="kpi"><span>Retorno total</span><b class="${cls(totRet)}">${brl(totRet)}</b><i class="${cls(totRet)}">${pct(cost?totRet/cost*100:0)} sobre o investido</i></div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr))">
+    <div class="card"><h2>Por classe</h2>${donut(clsList)}</div>
+    <div class="card"><h2>Por ativo</h2>${donut(top)}</div>
+  </div>
+  <div class="card"><h2>Meus ativos (${open.length})</h2>
+    <div class="chips">${['Todos',...clsList.map(c=>c.k)].map(c=>`<button class="${clsFilter===c?'on':''}" onclick="clsFilter='${c}';render()">${c}</button>`).join('')}</div>
+    <div class="scroll"><table><thead><tr>${th('ticker','Ativo')}${th('qty','Qtd')}${th('pm','Preço médio','hide-sm')}${th('price','Cotação')}${th('day','Hoje','hide-sm')}${th('value','Saldo')}${th('gainPct','Rentab.')}${th('divs','Proventos','hide-sm')}<th class="hide-sm">% cart.</th></tr></thead><tbody>
+    ${rows.map(p=>`<tr class="click" onclick="go('ativo','${p.ticker}')"><td>${tkCell(p.ticker,p.name,p.logo)}</td><td>${num(p.qty,p.qty%1?4:0)}</td><td class="hide-sm">${brl(p.pm)}</td><td>${brl(p.price)}${p.noQuote?' <span class="tag" title="Sem cotação — usando preço médio. Defina um preço manual em Ativos.">?</span>':''}</td><td class="hide-sm ${cls(p.day)}">${pct(p.day)}</td><td>${brl(p.value)}</td><td class="${cls(p.gain)}">${pct(p.gainPct)}<br><small>${brl(p.gain)}</small></td><td class="hide-sm">${brl(p.divs)}</td><td class="hide-sm">${num(tot?p.value/tot*100:0,1)}%</td></tr>`).join('')}
+    </tbody></table></div>
+    ${P.some(p=>p.qty===0)?`<p class="note">Ativos já vendidos totalmente: ${P.filter(p=>p.qty===0).map(p=>`<a href="#ativo/${p.ticker}">${p.ticker}</a> (${brl(p.realized)})`).join(', ')}</p>`:''}
+  </div>`;
+}
+function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=k==='ticker'?1:-1}render()}
+
+function vLanc(){
+  const last=S._lastType||'C';
+  const tx=sortedTx().reverse();
+  $('#app').innerHTML=`
+  <div class="card"><h2>Novo lançamento</h2>
+  <form class="row" id="f" autocomplete="off">
+    <label>Tipo<select name="type" id="ftype"><option value="C">Compra</option><option value="V">Venda</option><option value="D">Provento (dividendo/JCP/rendimento)</option></select></label>
+    <label>Ativo<input name="ticker" list="tickers" placeholder="PETR4" required style="text-transform:uppercase"></label>
+    <label>Data<input type="date" name="date" value="${today()}" required></label>
+    <label class="cv">Quantidade<input name="qty" inputmode="decimal" placeholder="100"></label>
+    <label class="cv">Preço unitário<input name="price" inputmode="decimal" placeholder="35,50"></label>
+    <label class="cv">Taxas (opcional)<input name="fees" inputmode="decimal" placeholder="0,00"></label>
+    <label class="dv">Tipo de provento<select name="kind"><option>Dividendo</option><option>JCP</option><option>Rendimento</option><option>Outro</option></select></label>
+    <label class="dv">Valor total recebido<input name="value" inputmode="decimal" placeholder="12,34"></label>
+    <button class="b">Salvar</button>
+  </form>
+  <datalist id="tickers">${(LIST||Object.keys(Q).map(k=>({stock:k}))).filter(s=>!/F$/.test(s.stock)).slice(0,3000).map(s=>`<option value="${s.stock}">`).join('')}</datalist>
+  <p class="note" id="hint"></p>
+  </div>
+  <div class="card"><h2>Histórico (${tx.length})</h2>
+  ${tx.length?`<div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Tipo</th><th>Qtd</th><th>Preço</th><th>Total</th><th></th></tr></thead><tbody>
+  ${tx.map(t=>`<tr><td>${fdate(t.date)}</td><td style="text-align:right"><a href="#ativo/${t.ticker}">${t.ticker}</a></td><td>${t.type==='C'?'<span class="pos">Compra</span>':t.type==='V'?'<span class="neg">Venda</span>':esc(t.kind||'Provento')}</td><td>${t.type==='D'?'—':num(t.qty,t.qty%1?4:0)}</td><td>${t.type==='D'?'—':brl(t.price)}</td><td>${brl(t.type==='D'?t.value:t.qty*t.price+(t.type==='C'?1:-1)*(t.fees||0))}</td><td><button class="x" title="Apagar" onclick="delTx('${t.id}')">✕</button></td></tr>`).join('')}
+  </tbody></table></div>`:'<p class="note">Nenhum lançamento ainda.</p>'}</div>`;
+  const f=$('#f'),ty=$('#ftype');ty.value=last;
+  const sync=()=>{const d=ty.value==='D';f.querySelectorAll('.cv').forEach(e=>e.style.display=d?'none':'');f.querySelectorAll('.dv').forEach(e=>e.style.display=d?'':'none')};
+  ty.onchange=sync;sync();
+  f.ticker.oninput=()=>{const t=f.ticker.value.toUpperCase().trim();const q=Q[t];$('#hint').innerHTML=q?`${esc(q.name)} — cotação ${brl(q.close)}`:'';if(q&&!f.price.value&&ty.value!=='D')f.price.placeholder=num(q.close)};
+  f.onsubmit=e=>{e.preventDefault();const fd=Object.fromEntries(new FormData(f));const t={id:uid(),type:fd.type,ticker:fd.ticker.toUpperCase().trim(),date:fd.date};
+    if(t.type==='D'){t.value=parseNum(fd.value);t.kind=fd.kind;if(!(t.value>0))return toast('Informe o valor recebido')}
+    else{t.qty=parseNum(fd.qty);t.price=parseNum(fd.price||f.price.placeholder);t.fees=parseNum(fd.fees||0)||0;if(!(t.qty>0)||!(t.price>0))return toast('Informe quantidade e preço')
+      if(t.type==='V'){const h=qtyAt(t.ticker,t.date);if(t.qty>h+1e-9)return toast(`Você só tinha ${num(h,0)} ${t.ticker} nessa data`)}}
+    S.tx.push(t);S._lastType=t.type;save();toast('Lançamento salvo');vLanc()};
+}
+function delTx(id){if(!confirm('Apagar este lançamento?'))return;S.tx=S.tx.filter(t=>t.id!==id);save();render()}
+
+function vProv(){
+  const D=S.tx.filter(t=>t.type==='D').sort((a,b)=>a.date<b.date?1:-1);
+  const now=new Date();const months=[];for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(d.toISOString().slice(0,7))}
+  const byM=months.map(m=>({k:m.slice(5)+'/'+m.slice(2,4),v:D.filter(t=>t.date.startsWith(m)).reduce((s,t)=>s+t.value,0)}));
+  const years={};D.forEach(t=>{const y=t.date.slice(0,4);years[y]=(years[y]||0)+t.value});
+  const last12=byM.reduce((s,m)=>s+m.v,0);
+  const byT={};D.forEach(t=>byT[t.ticker]=(byT[t.ticker]||0)+t.value);
+  $('#app').innerHTML=`
+  <div class="grid" style="margin-bottom:14px">
+    <div class="kpi"><span>Últimos 12 meses</span><b class="pos">${brl(last12)}</b><i class="mut">média ${brl(last12/12)}/mês</i></div>
+    ${Object.entries(years).sort().reverse().slice(0,3).map(([y,v])=>`<div class="kpi"><span>Em ${y}</span><b>${brl(v)}</b></div>`).join('')}
+  </div>
+  <div class="card"><h2>Proventos por mês</h2>${bars(byM)}</div>
+  <div class="card"><h2>Buscar proventos automaticamente</h2>
+    <p class="note">Calcula dividendos, JCP e rendimentos de cada ativo pela quantidade que você tinha na data-com. ${S.token?'':'<b>Precisa de um token grátis da brapi.dev</b> (veja em Ajustes) — sem token só funciona para PETR4, VALE3, ITUB4 e MGLU3.'}</p>
+    <div class="row"><button class="b" id="auto">Buscar e lançar proventos</button></div><p class="note" id="autoMsg"></p>
+    <div id="next"></div>
+  </div>
+  <div class="card"><h2>Por ativo</h2>${donut(Object.entries(byT).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v})))}</div>
+  <div class="card"><h2>Recebidos (${D.length})</h2>${D.length?`<div class="scroll"><table><thead><tr><th>Pagamento</th><th>Ativo</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody>
+  ${D.map(t=>`<tr><td>${fdate(t.date)}</td><td style="text-align:right">${t.ticker}</td><td>${esc(t.kind)}${t.auto?' <span class="tag">auto</span>':''}</td><td class="pos">${brl(t.value)}</td><td><button class="x" onclick="delTx('${t.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="note">Nenhum provento lançado ainda.</p>'}</div>`;
+  $('#auto').onclick=autoDivs;
+}
+async function autoDivs(){
+  const msg=$('#autoMsg');const tickers=[...new Set(S.tx.filter(t=>t.type!=='D').map(t=>t.ticker))];
+  if(!tickers.length)return toast('Lance compras primeiro');
+  let added=0,fails=[],future=[];const td=today();
+  for(const tk of tickers){
+    msg.textContent=`Buscando ${tk}…`;
+    try{const j=await api(`/quote/${tk}?dividends=true`);const cd=j.results?.[0]?.dividendsData?.cashDividends||[];
+      for(const d of cd){const com=(d.lastDatePrior||'').slice(0,10),pay=(d.paymentDate||d.lastDatePrior||'').slice(0,10);if(!com)continue;
+        const q=qtyAt(tk,com);if(q<=0)continue;
+        const kind=/JCP|JUROS/i.test(d.label)?'JCP':/REND/i.test(d.label)||classOf(tk)==='FIIs'?'Rendimento':'Dividendo';
+        const key=`${tk}|${com}|${d.label}|${d.rate}`;const val=Math.round(q*d.rate*100)/100;
+        if(pay>td){future.push({tk,pay,com,kind,val});continue}
+        if(S.tx.some(t=>t.autoKey===key))continue;
+        S.tx.push({id:uid(),type:'D',ticker:tk,date:pay,kind,value:val,auto:true,autoKey:key});added++}
+    }catch(e){fails.push(tk+(e.code==='MISSING_TOKEN'||/token/i.test(e.message)?' (precisa de token)':''))}
+  }
+  save();vProv();
+  $('#autoMsg').innerHTML=`${added} provento(s) lançado(s).${fails.length?' Falhou: '+fails.join(', '):''} <br><small>Obs.: JCP é mostrado com o valor bruto (antes dos 15% de IR).</small>`;
+  if(future.length)$('#next').innerHTML=`<h2 style="margin-top:12px">A receber</h2><div class="scroll"><table><thead><tr><th>Pagamento</th><th>Ativo</th><th>Tipo</th><th>Data-com</th><th>Valor</th></tr></thead><tbody>${future.sort((a,b)=>a.pay<b.pay?-1:1).map(f=>`<tr><td>${fdate(f.pay)}</td><td>${f.tk}</td><td>${f.kind}</td><td>${fdate(f.com)}</td><td class="pos">${brl(f.val)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function vAtivo(){
+  const tk=(location.hash.split('/')[1]||'').toUpperCase();
+  const pos=positions()[tk];
+  $('#app').innerHTML=`<div class="card"><form class="row" id="sf"><label>Buscar ativo<input name="t" list="tk2" value="${esc(tk)}" placeholder="Ex.: ITSA4, MXRF11, IVVB11" style="text-transform:uppercase"></label><button class="b">Ver</button></form>
+  <datalist id="tk2">${(LIST||[]).filter(s=>!/F$/.test(s.stock)).map(s=>`<option value="${s.stock}">${esc(s.name)}</option>`).join('')}</datalist></div><div id="det"></div>`;
+  $('#sf').onsubmit=e=>{e.preventDefault();const v=e.target.t.value.toUpperCase().trim();if(v)go('ativo',v)};
+  if(!tk){$('#det').innerHTML=`<div class="card note">Digite o código de uma ação, FII, ETF ou BDR para ver cotação, histórico, indicadores e dividendos.</div>`;return}
+  const q=Q[tk];
+  const myPos=pos&&(pos.qty>0||pos.realized||pos.divs)?`<div class="card"><h2>Minha posição</h2><div class="grid">
+    <div class="kpi"><span>Quantidade</span><b>${num(pos.qty,pos.qty%1?4:0)}</b></div><div class="kpi"><span>Preço médio</span><b>${brl(pos.pm)}</b></div>
+    <div class="kpi"><span>Saldo</span><b>${brl(pos.value)}</b></div><div class="kpi"><span>Rentabilidade</span><b class="${cls(pos.gain)}">${pct(pos.gainPct)}</b><i class="${cls(pos.gain)}">${brl(pos.gain)}</i></div>
+    <div class="kpi"><span>Proventos recebidos</span><b class="pos">${brl(pos.divs)}</b></div>${pos.realized?`<div class="kpi"><span>Lucro com vendas</span><b class="${cls(pos.realized)}">${brl(pos.realized)}</b></div>`:''}</div>
+    <form class="row" id="mf" style="margin-top:10px"><label>Preço manual (para ativos sem cotação, ex.: renda fixa)<input name="p" inputmode="decimal" value="${S.manual[tk]!=null?num(S.manual[tk]):''}" placeholder="vazio = cotação automática"></label><label>Classe<select name="c">${['','Ações','FIIs','ETFs','BDRs','Fiagro','FI-Infra','Renda fixa','Cripto','Exterior','Outros'].map(c=>`<option value="${c}" ${S.meta[tk]?.cls===c?'selected':''}>${c||'(automática)'}</option>`).join('')}</select></label><button class="b sec">Salvar</button></form></div>`:'';
+  $('#det').innerHTML=`<div class="card"><div class="hdr">${q?.logo?`<img src="${esc(q.logo)}" alt="">`:''}<div style="flex:1"><h2 style="margin:0">${tk} <span class="tag">${esc(classOf(tk))}</span></h2><div class="mut">${esc(q?.name||'')}</div>${q?.sector?`<div class="note">${esc(q.sector)}${q.subsector?' · '+esc(q.subsector):''}</div>`:''}</div>
+    <div style="text-align:right"><div class="big">${q?brl(q.close):'—'}</div>${q?`<div class="${cls(q.change)}">${pct(q.change)} hoje</div>`:''}</div></div></div>
+    ${myPos}<div id="more"><div class="card note">Carregando detalhes…</div></div>`;
+  const mf=$('#mf');if(mf)mf.onsubmit=e=>{e.preventDefault();const v=mf.p.value.trim();if(v)S.manual[tk]=parseNum(v);else delete S.manual[tk];S.meta[tk]=Object.assign(S.meta[tk]||{},{cls:mf.c.value||undefined});save();toast('Salvo')};
+  try{
+    const j=await api(`/quote/${tk}?range=5y&interval=1mo&fundamental=true&dividends=true`);const r=j.results[0];
+    if((location.hash.split('/')[1]||'').toUpperCase()!==tk)return;
+    const h=(r.historicalDataPrice||[]).filter(p=>p.close!=null).map(p=>{const d=new Date(p.date*1000);return{x:String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(2),y:p.close}});
+    const cd=r.dividendsData?.cashDividends||[];
+    const yAgo=new Date(Date.now()-365*864e5).toISOString().slice(0,10);
+    const div12=cd.filter(d=>(d.lastDatePrior||'').slice(0,10)>=yAgo).reduce((s,d)=>s+d.rate,0);
+    const price=r.regularMarketPrice;
+    const byYear={};cd.forEach(d=>{const y=(d.paymentDate||d.lastDatePrior||'').slice(0,4);if(y)byYear[y]=(byYear[y]||0)+d.rate});
+    const yrs=Object.keys(byYear).sort().slice(-8);
+    const ind=[['Cotação',brl(price)],['Variação 12m',h.length>12?pct((h[h.length-1].y/h[h.length-13].y-1)*100):'—'],['Mín. 52 sem.',brl(r.fiftyTwoWeekLow)],['Máx. 52 sem.',brl(r.fiftyTwoWeekHigh)],
+      ['P/L',r.priceEarnings?num(r.priceEarnings):'—'],['LPA',r.earningsPerShare?num(r.earningsPerShare):'—'],['Dividend yield 12m',div12&&price?pct(div12/price*100).replace('+',''):'—'],['Dividendos 12m (por cota/ação)',div12?brl(div12):'—'],
+      ['Valor de mercado',r.marketCap?'R$ '+(r.marketCap/1e9).toLocaleString('pt-BR',{maximumFractionDigits:1})+' bi':'—'],['Volume (dia)',r.regularMarketVolume?num(r.regularMarketVolume,0):'—']];
+    $('#more').innerHTML=`<div class="card"><h2>Indicadores</h2><div class="grid">${ind.map(([k,v])=>`<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join('')}</div></div>
+    <div class="card"><h2>Cotação — 5 anos</h2>${lineChart(h,{fmt:v=>num(v,v<10?2:0)})}</div>
+    ${yrs.length?`<div class="card"><h2>Proventos por ano (por ação/cota)</h2>${bars(yrs.map(y=>({k:y,v:byYear[y]})),{fmt:v=>'R$ '+num(v,4)})}</div>`:''}
+    ${cd.length?`<div class="card"><h2>Histórico de proventos</h2><div class="scroll"><table><thead><tr><th>Tipo</th><th>Data-com</th><th>Pagamento</th><th>Valor</th></tr></thead><tbody>${cd.slice(0,40).map(d=>`<tr><td>${esc(d.label)}</td><td>${fdate((d.lastDatePrior||'').slice(0,10))}</td><td>${fdate((d.paymentDate||'').slice(0,10))}</td><td>R$ ${num(d.rate,4)}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+  }catch(e){
+    if((location.hash.split('/')[1]||'').toUpperCase()!==tk)return;
+    $('#more').innerHTML=`<div class="card note">${/token/i.test(e.message)||e.code==='MISSING_TOKEN'?`Indicadores, gráfico e dividendos deste ativo precisam de um <b>token grátis da brapi.dev</b>. <a href="#ajustes">Configurar em Ajustes</a>.`:'Não consegui carregar detalhes: '+esc(e.message)}</div>`;
+  }
+}
+
+async function vMercado(){
+  $('#app').innerHTML=`<div class="card"><h2>Mercado</h2>
+  <div class="chips" id="mt">${[['stock','Ações'],['fii','FIIs'],['etf','ETFs'],['bdr','BDRs']].map(([k,l])=>`<button data-k="${k}" class="${mktFilter.type===k?'on':''}">${l}</button>`).join('')}</div>
+  <div class="chips" id="ms">${[['change|desc','Maiores altas'],['change|asc','Maiores baixas'],['volume|desc','Mais negociados'],['market_cap|desc','Maior valor de mercado']].map(([k,l])=>`<button data-k="${k}" class="${mktFilter.sort+'|'+mktFilter.dir===k?'on':''}">${l}</button>`).join('')}</div>
+  <div class="row"><label>Filtrar por nome, código ou setor<input id="mq" value="${esc(mktFilter.q)}" placeholder="Ex.: banco, energia, logística"></label></div></div>
+  <div class="card" id="mlist"><p class="note">Carregando…</p></div>`;
+  $('#mt').onclick=e=>{const k=e.target.dataset.k;if(k){mktFilter.type=k;vMercado()}};
+  $('#ms').onclick=e=>{const k=e.target.dataset.k;if(k){[mktFilter.sort,mktFilter.dir]=k.split('|');vMercado()}};
+  $('#mq').oninput=e=>{mktFilter.q=e.target.value;drawMkt()};
+  try{await loadList();stamp();drawMkt()}catch(e){$('#mlist').innerHTML=`<p class="note">Sem conexão: ${esc(e.message)}</p>`}
+}
+function drawMkt(){
+  const f=mktFilter;const q=f.q.trim().toLowerCase();
+  const typeOk=s=>f.type==='stock'?(s.subType==='stock'||s.subType==='unit'):s.subType===f.type;
+  let L=(LIST||[]).filter(s=>typeOk(s)&&!/F$/.test(s.stock)&&s.close!=null&&(s.volume||0)>=(f.sort==='change'?100000:1));
+  if(q)L=L.filter(s=>(s.stock+' '+s.name+' '+(s.sector||'')+' '+(s.subsector||'')).toLowerCase().includes(q));
+  const k={change:'change',volume:'volume',market_cap:'market_cap'}[f.sort];
+  L.sort((a,b)=>((a[k]??-Infinity)-(b[k]??-Infinity))*(f.dir==='asc'?1:-1));
+  if(f.dir==='asc'&&k==='change')L.sort((a,b)=>a.change-b.change);
+  L=L.slice(0,60);
+  $('#mlist').innerHTML=L.length?`<div class="scroll"><table><thead><tr><th>Ativo</th><th>Cotação</th><th>Hoje</th><th class="hide-sm">Volume</th><th class="hide-sm">Valor de mercado</th></tr></thead><tbody>
+  ${L.map(s=>`<tr class="click" onclick="go('ativo','${s.stock}')"><td>${tkCell(s.stock,s.subsector||s.name,s.logo)}</td><td>${brl(s.close)}</td><td class="${cls(s.change)}">${pct(s.change)}</td><td class="hide-sm">${num(s.volume,0)}</td><td class="hide-sm">${s.market_cap?(s.market_cap/1e9).toLocaleString('pt-BR',{maximumFractionDigits:1})+' bi':'—'}</td></tr>`).join('')}</tbody></table></div><p class="note">Altas/baixas mostram só ativos com volume acima de 100 mil no dia.</p>`:'<p class="note">Nada encontrado.</p>';
+}
+
+function vAjustes(){
+  $('#app').innerHTML=`
+  <div class="card"><h2>Token da brapi.dev (grátis)</h2>
+  <p class="note">As cotações de todos os ativos já funcionam sem cadastro. Para ver <b>indicadores, gráfico de 5 anos e dividendos</b> de qualquer ativo, e para buscar proventos automaticamente, crie uma conta grátis em <a href="https://brapi.dev/dashboard" target="_blank" rel="noopener">brapi.dev</a>, copie o token e cole aqui. O plano grátis dá milhares de consultas por mês — sobra para uso pessoal.</p>
+  <form class="row" id="tf"><label>Token<input name="t" value="${esc(S.token)}" placeholder="cole seu token aqui" autocomplete="off"></label><button class="b">Salvar</button></form></div>
+  <div class="card"><h2>Backup</h2>
+  <p class="note">Seus dados ficam guardados <b>só neste navegador</b>. Exporte um backup de vez em quando e importe no celular/computador para levar a carteira junto.</p>
+  <div class="row"><button class="b" id="ex">Exportar backup (.json)</button><label class="b sec" style="flex:0 0 auto;cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:8px;color:var(--fg)">Importar backup<input type="file" id="im" accept=".json,application/json" hidden></label><button class="b sec" id="csv">Exportar lançamentos (.csv)</button></div></div>
+  <div class="card"><h2>Importar planilha (CSV)</h2>
+  <p class="note">Uma linha por operação: <code>data;ativo;tipo;quantidade;preço;taxas</code> — tipo = C (compra) ou V (venda). Data em dd/mm/aaaa ou aaaa-mm-dd. Ex.: <code>15/03/2024;ITSA4;C;100;9,85;0</code></p>
+  <textarea id="csvIn" rows="5" style="width:100%;font:13px monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px"></textarea>
+  <div class="row" style="margin-top:8px"><button class="b" id="csvGo">Importar linhas</button></div></div>
+  <div class="card"><h2>Apagar tudo</h2><button class="b red" id="wipe">Apagar todos os lançamentos</button></div>
+  <p class="note">Cotações: brapi.dev (podem ter atraso). Isto não é recomendação de investimento.</p>`;
+  $('#tf').onsubmit=e=>{e.preventDefault();S.token=e.target.t.value.trim();save();toast('Token salvo')};
+  $('#ex').onclick=()=>dl(`carteira-${today()}.json`,JSON.stringify({...S,_v:1},null,1),'application/json');
+  $('#csv').onclick=()=>dl(`lancamentos-${today()}.csv`,'data;ativo;tipo;quantidade;preco;taxas;valor;provento\n'+sortedTx().map(t=>[t.date,t.ticker,t.type,t.qty??'',t.price??'',t.fees??'',t.value??'',t.kind??''].map(v=>String(v).replace('.',',')).join(';')).join('\n'),'text/csv');
+  $('#im').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.tx))throw 0;if(!confirm(`Substituir sua carteira por este backup (${d.tx.length} lançamentos)?`))return;Object.assign(S,{tx:d.tx,token:d.token||S.token,manual:d.manual||{},meta:d.meta||{}});save();toast('Backup importado');go('carteira')}catch(_){toast('Arquivo inválido')}};
+  $('#csvGo').onclick=()=>{let n=0,bad=0;for(const line of $('#csvIn').value.split(/\r?\n/)){const c=line.split(/[;\t]/).map(s=>s.trim());if(c.length<5){if(line.trim())bad++;continue}
+      let [d,tk,ty,q,p,fe]=c;if(/^\d{2}\/\d{2}\/\d{4}$/.test(d))d=d.split('/').reverse().join('-');ty=(ty||'').toUpperCase()[0];
+      const t={id:uid(),date:d,ticker:tk.toUpperCase(),type:ty==='V'?'V':'C',qty:parseNum(q),price:parseNum(p),fees:parseNum(fe||0)||0};
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!(t.qty>0)||!(t.price>0)){bad++;continue}S.tx.push(t);n++}
+    save();toast(`${n} linha(s) importada(s)${bad?`, ${bad} ignorada(s)`:''}`);if(n)$('#csvIn').value=''};
+  $('#wipe').onclick=()=>{if(confirm('Apagar TODOS os lançamentos? Exporte um backup antes.')&&confirm('Tem certeza?')){S.tx=[];S.manual={};save();toast('Carteira apagada')}};
+}
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+$('#refresh').onclick=()=>refreshQuotes(true);
+stamp();render();refreshQuotes();
+setInterval(()=>{if(document.visibilityState==='visible')refreshQuotes(true)},5*60*1000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(()=>{});
+</script>
+</body>
+</html>
