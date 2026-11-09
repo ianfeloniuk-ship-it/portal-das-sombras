@@ -1,3 +1,7 @@
+## Fora do jogo (09/11/2026) — Cripta: calendário das oferendas e modelo «Reserva & Renda»
+- Ian: quer renda extra (FIIs e ações com DY ≥ 4%, pagando pelo menos mês sim, mês não). `carteira/index.html`: ritmo de pagamento por ativo (Grimório e Vigília), calendário de 12 meses na aba Oferendas com a cobertura da carteira, e um modelo pronto no Ritual (metas por classe + 17 ativos na Vigília com etiqueta). A reserva vira o ativo RESERVA (classe Renda fixa), que fica de fora das consultas à API.
+- Teste (Playwright): aplicar modelo, pacto com aporte, despertar, calendário (PETR4/VALE3 sem token), celular sem rolagem lateral, sem erros no console.
+
 ## Fora do jogo (08/11/2026) — Carteira vira «Cripta» (tema de terror + recursos premium)
 - Ian: queria Graham, DY e «mais firulas», com cara de terror e linguagem própria. `carteira/index.html` refeito: névoa, sangue escorrendo, vela no título, fontes Pirata One + EB Garamond. Abas Cripta/Ritual/Oferendas/Grimório/Necrópole/Altar (termo real sempre embaixo).
 - Novo: preço de Graham, teto de Bazin (taxa ajustável), DY 12m e médio 5a, P/L, P/VP, ROE, margens, dívida/PL, EV/EBITDA, payout, nota 0–100 («veredito do Oráculo»), linhas de Graham/Bazin no gráfico, Vigília (lista de observação), evolução do patrimônio, renda prevista, pacto de aporte por classe. Detalhes guardados 12 h em `carteira.v1.d`. `sw.js` da carteira → `carteira-v2`.

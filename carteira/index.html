@@ -194,7 +194,10 @@ async function getDetail(tk,force){
 function metrics(D,price){
   price=price??D.price;const m={price};
   const yAgo=new Date(Date.now()-365*864e5).toISOString().slice(0,10);
-  m.div12=D.cd.filter(d=>d.c>=yAgo).reduce((s,d)=>s+d.r,0);
+  const rec=D.cd.filter(d=>d.c>=yAgo);
+  m.div12=rec.reduce((s,d)=>s+d.r,0);
+  m.months=[...new Set(rec.map(d=>Number((d.p||d.c).slice(5,7))))].sort((a,b)=>a-b);
+  m.freq=ritmo(m.months.length);
   m.dy=price&&m.div12?m.div12/price*100:null;
   const by={};D.cd.forEach(d=>{const y=(d.p||d.c).slice(0,4);by[y]=(by[y]||0)+d.r});m.byYear=by;
   const cy=new Date().getFullYear();const ys=[1,2,3,4,5].map(i=>String(cy-i));const first=Math.min(...Object.keys(by).map(Number),cy);
@@ -221,6 +224,8 @@ function metrics(D,price){
   m.crit=C;m.score=C.length?Math.round(C.filter(c=>c.ok).length/C.length*100):null;
   return m;
 }
+function ritmo(n){return n>=10?'mensal':n>=6?'bimestral':n>=4?'trimestral':n===3?'quadrimestral':n===2?'semestral':n===1?'anual':'sem pagamentos'}
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const verdict=s=>s==null?['—','Sem presságio','']:s>=70?['good','Relíquia sagrada','good']:s>=45?['mid','Alma em purgatório','mid']:['bad','Amaldiçoada',''];
 
 /* ═══ Carteira (preço médio) ═══ */
@@ -377,7 +382,9 @@ function vLanc(){
     <div class="row" id="tg">${(clsNames.length?clsNames:['Ações','FIIs']).map(c=>`<label>${esc(c)} (%)<input data-c="${esc(c)}" inputmode="decimal" value="${S.targets[c]??''}" placeholder="${tot?num(byCls[c]/tot*100||0,0):''}"></label>`).join('')}
     <label>Outra classe<input id="newc" placeholder="Ex.: Renda fixa"></label></div>
     <div class="row" style="margin-top:8px"><label>Valor do aporte<input id="aporte" inputmode="decimal" placeholder="1.000,00"></label><button class="b" id="pacto">Firmar pacto</button></div>
-    <div id="pactoOut"></div></div>
+    <div id="pactoOut"></div>
+    <hr class="orn"><h2 style="font-size:19px">Modelos prontos</h2>
+    ${Object.entries(MODELOS).map(([k,m])=>`<div class="vbox" style="margin-bottom:8px"><h3>${m.nome}</h3><p class="note" style="margin:4px 0 8px">${m.desc}</p><button class="b sec" onclick="aplicarModelo('${k}')">Aplicar este pacto</button></div>`).join('')}</div>
   <div class="card"><h2>Livro dos registros <small>${tx.length}</small></h2>
   ${tx.length?`<div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Rito</th><th>Qtd</th><th>Preço</th><th>Total</th><th></th></tr></thead><tbody>
   ${tx.map(t=>`<tr><td>${fdate(t.date)}</td><td><a href="#ativo/${t.ticker}">${t.ticker}</a></td><td>${t.type==='C'?'<span class="pos">Invocação</span>':t.type==='V'?'<span class="neg">Exorcismo</span>':'<span class="gold">'+esc(t.kind||'Oferenda')+'</span>'}</td><td>${t.type==='D'?'—':num(t.qty,t.qty%1?4:0)}</td><td>${t.type==='D'?'—':brl(t.price)}</td><td>${brl(t.type==='D'?t.value:t.qty*t.price+(t.type==='C'?1:-1)*(t.fees||0))}</td><td><button class="x" title="Apagar" onclick="delTx('${t.id}')">✕</button></td></tr>`).join('')}
@@ -400,10 +407,22 @@ function vLanc(){
     const nt=tot+ap;const def={};let dsum=0;for(const [c,t] of Object.entries(S.targets)){const d=Math.max(0,nt*t/sum-(byCls[c]||0));def[c]=d;dsum+=d}
     const rows=Object.entries(def).map(([c,d])=>({c,a:dsum?ap*d/dsum:ap*S.targets[c]/sum,now:tot?(byCls[c]||0)/tot*100:0,t:S.targets[c]/sum*100})).sort((a,b)=>b.a-a.a);
     $('#pactoOut').innerHTML=`<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Classe</th><th>Hoje</th><th>Meta</th><th>Aportar</th><th class="hide-sm">Sugestão</th></tr></thead><tbody>${rows.map(r=>{
-      const cand=P.filter(p=>p.cls===r.c).map(p=>({p,m:DET[p.ticker]?metrics(DET[p.ticker],p.price):null})).sort((a,b)=>((b.m?.mgG??-999)-(a.m?.mgG??-999))||(a.p.value-b.p.value))[0];
+      const pool=[...P,...S.watch.filter(t=>!P.some(p=>p.ticker===t)).map(t=>({ticker:t,cls:classOf(t),value:0,price:S.manual[t]??Q[t]?.close}))];const cand=pool.filter(p=>p.cls===r.c&&p.ticker!=='RESERVA').map(p=>({p,m:DET[p.ticker]?metrics(DET[p.ticker],p.price):null})).sort((a,b)=>((b.m?.mgG??-999)-(a.m?.mgG??-999))||(a.p.value-b.p.value))[0];
       return `<tr><td>${esc(r.c)}</td><td>${num(r.now,1)}%</td><td>${num(r.t,1)}%</td><td class="${r.a>0.005?'gold':'mut'}"><b>${brl(r.a)}</b></td><td class="hide-sm note">${cand&&r.a>0.005?`${cand.p.ticker}${cand.m?.mgG!=null?' ('+pct(cand.m.mgG,0)+' até Graham)':' (menor peso)'}`:''}</td></tr>`}).join('')}</tbody></table></div>`;
   };
 }
+const MODELOS={renda:{nome:'Reserva & Renda (nov/2026)',
+  desc:'85% na reserva (CDB de liquidez diária + Tesouro Selic), 6% em FIIs que pagam todo mês, 4% em ações privadas com DY ≥ 4%, 2% em ações de crescimento e 3% em cripto. Registre a reserva como o ativo RESERVA (quantidade = valor em reais, preço 1).',
+  targets:{'Renda fixa':85,'FIIs':6,'Ações':5.6,'BDRs':0.4,'Cripto':3},
+  meta:{RESERVA:{cls:'Renda fixa',name:'Reserva: CDB liquidez diária + Tesouro Selic'},BITH11:{cls:'Cripto'},ETHE11:{cls:'Cripto'}},
+  watch:[['KNCR11','renda · papel CDI'],['KNIP11','renda · papel IPCA'],['BTLG11','renda · logística'],['XPML11','renda · shoppings'],['HGRU11','renda · varejo'],
+    ['ITUB3','renda · mensal'],['ALOS3','renda · mensal'],['VIVT3','renda'],['PSSA3','renda · trimestral'],['VBBR3','renda · trimestral'],
+    ['EMBJ3','crescimento'],['PRIO3','crescimento'],['CURY3','crescimento + renda'],['WEGE3','crescimento'],['TSMC34','crescimento · BDR'],
+    ['BITH11','cripto · bitcoin'],['ETHE11','cripto · ethereum']]}};
+function aplicarModelo(k){const m=MODELOS[k];if(!confirm(`Aplicar o pacto "${m.nome}"? Suas metas por classe serão trocadas e ${m.watch.length} ativos entram na Vigília. Seus registros não mudam.`))return;
+  S.targets={...m.targets};for(const [t,meta] of Object.entries(m.meta))S.meta[t]=Object.assign(S.meta[t]||{},meta);
+  for(const [t,tag] of m.watch){S.meta[t]=Object.assign(S.meta[t]||{},{tag});if(!S.watch.includes(t))S.watch.push(t)}
+  save();toast('Pacto aplicado. Desperte a Vigília no Grimório.');vLanc()}
 function delTx(id){if(!confirm('Apagar este registro do livro?'))return;S.tx=S.tx.filter(t=>t.id!==id);save();render()}
 
 /* ═══ OFERENDAS — proventos ═══ */
@@ -423,13 +442,27 @@ function vProv(){
   <div class="card"><h2>Chamar as oferendas <small>busca automática</small></h2>
     <p class="note">Calcula cada dividendo, JCP e rendimento pela quantidade que você tinha na data-com e registra sozinho, sem repetir os que já existem. ${S.token?'':'<b>Precisa do selo de sangue</b> (token grátis, no Altar). Sem ele, só funciona para PETR4, VALE3, ITUB4 e MGLU3.'}</p>
     <div class="row"><button class="b" id="auto">Chamar oferendas</button></div><p class="note" id="autoMsg"></p><div id="next"></div></div>
+  ${calendario()}
   <div class="card"><h2>Quem mais oferece <small>por ativo</small></h2>${donut(Object.entries(byT).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v})))}</div>
   <div class="card"><h2>Oferendas recebidas <small>${D.length}</small></h2>${D.length?`<div class="scroll"><table><thead><tr><th>Pagamento</th><th>Ativo</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody>
   ${D.map(t=>`<tr><td>${fdate(t.date)}</td><td>${t.ticker}</td><td>${esc(t.kind)}${t.auto?' <span class="tag">auto</span>':''}</td><td class="pos">${brl(t.value)}</td><td><button class="x" onclick="delTx('${t.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="note">Nenhuma oferenda ainda.</p>'}</div>`;
   $('#auto').onclick=autoDivs;
 }
+function calendario(){
+  const own=Object.values(positions()).filter(p=>p.qty>0).map(p=>p.ticker);
+  const list=[...new Set([...own,...S.watch])].filter(t=>DET[t]);
+  if(!list.length)return`<div class="card"><h2>Calendário das oferendas <small>em que mês cada um paga</small></h2><p class="note">Desperte seus ativos no <a href="#ativo">Grimório</a> para ver em quais meses cada um costuma pagar.</p></div>`;
+  const rows=list.map(t=>({t,own:own.includes(t),m:metrics(DET[t],Q[t]?.close??DET[t].price)}));
+  const cover=new Set(rows.filter(r=>r.own).flatMap(r=>r.m.months));
+  const cov=rows.some(r=>r.own)?[...Array(12)].map((_,i)=>cover.has(i+1)):null;
+  const cell=on=>`<td style="text-align:center;color:${on?'var(--blood2)':'var(--line2)'}">${on?'●':'·'}</td>`;
+  return`<div class="card"><h2>Calendário das oferendas <small>meses de pagamento nos últimos 12 meses</small></h2><div class="scroll"><table><thead><tr><th>Ativo</th>${MES.map(x=>`<th style="text-align:center">${x}</th>`).join('')}<th>Ritmo</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td><b>${r.t}</b> <small class="mut">${r.own?'☩':'◉'}</small></td>${MES.map((_,i)=>cell(r.m.months.includes(i+1))).join('')}<td class="note">${r.m.freq}</td></tr>`).join('')}
+  ${cov?`<tr><td><b class="gold">Sua cripta</b></td>${cov.map(c=>`<td style="text-align:center" class="${c?'pos':'neg'}">${c?'✠':'✕'}</td>`).join('')}<td class="note">${cov.filter(Boolean).length} de 12 meses</td></tr>`:''}
+  </tbody></table></div><p class="note">☩ = na cripta · ◉ = em vigília. Baseado nos pagamentos do último ano; as empresas podem mudar as datas.</p></div>`;
+}
 async function autoDivs(){
-  const msg=$('#autoMsg');const tickers=[...new Set(S.tx.filter(t=>t.type!=='D').map(t=>t.ticker))];
+  const msg=$('#autoMsg');const tickers=[...new Set(S.tx.filter(t=>t.type!=='D').map(t=>t.ticker))].filter(t=>classOf(t)!=='Renda fixa');
   if(!tickers.length)return toast('Registre compras primeiro');
   let added=0;const fails=[],future=[];const td=today();
   for(const tk of tickers){
@@ -459,13 +492,13 @@ function vAtivo(){
 }
 function vVigilia(){
   const own=Object.values(positions()).filter(p=>p.qty>0).map(p=>p.ticker);
-  const all=[...new Set([...own,...S.watch])];
+  const all=[...new Set([...own,...S.watch])].filter(t=>classOf(t)!=='Renda fixa');
   const rows=all.map(t=>{const D=DET[t];const price=S.manual[t]??Q[t]?.close??D?.price;return{t,D,price,m:D?metrics(D,price):null,own:own.includes(t)}});
   $('#det').innerHTML=`<div class="card"><h2>A Vigília <small>seus ativos e os que você observa</small></h2>
   ${all.length?`<p class="note">Preço de Graham, teto de Bazin, dividend yield e a nota do Oráculo lado a lado. Toque em um ativo para ver tudo.</p>
   <div class="row" style="margin-bottom:10px"><button class="b" id="wake">Despertar todos</button><span class="note" id="wmsg"></span></div>
-  <div class="scroll"><table><thead><tr><th>Ativo</th><th>Cotação</th><th>Graham</th><th>Margem</th><th>Bazin</th><th>Margem</th><th>DY 12m</th><th>P/L</th><th class="hide-sm">P/VP</th><th>Nota</th></tr></thead><tbody>
-  ${rows.map(({t,D,price,m,own})=>`<tr class="click" onclick="go('ativo','${t}')"><td>${tkCell(t,(own?'☩ na cripta':'◉ em vigília'),Q[t]?.logo)}</td><td>${brl(price)}</td>${m?`<td>${brl(m.graham)}</td><td class="${cls(m.mgG)}">${pct(m.mgG,0)}</td><td>${brl(m.bazin)}</td><td class="${cls(m.mgB)}">${pct(m.mgB,0)}</td><td>${pct(m.dy,1,false)}</td><td>${num(m.pl,1)}</td><td class="hide-sm">${num(m.pvp,2)}</td><td class="${m.score>=70?'pos':m.score>=45?'gold':'neg'}"><b>${m.score??'—'}</b></td>`:'<td colspan="8" class="mut" style="text-align:center">adormecido</td>'}</tr>`).join('')}
+  <div class="scroll"><table><thead><tr><th>Ativo</th><th>Cotação</th><th>Graham</th><th>Margem</th><th>Bazin</th><th>Margem</th><th>DY 12m</th><th>Ritmo</th><th>P/L</th><th class="hide-sm">P/VP</th><th>Nota</th></tr></thead><tbody>
+  ${rows.map(({t,D,price,m,own})=>`<tr class="click" onclick="go('ativo','${t}')"><td>${tkCell(t,(own?'☩ na cripta':'◉ em vigília')+(S.meta[t]?.tag?' · '+S.meta[t].tag:''),Q[t]?.logo)}</td><td>${brl(price)}</td>${m?`<td>${brl(m.graham)}</td><td class="${cls(m.mgG)}">${pct(m.mgG,0)}</td><td>${brl(m.bazin)}</td><td class="${cls(m.mgB)}">${pct(m.mgB,0)}</td><td>${pct(m.dy,1,false)}</td><td class="note">${m.freq}</td><td>${num(m.pl,1)}</td><td class="hide-sm">${num(m.pvp,2)}</td><td class="${m.score>=70?'pos':m.score>=45?'gold':'neg'}"><b>${m.score??'—'}</b></td>`:'<td colspan="9" class="mut" style="text-align:center">adormecido</td>'}</tr>`).join('')}
   </tbody></table></div>`:`<p class="note">Nenhum ativo na cripta nem em vigília. Consulte um ativo acima e toque em <b>Vigiar</b> para acompanhar o preço justo dele.</p>`}</div>
   <div class="card"><h2>Os dois oráculos</h2><div class="val">
   <div class="vbox"><h3>Preço de Graham</h3><div class="f">√(22,5 × LPA × VPA)</div><p class="note" style="margin:0">Benjamin Graham, o pai do value investing, estimava o valor justo de uma empresa pelo lucro e pelo patrimônio por ação. Cotação abaixo dele sugere desconto, a tal margem de segurança.</p></div>
@@ -505,7 +538,7 @@ async function vDetail(tk){
     <div class="val" style="margin-bottom:16px">
       <div class="vbox"><h3>Preço de Graham</h3><div class="f">√(22,5 × LPA ${D.lpa!=null?num(D.lpa):'?'} × VPA ${D.vpa!=null?num(D.vpa):'?'})</div><div class="v">${m.graham?brl(m.graham):'—'}</div>${m.graham?gauge(m.mgG):'<p class="note">Indisponível: precisa de lucro e patrimônio positivos'+(D.vpa==null?' (o VPA não veio na consulta)':'')+'.</p>'}</div>
       <div class="vbox"><h3>Teto de Bazin</h3><div class="f">média 5a R$ ${num(m.avg5,4)} ÷ ${num(S.bazin,0)}%</div><div class="v">${m.bazin?brl(m.bazin):'—'}</div>${m.bazin?gauge(m.mgB):'<p class="note">Sem histórico de dividendos suficiente.</p>'}</div>
-      <div class="vbox"><h3>Dividend yield</h3><div class="f">últimos 12 meses · média de 5 anos</div><div class="v">${pct(m.dy,2,false)}</div><div class="note">média 5a: ${pct(m.dy5,2,false)}${pos&&pos.qty?` · renda prevista: <b class="gold">${brl(pos.qty*m.div12)}</b>/ano`:''}</div></div>
+      <div class="vbox"><h3>Dividend yield</h3><div class="f">últimos 12 meses · média de 5 anos</div><div class="v">${pct(m.dy,2,false)}</div><div class="note">ritmo: <b class="gold">${m.freq}</b>${m.months.length?' ('+m.months.map(x=>MES[x-1]).join(', ')+')':''}<br>média 5a: ${pct(m.dy5,2,false)}${pos&&pos.qty?` · renda prevista: <b class="gold">${brl(pos.qty*m.div12)}</b>/ano`:''}</div></div>
     </div>
     <div class="card"><h2>Indicadores <small>a anatomia do ativo</small></h2><div class="grid">${ind.map(([k,r,v])=>`<div class="kpi">${K(k,r||'&nbsp;')}<b>${v}</b></div>`).join('')}</div></div>
     <div class="card"><h2>Rastro da cotação <small>5 anos</small></h2>${lineChart(h,{fmt:v=>num(v,v<10?2:0),refs:[{k:'Graham',v:m.graham,c:'var(--gold)'},{k:'Bazin',v:m.bazin,c:'#8a6bb0'}]})}</div>
